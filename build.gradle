@@ -1,0 +1,31 @@
+plugins {
+    id 'java'
+}
+
+group 'org.example'
+version '1.0-SNAPSHOT'
+
+repositories {
+    // Prefer JCenter to Maven Central. See
+    // https://blog.bintray.com/2015/02/09/android-studio-migration-from-maven-central-to-jcenter/
+    jcenter()
+    mavenCentral()  // JCenter isn't quite a superset of Maven Central.
+}
+
+dependencies {
+    // Annotations: Nullable
+    implementation 'com.google.code.findbugs:jsr305:3.0.2'
+    implementation 'com.google.guava:guava:28.0-jre'
+    implementation 'net.java.dev.jna:jna:5.4.0'
+    implementation 'com.google.code.gson:gson:2.8.6'
+    implementation "com.google.auto.value:auto-value-annotations:1.7.4"
+    implementation 'com.google.flogger:flogger:0.5.1'
+
+    annotationProcessor "com.google.auto.value:auto-value:1.7.4"
+
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    testCompile 'com.google.truth:truth:1.1'
+    testCompile 'com.google.truth.extensions:truth-java8-extension:1.1'
+
+    runtime 'com.google.flogger:flogger-system-backend:0.5.1'
+}
