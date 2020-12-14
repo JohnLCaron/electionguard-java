@@ -49,7 +49,6 @@ public class ElectionPolynomial {
     ArrayList<Group.ElementModP> commitments = new ArrayList<>();
     ArrayList<SchnorrProof> proofs = new ArrayList<>();
 
-
     for (int i = 0; i < number_of_coefficients; i++) {
       // Note the nonce value is not safe.it is designed for testing only.
       // this method should be called without the nonce in production.
@@ -123,7 +122,7 @@ public class ElectionPolynomial {
     }
 
     ElementModP value_output = g_pow_p(coordinate);
-    return value_output.equals(commitment_output);
+    return value_output.elem.equals(commitment_output);
   }
 
 

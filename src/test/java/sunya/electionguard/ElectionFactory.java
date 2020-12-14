@@ -1,12 +1,11 @@
 package sunya.electionguard;
 
 import com.google.common.collect.ImmutableList;
-import com.google.gson.Gson;
-import sunya.integration.ElectionBuilderPojo;
 
 import javax.annotation.Nullable;
 import java.io.*;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,8 +30,7 @@ public class ElectionFactory {
   public ElectionDescription get_fake_election() {
 
     BallotStyle fake_ballot_style = new BallotStyle("some-ballot-style-id",
-            Optional.of(ImmutableList.of("some-geopoltical-unit-id")),
-            Optional.empty(), Optional.empty());
+            ImmutableList.of("some-geopoltical-unit-id"), null, null);
 
     // Referendum selections are simply a special case of `candidate`in the object model
     List<SelectionDescription> fake_referendum_ballot_selections = ImmutableList.of(
@@ -48,10 +46,9 @@ public class ElectionFactory {
             sequence_order,
             VoteVariationType.one_of_m,
             number_elected,
-            Optional.of(votes_allowed),
+            votes_allowed,
             "some-referendum-contest-name",
-            fake_referendum_ballot_selections,
-            Optional.empty(), Optional.empty());
+            fake_referendum_ballot_selections, null, null);
 
     List<SelectionDescription> fake_candidate_ballot_selections = ImmutableList.of(
             new SelectionDescription("some-object-id-candidate-1", "some-candidate-id-1", 0),
@@ -68,10 +65,10 @@ public class ElectionFactory {
             sequence_order_2,
             VoteVariationType.one_of_m,
             number_elected_2,
-            Optional.of(votes_allowed_2),
+            votes_allowed_2,
             "some-candidate-contest-name",
             fake_candidate_ballot_selections,
-            Optional.empty(), Optional.empty(), ImmutableList.of());
+            null, null, null);
 
     // String election_scope_id, ElectionType type, Instant start_date, Instant end_date,
     // List<GeopoliticalUnit> geopolitical_units, List<Party> parties, List<Candidate> candidates,
@@ -79,16 +76,15 @@ public class ElectionFactory {
     // Optional<InternationalizedText> name, Optional<ContactInformation> contact_information
     ElectionDescription fake_election = new ElectionDescription(
             "some-scope-id",
-            ElectionType.unknown, Instant.now(), Instant.now(),
-            ImmutableList.of(new GeopoliticalUnit("some-geopoltical-unit-id", "some-gp-unit-name", ReportingUnitType.unknown, Optional.empty())),
+            ElectionType.unknown, LocalDate.now(), LocalDate.now(),
+            ImmutableList.of(new GeopoliticalUnit("some-geopoltical-unit-id", "some-gp-unit-name", ReportingUnitType.unknown, null)),
             ImmutableList.of(new Party("some-party-id-1"), new Party("some-party-id-2")),
             ImmutableList.of(new Candidate("some-candidate-id-1"),
                     new Candidate("some-candidate-id-2"),
                     new Candidate("some-candidate-id-3")),
             ImmutableList.of(fake_referendum_contest, fake_candidate_contest),
             ImmutableList.of(fake_ballot_style),
-            Optional.empty(), Optional.empty()
-    );
+            null, null);
 
     return fake_election;
   }
@@ -123,13 +119,7 @@ public class ElectionFactory {
   }
 
   private ElectionDescription _get_election_from_file(String filename) throws IOException {
-    String current = new java.io.File("./src/test/resources/").getCanonicalPath();
-    System.out.printf("Current '%s'%n", current);
-
-    InputStream is = new FileInputStream((current + "/" + filename));
-    Reader reader = new InputStreamReader(is);
-    Gson gson = new Gson();
-    ElectionBuilderPojo builder = gson.fromJson(reader, ElectionBuilderPojo.class);
+    ElectionBuilderFromJson builder = new ElectionBuilderFromJson(filename);
     return builder.build();
   }
 

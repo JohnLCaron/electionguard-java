@@ -1,10 +1,13 @@
 package sunya.electionguard;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 
+import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import java.math.BigInteger;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -90,6 +93,7 @@ public class Election {
    * Use this as a type for character strings.
    * See: https://developers.google.com/elections-data/reference/annotated-string
    */
+  @Immutable
   static class AnnotatedString implements Hash.CryptoHashable {
     final String annotation;
     final String value;
@@ -109,6 +113,7 @@ public class Election {
    * The ISO-639 language
    * see: https://en.wikipedia.org/wiki/ISO_639
    */
+  @Immutable
   static class Language implements Hash.CryptoHashable {
     final String value;
     final String language;
@@ -128,11 +133,12 @@ public class Election {
    * Data entity used to represent multi-national text. Use when text on a ballot contains multi-national text.
    * See: https://developers.google.com/elections-data/reference/internationalized-text
    */
+  @Immutable
   static class InternationalizedText implements Hash.CryptoHashable {
-    final List<Language> text;
+    final ImmutableList<Language> text;
 
-    public InternationalizedText(List<Language> text) {
-      this.text = text;
+    public InternationalizedText(@Nullable List<Language> text) {
+      this.text = text == null ? ImmutableList.of() : ImmutableList.copyOf(text);
     }
 
     @Override
@@ -145,18 +151,36 @@ public class Election {
    * For defining contact information about objects such as persons, boards of authorities, and organizations.
    * See: https://developers.google.com/elections-data/reference/contact-information
    */
+  @Immutable
   static class ContactInformation implements Hash.CryptoHashable {
-    Optional<List<String>> address_line;
-    Optional<List<AnnotatedString>> email;
-    Optional<List<AnnotatedString>> phone;
-    Optional<String> name;
+    final Optional<ImmutableList<String>> address_line;
+    final Optional<ImmutableList<AnnotatedString>> email;
+    final Optional<ImmutableList<AnnotatedString>> phone;
+    final Optional<String> name;
+
+    public ContactInformation(@Nullable List<String> address_line,
+                              @Nullable List<AnnotatedString> email,
+                              @Nullable List<AnnotatedString> phone,
+                              @Nullable String name) {
+      this.address_line = Optional.ofNullable(toImmutableList(address_line));
+      this.email = Optional.ofNullable(toImmutableList(email));
+      this.phone = Optional.ofNullable(toImmutableList(phone));
+      this.name = Optional.ofNullable(Strings.emptyToNull(name));
+    }
 
     @Override
     public Group.ElementModQ crypto_hash() {
+      // TODO hash Optional
       return Hash.hash_elems(this.name, this.address_line, this.email, this.phone);
     }
   }
 
+  static <T> ImmutableList<T> toImmutableList(List<T> from) {
+    if (from == null || from.isEmpty()) {
+      return null;
+    }
+    return ImmutableList.copyOf(from);
+  }
 
   /**
    * Use this entity for defining geopolitical units such as cities, districts, jurisdictions, or precincts,
@@ -169,11 +193,14 @@ public class Election {
     final ReportingUnitType type;
     final Optional<ContactInformation> contact_information;
 
-    public GeopoliticalUnit(String object_id, String name, ReportingUnitType type, Optional<ContactInformation> contact_information) {
+    public GeopoliticalUnit(String object_id,
+                            String name,
+                            ReportingUnitType type,
+                            @Nullable ContactInformation contact_information) {
       super(object_id);
       this.name = name;
       this.type = type;
-      this.contact_information = contact_information;
+      this.contact_information = Optional.ofNullable(contact_information);
     }
 
     @Override
@@ -185,16 +212,20 @@ public class Election {
   /**
    * A BallotStyle works as a key to uniquely specify a set of contests. See also `ContestDescription`.
    */
+  @Immutable
   static class BallotStyle extends ElectionObjectBase implements Hash.CryptoHashable {
-    final Optional<List<String>> geopolitical_unit_ids;
-    final Optional<List<String>> party_ids;
+    final Optional<ImmutableList<String>> geopolitical_unit_ids;
+    final Optional<ImmutableList<String>> party_ids;
     final Optional<String> image_uri;
 
-    public BallotStyle(String object_id, Optional<List<String>> geopolitical_unit_ids, Optional<List<String>> party_ids, Optional<String> image_uri) {
+    public BallotStyle(String object_id,
+                       @Nullable List<String> geopolitical_unit_ids,
+                       @Nullable List<String> party_ids,
+                       @Nullable String image_uri) {
       super(object_id);
-      this.geopolitical_unit_ids = geopolitical_unit_ids;
-      this.party_ids = party_ids;
-      this.image_uri = image_uri;
+      this.geopolitical_unit_ids = Optional.ofNullable(toImmutableList(geopolitical_unit_ids));
+      this.party_ids = Optional.ofNullable(toImmutableList(party_ids));
+      this.image_uri = Optional.ofNullable(image_uri);
     }
 
 
@@ -209,6 +240,7 @@ public class Election {
    * Use this entity to describe a political party that can then be referenced from other entities.
    * See: https://developers.google.com/elections-data/reference/party
    */
+  @Immutable
   static class Party extends ElectionObjectBase implements Hash.CryptoHashable {
     final InternationalizedText ballot_name;
     final Optional<String> abbreviation;
@@ -223,12 +255,16 @@ public class Election {
       this.logo_uri = Optional.empty();
     }
 
-    public Party(String object_id, InternationalizedText ballot_name, Optional<String> abbreviation, Optional<String> color, Optional<String> logo_uri) {
+    public Party(String object_id,
+                 InternationalizedText ballot_name,
+                 @Nullable String abbreviation,
+                 @Nullable String color,
+                 @Nullable String logo_uri) {
       super(object_id);
       this.ballot_name = ballot_name;
-      this.abbreviation = abbreviation;
-      this.color = color;
-      this.logo_uri = logo_uri;
+      this.abbreviation = Optional.ofNullable(abbreviation);
+      this.color = Optional.ofNullable(color);
+      this.logo_uri = Optional.ofNullable(logo_uri);
     }
 
     @Override
@@ -251,6 +287,7 @@ public class Election {
    * would be included in the model to represent the `affirmative` and `negative`
    * selections for the contest.  See the wiki, readme's, and tests in this repo for more info
    */
+  @Immutable
   static class Candidate extends ElectionObjectBase implements Hash.CryptoHashable {
     final InternationalizedText ballot_name;
     final Optional<String> party_id;
@@ -266,12 +303,16 @@ public class Election {
       ;
     }
 
-    public Candidate(String object_id, InternationalizedText ballot_name, Optional<String> party_id, Optional<String> image_uri, Optional<Boolean> is_write_in) {
+    public Candidate(String object_id,
+                     InternationalizedText ballot_name,
+                     @Nullable String party_id,
+                     @Nullable String image_uri,
+                     @Nullable Boolean is_write_in) {
       super(object_id);
       this.ballot_name = ballot_name;
-      this.party_id = party_id;
-      this.image_uri = image_uri;
-      this.is_write_in = is_write_in;
+      this.party_id = Optional.ofNullable(party_id);
+      this.image_uri = Optional.ofNullable(image_uri);
+      this.is_write_in = Optional.ofNullable(is_write_in);
     }
 
     @Override
@@ -293,15 +334,16 @@ public class Election {
    * For a given election, the sequence of selections displayed to a user may be different
    * however that information is not captured by default when encrypting a specific ballot.
    */
+  @Immutable
   static class SelectionDescription extends ElectionObjectBase implements Hash.CryptoHashable {
-    String candidate_id;
+    final String candidate_id;
     /**
      * Used for ordering selections in a contest to ensure various encryption primitives are deterministic.
      * The sequence order must be unique and should be representative of how the contests are represnted
      * on a "master" ballot in an external system.  The sequence order is not required to be in the order
      * in which they are displayed to a voter.  Any acceptable range of integer values may be provided.
      */
-    int sequence_order;
+    final int sequence_order;
 
     public SelectionDescription(String object_id, String candidate_id, int sequence_order) {
       super(object_id);
@@ -351,7 +393,7 @@ public class Election {
     final String name;
 
     // For associating a ballot selection for the contest, i.e., a candidate, a ballot measure.
-    final List<SelectionDescription> ballot_selections;
+    final ImmutableList<SelectionDescription> ballot_selections;
 
     // Title of the contest as it appears on the ballot.
     final Optional<InternationalizedText> ballot_title;
@@ -359,20 +401,26 @@ public class Election {
     // Subtitle of the contest as it appears on the ballot.
     final Optional<InternationalizedText> ballot_subtitle;
 
-    public ContestDescription(String object_id, String electoral_district_id, int sequence_order, VoteVariationType vote_variation,
-                              int number_elected, Optional<Integer> votes_allowed, String name,
-                              List<SelectionDescription> ballot_selections, Optional<InternationalizedText> ballot_title,
-                              Optional<InternationalizedText> ballot_subtitle) {
+    public ContestDescription(String object_id,
+                              String electoral_district_id,
+                              int sequence_order,
+                              VoteVariationType vote_variation,
+                              int number_elected,
+                              @Nullable Integer votes_allowed,
+                              String name,
+                              List<SelectionDescription> ballot_selections,
+                              @Nullable InternationalizedText ballot_title,
+                              @Nullable InternationalizedText ballot_subtitle) {
       super(object_id);
       this.electoral_district_id = electoral_district_id;
       this.sequence_order = sequence_order;
       this.vote_variation = vote_variation;
       this.number_elected = number_elected;
-      this.votes_allowed = votes_allowed;
+      this.votes_allowed = Optional.ofNullable(votes_allowed);
       this.name = name;
-      this.ballot_selections = ballot_selections;
-      this.ballot_title = ballot_title;
-      this.ballot_subtitle = ballot_subtitle;
+      this.ballot_selections = ImmutableList.copyOf(ballot_selections);
+      this.ballot_title = Optional.ofNullable(ballot_title);
+      this.ballot_subtitle = Optional.ofNullable(ballot_subtitle);
     }
 
     @Override
@@ -456,21 +504,22 @@ public class Election {
    * this subclass is used purely for convenience
    */
   static class CandidateContestDescription extends ContestDescription {
-    final List<String> primary_party_ids;
+    final ImmutableList<String> primary_party_ids;
 
     public CandidateContestDescription(String object_id,
                                        String electoral_district_id,
                                        int sequence_order,
                                        VoteVariationType vote_variation,
                                        int number_elected,
-                                       Optional<Integer> votes_allowed,
+                                       @Nullable Integer votes_allowed,
                                        String name,
                                        List<SelectionDescription> ballot_selections,
-                                       Optional<InternationalizedText> ballot_title,
-                                       Optional<InternationalizedText> ballot_subtitle,
+                                       @Nullable InternationalizedText ballot_title,
+                                       @Nullable InternationalizedText ballot_subtitle,
                                        List<String> primary_party_ids) {
-      super(object_id, electoral_district_id, sequence_order, vote_variation, number_elected, votes_allowed, name, ballot_selections, ballot_title, ballot_subtitle);
-      this.primary_party_ids = primary_party_ids;
+      super(object_id, electoral_district_id, sequence_order, vote_variation, number_elected, votes_allowed,
+              name, ballot_selections, ballot_title, ballot_subtitle);
+      this.primary_party_ids = ImmutableList.copyOf(primary_party_ids);
     }
   }
 
@@ -482,8 +531,17 @@ public class Election {
    */
   static class ReferendumContestDescription extends ContestDescription {
 
-    public ReferendumContestDescription(String object_id, String electoral_district_id, int sequence_order, VoteVariationType vote_variation, int number_elected, Optional<Integer> votes_allowed, String name, List<SelectionDescription> ballot_selections, Optional<InternationalizedText> ballot_title, Optional<InternationalizedText> ballot_subtitle) {
-      super(object_id, electoral_district_id, sequence_order, vote_variation, number_elected, votes_allowed, name, ballot_selections, ballot_title, ballot_subtitle);
+    public ReferendumContestDescription(String object_id,
+                                        String electoral_district_id,
+                                        int sequence_order,
+                                        VoteVariationType vote_variation,
+                                        int number_elected,
+                                        @Nullable Integer votes_allowed,
+                                        String name, List<SelectionDescription> ballot_selections,
+                                        @Nullable InternationalizedText ballot_title,
+                                        @Nullable InternationalizedText ballot_subtitle) {
+      super(object_id, electoral_district_id, sequence_order, vote_variation, number_elected, votes_allowed,
+              name, ballot_selections, ballot_title, ballot_subtitle);
     }
   }
 
@@ -494,16 +552,23 @@ public class Election {
    * become one. This allows the `ConstantChaumPedersenProof` to verify correctly for undervoted contests.)
    */
   static class ContestDescriptionWithPlaceholders extends ContestDescription {
-    List<SelectionDescription> placeholder_selections;
+    ImmutableList<SelectionDescription> placeholder_selections;
 
-    public ContestDescriptionWithPlaceholders(String object_id, String electoral_district_id, int sequence_order,
-            VoteVariationType vote_variation, int number_elected, Optional<Integer> votes_allowed, String name,
-            List<SelectionDescription> ballot_selections, Optional<InternationalizedText> ballot_title,
-            Optional<InternationalizedText> ballot_subtitle, List<SelectionDescription> placeholder_selections) {
+    public ContestDescriptionWithPlaceholders(String object_id,
+                                              String electoral_district_id,
+                                              int sequence_order,
+                                              VoteVariationType vote_variation,
+                                              int number_elected,
+                                              @Nullable Integer votes_allowed,
+                                              String name,
+                                              List<SelectionDescription> ballot_selections,
+                                              @Nullable InternationalizedText ballot_title,
+                                              @Nullable InternationalizedText ballot_subtitle,
+                                              List<SelectionDescription> placeholder_selections) {
 
       super(object_id, electoral_district_id, sequence_order, vote_variation, number_elected, votes_allowed, name,
               ballot_selections, ballot_title, ballot_subtitle);
-      this.placeholder_selections = placeholder_selections;
+      this.placeholder_selections = ImmutableList.copyOf(placeholder_selections);
     }
 
     boolean is_valid() {
@@ -527,32 +592,39 @@ public class Election {
   public static class ElectionDescription implements Hash.CryptoHashable {
     final String election_scope_id;
     final ElectionType type;
-    final Instant start_date;
-    final Instant end_date;
-    final List<GeopoliticalUnit> geopolitical_units;
-    final List<Party> parties;
-    final List<Candidate> candidates;
-    final List<ContestDescription> contests;
-    final List<BallotStyle> ballot_styles;
+    final LocalDate start_date;
+    final LocalDate end_date;
+    final ImmutableList<GeopoliticalUnit> geopolitical_units;
+    final ImmutableList<Party> parties;
+    final ImmutableList<Candidate> candidates;
+    final ImmutableList<ContestDescription> contests;
+    final ImmutableList<BallotStyle> ballot_styles;
     final Optional<InternationalizedText> name;
     final Optional<ContactInformation> contact_information;
 
     // TODO maybe use a Builder?
-    public ElectionDescription(String election_scope_id, ElectionType type, Instant start_date, Instant end_date,
-                               List<GeopoliticalUnit> geopolitical_units, List<Party> parties, List<Candidate> candidates,
-                               List<ContestDescription> contests, List<BallotStyle> ballot_styles,
-                               Optional<InternationalizedText> name, Optional<ContactInformation> contact_information) {
+    public ElectionDescription(String election_scope_id,
+                               ElectionType type,
+                               LocalDate start_date,
+                               LocalDate end_date,
+                               List<GeopoliticalUnit> geopolitical_units,
+                               List<Party> parties,
+                               List<Candidate> candidates,
+                               List<ContestDescription> contests,
+                               List<BallotStyle> ballot_styles,
+                               @Nullable InternationalizedText name,
+                               @Nullable ContactInformation contact_information) {
       this.election_scope_id = election_scope_id;
       this.type = type;
       this.start_date = start_date;
       this.end_date = end_date;
-      this.geopolitical_units = geopolitical_units;
-      this.parties = parties;
-      this.candidates = candidates;
-      this.contests = contests;
-      this.ballot_styles = ballot_styles;
-      this.name = name;
-      this.contact_information = contact_information;
+      this.geopolitical_units = ImmutableList.copyOf(geopolitical_units);
+      this.parties = ImmutableList.copyOf(parties);
+      this.candidates = ImmutableList.copyOf(candidates);
+      this.contests = ImmutableList.copyOf(contests);
+      this.ballot_styles = ImmutableList.copyOf(ballot_styles);
+      this.name = Optional.ofNullable(name);
+      this.contact_information = Optional.ofNullable(contact_information);
     }
 
     @Override
@@ -580,7 +652,6 @@ public class Election {
       HashSet<String> party_ids = new HashSet<>();
       HashSet<String> candidate_ids = new HashSet<>();
       HashSet<String> contest_ids = new HashSet<>();
-      HashSet<String> selection_ids = new HashSet<>();
 
       // Validate GP Units
       for (GeopoliticalUnit gp_unit : this.geopolitical_units) {
@@ -705,9 +776,9 @@ public class Election {
   static class InternalElectionDescription {
     final ElectionDescription description;
 
-    List<GeopoliticalUnit> geopolitical_units;
-    List<ContestDescriptionWithPlaceholders> contests;
-    List<BallotStyle> ballot_styles;
+    ImmutableList<GeopoliticalUnit> geopolitical_units;
+    ImmutableList<ContestDescriptionWithPlaceholders> contests;
+    ImmutableList<BallotStyle> ballot_styles;
     Group.ElementModQ description_hash;
 
     public InternalElectionDescription(ElectionDescription description) {
@@ -753,7 +824,7 @@ public class Election {
      * For each contest, append the `number_elected` number
      * of placeholder selections to the end of the contest collection.
      */
-    private List<ContestDescriptionWithPlaceholders> _generate_contests_with_placeholders(
+    private ImmutableList<ContestDescriptionWithPlaceholders> _generate_contests_with_placeholders(
             ElectionDescription description) {
 
       List<ContestDescriptionWithPlaceholders> contests = new ArrayList<>();
@@ -761,7 +832,7 @@ public class Election {
         List<SelectionDescription> placeholder_selections = generate_placeholder_selections_from(contest, contest.number_elected);
         contests.add(contest_description_with_placeholders_from(contest, placeholder_selections));
       }
-      return contests;
+      return ImmutableList.copyOf(contests);
     }
 
   }
@@ -769,6 +840,7 @@ public class Election {
   /**
    * The constants for mathematical functions during the election.
    */
+  @Immutable
   static class ElectionConstants {
     public static final BigInteger large_prime = Group.P; // large prime or p"""
     public static final BigInteger small_prime = Group.Q; // small prime or q"""
@@ -859,10 +931,10 @@ public class Election {
   }
 
   /**
-   *     Generates a placeholder selection description
-   *     :param description: contest description
-   *     :param placeholders: list of placeholder descriptions of selections
-   *     :return: a SelectionDescription or None
+   * Generates a placeholder selection description
+   * :param description: contest description
+   * :param placeholders: list of placeholder descriptions of selections
+   * :return: a SelectionDescription or None
    */
   static ContestDescriptionWithPlaceholders contest_description_with_placeholders_from(
           ContestDescription description, List<SelectionDescription> placeholders) {
@@ -873,11 +945,11 @@ public class Election {
             description.sequence_order,
             description.vote_variation,
             description.number_elected,
-            description.votes_allowed,
+            description.votes_allowed.orElse(null),
             description.name,
             description.ballot_selections,
-            description.ballot_title,
-            description.ballot_subtitle,
+            description.ballot_title.orElse(null),
+            description.ballot_subtitle.orElse(null),
             placeholders);
   }
 
@@ -912,21 +984,21 @@ public class Election {
             use_sequence_id));
   }
 
-    /**
-     *     Generates the specified number of placeholder selections in ascending sequence order from the max selection sequence orderf
-     *
-     *     :param contest: ContestDescription for input
-     *     :param count: optionally specify a number of placeholders to generate
-     *     :return: a collection of `SelectionDescription` objects, which may be empty
-     */
-    static List<SelectionDescription> generate_placeholder_selections_from (ContestDescription contest,int count){
-      //  max_sequence_order = max([selection.sequence_order for selection in contest.ballot_selections]);
-      int max_sequence_order = contest.ballot_selections.stream().map(s -> s.sequence_order).max(Integer::compare).orElse(0);
-      List<SelectionDescription> selections = new ArrayList<>();
-      for (int i = 0; i < count; i++) {
-        int sequence_order = max_sequence_order + 1 + i;
-        selections.add(generate_placeholder_selection_from(contest, Optional.of(sequence_order)).get());
-      }
-      return selections;
+  /**
+   * Generates the specified number of placeholder selections in ascending sequence order from the max selection sequence orderf
+   * <p>
+   * :param contest: ContestDescription for input
+   * :param count: optionally specify a number of placeholders to generate
+   * :return: a collection of `SelectionDescription` objects, which may be empty
+   */
+  static List<SelectionDescription> generate_placeholder_selections_from(ContestDescription contest, int count) {
+    //  max_sequence_order = max([selection.sequence_order for selection in contest.ballot_selections]);
+    int max_sequence_order = contest.ballot_selections.stream().map(s -> s.sequence_order).max(Integer::compare).orElse(0);
+    List<SelectionDescription> selections = new ArrayList<>();
+    for (int i = 0; i < count; i++) {
+      int sequence_order = max_sequence_order + 1 + i;
+      selections.add(generate_placeholder_selection_from(contest, Optional.of(sequence_order)).get());
     }
+    return selections;
   }
+}

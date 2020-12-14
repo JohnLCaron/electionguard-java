@@ -4,84 +4,85 @@ import java.util.List;
 
 /** POJO'S for reading Election metadata in using Gson. */
 public class ElectionBuilderPojo {
-  InternationalizedText name;
-  String election_scope_id;
-  String type;
-  String start_date;
-  String end_date;
-  ContactInformation contact_information;
+  public InternationalizedText name;
+  public String election_scope_id;
+  public String type;
+  public String start_date; // ISO-8601 Local or UTC? Assume local has zone offset
+  public String end_date; // ISO-8601 Local or UTC? Assume local has zone offset
+  public ContactInformation contact_information;
 
-  List<GeopoliticalUnit> geopolitical_units;
-  List<Party> parties;
-  List<Candidate> candidates;
-  List<ContestDescription> contests;
-  List<BallotStyle> ballot_styles;
+  public List<GeopoliticalUnit> geopolitical_units;
+  public List<Party> parties;
+  public List<Candidate> candidates;
+  public List<ContestDescription> contests;
+  public List<BallotStyle> ballot_styles;
 
-  static class AnnotatedString {
-    String annotation;
-    String value;
+  public static class AnnotatedString {
+    public String annotation;
+    public String value;
   }
 
-  static class BallotStyle extends ElectionObjectBase {
-    List<String> geopolitical_unit_ids;
-    List<String> party_ids;
-    String image_uri;
+  public static class BallotStyle extends ElectionObjectBase {
+    public List<String> geopolitical_unit_ids;
+    public List<String> party_ids;
+    public String image_uri;
   }
 
-  static class Candidate extends ElectionObjectBase {
-    InternationalizedText ballot_name;
-    String party_id;
-    String image_uri;
-    boolean is_write_in;
+  public static class Candidate extends ElectionObjectBase {
+    public InternationalizedText ballot_name;
+    public String party_id;
+    public String image_uri;
+    public Boolean is_write_in;
   }
 
-  static class ContestDescription extends ElectionObjectBase {
-    String electoral_district_id;
-    int sequence_order;
-    String vote_variation;
-    int number_elected;
-    int votes_allowed;
-    String name;
-    List<SelectionDescription> ballot_selections;
-    InternationalizedText ballot_title;
-    InternationalizedText ballot_subtitle;
+  public static class ContestDescription extends ElectionObjectBase {
+    public String electoral_district_id;
+    public int sequence_order;
+    public String vote_variation;
+    public int number_elected;
+    public Integer votes_allowed;
+    public String name;
+    public List<SelectionDescription> ballot_selections;
+    public InternationalizedText ballot_title;
+    public InternationalizedText ballot_subtitle;
   }
 
-  static class ContactInformation {
-    List<String> address_line;
-    List<AnnotatedString> email;
-    List<AnnotatedString> phone;
-    String name;
+  public static class ContactInformation {
+    public List<String> address_line;
+    public List<AnnotatedString> email;
+    public List<AnnotatedString> phone;
+    public String name;
   }
 
-  static class ElectionObjectBase {
-    String object_id;
+  public static class ElectionObjectBase {
+    public String object_id;
   }
 
-  static class GeopoliticalUnit extends ElectionObjectBase {
-    String name;
-    String type;
-    ContactInformation contact_information;
+  public static class GeopoliticalUnit extends ElectionObjectBase {
+    public String name;
+    public String type;
+    public ContactInformation contact_information;
   }
 
-  static class InternationalizedText {
-    List<Language> text;
+  public static class InternationalizedText {
+    public List<Language> text;
   }
 
-  static class Language {
-    String value;
-    String language;
+  public static class Language {
+    public String value;
+    public String language;
   }
 
-  static class Party extends ElectionObjectBase {
-    InternationalizedText ballot_name;
-    String abbreviation;
-    String color;
-    String logo_uri;
+  public static class Party extends ElectionObjectBase {
+    public InternationalizedText ballot_name;
+    public String abbreviation;
+    public String color;
+    public String logo_uri;
   }
 
-  static class SelectionDescription extends ElectionObjectBase {
-    String candidate_id;
+  public static class SelectionDescription extends ElectionObjectBase {
+    public String candidate_id;
+    public int sequence_order;
   }
 
 }

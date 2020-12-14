@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
 import pca.cs.jna.gmp.GMP;
 
+import javax.annotation.concurrent.Immutable;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Objects;
@@ -21,6 +22,7 @@ public class Group {
   static final BigInteger QINV_MODP = mult_inv_p(Q);
   static final BigInteger R = P_MINUS_ONE.multiply(QINV_MODP).mod(P);
 
+  @Immutable
   static class ElementMod {
     final BigInteger elem; // maybe this is just an integer?
 
@@ -66,6 +68,7 @@ public class Group {
     }
   }
 
+  @Immutable
   static class ElementModQ extends ElementMod {
     ElementModQ(BigInteger elem) {
       super(elem);
@@ -87,6 +90,7 @@ public class Group {
     }
   }
 
+  @Immutable
   static class ElementModP extends ElementMod {
     ElementModP(BigInteger elem) {
       super(elem);
