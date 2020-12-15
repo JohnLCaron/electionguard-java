@@ -3,6 +3,7 @@ package sunya.electionguard;
 import com.google.common.base.Preconditions;
 
 import java.math.BigInteger;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -120,7 +121,7 @@ class ElGamal {
    *     @param keys: list of public elgamal keys
    *     @return: joint key of elgamal keys
    */
-  static ElementModP elgamal_combine_public_keys(List<ElementModP> keys) {
+  static ElementModP elgamal_combine_public_keys(Collection<ElementModP> keys) {
                   return Group.mult_p(keys);
   }
 

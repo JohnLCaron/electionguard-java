@@ -2,10 +2,10 @@ package sunya.electionguard;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
-import pca.cs.jna.gmp.GMP;
 
 import javax.annotation.concurrent.Immutable;
 import java.math.BigInteger;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -121,7 +121,6 @@ public class Group {
     }
   }
 
-
   // Common constants
   static final ElementModQ ZERO_MOD_Q = new ElementModQ(BigInteger.ZERO);
   static final ElementModQ ONE_MOD_Q = new ElementModQ(BigInteger.ONE);
@@ -130,6 +129,20 @@ public class Group {
   static final ElementModP ZERO_MOD_P = new ElementModP(BigInteger.ZERO);
   static final ElementModP ONE_MOD_P = new ElementModP(BigInteger.ONE);
   static final ElementModP TWO_MOD_P = new ElementModP(BigInteger.TWO);
+
+  /**
+   *     Given a hex string representing bytes, returns an ElementModQ.
+   *     Returns `None` if the number is out of the allowed
+   *     [0,Q) range.
+   */
+  static Optional<ElementModQ> hex_to_q(String input) {
+    BigInteger b = new BigInteger(input, 16);
+    if (b.compareTo(Q) < 0) {
+      return Optional.of(new ElementModQ(b));
+    } else {
+      return Optional.empty();
+    }
+  }
 
   /**
    * Given a Python integer, returns an ElementModP.
@@ -245,10 +258,6 @@ public class Group {
     return b.modInverse(P);
   }
 
-  static public BigInteger mult_inv_p_gmp(BigInteger b) {
-    return GMP.modInverse(b, P);
-  }
-
   /**
    * Computes b^e mod p.
    *
@@ -261,10 +270,6 @@ public class Group {
 
   static public BigInteger pow_p(BigInteger b, BigInteger e) {
     return b.modPow(e, P);
-  }
-
-  static public BigInteger pow_p_gmp(BigInteger b, BigInteger e) {
-    return GMP.modPowInsecure(b, e, P);
   }
 
   /**
@@ -282,7 +287,7 @@ public class Group {
    *
    * @param elems: Zero or more elements in [0,P).
    */
-  static ElementModP mult_p(List<ElementModP> elems) {
+  static ElementModP mult_p(Collection<ElementModP> elems) {
     return mult_p(Iterables.toArray(elems, ElementModP.class));
   }
 
@@ -309,17 +314,6 @@ public class Group {
       product = product.multiply(x).mod(P);
     }
     return product;
-  }
-
-  // testing
-  public static ElementModP mult_p_gmp(List<BigInteger> elems) {
-    Preconditions.checkArgument(!elems.isEmpty());
-    BigInteger product = BigInteger.ONE;
-    for (BigInteger x : elems) {
-      product = GMP.multiply(product, x);
-      product = GMP.mod(product, P);
-    }
-    return new ElementModP(product);
   }
 
   /**

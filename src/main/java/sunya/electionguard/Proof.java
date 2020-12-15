@@ -1,5 +1,7 @@
 package sunya.electionguard;
 
+import java.util.Objects;
+
 public class Proof {
   enum Usage {
     Unknown("Unknown"),
@@ -23,5 +25,19 @@ public class Proof {
   public Proof(String name, Usage usage) {
     this.name = name;
     this.usage = usage;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    Proof proof = (Proof) o;
+    return name.equals(proof.name) &&
+            usage == proof.usage;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(name, usage);
   }
 }

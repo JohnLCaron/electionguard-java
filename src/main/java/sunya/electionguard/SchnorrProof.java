@@ -1,8 +1,9 @@
 package sunya.electionguard;
 
+import java.util.Objects;
+
 import static sunya.electionguard.Group.*;
 import static sunya.electionguard.Proof.Usage.SecretValue;
-
 
 public class SchnorrProof extends Proof {
   /** k in the spec */
@@ -43,6 +44,23 @@ public class SchnorrProof extends Proof {
     }
 
     return success;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    if (!super.equals(o)) return false;
+    SchnorrProof that = (SchnorrProof) o;
+    return publicKey.equals(that.publicKey) &&
+            commitment.equals(that.commitment) &&
+            challenge.equals(that.challenge) &&
+            response.equals(that.response);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(super.hashCode(), publicKey, commitment, challenge, response);
   }
 
   /**

@@ -7,9 +7,7 @@ import org.junit.Test;
 import java.io.IOException;
 
 import static com.google.common.truth.Truth.assertThat;
-
 import static sunya.electionguard.Election.*;
-
 
 public class TestElection {
   static ElectionFactory election_factory;
@@ -67,15 +65,21 @@ public class TestElection {
     assertThat(subject1.crypto_hash()).isEqualTo(subject3.crypto_hash());
   } */
 
-  /* implement equals
   @Test
   public void test_election_from_file_generates_consistent_internal_description_contest_hashes() throws IOException {
     ElectionDescription comparator = election_factory.get_simple_election_from_file();
     InternalElectionDescription subject = new InternalElectionDescription(comparator);
 
-    assertThat(comparator.contests).containsExactlyElementsIn(subject.contests);
+    assertThat(comparator.contests.size()).isEqualTo(subject.contests.size());
+
+    for (ContestDescription expected : comparator.contests) {
+      for (ContestDescription actual : subject.contests) {
+        if (expected.object_id.equals(actual.object_id)) {
+          assertThat(expected.crypto_hash()).isEqualTo(actual.crypto_hash());
+        }
+      }
+    }
   }
-   */
 
   @Test
   public void test_contest_description_valid_input_succeeds() {

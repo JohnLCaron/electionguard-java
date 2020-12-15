@@ -8,9 +8,9 @@ import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
+import java.util.Optional;
 
 public class Rsa {
-
   private static final int PUBLIC_EXPONENT = 65537;
   private static final int KEY_SIZE = 4096;
   private static final int PADDING = 11;
@@ -18,14 +18,21 @@ public class Rsa {
   private static final String ISO_ENCODING = "ISO-8859-1";
   private static final String BYTE_ORDER = "big";
 
-  /** Key pair of RSA pkcs1 in bytes */
-  static class RSAKeyPair {
-    final String private_key;
-    final String public_key;
+  public static Optional<Auxiliary.ByteString> encrypt(String message, PublicKey public_key) {
+    try {
+      return Optional.of(new Auxiliary.ByteString(rsa_encrypt(message, public_key)));
+    } catch (Exception e) {
+      // log
+      return Optional.empty();
+    }
+  }
 
-    RSAKeyPair(String private_key, String public_key) {
-      this.private_key = private_key;
-      this.public_key = public_key;
+  public static Optional<String> decrypt(Auxiliary.ByteString encrypted_message, PrivateKey secret_key) {
+    try {
+      return Optional.of(rsa_decrypt(encrypted_message.getBytes(), secret_key));
+    } catch (Exception e) {
+      // log
+      return Optional.empty();
     }
   }
 
@@ -123,5 +130,4 @@ public class Rsa {
     }
     return count;
   }
-
 }

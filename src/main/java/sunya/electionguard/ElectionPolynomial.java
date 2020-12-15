@@ -3,6 +3,7 @@ package sunya.electionguard;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 
+import javax.annotation.Nullable;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,11 +41,8 @@ public class ElectionPolynomial {
    *     :param number_of_coefficients: Number of coefficients of polynomial
    *     :param nonce: an optional nonce parameter that may be provided (useful for testing)
    *     :return: Polynomial used to share election keys
-   * @param number_of_coefficients
-   * @param nonce
-   * @return
    */
-  static ElectionPolynomial generate_polynomial(int number_of_coefficients, Group.ElementModQ nonce) {
+  static ElectionPolynomial generate_polynomial(int number_of_coefficients, @Nullable Group.ElementModQ nonce) {
     ArrayList<Group.ElementModQ> coefficients = new ArrayList<>();
     ArrayList<Group.ElementModP> commitments = new ArrayList<>();
     ArrayList<SchnorrProof> proofs = new ArrayList<>();
