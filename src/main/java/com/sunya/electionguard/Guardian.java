@@ -3,10 +3,12 @@ package com.sunya.electionguard;
 import com.google.common.flogger.FluentLogger;
 
 import javax.annotation.Nullable;
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import static com.sunya.electionguard.Group.*;
 import static com.sunya.electionguard.KeyCeremony.*;
 
 
@@ -152,6 +154,12 @@ public class Guardian extends ElectionObjectBase {
    */
   boolean all_auxiliary_public_keys_received() {
     return this._guardian_auxiliary_public_keys.size() == this.ceremony_details.number_of_guardians();
+  }
+
+  /**         Get a read-only view of the Guardian Election Public Keys shared with this Guardian. */
+  Map<String, ElectionPublicKey> guardian_election_public_keys() {
+          // TODO make readonly
+          return _guardian_election_public_keys;
   }
 
   /**
@@ -316,8 +324,8 @@ public class Guardian extends ElectionObjectBase {
   }
 
   /**
-   *         Creates a joint election key from the public keys of all guardians
-   *         :return: Optional joint key for election
+   * Creates a joint election key from the public keys of all guardians
+   * :return: Optional joint key for election
    */
   Optional<Group.ElementModP> publish_joint_key() {
     if (!this.all_election_public_keys_received()) {
@@ -327,5 +335,138 @@ public class Guardian extends ElectionObjectBase {
       return Optional.empty();
     }
     return Optional.of(KeyCeremony.combine_election_public_keys(this._guardian_election_public_keys));
+  }
+
+  /**
+   * Compute a partial decryption of an elgamal encryption
+   * <p>
+   * :param elgamal: the `ElGamalCiphertext` that will be partially decrypted
+   * :param extended_base_hash: the extended base hash of the election that
+   * was used to generate t he ElGamal Ciphertext
+   * :param nonce_seed: an optional value used to generate the `ChaumPedersenProof`
+   * if no value is provided, a random number will be used.
+   * :return: a `Tuple[ElementModP, ChaumPedersenProof]` of the decryption and its proof
+   *
+   * @return
+   */
+
+  Tuple partially_decrypt(
+          ElGamal.Ciphertext elgamal,
+          ElementModQ extended_base_hash,
+          @Nullable ElementModQ nonce_seed) {
+
+    if (nonce_seed == null) {
+      nonce_seed = rand_q();
+    }
+
+    //TODO: ISSUE #47: Decrypt the election secret key
+
+    // 𝑀_i = 𝐴^𝑠𝑖 mod 𝑝
+    ElementModP partial_decryption = elgamal.partial_decrypt(this._election_keys.key_pair().secret_key);
+
+    // ElGamal.Ciphertext message,
+    //          ElementModQ s,
+    //          ElementModP m,
+    //          ElementModQ seed,
+    //          ElementModQ hash_header
+    // 𝑀_i = 𝐴^𝑠𝑖 mod 𝑝 and 𝐾𝑖 = 𝑔^𝑠𝑖 mod 𝑝
+    ChaumPedersen.ChaumPedersenProof proof = ChaumPedersen.make_chaum_pedersen(
+            elgamal,
+            this._election_keys.key_pair().secret_key,
+            partial_decryption,
+            nonce_seed,
+            extended_base_hash);
+
+    return new Tuple(partial_decryption, proof);
+  }
+
+  static class Tuple {
+    final ElementModP decryption;
+    final ChaumPedersen.ChaumPedersenProof proof;
+
+    Tuple(ElementModP partial_decryption, ChaumPedersen.ChaumPedersenProof proof) {
+      this.decryption = partial_decryption;
+      this.proof = proof;
+    }
+  }
+
+  /**
+   * Compute a compensated partial decryption of an elgamal encryption
+   * on behalf of the missing guardian
+   * <p>
+   * :param missing_guardian_id: the guardian
+   * :param elgamal: the `ElGamalCiphertext` that will be partially decrypted
+   * :param extended_base_hash: the extended base hash of the election that
+   * was used to generate t he ElGamal Ciphertext
+   * :param nonce_seed: an optional value used to generate the `ChaumPedersenProof`
+   * if no value is provided, a random number will be used.
+   * :param decrypt: an `AuxiliaryDecrypt` function to decrypt the missing guardina private key backup
+   * :return: a `Tuple[ElementModP, ChaumPedersenProof]` of the decryption and its proof
+   *
+   * @return
+   */
+  Optional<Tuple> compensate_decrypt(
+          String missing_guardian_id,
+          ElGamal.Ciphertext elgamal,
+          ElementModQ extended_base_hash,
+          @Nullable ElementModQ nonce_seed,
+          Auxiliary.Decryptor decryptor) {
+
+    if (nonce_seed == null) {
+      nonce_seed = rand_q();
+    }
+
+    ElectionPartialKeyBackup backup = this._guardian_election_partial_key_backups.get(missing_guardian_id);
+    if (backup == null) {
+      logger.atInfo().log("compensate decrypt guardian %s missing backup for %s",
+              this.object_id, missing_guardian_id);
+      return Optional.empty();
+    }
+
+    Optional<String> decrypted_value = decryptor.decrypt(backup.encrypted_value(), this._auxiliary_keys.secret_key);
+    if (decrypted_value.isEmpty()) {
+      logger.atInfo().log("compensate decrypt guardian %s failed decryption for %s",
+              this.object_id, missing_guardian_id);
+      return Optional.empty();
+    }
+    ElementModQ partial_secret_key = hex_to_q(decrypted_value.get()).get();
+
+    // 𝑀_{𝑖,l} = 𝐴^P𝑖_{l}
+    ElementModP partial_decryption = elgamal.partial_decrypt(partial_secret_key);
+
+    // 𝑀_{𝑖,l} = 𝐴^𝑠𝑖 mod 𝑝 and 𝐾𝑖 = 𝑔^𝑠𝑖 mod 𝑝
+    ChaumPedersen.ChaumPedersenProof proof = ChaumPedersen.make_chaum_pedersen(
+            elgamal,
+            partial_secret_key,
+            partial_decryption,
+            nonce_seed,
+            extended_base_hash);
+
+    return Optional.of(new Tuple(partial_decryption, proof));
+  }
+
+  /**
+   * Compute the recovery public key for a given guardian .
+   */
+  Optional<ElementModP> recovery_public_key_for(String missing_guardian_id) {
+    ElectionPartialKeyBackup backup = this._guardian_election_partial_key_backups.get(missing_guardian_id);
+    if (backup == null) {
+      logger.atInfo().log("compensate decrypt guardian %s missing backup for %s",
+              this.object_id, missing_guardian_id);
+      return Optional.empty();
+    }
+
+    // compute the recovery public key,
+    // corresponding to the secret share Pi(l)
+    // K_ij^(l^j) for j in 0..k-1.  K_ij is coefficients[j].public_key
+    ElementModP pub_key = ONE_MOD_P;
+    int count = 0;
+    for (ElementModP commitment : backup.coefficient_commitments()) {
+      ElementModQ exponent = pow_q(BigInteger.valueOf(this.sequence_order), BigInteger.valueOf(count));
+      pub_key = mult_p(pub_key, pow_p(commitment, exponent));
+      count++;
+    }
+
+    return Optional.of(pub_key);
   }
 }

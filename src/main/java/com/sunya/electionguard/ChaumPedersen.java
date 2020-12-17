@@ -437,4 +437,36 @@ class ChaumPedersen {
 
     return new DisjunctiveChaumPedersenProof(a0, b0, a1, b1, c0, c1, c, v0, v1);
   }
+
+  /**
+   *     Produces a proof that a given value corresponds to a specific encryption.
+   *     computes: 𝑀 =𝐴^𝑠𝑖 mod 𝑝 and 𝐾𝑖 = 𝑔^𝑠𝑖 mod 𝑝
+   *
+   *     :param message: An ElGamal ciphertext
+   *     :param s: The nonce or secret used to derive the value
+   *     :param m: The value we are trying to prove
+   *     :param seed: Used to generate other random values here
+   *     :param hash_header: A value used when generating the challenge,
+   *                         usually the election extended base hash (𝑄')
+   * @return
+   */
+  static ChaumPedersenProof make_chaum_pedersen(
+          ElGamal.Ciphertext message,
+          ElementModQ s,
+          ElementModP m,
+          ElementModQ seed,
+          ElementModQ hash_header) {
+
+    ElementModP alpha = message.pad;
+    ElementModP beta = message.data;
+
+    // Pick one random number in Q.
+    ElementModQ u = new Nonces(seed, "constant-chaum-pedersen-proof").get(0);
+    ElementModP a = g_pow_p(u);  // 𝑔^𝑢𝑖 mod 𝑝
+    ElementModP b = pow_p(alpha, u);  // 𝐴^𝑢𝑖 mod 𝑝
+    ElementModQ c = Hash.hash_elems(hash_header, alpha, beta, a, b, m);  // sha256(𝑄', A, B, a𝑖, b𝑖, 𝑀𝑖)
+    ElementModQ v = a_plus_bc_q(u, c, s);  // (𝑢𝑖 + 𝑐𝑖𝑠𝑖) mod 𝑞
+
+    return new ChaumPedersenProof(a, b, c, v);
+  }
 }

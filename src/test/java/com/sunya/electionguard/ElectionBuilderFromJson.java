@@ -2,7 +2,6 @@ package com.sunya.electionguard;
 
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
-import com.sunya.integration.ElectionBuilderPojo;
 
 import javax.annotation.Nullable;
 import java.io.*;

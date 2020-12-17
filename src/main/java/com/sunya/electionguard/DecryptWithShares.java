@@ -11,7 +11,6 @@ import static com.sunya.electionguard.Group.*;
 import static com.sunya.electionguard.DecryptionShare.*;
 import static com.sunya.electionguard.Tally.*;
 
-
 class DecryptWithShares {
 
   /**
@@ -43,7 +42,7 @@ class DecryptWithShares {
 
     // accumulate all of the shares calculated for the selection
     // all_shares_product_M = mult_p( *[decryption.share for (_, decryption) in shares.values()]);
-    List<BigInteger> decryption_shares = shares.values().stream().map(t -> t.decryption.share.elem).collect(Collectors.toList());
+    List<BigInteger> decryption_shares = shares.values().stream().map(t -> t.decryption.share().elem).collect(Collectors.toList());
     ElementModP all_shares_product_M = new ElementModP(mult_p(decryption_shares));
 
     // Calculate 𝑀 = 𝐵⁄(∏𝑀𝑖)mod 𝑝.
@@ -142,7 +141,7 @@ class DecryptWithShares {
       HashMap<String, BallotDecryptionShare> ballot_shares = new HashMap<>();
       for (Map.Entry<String, TallyDecryptionShare> entry : shares.entrySet()) {
         TallyDecryptionShare share = entry.getValue();
-        ballot_shares.put(entry.getKey(), share.spoiled_ballots.get(spoiled_ballot.object_id));
+        ballot_shares.put(entry.getKey(), share.spoiled_ballots().get(spoiled_ballot.object_id));
       }
 
       Optional<Map<String, Tally.PlaintextTallyContest>> decrypted_ballot = decrypt_ballot(spoiled_ballot, ballot_shares, extended_base_hash);

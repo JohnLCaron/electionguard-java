@@ -42,10 +42,10 @@ public class Encrypt {
     private ElementModQ _seed_hash;
 
     public EncryptionMediator(InternalElectionDescription metadata, CiphertextElectionContext encryption,
-                              ElementModQ seed_hash) {
+                              EncryptionDevice encryption_device) {
       this._metadata = metadata;
       this._encryption = encryption;
-      this._seed_hash = seed_hash;
+      this._seed_hash = encryption_device.get_hash();
     }
 
     /** Encrypt the specified ballot using the cached election context. */

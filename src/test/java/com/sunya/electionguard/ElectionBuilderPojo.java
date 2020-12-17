@@ -1,4 +1,4 @@
-package com.sunya.integration;
+package com.sunya.electionguard;
 
 import java.util.List;
 

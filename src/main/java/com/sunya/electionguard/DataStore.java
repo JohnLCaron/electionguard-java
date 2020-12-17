@@ -2,7 +2,7 @@ package com.sunya.electionguard;
 
 import java.util.*;
 
-public class DataStore {
+public class DataStore implements Iterable<Ballot.CiphertextAcceptedBallot> {
   HashMap<String, Ballot.CiphertextAcceptedBallot> map = new HashMap<>();
 
   boolean containsKey(String key) {
@@ -19,4 +19,8 @@ public class DataStore {
   }
 
 
+  @Override
+  public Iterator<Ballot.CiphertextAcceptedBallot> iterator() {
+    return map.values().iterator();
+  }
 }

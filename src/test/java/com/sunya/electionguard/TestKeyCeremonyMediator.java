@@ -15,7 +15,7 @@ import static com.sunya.electionguard.KeyCeremony.*;
 public class TestKeyCeremonyMediator {
   private static final int NUMBER_OF_GUARDIANS = 2;
   private static final int QUORUM = 2;
-  private static final KeyCeremony.CeremonyDetails CEREMONY_DETAILS = CeremonyDetails.create(NUMBER_OF_GUARDIANS, QUORUM);
+  private static final CeremonyDetails CEREMONY_DETAILS = CeremonyDetails.create(NUMBER_OF_GUARDIANS, QUORUM);
   private static final String GUARDIAN_1_ID = "Guardian 1";
   private static final String GUARDIAN_2_ID = "Guardian 2";
   private static final String VERIFIER_ID = "Guardian 3";

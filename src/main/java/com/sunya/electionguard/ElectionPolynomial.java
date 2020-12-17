@@ -2,6 +2,7 @@ package com.sunya.electionguard;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 
 import javax.annotation.Nullable;
 import java.math.BigInteger;
@@ -93,10 +94,10 @@ public class ElectionPolynomial {
    *     @param degrees: the degrees across which to plot, usually the collection of
    *                     available Guardians' Sequence Orders
    */
-  static ElementModQ compute_lagrange_coefficient(BigInteger coordinate, BigInteger... degrees) {
-    ElementModQ numerator = mult_q(degrees);
+  static ElementModQ compute_lagrange_coefficient(BigInteger coordinate, List<BigInteger> degrees) {
+    ElementModQ numerator = mult_q(Iterables.toArray(degrees, BigInteger.class));
     // denominator = mult_q(*[(degree - coordinate) for degree in degrees])
-    List<BigInteger> diff = Arrays.stream(degrees).map(degree -> degree.subtract(coordinate)).collect(Collectors.toList());
+    List<BigInteger> diff = degrees.stream().map(degree -> degree.subtract(coordinate)).collect(Collectors.toList());
     ElementModQ denominator = mult_q((BigInteger[]) diff.toArray());
     return div_q(numerator, denominator);
   }
