@@ -1,5 +1,7 @@
 package com.sunya.electionguard;
 
+import com.google.common.base.Preconditions;
+
 /**
  *     Creates a sequence of random elements in [0,Q), seeded from an initial element in [0,Q).
  *     If you start with the same seed, you'll get exactly the same sequence. Optional string
@@ -13,14 +15,13 @@ package com.sunya.electionguard;
 public class Nonces {
 
   private final Group.ElementModQ seed;
-  private final Object[] headers;
 
   Nonces(Group.ElementModQ seed, Object... headers) {
-    this.seed = seed;
-    this.headers = headers;
+    this.seed = (headers.length > 0) ? Hash.hash_elems(seed, headers) : seed;
   }
 
-  Group.ElementModQ get(int element) {
-    return Hash.hash_elems(seed, element, headers);
+  Group.ElementModQ get(int index) {
+    Preconditions.checkArgument(index >= 0, "Nonces do not support negative indices.");
+    return Hash.hash_elems(seed, index);
   }
 }

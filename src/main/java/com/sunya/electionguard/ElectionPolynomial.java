@@ -7,7 +7,6 @@ import com.google.common.collect.Iterables;
 import javax.annotation.Nullable;
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -51,7 +50,7 @@ public class ElectionPolynomial {
     for (int i = 0; i < number_of_coefficients; i++) {
       // Note the nonce value is not safe.it is designed for testing only.
       // this method should be called without the nonce in production.
-      Group.ElementModQ coefficient = (nonce == null) ? rand_q() : add_q(nonce.elem, BigInteger.valueOf(i));
+      Group.ElementModQ coefficient = (nonce == null) ? rand_q() : add_qi(nonce.elem, BigInteger.valueOf(i));
       Group.ElementModP commitment = g_pow_p(coefficient);
       // TODO Alternate schnoor proof method that doesn 't need KeyPair
       SchnorrProof proof = SchnorrProof.make_schnorr_proof(new ElGamal.KeyPair(coefficient, commitment), rand_q());
@@ -82,7 +81,7 @@ public class ElectionPolynomial {
     for (ElementModQ coefficient : polynomial.coefficients) {
       ElementModQ exponent = pow_q(exponent_modifier, BigInteger.valueOf(count));
       ElementModQ factor = mult_q(coefficient, exponent);
-      computed_value = add_q(computed_value.elem, factor.elem);
+      computed_value = add_qi(computed_value.elem, factor.elem);
       count++;
     }
     return computed_value;
@@ -98,7 +97,7 @@ public class ElectionPolynomial {
     ElementModQ numerator = mult_q(Iterables.toArray(degrees, BigInteger.class));
     // denominator = mult_q(*[(degree - coordinate) for degree in degrees])
     List<BigInteger> diff = degrees.stream().map(degree -> degree.subtract(coordinate)).collect(Collectors.toList());
-    ElementModQ denominator = mult_q((BigInteger[]) diff.toArray());
+    ElementModQ denominator = mult_q(Iterables.toArray(diff, BigInteger.class));
     return div_q(numerator, denominator);
   }
 

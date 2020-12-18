@@ -74,11 +74,13 @@ class ChaumPedersen {
       boolean in_bounds_v0 = v0.is_in_bounds();
       boolean in_bounds_v1 = v1.is_in_bounds();
 
-      boolean consistent_c = add_q(c0.elem, c1.elem).equals(c) && c.equals(Hash.hash_elems(q, alpha, beta, a0, b0, a1, b1));
-      boolean consistent_gv0 = g_pow_p(v0).equals(Group.mult_p(a0, Group.pow_p(alpha, c0)));
-      boolean consistent_gv1 = g_pow_p(v1).equals(Group.mult_p(a1, Group.pow_p(alpha, c1)));
-      boolean consistent_kv0 = Group.pow_p(k, v0).equals(Group.mult_p(b0, Group.pow_p(beta, c0)));
-      boolean consistent_gc1kv1 = Group.mult_p(g_pow_p(c1), Group.pow_p(k, v1)).equals(Group.mult_p(b1, Group.pow_p(beta, c1)));
+      boolean consistent_c = add_qi(c0.elem, c1.elem).equals(c) && c.equals(Hash.hash_elems(q, alpha, beta, a0, b0, a1, b1));
+      boolean consistent_gv0 = g_pow_p(v0).equals(mult_p(a0, pow_p(alpha, c0)));
+      boolean consistent_gv1 = g_pow_p(v1).equals(mult_p(a1, pow_p(alpha, c1)));
+      boolean consistent_kv0 = pow_p(k, v0).equals(mult_p(b0, pow_p(beta, c0)));
+
+      // consistent_gc1kv1 = mult_p(g_pow_p(c1), pow_p(k, v1)) == mult_p(b1, pow_p(beta, c1))
+      boolean consistent_gc1kv1 = mult_p(g_pow_p(c1), pow_p(k, v1)).equals(mult_p(b1, pow_p(beta, c1)));
 
       boolean success = (in_bounds_alpha && in_bounds_beta && in_bounds_a0 && in_bounds_b0 && in_bounds_a1 &&
               in_bounds_b1 && in_bounds_c0 && in_bounds_c1 && in_bounds_v0 && in_bounds_v1 && consistent_c &&
@@ -162,11 +164,11 @@ class ChaumPedersen {
       boolean same_c = c.equals(Hash.hash_elems(q, alpha, beta, a, b, m));
       boolean consistent_gv = (in_bounds_v && in_bounds_a && in_bounds_c &&
               // The equation 𝑔^𝑣𝑖 = 𝑎𝑖𝐾^𝑐𝑖
-              g_pow_p(v).equals(Group.mult_p(a, Group.pow_p(k, c))));
+              g_pow_p(v).equals(mult_p(a, pow_p(k, c))));
 
       // The equation 𝐴^𝑣𝑖 = 𝑏𝑖𝑀𝑖^𝑐𝑖 mod 𝑝
       boolean consistent_av = (in_bounds_alpha && in_bounds_b && in_bounds_c && in_bounds_v &&
-              Group.pow_p(alpha, v).equals(Group.mult_p(b, Group.pow_p(m, c))));
+              pow_p(alpha, v).equals(mult_p(b, pow_p(m, c))));
 
       boolean success = in_bounds_alpha && in_bounds_beta && in_bounds_k && in_bounds_m && in_bounds_a && in_bounds_b
               && in_bounds_c && in_bounds_v && in_bounds_q && same_c && consistent_gv && consistent_av;
@@ -325,7 +327,7 @@ class ChaumPedersen {
     // Pick one random number in Q.
     ElementModQ u = new Nonces(seed, "constant-chaum-pedersen-proof").get(0);
     ElementModP a = g_pow_p(u);  // 𝑔^𝑢𝑖 mod 𝑝
-    ElementModP b = Group.pow_p(k, u);  // 𝐴^𝑢𝑖 mod 𝑝
+    ElementModP b = pow_p(k, u);  // 𝐴^𝑢𝑖 mod 𝑝
     ElementModQ c = Hash.hash_elems(hash_header, alpha, beta, a, b); // sha256(𝑄', A, B, a, b)
     ElementModQ v = a_plus_bc_q(u, c, r);
 
@@ -387,10 +389,10 @@ class ChaumPedersen {
 
     // Compute the NIZKP
     ElementModP a0 = g_pow_p(u0);
-    ElementModP b0 = Group.pow_p(k, u0);
+    ElementModP b0 = pow_p(k, u0);
     ElementModQ q_minus_c1 = negate_q(c1);
-    ElementModP a1 = Group.mult_p(g_pow_p(v1), Group.pow_p(alpha, q_minus_c1));
-    ElementModP b1 = Group.mult_p(Group.pow_p(k, v1), g_pow_p(c1), Group.pow_p(beta, q_minus_c1));
+    ElementModP a1 = mult_p(g_pow_p(v1), pow_p(alpha, q_minus_c1));
+    ElementModP b1 = mult_p(pow_p(k, v1), g_pow_p(c1), pow_p(beta, q_minus_c1));
     ElementModQ c = Hash.hash_elems(q, alpha, beta, a0, b0, a1, b1);
     ElementModQ c0 = a_minus_b_q(c, c1);
     ElementModQ v0 = a_plus_bc_q(u0, c0, r);

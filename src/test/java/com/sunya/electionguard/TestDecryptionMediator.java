@@ -1,11 +1,13 @@
 package com.sunya.electionguard;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -14,7 +16,7 @@ import static com.google.common.truth.Truth8.assertThat;
 
 import static com.sunya.electionguard.Ballot.*;
 import static com.sunya.electionguard.Election.*;
-import static com.sunya.electionguard.Group.ZERO_MOD_P;
+import static com.sunya.electionguard.Group.*;
 import static com.sunya.electionguard.KeyCeremony.*;
 
 public class TestDecryptionMediator {
@@ -45,7 +47,7 @@ public class TestDecryptionMediator {
   CiphertextBallot encrypted_fake_spoiled_ballot;
   List<CiphertextBallot> more_fake_encrypted_ballots;
   List<CiphertextBallot> more_fake_encrypted_spoiled_ballots;
-  Map<String, Integer> expected_plaintext_tally;
+  Map<String, BigInteger> expected_plaintext_tally;
   Tally.CiphertextTally ciphertext_tally;
 
   @Before
@@ -97,10 +99,9 @@ public class TestDecryptionMediator {
       this.more_fake_spoiled_ballots.add(
               ballot_factory.get_fake_ballot(this.metadata, "some-unique-ballot-id-spoiled" + i, true));
     }
-    ;
+
     assertThat(this.fake_cast_ballot.is_valid(this.metadata.ballot_styles.get(0).object_id)).isTrue();
     assertThat(this.fake_spoiled_ballot.is_valid(this.metadata.ballot_styles.get(0).object_id)).isTrue();
-    // this.expected_plaintext_tally = accumulate_plaintext_ballots([this.fake_cast_ballot] + this.more_fake_ballots)
     ArrayList<PlaintextBallot> all = new ArrayList<>(this.more_fake_ballots);
     all.add(this.fake_cast_ballot);
     this.expected_plaintext_tally = TestTally.accumulate_plaintext_ballots(all);
@@ -113,7 +114,7 @@ public class TestDecryptionMediator {
     // missing_selection_ids = selection_ids.difference( set(this.expected_plaintext_tally) )
     Sets.SetView<String> missing_selection_ids = Sets.difference(selection_ids, this.expected_plaintext_tally.keySet());
     for (String id : missing_selection_ids) {
-      this.expected_plaintext_tally.put(id, 0);
+      this.expected_plaintext_tally.put(id, BigInteger.ZERO);
     }
 
     // Encrypt
@@ -179,6 +180,149 @@ public class TestDecryptionMediator {
 
     // Cannot get plaintext tally without a quorum
     assertThat(subject.get_plaintext_tally(true, null)).isEmpty();
+  }
+
+  @Test
+  public void test_compute_selection() {
+    Tally.CiphertextTallySelection first_selection =
+            this.ciphertext_tally.cast.values().stream().flatMap(contest -> contest.tally_selections.values().stream())
+                    .findFirst().orElseThrow(RuntimeException::new);
+
+    Optional<DecryptionShare.CiphertextDecryptionSelection> result =
+            Decryption.compute_decryption_share_for_selection(this.guardians.get(0), first_selection, this.context);
+    assertThat(result).isPresent();
+  }
+
+  @Test
+  public void test_compute_compensated_selection_failure() {
+    Tally.CiphertextTallySelection first_selection =
+            this.ciphertext_tally.cast.values().stream().flatMap(contest -> contest.tally_selections.values().stream())
+                    .findFirst().orElseThrow(RuntimeException::new);
+
+    this.guardians.get(0)._guardian_election_partial_key_backups.remove(this.guardians.get(2).object_id);
+
+    assertThat(this.guardians.get(0).recovery_public_key_for(this.guardians.get(2).object_id)).isEmpty();
+
+    Optional<DecryptionShare.CiphertextCompensatedDecryptionSelection> result =
+            Decryption.compute_compensated_decryption_share_for_selection(
+                    this.guardians.get(0),
+                    this.guardians.get(2).object_id,
+                    first_selection,
+                    this.context,
+                    identity_auxiliary_decrypt);
+
+    assertThat(result).isEmpty();
+  }
+
+  /**
+   * Demonstrates the complete workflow for computing a compensated decryption share
+   * for one selection. It is useful for verifying that the workflow is correct.
+   */
+  @Test
+  public void test_compute_compensated_selection() {
+    Tally.CiphertextTallySelection first_selection =
+            this.ciphertext_tally.cast.values().stream().flatMap(contest -> contest.tally_selections.values().stream())
+                    .findFirst().orElseThrow(RuntimeException::new);
+
+    // Compute lagrange coefficients for the guardians that are present
+    Group.ElementModQ lagrange_0 = ElectionPolynomial.compute_lagrange_coefficient(
+            BigInteger.valueOf(this.guardians.get(0).sequence_order),
+            ImmutableList.of(BigInteger.valueOf(this.guardians.get(1).sequence_order)));
+    Group.ElementModQ lagrange_1 = ElectionPolynomial.compute_lagrange_coefficient(
+            BigInteger.valueOf(this.guardians.get(1).sequence_order),
+            ImmutableList.of(BigInteger.valueOf(this.guardians.get(0).sequence_order)));
+
+    System.out.printf("lagrange: sequence_orders: (%s, %s, %s)%n",
+            this.guardians.get(0).sequence_order, this.guardians.get(1).sequence_order, this.guardians.get(2).sequence_order);
+    System.out.printf("%s%n", lagrange_0);
+    System.out.printf("%s%n", lagrange_1);
+
+    // compute their shares
+    Optional<DecryptionShare.CiphertextDecryptionSelection> share_0 =
+            Decryption.compute_decryption_share_for_selection(this.guardians.get(0), first_selection, this.context);
+
+    Optional<DecryptionShare.CiphertextDecryptionSelection> share_1 =
+            Decryption.compute_decryption_share_for_selection(this.guardians.get(1), first_selection, this.context);
+
+    assertThat(share_0).isPresent();
+    assertThat(share_1).isPresent();
+
+    // compute compensations shares for the missing guardian
+    Optional<DecryptionShare.CiphertextCompensatedDecryptionSelection> compensation_0 =
+            Decryption.compute_compensated_decryption_share_for_selection(
+                    this.guardians.get(0),
+                    this.guardians.get(2).object_id,
+                    first_selection,
+                    this.context,
+                    identity_auxiliary_decrypt);
+
+    Optional<DecryptionShare.CiphertextCompensatedDecryptionSelection> compensation_1 =
+            Decryption.compute_compensated_decryption_share_for_selection(
+                    this.guardians.get(1),
+                    this.guardians.get(2).object_id,
+                    first_selection,
+                    this.context,
+                    identity_auxiliary_decrypt);
+
+    assertThat(compensation_0).isPresent();
+    assertThat(compensation_1).isPresent();
+
+    DecryptionShare.CiphertextCompensatedDecryptionSelection comp0 = compensation_0.get();
+    DecryptionShare.CiphertextCompensatedDecryptionSelection comp1 = compensation_1.get();
+    System.out.printf("%nSHARES: %s%n %s%n", compensation_0, compensation_1);
+
+    // Check the share proofs
+    assertThat(comp0.proof().is_valid(
+            first_selection.ciphertext,
+            this.guardians.get(0).recovery_public_key_for(this.guardians.get(2).object_id).get(),
+            comp0.share(),
+            this.context.crypto_extended_base_hash)).isTrue();
+
+    assertThat(comp1.proof().is_valid(
+            first_selection.ciphertext,
+            this.guardians.get(1).recovery_public_key_for(this.guardians.get(2).object_id).get(),
+            comp1.share(),
+            this.context.crypto_extended_base_hash)).isTrue();
+
+    List<ElementModP> share_pow_p = ImmutableList.of(pow_p(comp0.share(), lagrange_0), pow_p(comp1.share(), lagrange_1));
+    System.out.printf("%nSHARE_POW_P%n%s%n", share_pow_p);
+
+    // reconstruct the missing share from the compensation shares
+    ElementModP reconstructed_share = mult_p(share_pow_p);
+    System.out.printf("%nRECONSTRUCTED SHARE%s%n", reconstructed_share);
+
+    DecryptionShare.CiphertextDecryptionSelection share_2 = DecryptionShare.create_ciphertext_decryption_selection(
+            first_selection.object_id,
+            this.guardians.get(2).object_id,
+            first_selection.description_hash,
+            reconstructed_share,
+            Optional.empty(),
+            Optional.of(ImmutableMap.of(
+                    this.guardians.get(0).object_id, comp0,
+                    this.guardians.get(1).object_id, comp1))
+    );
+
+    // Decrypt the result
+    Optional<Tally.PlaintextTallySelection> result = DecryptWithShares.decrypt_selection_with_decryption_shares(
+            first_selection,
+            ImmutableMap.of(
+                    this.guardians.get(0).object_id,
+                    new DecryptionShare.Tuple2(this.guardians.get(0).share_election_public_key().key(), share_0.get()),
+
+                    this.guardians.get(1).object_id,
+                    new DecryptionShare.Tuple2(this.guardians.get(1).share_election_public_key().key(), share_1.get()),
+
+                    this.guardians.get(2).object_id,
+                    new DecryptionShare.Tuple2(this.guardians.get(2).share_election_public_key().key(), share_2)),
+            this.context.crypto_extended_base_hash,
+            false);
+
+    System.out.printf("%s%n", result);
+
+    assertThat(result).isPresent();
+    BigInteger expected = this.expected_plaintext_tally.get(first_selection.object_id);
+    BigInteger actual = result.get().tally;
+    assertThat(result.get().tally).isEqualTo(this.expected_plaintext_tally.get(first_selection.object_id));
   }
 
 }

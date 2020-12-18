@@ -57,9 +57,10 @@ class Ballot {
       this.extended_data = extendedData;
     }
 
-    boolean is_valid(String expectedObjectId) {
-      if (!expectedObjectId.equals(object_id)) {
-        // f"invalid object_id: expected({expected_object_id}) actual({self.object_id})"
+    boolean is_valid(String expected_object_id) {
+      if (!expected_object_id.equals(object_id)) {
+        logger.atInfo().log("invalid object_id: expected %s actual %s",
+                expected_object_id, this.object_id);
         return false;
       }
 
@@ -82,8 +83,7 @@ class Ballot {
       try {
         asBool = Utils.strtobool(vote);
       } catch (Exception e) {
-        logger.atInfo().log("to_int could not convert plaintext: %s", vote);
-        // f"to_int could not convert plaintext: {self.vote.lower()} to bool"
+        logger.atInfo().log("to_int could not convert plaintext: '%s' to bool", vote);
       }
 
       // TODO: ISSUE #33: If the boolean coercion above fails, support integer votes
@@ -297,7 +297,6 @@ class Ballot {
 
     /**
      * Given a PlaintextBallotContest returns true if the state is representative of the expected values.
-     * <p>
      * Note: because this class supports partial representations, undervotes are considered a valid state.
      */
     boolean is_valid(

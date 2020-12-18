@@ -1,5 +1,6 @@
 package com.sunya.electionguard;
 
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,13 +18,10 @@ public class TestTally {
    * <p>
    * :param ballots: a list of plaintext ballots
    * :return: a dict from selection object_id's to integer totals
-   *
-   * @return
    */
+  static Map<String, BigInteger> accumulate_plaintext_ballots(List<Ballot.PlaintextBallot> ballots) {
 
-  static Map<String, Integer> accumulate_plaintext_ballots(List<Ballot.PlaintextBallot> ballots) {
-
-    Map<String, Integer> result = new HashMap<>();
+    Map<String, BigInteger> result = new HashMap<>();
     for (Ballot.PlaintextBallot ballot : ballots) {
       for (Ballot.PlaintextBallotContest contest : ballot.contests) {
         for (Ballot.PlaintextBallotSelection selection : contest.ballot_selections) {
@@ -31,7 +29,7 @@ public class TestTally {
                   .that(selection.is_placeholder_selection).isFalse();
           String desc_id = selection.object_id;
           // returns 1 or 0 for n-of-m ballot selections
-          result.merge(desc_id, selection.to_int(), Integer::sum);
+          result.merge(desc_id, BigInteger.valueOf(selection.to_int()), BigInteger::add);
         }
       }
     }

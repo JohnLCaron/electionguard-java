@@ -55,7 +55,7 @@ public class Group {
     @Override
     public boolean equals(Object o) {
       if (this == o) return true;
-      if (o == null || getClass() != o.getClass()) return false;
+      if (!(o instanceof ElementMod)) return false;
       ElementMod that = (ElementMod) o;
       return elem.equals(that.elem);
     }
@@ -63,6 +63,13 @@ public class Group {
     @Override
     public int hashCode() {
       return Objects.hash(elem);
+    }
+
+    @Override
+    public String toString() {
+      return "ElementMod{" +
+              "elem=" + elem +
+              '}';
     }
   }
 
@@ -183,7 +190,7 @@ public class Group {
   /**
    * Adds together one or more elements in Q, returns the sum mod Q
    */
-  static ElementModQ add_q(BigInteger... elems) {
+  static ElementModQ add_qi(BigInteger... elems) {
     BigInteger t = BigInteger.ZERO;
     for (BigInteger e : elems) {
       t = t.add(e).mod(Q);
@@ -203,22 +210,30 @@ public class Group {
    * Computes (a-b) mod q.
    */
   static ElementModQ a_minus_b_q(ElementModQ a, ElementModQ b) {
+    BigInteger r1 = a.elem.subtract(b.elem);
+    BigInteger r2 = r1.mod(Q);
+    ElementModQ r3 = new ElementModQ(r2);
+
     return new ElementModQ(a.elem.subtract(b.elem).mod(Q));
+  }
+
+  static ElementModQ a_minus_b_q(BigInteger a, BigInteger b) {
+    return new ElementModQ(a.subtract(b).mod(Q));
   }
 
   /**
    * Computes a/b mod p
    */
   static ElementModP div_p(ElementMod a, ElementMod b) {
-    return new ElementModP(div_p(a.elem, b.elem));
+    return div_p(a.elem, b.elem);
   }
 
   /**
    * Computes a/b mod p
    */
-  static BigInteger div_p(BigInteger a, BigInteger b) {
+  static ElementModP div_p(BigInteger a, BigInteger b) {
     BigInteger inverse = b.modInverse(P);
-    return mult_p(a, inverse);
+    return new ElementModP(mult_pi(a, inverse));
   }
 
   /**
@@ -227,6 +242,11 @@ public class Group {
   static ElementModQ div_q(ElementMod a, ElementMod b) {
     BigInteger inverse = b.elem.modInverse(Q);
     return mult_q(a, int_to_q_unchecked(inverse));
+  }
+
+  static ElementModQ div_q(BigInteger a, BigInteger b) {
+    BigInteger inverse = b.modInverse(Q);
+    return mult_q(a, inverse);
   }
 
   /**
@@ -242,6 +262,12 @@ public class Group {
   static ElementModQ a_plus_bc_q(ElementModQ a, ElementModQ b, ElementModQ c) {
     BigInteger product = b.elem.multiply(c.elem);
     BigInteger sum = a.elem.add(product);
+    return new ElementModQ(sum.mod(Q));
+  }
+
+  static ElementModQ a_plus_bc_q(BigInteger a, BigInteger b, BigInteger c) {
+    BigInteger product = b.multiply(c);
+    BigInteger sum = a.add(product);
     return new ElementModQ(sum.mod(Q));
   }
 
@@ -303,10 +329,10 @@ public class Group {
   }
 
   public static BigInteger mult_p(Iterable<BigInteger> elems) {
-    return mult_p(Iterables.toArray(elems, BigInteger.class));
+    return mult_pi(Iterables.toArray(elems, BigInteger.class));
   }
 
-  public static BigInteger mult_p(BigInteger... elems) {
+  public static BigInteger mult_pi(BigInteger... elems) {
     BigInteger product = BigInteger.ONE;
     for (BigInteger x : elems) {
       product = product.multiply(x).mod(P);
