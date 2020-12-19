@@ -2,8 +2,8 @@ plugins {
     id 'java'
 }
 
-group 'org.example'
-version '1.0-SNAPSHOT'
+group 'com.sunya.electionguard'
+version '0.1-SNAPSHOT'
 
 repositories {
     // Prefer JCenter to Maven Central. See
@@ -12,20 +12,80 @@ repositories {
     mavenCentral()  // JCenter isn't quite a superset of Maven Central.
 }
 
+ext.junitPlatformVersion = '1.7.0'
+ext.junitJupiterVersion = '5.7.0'
+ext.jqwikVersion = '1.3.10'
+
+sourceSets {
+    integration {
+        java.srcDir "$projectDir/src/integration/java"
+        resources.srcDir "$projectDir/src/integration/resources"
+        compileClasspath += main.output + test.output
+        runtimeClasspath += main.output + test.output
+    }
+}
+
+sourceSets {
+    testproperties {
+        java.srcDir "$projectDir/src/testproperties/java"
+        resources.srcDir "$projectDir/src/testproperties/resources"
+        compileClasspath += main.output + test.output
+        runtimeClasspath += main.output + test.output
+    }
+}
+
+configurations {
+    integrationImplementation.extendsFrom testImplementation
+    integrationRuntime.extendsFrom testRuntime
+}
+
+configurations {
+    testpropertiesImplementation.extendsFrom testImplementation
+    testpropertiesRuntime.extendsFrom testRuntime
+}
+
+compileTestJava {
+    // To enable argument names in reporting and debugging
+    options.compilerArgs += '-parameters'
+}
+
+test {
+    useJUnitPlatform {
+        includeEngines 'jqwik'
+
+        // Or include several Junit engines if you use them
+        // includeEngines 'jqwik', 'junit-jupiter', 'junit-vintage'
+
+        // includeTags 'fast', 'medium'
+        // excludeTags 'slow'
+    }
+
+    include '**/*Properties.class'
+    include '**/*Test.class'
+    include '**/*Tests.class'
+}
+
 dependencies {
     // Annotations: Nullable
     implementation 'com.google.code.findbugs:jsr305:3.0.2'
     implementation 'com.google.guava:guava:28.0-jre'
-    implementation 'net.java.dev.jna:jna:5.4.0'
     implementation 'com.google.code.gson:gson:2.8.6'
     implementation "com.google.auto.value:auto-value-annotations:1.7.4"
     implementation 'com.google.flogger:flogger:0.5.1'
+    runtime 'com.google.flogger:flogger-system-backend:0.5.1'
 
     annotationProcessor "com.google.auto.value:auto-value:1.7.4"
 
-    testCompile group: 'junit', name: 'junit', version: '4.12'
     testCompile 'com.google.truth:truth:1.1'
     testCompile 'com.google.truth.extensions:truth-java8-extension:1.1'
 
-    runtime 'com.google.flogger:flogger-system-backend:0.5.1'
+
+    // aggregate jqwik dependency
+    testImplementation "net.jqwik:jqwik:${jqwikVersion}"
+
+    // Add if you also want to use the Jupiter engine or Assertions from it
+    testImplementation "org.junit.jupiter:junit-jupiter:5.7.0"
+
+    // Add any other test library you need...
+    testImplementation "org.assertj:assertj-core:3.12.2"
 }

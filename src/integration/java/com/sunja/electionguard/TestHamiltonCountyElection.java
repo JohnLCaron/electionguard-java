@@ -1,4 +1,4 @@
-package com.sunya.integration;
+package com.sunja.electionguard;
 
 import com.sunya.electionguard.Election;
 import com.sunya.electionguard.ElectionFactory;

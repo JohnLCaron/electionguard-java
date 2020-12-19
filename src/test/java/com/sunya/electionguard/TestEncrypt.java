@@ -192,6 +192,7 @@ public class TestEncrypt {
     assertThat(result.ballot_selections.size()).isEqualTo(expected_entries);
   }
 
+  /*
   @settings(
           deadline=timedelta(milliseconds=4000),
           suppress_health_check=[HealthCheck.too_slow],
@@ -236,5 +237,6 @@ public class TestEncrypt {
         )
                 self.assertEqual(len(result.ballot_selections), expected_entries)
 
+*/
 
 }
