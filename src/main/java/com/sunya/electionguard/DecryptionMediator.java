@@ -66,7 +66,7 @@ public class DecryptionMediator {
 
     // Compute the Decryption Share for the guardian
     Optional<TallyDecryptionShare> share =
-            Decryption.compute_decryption_share(guardian, this._ciphertext_tally, this._encryption, Optional.empty());
+            Decryption.compute_decryption_share(guardian, this._ciphertext_tally, this._encryption);
     if (share.isEmpty()) {
       logger.atInfo().log("announce could not generate decryption share for %s", guardian.object_id);
       return Optional.empty();
@@ -160,7 +160,7 @@ public class DecryptionMediator {
               missing_guardian_id,
               this._ciphertext_tally,
               this._encryption,
-              decryptor, Optional.empty());
+              decryptor);
       if (share.isEmpty()) {
         logger.atInfo().log("compensation failed for missing: %s", missing_guardian_id);
         break;
@@ -186,11 +186,8 @@ public class DecryptionMediator {
    * <p>
    * :param recompute: Specify if the function should recompute the result, even if one already exists.
    * :return: a `PlaintextTally` or `None`
-   *
-   * @return
    */
-  Optional<PlaintextTally> get_plaintext_tally(
-          boolean recompute, Auxiliary.Decryptor decryptor) {
+  Optional<PlaintextTally> get_plaintext_tally(boolean recompute, Auxiliary.Decryptor decryptor) {
     if (decryptor == null) {
       decryptor = Rsa::decrypt;
     }

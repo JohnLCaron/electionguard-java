@@ -371,7 +371,7 @@ class ChaumPedersen {
    * usually the election extended base hash (𝑄')
    * :param seed: Used to generate other random values here
    */
-  private static DisjunctiveChaumPedersenProof make_disjunctive_chaum_pedersen_zero(
+  static DisjunctiveChaumPedersenProof make_disjunctive_chaum_pedersen_zero(
           ElGamal.Ciphertext message,
           ElementModQ r,
           ElementModP k,
@@ -411,7 +411,7 @@ class ChaumPedersen {
    * usually the election extended base hash (𝑄')
    * :param seed: Used to generate other random values here
    */
-  private static DisjunctiveChaumPedersenProof make_disjunctive_chaum_pedersen_one(
+  static DisjunctiveChaumPedersenProof make_disjunctive_chaum_pedersen_one(
           ElGamal.Ciphertext message,
           ElementModQ r,
           ElementModP k,

@@ -5,6 +5,7 @@ import com.google.common.collect.Iterables;
 import javax.annotation.Nullable;
 import java.math.BigInteger;
 import java.util.*;
+import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
 import static com.sunya.electionguard.Ballot.*;
@@ -127,7 +128,7 @@ class Tally {
     /**
      * Append a collection of Ballots to the tally and recalculate.
      */
-    boolean batch_append(Iterable<CiphertextAcceptedBallot> ballots, Optional<Scheduler> scheduler) {
+    boolean batch_append(Iterable<CiphertextAcceptedBallot> ballots) {
       Map<String, Map<String, ElGamal.Ciphertext>> cast_ballot_selections = new HashMap<>();
 
       for (CiphertextAcceptedBallot ballot : ballots) {
@@ -153,7 +154,7 @@ class Tally {
       }
 
       // cache the cast ballot id's so they are not double counted
-      if (this._execute_accumulate(cast_ballot_selections, scheduler)) {
+      if (this._execute_accumulate(cast_ballot_selections)) {
         for (CiphertextAcceptedBallot ballot : ballots) {
           if (ballot.state == BallotBoxState.CAST) {
             this._cast_ballot_ids.add(ballot.object_id);
@@ -203,10 +204,9 @@ class Tally {
       }
     }
 
-    static class RunAccumulate implements Runnable {
+    static class RunAccumulate implements Callable<Tuple1> {
       final String id;
       final Map<String, ElGamal.Ciphertext> ballot_selections;
-      Tuple1 result;
 
       public RunAccumulate(String id, Map<String, ElGamal.Ciphertext> ballot_selections) {
         this.id = id;
@@ -214,8 +214,8 @@ class Tally {
       }
 
       @Override
-      public void run() {
-        result = _accumulate(id, ballot_selections);
+      public Tuple1 call() {
+        return _accumulate(id, ballot_selections);
       }
     }
 
@@ -225,14 +225,13 @@ class Tally {
     }
 
     boolean _execute_accumulate(
-            Map<String, Map<String, ElGamal.Ciphertext>> ciphertext_selections_by_selection_id,
-            Optional<Scheduler> schedulerO) {
-      Scheduler scheduler = schedulerO.orElse(new Scheduler());
+            Map<String, Map<String, ElGamal.Ciphertext>> ciphertext_selections_by_selection_id) {
 
-      List<RunAccumulate> tasks =
+      List<Callable<Tuple1>> tasks =
               ciphertext_selections_by_selection_id.entrySet().stream()
                       .map(entry -> new RunAccumulate(entry.getKey(), entry.getValue()))
                       .collect(Collectors.toList());
+      Scheduler<Tuple1> scheduler = new Scheduler<>();
       List<Tuple1> result_set = scheduler.schedule(tasks, true);
 
       Map<String, ElGamal.Ciphertext> result_dict = result_set.stream()
@@ -279,7 +278,7 @@ class Tally {
 
     // TODO: ISSUE //14: unique Id for the tally
     CiphertextTally tally = new CiphertextTally("election-results", metadata, context);
-    if (tally.batch_append(store, Optional.empty())) {
+    if (tally.batch_append(store)) {
       return Optional.of(tally);
     }
     return Optional.empty();

@@ -42,6 +42,7 @@ public class BallotFactory {
     return new PlaintextBallot(ballot_id, election.ballot_styles.get(0).object_id, contests);
   }
 
+  // TODO should be in TestUtils
   PlaintextBallotSelection get_random_selection_from(
           SelectionDescription description,
           Random random_source,
@@ -60,7 +61,7 @@ public class BallotFactory {
   PlaintextBallotContest get_random_contest_from(
           ContestDescription description,
           Random random,
-          boolean suppress_validity_check,
+          boolean suppress_validity_check, // false, false
           boolean with_trues) {
 
     if (!suppress_validity_check) {

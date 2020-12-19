@@ -5,8 +5,10 @@ import com.google.common.collect.ImmutableList;
 import javax.annotation.Nullable;
 import java.io.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 
 import static com.sunya.electionguard.Election.*;
 import static com.sunya.electionguard.Group.*;
@@ -97,7 +99,9 @@ public class ElectionFactory {
     return builder.build();
   }
 
-  /** Get a single Fake Ballot object that is manually constructed with default vaules. */
+  /**
+   * Get a single Fake Ballot object that is manually constructed with default vaules.
+   */
   Ballot.PlaintextBallot get_fake_ballot(@Nullable ElectionDescription election, @Nullable String ballot_id) {
     if (election == null) {
       election = this.get_fake_election();
@@ -112,7 +116,7 @@ public class ElectionFactory {
             election.ballot_styles.get(0).object_id,
             ImmutableList.of(Encrypt.contest_from(election.contests.get(0)),
                     Encrypt.contest_from(election.contests.get(1)))
-          );
+    );
 
     return fake_ballot;
   }
@@ -120,6 +124,89 @@ public class ElectionFactory {
   private ElectionDescription _get_election_from_file(String filename) throws IOException {
     ElectionBuilderFromJson builder = new ElectionBuilderFromJson(filename);
     return builder.build();
+  }
+
+  ///////////////////////////////////////////////////////////////////////////////////////
+  // should all be in TestUtils ?
+  private static Random random = new Random(System.currentTimeMillis());
+
+  static class SelectionTuple {
+    String id;
+    SelectionDescription selection_description;
+
+    public SelectionTuple(String id, SelectionDescription selection_description) {
+      this.id = id;
+      this.selection_description = selection_description;
+    }
+  }
+
+  /*
+      draw: _DrawType,
+    ints=integers(1, 20),
+    emails=emails(),
+    candidate_id: Optional[str] = None,
+    sequence_order: Optional[int] = None,
+   */
+  static SelectionTuple get_selection_description_well_formed() {
+    String candidate_id = String.format("candidate_id-%d", TestUtils.randomInt(20));
+    String object_id = String.format("object_id-%d", TestUtils.randomInt());
+    int sequence_order = random.nextInt(20);
+    return new SelectionTuple(object_id, new SelectionDescription(object_id, candidate_id, sequence_order));
+  }
+
+  static class ContestTuple {
+    String id;
+    ContestDescriptionWithPlaceholders contest_description;
+
+    public ContestTuple(String id, ContestDescriptionWithPlaceholders contest_description) {
+      this.id = id;
+      this.contest_description = contest_description;
+    }
+  }
+
+  /*
+      draw: _DrawType,
+    ints=integers(1, 20),
+    text=text(),
+    emails=emails(),
+    selections=get_selection_description_well_formed(),
+    sequence_order: Optional[int] = None,
+    electoral_district_id: Optional[str] = None,
+   */
+  // TODO some kind of injection thing ??
+  static ContestTuple get_contest_description_well_formed() {
+    int sequence_order = TestUtils.randomInt(20);
+    String electoral_district_id = "{draw(emails)}-gp-unit";
+
+    String candidate_id = String.format("candidate_id-%d", TestUtils.randomInt(20));
+    String object_id = String.format("object_id-%d", TestUtils.randomInt());
+
+    int first_int = TestUtils.randomInt(20);
+    int second_int = TestUtils.randomInt(20);
+
+    // TODO ISSUE #33: support more votes than seats for other VoteVariationType options
+    int number_elected = Math.min(first_int, second_int);
+    int votes_allowed = number_elected;
+
+    List<SelectionDescription> selection_descriptions = new ArrayList<>();
+    for (int i = 0; i < Math.max(first_int, second_int); i++) {
+      SelectionDescription selection_description = new SelectionDescription(object_id, candidate_id, i);
+      selection_descriptions.add(selection_description);
+    }
+
+    ContestDescription contest_description = new ContestDescription(
+            object_id,
+            electoral_district_id,
+            sequence_order,
+            VoteVariationType.n_of_m,
+            number_elected,
+            votes_allowed,
+            "draw(text)",
+            selection_descriptions,
+            null, null);
+
+    List<SelectionDescription> placeholder_selections = generate_placeholder_selections_from(contest_description, number_elected);
+    return new ContestTuple(object_id, contest_description_with_placeholders_from(contest_description, placeholder_selections));
   }
 
 }

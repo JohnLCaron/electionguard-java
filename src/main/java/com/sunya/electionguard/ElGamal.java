@@ -1,6 +1,7 @@
 package com.sunya.electionguard;
 
 import com.google.common.base.Preconditions;
+import com.google.common.flogger.FluentLogger;
 
 import java.math.BigInteger;
 import java.util.Collection;
@@ -10,6 +11,7 @@ import static com.sunya.electionguard.Dlog.discrete_log;
 import static com.sunya.electionguard.Group.*;
 
 class ElGamal {
+  private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   /**
    * A tuple of an ElGamal secret key and public key.
@@ -134,10 +136,11 @@ class ElGamal {
    */
   static Optional<Ciphertext> elgamal_encrypt(int m, ElementModQ nonce, ElementModP public_key) {
     if (nonce.equals(ZERO_MOD_Q)) {
-      // log_error("ElGamal encryption requires a non-zero nonce")
+      logger.atSevere().log("ElGamal encryption requires a non-zero nonce");
       return Optional.empty();
     }
-    return int_to_q(BigInteger.valueOf(m)).flatMap(q -> Optional.of(new Ciphertext(g_pow_p(nonce), Group.mult_p(g_pow_p(q), Group.pow_p(public_key, nonce)))));
+    return int_to_q(BigInteger.valueOf(m)).map(bm ->
+            new Ciphertext(g_pow_p(nonce), mult_p(g_pow_p(bm), pow_p(public_key, nonce))));
   }
 
   /**

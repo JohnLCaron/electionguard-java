@@ -396,4 +396,8 @@ public class Group {
   static boolean greaterThanEqual(BigInteger x, BigInteger b) {
     return x.compareTo(b) >= 0;
   }
+
+  static boolean lessThan(BigInteger x, BigInteger b) {
+    return x.compareTo(b) < 0;
+  }
 }
