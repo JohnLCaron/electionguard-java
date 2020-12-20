@@ -754,6 +754,24 @@ public class Election {
     public int hashCode() {
       return Objects.hash(super.hashCode(), placeholder_selections);
     }
+
+    /**
+     *         Gets the description for a particular id
+     *         :param selection_id: Id of Selection
+     *         :return: description
+     */
+    Optional<SelectionDescription> selection_for(String selection_id) {
+
+      Optional<SelectionDescription> first_match = this.ballot_selections.stream()
+              .filter(s -> s.object_id.equals(selection_id)).findFirst();
+      if (first_match.isPresent()) {
+        return first_match;
+      }
+
+      Optional<SelectionDescription> first_placeholder = this.placeholder_selections.stream()
+              .filter(s -> s.object_id.equals(selection_id)).findFirst();
+      return first_placeholder;
+    }
   }
 
   /**

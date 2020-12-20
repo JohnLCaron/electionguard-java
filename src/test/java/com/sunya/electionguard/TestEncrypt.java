@@ -84,7 +84,7 @@ public class TestEncrypt {
     ElementModQ seed = TestUtils.elements_mod_q_no_zero();
 
     Election.SelectionDescription description = tuple.selection_description;
-    Ballot.PlaintextBallotSelection subject = ballot_factory.get_random_selection_from(description, new Random(), false);
+    Ballot.PlaintextBallotSelection subject = ballot_factory.get_random_selection_from(description);
 
     Optional<Ballot.CiphertextBallotSelection> result = encrypt_selection(subject, description, keypair.public_key, ONE_MOD_Q, seed, false, true);
     assertThat(result).isPresent();
@@ -99,7 +99,7 @@ public class TestEncrypt {
     ElementModQ seed = TestUtils.elements_mod_q_no_zero();
 
     Election.SelectionDescription description = tuple.selection_description;
-    Ballot.PlaintextBallotSelection subject = ballot_factory.get_random_selection_from(description, new Random(), false);
+    Ballot.PlaintextBallotSelection subject = ballot_factory.get_random_selection_from(description);
 
     Optional<Ballot.CiphertextBallotSelection> resultO = encrypt_selection(subject, description, keypair.public_key, ONE_MOD_Q, seed, false, true);
     assertThat(resultO).isPresent();
@@ -176,7 +176,7 @@ public class TestEncrypt {
     ElementModQ nonce_seed = TestUtils.elements_mod_q_no_zero();
 
     Election.ContestDescriptionWithPlaceholders description = tuple.contest_description;
-    Ballot.PlaintextBallotContest subject = ballot_factory.get_random_contest_from(description, new Random(), false, false);
+    Ballot.PlaintextBallotContest subject = ballot_factory.get_random_contest_from(description, false, false);
 
     // TODO want ContestDescriptionWithPlaceholders, has ContestDescription
     Optional<Ballot.CiphertextBallotContest> resultO = encrypt_contest(subject, description, keypair.public_key, ONE_MOD_Q, nonce_seed, true);

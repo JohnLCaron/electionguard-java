@@ -63,6 +63,7 @@ test {
     include '**/*Properties.class'
     include '**/*Test.class'
     include '**/*Tests.class'
+    include '**/Test*.class'
 }
 
 dependencies {
@@ -72,12 +73,12 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.6'
     implementation "com.google.auto.value:auto-value-annotations:1.7.4"
     implementation 'com.google.flogger:flogger:0.5.1'
-    runtime 'com.google.flogger:flogger-system-backend:0.5.1'
+    runtimeOnly 'com.google.flogger:flogger-system-backend:0.5.1'
 
     annotationProcessor "com.google.auto.value:auto-value:1.7.4"
 
-    testCompile 'com.google.truth:truth:1.1'
-    testCompile 'com.google.truth.extensions:truth-java8-extension:1.1'
+    testImplementation 'com.google.truth:truth:1.1'
+    testImplementation 'com.google.truth.extensions:truth-java8-extension:1.1'
 
 
     // aggregate jqwik dependency

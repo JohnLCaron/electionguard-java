@@ -21,35 +21,10 @@ import static com.sunya.electionguard.Election.*;
 public class BallotFactory {
   private static final String simple_ballot_filename = "ballot_in_simple.json";
   private static final String simple_ballots_filename = "plaintext_ballots_simple.json";
+  private static final Random random = new Random(System.currentTimeMillis());
 
-  /**
-   * Get a single Fake Ballot object that is manually constructed with default vaules .
-   */
-  PlaintextBallot get_fake_ballot(
-          InternalElectionDescription election,
-          @Nullable String ballot_id,
-          boolean with_trues) { // default true
-
-    if (ballot_id == null) {
-      ballot_id = "some-unique-ballot-id-123";
-    }
-
-    List<PlaintextBallotContest> contests = new ArrayList<>();
-    for (ContestDescriptionWithPlaceholders contest : election.get_contests_for(election.ballot_styles.get(0).object_id)) {
-      contests.add(this.get_random_contest_from(contest, new Random(), false, with_trues));
-    }
-
-    return new PlaintextBallot(ballot_id, election.ballot_styles.get(0).object_id, contests);
-  }
-
-  // TODO should be in TestUtils
-  PlaintextBallotSelection get_random_selection_from(
-          SelectionDescription description,
-          Random random_source,
-          boolean is_placeholder) { // default false
-
-    boolean selected = random_source.nextBoolean();
-    return Encrypt.selection_from(description, is_placeholder, selected);
+  static PlaintextBallotSelection get_random_selection_from(SelectionDescription description) {
+    return Encrypt.selection_from(description, false, random.nextBoolean());
   }
 
   /**
@@ -60,7 +35,6 @@ public class BallotFactory {
    */
   PlaintextBallotContest get_random_contest_from(
           ContestDescription description,
-          Random random,
           boolean suppress_validity_check, // false, false
           boolean with_trues) {
 
@@ -73,7 +47,7 @@ public class BallotFactory {
     int voted = 0;
 
     for (SelectionDescription selection_description : description.ballot_selections) {
-      PlaintextBallotSelection selection = this.get_random_selection_from(selection_description, random, false);
+      PlaintextBallotSelection selection = this.get_random_selection_from(selection_description);
           // the caller may force a true value
       voted += selection.to_int();
       if (with_trues && voted <= 1 && selection.to_int() == 1) {
@@ -93,11 +67,29 @@ public class BallotFactory {
     return new PlaintextBallotContest(description.object_id, selections);
   }
 
+  /**
+   * Get a single Fake Ballot object that is manually constructed with default vaules .
+   */
+  PlaintextBallot get_fake_ballot(
+          InternalElectionDescription election,
+          @Nullable String ballot_id,
+          boolean with_trues) { // default true
+
+    if (ballot_id == null) {
+      ballot_id = "some-unique-ballot-id-123";
+    }
+
+    List<PlaintextBallotContest> contests = new ArrayList<>();
+    for (ContestDescriptionWithPlaceholders contest : election.get_contests_for(election.ballot_styles.get(0).object_id)) {
+      contests.add(this.get_random_contest_from(contest, false, with_trues));
+    }
+
+    return new PlaintextBallot(ballot_id, election.ballot_styles.get(0).object_id, contests);
+  }
+
   ///////////////////////////////////////////////////
-  private static final Random random = new Random(System.currentTimeMillis());
 
   static PlaintextBallotSelection get_selection_well_formed() {
-
     ExtendedData extra_data = new ExtendedData("random", 33);
     return new PlaintextBallotSelection("selection-{draw(uuids)}",
                 random.nextBoolean() ? "true" : "false",
@@ -106,7 +98,6 @@ public class BallotFactory {
   }
 
   static PlaintextBallotSelection get_selection_poorly_formed() {
-
     ExtendedData extra_data = new ExtendedData("random", 33);
     return new PlaintextBallotSelection("selection-{draw(uuids)}",
             random.nextBoolean() ? "yeah" : "nope",

@@ -67,9 +67,7 @@ public class Group {
 
     @Override
     public String toString() {
-      return "ElementMod{" +
-              "elem=" + elem +
-              '}';
+      return "ElementMod{elem=" + elem + '}';
     }
   }
 
@@ -92,6 +90,11 @@ public class Group {
         return false;
       }
       return this.elem.compareTo(Q) < 0;
+    }
+
+    @Override
+    public String toString() {
+      return "ElementModQ{'" + elem + '}';
     }
   }
 
@@ -123,6 +126,11 @@ public class Group {
     boolean is_valid_residue() {
       boolean residue = pow_p(this, new ElementModQ(Q)).equals(ONE_MOD_P);
       return this.is_in_bounds() && residue;
+    }
+
+    @Override
+    public String toString() {
+      return "ElementModP{'" + elem + '}';
     }
   }
 

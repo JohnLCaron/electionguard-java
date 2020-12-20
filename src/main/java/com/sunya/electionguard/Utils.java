@@ -2,6 +2,7 @@ package com.sunya.electionguard;
 
 import com.google.common.collect.ImmutableList;
 
+import java.math.BigInteger;
 import java.util.List;
 
 public class Utils {
@@ -20,6 +21,10 @@ public class Utils {
     if (truthy.contains(clean)) return true;
     if (falsey.contains(clean)) return false;
     throw new RuntimeException("invalid truth value " + val);
+  }
+
+  static String isTrue(BigInteger val) {
+    return val.equals(BigInteger.ZERO) ? "false" : "true";
   }
 
 }
