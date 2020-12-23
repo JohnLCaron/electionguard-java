@@ -127,8 +127,11 @@ public class Encrypt {
     }
 
     ElementModQ selection_description_hash = selection_description.crypto_hash();
-    Nonces nonce_sequence = new Nonces(nonce_seed, selection_description_hash);
+    Nonces nonce_sequence = new Nonces(selection_description_hash, nonce_seed);
     ElementModQ selection_nonce = nonce_sequence.get(selection_description.sequence_order);
+    logger.atFine().log("encrypt_selection %n  %s%n  %s%n  %d%n%s%n",
+            selection_description.crypto_hash(), nonce_seed, selection_description.sequence_order, selection_nonce);
+
     ElementModQ disjunctive_chaum_pedersen_nonce = nonce_sequence.get(0);
 
     int selection_representation = selection.to_int();
@@ -230,7 +233,7 @@ public class Encrypt {
 
     // account for sequence id
     ElementModQ contest_description_hash = contest_description.crypto_hash();
-    Nonces nonce_sequence = new Nonces(nonce_seed, contest_description_hash);
+    Nonces nonce_sequence = new Nonces(contest_description_hash, nonce_seed);
     ElementModQ contest_nonce = nonce_sequence.get(contest_description.sequence_order);
     // TODO wtf?   chaum_pedersen_nonce = next(iter(nonce_sequence)) the one following contest_nonce? the first ??
     ElementModQ chaum_pedersen_nonce = nonce_sequence.get(0);
@@ -320,17 +323,6 @@ public class Encrypt {
       logger.atInfo().log("mismatching selection count: only n-of-m style elections are currently supported");
     }
 
-    // String object_id,
-    //          ElementModQ description_hash,
-    //          List<CiphertextBallotSelection> ballot_selections,
-    //          ElementModP elgamal_public_key,
-    //          ElementModQ crypto_extended_base_hash,
-    //          ElementModQ proof_seed,
-    //          int number_elected,
-    //          Optional<ElementModQ> crypto_hash,
-    //          Optional<ChaumPedersen.ConstantChaumPedersenProof> proof,
-    //          Optional<ElementModQ> nonce
-    // Create the return object
     CiphertextBallotContest encrypted_contest = make_ciphertext_ballot_contest(
         contest.object_id,
         contest_description_hash,
@@ -355,6 +347,7 @@ public class Encrypt {
     if (encrypted_contest.is_valid_encryption(contest_description_hash, elgamal_public_key, crypto_extended_base_hash)) {
       return Optional.of(encrypted_contest);
     } else {
+      encrypted_contest.is_valid_encryption(contest_description_hash, elgamal_public_key, crypto_extended_base_hash);
       logger.atInfo().log("mismatching contest proof for contest %s", encrypted_contest.object_id);
       return Optional.empty();
     }

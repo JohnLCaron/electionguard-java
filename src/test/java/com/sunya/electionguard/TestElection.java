@@ -1,6 +1,7 @@
 package com.sunya.electionguard;
 
 import com.google.common.collect.ImmutableList;
+import net.jqwik.api.Example;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -17,7 +18,7 @@ public class TestElection {
     election_factory = new ElectionFactory();
   }
 
-  @Test
+  @Example
   public void test_simple_election_is_valid() throws IOException {
     ElectionDescription subject = election_factory.get_simple_election_from_file();
     assertThat(subject.election_scope_id).isNotNull();
@@ -26,7 +27,7 @@ public class TestElection {
   }
 
   /* roundtrip to json
-  @Test
+  @Example
   public void test_simple_election_can_serialize() throws IOException {
     Election.ElectionDescription subject = election_factory.get_simple_election_from_file();
 
@@ -40,7 +41,7 @@ public class TestElection {
     assertThat(subject.is_valid()).isTrue();
   } */
 
-  @Test
+  @Example
   public void test_election_has_deterministic_hash() throws IOException {
     ElectionDescription subject1 = election_factory.get_simple_election_from_file();
     ElectionDescription subject2 = election_factory.get_simple_election_from_file();
@@ -49,7 +50,7 @@ public class TestElection {
   }
 
   /* mutable, use json?
-  @Test
+  @Example
   public void test_election_hash_is_consistent_regardless_of_format() throws IOException {
     Election.ElectionDescription subject1 = election_factory.get_simple_election_from_file();
     Election.ElectionDescription subject2 = election_factory.get_simple_election_from_file();
@@ -65,7 +66,7 @@ public class TestElection {
     assertThat(subject1.crypto_hash()).isEqualTo(subject3.crypto_hash());
   } */
 
-  @Test
+  @Example
   public void test_election_from_file_generates_consistent_internal_description_contest_hashes() throws IOException {
     ElectionDescription comparator = election_factory.get_simple_election_from_file();
     InternalElectionDescription subject = new InternalElectionDescription(comparator);
@@ -81,7 +82,7 @@ public class TestElection {
     }
   }
 
-  @Test
+  @Example
   public void test_contest_description_valid_input_succeeds() {
     ContestDescriptionWithPlaceholders description = new ContestDescriptionWithPlaceholders(
             "0@A.com-contest",
@@ -111,7 +112,7 @@ public class TestElection {
     assertThat(description.is_valid()).isTrue();
   }
 
-  @Test
+  @Example
   public void test_contest_description_invalid_input_fails() {
     ContestDescriptionWithPlaceholders description = new ContestDescriptionWithPlaceholders(
             "0@A.com-contest",

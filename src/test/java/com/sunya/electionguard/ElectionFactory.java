@@ -17,8 +17,8 @@ public class ElectionFactory {
   private static final String simple_election_manifest_filename = "election_manifest_simple.json";
   private static final String hamilton_election_manifest_filename = "hamilton_election_manifest.json";
 
-  public ElectionDescription get_simple_election_from_file() throws IOException {
-    return this._get_election_from_file(simple_election_manifest_filename);
+  public static ElectionDescription get_simple_election_from_file() throws IOException {
+    return _get_election_from_file(simple_election_manifest_filename);
   }
 
   public ElectionDescription get_hamilton_election_from_file() throws IOException {
@@ -90,7 +90,7 @@ public class ElectionFactory {
     return fake_election;
   }
 
-  public Optional<ElectionBuilder.Tuple> get_fake_ciphertext_election(
+  public static Optional<ElectionBuilder.Tuple> get_fake_ciphertext_election(
           ElectionDescription description,
           ElementModP elgamal_public_key) {
 
@@ -121,7 +121,7 @@ public class ElectionFactory {
     return fake_ballot;
   }
 
-  private ElectionDescription _get_election_from_file(String filename) throws IOException {
+  private static ElectionDescription _get_election_from_file(String filename) throws IOException {
     ElectionBuilderFromJson builder = new ElectionBuilderFromJson(filename);
     return builder.build();
   }
@@ -173,13 +173,9 @@ public class ElectionFactory {
     sequence_order: Optional[int] = None,
     electoral_district_id: Optional[str] = None,
    */
-  // TODO some kind of injection thing ??
-  static ContestTuple get_contest_description_well_formed() {
+  static ContestDescriptionWithPlaceholders get_contest_description_well_formed() {
     int sequence_order = TestUtils.randomInt(20);
     String electoral_district_id = "{draw(emails)}-gp-unit";
-
-    String candidate_id = String.format("candidate_id-%d", TestUtils.randomInt(20));
-    String object_id = String.format("object_id-%d", TestUtils.randomInt());
 
     int first_int = TestUtils.randomInt(20);
     int second_int = TestUtils.randomInt(20);
@@ -190,12 +186,14 @@ public class ElectionFactory {
 
     List<SelectionDescription> selection_descriptions = new ArrayList<>();
     for (int i = 0; i < Math.max(first_int, second_int); i++) {
+      String object_id = String.format("object_id-%d", TestUtils.randomInt());
+      String candidate_id = String.format("candidate_id-%d", TestUtils.randomInt());
       SelectionDescription selection_description = new SelectionDescription(object_id, candidate_id, i);
       selection_descriptions.add(selection_description);
     }
 
     ContestDescription contest_description = new ContestDescription(
-            object_id,
+            String.format("object_id-%d", TestUtils.randomInt()),
             electoral_district_id,
             sequence_order,
             VoteVariationType.n_of_m,
@@ -206,7 +204,8 @@ public class ElectionFactory {
             null, null);
 
     List<SelectionDescription> placeholder_selections = generate_placeholder_selections_from(contest_description, number_elected);
-    return new ContestTuple(object_id, contest_description_with_placeholders_from(contest_description, placeholder_selections));
+    return contest_description_with_placeholders_from(contest_description, placeholder_selections);
+    // return new ContestTuple(contest_description.object_id, contest_description_with_placeholders_from(contest_description, placeholder_selections));
   }
 
 }

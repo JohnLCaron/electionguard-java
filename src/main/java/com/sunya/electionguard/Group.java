@@ -41,15 +41,23 @@ public class Group {
     }
 
     /**
-     * Converts from the element to the hex representation of bytes. This is preferable to directly
-     * accessing `elem`, whose representation might change.
+     * Converts from the element to the hex String of the BigInteger bytes.
+     * This is preferable to directly accessing `elem`, whose representation might change.
      */
     String to_hex() {
       String h = elem.toString(16);
       if (h.length() % 2 == 1) {
         h = "0" + h;
       }
-      return h;
+      return h.toUpperCase();
+    }
+
+    /**
+     * Converts from the element to the representation of bytes by first going through hex.
+     * This is preferable to directly accessing `elem`, whose representation might change.
+     */
+    byte[] to_bytes() {
+      return Utils.b16decode(this.to_hex(), false);
     }
 
     @Override
@@ -144,9 +152,9 @@ public class Group {
   static final ElementModP TWO_MOD_P = new ElementModP(BigInteger.TWO);
 
   /**
-   *     Given a hex string representing bytes, returns an ElementModQ.
-   *     Returns `None` if the number is out of the allowed
-   *     [0,Q) range.
+   * Given a hex string representing bytes, returns an ElementModQ.
+   * Returns `None` if the number is out of the allowed
+   * [0,Q) range.
    */
   static Optional<ElementModQ> hex_to_q(String input) {
     BigInteger b = new BigInteger(input, 16);

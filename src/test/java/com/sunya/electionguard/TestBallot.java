@@ -1,5 +1,6 @@
 package com.sunya.electionguard;
 
+import net.jqwik.api.Example;
 import org.junit.Test;
 
 import java.util.List;
@@ -12,7 +13,7 @@ import static com.sunya.electionguard.Ballot.*;
 public class TestBallot {
   static BallotFactory factory = new BallotFactory();
 
-  @Test
+  @Example
   public void test_ballot_is_valid() {
     Ballot.PlaintextBallot subject = factory.get_simple_ballot_from_file();
 
@@ -25,7 +26,7 @@ public class TestBallot {
     assertThat(first_contest.is_valid("justice-supreme-court", 2, 2, Optional.empty())).isTrue();
   }
 
-  @Test
+  @Example
   public void test_ballots_are_valid() {
     List<PlaintextBallot> ballots = factory.get_simple_ballots_from_file();
     for (PlaintextBallot subject : ballots) {
@@ -49,7 +50,7 @@ public class TestBallot {
     }
   }
 
-  @Test
+  @Example
   public void test_plaintext_ballot_selection_is_valid () {
     PlaintextBallotSelection selection = BallotFactory.get_selection_well_formed();
     assertThat(selection.is_valid(selection.object_id)).isTrue();
@@ -58,13 +59,13 @@ public class TestBallot {
     assertThat(as_int >= 0 && as_int <= 1).isTrue();
   }
 
-  @Test
+  @Example
   public void test_plaintext_ballot_selection_is_invalid () {
     PlaintextBallotSelection selection = BallotFactory.get_selection_poorly_formed();
     assertThat(selection.is_valid(selection.object_id)).isFalse();
 
     int as_int = selection.to_int();
-    assertThat(as_int >= 0 && as_int <= 1).isTrue();
+    assertThat(as_int >= 0 && as_int <= 1).isFalse();
   }
 
 }

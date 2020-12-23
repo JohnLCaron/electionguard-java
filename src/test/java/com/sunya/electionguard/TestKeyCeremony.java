@@ -1,5 +1,6 @@
 package com.sunya.electionguard;
 
+import net.jqwik.api.Example;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -23,7 +24,7 @@ public class TestKeyCeremony {
   static Auxiliary.Decryptor identity_auxiliary_decrypt = (m, k) -> Optional.of(new String(m.getBytes()));
   static Auxiliary.Encryptor identity_auxiliary_encrypt = (m, k) -> Optional.of(new Auxiliary.ByteString(m.getBytes()));
 
-  @Test
+  @Example
   public void test_generate_rsa_auxiliary_key_pair() {
 
     // Act
@@ -35,7 +36,7 @@ public class TestKeyCeremony {
     assertThat(auxiliary_key_pair.secret_key).isNotNull();
   }
 
-  @Test
+  @Example
   public void test_generate_election_key_pair() {
     // Act
     ElectionKeyPair election_key_pair = generate_election_key_pair(NUMBER_OF_GUARDIANS, null);
@@ -51,7 +52,7 @@ public class TestKeyCeremony {
     }
   }
 
-  @Test
+  @Example
   public void test_generate_election_partial_key_backup() {
     // Arrange
     ElectionKeyPair election_key_pair = generate_election_key_pair(QUORUM, null);
@@ -81,7 +82,7 @@ public class TestKeyCeremony {
     }
   }
 
-  @Test
+  @Example
   public void test_verify_election_partial_key_backup() {
     // Arrange
     Auxiliary.KeyPair recipient_auxiliary_key_pair = generate_rsa_auxiliary_key_pair();
@@ -112,7 +113,7 @@ public class TestKeyCeremony {
     assertThat(verification.verified()).isTrue();
   }
 
-  @Test
+  @Example
   public void test_generate_election_partial_key_challenge() {
     // Arrange
     Auxiliary.KeyPair recipient_auxiliary_key_pair = generate_rsa_auxiliary_key_pair();
@@ -142,7 +143,7 @@ public class TestKeyCeremony {
     }
   }
 
-  @Test
+  @Example
   public void test_verify_election_partial_key_challenge() {
     // Arrange
     Auxiliary.KeyPair recipient_auxiliary_key_pair = generate_rsa_auxiliary_key_pair();
@@ -171,7 +172,7 @@ public class TestKeyCeremony {
     assertThat(verification.verified()).isTrue();
   }
 
-  @Test
+  @Example
   public void test_combine_election_public_keys() {
     // Arrange
     ElectionKeyPair random_keypair = generate_election_key_pair(QUORUM, null);

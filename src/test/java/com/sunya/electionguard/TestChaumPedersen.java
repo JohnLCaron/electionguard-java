@@ -1,5 +1,6 @@
 package com.sunya.electionguard;
 
+import net.jqwik.api.Example;
 import org.junit.Test;
 
 import java.util.Optional;
@@ -14,7 +15,7 @@ public class TestChaumPedersen {
 
   //// TestDisjunctiveChaumPedersen
 
-  @Test
+  @Example
   public void test_djcp_proofs_simple() {
           // doesn't get any simpler than this
     ElGamal.KeyPair  keypair = ElGamal.elgamal_keypair_from_secret(TWO_MOD_Q).get();
@@ -36,7 +37,7 @@ public class TestChaumPedersen {
     assertThat(proof1bad.is_valid(message1, keypair.public_key, ONE_MOD_Q)).isFalse();
   }
 
-  @Test
+  @Example
   public void test_djcp_proof_invalid_inputs() {
     // this is here to push up our coverage
     Optional<ElGamal.KeyPair> keypair = ElGamal.elgamal_keypair_from_secret(TWO_MOD_Q);
@@ -55,7 +56,7 @@ public class TestChaumPedersen {
 
   //// TestChaumPedersen
 
-  @Test
+  @Example
   public void test_cp_proofs_simple() {
     ElGamal.KeyPair  keypair = ElGamal.elgamal_keypair_from_secret(TWO_MOD_Q).get();
     ElementModQ nonce = ONE_MOD_Q;
@@ -72,7 +73,7 @@ public class TestChaumPedersen {
 
   // TestConstantChaumPedersen
 
-  @Test
+  @Example
   public void test_ccp_proofs_simple_encryption_of_zero() {
     ElGamal.KeyPair keypair = ElGamal.elgamal_keypair_from_secret(TWO_MOD_Q).get();
     ElementModQ nonce = ONE_MOD_Q;
@@ -87,7 +88,7 @@ public class TestChaumPedersen {
     assertThat(bad_proof.is_valid(message, keypair.public_key, ONE_MOD_Q)).isFalse();
   }
 
-  @Test
+  @Example
   public void test_ccp_proofs_simple_encryption_of_one() {
     ElGamal.KeyPair keypair = ElGamal.elgamal_keypair_from_secret(TWO_MOD_Q).get();
     ElementModQ nonce = ONE_MOD_Q;

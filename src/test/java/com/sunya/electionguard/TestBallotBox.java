@@ -1,8 +1,7 @@
 package com.sunya.electionguard;
 
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import net.jqwik.api.Example;
+import net.jqwik.api.lifecycle.BeforeContainer;
 
 import java.math.BigInteger;
 import java.util.Optional;
@@ -18,7 +17,7 @@ public class TestBallotBox {
   private static final ElementModQ SEED_HASH = new Encrypt.EncryptionDevice("Location").get_hash();
   static ElectionFactory election_factory;
 
-  @BeforeClass
+  @BeforeContainer
   public static void setup() {
     election_factory = new ElectionFactory();
   }
@@ -30,8 +29,7 @@ public class TestBallotBox {
   DataStore store;
   BallotBox subject;
 
-  @Before
-  public void setupElection() {
+  public TestBallotBox() {
     // Arrange
     ElGamal.KeyPair keypair = ElGamal.elgamal_keypair_from_secret(int_to_q_unchecked(BigInteger.TWO))
             .orElseThrow(() -> new RuntimeException());
@@ -53,7 +51,7 @@ public class TestBallotBox {
     subject = new BallotBox(metadata, context, store);
   }
 
-  @Test
+  @Example
   public void test_ballot_box_cast_ballot() {
     // Act
     assertThat(BallotValidator.ballot_is_valid_for_election(data, metadata, context)).isTrue();
@@ -74,7 +72,7 @@ public class TestBallotBox {
     assertThat(subject.spoil(data)).isEmpty();  // cannot spoil a ballot already cast
   }
 
-  @Test
+  @Example
   public void test_ballot_box_spoil_ballot() {
           //Act
     Optional<CiphertextAcceptedBallot> resultO = subject.spoil(data);
@@ -94,7 +92,7 @@ public class TestBallotBox {
     assertThat(subject.cast(data)).isEmpty();  //cannot cast a ballot already spoiled
   }
 
-  @Test
+  @Example
   public void test_cast_ballot() {
     //Act
     CiphertextAcceptedBallot result = subject.accept_ballot(data, BallotBoxState.CAST).orElse(null);
@@ -112,7 +110,7 @@ public class TestBallotBox {
     assertThat(subject.accept_ballot(data, BallotBoxState.SPOILED)).isEmpty();  //cannot spoil a ballot already cast
   }
 
-  @Test
+  @Example
   public void test_spoil_ballot() {
           //Act
     CiphertextAcceptedBallot result = subject.accept_ballot(data, BallotBoxState.SPOILED).orElse(null);
@@ -129,6 +127,5 @@ public class TestBallotBox {
     assertThat(subject.accept_ballot(data, BallotBoxState.CAST)).isEmpty();  //cannot cast again
     assertThat(subject.accept_ballot(data, BallotBoxState.SPOILED)).isEmpty();  //cannot spoil a ballot already cast
   }
-
 
 }

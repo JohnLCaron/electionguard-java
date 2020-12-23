@@ -1,5 +1,6 @@
 package com.sunya.electionguard;
 
+import net.jqwik.api.Example;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -12,7 +13,7 @@ import static com.google.common.truth.Truth.assertThat;
 public class TestScheduler {
   private static Random random = new Random();
 
-  @Test
+  @Example
   public void test_schedule_callable_throws() {
     Scheduler<Integer> subject = new Scheduler<>();
 
@@ -24,7 +25,7 @@ public class TestScheduler {
     List<Integer> result = subject.schedule(tasks, false);
     assertThat(result).isNotNull();
     assertThat(result).isInstanceOf(List.class);
-    assertThat(result.stream().reduce(Integer::sum)).isEqualTo(42 * 11);
+    assertThat(result.stream().reduce(Integer::sum).orElse(0)).isEqualTo(42 * 11);
   }
 
   static class TestCallable implements Callable<Integer> {
@@ -45,7 +46,7 @@ public class TestScheduler {
     }
   }
 
-  @Test
+  @Example
   public void test_exceptions() {
     Scheduler<Integer> subject = new Scheduler<>();
 

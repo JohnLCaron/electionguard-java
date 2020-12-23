@@ -5,9 +5,12 @@ import java.util.Random;
 
 import static com.sunya.electionguard.Group.*;
 
-
 public class TestUtils {
   private static Random random = new Random(System.currentTimeMillis());
+
+  static boolean randomBool() {
+    return random.nextBoolean();
+  }
 
   static int randomInt() {
     return random.nextInt();

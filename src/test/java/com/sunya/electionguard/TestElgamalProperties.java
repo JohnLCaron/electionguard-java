@@ -2,7 +2,10 @@ package com.sunya.electionguard;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableList;
-import org.junit.Test;
+import net.jqwik.api.Example;
+import net.jqwik.api.ForAll;
+import net.jqwik.api.Property;
+import net.jqwik.api.constraints.IntRange;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -16,9 +19,9 @@ import static com.sunya.electionguard.ElGamal.*;
 import static com.sunya.electionguard.Group.*;
 import static org.junit.Assert.fail;
 
-public class TestElgamal {
+public class TestElgamalProperties extends TestProperties {
 
-  @Test
+  @Example
   public void test_simple_elgamal_encryption_decryption() {
     ElementModQ nonce = ONE_MOD_Q;
     ElementModQ secret_key = TWO_MOD_Q;
@@ -40,67 +43,62 @@ public class TestElgamal {
     assertThat(plaintext).isEqualTo(BigInteger.ZERO); // TODO FAILS
   }
 
-  @Test
-  public void test_elgamal_encrypt_requires_nonzero_nonce() {
-    ElGamal.KeyPair keypair = TestUtils.elgamal_keypairs();
-    for (int message = 0; message < 100; message++) {
+  @Property
+  public void test_elgamal_encrypt_requires_nonzero_nonce(
+          @ForAll("elgamal_keypairs") ElGamal.KeyPair keypair,
+          @ForAll @IntRange(min = 0, max = 100) int message) {
       assertThat(elgamal_encrypt(message, ZERO_MOD_Q, keypair.public_key)).isEmpty();
-    }
   }
 
-  @Test
+  @Example
   public void test_elgamal_keypair_from_secret_requires_key_greater_than_one() {
     assertThat(elgamal_keypair_from_secret(ZERO_MOD_Q)).isEmpty();
     assertThat(elgamal_keypair_from_secret(ONE_MOD_Q)).isEmpty();
   }
 
-  @Test
-  public void test_elgamal_encryption_decryption_inverses() {
-    ElGamal.KeyPair keypair = TestUtils.elgamal_keypairs();
-    ElementModQ nonce = TestUtils.elements_mod_q_no_zero();
-    for (int message = 0; message < 100; message++) {
+  @Property
+  public void test_elgamal_encryption_decryption_inverses(
+          @ForAll("elgamal_keypairs") ElGamal.KeyPair keypair,
+          @ForAll @IntRange(min = 0, max = 100) int message,
+          @ForAll("elements_mod_q_no_zero") ElementModQ nonce) {
       Ciphertext ciphertext = elgamal_encrypt(message, nonce, keypair.public_key).get();
       BigInteger plaintext = ciphertext.decrypt(keypair.secret_key);
-      // assertThat(plaintext).isEqualTo(BigInteger.valueOf(message)); TODO FAILS
-    }
+      assertThat(plaintext).isEqualTo(BigInteger.valueOf(message));
   }
 
-  @Test
-  public void test_elgamal_encryption_decryption_with_known_nonce_inverses() {
-    ElGamal.KeyPair keypair = TestUtils.elgamal_keypairs();
-    ElementModQ nonce = TestUtils.elements_mod_q_no_zero();
-    for (int message = 0; message < 100; message++) {
+  @Property
+  public void test_elgamal_encryption_decryption_with_known_nonce_inverses(
+          @ForAll("elgamal_keypairs") ElGamal.KeyPair keypair,
+          @ForAll @IntRange(min = 0, max = 100) int message,
+          @ForAll("elements_mod_q_no_zero") ElementModQ nonce) {
       Ciphertext ciphertext = elgamal_encrypt(message, nonce, keypair.public_key).get();
       BigInteger plaintext = ciphertext.decrypt_known_nonce(keypair.public_key, nonce);
       assertThat(plaintext).isEqualTo(BigInteger.valueOf(message)); // TODO FAILS
-    }
   }
 
-  @Test
-  public void test_elgamal_generated_keypairs_are_within_range() {
-    ElGamal.KeyPair keypair = TestUtils.elgamal_keypairs();
+  @Property
+  public void test_elgamal_generated_keypairs_are_within_range(
+          @ForAll("elgamal_keypairs") ElGamal.KeyPair keypair) {
     assertThat(Group.lessThan(keypair.public_key.getBigInt(), P)).isTrue();
     assertThat(Group.lessThan(keypair.secret_key.getBigInt(), Q)).isTrue();
     assertThat(g_pow_p(keypair.secret_key)).isEqualTo(keypair.public_key);
   }
 
-  @Test
-  public void test_elgamal_add_homomorphic_accumulation_decrypts_successfully() {
-    ElGamal.KeyPair keypair = TestUtils.elgamal_keypairs();
-    ElementModQ r1 = TestUtils.elements_mod_q_no_zero();
-    ElementModQ r2 = TestUtils.elements_mod_q_no_zero();
-    for (int m1 = 0; m1 < 100; m1++) {
-      for (int m2 = 0; m2 < 100; m2++) {
-        Ciphertext c1 = elgamal_encrypt(m1, r1, keypair.public_key).get();
-        Ciphertext c2 = elgamal_encrypt(m2, r2, keypair.public_key).get();
-        Ciphertext c_sum = elgamal_add(c1, c2);
-        BigInteger total = c_sum.decrypt(keypair.secret_key);
-        assertThat(total).isEqualTo(BigInteger.valueOf(m1 + m2)); // TODO FAILS
-      }
-    }
+  @Property
+  public void test_elgamal_add_homomorphic_accumulation_decrypts_successfully(
+          @ForAll("elgamal_keypairs") ElGamal.KeyPair keypair,
+          @ForAll @IntRange(min = 0, max = 100) int m1,
+          @ForAll("elements_mod_q_no_zero") ElementModQ r1,
+          @ForAll @IntRange(min = 0, max = 100) int m2,
+          @ForAll("elements_mod_q_no_zero") ElementModQ r2) {
+    Ciphertext c1 = elgamal_encrypt(m1, r1, keypair.public_key).get();
+    Ciphertext c2 = elgamal_encrypt(m2, r2, keypair.public_key).get();
+    Ciphertext c_sum = elgamal_add(c1, c2);
+    BigInteger total = c_sum.decrypt(keypair.secret_key);
+    assertThat(total).isEqualTo(BigInteger.valueOf(m1 + m2)); // TODO FAILS
   }
 
-  @Test
+  @Example
   public void test_elgamal_add_requires_args() {
     try {
       elgamal_add();
@@ -110,13 +108,13 @@ public class TestElgamal {
     }
   }
 
-  @Test
+  @Example
   public void test_elgamal_keypair_produces_valid_residue() {
     ElGamal.KeyPair keypair = TestUtils.elgamal_keypairs();
     assertThat(keypair.public_key.is_valid_residue()).isTrue();
   }
 
-  @Test
+  @Example
   public void test_elgamal_keypair_random() {
     ElGamal.KeyPair random_keypair = elgamal_keypair_random();
     ElGamal.KeyPair random_keypair_two = elgamal_keypair_random();
@@ -128,7 +126,7 @@ public class TestElgamal {
     assertThat(random_keypair).isNotEqualTo(random_keypair_two);
   }
 
-  @Test
+  @Example
   public void test_elgamal_combine_public_keys() {
     ElGamal.KeyPair random_keypair = elgamal_keypair_random();
     ElGamal.KeyPair random_keypair_two = elgamal_keypair_random();
@@ -154,8 +152,10 @@ public class TestElgamal {
     }
   }
 
-  /** Ensures running lots of parallel exponentiations still yields the correct answer. */
-   @Test
+  /**
+   * Ensures running lots of parallel exponentiations still yields the correct answer.
+   */
+  @Example
   public void test_parallelism_is_safe() {
     int problem_size = 1000;
     Nonces nonces = new Nonces(int_to_q_unchecked(BigInteger.valueOf(3)));
@@ -174,16 +174,16 @@ public class TestElgamal {
     Stopwatch stopwatch = Stopwatch.createStarted();
     List<KeyPair> keypairs = subject.schedule(tasks, false);
     double ptime = stopwatch.elapsed(TimeUnit.MILLISECONDS);
-     System.out.printf("Parallel %.3f%n", ptime);
+    System.out.printf("Parallel %.3f%n", ptime);
 
     Stopwatch stopwatch2 = Stopwatch.createStarted();
     for (KeyPair keypair : keypairs) {
       assertThat(keypair.public_key).isEqualTo(elgamal_keypair_from_secret(keypair.secret_key).get().public_key);
     }
     double stime = stopwatch2.elapsed(TimeUnit.MILLISECONDS);
-     System.out.printf("Serial %.3f%n", stime);
+    System.out.printf("Serial %.3f%n", stime);
 
-     double speedup = stime / ptime;
+    double speedup = stime / ptime;
     System.out.printf("Serial/Parallel speedup: %.3f%n", speedup);
   }
 

@@ -1,6 +1,7 @@
 package com.sunya.electionguard;
 
 import com.google.common.collect.ImmutableList;
+import net.jqwik.api.Example;
 import org.junit.Test;
 
 import java.math.BigInteger;
@@ -15,13 +16,13 @@ public class TestElectionPolynomial {
   private static final int TEST_POLYNOMIAL_DEGREE = 3;
   private static final BigInteger TEST_EXPONENT_MODIFIER = BigInteger.ONE;
 
-  @Test
+  @Example
   public void test_contest_description_valid_input_succeeds() {
     ElectionPolynomial polynomial = generate_polynomial(TEST_POLYNOMIAL_DEGREE, null);
     assertThat(polynomial).isNotNull();
   }
 
-  @Test
+  @Example
   public void test_compute_polynomial_coordinate() {
     ElectionPolynomial polynomial =  polynomial = new ElectionPolynomial(
             ImmutableList.of(ONE_MOD_Q, TWO_MOD_Q),
@@ -33,7 +34,7 @@ public class TestElectionPolynomial {
     assertThat(value).isNotNull();
   }
 
-    @Test
+    @Example
     public void test_verify_polynomial_coordinate() {
       ElectionPolynomial polynomial = generate_polynomial(TEST_POLYNOMIAL_DEGREE, null);
 

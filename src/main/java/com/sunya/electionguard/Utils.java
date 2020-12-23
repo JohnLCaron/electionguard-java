@@ -1,10 +1,14 @@
 package com.sunya.electionguard;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.io.BaseEncoding;
 
 import java.math.BigInteger;
 import java.util.List;
 
+/**
+ * Covers for Python library methods.
+ */
 public class Utils {
 
   private static final List<String> truthy = ImmutableList.of("y", "yes", "t", "true", "on", "1");
@@ -27,4 +31,50 @@ public class Utils {
     return val.equals(BigInteger.ZERO) ? "false" : "true";
   }
 
+  /////////////////////////////////////////////////////////////////////////////////
+  // RFC 3548, Base 16 Alphabet specifies uppercase, but hexlify() returns
+  // lowercase.  The RFC also recommends against accepting input case insensitively
+
+  /**
+   * Encode the bytes-like object s using Base16 and return a bytes object.
+   */
+  static String b16encode(byte[] s) {
+    // return binascii.hexlify(s).upper();
+    return BaseEncoding.base16().encode(s).toUpperCase();
+  }
+
+  /**
+   * Decode the Base16 encoded bytes-like object or ASCII string s.
+   * <p>
+   * Optional casefold is a flag specifying whether a lowercase alphabet is
+   * acceptable as input.  For security purposes, the default is False.
+   * <p>
+   * The result is returned as a bytes object.  A binascii.Error is raised if
+   * s is incorrectly padded or if there are non-alphabet characters present
+   * in the input.
+   */
+  static byte[] b16decode(String s, boolean casefold) {
+    /* s = _bytes_from_decode_data(s); TODO not sure what this does
+    if (casefold) {
+      s = s.toUpperCase();
+    } */
+    s = s.toUpperCase();
+
+    /* TODO
+    if (re.search(b '[^0-9A-F]', s)){
+      raise binascii.Error('Non-base16 digit found');
+    } */
+
+    // binascii.unhexlify(s)
+    return BaseEncoding.base16().decode(s);
+  }
+
+  /*
+  private static String _bytes_from_decode_data(String s) {
+    try {
+      return s.encode('ascii');
+    } catch (UnicodeEncodeError e) {
+      throw ValueError('string argument should contain only ASCII characters');
+    }
+  } */
 }

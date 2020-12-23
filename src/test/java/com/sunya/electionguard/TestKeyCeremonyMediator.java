@@ -1,6 +1,7 @@
 package com.sunya.electionguard;
 
 import com.google.common.collect.Iterables;
+import net.jqwik.api.Example;
 import org.junit.Test;
 
 import java.util.List;
@@ -34,7 +35,7 @@ public class TestKeyCeremonyMediator {
     GUARDIAN_2.generate_election_partial_key_backups(identity_auxiliary_encrypt);
   }
 
-  @Test
+  @Example
   public void test_reset() {
     KeyCeremonyMediator mediator = new KeyCeremonyMediator(CEREMONY_DETAILS);
     CeremonyDetails new_ceremony_details = CeremonyDetails.create(3, 3);
@@ -43,7 +44,7 @@ public class TestKeyCeremonyMediator {
     assertThat(mediator.ceremony_details).isEqualTo(new_ceremony_details);
   }
 
-  @Test
+  @Example
   public void test_mediator_takes_attendance() {
     KeyCeremonyMediator mediator = new KeyCeremonyMediator(CEREMONY_DETAILS);
 
@@ -61,7 +62,7 @@ public class TestKeyCeremonyMediator {
     assertThat(Iterables.size(guardians)).isEqualTo(NUMBER_OF_GUARDIANS);
   }
 
-  @Test
+  @Example
   public void test_exchange_of_auxiliary_public_keys() {
     KeyCeremonyMediator mediator = new KeyCeremonyMediator(CEREMONY_DETAILS);
 
@@ -80,7 +81,7 @@ public class TestKeyCeremonyMediator {
     assertThat(Iterables.size(partial_list)).isEqualTo(2);
   }
 
-  @Test
+  @Example
   public void test_exchange_of_election_public_keys() {
     KeyCeremonyMediator mediator = new KeyCeremonyMediator(CEREMONY_DETAILS);
 
@@ -99,7 +100,7 @@ public class TestKeyCeremonyMediator {
     assertThat(Iterables.size(partial_list)).isEqualTo(2);
   }
 
-  @Test
+  @Example
   public void test_exchange_of_election_partial_key_backup() {
     KeyCeremonyMediator mediator = new KeyCeremonyMediator(CEREMONY_DETAILS);
     mediator.confirm_presence_of_guardian(GUARDIAN_1.share_public_keys());
@@ -131,7 +132,7 @@ public class TestKeyCeremonyMediator {
   }
 
   /**         Test for the happy path of the verification process where each key is successfully verified and no bad actors. */
-   @Test
+   @Example
   public void test_partial_key_backup_verification_success() {
      KeyCeremonyMediator mediator = new KeyCeremonyMediator(CEREMONY_DETAILS);
 
@@ -163,7 +164,7 @@ public class TestKeyCeremonyMediator {
    *         In this case, the recipient guardian does not correctly verify the sent key backup.
    *         This failed verificaton requires the sender create a challenge and a new verifier aka another guardian must verify this challenge.
    */
-  @Test
+  @Example
   public void test_partial_key_backup_verification_failure() {
     KeyCeremonyMediator mediator = new KeyCeremonyMediator(CEREMONY_DETAILS);
     mediator.confirm_presence_of_guardian(GUARDIAN_1.share_public_keys());

@@ -3,9 +3,9 @@ package com.sunya.electionguard;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
+import net.jqwik.api.Example;
+import net.jqwik.api.lifecycle.AfterContainer;
 import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -50,8 +50,7 @@ public class TestDecryptionMediator {
   Map<String, BigInteger> expected_plaintext_tally;
   Tally.CiphertextTally ciphertext_tally;
 
-  @Before
-  public void setup() {
+  public TestDecryptionMediator() {
 
     this.key_ceremony = new KeyCeremonyMediator(this.CEREMONY_DETAILS);
 
@@ -158,12 +157,12 @@ public class TestDecryptionMediator {
     this.ciphertext_tally = Tally.tally_ballots(ballot_store, this.metadata, this.context).get();
   }
 
-  @After
+  @AfterContainer
   public void tearDown() {
     this.key_ceremony.reset(CeremonyDetails.create(NUMBER_OF_GUARDIANS, QUORUM));
   }
 
-  @Test
+  @Example
   public void test_announce() {
     DecryptionMediator subject = new DecryptionMediator(this.metadata, this.context, this.ciphertext_tally);
 
@@ -182,7 +181,7 @@ public class TestDecryptionMediator {
     assertThat(subject.get_plaintext_tally(true, null)).isEmpty();
   }
 
-  @Test
+  @Example
   public void test_compute_selection() {
     Tally.CiphertextTallySelection first_selection =
             this.ciphertext_tally.cast.values().stream().flatMap(contest -> contest.tally_selections.values().stream())
@@ -193,7 +192,7 @@ public class TestDecryptionMediator {
     assertThat(result).isPresent();
   }
 
-  @Test
+  @Example
   public void test_compute_compensated_selection_failure() {
     Tally.CiphertextTallySelection first_selection =
             this.ciphertext_tally.cast.values().stream().flatMap(contest -> contest.tally_selections.values().stream())
@@ -218,7 +217,7 @@ public class TestDecryptionMediator {
    * Demonstrates the complete workflow for computing a compensated decryption share
    * for one selection. It is useful for verifying that the workflow is correct.
    */
-  @Test
+  @Example
   public void test_compute_compensated_selection() {
     Tally.CiphertextTallySelection first_selection =
             this.ciphertext_tally.cast.values().stream().flatMap(contest -> contest.tally_selections.values().stream())

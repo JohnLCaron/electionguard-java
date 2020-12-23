@@ -10,7 +10,6 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -21,10 +20,9 @@ import static com.sunya.electionguard.Election.*;
 public class BallotFactory {
   private static final String simple_ballot_filename = "ballot_in_simple.json";
   private static final String simple_ballots_filename = "plaintext_ballots_simple.json";
-  private static final Random random = new Random(System.currentTimeMillis());
 
   static PlaintextBallotSelection get_random_selection_from(SelectionDescription description) {
-    return Encrypt.selection_from(description, false, random.nextBoolean());
+    return Encrypt.selection_from(description, false, TestUtils.randomBool());
   }
 
   /**
@@ -39,7 +37,10 @@ public class BallotFactory {
           boolean with_trues) {
 
     if (!suppress_validity_check) {
-      assertWithMessage("the contest description must be valid").that(description.is_valid()).isTrue();
+      boolean ok = description.is_valid();
+      if (!ok) {
+        assertWithMessage("the contest description must be valid").that(description.is_valid()).isTrue();
+      }
     }
 
     List<PlaintextBallotSelection> selections = new ArrayList<>();
@@ -56,10 +57,10 @@ public class BallotFactory {
       }
 
           // Possibly append the true selection, indicating an undervote
-      if (voted <= description.number_elected && random.nextBoolean()) {
+      if (voted <= description.number_elected && TestUtils.randomBool()) {
         selections.add(selection);
         // Possibly append the false selections as well, indicating some choices may be explicitly false
-      } else if (random.nextBoolean()) {
+      } else if (TestUtils.randomBool()) {
         selections.add( Encrypt.selection_from(selection_description, false, false));
       }
     }
@@ -92,17 +93,17 @@ public class BallotFactory {
   static PlaintextBallotSelection get_selection_well_formed() {
     ExtendedData extra_data = new ExtendedData("random", 33);
     return new PlaintextBallotSelection("selection-{draw(uuids)}",
-                random.nextBoolean() ? "true" : "false",
-                random.nextBoolean(),
-                random.nextBoolean() ? Optional.of(extra_data) : Optional.empty());
+                TestUtils.randomBool() ? "true" : "false",
+                TestUtils.randomBool(),
+                TestUtils.randomBool() ? Optional.of(extra_data) : Optional.empty());
   }
 
   static PlaintextBallotSelection get_selection_poorly_formed() {
     ExtendedData extra_data = new ExtendedData("random", 33);
     return new PlaintextBallotSelection("selection-{draw(uuids)}",
-            random.nextBoolean() ? "yeah" : "nope",
-            random.nextBoolean(),
-            random.nextBoolean() ? Optional.of(extra_data) : Optional.empty());
+            TestUtils.randomBool() ? "yeah" : "nope",
+            TestUtils.randomBool(),
+            TestUtils.randomBool() ? Optional.of(extra_data) : Optional.empty());
   }
 
   //////////////////////////////////////////////////////////////////////////////////////

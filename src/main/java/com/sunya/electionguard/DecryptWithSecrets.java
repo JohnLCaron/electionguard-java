@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static com.sunya.electionguard.Ballot.*;
 import static com.sunya.electionguard.Group.*;
 
 public class DecryptWithSecrets {
@@ -22,8 +23,8 @@ public class DecryptWithSecrets {
    * :param crypto_extended_base_hash: the extended base hash code (𝑄') for the election
    * :param suppress_validity_check: do not validate the encryption prior to decrypting (useful for tests)
    */
-  static Optional<Ballot.PlaintextBallotSelection> decrypt_selection_with_secret(
-          Ballot.CiphertextBallotSelection selection,
+  static Optional<PlaintextBallotSelection> decrypt_selection_with_secret(
+          CiphertextBallotSelection selection,
           Election.SelectionDescription description,
           ElementModP public_key,
           ElementModQ secret_key,
@@ -40,7 +41,7 @@ public class DecryptWithSecrets {
 
     // TODO: ISSUE #47: handle decryption of the extradata field if needed
 
-    return Optional.of(new Ballot.PlaintextBallotSelection(
+    return Optional.of(new PlaintextBallotSelection(
             selection.object_id,
             Utils.isTrue(plaintext_vote),
             selection.is_placeholder_selection,
@@ -60,8 +61,8 @@ public class DecryptWithSecrets {
    *
    * @return
    */
-  static Optional<Ballot.PlaintextBallotSelection> decrypt_selection_with_nonce(
-          Ballot.CiphertextBallotSelection selection,
+  static Optional<PlaintextBallotSelection> decrypt_selection_with_nonce(
+          CiphertextBallotSelection selection,
           Election.SelectionDescription description,
           ElementModP public_key,
           ElementModQ crypto_extended_base_hash,
@@ -78,8 +79,10 @@ public class DecryptWithSecrets {
     if (nonce_seed.isEmpty()) {
       nonce = selection.nonce;
     } else {
-      Nonces nonce_sequence = new Nonces(description.crypto_hash(), nonce_seed);
+      Nonces nonce_sequence = new Nonces(description.crypto_hash(), nonce_seed.get());
       nonce = Optional.of(nonce_sequence.get(description.sequence_order));
+      logger.atFine().log("decrypt_selection_with_nonce %n  %s%n  %s%n  %d%n%s%n",
+              description.crypto_hash(), nonce_seed, description.sequence_order, nonce);
     }
 
     if (nonce.isEmpty()) {
@@ -88,7 +91,7 @@ public class DecryptWithSecrets {
       return Optional.empty();
     }
 
-    if (selection.nonce.isPresent() && !nonce.equals(selection.nonce)) {
+    if (selection.nonce.isPresent() && !nonce.get().equals(selection.nonce.get())) {
       logger.atWarning().log("decrypt could not verify a nonce value for selection %s}",
               selection.object_id);
       return Optional.empty();
@@ -98,7 +101,7 @@ public class DecryptWithSecrets {
 
     // TODO: ISSUE #35: encrypt/decrypt: handle decryption of the extradata field if needed
 
-    return Optional.of(new Ballot.PlaintextBallotSelection(
+    return Optional.of(new PlaintextBallotSelection(
             selection.object_id,
             Utils.isTrue(plaintext_vote),
             selection.is_placeholder_selection,
@@ -116,8 +119,8 @@ public class DecryptWithSecrets {
    * :param suppress_validity_check: do not validate the encryption prior to decrypting (useful for tests)
    * :param remove_placeholders: filter out placeholder ciphertext selections after decryption
    */
-  static Optional<Ballot.PlaintextBallotContest> decrypt_contest_with_secret(
-          Ballot.CiphertextBallotContest contest,
+  static Optional<PlaintextBallotContest> decrypt_contest_with_secret(
+          CiphertextBallotContest contest,
           Election.ContestDescriptionWithPlaceholders description,
           ElementModP public_key,
           ElementModQ secret_key,
@@ -130,10 +133,10 @@ public class DecryptWithSecrets {
             !contest.is_valid_encryption(description.crypto_hash(), public_key, crypto_extended_base_hash)) {
       return Optional.empty();
     }
-    List<Ballot.PlaintextBallotSelection> plaintext_selections = new ArrayList<>();
-    for (Ballot.CiphertextBallotSelection selection : contest.ballot_selections) {
+    List<PlaintextBallotSelection> plaintext_selections = new ArrayList<>();
+    for (CiphertextBallotSelection selection : contest.ballot_selections) {
       Optional<Election.SelectionDescription> selection_description = description.selection_for(selection.object_id);
-      Optional<Ballot.PlaintextBallotSelection> plaintext_selection = decrypt_selection_with_secret(
+      Optional<PlaintextBallotSelection> plaintext_selection = decrypt_selection_with_secret(
               selection,
               selection_description.get(),
               public_key,
@@ -152,7 +155,202 @@ public class DecryptWithSecrets {
       }
     }
 
-    return Optional.of(new Ballot.PlaintextBallotContest(contest.object_id, plaintext_selections));
+    return Optional.of(new PlaintextBallotContest(contest.object_id, plaintext_selections));
+  }
+
+  /**
+   * Decrypt the specified `CiphertextBallotContest` within the context of the specified contest.
+   * <p>
+   * :param contest: the contest to decrypt
+   * :param description: the qualified contest metadata that includes placeholder selections
+   * :param public_key: the public key for the election (K)
+   * :param crypto_extended_base_hash: the extended base hash code (𝑄') for the election
+   * :param nonce_seed: the optional nonce that was seeded to the encryption function
+   * if no value is provided, the nonce field from the contest is used
+   * :param suppress_validity_check: do not validate the encryption prior to decrypting (useful for tests)
+   * :param remove_placeholders: filter out placeholder ciphertext selections after decryption
+   *
+   * @return
+   */
+  static Optional<PlaintextBallotContest> decrypt_contest_with_nonce(
+          CiphertextBallotContest contest,
+          Election.ContestDescriptionWithPlaceholders description,
+          ElementModP public_key,
+          ElementModQ crypto_extended_base_hash,
+          Optional<ElementModQ> nonce_seed,
+          boolean suppress_validity_check, // default false,
+          boolean remove_placeholders // default True,
+  ) {
+
+    if (!suppress_validity_check && !contest.is_valid_encryption(
+            description.crypto_hash(), public_key, crypto_extended_base_hash)) {
+      return Optional.empty();
+    }
+
+    if (nonce_seed.isEmpty()) {
+      nonce_seed = contest.nonce;
+      logger.atFine().log("decrypt_contest_with_nonce empty %n  %s%n", nonce_seed);
+
+    } else {
+      Nonces nonce_sequence = new Nonces(description.crypto_hash(), nonce_seed.get());
+      ElementModQ result = nonce_sequence.get(description.sequence_order);
+      logger.atFine().log("decrypt_contest_with_nonce %n  %s%n  %s%n  %d%n%s%n",
+              description.crypto_hash(), nonce_seed, description.sequence_order, result);
+      nonce_seed = Optional.of(result);
+      ;
+    }
+
+    if (nonce_seed.isEmpty()) {
+      logger.atWarning().log("missing nonce_seed value.  decrypt could not derive a nonce value for contest %s}",
+              contest.object_id);
+      return Optional.empty();
+    }
+
+    if (contest.nonce.isPresent() && !nonce_seed.get().equals(contest.nonce.get())) {
+      logger.atWarning().log("decrypt could not verify a nonce value for contest %s}",
+              contest.object_id);
+      return Optional.empty();
+    }
+
+    List<PlaintextBallotSelection> plaintext_selections = new ArrayList<>();
+    for (CiphertextBallotSelection selection : contest.ballot_selections) {
+      Optional<Election.SelectionDescription> selection_description = description.selection_for(selection.object_id);
+      Optional<PlaintextBallotSelection> plaintext_selection = decrypt_selection_with_nonce(
+              selection,
+              selection_description.get(),
+              public_key,
+              crypto_extended_base_hash,
+              nonce_seed,
+              suppress_validity_check);
+
+      if (plaintext_selection.isPresent()) {
+        if (!remove_placeholders || !plaintext_selection.get().is_placeholder_selection) {
+          plaintext_selections.add(plaintext_selection.get());
+        }
+      } else {
+        logger.atWarning().log("decryption with nonce failed for contest: %s selection: %s",
+                contest.object_id, selection.object_id);
+        return Optional.empty();
+      }
+    }
+
+    return Optional.of(new PlaintextBallotContest(contest.object_id, plaintext_selections));
+  }
+
+  /**
+   * Decrypt the specified `CiphertextBallot` within the context of the specified election.
+   * <p>
+   * :param ballot: the ballot to decrypt
+   * :param election_metadata: the qualified election metadata that includes placeholder selections
+   * :param crypto_extended_base_hash: the extended base hash code (𝑄') for the election
+   * :param public_key: the public key for the election (K)
+   * :param secret_key: the known secret key used to generate the public key for this election
+   * :param suppress_validity_check: do not validate the encryption prior to decrypting (useful for tests)
+   * :param remove_placeholders: filter out placeholder ciphertext selections after decryption
+   *
+   * @return
+   */
+
+  static Optional<PlaintextBallot> decrypt_ballot_with_secret(
+          CiphertextBallot ballot,
+          Election.InternalElectionDescription election_metadata,
+          ElementModQ crypto_extended_base_hash,
+          ElementModP public_key,
+          ElementModQ secret_key,
+          boolean suppress_validity_check, // default False,
+          boolean remove_placeholders // default  True,
+  ) {
+
+    if (!suppress_validity_check && !ballot.is_valid_encryption(
+            election_metadata.description_hash, public_key, crypto_extended_base_hash)) {
+      return Optional.empty();
+    }
+
+    List<PlaintextBallotContest> plaintext_contests = new ArrayList<>();
+
+    for (CiphertextBallotContest contest : ballot.contests) {
+      Optional<Election.ContestDescriptionWithPlaceholders> description = election_metadata.contest_for(contest.object_id);
+      Optional<PlaintextBallotContest> plaintext_contest = decrypt_contest_with_secret(
+              contest,
+              description.get(),
+              public_key,
+              secret_key,
+              crypto_extended_base_hash,
+              suppress_validity_check,
+              remove_placeholders);
+
+      if (plaintext_contest.isPresent()) {
+        plaintext_contests.add(plaintext_contest.get());
+      } else {
+        logger.atWarning().log("decryption with nonce failed for ballot: %s selection: %s",
+                ballot.object_id, contest.object_id);
+        return Optional.empty();
+      }
+    }
+
+    return Optional.of(new PlaintextBallot(ballot.object_id, ballot.ballot_style, plaintext_contests));
+  }
+
+  /**
+   * Decrypt the specified `CiphertextBallot` within the context of the specified election.
+   * <p>
+   * :param ballot: the ballot to decrypt
+   * :param election_metadata: the qualified election metadata that includes placeholder selections
+   * :param crypto_extended_base_hash: the extended base hash code (𝑄') for the election
+   * :param public_key: the public key for the election (K)
+   * :param nonce: the optional master ballot nonce that was either seeded to, or gernated by the encryption function
+   * :param suppress_validity_check: do not validate the encryption prior to decrypting (useful for tests)
+   * :param remove_placeholders: filter out placeholder ciphertext selections after decryption
+   *
+   * @return
+   */
+  static Optional<PlaintextBallot> decrypt_ballot_with_nonce(
+          CiphertextBallot ballot,
+          Election.InternalElectionDescription election_metadata,
+          ElementModQ crypto_extended_base_hash,
+          ElementModP public_key,
+          Optional<ElementModQ> nonce,
+          boolean suppress_validity_check, // default False,
+          boolean remove_placeholders // default True,
+  ) {
+
+    if (!suppress_validity_check && !ballot.is_valid_encryption(
+            election_metadata.description_hash, public_key, crypto_extended_base_hash)) {
+      return Optional.empty();
+    }
+
+    // Use the hashed representation included in the ballot or override with the provided values
+    Optional<ElementModQ> nonce_seed = nonce.isEmpty() ? ballot.hashed_ballot_nonce() :
+            Optional.of(CiphertextBallot.nonce_seed(election_metadata.description_hash, ballot.object_id, nonce.get()));
+
+    if (nonce_seed.isEmpty()) {
+      logger.atWarning().log(
+              "missing nonce_seed value. decrypt could not derive a nonce value for ballot %s", ballot.object_id);
+      return Optional.empty();
+    }
+
+    List<PlaintextBallotContest> plaintext_contests = new ArrayList<>();
+
+    for (CiphertextBallotContest contest : ballot.contests) {
+      Optional<Election.ContestDescriptionWithPlaceholders> description = election_metadata.contest_for(contest.object_id);
+      Optional<PlaintextBallotContest> plaintext_contest = decrypt_contest_with_nonce(
+              contest,
+              description.get(),
+              public_key,
+              crypto_extended_base_hash,
+              nonce_seed,
+              suppress_validity_check,
+              remove_placeholders);
+
+      if (plaintext_contest.isPresent()) {
+        plaintext_contests.add(plaintext_contest.get());
+      } else {
+        logger.atWarning().log(
+                "decryption with nonce failed for ballot: %s selection: %s", ballot.object_id, contest.object_id);
+        return Optional.empty();
+      }
+    }
+    return Optional.of(new PlaintextBallot(ballot.object_id, ballot.ballot_style, plaintext_contests));
   }
 
 }

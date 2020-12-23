@@ -2,6 +2,7 @@ package com.sunya.electionguard;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
+import com.google.common.flogger.FluentLogger;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
@@ -13,6 +14,7 @@ import java.util.stream.Collectors;
 import static com.sunya.electionguard.Group.*;
 
 public class Election {
+    private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   /**
    * enumerations for the `ElectionReport` entity
@@ -483,6 +485,15 @@ public class Election {
     public int hashCode() {
       return Objects.hash(super.hashCode(), candidate_id, sequence_order);
     }
+
+    @Override
+    public String toString() {
+      return "SelectionDescription{" +
+              "candidate_id='" + candidate_id + '\'' +
+              ", sequence_order=" + sequence_order +
+              ", object_id='" + object_id + '\'' +
+              '}';
+    }
   }
 
   /**
@@ -600,12 +611,10 @@ public class Election {
       HashSet<String> selection_ids = new HashSet<>();
       HashSet<Integer> sequence_ids = new HashSet<>();
 
-      int selection_count = 0;
       int expected_selection_count = this.ballot_selections.size();
 
       // count unique ids
       for (SelectionDescription selection : this.ballot_selections) {
-        selection_count += 1;
         //  validate the object_id
         if (!selection_ids.contains(selection.object_id)) {
           selection_ids.add(selection.object_id);
@@ -628,19 +637,15 @@ public class Election {
               selections_have_valid_candidate_ids && selections_have_valid_selection_ids && selections_have_valid_sequence_ids;
 
       if (!success) {
-        /* log_warning(
-                "Contest %s failed validation check: %s",
-                this.object_id,
-                str(
-                        {
-                                "contest_has_valid_number_elected":contest_has_valid_number_elected,
-                "contest_has_valid_votes_allowed":contest_has_valid_votes_allowed,
-                "selections_have_valid_candidate_ids":selections_have_valid_candidate_ids,
-                "selections_have_valid_selection_ids":selections_have_valid_selection_ids,
-                "selections_have_valid_sequence_ids":selections_have_valid_sequence_ids,
-    }
-                ),
-                        ) */
+        logger.atWarning().log(
+                "Contest %s failed validation check: %s", this.object_id,
+                String.format("contest_has_valid_number_elected %s%n" +
+                "contest_has_valid_votes_allowed %s%n" +
+                "selections_have_valid_candidate_ids %s%n" +
+                "selections_have_valid_selection_ids %s%n" +
+                "selections_have_valid_sequence_ids %s%n",
+                contest_has_valid_number_elected, contest_has_valid_votes_allowed, selections_have_valid_candidate_ids,
+                selections_have_valid_selection_ids, selections_have_valid_sequence_ids));
       }
 
       return success;
