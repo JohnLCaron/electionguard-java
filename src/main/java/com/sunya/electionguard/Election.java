@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 import static com.sunya.electionguard.Group.*;
 
 public class Election {
-    private static final FluentLogger logger = FluentLogger.forEnclosingClass();
+  private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   /**
    * enumerations for the `ElectionReport` entity
@@ -347,6 +347,10 @@ public class Election {
       this.logo_uri = Optional.ofNullable(logo_uri);
     }
 
+    String get_party_id() {
+      return this.object_id;
+    }
+
     @Override
     public Group.ElementModQ crypto_hash() {
       return Hash.hash_elems(
@@ -410,6 +414,13 @@ public class Election {
       this.party_id = Optional.ofNullable(party_id);
       this.image_uri = Optional.ofNullable(image_uri);
       this.is_write_in = Optional.ofNullable(is_write_in);
+    }
+
+    /**
+     * Given a `Candidate`, returns a "candidate ID", which is used in other ElectionGuard structures.
+     */
+    String get_candidate_id() {
+      return this.object_id;
     }
 
     @Override
@@ -640,12 +651,12 @@ public class Election {
         logger.atWarning().log(
                 "Contest %s failed validation check: %s", this.object_id,
                 String.format("contest_has_valid_number_elected %s%n" +
-                "contest_has_valid_votes_allowed %s%n" +
-                "selections_have_valid_candidate_ids %s%n" +
-                "selections_have_valid_selection_ids %s%n" +
-                "selections_have_valid_sequence_ids %s%n",
-                contest_has_valid_number_elected, contest_has_valid_votes_allowed, selections_have_valid_candidate_ids,
-                selections_have_valid_selection_ids, selections_have_valid_sequence_ids));
+                                "contest_has_valid_votes_allowed %s%n" +
+                                "selections_have_valid_candidate_ids %s%n" +
+                                "selections_have_valid_selection_ids %s%n" +
+                                "selections_have_valid_sequence_ids %s%n",
+                        contest_has_valid_number_elected, contest_has_valid_votes_allowed, selections_have_valid_candidate_ids,
+                        selections_have_valid_selection_ids, selections_have_valid_sequence_ids));
       }
 
       return success;
@@ -761,9 +772,9 @@ public class Election {
     }
 
     /**
-     *         Gets the description for a particular id
-     *         :param selection_id: Id of Selection
-     *         :return: description
+     * Gets the description for a particular id
+     * :param selection_id: Id of Selection
+     * :return: description
      */
     Optional<SelectionDescription> selection_for(String selection_id) {
 

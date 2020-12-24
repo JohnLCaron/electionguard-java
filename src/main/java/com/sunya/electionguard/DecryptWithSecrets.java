@@ -146,12 +146,12 @@ public class DecryptWithSecrets {
       if (plaintext_selection.isPresent()) {
         if (!remove_placeholders || !plaintext_selection.get().is_placeholder_selection) {
           plaintext_selections.add(plaintext_selection.get());
-        } else {
-          logger.atWarning().log(
-                  "decryption with secret failed for contest: %s selection: %s",
-                  contest.object_id, selection.object_id);
-          return Optional.empty();
         }
+      } else {
+        logger.atWarning().log(
+                "decryption with secret failed for contest: %s selection: %s",
+                contest.object_id, selection.object_id);
+        return Optional.empty();
       }
     }
 

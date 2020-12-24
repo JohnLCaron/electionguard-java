@@ -353,9 +353,22 @@ class ChaumPedersen {
           ElementModP k,
           ElementModQ q,
           ElementModQ seed,
+          BigInteger plaintext) {
+
+    Preconditions.checkArgument(Group.betweenInclusive(BigInteger.ZERO, plaintext, BigInteger.ONE), "make_disjunctive_chaum_pedersen only supports plaintexts of 0 or 1");
+    return (plaintext.equals(BigInteger.ZERO)) ? make_disjunctive_chaum_pedersen_zero(message, r, k, q, seed) :
+            make_disjunctive_chaum_pedersen_one(message, r, k, q, seed);
+  }
+
+  static DisjunctiveChaumPedersenProof make_disjunctive_chaum_pedersen(
+          ElGamal.Ciphertext message,
+          ElementModQ r,
+          ElementModP k,
+          ElementModQ q,
+          ElementModQ seed,
           int plaintext) {
 
-    Preconditions.checkArgument(0 <= plaintext && plaintext <= 1, "make_disjunctive_chaum_pedersen only supports plaintexts of 0 or 1");
+    Preconditions.checkArgument(0 <= plaintext && plaintext <= 1, "make_disjunctive_chaum_pedersen only supports integers of 0 or 1");
     return (plaintext == 0) ? make_disjunctive_chaum_pedersen_zero(message, r, k, q, seed) :
             make_disjunctive_chaum_pedersen_one(message, r, k, q, seed);
   }

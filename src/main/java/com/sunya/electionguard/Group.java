@@ -408,6 +408,14 @@ public class Group {
     return x.compareTo(exclusive_upper_bound) < 0;
   }
 
+  // is lower <= x <= upper, ie is x in [lower, upper] ?
+  static boolean betweenInclusive(BigInteger inclusive_lower_bound, BigInteger x, BigInteger inclusive_upper_bound) {
+    if (x.compareTo(inclusive_lower_bound) < 0) {
+      return false;
+    }
+    return x.compareTo(inclusive_upper_bound) <= 0;
+  }
+
   // is x >= b ?
   static boolean greaterThanEqual(BigInteger x, BigInteger b) {
     return x.compareTo(b) >= 0;
@@ -415,5 +423,13 @@ public class Group {
 
   static boolean lessThan(BigInteger x, BigInteger b) {
     return x.compareTo(b) < 0;
+  }
+
+  static BigInteger sum(Iterable<BigInteger> elems) {
+    BigInteger sum = BigInteger.ZERO;
+    for (BigInteger e : elems) {
+      sum = sum.add(e);
+    }
+    return sum;
   }
 }

@@ -5,7 +5,23 @@ import net.jqwik.api.Arbitrary;
 import net.jqwik.api.ForAll;
 import net.jqwik.api.Provide;
 
+import java.util.Random;
+
 public abstract class TestProperties {
+  static Random random = new Random(System.currentTimeMillis());
+
+  @Provide
+  Arbitrary<ElectionTestHelper.EverythingTuple> elections_and_ballots() {
+    ElectionTestHelper helper = new ElectionTestHelper(random);
+    return Arbitraries.of(helper.elections_and_ballots(1 + random.nextInt(2)));
+  }
+
+  @Provide
+  Arbitrary<Election.ElectionDescription> election_description() {
+    ElectionTestHelper helper = new ElectionTestHelper(random);
+    return Arbitraries.of(helper.election_descriptions(
+            1 + random.nextInt(2), 1 + random.nextInt(2)));
+  }
 
   @Provide
   Arbitrary<Election.SelectionDescription> selection_description() {
