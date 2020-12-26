@@ -1,6 +1,7 @@
 package com.sunya.electionguard;
 
 import com.google.common.collect.Iterables;
+import com.google.common.flogger.FluentLogger;
 
 import javax.annotation.Nullable;
 import java.math.BigInteger;
@@ -12,6 +13,17 @@ import static com.sunya.electionguard.Ballot.*;
 import static com.sunya.electionguard.Group.*;
 
 class Tally {
+  private static final FluentLogger logger = FluentLogger.forEnclosingClass();
+
+  static class Tuple {
+    final String id;
+    @Nullable final ElGamal.Ciphertext ciphertext;
+
+    public Tuple(String id, @Nullable ElGamal.Ciphertext ciphertext) {
+      this.id = id;
+      this.ciphertext = ciphertext;
+    }
+  }
 
   /**
    * A plaintext Tally Selection is a decrypted selection of a contest.
@@ -84,7 +96,100 @@ class Tally {
       this.description_hash = description_hash;
       this.tally_selections = tally_selections;
     }
+
+    /**         Accumulate the contest selections of an individual ballot into this tally. */
+     boolean accumulate_contest(List<CiphertextBallotSelection> contest_selections) {
+
+       if (contest_selections.isEmpty()) {
+         logger.atWarning().log("accumulate cannot add missing selections for contest %s", this.object_id);
+         return false;
+       }
+
+       // Validate the input data by comparing the selection id's provided
+       // to the valid selection id's for this tally contest
+       List<String> selection_ids = contest_selections.stream()
+               .filter(s -> !s.is_placeholder_selection)
+               .map(s-> s.object_id)
+               .collect(Collectors.toList());
+
+       // if (any(set(this.tally_selections).difference(selection_ids))) {
+       Set<String> have = this.tally_selections.keySet();
+       if (selection_ids.stream().anyMatch(id -> have.contains(id))) {
+         logger.atWarning().log("accumulate cannot add mismatched selections for contest %s", this.object_id);
+         return false;
+       }
+
+       // iterate through the tally selections and add the new value to the total
+       List<Callable<Tuple>> tasks =
+               this.tally_selections.entrySet().stream()
+                       .map(entry -> new RunAccumulate(entry.getKey(), entry.getValue(), contest_selections))
+                       .collect(Collectors.toList());
+       Scheduler<Tuple> scheduler = new Scheduler<>();
+       List<Tuple> results = scheduler.schedule(tasks, true);
+
+       for (Tuple tuple : results){
+         if (tuple.ciphertext == null) {
+           return false;
+         } else {
+           CiphertextTallySelection selection = this.tally_selections.get(tuple.id);
+           selection.ciphertext = tuple.ciphertext;
+         }
+       }
+
+       return true;
+     }
+
+    static class RunAccumulate implements Callable<Tuple> {
+      final String id;
+      final CiphertextTallySelection selection_tally;
+      final List<CiphertextBallotSelection> contest_selections;
+
+      public RunAccumulate(String id, CiphertextTallySelection selection_tally, List<CiphertextBallotSelection> contest_selections) {
+        this.id = id;
+        this.selection_tally = selection_tally;
+        this.contest_selections = contest_selections;
+      }
+
+      @Override
+      public Tuple call() {
+        return _accumulate_selections(id, selection_tally, contest_selections);
+      }
+    }
+
+    static Tuple _accumulate_selections(
+            String key,
+            CiphertextTallySelection selection_tally,
+            List<CiphertextBallotSelection> contest_selections) {
+
+      Optional<CiphertextBallotSelection> use_selection = contest_selections.stream()
+              .filter(s -> key.equals(s.object_id)).findFirst();
+
+                        // a selection on the ballot that is required was not found
+        // this should never happen when using the `CiphertextTally`
+      // but sanity check anyway
+      if (use_selection.isEmpty()) {
+        logger.atWarning().log("add cannot accumulate for missing selection %s ", key);
+        return new Tuple(key, null);
+      }
+
+      return new Tuple(key,selection_tally.elgamal_accumulate(use_selection.get().ciphertext));
+    }
   }
+
+  /**
+   * The plaintext representation of all contests in the election
+   */
+  static class PlaintextTally extends ElectionObjectBase {
+    Map<String, PlaintextTallyContest> contests;
+    Map<String, Map<String, PlaintextTallyContest>> spoiled_ballots;
+
+    public PlaintextTally(String object_id, Map<String, PlaintextTallyContest> contests,
+                          Map<String, Map<String, PlaintextTallyContest>> spoiled_ballots) {
+      super(object_id);
+      this.contests = contests;
+      this.spoiled_ballots = spoiled_ballots;
+    }
+  } // PlaintextTally
 
   /**
    * A `CiphertextTally` accepts cast and spoiled ballots and accumulates a tally on the cast ballots.
@@ -124,6 +229,36 @@ class Tally {
       return this._cast_ballot_ids.contains(ballot.object_id) || this.spoiled_ballots.containsKey(ballot.object_id);
     }
 
+    /**
+     * Append a ballot to the tally and recalculate the tally. .
+     */
+    boolean append(CiphertextAcceptedBallot ballot) {
+      if (ballot.state == BallotBoxState.UNKNOWN) {
+        logger.atWarning().log("append cannot add %s with invalid state", ballot.object_id);
+        return false;
+      }
+
+      if (this.contains(ballot)) {
+        logger.atWarning().log("append cannot add %s that is already tallied", ballot.object_id);
+        return false;
+      }
+
+
+      if (!BallotValidator.ballot_is_valid_for_election(ballot, this._metadata, this._encryption)) {
+        return false;
+      }
+
+      if (ballot.state == BallotBoxState.CAST) {
+        return this._add_cast(ballot);
+      }
+
+      if (ballot.state == BallotBoxState.SPOILED) {
+        return this._add_spoiled(ballot);
+      }
+
+      logger.atWarning().log("append cannot add %s", ballot);
+      return false;
+    }
 
     /**
      * Append a collection of Ballots to the tally and recalculate.
@@ -165,6 +300,30 @@ class Tally {
       return false;
     }
 
+    /**
+     * Add a cast ballot to the tally, synchronously.
+     */
+    boolean _add_cast(CiphertextAcceptedBallot ballot) {
+
+      // iterate through the contests and elgamal add
+      for (CiphertextBallotContest contest : ballot.contests) {
+        // This should never happen since the ballot is validated against the election metadata
+        // but it's possible the local dictionary was modified so we double check.
+        if (!this.cast.containsKey(contest.object_id)) {
+          logger.atWarning().log("add cast missing contest in valid set %s", contest.object_id);
+          return false;
+        }
+
+        CiphertextTallyContest use_contest = this.cast.get(contest.object_id);
+        if (!use_contest.accumulate_contest(contest.ballot_selections)) {
+          return false;
+        }
+        this.cast.put(contest.object_id, use_contest);
+      }
+      this._cast_ballot_ids.add(ballot.object_id);
+      return true;
+    }
+
 
     /**
      * Add a spoiled ballot.
@@ -194,17 +353,8 @@ class Tally {
     }
 
     // Allow _accumulate to be run in parellel
-    static class Tuple1 {
-      final String id;
-      final ElGamal.Ciphertext ciphertext;
 
-      public Tuple1(String id, ElGamal.Ciphertext ciphertext) {
-        this.id = id;
-        this.ciphertext = ciphertext;
-      }
-    }
-
-    static class RunAccumulate implements Callable<Tuple1> {
+    static class RunAccumulate implements Callable<Tuple> {
       final String id;
       final Map<String, ElGamal.Ciphertext> ballot_selections;
 
@@ -214,25 +364,25 @@ class Tally {
       }
 
       @Override
-      public Tuple1 call() {
+      public Tuple call() {
         return _accumulate(id, ballot_selections);
       }
     }
 
-    static Tuple1 _accumulate(String id, Map<String, ElGamal.Ciphertext> ballot_selections) {
+    static Tuple _accumulate(String id, Map<String, ElGamal.Ciphertext> ballot_selections) {
       //  *[ciphertext for ciphertext in ballot_selections.values()]
-      return new Tuple1(id, ElGamal.elgamal_add(Iterables.toArray(ballot_selections.values(), ElGamal.Ciphertext.class)));
+      return new Tuple(id, ElGamal.elgamal_add(Iterables.toArray(ballot_selections.values(), ElGamal.Ciphertext.class)));
     }
 
     boolean _execute_accumulate(
             Map<String, Map<String, ElGamal.Ciphertext>> ciphertext_selections_by_selection_id) {
 
-      List<Callable<Tuple1>> tasks =
+      List<Callable<Tuple>> tasks =
               ciphertext_selections_by_selection_id.entrySet().stream()
                       .map(entry -> new RunAccumulate(entry.getKey(), entry.getValue()))
                       .collect(Collectors.toList());
-      Scheduler<Tuple1> scheduler = new Scheduler<>();
-      List<Tuple1> result_set = scheduler.schedule(tasks, true);
+      Scheduler<Tuple> scheduler = new Scheduler<>();
+      List<Tuple> result_set = scheduler.schedule(tasks, true);
 
       Map<String, ElGamal.Ciphertext> result_dict = result_set.stream()
               .collect(Collectors.toMap(t -> t.id, t -> t.ciphertext));
@@ -253,19 +403,24 @@ class Tally {
   } // class CiphertextTally
 
   /**
-   * The plaintext representation of all contests in the election
+   * Tally a ballot that is either Cast or Spoiled
+   * :return: The mutated CiphertextTally or None if there is an error
+   *
+   * @return
    */
-  static class PlaintextTally extends ElectionObjectBase {
-    Map<String, PlaintextTallyContest> contests;
-    Map<String, Map<String, PlaintextTallyContest>> spoiled_ballots;
+  static Optional<CiphertextTally> tally_ballot(CiphertextAcceptedBallot ballot, CiphertextTally tally) {
 
-    public PlaintextTally(String object_id, Map<String, PlaintextTallyContest> contests,
-                          Map<String, Map<String, PlaintextTallyContest>> spoiled_ballots) {
-      super(object_id);
-      this.contests = contests;
-      this.spoiled_ballots = spoiled_ballots;
+    if (ballot.state == BallotBoxState.UNKNOWN) {
+      logger.atWarning().log("tally ballots error tallying unknown state for ballot %s", ballot.object_id);
+      return Optional.empty();
     }
-  } // PlaintextTally
+
+    if (tally.append(ballot)) {
+      return Optional.of(tally);
+    }
+
+    return Optional.empty();
+  }
 
   /**
    * Tally all of the ballots in the ballot store.

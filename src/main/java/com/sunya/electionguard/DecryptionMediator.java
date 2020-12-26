@@ -184,10 +184,10 @@ public class DecryptionMediator {
    * Get the plaintext tally for the election by composing each Guardian's
    * decrypted representation of each selection into a decrypted representation
    * <p>
-   * :param recompute: Specify if the function should recompute the result, even if one already exists.
+   * :param recompute: Specify if the function should recompute the result, even if one already exists. default false
    * :return: a `PlaintextTally` or `None`
    */
-  Optional<PlaintextTally> get_plaintext_tally(boolean recompute, Auxiliary.Decryptor decryptor) {
+  Optional<PlaintextTally> get_plaintext_tally(boolean recompute, @Nullable Auxiliary.Decryptor decryptor) {
     if (decryptor == null) {
       decryptor = Rsa::decrypt;
     }

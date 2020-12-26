@@ -7,7 +7,7 @@ import java.util.Map;
 
 import static com.google.common.truth.Truth.assertWithMessage;
 
-public class TestTally {
+public class TallyTestHelper {
 
   /**
    * Internal helper function for testing: takes a list of plaintext ballots as input,

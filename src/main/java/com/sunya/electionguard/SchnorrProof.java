@@ -7,7 +7,7 @@ import static com.sunya.electionguard.Proof.Usage.SecretValue;
 
 public class SchnorrProof extends Proof {
   /** k in the spec */
-  final ElementModP publicKey;
+  final ElementModP public_key;
   /** h in the spec */
   final ElementModP commitment;
   /** c in the spec */
@@ -15,9 +15,9 @@ public class SchnorrProof extends Proof {
   /** u in the spec */
   final ElementModQ response;
 
-  SchnorrProof(ElementModP publicKey, ElementModP commitment, ElementModQ challenge, ElementModQ response) {
+  SchnorrProof(ElementModP public_key, ElementModP commitment, ElementModQ challenge, ElementModQ response) {
     super("SchnorrProof", SecretValue);
-    this.publicKey = publicKey;
+    this.public_key = public_key;
     this.commitment = commitment;
     this.challenge = challenge;
     this.response = response;
@@ -28,7 +28,7 @@ public class SchnorrProof extends Proof {
    *         @return true if the transcript is valid, false if anything is wrong
    */
   boolean is_valid() {
-    ElementModP k = this.publicKey;
+    ElementModP k = this.public_key;
     ElementModP h = this.commitment;
     ElementModQ u = this.response;
     boolean valid_public_key = k.is_valid_residue();
@@ -52,7 +52,7 @@ public class SchnorrProof extends Proof {
     if (o == null || getClass() != o.getClass()) return false;
     if (!super.equals(o)) return false;
     SchnorrProof that = (SchnorrProof) o;
-    return publicKey.equals(that.publicKey) &&
+    return public_key.equals(that.public_key) &&
             commitment.equals(that.commitment) &&
             challenge.equals(that.challenge) &&
             response.equals(that.response);
@@ -60,7 +60,7 @@ public class SchnorrProof extends Proof {
 
   @Override
   public int hashCode() {
-    return Objects.hash(super.hashCode(), publicKey, commitment, challenge, response);
+    return Objects.hash(super.hashCode(), public_key, commitment, challenge, response);
   }
 
   /**

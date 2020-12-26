@@ -305,6 +305,17 @@ class DecryptionShare {
 
   } // class CompensatedTallyDecryptionShare
 
+
+  static class Tuple2 {
+    final ElementModP public_key;
+    final CiphertextDecryptionSelection decryption;
+
+    public Tuple2(ElementModP public_key, CiphertextDecryptionSelection decryption) {
+      this.public_key = public_key;
+      this.decryption = decryption;
+    }
+  }
+
   /**
    * A Guardian's Partial Decryption Share of an election tally.
    */
@@ -326,16 +337,6 @@ class DecryptionShare {
       return new AutoValue_DecryptionShare_TallyDecryptionShare(guardian_id, public_key, contests, spoiled_ballots);
     }
 
-  }
-
-  static class Tuple2 {
-    final ElementModP public_key;
-    final CiphertextDecryptionSelection decryption;
-
-    public Tuple2(ElementModP public_key, CiphertextDecryptionSelection decryption) {
-      this.public_key = public_key;
-      this.decryption = decryption;
-    }
   }
 
   /**

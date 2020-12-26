@@ -1,6 +1,9 @@
 package com.sunya.electionguard;
 
 import net.jqwik.api.Example;
+import net.jqwik.api.ForAll;
+import net.jqwik.api.Property;
+import net.jqwik.api.ShrinkingMode;
 import org.junit.Test;
 
 import java.util.List;
@@ -10,7 +13,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 import static com.sunya.electionguard.Ballot.*;
 
-public class TestBallot {
+public class TestBallotProperties extends TestProperties {
   static BallotFactory factory = new BallotFactory();
 
   @Example
@@ -50,18 +53,18 @@ public class TestBallot {
     }
   }
 
-  @Example
-  public void test_plaintext_ballot_selection_is_valid () {
-    PlaintextBallotSelection selection = BallotFactory.get_selection_well_formed();
+  @Property(tries = 10, shrinking = ShrinkingMode.OFF)
+  public void test_plaintext_ballot_selection_is_valid(
+          @ForAll("get_selection_well_formed") PlaintextBallotSelection selection) {
     assertThat(selection.is_valid(selection.object_id)).isTrue();
 
     int as_int = selection.to_int();
     assertThat(as_int >= 0 && as_int <= 1).isTrue();
   }
 
-  @Example
-  public void test_plaintext_ballot_selection_is_invalid () {
-    PlaintextBallotSelection selection = BallotFactory.get_selection_poorly_formed();
+  @Property(tries = 10, shrinking = ShrinkingMode.OFF)
+  public void test_plaintext_ballot_selection_is_invalid (
+    @ForAll("get_selection_poorly_formed") PlaintextBallotSelection selection) {
     assertThat(selection.is_valid(selection.object_id)).isFalse();
 
     int as_int = selection.to_int();

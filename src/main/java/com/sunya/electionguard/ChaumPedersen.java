@@ -167,34 +167,29 @@ class ChaumPedersen {
               g_pow_p(v).equals(mult_p(a, pow_p(k, c))));
 
       // The equation 𝐴^𝑣𝑖 = 𝑏𝑖𝑀𝑖^𝑐𝑖 mod 𝑝
-      boolean consistent_av = (in_bounds_alpha && in_bounds_b && in_bounds_c && in_bounds_v &&
-              pow_p(alpha, v).equals(mult_p(b, pow_p(m, c))));
+      boolean temp = pow_p(alpha, v).equals(mult_p(b, pow_p(m, c)));
+      boolean consistent_av = (in_bounds_alpha && in_bounds_b && in_bounds_c && in_bounds_v && temp);
 
       boolean success = in_bounds_alpha && in_bounds_beta && in_bounds_k && in_bounds_m && in_bounds_a && in_bounds_b
               && in_bounds_c && in_bounds_v && in_bounds_q && same_c && consistent_gv && consistent_av;
 
       if (!success) {
-                  /* "found an invalid Chaum-Pedersen proof: "
-                        + str(
-    {
-      "in_bounds_alpha": in_bounds_alpha,
-            "in_bounds_beta": in_bounds_beta,
-            "in_bounds_k": in_bounds_k,
-            "in_bounds_m": in_bounds_m,
-            "in_bounds_a": in_bounds_a,
-            "in_bounds_b": in_bounds_b,
-            "in_bounds_c": in_bounds_c,
-            "in_bounds_v": in_bounds_v,
-            "in_bounds_q": in_bounds_q,
-            "same_c": same_c,
-            "consistent_gv": consistent_gv,
-            "consistent_av": consistent_av,
-            "k": k,
-            "q": q,
-            "proof": this,
-    }
-                ),
-                        ) */
+        logger.atWarning().log("found an invalid Chaum-Pedersen proof, " +
+                String.format("in_bounds_alpha %s%n", in_bounds_alpha) +
+                String.format("in_bounds_beta %s%n", in_bounds_beta) +
+                String.format("in_bounds_k %s%n", in_bounds_k) +
+                String.format("in_bounds_m %s%n", in_bounds_m) +
+                String.format("in_bounds_a %s%n", in_bounds_a) +
+                String.format("in_bounds_b %s%n", in_bounds_b) +
+                String.format("in_bounds_c %s%n", in_bounds_c) +
+                String.format("in_bounds_v %s%n", in_bounds_v) +
+                String.format("in_bounds_q %s%n", in_bounds_q) +
+                String.format("same_c %s%n", same_c) +
+                String.format("consistent_gv %s%n", consistent_gv) +
+                String.format("consistent_av %s%n", consistent_av) +
+                String.format("k %s%n", k) +
+                String.format("q %s%n", q) +
+                String.format("proof %s%n", this));
       }
       return success;
     }

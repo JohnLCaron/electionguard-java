@@ -2,7 +2,6 @@ package com.sunya.electionguard;
 
 import net.jqwik.api.Arbitraries;
 import net.jqwik.api.Arbitrary;
-import net.jqwik.api.ForAll;
 import net.jqwik.api.Provide;
 
 import java.util.Random;
@@ -21,6 +20,16 @@ public abstract class TestProperties {
     ElectionTestHelper helper = new ElectionTestHelper(random);
     return Arbitraries.of(helper.election_descriptions(
             1 + random.nextInt(2), 1 + random.nextInt(2)));
+  }
+
+  @Provide
+  Arbitrary<Ballot.PlaintextBallotSelection> get_selection_poorly_formed() {
+    return Arbitraries.of(BallotFactory.get_selection_poorly_formed());
+  }
+
+  @Provide
+  Arbitrary<Ballot.PlaintextBallotSelection> get_selection_well_formed() {
+    return Arbitraries.of(BallotFactory.get_selection_well_formed());
   }
 
   @Provide

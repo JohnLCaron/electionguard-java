@@ -21,7 +21,7 @@ class DecryptWithShares {
    *     :param shares: the collection of shares to decrypt the selection
    *     :param extended_base_hash: the extended base hash code (𝑄') for the election
    *     :return: a `PlaintextTallySelection` or `None` if there is an error
-   *     :param suppress_validity_check: do not validate the encryption prior to decrypting (useful for tests)
+   *     :param suppress_validity_check: do not validate the encryption prior to decrypting (default false)
    */
   static Optional<Tally.PlaintextTallySelection> decrypt_selection_with_decryption_shares(
           Ballot.CiphertextSelection selection,

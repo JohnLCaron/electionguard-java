@@ -43,7 +43,7 @@ public class TestEncryptHypothesisProperties extends TestProperties {
     Election.CiphertextElectionContext context = everything.context;
 
     // Tally the plaintext ballots for comparison later
-    Map<String, Integer> plaintext_tallies = TestHelpers.accumulate_plaintext_ballots(ballots);
+    Map<String, BigInteger> plaintext_tallies = TallyTestHelper.accumulate_plaintext_ballots(ballots);
     int num_ballots = ballots.size();
     int num_contests = metadata.contests.size();
 
@@ -106,7 +106,7 @@ public class TestEncryptHypothesisProperties extends TestProperties {
               .map(p -> decrypted_tallies.get(p.object_id)).collect(Collectors.toList());
 
       List<BigInteger> plaintext_tally_values = contest.ballot_selections.stream()
-              .map(s -> BigInteger.valueOf(plaintext_tallies.get(s.object_id))).collect(Collectors.toList());
+              .map(s -> plaintext_tallies.get(s.object_id)).collect(Collectors.toList());
 
       // verify the plaintext tallies match the decrypted tallies
       assertThat(decrypted_selection_tallies).isEqualTo(plaintext_tally_values);

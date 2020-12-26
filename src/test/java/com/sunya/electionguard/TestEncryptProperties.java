@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 
+import static com.sunya.electionguard.Ballot.*;
 import static com.sunya.electionguard.ChaumPedersen.*;
 import static com.sunya.electionguard.Encrypt.*;
 import static com.sunya.electionguard.ElGamal.*;
@@ -35,11 +36,11 @@ public class TestEncryptProperties extends TestProperties {
     Election.SelectionDescription metadata = new Election.SelectionDescription("some-selection-object-id", "some-candidate-id", 1);
     ElementModQ hash_context = metadata.crypto_hash();
 
-    Ballot.PlaintextBallotSelection subject = selection_from(metadata, false, false);
+    PlaintextBallotSelection subject = selection_from(metadata, false, false);
     assertThat(subject.is_valid(metadata.object_id)).isTrue();
 
     // Act
-    Optional<Ballot.CiphertextBallotSelection> result = encrypt_selection(subject, metadata, keypair.public_key, ONE_MOD_Q, nonce, false, true);
+    Optional<CiphertextBallotSelection> result = encrypt_selection(subject, metadata, keypair.public_key, ONE_MOD_Q, nonce, false, true);
 
     // Assert
     assertThat(result).isPresent();
@@ -53,23 +54,23 @@ public class TestEncryptProperties extends TestProperties {
     ElementModQ nonce = TestUtils.elements_mod_q();
     Election.SelectionDescription metadata = new Election.SelectionDescription("some-selection-object-id", "some-candidate-id", 1);
     ElementModQ hash_context = metadata.crypto_hash();
-    Ballot.PlaintextBallotSelection subject = selection_from(metadata, false, false);
+    PlaintextBallotSelection subject = selection_from(metadata, false, false);
     assertThat(subject.is_valid(metadata.object_id)).isTrue();
 
-    Optional<Ballot.CiphertextBallotSelection> resultO = encrypt_selection(subject, metadata, keypair.public_key, ONE_MOD_Q, nonce, false, true);
+    Optional<CiphertextBallotSelection> resultO = encrypt_selection(subject, metadata, keypair.public_key, ONE_MOD_Q, nonce, false, true);
     assertThat(resultO).isPresent();
-    Ballot.CiphertextBallotSelection result = resultO.get();
+    CiphertextBallotSelection result = resultO.get();
 
     // tamper with the description_hash
-    // Ballot.CiphertextBallotSelection malformed_description_hash = result.toBuilder().setDescriptionHash(TWO_MOD_Q).build();
-    Ballot.CiphertextBallotSelection malformed_description_hash = new Ballot.CiphertextBallotSelection(
+    // CiphertextBallotSelection malformed_description_hash = result.toBuilder().setDescriptionHash(TWO_MOD_Q).build();
+    CiphertextBallotSelection malformed_description_hash = new CiphertextBallotSelection(
             result.object_id, TWO_MOD_Q, result.ciphertext,
             result.crypto_hash, result.is_placeholder_selection, result.nonce,
             result.proof, result.extended_data);
 
     // remove the proof
-    // Ballot.CiphertextBallotSelection missing_proof = result.toBuilder().clearProof().build();
-    Ballot.CiphertextBallotSelection missing_proof = new Ballot.CiphertextBallotSelection(
+    // CiphertextBallotSelection missing_proof = result.toBuilder().clearProof().build();
+    CiphertextBallotSelection missing_proof = new CiphertextBallotSelection(
             result.object_id, result.description_hash, result.ciphertext,
             result.crypto_hash, result.is_placeholder_selection, result.nonce,
             Optional.empty(), result.extended_data);
@@ -83,9 +84,9 @@ public class TestEncryptProperties extends TestProperties {
           @ForAll("selection_description") Election.SelectionDescription description,
           @ForAll("elgamal_keypairs") ElGamal.KeyPair keypair,
           @ForAll("elements_mod_q_no_zero") ElementModQ seed) {
-    Ballot.PlaintextBallotSelection subject = ballot_factory.get_random_selection_from(description);
+    PlaintextBallotSelection subject = ballot_factory.get_random_selection_from(description);
 
-    Optional<Ballot.CiphertextBallotSelection> result = encrypt_selection(subject, description, keypair.public_key, ONE_MOD_Q, seed, false, true);
+    Optional<CiphertextBallotSelection> result = encrypt_selection(subject, description, keypair.public_key, ONE_MOD_Q, seed, false, true);
     assertThat(result).isPresent();
     assertThat(result.get().ciphertext).isNotNull();
     assertThat(result.get().is_valid_encryption(description.crypto_hash(), keypair.public_key, ONE_MOD_Q)).isTrue();
@@ -97,16 +98,16 @@ public class TestEncryptProperties extends TestProperties {
           @ForAll("elgamal_keypairs") ElGamal.KeyPair keypair,
           @ForAll("elements_mod_q_no_zero") ElementModQ seed,
           @ForAll @IntRange(min = 0, max = 100) int random_seed) {
-    Ballot.PlaintextBallotSelection subject = ballot_factory.get_random_selection_from(description);
+    PlaintextBallotSelection subject = ballot_factory.get_random_selection_from(description);
 
-    Optional<Ballot.CiphertextBallotSelection> resultO = encrypt_selection(subject, description, keypair.public_key, ONE_MOD_Q, seed, false, true);
+    Optional<CiphertextBallotSelection> resultO = encrypt_selection(subject, description, keypair.public_key, ONE_MOD_Q, seed, false, true);
     assertThat(resultO).isPresent();
     assertThat(resultO.get().is_valid_encryption(description.crypto_hash(), keypair.public_key, ONE_MOD_Q)).isTrue();
-    Ballot.CiphertextBallotSelection result = resultO.get();
+    CiphertextBallotSelection result = resultO.get();
 
     // tamper with the encryption
     Ciphertext malformed_message = new Ciphertext(mult_p(result.ciphertext.pad, TWO_MOD_P), result.ciphertext.data);
-    Ballot.CiphertextBallotSelection malformed_encryption = new Ballot.CiphertextBallotSelection(
+    CiphertextBallotSelection malformed_encryption = new CiphertextBallotSelection(
             result.object_id, TWO_MOD_Q, malformed_message,
             result.crypto_hash, result.is_placeholder_selection, result.nonce,
             result.proof, result.extended_data);
@@ -125,7 +126,7 @@ public class TestEncryptProperties extends TestProperties {
             proof.proof_zero_response,
             proof.proof_one_response
     );
-    Ballot.CiphertextBallotSelection malformed_proof = new Ballot.CiphertextBallotSelection(
+    CiphertextBallotSelection malformed_proof = new CiphertextBallotSelection(
             result.object_id, TWO_MOD_Q, malformed_message,
             result.crypto_hash, result.is_placeholder_selection, result.nonce,
             Optional.of(malformed_disjunctive), result.extended_data);
@@ -158,10 +159,10 @@ public class TestEncryptProperties extends TestProperties {
             ImmutableList.of(descp));
 
     ElementModQ hash_context = metadata.crypto_hash();
-    Ballot.PlaintextBallotContest subject = contest_from(metadata);
+    PlaintextBallotContest subject = contest_from(metadata);
 
     assertThat(subject.is_valid(metadata.object_id, metadata.ballot_selections.size(), metadata.number_elected, metadata.votes_allowed)).isTrue();
-    Optional<Ballot.CiphertextBallotContest> result = encrypt_contest(subject, metadata, keypair.public_key, ONE_MOD_Q, nonce, true);
+    Optional<CiphertextBallotContest> result = encrypt_contest(subject, metadata, keypair.public_key, ONE_MOD_Q, nonce, true);
 
     assertThat(result).isPresent();
     assertThat(result.get().is_valid_encryption(hash_context, keypair.public_key, ONE_MOD_Q)).isTrue();
@@ -174,12 +175,12 @@ public class TestEncryptProperties extends TestProperties {
           @ForAll("elements_mod_q_no_zero") ElementModQ nonce_seed,
           @ForAll @IntRange(min = 0, max = 100) int random_seed) {
 
-    Ballot.PlaintextBallotContest subject = ballot_factory.get_random_contest_from(description, false, false);
+    PlaintextBallotContest subject = ballot_factory.get_random_contest_from(description, false, false);
 
     // TODO want ContestDescriptionWithPlaceholders, has ContestDescription
-    Optional<Ballot.CiphertextBallotContest> resultO = encrypt_contest(subject, description, keypair.public_key, ONE_MOD_Q, nonce_seed, true);
+    Optional<CiphertextBallotContest> resultO = encrypt_contest(subject, description, keypair.public_key, ONE_MOD_Q, nonce_seed, true);
     assertThat(resultO).isPresent();
-    Ballot.CiphertextBallotContest result = resultO.get();
+    CiphertextBallotContest result = resultO.get();
 
     assertThat(result.is_valid_encryption(description.crypto_hash(), keypair.public_key, ONE_MOD_Q)).isTrue();
 
@@ -196,12 +197,12 @@ public class TestEncryptProperties extends TestProperties {
           @ForAll("elements_mod_q_no_zero") ElementModQ nonce_seed,
           @ForAll @IntRange(min = 0, max = 100) int random_seed) {
 
-    Ballot.PlaintextBallotContest subject = ballot_factory.get_random_contest_from(description, false, false);
+    PlaintextBallotContest subject = ballot_factory.get_random_contest_from(description, false, false);
 
-    Optional<Ballot.CiphertextBallotContest> resultO = encrypt_contest(
+    Optional<CiphertextBallotContest> resultO = encrypt_contest(
             subject, description, keypair.public_key, ONE_MOD_Q, nonce_seed, true);
     assertThat(resultO).isPresent();
-    Ballot.CiphertextBallotContest result = resultO.get();
+    CiphertextBallotContest result = resultO.get();
     assertThat(result.is_valid_encryption(description.crypto_hash(), keypair.public_key, ONE_MOD_Q)).isTrue();
 
     // tamper with the proof
@@ -211,13 +212,13 @@ public class TestEncryptProperties extends TestProperties {
     ConstantChaumPedersenProof malformed_disjunctive = new ConstantChaumPedersenProof(
             altered_a, proof.data, proof.challenge, proof.response, proof.constant);
 
-    Ballot.CiphertextBallotContest malformed_proof = new Ballot.CiphertextBallotContest(
+    CiphertextBallotContest malformed_proof = new CiphertextBallotContest(
             result.object_id, result.description_hash,
             result.ballot_selections, result.crypto_hash, result.nonce, Optional.of(malformed_disjunctive));
     assertThat(malformed_proof.is_valid_encryption(description.crypto_hash(), keypair.public_key, ONE_MOD_Q)).isFalse();
 
     // remove the proof
-    Ballot.CiphertextBallotContest missing_proof = new Ballot.CiphertextBallotContest(
+    CiphertextBallotContest missing_proof = new CiphertextBallotContest(
             result.object_id, result.description_hash,
             result.ballot_selections, result.crypto_hash, result.nonce, Optional.empty());
     assertThat(missing_proof.is_valid_encryption(description.crypto_hash(), keypair.public_key, ONE_MOD_Q)).isFalse();
@@ -230,32 +231,27 @@ public class TestEncryptProperties extends TestProperties {
           @ForAll("elgamal_keypairs") ElGamal.KeyPair keypair,
           @ForAll("elements_mod_q_no_zero") ElementModQ seed,
           @ForAll @IntRange(min = 1, max = 6) int overvotes) {
-    Ballot.PlaintextBallotContest subject = ballot_factory.get_random_contest_from(description, false, false);
 
+    PlaintextBallotContest subject = ballot_factory.get_random_contest_from(description, false, false);
+    //  highest_sequence = max( *[selection.sequence_order for selection in description.ballot_selections], 1, )
     int highest_sequence = Math.max(1, description.ballot_selections.stream().mapToInt(s -> s.sequence_order).max().orElse(0));
 
+    List<PlaintextBallotSelection> extra_ballot_selections = new ArrayList<>(subject.ballot_selections);
     for (int i = 0; i < overvotes; i++) {
-      Ballot.PlaintextBallotSelection extra = ballot_factory.get_random_selection_from(description.ballot_selections.get(0));
-      extra.sequence_order = highest_sequence + i + 1;
-      subject.ballot_selections.add(extra);
+      // extra = ballot_factory.get_random_selection_from( description.ballot_selections[0], random )
+      PlaintextBallotSelection extra = ballot_factory.get_random_selection_from(description.ballot_selections.get(0));
+      // PlaintextBallotSelection extraModified = new Election.SelectionDescription(extra.object_id, extra.vote, extra.is_placeholder_selection, extra.extended_data);
+      extra.sequence_order = highest_sequence + i + 1 // TODO there is no extra.sequence_order field
+      extra_ballot_selections.add(extraModified);
     }
 
-    Optional<Ballot.CiphertextBallotContest> result = encrypt_contest(subject, description, keypair.public_key, ONE_MOD_Q, seed, true);
+
+    Optional<CiphertextBallotContest> result = encrypt_contest(subject, description, keypair.public_key, ONE_MOD_Q, seed, true);
     assertThat(result).isEmpty();
   } */
 
   @Example
   public void test_encrypt_contest_manually_formed_contest_description_valid_succeeds() {
-    /* (String object_id,
-        String electoral_district_id,
-        int sequence_order,
-        VoteVariationType vote_variation,
-        int number_elected,
-        @Nullable Integer votes_allowed,
-        String name,
-        List<SelectionDescription> ballot_selections,
-        @Nullable InternationalizedText ballot_title,
-        @Nullable InternationalizedText ballot_subtitle */
     Election.ContestDescription description = new Election.ContestDescription(
             "0@A.com-contest",
             "0@A.com-gp-unit",
@@ -278,13 +274,13 @@ public class TestEncryptProperties extends TestProperties {
     KeyPair keypair = elgamal_keypair_from_secret(TWO_MOD_Q).get();
     ElementModQ seed = ONE_MOD_Q;
 
-    Ballot.PlaintextBallotContest data = ballot_factory.get_random_contest_from(description, false, false);
+    PlaintextBallotContest data = ballot_factory.get_random_contest_from(description, false, false);
 
     List<Election.SelectionDescription> placeholders = Election.generate_placeholder_selections_from(description, description.number_elected);
     Election.ContestDescriptionWithPlaceholders description_with_placeholders =
             Election.contest_description_with_placeholders_from(description, placeholders);
 
-    Optional<Ballot.CiphertextBallotContest> subject = encrypt_contest(
+    Optional<CiphertextBallotContest> subject = encrypt_contest(
             data,
             description_with_placeholders,
             keypair.public_key,
@@ -324,13 +320,13 @@ public class TestEncryptProperties extends TestProperties {
     ElementModQ seed = ONE_MOD_Q;
 
     // Bypass checking the validity of the description
-    Ballot.PlaintextBallotContest data = ballot_factory.get_random_contest_from(description, true, false);
+    PlaintextBallotContest data = ballot_factory.get_random_contest_from(description, true, false);
 
     List<Election.SelectionDescription> placeholders = Election.generate_placeholder_selections_from(description, description.number_elected);
     Election.ContestDescriptionWithPlaceholders description_with_placeholders =
             Election.contest_description_with_placeholders_from(description, placeholders);
 
-    Optional<Ballot.CiphertextBallotContest> subject = encrypt_contest(
+    Optional<CiphertextBallotContest> subject = encrypt_contest(
             data,
             description_with_placeholders,
             keypair.public_key,
@@ -350,15 +346,15 @@ public class TestEncryptProperties extends TestProperties {
     ElementModQ nonce_seed = TWO_MOD_Q;
 
     // TODO:Ballot Factory
-    Ballot.PlaintextBallot subject = election_factory.get_fake_ballot(metadata.description, null);
+    PlaintextBallot subject = election_factory.get_fake_ballot(metadata.description, null);
     assertThat(subject.is_valid(metadata.ballot_styles.get(0).object_id)).isTrue();
 
-    Optional<Ballot.CiphertextBallot> resultO = encrypt_ballot(subject, metadata, context, SEED_HASH, Optional.empty(), true);
+    Optional<CiphertextBallot> resultO = encrypt_ballot(subject, metadata, context, SEED_HASH, Optional.empty(), true);
     assertThat(resultO).isPresent();
-    Ballot.CiphertextBallot result = resultO.get();
+    CiphertextBallot result = resultO.get();
 
     Optional<String> tracker_code = result.get_tracker_code();
-    Optional<Ballot.CiphertextBallot> result_from_seed = encrypt_ballot(subject, metadata, context, SEED_HASH, Optional.of(nonce_seed), true);
+    Optional<CiphertextBallot> result_from_seed = encrypt_ballot(subject, metadata, context, SEED_HASH, Optional.of(nonce_seed), true);
 
     assertThat(result.tracking_hash).isPresent();
     assertThat(tracker_code).isPresent();
@@ -384,13 +380,13 @@ public class TestEncryptProperties extends TestProperties {
     Election.InternalElectionDescription metadata = tuple.description;
     Election.CiphertextElectionContext context = tuple.context;
 
-    Ballot.PlaintextBallot data = election_factory.get_fake_ballot(metadata.description, null);
+    PlaintextBallot data = election_factory.get_fake_ballot(metadata.description, null);
     assertThat(data.is_valid(metadata.ballot_styles.get(0).object_id)).isTrue();
 
     EncryptionDevice device = new EncryptionDevice("Location");
     EncryptionMediator subject = new EncryptionMediator(metadata, context, device);
 
-    Optional<Ballot.CiphertextBallot> result = subject.encrypt(data);
+    Optional<CiphertextBallot> result = subject.encrypt(data);
     assertThat(result).isPresent();
     assertThat(result.get().is_valid_encryption(metadata.description_hash, keypair.public_key, context.crypto_extended_base_hash)).isTrue();
   }
@@ -403,13 +399,13 @@ public class TestEncryptProperties extends TestProperties {
     Election.InternalElectionDescription metadata = tuple.description;
     Election.CiphertextElectionContext context = tuple.context;
 
-    Ballot.PlaintextBallot data = ballot_factory.get_simple_ballot_from_file();
+    PlaintextBallot data = ballot_factory.get_simple_ballot_from_file();
     assertThat(data.is_valid(metadata.ballot_styles.get(0).object_id)).isTrue();
 
     EncryptionDevice device = new EncryptionDevice("Location");
     EncryptionMediator subject = new EncryptionMediator(metadata, context, device);
 
-    Optional<Ballot.CiphertextBallot> result = subject.encrypt(data);
+    Optional<CiphertextBallot> result = subject.encrypt(data);
     assertThat(result).isPresent();
     assertThat(data.object_id).isEqualTo(result.get().object_id);
     assertThat(result.get().is_valid_encryption(metadata.description_hash, keypair.public_key, context.crypto_extended_base_hash)).isTrue();
@@ -427,18 +423,18 @@ public class TestEncryptProperties extends TestProperties {
      Election.InternalElectionDescription metadata = tuple.description;
      Election.CiphertextElectionContext context = tuple.context;
 
-     Ballot.PlaintextBallot data = ballot_factory.get_simple_ballot_from_file();
+     PlaintextBallot data = ballot_factory.get_simple_ballot_from_file();
      assertThat(data.is_valid(metadata.ballot_styles.get(0).object_id)).isTrue();
 
      EncryptionDevice device = new EncryptionDevice("Location");
      EncryptionMediator subject = new EncryptionMediator(metadata, context, device);
 
-     Optional<Ballot.CiphertextBallot> resultO = subject.encrypt(data);
+     Optional<CiphertextBallot> resultO = subject.encrypt(data);
      assertThat(resultO).isPresent();
-     Ballot.CiphertextBallot result = resultO.get();
+     CiphertextBallot result = resultO.get();
      assertThat(result.is_valid_encryption(metadata.description_hash, keypair.public_key, context.crypto_extended_base_hash)).isTrue();
 
-     for (Ballot.CiphertextBallotContest contest : result.contests) {
+     for (CiphertextBallotContest contest : result.contests) {
        // Find the contest description
        Election.ContestDescriptionWithPlaceholders contest_description =
                metadata.contests.stream().filter(c -> c.object_id.equals(contest.object_id)).findFirst().orElseThrow(() -> new RuntimeException());
@@ -465,7 +461,7 @@ public class TestEncryptProperties extends TestProperties {
                        keypair.public_key,
                        context.crypto_extended_base_hash)).isTrue();
 
-       for (Ballot.CiphertextBallotSelection selection : contest.ballot_selections) {
+       for (CiphertextBallotSelection selection : contest.ballot_selections) {
          // Since we know the nonce, we can decrypt the plaintext
          BigInteger representation = selection.ciphertext.decrypt_known_nonce(keypair.public_key, selection.nonce.get());
 

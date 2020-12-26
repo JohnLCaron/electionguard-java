@@ -50,11 +50,11 @@ class Ballot {
     final boolean is_placeholder_selection; // default false
     final Optional<ExtendedData> extended_data; // default None
 
-    PlaintextBallotSelection(String objectId, String vote, boolean is_placeholder_selection, Optional<ExtendedData> extendedData) {
-      super(objectId);
+    PlaintextBallotSelection(String object_id, String vote, boolean is_placeholder_selection, Optional<ExtendedData> extended_data) {
+      super(object_id);
       this.vote = vote;
       this.is_placeholder_selection = is_placeholder_selection;
-      this.extended_data = extendedData;
+      this.extended_data = extended_data;
     }
 
     boolean is_valid(String expected_object_id) {
