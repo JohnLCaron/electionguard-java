@@ -6,6 +6,7 @@ import net.jqwik.api.Property;
 import net.jqwik.api.ShrinkingMode;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,7 +18,7 @@ public class TestBallotProperties extends TestProperties {
   static BallotFactory factory = new BallotFactory();
 
   @Example
-  public void test_ballot_is_valid() {
+  public void test_ballot_is_valid() throws IOException {
     Ballot.PlaintextBallot subject = factory.get_simple_ballot_from_file();
 
     assertThat(subject.object_id).isNotNull();
@@ -30,7 +31,7 @@ public class TestBallotProperties extends TestProperties {
   }
 
   @Example
-  public void test_ballots_are_valid() {
+  public void test_ballots_are_valid() throws IOException {
     List<PlaintextBallot> ballots = factory.get_simple_ballots_from_file();
     for (PlaintextBallot subject : ballots) {
       assertThat(subject.object_id).isNotNull();

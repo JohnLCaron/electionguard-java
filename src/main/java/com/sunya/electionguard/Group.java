@@ -144,11 +144,11 @@ public class Group {
 
   // Common constants
   static final ElementModQ ZERO_MOD_Q = new ElementModQ(BigInteger.ZERO);
-  static final ElementModQ ONE_MOD_Q = new ElementModQ(BigInteger.ONE);
+  public static final ElementModQ ONE_MOD_Q = new ElementModQ(BigInteger.ONE);
   static final ElementModQ TWO_MOD_Q = new ElementModQ(BigInteger.TWO);
 
   static final ElementModP ZERO_MOD_P = new ElementModP(BigInteger.ZERO);
-  static final ElementModP ONE_MOD_P = new ElementModP(BigInteger.ONE);
+  public static final ElementModP ONE_MOD_P = new ElementModP(BigInteger.ONE);
   static final ElementModP TWO_MOD_P = new ElementModP(BigInteger.TWO);
 
   /**
@@ -199,7 +199,7 @@ public class Group {
     return new ElementModP(biggy);
   }
 
-  static ElementModQ int_to_q_unchecked(BigInteger biggy) {
+  public static ElementModQ int_to_q_unchecked(BigInteger biggy) {
     return new ElementModQ(biggy);
   }
 

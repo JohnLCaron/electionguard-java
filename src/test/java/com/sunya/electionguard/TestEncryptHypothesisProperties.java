@@ -143,7 +143,7 @@ public class TestEncryptHypothesisProperties extends TestProperties {
           if (!tally.containsKey(desc_id)) {
             tally.put(desc_id, encrypted_zero);
           }
-          tally.put(desc_id, ElGamal.elgamal_add(tally.get(desc_id), selection.ciphertext));
+          tally.put(desc_id, ElGamal.elgamal_add(tally.get(desc_id), selection.ciphertext()));
         }
       }
     }

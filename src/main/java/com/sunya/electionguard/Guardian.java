@@ -48,7 +48,7 @@ public class Guardian extends ElectionObjectBase {
    * :param nonce_seed: an optional `ElementModQ` value that can be used to generate the `ElectionKeyPair`.
    * It is recommended to only use this field for testing.
    */
-  Guardian(String id,
+  public Guardian(String id,
            int sequence_order,
            int number_of_guardians,
            int quorum,
@@ -156,6 +156,8 @@ public class Guardian extends ElectionObjectBase {
     return this._guardian_auxiliary_public_keys.size() == this.ceremony_details.number_of_guardians();
   }
 
+  // guardian_auxiliary_public_keys() not used
+
   /**         Get a read-only view of the Guardian Election Public Keys shared with this Guardian. */
   Map<String, ElectionPublicKey> guardian_election_public_keys() {
           // TODO make readonly
@@ -167,6 +169,11 @@ public class Guardian extends ElectionObjectBase {
    */
   Auxiliary.PublicKey share_auxiliary_public_key() {
     return new Auxiliary.PublicKey(this.object_id, this.sequence_order, this._auxiliary_keys.public_key);
+  }
+
+  /**         Share coefficient validation set to be used for validating the coefficients post election. */
+  CoefficientValidationSet share_coefficient_validation_set() {
+    return KeyCeremony.get_coefficient_validation_set(this.object_id, this._election_keys.polynomial());
   }
 
   /**

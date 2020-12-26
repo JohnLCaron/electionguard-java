@@ -26,15 +26,15 @@ class DecryptWithShares {
   static Optional<Tally.PlaintextTallySelection> decrypt_selection_with_decryption_shares(
           Ballot.CiphertextSelection selection,
           // shares: Dict[ GUARDIAN_ID, Tuple[ELECTION_PUBLIC_KEY, CiphertextDecryptionSelection] ],
-          Map<String, Tuple2> shares,
+          Map<String, KeyAndSelection> shares,
           Group.ElementModQ extended_base_hash,
           boolean suppress_validity_check) {
 
     if (!suppress_validity_check) {
       // Verify that all of the shares are computed correctly
-      for (Tuple2 tuple : shares.values()) {
+      for (KeyAndSelection tuple : shares.values()) {
         // verify we have a proof or recovered parts
-        if (!tuple.decryption.is_valid(selection.ciphertext, tuple.public_key, extended_base_hash)) {
+        if (!tuple.decryption.is_valid(selection.ciphertext(), tuple.public_key, extended_base_hash)) {
           return Optional.empty();
         }
       }
@@ -46,7 +46,7 @@ class DecryptWithShares {
     ElementModP all_shares_product_M = new ElementModP(mult_p(decryption_shares));
 
     // Calculate 𝑀 = 𝐵⁄(∏𝑀𝑖)mod 𝑝.
-    Group.ElementModP M = div_p(selection.ciphertext.data, all_shares_product_M);
+    Group.ElementModP M = div_p(selection.ciphertext().data, all_shares_product_M);
     BigInteger dlogM = Dlog.discrete_log(M);
 
     // [share for (guardian_id, (public_key, share))in shares.items()],
@@ -55,7 +55,7 @@ class DecryptWithShares {
             selection.object_id,
             dlogM,
             M,
-            selection.ciphertext,
+            selection.ciphertext(),
             selections
           ));
   }
@@ -67,7 +67,6 @@ class DecryptWithShares {
    *     :param shares: a collection of `TallyDecryptionShare` used to decrypt
    *     :param extended_base_hash: the extended base hash code (𝑄') for the election
    *     :return: a collection of `PlaintextTallyContest` or `None` if there is an error
-   * @return
    */
   static Optional<Map<String, Tally.PlaintextTallyContest>> decrypt_tally_contests_with_decryption_shares(
           Map<String, CiphertextTallyContest> tally,
@@ -81,7 +80,7 @@ class DecryptWithShares {
       HashMap<String, PlaintextTallySelection> selections = new HashMap<>();
 
       for (CiphertextTallySelection selection : contest.tally_selections.values()) {
-        Map<String, Tuple2> tally_shares = get_tally_shares_for_selection(selection.object_id, shares);
+        Map<String, KeyAndSelection> tally_shares = get_tally_shares_for_selection(selection.object_id, shares);
         Optional<Tally.PlaintextTallySelection> plaintext_selectionO = decrypt_selection_with_decryption_shares(
                 selection, tally_shares, extended_base_hash, false);
         if (plaintext_selectionO.isEmpty()) {
@@ -167,7 +166,7 @@ class DecryptWithShares {
       HashMap<String, PlaintextTallySelection> selections = new HashMap<>();
 
       for (Ballot.CiphertextBallotSelection selection : contest.ballot_selections) {
-        Map<String, Tuple2> selection_shares = get_ballot_shares_for_selection(selection.object_id, shares);
+        Map<String, KeyAndSelection> selection_shares = get_ballot_shares_for_selection(selection.object_id, shares);
         Optional<Tally.PlaintextTallySelection> plaintext_selectionO = decrypt_selection_with_decryption_shares(
                 selection, selection_shares, extended_base_hash, false);
 

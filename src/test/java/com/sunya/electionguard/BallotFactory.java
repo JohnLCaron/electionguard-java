@@ -1,17 +1,12 @@
 package com.sunya.electionguard;
 
-import com.google.common.base.Strings;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import com.sunya.electionguard.publish.PlaintextBallotFromJson;
 
 import javax.annotation.Nullable;
 import java.io.*;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static com.google.common.truth.Truth.assertWithMessage;
 import static com.sunya.electionguard.Ballot.*;
@@ -109,86 +104,22 @@ public class BallotFactory {
   //////////////////////////////////////////////////////////////////////////////////////
 
   @Nullable
-  PlaintextBallot get_simple_ballot_from_file() {
+  List<PlaintextBallot> get_simple_ballots_from_file() throws IOException {
+    String current = new java.io.File("./src/test/resources/").getCanonicalPath();
+    PlaintextBallotFromJson builder = new PlaintextBallotFromJson(current + this.simple_ballots_filename);
+    return builder.get_ballots_from_file();
+  }
+
+  @Nullable
+  PlaintextBallot get_simple_ballot_from_file() throws IOException {
     return this._get_ballot_from_file(this.simple_ballot_filename);
   }
 
   @Nullable
-  private PlaintextBallot _get_ballot_from_file(String filename) {
-    try {
-      String current = new java.io.File("./src/test/resources/").getCanonicalPath();
-      InputStream is = new FileInputStream((current + "/" + filename));
-      Reader reader = new InputStreamReader(is);
-      Gson gson = new Gson(); // default exclude nulls
-      PlaintextBallotPojo pojo = gson.fromJson(reader, PlaintextBallotPojo.class);
-      return convertPlaintextBallot(pojo);
-
-    } catch (IOException ioe) {
-      throw new RuntimeException(ioe);
-    }
-  }
-
-  @Nullable
-  List<PlaintextBallot> get_simple_ballots_from_file() {
-    return this._get_ballots_from_file(this.simple_ballots_filename);
-  }
-
-  @Nullable
-  private List<PlaintextBallot> _get_ballots_from_file(String filename) {
-    try {
-      String current = new java.io.File("./src/test/resources/").getCanonicalPath();
-      InputStream is = new FileInputStream((current + "/" + filename));
-      Reader reader = new InputStreamReader(is);
-      Gson gson = new Gson(); // default exclude nulls
-      Type listType = new TypeToken<ArrayList<PlaintextBallotPojo>>(){}.getType();
-
-      List<PlaintextBallotPojo> pojo = gson.fromJson(reader, listType);
-      return convertList(pojo, this::convertPlaintextBallot);
-
-    } catch (IOException ioe) {
-      throw new RuntimeException(ioe);
-    }
-  }
-
-  @Nullable
-  <T, U> List<U> convertList(@Nullable List<T> from, Function<T, U> converter) {
-    return from == null ? null : from.stream().map(converter::apply).collect(Collectors.toList());
-  }
-
-  @Nullable
-  private PlaintextBallot convertPlaintextBallot(@Nullable PlaintextBallotPojo pojo) {
-    if (pojo == null) {
-      return null;
-    }
-    return new PlaintextBallot(
-            Strings.nullToEmpty(pojo.object_id),
-            Strings.nullToEmpty(pojo.ballot_style),
-            convertList(pojo.contests, this::convertPlaintextBallotContest));
-  }
-
-  @Nullable
-  private PlaintextBallotContest convertPlaintextBallotContest(@Nullable PlaintextBallotPojo.PlaintextBallotContest pojo) {
-    if (pojo == null) {
-      return null;
-    }
-    return new PlaintextBallotContest(
-            Strings.nullToEmpty(pojo.object_id),
-            convertList(pojo.ballot_selections, this::convertPlaintextBallotSelection));
-  }
-
-  @Nullable
-  private PlaintextBallotSelection convertPlaintextBallotSelection(@Nullable PlaintextBallotPojo.PlaintextBallotSelection pojo) {
-    if (pojo == null) {
-      return null;
-    }
-
-    return new PlaintextBallotSelection(
-            Strings.nullToEmpty(pojo.object_id),
-            Strings.nullToEmpty(pojo.vote),
-            false,
-            (pojo.extra_data == null) ?
-                    Optional.empty() :
-                    Optional.of(new ExtendedData(pojo.extra_data, pojo.extra_data.length())));
+  private PlaintextBallot _get_ballot_from_file(String filename) throws IOException {
+    String current = new java.io.File("./src/test/resources/").getCanonicalPath();
+    PlaintextBallotFromJson builder = new PlaintextBallotFromJson(current + filename);
+    return builder.get_ballot_from_file();
   }
 
 }

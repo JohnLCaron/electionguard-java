@@ -85,9 +85,88 @@ public class Decryption {
             spoiled_ballots.get()));
   }
 
-  /**
-   * Compute the decryption for all spoiled ballots in the Ciphertext Tally.
-   */
+  /** Compute the decryption for all of the cast contests in the Ciphertext Tally. */
+  static Optional<Map<String, CiphertextDecryptionContest>> compute_decryption_share_for_cast_contests(
+          Guardian guardian,
+          CiphertextTally tally,
+          CiphertextElectionContext context) {
+
+    Map<String, CiphertextDecryptionContest> contests = new HashMap<>();
+
+    for (CiphertextTallyContest contest : tally.cast.values()) {
+      Map<String, CiphertextDecryptionSelection> selections = new HashMap<>();
+
+      // [(guardian, selection, context) for (_, selection) in contest.tally_selections.items()],
+      List<Callable<Optional<CiphertextDecryptionSelection>>> tasks =
+              contest.tally_selections.values().stream().map(selection ->
+                      new RunComputeDecryptionShareForSelection(guardian, selection, context)).collect(Collectors.toList());
+
+      Scheduler<Optional<CiphertextDecryptionSelection>> scheduler = new Scheduler<>();
+      List<Optional<CiphertextDecryptionSelection>> selection_decryptions = scheduler.schedule(tasks, true);
+
+      // verify the decryptions are received and add them to the collection
+      for (Optional<CiphertextDecryptionSelection> decryption : selection_decryptions) {
+        if (decryption.isEmpty()) {
+          logger.atInfo().log("could not compute share for guardian %s contest %s",
+                  guardian.object_id, contest.object_id);
+          return Optional.empty();
+        }
+        selections.put(decryption.get().object_id(), decryption.get());
+      }
+
+      contests.put(contest.object_id, CiphertextDecryptionContest.create(
+              contest.object_id, guardian.object_id, contest.description_hash, selections));
+    }
+
+    return Optional.of(contests);
+  }
+
+  /** Compute the compensated decryption for all of the cast contests in the Ciphertext Tally. */
+  static Optional<Map<String, CiphertextCompensatedDecryptionContest>> compute_compensated_decryption_share_for_cast_contests(
+          Guardian guardian,
+          String missing_guardian_id,
+          CiphertextTally tally,
+          CiphertextElectionContext context,
+          Auxiliary.Decryptor decryptor) {
+
+    Map<String, CiphertextCompensatedDecryptionContest> contests = new HashMap<>();
+
+    for (CiphertextTallyContest contest : tally.cast.values()) {
+      Map<String, CiphertextCompensatedDecryptionSelection> selections = new HashMap<>();
+
+      // [ (guardian, missing_guardian_id, selection, context, decrypt)
+      //          for (_, selection) in contest.tally_selections.items() ],
+      List<Callable<Optional<CiphertextCompensatedDecryptionSelection>>> tasks =
+              contest.tally_selections.values().stream()
+                      .map(selection -> new RunComputeCompensatedDecryptionShareForSelection(
+                              guardian, missing_guardian_id, selection, context, decryptor))
+                      .collect(Collectors.toList());
+
+      Scheduler<Optional<CiphertextCompensatedDecryptionSelection>> scheduler = new Scheduler<>();
+      List<Optional<CiphertextCompensatedDecryptionSelection>>
+              selection_decryptions = scheduler.schedule(tasks, true);
+
+
+      // verify the decryptions are received and add them to the collection
+      for (Optional<CiphertextCompensatedDecryptionSelection> decryption : selection_decryptions) {
+        if (decryption.isEmpty()) {
+          logger.atInfo().log("could not compute share for guardian %s contest %s", guardian.object_id, contest.object_id);
+          return Optional.empty();
+        }
+        selections.put(decryption.get().object_id(), decryption.get());
+      }
+
+      contests.put(contest.object_id, CiphertextCompensatedDecryptionContest.create(
+              contest.object_id,
+              guardian.object_id,
+              missing_guardian_id,
+              contest.description_hash,
+              selections));
+    }
+    return Optional.of(contests);
+  }
+
+  /** Compute the decryption for all spoiled ballots in the Ciphertext Tally. */
   static Optional<Map<String, DecryptionShare.CompensatedBallotDecryptionShare>> compute_compensated_decryption_share_for_spoiled_ballots(
           Guardian guardian,
           String missing_guardian_id,
@@ -163,95 +242,7 @@ public class Decryption {
             contests));
   }
 
-
-  /**
-   * Compute the decryption for all of the cast contests in the Ciphertext Tally.
-   */
-  static Optional<Map<String, CiphertextDecryptionContest>> compute_decryption_share_for_cast_contests(
-          Guardian guardian,
-          CiphertextTally tally,
-          CiphertextElectionContext context) {
-
-    Map<String, CiphertextDecryptionContest> contests = new HashMap<>();
-
-    for (CiphertextTallyContest contest : tally.cast.values()) {
-      Map<String, CiphertextDecryptionSelection> selections = new HashMap<>();
-
-      // [(guardian, selection, context) for (_, selection) in contest.tally_selections.items()],
-      List<Callable<Optional<CiphertextDecryptionSelection>>> tasks =
-              contest.tally_selections.values().stream().map(selection ->
-                      new RunComputeDecryptionShareForSelection(guardian, selection, context)).collect(Collectors.toList());
-
-      Scheduler<Optional<CiphertextDecryptionSelection>> scheduler = new Scheduler<>();
-      List<Optional<CiphertextDecryptionSelection>> selection_decryptions = scheduler.schedule(tasks, true);
-
-      // verify the decryptions are received and add them to the collection
-      for (Optional<CiphertextDecryptionSelection> decryption : selection_decryptions) {
-        if (decryption.isEmpty()) {
-          logger.atInfo().log("could not compute share for guardian %s contest %s",
-                  guardian.object_id, contest.object_id);
-          return Optional.empty();
-        }
-        selections.put(decryption.get().object_id(), decryption.get());
-      }
-
-      contests.put(contest.object_id, CiphertextDecryptionContest.create(
-              contest.object_id, guardian.object_id, contest.description_hash, selections));
-    }
-
-    return Optional.of(contests);
-  }
-
-  /**
-   * Compute the compensated decryption for all of the cast contests in the Ciphertext Tally.
-   */
-  static Optional<Map<String, CiphertextCompensatedDecryptionContest>> compute_compensated_decryption_share_for_cast_contests(
-          Guardian guardian,
-          String missing_guardian_id,
-          CiphertextTally tally,
-          CiphertextElectionContext context,
-          Auxiliary.Decryptor decryptor) {
-
-    Map<String, CiphertextCompensatedDecryptionContest> contests = new HashMap<>();
-
-    for (CiphertextTallyContest contest : tally.cast.values()) {
-      Map<String, CiphertextCompensatedDecryptionSelection> selections = new HashMap<>();
-
-      // [ (guardian, missing_guardian_id, selection, context, decrypt)
-      //          for (_, selection) in contest.tally_selections.items() ],
-      List<Callable<Optional<CiphertextCompensatedDecryptionSelection>>> tasks =
-              contest.tally_selections.values().stream()
-                      .map(selection -> new RunComputeCompensatedDecryptionShareForSelection(
-                              guardian, missing_guardian_id, selection, context, decryptor))
-                      .collect(Collectors.toList());
-
-      Scheduler<Optional<CiphertextCompensatedDecryptionSelection>> scheduler = new Scheduler<>();
-      List<Optional<CiphertextCompensatedDecryptionSelection>>
-              selection_decryptions = scheduler.schedule(tasks, true);
-
-
-      // verify the decryptions are received and add them to the collection
-      for (Optional<CiphertextCompensatedDecryptionSelection> decryption : selection_decryptions) {
-        if (decryption.isEmpty()) {
-          logger.atInfo().log("could not compute share for guardian %s contest %s", guardian.object_id, contest.object_id);
-          return Optional.empty();
-        }
-        selections.put(decryption.get().object_id(), decryption.get());
-      }
-
-      contests.put(contest.object_id, CiphertextCompensatedDecryptionContest.create(
-              contest.object_id,
-              guardian.object_id,
-              missing_guardian_id,
-              contest.description_hash,
-              selections));
-    }
-    return Optional.of(contests);
-  }
-
-  /**
-   * Compute the decryption for all spoiled ballots in the Ciphertext Tally.
-   */
+  /** Compute the decryption for all spoiled ballots in the Ciphertext Tally. */
   static Optional<Map<String, BallotDecryptionShare>> compute_decryption_share_for_spoiled_ballots(
           Guardian guardian,
           CiphertextTally tally,
@@ -345,9 +336,9 @@ public class Decryption {
           Ballot.CiphertextSelection selection,
           CiphertextElectionContext context) {
 
-    Guardian.Tuple tuple = guardian.partially_decrypt(selection.ciphertext, context.crypto_extended_base_hash, null);
+    Guardian.Tuple tuple = guardian.partially_decrypt(selection.ciphertext(), context.crypto_extended_base_hash, null);
 
-    if (tuple.proof.is_valid(selection.ciphertext, guardian.share_election_public_key().key(),
+    if (tuple.proof.is_valid(selection.ciphertext(), guardian.share_election_public_key().key(),
             tuple.decryption, context.crypto_extended_base_hash)) {
       return Optional.of(DecryptionShare.create_ciphertext_decryption_selection(
               selection.object_id,
@@ -411,7 +402,7 @@ public class Decryption {
 
     Optional<Guardian.Tuple> compensated = available_guardian.compensate_decrypt(
             missing_guardian_id,
-            selection.ciphertext,
+            selection.ciphertext(),
             context.crypto_extended_base_hash,
             null,
             decryptor);
@@ -430,7 +421,7 @@ public class Decryption {
     }
 
     if (tuple.proof.is_valid(
-            selection.ciphertext,
+            selection.ciphertext(),
             recovery_public_key.get(),
             tuple.decryption,
             context.crypto_extended_base_hash)) {

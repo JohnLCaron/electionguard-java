@@ -3,6 +3,7 @@ package com.sunya.electionguard;
 import com.google.common.base.Preconditions;
 import com.google.common.flogger.FluentLogger;
 
+import javax.annotation.concurrent.Immutable;
 import java.math.BigInteger;
 import java.util.Collection;
 import java.util.Optional;
@@ -16,6 +17,7 @@ class ElGamal {
   /**
    * A tuple of an ElGamal secret key and public key.
    */
+  @Immutable
   static class KeyPair {
     final ElementModQ secret_key;
     final ElementModP public_key;
@@ -31,6 +33,7 @@ class ElGamal {
    * homomorphic addition). Create one with `elgamal_encrypt`. Add them with `elgamal_add`.
    * Decrypt using one of the supplied instance methods.
    */
+  @Immutable
   static class Ciphertext {
     /** pad or alpha. */
     final ElementModP pad;
@@ -46,7 +49,7 @@ class ElGamal {
      * Decrypts an ElGamal ciphertext with a "known product" (the blinding factor used in the encryption).
      *
      * @param product: The known product (blinding factor).
-     * @return: An exponentially encoded plaintext message.
+     * @return An exponentially encoded plaintext message.
      */
     BigInteger decrypt_known_product(ElementModP product) {
       return discrete_log(Group.mult_p(this.data, Group.mult_inv_p(product)));
@@ -56,7 +59,7 @@ class ElGamal {
      * Decrypt an ElGamal ciphertext using a known ElGamal secret key.
      *
      * @param secretKey : The corresponding ElGamal secret key.
-     * @return: An exponentially encoded plaintext message.
+     * @return An exponentially encoded plaintext message.
      */
     BigInteger decrypt(ElementModQ secretKey) {
       return decrypt_known_product(Group.pow_p(this.pad, secretKey));
@@ -67,7 +70,7 @@ class ElGamal {
      *
      * @param publicKey : The corresponding ElGamal public key.
      * @param nonce :     The secret nonce used to create the ciphertext.
-     * @return: An exponentially encoded plaintext message.
+     * @return An exponentially encoded plaintext message.
      */
     BigInteger decrypt_known_nonce(ElementModP publicKey, ElementModQ nonce) {
       return decrypt_known_product(Group.pow_p(publicKey, nonce));
@@ -79,7 +82,7 @@ class ElGamal {
      * 𝑀_i = 𝐴^𝑠𝑖 mod 𝑝 in the spec
      *
      * @param secretKey: The corresponding ElGamal secret key.
-     * @return: An exponentially encoded plaintext message.
+     * @return An exponentially encoded plaintext message.
      */
     ElementModP partial_decrypt(ElementModQ secretKey) {
       return Group.pow_p(this.pad, secretKey);
@@ -120,7 +123,7 @@ class ElGamal {
    *     Combine multiple elgamal public keys into a joint key-> ElementModP:
    *
    *     @param keys: list of public elgamal keys
-   *     @return: joint key of elgamal keys
+   *     @return joint key of elgamal keys
    */
   static ElementModP elgamal_combine_public_keys(Collection<ElementModP> keys) {
                   return Group.mult_p(keys);

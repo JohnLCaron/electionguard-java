@@ -1,4 +1,4 @@
-package com.sunya.electionguard;
+package com.sunya.electionguard.publish;
 
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
@@ -14,21 +14,21 @@ import java.util.stream.Collectors;
 
 import static com.sunya.electionguard.Election.*;
 
-public class ElectionBuilderFromJson {
-
+public class ElectionDescriptionFromJson {
   private final String filename;
-  ElectionBuilderFromJson(String filename) {
+
+  public ElectionDescriptionFromJson(String filename) {
     this.filename = filename;
   }
 
-  ElectionDescription build() throws IOException {
+  public ElectionDescription build() throws IOException {
     String current = new java.io.File("./src/test/resources/").getCanonicalPath();
     System.out.printf("Current '%s'%n", current);
 
     InputStream is = new FileInputStream((current + "/" + filename));
     Reader reader = new InputStreamReader(is);
     Gson gson = new Gson(); // default exclude nulls
-    ElectionBuilderPojo pojo = gson.fromJson(reader, ElectionBuilderPojo.class);
+    ElectionDescriptionPojo pojo = gson.fromJson(reader, ElectionDescriptionPojo.class);
     return convert(pojo);
   }
 
@@ -37,7 +37,7 @@ public class ElectionBuilderFromJson {
     return from == null ? null : from.stream().map(converter::apply).collect(Collectors.toList());
   }
 
-  ElectionDescription convert(ElectionBuilderPojo pojo) {
+  ElectionDescription convert(ElectionDescriptionPojo pojo) {
     // TODO going to throw an Exception if these arent present or invalid format
     DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
     LocalDate startLocalDate = formatter.parse(pojo.start_date, TemporalQueries.localDate());
@@ -59,7 +59,7 @@ public class ElectionBuilderFromJson {
     }
 
   @Nullable
-  AnnotatedString convertAnnotatedString(@Nullable ElectionBuilderPojo.AnnotatedString pojo) {
+  AnnotatedString convertAnnotatedString(@Nullable ElectionDescriptionPojo.AnnotatedString pojo) {
     if (pojo == null) {
       return null;
     }
@@ -70,7 +70,7 @@ public class ElectionBuilderFromJson {
 
 
   @Nullable
-  BallotStyle convertBallotStyle(@Nullable ElectionBuilderPojo.BallotStyle pojo) {
+  BallotStyle convertBallotStyle(@Nullable ElectionDescriptionPojo.BallotStyle pojo) {
     if (pojo == null) {
       return null;
     }
@@ -81,7 +81,7 @@ public class ElectionBuilderFromJson {
   }
 
   @Nullable
-  Candidate convertCandidate(@Nullable ElectionBuilderPojo.Candidate pojo) {
+  Candidate convertCandidate(@Nullable ElectionDescriptionPojo.Candidate pojo) {
     if (pojo == null) {
       return null;
     }
@@ -90,7 +90,7 @@ public class ElectionBuilderFromJson {
   }
 
   @Nullable
-  ContactInformation convertContactInformation(@Nullable ElectionBuilderPojo.ContactInformation pojo) {
+  ContactInformation convertContactInformation(@Nullable ElectionDescriptionPojo.ContactInformation pojo) {
     if (pojo == null) {
       return null;
     }
@@ -102,7 +102,7 @@ public class ElectionBuilderFromJson {
   }
 
   @Nullable
-  ContestDescription convertContestDescription(@Nullable ElectionBuilderPojo.ContestDescription pojo) {
+  ContestDescription convertContestDescription(@Nullable ElectionDescriptionPojo.ContestDescription pojo) {
     if (pojo == null) {
       return null;
     }
@@ -120,7 +120,7 @@ public class ElectionBuilderFromJson {
   }
 
   @Nullable
-  GeopoliticalUnit convertGeopoliticalUnit(@Nullable ElectionBuilderPojo.GeopoliticalUnit pojo) {
+  GeopoliticalUnit convertGeopoliticalUnit(@Nullable ElectionDescriptionPojo.GeopoliticalUnit pojo) {
     if (pojo == null) {
       return null;
     }
@@ -132,7 +132,7 @@ public class ElectionBuilderFromJson {
   }
 
   @Nullable
-  InternationalizedText convertInternationalizedText(@Nullable ElectionBuilderPojo.InternationalizedText pojo) {
+  InternationalizedText convertInternationalizedText(@Nullable ElectionDescriptionPojo.InternationalizedText pojo) {
     if (pojo == null) {
       return null;
     }
@@ -140,7 +140,7 @@ public class ElectionBuilderFromJson {
   }
 
   @Nullable
-  Language convertLanguage(@Nullable ElectionBuilderPojo.Language pojo) {
+  Language convertLanguage(@Nullable ElectionDescriptionPojo.Language pojo) {
     if (pojo == null) {
       return null;
     }
@@ -150,7 +150,7 @@ public class ElectionBuilderFromJson {
   }
 
   @Nullable
-  Party convertParty(@Nullable ElectionBuilderPojo.Party pojo) {
+  Party convertParty(@Nullable ElectionDescriptionPojo.Party pojo) {
     if (pojo == null) {
       return null;
     }
@@ -163,7 +163,7 @@ public class ElectionBuilderFromJson {
   }
 
   @Nullable
-  SelectionDescription convertSelectionDescription(@Nullable ElectionBuilderPojo.SelectionDescription pojo) {
+  SelectionDescription convertSelectionDescription(@Nullable ElectionDescriptionPojo.SelectionDescription pojo) {
     if (pojo == null) {
       return null;
     }

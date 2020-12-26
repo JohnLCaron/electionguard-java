@@ -133,8 +133,8 @@ public class KeyCeremony {
    * Set of validation pieces for election key coefficients.
    */
   @AutoValue
-  abstract static class CoefficientValidationSet {
-    abstract String owner_id();
+  public abstract static class CoefficientValidationSet {
+    public abstract String owner_id();
 
     abstract List<ElementModP> coefficient_commitments();
 
@@ -238,6 +238,13 @@ public class KeyCeremony {
             polynomial.coefficient_commitments,
             polynomial.coefficient_proofs));
   }
+
+  /** Get coefficient validation set from polynomial. */
+   static CoefficientValidationSet get_coefficient_validation_set(
+          String owner_id,
+          ElectionPolynomial polynomial) {
+     return CoefficientValidationSet.create(owner_id, polynomial.coefficient_commitments, polynomial.coefficient_proofs);
+   }
 
   /**
    * Verify election partial key backup contain point on owners polynomial

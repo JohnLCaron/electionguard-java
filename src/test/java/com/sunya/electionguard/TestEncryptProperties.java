@@ -44,7 +44,7 @@ public class TestEncryptProperties extends TestProperties {
 
     // Assert
     assertThat(result).isPresent();
-    assertThat(result.get().ciphertext).isNotNull();
+    assertThat(result.get().ciphertext()).isNotNull();
     assertThat(result.get().is_valid_encryption(hash_context, keypair.public_key, ONE_MOD_Q)).isTrue();
   }
 
@@ -64,14 +64,14 @@ public class TestEncryptProperties extends TestProperties {
     // tamper with the description_hash
     // CiphertextBallotSelection malformed_description_hash = result.toBuilder().setDescriptionHash(TWO_MOD_Q).build();
     CiphertextBallotSelection malformed_description_hash = new CiphertextBallotSelection(
-            result.object_id, TWO_MOD_Q, result.ciphertext,
+            result.object_id, TWO_MOD_Q, result.ciphertext(),
             result.crypto_hash, result.is_placeholder_selection, result.nonce,
             result.proof, result.extended_data);
 
     // remove the proof
     // CiphertextBallotSelection missing_proof = result.toBuilder().clearProof().build();
     CiphertextBallotSelection missing_proof = new CiphertextBallotSelection(
-            result.object_id, result.description_hash, result.ciphertext,
+            result.object_id, result.description_hash, result.ciphertext(),
             result.crypto_hash, result.is_placeholder_selection, result.nonce,
             Optional.empty(), result.extended_data);
 
@@ -88,7 +88,7 @@ public class TestEncryptProperties extends TestProperties {
 
     Optional<CiphertextBallotSelection> result = encrypt_selection(subject, description, keypair.public_key, ONE_MOD_Q, seed, false, true);
     assertThat(result).isPresent();
-    assertThat(result.get().ciphertext).isNotNull();
+    assertThat(result.get().ciphertext()).isNotNull();
     assertThat(result.get().is_valid_encryption(description.crypto_hash(), keypair.public_key, ONE_MOD_Q)).isTrue();
   }
 
@@ -106,7 +106,7 @@ public class TestEncryptProperties extends TestProperties {
     CiphertextBallotSelection result = resultO.get();
 
     // tamper with the encryption
-    Ciphertext malformed_message = new Ciphertext(mult_p(result.ciphertext.pad, TWO_MOD_P), result.ciphertext.data);
+    Ciphertext malformed_message = new Ciphertext(mult_p(result.ciphertext().pad, TWO_MOD_P), result.ciphertext().data);
     CiphertextBallotSelection malformed_encryption = new CiphertextBallotSelection(
             result.object_id, TWO_MOD_Q, malformed_message,
             result.crypto_hash, result.is_placeholder_selection, result.nonce,
@@ -440,7 +440,7 @@ public class TestEncryptProperties extends TestProperties {
                metadata.contests.stream().filter(c -> c.object_id.equals(contest.object_id)).findFirst().orElseThrow(() -> new RuntimeException());
 
        // Homomorpically accumulate the selection encryptions
-       List<ElGamal.Ciphertext> ciphertexts = contest.ballot_selections.stream().map(s -> s.ciphertext).collect(Collectors.toList());
+       List<ElGamal.Ciphertext> ciphertexts = contest.ballot_selections.stream().map(s -> s.ciphertext()).collect(Collectors.toList());
        Ciphertext elgamal_accumulation = elgamal_add(Iterables.toArray(ciphertexts, ElGamal.Ciphertext.class));
 
        // accumulate the selection nonce's
@@ -463,19 +463,19 @@ public class TestEncryptProperties extends TestProperties {
 
        for (CiphertextBallotSelection selection : contest.ballot_selections) {
          // Since we know the nonce, we can decrypt the plaintext
-         BigInteger representation = selection.ciphertext.decrypt_known_nonce(keypair.public_key, selection.nonce.get());
+         BigInteger representation = selection.ciphertext().decrypt_known_nonce(keypair.public_key, selection.nonce.get());
 
          // one could also decrypt with the secret key:
          // representation = selection.message.decrypt(keypair.secret_key)
 
          DisjunctiveChaumPedersenProof regenerated_disjuctive = make_disjunctive_chaum_pedersen(
-                 selection.ciphertext,
+                 selection.ciphertext(),
                  selection.nonce.get(),
                  keypair.public_key,
                  context.crypto_extended_base_hash,
                  add_q(selection.nonce.get(), TWO_MOD_Q),
                  representation);
-         assertThat(regenerated_disjuctive.is_valid(selection.ciphertext, keypair.public_key, context.crypto_extended_base_hash))
+         assertThat(regenerated_disjuctive.is_valid(selection.ciphertext(), keypair.public_key, context.crypto_extended_base_hash))
                  .isTrue();
        }
      }

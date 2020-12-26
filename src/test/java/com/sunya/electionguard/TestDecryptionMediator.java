@@ -266,13 +266,13 @@ public class TestDecryptionMediator extends TestProperties {
 
     // Check the share proofs
     assertThat(comp0.proof().is_valid(
-            first_selection.ciphertext,
+            first_selection.ciphertext(),
             this.guardians.get(0).recovery_public_key_for(this.guardians.get(2).object_id).get(),
             comp0.share(),
             this.context.crypto_extended_base_hash)).isTrue();
 
     assertThat(comp1.proof().is_valid(
-            first_selection.ciphertext,
+            first_selection.ciphertext(),
             this.guardians.get(1).recovery_public_key_for(this.guardians.get(2).object_id).get(),
             comp1.share(),
             this.context.crypto_extended_base_hash)).isTrue();
@@ -300,13 +300,13 @@ public class TestDecryptionMediator extends TestProperties {
             first_selection,
             ImmutableMap.of(
                     this.guardians.get(0).object_id,
-                    new DecryptionShare.Tuple2(this.guardians.get(0).share_election_public_key().key(), share_0.get()),
+                    new DecryptionShare.KeyAndSelection(this.guardians.get(0).share_election_public_key().key(), share_0.get()),
 
                     this.guardians.get(1).object_id,
-                    new DecryptionShare.Tuple2(this.guardians.get(1).share_election_public_key().key(), share_1.get()),
+                    new DecryptionShare.KeyAndSelection(this.guardians.get(1).share_election_public_key().key(), share_1.get()),
 
                     this.guardians.get(2).object_id,
-                    new DecryptionShare.Tuple2(this.guardians.get(2).share_election_public_key().key(), share_2)),
+                    new DecryptionShare.KeyAndSelection(this.guardians.get(2).share_election_public_key().key(), share_2)),
             this.context.crypto_extended_base_hash,
             false);
 
@@ -331,17 +331,17 @@ public class TestDecryptionMediator extends TestProperties {
     DecryptionShare.TallyDecryptionShare third_share = compute_decryption_share(this.guardians.get(2), this.ciphertext_tally, this.context).get();
 
     // build type: Dict[GUARDIAN_ID, Tuple[ELECTION_PUBLIC_KEY, TallyDecryptionShare]]
-    Map<String, DecryptionShare.Tuple2> shares = new HashMap<>();
+    Map<String, DecryptionShare.KeyAndSelection> shares = new HashMap<>();
 
-    shares.put(this.guardians.get(0).object_id, new DecryptionShare.Tuple2(
+    shares.put(this.guardians.get(0).object_id, new DecryptionShare.KeyAndSelection(
             this.guardians.get(0).share_election_public_key().key(),
             first_share.contests().get(first_contest.object_id).selections().get(first_selection.object_id)));
 
-    shares.put(this.guardians.get(1).object_id, new DecryptionShare.Tuple2(
+    shares.put(this.guardians.get(1).object_id, new DecryptionShare.KeyAndSelection(
             this.guardians.get(1).share_election_public_key().key(),
             second_share.contests().get(first_contest.object_id).selections().get(first_selection.object_id)));
 
-    shares.put(this.guardians.get(2).object_id, new DecryptionShare.Tuple2(
+    shares.put(this.guardians.get(2).object_id, new DecryptionShare.KeyAndSelection(
             this.guardians.get(2).share_election_public_key().key(),
             third_share.contests().get(first_contest.object_id).selections().get(first_selection.object_id)));
 

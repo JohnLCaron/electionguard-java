@@ -54,8 +54,6 @@ public class DecryptionMediator {
    * <p>
    * :param guardian: The guardian who will participate in the decryption.
    * :return: a `TallyDecryptionShare` for this `Guardian` or `None` if there is an error.
-   *
-   * @return
    */
   Optional<TallyDecryptionShare> announce(Guardian guardian) {
     // Only allow a guardian to announce once
@@ -87,11 +85,6 @@ public class DecryptionMediator {
 
     // Check this guardian's collection of public keys
     // for other guardians that have not announced
-    //         missing_guardians: Dict[MISSING_GUARDIAN_ID, ElectionPublicKey] = {
-    //            guardian_id: public_key
-    //            for guardian_id, public_key in guardian.guardian_election_public_keys()
-    //            if guardian_id not in this._available_guardians
-    //        }
     Map<String, KeyCeremony.ElectionPublicKey> missing_guardians =
             guardian.guardian_election_public_keys().entrySet().stream()
                     .filter(e -> !this._available_guardians.containsKey(e.getKey()))
@@ -125,8 +118,6 @@ public class DecryptionMediator {
    * :param missing_guardian_id: the guardian that failed to `announce`.
    * :return: a collection of `CompensatedTallyDecryptionShare` generated from all available guardians
    * or `None if there is an error
-   *
-   * @return
    */
   Optional<List<CompensatedTallyDecryptionShare>> compensate(
           String missing_guardian_id, @Nullable Auxiliary.Decryptor decryptor) {

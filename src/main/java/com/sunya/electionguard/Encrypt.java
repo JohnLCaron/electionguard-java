@@ -2,6 +2,7 @@ package com.sunya.electionguard;
 
 import com.google.common.flogger.FluentLogger;
 
+import javax.annotation.concurrent.Immutable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -17,8 +18,9 @@ public class Encrypt {
   /**
    * Metadata for encryption device.
    */
-  static class EncryptionDevice {
-    final long uuid;
+  @Immutable
+  public static class EncryptionDevice {
+    public final String uuid;
     final String location;
 
     public EncryptionDevice(String location) {
@@ -27,7 +29,7 @@ public class Encrypt {
     }
 
     ElementModQ get_hash() {
-            return Tracker.get_hash_for_device(this.uuid, this.location);
+      return Hash.hash_elems(uuid, location);
     }
   }
 
@@ -36,10 +38,10 @@ public class Encrypt {
    *
    *     It composes Elections and Ballots.
    */
-  static class EncryptionMediator {
+  public static class EncryptionMediator {
     private final InternalElectionDescription _metadata;
     private final CiphertextElectionContext _encryption;
-    private ElementModQ _seed_hash;
+    private ElementModQ _seed_hash; // LOOK mutable
 
     public EncryptionMediator(InternalElectionDescription metadata, CiphertextElectionContext encryption,
                               EncryptionDevice encryption_device) {
@@ -53,7 +55,7 @@ public class Encrypt {
       Optional<CiphertextBallot> encrypted_ballot =
               encrypt_ballot(ballot, this._metadata, this._encryption, this._seed_hash, Optional.empty(), true);
       if (encrypted_ballot.isPresent() && encrypted_ballot.get().tracking_hash.isPresent()) {
-        // LOOK mutable
+        // TODO mutable why?
         this._seed_hash = encrypted_ballot.get().tracking_hash.get();
       }
       return encrypted_ballot;
@@ -63,8 +65,8 @@ public class Encrypt {
   /**
    * Get unique identifier for device.
    */
-  static long generate_device_uuid() {
-    return 1234L; // TODO
+  private static String generate_device_uuid() {
+    return java.util.UUID.randomUUID().toString();
   }
 
   /**
@@ -148,18 +150,6 @@ public class Encrypt {
     // TODO: ISSUE #35: encrypt/decrypt: encrypt the extended_data field
 
     // Create the return object
-    //           String object_id,
-    //          ElementModQ description_hash,
-    //          ElGamal.Ciphertext ciphertext,
-    //          ElementModP elgamal_public_key,
-    //          ElementModQ crypto_extended_base_hash,
-    //          ElementModQ proof_seed,
-    //          int selection_representation,
-    //          boolean is_placeholder_selection,
-    //          Optional<ElementModQ> nonce,
-    //          Optional<ElementModQ> crypto_hash,
-    //          Optional<ChaumPedersen.DisjunctiveChaumPedersenProof> proof,
-    //          Optional<ElGamal.Ciphertext> extended_data
     CiphertextBallotSelection encrypted_selection = make_ciphertext_ballot_selection(
             selection.object_id,
             selection_description_hash,

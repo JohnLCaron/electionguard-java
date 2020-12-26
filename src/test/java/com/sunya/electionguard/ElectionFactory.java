@@ -1,6 +1,7 @@
 package com.sunya.electionguard;
 
 import com.google.common.collect.ImmutableList;
+import com.sunya.electionguard.publish.ElectionDescriptionFromJson;
 
 import javax.annotation.Nullable;
 import java.io.*;
@@ -22,7 +23,7 @@ public class ElectionFactory {
   }
 
   public ElectionDescription get_hamilton_election_from_file() throws IOException {
-    return this._get_election_from_file(hamilton_election_manifest_filename);
+    return _get_election_from_file(hamilton_election_manifest_filename);
   }
 
   /**
@@ -71,10 +72,6 @@ public class ElectionFactory {
             fake_candidate_ballot_selections,
             null, null, null);
 
-    // String election_scope_id, ElectionType type, Instant start_date, Instant end_date,
-    // List<GeopoliticalUnit> geopolitical_units, List<Party> parties, List<Candidate> candidates,
-    // List<ContestDescription> contests, List<BallotStyle> ballot_styles,
-    // Optional<InternationalizedText> name, Optional<ContactInformation> contact_information
     ElectionDescription fake_election = new ElectionDescription(
             "some-scope-id",
             ElectionType.unknown, LocalDate.now(), LocalDate.now(),
@@ -122,7 +119,7 @@ public class ElectionFactory {
   }
 
   private static ElectionDescription _get_election_from_file(String filename) throws IOException {
-    ElectionBuilderFromJson builder = new ElectionBuilderFromJson(filename);
+    ElectionDescriptionFromJson builder = new ElectionDescriptionFromJson(filename);
     return builder.build();
   }
 
@@ -140,13 +137,6 @@ public class ElectionFactory {
     }
   }
 
-  /*
-      draw: _DrawType,
-    ints=integers(1, 20),
-    emails=emails(),
-    candidate_id: Optional[str] = None,
-    sequence_order: Optional[int] = None,
-   */
   static SelectionTuple get_selection_description_well_formed() {
     String candidate_id = String.format("candidate_id-%d", TestUtils.randomInt(20));
     String object_id = String.format("object_id-%d", TestUtils.randomInt());
@@ -154,25 +144,6 @@ public class ElectionFactory {
     return new SelectionTuple(object_id, new SelectionDescription(object_id, candidate_id, sequence_order));
   }
 
-  static class ContestTuple {
-    String id;
-    ContestDescriptionWithPlaceholders contest_description;
-
-    public ContestTuple(String id, ContestDescriptionWithPlaceholders contest_description) {
-      this.id = id;
-      this.contest_description = contest_description;
-    }
-  }
-
-  /*
-      draw: _DrawType,
-    ints=integers(1, 20),
-    text=text(),
-    emails=emails(),
-    selections=get_selection_description_well_formed(),
-    sequence_order: Optional[int] = None,
-    electoral_district_id: Optional[str] = None,
-   */
   static ContestDescriptionWithPlaceholders get_contest_description_well_formed() {
     int sequence_order = TestUtils.randomInt(20);
     String electoral_district_id = "{draw(emails)}-gp-unit";
@@ -205,7 +176,6 @@ public class ElectionFactory {
 
     List<SelectionDescription> placeholder_selections = generate_placeholder_selections_from(contest_description, number_elected);
     return contest_description_with_placeholders_from(contest_description, placeholder_selections);
-    // return new ContestTuple(contest_description.object_id, contest_description_with_placeholders_from(contest_description, placeholder_selections));
   }
 
 }

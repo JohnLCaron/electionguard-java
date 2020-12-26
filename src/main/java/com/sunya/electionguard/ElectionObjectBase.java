@@ -7,7 +7,8 @@ import java.util.Objects;
  *     that is both serializable and identifiable by objectId
  */
 public class ElectionObjectBase {
-  final String object_id;
+  // TODO TestTallyProperties needs to change this, make mutable version?
+  public String object_id;
 
   public ElectionObjectBase(String object_id) {
     this.object_id = object_id;

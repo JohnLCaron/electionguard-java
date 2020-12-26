@@ -29,9 +29,7 @@ public class Auxiliary {
     /** The sequence order of the auxiliary public key (usually the guardian's sequence order). */
     public final int sequence_order;
 
-    /**
-     * The public key.
-     */
+    /** The public key. */
     public final java.security.PublicKey key;
 
     public PublicKey(String owner_id, int sequence_order, java.security.PublicKey key) {
@@ -41,18 +39,17 @@ public class Auxiliary {
     }
   }
 
-  // sort of immutable
+  @Immutable
   public static final class ByteString {
     private final byte[] bytes;
 
     public ByteString(byte[] bytes) {
       Preconditions.checkNotNull(bytes);
-      this.bytes = bytes;
+      this.bytes = bytes.clone();
     }
 
-    // should make a copy ??
     public byte[] getBytes() {
-      return bytes;
+      return bytes.clone();
     }
 
     @Override

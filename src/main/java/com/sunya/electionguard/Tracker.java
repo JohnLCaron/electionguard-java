@@ -19,7 +19,7 @@ public class Tracker {
    *     :param location: Location of device
    *     :return: Starting hash of device
    */
-  static ElementModQ get_hash_for_device(long uuid, String location) {
+  static ElementModQ get_hash_for_device(String uuid, String location) {
     return Hash.hash_elems(uuid, location);
   }
 

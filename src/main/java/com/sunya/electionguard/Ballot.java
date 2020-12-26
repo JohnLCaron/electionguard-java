@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 
 import static com.sunya.electionguard.Group.*;
 
-class Ballot {
+public class Ballot {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   /**
@@ -17,13 +17,27 @@ class Ballot {
    * This class is used primarily as a field on a selection to indicate a write-in candidate text value.
    */
   @Immutable
-  static class ExtendedData {
+  public static class ExtendedData {
     final String value;
     final int length;
 
-    ExtendedData(String value, int length) {
+    public ExtendedData(String value, int length) {
       this.value = value;
       this.length = length;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      ExtendedData that = (ExtendedData) o;
+      return length == that.length &&
+              value.equals(that.value);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(value, length);
     }
   }
 
@@ -45,12 +59,12 @@ class Ballot {
    * discarded when encrypting.
    */
   @Immutable
-  static class PlaintextBallotSelection extends ElectionObjectBase {
+  public static class PlaintextBallotSelection extends ElectionObjectBase {
     final String vote;
     final boolean is_placeholder_selection; // default false
     final Optional<ExtendedData> extended_data; // default None
 
-    PlaintextBallotSelection(String object_id, String vote, boolean is_placeholder_selection, Optional<ExtendedData> extended_data) {
+    public PlaintextBallotSelection(String object_id, String vote, boolean is_placeholder_selection, Optional<ExtendedData> extended_data) {
       super(object_id);
       this.vote = vote;
       this.is_placeholder_selection = is_placeholder_selection;
@@ -113,14 +127,18 @@ class Ballot {
    * Encrypted selection.
    */
   @Immutable
-  static class CiphertextSelection extends ElectionObjectBase {
+  public static class CiphertextSelection extends ElectionObjectBase {
     final ElementModQ description_hash;
-    final ElGamal.Ciphertext ciphertext;
+    private final ElGamal.Ciphertext ciphertext;
 
     CiphertextSelection(String object_id, ElementModQ description_hash, ElGamal.Ciphertext ciphertext) {
       super(object_id);
       this.description_hash = description_hash;
       this.ciphertext = ciphertext;
+    }
+
+    ElGamal.Ciphertext ciphertext() {
+      return ciphertext;
     }
   }
 
@@ -148,7 +166,7 @@ class Ballot {
    * By keeping the `proof` the nonce is not required fotor verify the encrypted selection.
    */
   @Immutable
-  static class CiphertextBallotSelection extends CiphertextSelection {
+  public static class CiphertextBallotSelection extends CiphertextSelection {
     final ElementModQ crypto_hash;
     final boolean is_placeholder_selection;
     final Optional<ElementModQ> nonce;
@@ -170,7 +188,7 @@ class Ballot {
      * Remove nonce and return new object.
      */
     CiphertextBallotSelection removeNonce() {
-      return new CiphertextBallotSelection(this.object_id, this.description_hash, this.ciphertext,
+      return new CiphertextBallotSelection(this.object_id, this.description_hash, this.ciphertext(),
               this.crypto_hash, this.is_placeholder_selection, Optional.empty(),
               this.proof, this.extended_data);
     }
@@ -205,7 +223,7 @@ class Ballot {
         return false;
       }
 
-      return proof.get().is_valid(ciphertext, elgamelPublicKey, cryptoExtendedBaseHash);
+      return proof.get().is_valid(ciphertext(), elgamelPublicKey, cryptoExtendedBaseHash);
     }
 
     /**
@@ -219,7 +237,25 @@ class Ballot {
      * In most cases the seed_hash should match the `description_hash`
      */
     ElementModQ crypto_hash_with(ElementModQ seedHash) {
-      return _ciphertext_ballot_selection_crypto_hash_with(this.object_id, seedHash, this.ciphertext);
+      return _ciphertext_ballot_selection_crypto_hash_with(this.object_id, seedHash, this.ciphertext());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      if (!super.equals(o)) return false;
+      CiphertextBallotSelection that = (CiphertextBallotSelection) o;
+      return is_placeholder_selection == that.is_placeholder_selection &&
+              crypto_hash.equals(that.crypto_hash) &&
+              Objects.equals(nonce, that.nonce) &&
+              Objects.equals(proof, that.proof) &&
+              Objects.equals(extended_data, that.extended_data);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(super.hashCode(), crypto_hash, is_placeholder_selection, nonce, proof, extended_data);
     }
   }
 
@@ -234,7 +270,6 @@ class Ballot {
    * given nonce isn't `None`. Likewise, if a crypto_hash is not provided, it will be derived from
    * the other fields.
    */
-
   static CiphertextBallotSelection make_ciphertext_ballot_selection(
           String object_id,
           ElementModQ description_hash,
@@ -288,10 +323,10 @@ class Ballot {
    * Typically partial contests are passed into Electionguard for memory constrained systems,
    * while complete contests are passed into ElectionGuard when running encryption on an existing dataset.
    */
-  static class PlaintextBallotContest extends ElectionObjectBase {
+  public static class PlaintextBallotContest extends ElectionObjectBase {
     List<PlaintextBallotSelection> ballot_selections; // Collection of ballot selections
 
-    PlaintextBallotContest(String object_id, List<PlaintextBallotSelection> ballot_selections) {
+    public PlaintextBallotContest(String object_id, List<PlaintextBallotSelection> ballot_selections) {
       super(object_id);
       this.ballot_selections = ballot_selections;
     }
@@ -339,6 +374,20 @@ class Ballot {
       }
       return true;
     }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      if (!super.equals(o)) return false;
+      PlaintextBallotContest that = (PlaintextBallotContest) o;
+      return ballot_selections.equals(that.ballot_selections);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(super.hashCode(), ballot_selections);
+    }
   }
 
   /**
@@ -355,13 +404,10 @@ class Ballot {
    * master nonce, both values can be regenerated.  If the `nonce` for this contest is completely random,
    * then it is required in order to regenerate the proof.
    */
-  static class CiphertextBallotContest extends ElectionObjectBase implements Hash.CryptoHashCheckable {
+  public static class CiphertextBallotContest extends ElectionObjectBase implements Hash.CryptoHashCheckable {
     ElementModQ description_hash; // Hash from contestDescription
-
-    List<CiphertextBallotSelection> ballot_selections; //Collection of ballot selections
-
+    List<CiphertextBallotSelection> ballot_selections; // Collection of ballot selections
     ElementModQ crypto_hash; // Hash of the encrypted values
-
     Optional<ElementModQ> nonce; // The nonce used to generate the encryption. Sensitive & should be treated as a secret.
 
     //     The proof demonstrates the sum of the selections does not exceed the maximum
@@ -369,7 +415,9 @@ class Ballot {
     Optional<ChaumPedersen.ConstantChaumPedersenProof> proof;
 
     public CiphertextBallotContest(String object_id, ElementModQ description_hash,
-                                   List<CiphertextBallotSelection> ballot_selections, ElementModQ crypto_hash, Optional<ElementModQ> nonce,
+                                   List<CiphertextBallotSelection> ballot_selections,
+                                   ElementModQ crypto_hash,
+                                   Optional<ElementModQ> nonce,
                                    Optional<ChaumPedersen.ConstantChaumPedersenProof> proof) {
       super(object_id);
       this.description_hash = description_hash;
@@ -391,6 +439,8 @@ class Ballot {
       return new CiphertextBallotContest(this.object_id, this.description_hash, new_selections, this.crypto_hash,
               Optional.empty(), this.proof);
     }
+
+    // not used aggregate_nonce()
 
     /**
      * Given an encrypted BallotContest, generates a hash, suitable for rolling up
@@ -451,12 +501,32 @@ class Ballot {
       ElGamal.Ciphertext elgamal_accumulation = this.elgamal_accumulate();
       return this.proof.get().is_valid(elgamal_accumulation, elgamal_public_key, crypto_extended_base_hash);
     }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      if (!super.equals(o)) return false;
+      CiphertextBallotContest that = (CiphertextBallotContest) o;
+      return description_hash.equals(that.description_hash) &&
+              ballot_selections.equals(that.ballot_selections) &&
+              crypto_hash.equals(that.crypto_hash) &&
+              nonce.equals(that.nonce) &&
+              proof.equals(that.proof);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(super.hashCode(), description_hash, ballot_selections, crypto_hash, nonce, proof);
+    }
   }
 
   private static ElGamal.Ciphertext _ciphertext_ballot_elgamal_accumulate(
           List<CiphertextBallotSelection> ballot_selections) {
     // return elgamal_add(*[selection.ciphertext for selection in ballot_selections]);
-    List<ElGamal.Ciphertext> texts = ballot_selections.stream().map(selection -> selection.ciphertext).collect(Collectors.toList());
+    List<ElGamal.Ciphertext> texts = ballot_selections.stream()
+            .map(selection -> selection.ciphertext())
+            .collect(Collectors.toList());
     return ElGamal.elgamal_add(Iterables.toArray(texts, ElGamal.Ciphertext.class));
   }
 
@@ -471,7 +541,7 @@ class Ballot {
 
     // selection_hashes = [selection.crypto_hash for selection in ballot_selections]
     List<ElementModQ> selection_hashes = ballot_selections.stream().map(s -> s.crypto_hash).collect(Collectors.toList());
-    ElementModQ result =  Hash.hash_elems(object_id, seed_hash, selection_hashes);
+    ElementModQ result = Hash.hash_elems(object_id, seed_hash, selection_hashes);
     logger.atFine().log("%n%n _ciphertext_ballot_context_crypto_hash:%n %s%n %s%n %s%n%s%n", object_id, seed_hash, selection_hashes, result);
     return result;
   }
@@ -541,10 +611,10 @@ class Ballot {
    * A PlaintextBallot represents a voters selections for a given ballot and ballot style
    * :field object_id: A unique Ballot ID that is relevant to the external system
    */
-  static class PlaintextBallot extends ElectionObjectBase {
-    String ballot_style; // The `object_id` of the `BallotStyle` in the `Election` Manifest"""
-
-    List<PlaintextBallotContest> contests; // The list of contests for this ballot
+  @Immutable
+  public static class PlaintextBallot extends ElectionObjectBase {
+    final String ballot_style; // The `object_id` of the `BallotStyle` in the `Election` Manifest"""
+    final List<PlaintextBallotContest> contests; // The list of contests for this ballot
 
     public PlaintextBallot(String object_id, String ballot_style, List<PlaintextBallotContest> contests) {
       super(object_id);
@@ -564,6 +634,30 @@ class Ballot {
       }
       return true;
     }
+
+    @Override
+    public String toString() {
+      return "PlaintextBallot{" +
+              "ballot_style='" + ballot_style + '\'' +
+              ", contests=" + contests +
+              ", object_id='" + object_id + '\'' +
+              '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      if (!super.equals(o)) return false;
+      PlaintextBallot that = (PlaintextBallot) o;
+      return ballot_style.equals(that.ballot_style) &&
+              contests.equals(that.contests);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(super.hashCode(), ballot_style, contests);
+    }
   }
 
   /**
@@ -577,7 +671,7 @@ class Ballot {
    * :field object_id: A unique Ballot ID that is relevant to the external system
    */
   @Immutable
-  static class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoHashCheckable {
+  public static class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoHashCheckable {
     final String ballot_style;
     final ElementModQ description_hash;
     final ElementModQ previous_tracking_hash;
@@ -602,13 +696,38 @@ class Ballot {
       this.nonce = nonce;
     }
 
-    /**         Get a tracker hash as a code in friendly readable words for sharing :return: Tracker in words or None. */
-     Optional<String> get_tracker_code() {
-       if (this.tracking_hash.isEmpty()) {
-         return Optional.empty();
-       }
-       return Tracker.tracker_hash_to_words(this.tracking_hash.get(), null);
-     }
+    /**
+     * :return: a representation of the election and the external Id in the nonce's used
+     * to derive other nonce values on the ballot
+     */
+    static ElementModQ nonce_seed(ElementModQ description_hash, String object_id, ElementModQ nonce) {
+      return Hash.hash_elems(description_hash, object_id, nonce);
+    }
+
+    /**
+     * :return: a hash value derived from the description hash, the object id, and the nonce value
+     * suitable for deriving other nonce values on the ballot
+     *
+     * @return
+     */
+    Optional<ElementModQ> hashed_ballot_nonce() {
+      if (this.nonce.isEmpty()) {
+        logger.atWarning().log("missing nonce for ballot %s could not derive from null nonce", this.object_id);
+        return Optional.empty();
+      }
+
+      return Optional.of(nonce_seed(this.description_hash, this.object_id, this.nonce.get()));
+    }
+
+    /**
+     * Get a tracker hash as a code in friendly readable words for sharing :return: Tracker in words or None.
+     */
+    Optional<String> get_tracker_code() {
+      if (this.tracking_hash.isEmpty()) {
+        return Optional.empty();
+      }
+      return Tracker.tracker_hash_to_words(this.tracking_hash.get(), null);
+    }
 
     /**
      * Given an encrypted Ballot, generates a hash, suitable for rolling up
@@ -666,188 +785,205 @@ class Ballot {
       return valid;
     }
 
-    /**
-     * :return: a representation of the election and the external Id in the nonce's used
-     * to derive other nonce values on the ballot
-     */
-    static ElementModQ nonce_seed(ElementModQ description_hash, String object_id, ElementModQ nonce) {
-      return Hash.hash_elems(description_hash, object_id, nonce);
+    @Override
+    public String toString() {
+      return "CiphertextBallot{" +
+              "ballot_style='" + ballot_style + '\'' +
+              ", description_hash=" + description_hash +
+              ", previous_tracking_hash=" + previous_tracking_hash +
+              ", contests=" + contests +
+              ", tracking_hash=" + tracking_hash +
+              ", timestamp=" + timestamp +
+              ", crypto_hash=" + crypto_hash +
+              ", nonce=" + nonce +
+              ", object_id='" + object_id + '\'' +
+              '}';
     }
 
-    /**
-     * :return: a hash value derived from the description hash, the object id, and the nonce value
-     * suitable for deriving other nonce values on the ballot
-     *
-     * @return
-     */
-    Optional<ElementModQ> hashed_ballot_nonce() {
-      if (this.nonce.isEmpty()) {
-        logger.atWarning().log("missing nonce for ballot %s could not derive from null nonce", this.object_id);
-        return Optional.empty();
-      }
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      if (!super.equals(o)) return false;
+      CiphertextBallot that = (CiphertextBallot) o;
+      return timestamp == that.timestamp &&
+              ballot_style.equals(that.ballot_style) &&
+              description_hash.equals(that.description_hash) &&
+              previous_tracking_hash.equals(that.previous_tracking_hash) &&
+              contests.equals(that.contests) &&
+              tracking_hash.equals(that.tracking_hash) &&
+              crypto_hash.equals(that.crypto_hash) &&
+              nonce.equals(that.nonce);
+    }
 
-      return Optional.of(nonce_seed(this.description_hash, this.object_id, this.nonce.get()));
+    @Override
+    public int hashCode() {
+      return Objects.hash(super.hashCode(), ballot_style, description_hash, previous_tracking_hash, contests, tracking_hash, timestamp, crypto_hash, nonce);
     }
   }
 
-    /**
-     * Enumeration used when marking a ballot as cast or spoiled
-     */
-    enum BallotBoxState {
-      CAST, /* A ballot that has been explicitly cast */
-      SPOILED, // A ballot that has been explicitly spoiled
-      UNKNOWN; // A ballot whose state is unknown to ElectionGuard and will not be included in any election results
-    }
-
-    /**
-     * A `CiphertextAcceptedBallot` represents a ballot that is accepted for inclusion in election results.
-     * An accepted ballot is or is about to be either cast or spoiled.
-     * The state supports the `BallotBoxState.UNKNOWN` enumeration to indicate that this object is mutable
-     * and has not yet been explicitly assigned a specific state.
-     * <p>
-     * Note, additionally, this ballot includes all proofs but no nonces.
-     * <p>
-     * Do not make this class directly. Use `make_ciphertext_accepted_ballot` or `from_ciphertext_ballot` instead.
-     */
-    static class CiphertextAcceptedBallot extends CiphertextBallot {
-      final BallotBoxState state;
-
-      public CiphertextAcceptedBallot(String object_id,
-                                      String ballot_style,
-                                      ElementModQ description_hash,
-                                      ElementModQ previous_tracking_hash,
-                                      List<CiphertextBallotContest> contests,
-                                      Optional<ElementModQ> tracking_hash,
-                                      long timestamp,
-                                      ElementModQ crypto_hash,
-                                      Optional<ElementModQ> nonce,
-                                      BallotBoxState state) {
-        super(object_id, ballot_style, description_hash, previous_tracking_hash, contests, tracking_hash, timestamp, crypto_hash, nonce);
-        this.state = state;
-      }
-    }
-
-    /**
-     * Makes a `CiphertextBallot`, initially in the state where it's neither been cast nor spoiled.
-     * <p>
-     * :param object_id: the object_id of this specific ballot
-     * :param ballot_style: The `object_id` of the `BallotStyle` in the `Election` Manifest
-     * :param description_hash: Hash of the election metadata
-     * :param crypto_base_hash: Hash of the cryptographic election context
-     * :param contests: List of contests for this ballot
-     * :param timestamp: Timestamp at which the ballot encryption is generated in tick
-     * :param previous_tracking_hash: Previous tracking hash or seed hash
-     * :param nonce: optional nonce used as part of the encryption process
-     *
-     * @return
-     */
-    static CiphertextBallot make_ciphertext_ballot(
-            String object_id,
-            String ballot_style,
-            ElementModQ description_hash,
-            Optional<ElementModQ> previous_tracking_hashO,
-            List<CiphertextBallotContest> contests,
-            Optional<ElementModQ> nonce,
-            Optional<Long> timestamp,
-            Optional<ElementModQ> tracking_hash) {
-
-      if (contests.isEmpty()) {
-        logger.atInfo().log("ciphertext ballot with no contests: %s", object_id);
-      }
-
-      List<ElementModQ> contest_hashes = contests.stream().map(c -> c.crypto_hash).collect(Collectors.toList());
-      ElementModQ contest_hash = Hash.hash_elems(object_id, description_hash, contest_hashes);
-
-      long time = timestamp.orElse(System.currentTimeMillis());
-      ElementModQ previous_tracking_hash = previous_tracking_hashO.orElse(description_hash);
-      if (tracking_hash.isEmpty()) {
-        tracking_hash = Optional.of(Tracker.get_rotating_tracker_hash(previous_tracking_hash, time, contest_hash));
-      }
-
-      return new CiphertextBallot(
-              object_id,
-              ballot_style,
-              description_hash,
-              previous_tracking_hash,
-              contests,
-              tracking_hash,
-              time,
-              contest_hash,
-              nonce);
-    }
-
-    /**
-     * Makes a `CiphertextAcceptedBallot`, ensuring that no nonces are part of the contests.
-     * <p>
-     * :param object_id: the object_id of this specific ballot
-     * :param ballot_style: The `object_id` of the `BallotStyle` in the `Election` Manifest
-     * :param description_hash: Hash of the election metadata
-     * :param previous_tracking_hash: Previous tracking hash or seed hash
-     * :param contests: List of contests for this ballot
-     * :param timestamp: Timestamp at which the ballot encryption is generated in tick
-     * :param state: ballot box state
-     */
-    static CiphertextAcceptedBallot make_ciphertext_accepted_ballot(
-            String object_id,
-            String ballot_style,
-            ElementModQ description_hash,
-            Optional<ElementModQ> previous_tracking_hashO,
-            List<CiphertextBallotContest> contests,
-            Optional<ElementModQ> tracking_hash,
-            Optional<Long> timestampO,
-            BallotBoxState state) { // default BallotBoxState.UNKNOWN,
-
-      if (contests.isEmpty()) {
-        logger.atInfo().log("ciphertext ballot with no contest: %s", object_id);
-      }
-
-      List<ElementModQ> contest_hashes = contests.stream().map(c -> c.crypto_hash).collect(Collectors.toList());
-      ElementModQ contest_hash = Hash.hash_elems(object_id, description_hash, contest_hashes);
-
-      long timestamp = timestampO.orElse(System.currentTimeMillis());
-      ElementModQ previous_tracking_hash = previous_tracking_hashO.orElse(description_hash);
-      if (tracking_hash.isEmpty()) {
-        tracking_hash = Optional.of(Tracker.get_rotating_tracker_hash(previous_tracking_hash, timestamp, contest_hash));
-      }
-
-      // copy the contests and selections, removing all nonces
-      List<CiphertextBallotContest> new_contests = contests.stream().map(CiphertextBallotContest::removeNonces).collect(Collectors.toList());
-
-      return new CiphertextAcceptedBallot(
-              object_id,
-              ballot_style,
-              description_hash,
-              previous_tracking_hash,
-              new_contests,
-              tracking_hash,
-              timestamp,
-              contest_hash,
-              Optional.empty(),
-              state);
-    }
-
-    /**
-     * Convert a `CiphertextBallot` into a `CiphertextAcceptedBallot`, with all nonces removed.
-     */
-    static CiphertextAcceptedBallot from_ciphertext_ballot(CiphertextBallot ballot, BallotBoxState state) {
-
-      //           String object_id,
-      //          String ballot_style,
-      //          ElementModQ description_hash,
-      //          Optional<ElementModQ> previous_tracking_hashO,
-      //          List<CiphertextBallotContest> contests,
-      //          Optional<ElementModQ> tracking_hash,
-      //          Optional<Long> timestampO,
-      //          BallotBoxState state
-      return make_ciphertext_accepted_ballot(
-              ballot.object_id,
-              ballot.ballot_style,
-              ballot.description_hash,
-              Optional.of(ballot.previous_tracking_hash),
-              ballot.contests,
-              ballot.tracking_hash,
-              Optional.of(ballot.timestamp),
-              state);
-    }
-
+  /**
+   * Enumeration used when marking a ballot as cast or spoiled
+   */
+  public enum BallotBoxState {
+    CAST, /* A ballot that has been explicitly cast */
+    SPOILED, // A ballot that has been explicitly spoiled
+    UNKNOWN; // A ballot whose state is unknown to ElectionGuard and will not be included in any election results
   }
+
+  /**
+   * A `CiphertextAcceptedBallot` represents a ballot that is accepted for inclusion in election results.
+   * An accepted ballot is or is about to be either cast or spoiled.
+   * The state supports the `BallotBoxState.UNKNOWN` enumeration to indicate that this object is mutable
+   * and has not yet been explicitly assigned a specific state.
+   * <p>
+   * Note, additionally, this ballot includes all proofs but no nonces.
+   * <p>
+   * Do not make this class directly. Use `make_ciphertext_accepted_ballot` or `from_ciphertext_ballot` instead.
+   */
+  public static class CiphertextAcceptedBallot extends CiphertextBallot {
+    // TODO TestTallyProperties needs to change this, make mutable version?
+    BallotBoxState state;
+
+    public CiphertextAcceptedBallot(String object_id,
+                                    String ballot_style,
+                                    ElementModQ description_hash,
+                                    ElementModQ previous_tracking_hash,
+                                    List<CiphertextBallotContest> contests,
+                                    Optional<ElementModQ> tracking_hash,
+                                    long timestamp,
+                                    ElementModQ crypto_hash,
+                                    Optional<ElementModQ> nonce,
+                                    BallotBoxState state) {
+      super(object_id, ballot_style, description_hash, previous_tracking_hash, contests, tracking_hash, timestamp, crypto_hash, nonce);
+      this.state = state;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      if (!super.equals(o)) return false;
+      CiphertextAcceptedBallot that = (CiphertextAcceptedBallot) o;
+      return state == that.state;
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(super.hashCode(), state);
+    }
+  }
+
+  /**
+   * Makes a `CiphertextBallot`, initially in the state where it's neither been cast nor spoiled.
+   * <p>
+   * :param object_id: the object_id of this specific ballot
+   * :param ballot_style: The `object_id` of the `BallotStyle` in the `Election` Manifest
+   * :param description_hash: Hash of the election metadata
+   * :param crypto_base_hash: Hash of the cryptographic election context
+   * :param contests: List of contests for this ballot
+   * :param timestamp: Timestamp at which the ballot encryption is generated in tick
+   * :param previous_tracking_hash: Previous tracking hash or seed hash
+   * :param nonce: optional nonce used as part of the encryption process
+   */
+  public static CiphertextBallot make_ciphertext_ballot(
+          String object_id,
+          String ballot_style,
+          ElementModQ description_hash,
+          Optional<ElementModQ> previous_tracking_hashO,
+          List<CiphertextBallotContest> contests,
+          Optional<ElementModQ> nonce,
+          Optional<Long> timestamp,
+          Optional<ElementModQ> tracking_hash) {
+
+    if (contests.isEmpty()) {
+      logger.atInfo().log("ciphertext ballot with no contests: %s", object_id);
+    }
+
+    List<ElementModQ> contest_hashes = contests.stream().map(c -> c.crypto_hash).collect(Collectors.toList());
+    ElementModQ contest_hash = Hash.hash_elems(object_id, description_hash, contest_hashes);
+
+    long time = timestamp.orElse(System.currentTimeMillis());
+    ElementModQ previous_tracking_hash = previous_tracking_hashO.orElse(description_hash);
+    if (tracking_hash.isEmpty()) {
+      tracking_hash = Optional.of(Tracker.get_rotating_tracker_hash(previous_tracking_hash, time, contest_hash));
+    }
+
+    return new CiphertextBallot(
+            object_id,
+            ballot_style,
+            description_hash,
+            previous_tracking_hash,
+            contests,
+            tracking_hash,
+            time,
+            contest_hash,
+            nonce);
+  }
+
+  /**
+   * Makes a `CiphertextAcceptedBallot`, ensuring that no nonces are part of the contests.
+   * <p>
+   * :param object_id: the object_id of this specific ballot
+   * :param ballot_style: The `object_id` of the `BallotStyle` in the `Election` Manifest
+   * :param description_hash: Hash of the election metadata
+   * :param previous_tracking_hash: Previous tracking hash or seed hash
+   * :param contests: List of contests for this ballot
+   * :param timestamp: Timestamp at which the ballot encryption is generated in tick
+   * :param state: ballot box state
+   */
+  static CiphertextAcceptedBallot make_ciphertext_accepted_ballot(
+          String object_id,
+          String ballot_style,
+          ElementModQ description_hash,
+          Optional<ElementModQ> previous_tracking_hashO,
+          List<CiphertextBallotContest> contests,
+          Optional<ElementModQ> tracking_hash,
+          Optional<Long> timestampO,
+          BallotBoxState state) { // default BallotBoxState.UNKNOWN,
+
+    if (contests.isEmpty()) {
+      logger.atInfo().log("ciphertext ballot with no contest: %s", object_id);
+    }
+
+    List<ElementModQ> contest_hashes = contests.stream().map(c -> c.crypto_hash).collect(Collectors.toList());
+    ElementModQ contest_hash = Hash.hash_elems(object_id, description_hash, contest_hashes);
+
+    long timestamp = timestampO.orElse(System.currentTimeMillis());
+    ElementModQ previous_tracking_hash = previous_tracking_hashO.orElse(description_hash);
+    if (tracking_hash.isEmpty()) {
+      tracking_hash = Optional.of(Tracker.get_rotating_tracker_hash(previous_tracking_hash, timestamp, contest_hash));
+    }
+
+    // copy the contests and selections, removing all nonces
+    List<CiphertextBallotContest> new_contests = contests.stream().map(CiphertextBallotContest::removeNonces).collect(Collectors.toList());
+
+    return new CiphertextAcceptedBallot(
+            object_id,
+            ballot_style,
+            description_hash,
+            previous_tracking_hash,
+            new_contests,
+            tracking_hash,
+            timestamp,
+            contest_hash,
+            Optional.empty(),
+            state);
+  }
+
+  /**
+   * Convert a `CiphertextBallot` into a `CiphertextAcceptedBallot`, with all nonces removed.
+   */
+  static CiphertextAcceptedBallot from_ciphertext_ballot(CiphertextBallot ballot, BallotBoxState state) {
+    return make_ciphertext_accepted_ballot(
+            ballot.object_id,
+            ballot.ballot_style,
+            ballot.description_hash,
+            Optional.of(ballot.previous_tracking_hash),
+            ballot.contests,
+            ballot.tracking_hash,
+            Optional.of(ballot.timestamp),
+            state);
+  }
+
+}

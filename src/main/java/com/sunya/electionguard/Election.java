@@ -20,7 +20,7 @@ public class Election {
    * enumerations for the `ElectionReport` entity
    * see: https://developers.google.com/elections-data/reference/election-type
    */
-  enum ElectionType {
+  public enum ElectionType {
     unknown,
     general,
     partisan_primary_closed,
@@ -35,7 +35,7 @@ public class Election {
    * Enumeration for the type of geopolitical unit
    * see: https://developers.google.com/elections-data/reference/reporting-unit-type
    */
-  enum ReportingUnitType {
+  public enum ReportingUnitType {
     unknown,
     ballot_batch,
     ballot_style_area,
@@ -71,7 +71,7 @@ public class Election {
    * Enumeration for contest algorithm or rules in the `Contest` entity
    * see: https://developers.google.com/elections-data/reference/vote-variation
    */
-  enum VoteVariationType {
+  public enum VoteVariationType {
     unknown,
     one_of_m,
     approval,
@@ -92,7 +92,7 @@ public class Election {
    * See: https://developers.google.com/elections-data/reference/annotated-string
    */
   @Immutable
-  static class AnnotatedString implements Hash.CryptoHashable {
+  public static class AnnotatedString implements Hash.CryptoHashable {
     final String annotation;
     final String value;
 
@@ -126,7 +126,7 @@ public class Election {
    * see: https://en.wikipedia.org/wiki/ISO_639
    */
   @Immutable
-  static class Language implements Hash.CryptoHashable {
+  public static class Language implements Hash.CryptoHashable {
     final String value;
     final String language;
 
@@ -160,7 +160,7 @@ public class Election {
    * See: https://developers.google.com/elections-data/reference/internationalized-text
    */
   @Immutable
-  static class InternationalizedText implements Hash.CryptoHashable {
+  public static class InternationalizedText implements Hash.CryptoHashable {
     final ImmutableList<Language> text;
 
     public InternationalizedText(@Nullable List<Language> text) {
@@ -191,7 +191,7 @@ public class Election {
    * See: https://developers.google.com/elections-data/reference/contact-information
    */
   @Immutable
-  static class ContactInformation implements Hash.CryptoHashable {
+  public static class ContactInformation implements Hash.CryptoHashable {
     final Optional<ImmutableList<String>> address_line;
     final Optional<ImmutableList<AnnotatedString>> email;
     final Optional<ImmutableList<AnnotatedString>> phone;
@@ -236,7 +236,7 @@ public class Election {
    * See: https://developers.google.com/elections-data/reference/gp-unit
    */
   @Immutable
-  static class GeopoliticalUnit extends ElectionObjectBase implements Hash.CryptoHashable {
+  public static class GeopoliticalUnit extends ElectionObjectBase implements Hash.CryptoHashable {
     final String name;
     final ReportingUnitType type;
     final Optional<ContactInformation> contact_information;
@@ -277,7 +277,7 @@ public class Election {
    * A BallotStyle works as a key to uniquely specify a set of contests. See also `ContestDescription`.
    */
   @Immutable
-  static class BallotStyle extends ElectionObjectBase implements Hash.CryptoHashable {
+  public static class BallotStyle extends ElectionObjectBase implements Hash.CryptoHashable {
     final Optional<ImmutableList<String>> geopolitical_unit_ids;
     final Optional<ImmutableList<String>> party_ids;
     final Optional<String> image_uri;
@@ -321,7 +321,7 @@ public class Election {
    * See: https://developers.google.com/elections-data/reference/party
    */
   @Immutable
-  static class Party extends ElectionObjectBase implements Hash.CryptoHashable {
+  public static class Party extends ElectionObjectBase implements Hash.CryptoHashable {
     final InternationalizedText ballot_name;
     final Optional<String> abbreviation;
     final Optional<String> color;
@@ -389,7 +389,7 @@ public class Election {
    * selections for the contest.  See the wiki, readme's, and tests in this repo for more info
    */
   @Immutable
-  static class Candidate extends ElectionObjectBase implements Hash.CryptoHashable {
+  public static class Candidate extends ElectionObjectBase implements Hash.CryptoHashable {
     final InternationalizedText ballot_name;
     final Optional<String> party_id;
     final Optional<String> image_uri;
@@ -401,7 +401,6 @@ public class Election {
       this.party_id = Optional.empty();
       this.image_uri = Optional.empty();
       this.is_write_in = Optional.empty();
-      ;
     }
 
     public Candidate(String object_id,
@@ -416,9 +415,7 @@ public class Election {
       this.is_write_in = Optional.ofNullable(is_write_in);
     }
 
-    /**
-     * Given a `Candidate`, returns a "candidate ID", which is used in other ElectionGuard structures.
-     */
+    /** Get the "candidate ID" for this Candidate. */
     String get_candidate_id() {
       return this.object_id;
     }
@@ -460,7 +457,7 @@ public class Election {
    * however that information is not captured by default when encrypting a specific ballot.
    */
   @Immutable
-  static class SelectionDescription extends ElectionObjectBase implements Hash.CryptoHashable {
+  public static class SelectionDescription extends ElectionObjectBase implements Hash.CryptoHashable {
     final String candidate_id;
     /**
      * Used for ordering selections in a contest to ensure various encryption primitives are deterministic.
@@ -517,7 +514,8 @@ public class Election {
    * For a given election, the sequence of contests displayed to a user may be different
    * however that information is not captured by default when encrypting a specific ballot.
    */
-  static class ContestDescription extends ElectionObjectBase implements Hash.CryptoHashable {
+  @Immutable
+  public static class ContestDescription extends ElectionObjectBase implements Hash.CryptoHashable {
 
     final String electoral_district_id;
     /**
@@ -610,9 +608,7 @@ public class Election {
               this.ballot_selections);
     }
 
-    /**
-     * Check the validity of the contest object by verifying its data.
-     */
+    /** Check the validity of the contest object by verifying its data. */
     boolean is_valid() {
       boolean contest_has_valid_number_elected = this.number_elected <= this.ballot_selections.size();
       boolean contest_has_valid_votes_allowed = this.votes_allowed.isEmpty() || this.number_elected <= this.votes_allowed.get();
@@ -669,7 +665,8 @@ public class Election {
    * Note: The ElectionGuard Data Spec deviates from the NIST model in that
    * this subclass is used purely for convenience
    */
-  static class CandidateContestDescription extends ContestDescription {
+  @Immutable
+  public static class CandidateContestDescription extends ContestDescription {
     final ImmutableList<String> primary_party_ids;
 
     public CandidateContestDescription(String object_id,
@@ -709,7 +706,8 @@ public class Election {
    * Note: The ElectionGuard Data Spec deviates from the NIST model in that
    * this subclass is used purely for convenience.
    */
-  static class ReferendumContestDescription extends ContestDescription {
+  @Immutable
+  public static class ReferendumContestDescription extends ContestDescription {
 
     public ReferendumContestDescription(String object_id,
                                         String electoral_district_id,
@@ -732,8 +730,9 @@ public class Election {
    * with the rest zero, so if a voter deliberately undervotes, one or more of the placeholder counters will
    * become one. This allows the `ConstantChaumPedersenProof` to verify correctly for undervoted contests.)
    */
-  static class ContestDescriptionWithPlaceholders extends ContestDescription {
-    ImmutableList<SelectionDescription> placeholder_selections;
+  @Immutable
+  public static class ContestDescriptionWithPlaceholders extends ContestDescription {
+    final ImmutableList<SelectionDescription> placeholder_selections;
 
     public ContestDescriptionWithPlaceholders(String object_id,
                                               String electoral_district_id,
@@ -802,6 +801,7 @@ public class Election {
    * <p>
    * See: https://developers.google.com/elections-data/reference/election
    */
+  @Immutable
   public static class ElectionDescription implements Hash.CryptoHashable {
     final String election_scope_id;
     final ElectionType type;
@@ -882,7 +882,6 @@ public class Election {
      * Verifies the dataset to ensure it is well-formed.
      */
     boolean is_valid() {
-
       HashSet<String> gp_unit_ids = new HashSet<>();
       HashSet<String> ballot_style_ids = new HashSet<>();
       HashSet<String> party_ids = new HashSet<>();
@@ -981,24 +980,21 @@ public class Election {
       );
 
       if (!success) {
-                  /* log_warning(
-                          "Election failed validation check: is_valid: %s",
-                          str(
-                                  {
-                                          "geopolitical_units_valid":geopolitical_units_valid,
-                          "ballot_styles_valid":ballot_styles_valid,
-                          "ballot_styles_have_valid_gp_unit_ids":ballot_styles_have_valid_gp_unit_ids,
-                          "parties_valid":parties_valid,
-                          "candidates_valid":candidates_valid,
-                          "candidates_have_valid_length":candidates_have_valid_length,
-                          "candidates_have_valid_party_ids":candidates_have_valid_party_ids,
-                          "contests_valid":contests_valid,
-                          "contests_have_valid_object_ids":contests_have_valid_object_ids,
-                          "contests_have_valid_sequence_ids":contests_have_valid_sequence_ids,
-                          "contests_validate_their_properties":contests_validate_their_properties,
-                          "contests_have_valid_electoral_district_id":contests_have_valid_electoral_district_id,
-                          "candidate_contests_have_valid_party_ids":candidate_contests_have_valid_party_ids,
-    */
+                  logger.atWarning().log(
+                          "Election failed validation check: is_valid: ",
+                          "geopolitical_units_valid", geopolitical_units_valid,
+                          "ballot_styles_valid", ballot_styles_valid,
+                          "ballot_styles_have_valid_gp_unit_ids", ballot_styles_have_valid_gp_unit_ids,
+                          "parties_valid", parties_valid,
+                          "candidates_valid", candidates_valid,
+                          "candidates_have_valid_length", candidates_have_valid_length,
+                          "candidates_have_valid_party_ids", candidates_have_valid_party_ids,
+                          "contests_valid", contests_valid,
+                          "contests_have_valid_object_ids", contests_have_valid_object_ids,
+                          "contests_have_valid_sequence_ids", contests_have_valid_sequence_ids,
+                          "contests_validate_their_properties", contests_validate_their_properties,
+                          "contests_have_valid_electoral_district_id", contests_have_valid_electoral_district_id,
+                          "candidate_contests_have_valid_party_ids", candidate_contests_have_valid_party_ids);
       }
       return success;
     }
@@ -1009,7 +1005,7 @@ public class Election {
    * the components that ElectionGuard uses for conducting an election.  The key component is the
    * `contests` collection, which applies placeholder selections to the `ElectionDescription` contests
    */
-  static class InternalElectionDescription {
+  public static class InternalElectionDescription {
     final ElectionDescription description;
 
     ImmutableList<GeopoliticalUnit> geopolitical_units;
@@ -1029,7 +1025,6 @@ public class Election {
       return contests.stream().filter(c -> c.object_id.equals(contest_id)).findFirst();
     }
 
-
     /**
      * Find the ballot style for a specified ballot_style_id
      */
@@ -1041,7 +1036,7 @@ public class Election {
      * Get contests for a ballot style
      *
      * @param ballot_style_id: ballot style id
-     * @return: contest descriptions
+     * @return contest descriptions
      */
     List<ContestDescriptionWithPlaceholders> get_contests_for(String ballot_style_id) {
       Optional<BallotStyle> style = this.get_ballot_style(ballot_style_id);
@@ -1093,7 +1088,7 @@ public class Election {
    * The constants for mathematical functions during the election.
    */
   @Immutable
-  static class ElectionConstants {
+  public static class ElectionConstants {
     public static final BigInteger large_prime = Group.P; // large prime or p"""
     public static final BigInteger small_prime = Group.Q; // small prime or q"""
     public static final BigInteger cofactor = Group.R; // cofactor or r"""
@@ -1111,7 +1106,7 @@ public class Election {
    * To make an instance of this class, don't construct it directly. Use
    * `make_ciphertext_election_context` instead.
    */
-  static class CiphertextElectionContext {
+  public static class CiphertextElectionContext {
     final int number_of_guardians; // The number of guardians necessary to generate the public key
     final int quorum; // The quorum of guardians necessary to decrypt an election.  Must be less than `number_of_guardians`
 
@@ -1164,7 +1159,7 @@ public class Election {
    * :param elgamal_public_key: the public key of the election
    * :param description_hash: the hash of the election metadata
    */
-  static CiphertextElectionContext make_ciphertext_election_context(
+  public static CiphertextElectionContext make_ciphertext_election_context(
           int number_of_guardians,
           int quorum,
           ElementModP elgamal_public_key,
@@ -1223,7 +1218,7 @@ public class Election {
             placeholders);
   }
 
-  /*
+  /**
       Generates a placeholder selection description that is unique so it can be hashed
 
     :param use_sequence_id: an optional integer unique to the contest identifying this selection's place in the contest
@@ -1271,7 +1266,6 @@ public class Election {
     }
     return selections;
   }
-
 
   private static <T> ImmutableList<T> toImmutableList(List<T> from) {
     if (from == null || from.isEmpty()) {

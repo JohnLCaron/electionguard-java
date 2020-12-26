@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 
 import javax.annotation.Nullable;
+import javax.annotation.concurrent.Immutable;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +19,7 @@ import static com.sunya.electionguard.Group.*;
  *     The 0-index coefficient is used for a secret key which can
  *     be discovered by a quorum of n guardians corresponding to n coefficients.
  */
+@Immutable
 public class ElectionPolynomial {
 
   /** The secret coefficients `a_ij`. */

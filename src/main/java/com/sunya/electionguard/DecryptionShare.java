@@ -3,6 +3,7 @@ package com.sunya.electionguard;
 import com.google.auto.value.AutoValue;
 import com.google.common.flogger.FluentLogger;
 
+import javax.annotation.concurrent.Immutable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -305,12 +306,12 @@ class DecryptionShare {
 
   } // class CompensatedTallyDecryptionShare
 
-
-  static class Tuple2 {
+  @Immutable
+  static class KeyAndSelection {
     final ElementModP public_key;
     final CiphertextDecryptionSelection decryption;
 
-    public Tuple2(ElementModP public_key, CiphertextDecryptionSelection decryption) {
+    public KeyAndSelection(ElementModP public_key, CiphertextDecryptionSelection decryption) {
       this.public_key = public_key;
       this.decryption = decryption;
     }
@@ -342,13 +343,13 @@ class DecryptionShare {
   /**
    * Get all of the cast shares for a specific selection
    */
-  static Map<String, Tuple2> get_tally_shares_for_selection(String selection_id, Map<String, TallyDecryptionShare> shares) {
-    HashMap<String, Tuple2> cast_shares = new HashMap<>();
+  static Map<String, KeyAndSelection> get_tally_shares_for_selection(String selection_id, Map<String, TallyDecryptionShare> shares) {
+    HashMap<String, KeyAndSelection> cast_shares = new HashMap<>();
     for (TallyDecryptionShare share : shares.values()) {
       for (CiphertextDecryptionContest contest : share.contests().values()) {
         for (CiphertextDecryptionSelection selection : contest.selections().values()) {
           if (selection.object_id().equals(selection_id)) {
-            cast_shares.put(share.guardian_id(), new Tuple2(share.public_key(), selection));
+            cast_shares.put(share.guardian_id(), new KeyAndSelection(share.public_key(), selection));
           }
         }
       }
@@ -359,13 +360,13 @@ class DecryptionShare {
   /**
    * Get the ballot shares for a given selection, in the context of a specific ballot.
    */
-  static Map<String, Tuple2> get_ballot_shares_for_selection(String selection_id, Map<String, BallotDecryptionShare> shares) {
-    HashMap<String, Tuple2> ballot_shares = new HashMap<>();
+  static Map<String, KeyAndSelection> get_ballot_shares_for_selection(String selection_id, Map<String, BallotDecryptionShare> shares) {
+    HashMap<String, KeyAndSelection> ballot_shares = new HashMap<>();
     for (BallotDecryptionShare ballot_share : shares.values()) {
       for (CiphertextDecryptionContest contest_share : ballot_share.contests().values()) {
         for (CiphertextDecryptionSelection selection_share : contest_share.selections().values()) {
           if (selection_share.object_id().equals(selection_id)) {
-            ballot_shares.put(ballot_share.guardian_id(), new Tuple2(ballot_share.public_key(), selection_share));
+            ballot_shares.put(ballot_share.guardian_id(), new KeyAndSelection(ballot_share.public_key(), selection_share));
           }
         }
       }

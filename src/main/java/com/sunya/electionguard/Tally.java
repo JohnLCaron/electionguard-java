@@ -12,12 +12,13 @@ import java.util.stream.Collectors;
 import static com.sunya.electionguard.Ballot.*;
 import static com.sunya.electionguard.Group.*;
 
-class Tally {
+public class Tally {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   static class Tuple {
     final String id;
-    @Nullable final ElGamal.Ciphertext ciphertext;
+    @Nullable
+    final ElGamal.Ciphertext ciphertext;
 
     public Tuple(String id, @Nullable ElGamal.Ciphertext ciphertext) {
       this.id = id;
@@ -53,11 +54,15 @@ class Tally {
    */
   static class CiphertextTallySelection extends CiphertextSelection {
     // Note not immutable - override superclass
-    ElGamal.Ciphertext ciphertext; // default=ElGamalCiphertext(ONE_MOD_P, ONE_MOD_P)
+    ElGamal.Ciphertext ciphertext_mutable; // default=ElGamalCiphertext(ONE_MOD_P, ONE_MOD_P)
 
     public CiphertextTallySelection(String object_id, ElementModQ description_hash, @Nullable ElGamal.Ciphertext ciphertext) {
       super(object_id, description_hash, ciphertext == null ? new ElGamal.Ciphertext(ONE_MOD_P, ONE_MOD_P) : ciphertext);
-      this.ciphertext = (ciphertext == null) ? new ElGamal.Ciphertext(ONE_MOD_P, ONE_MOD_P) : ciphertext;
+      this.ciphertext_mutable = (ciphertext == null) ? new ElGamal.Ciphertext(ONE_MOD_P, ONE_MOD_P) : ciphertext;
+    }
+
+    ElGamal.Ciphertext ciphertext() {
+      return ciphertext_mutable;
     }
 
     /**
@@ -65,8 +70,8 @@ class Tally {
      */
     ElGamal.Ciphertext elgamal_accumulate(ElGamal.Ciphertext elgamal_ciphertext) {
       // Note not immutable
-      this.ciphertext = ElGamal.elgamal_add(this.ciphertext, elgamal_ciphertext);
-      return this.ciphertext;
+      this.ciphertext_mutable = ElGamal.elgamal_add(this.ciphertext_mutable, elgamal_ciphertext);
+      return this.ciphertext();
     }
   }
 
@@ -97,47 +102,50 @@ class Tally {
       this.tally_selections = tally_selections;
     }
 
-    /**         Accumulate the contest selections of an individual ballot into this tally. */
-     boolean accumulate_contest(List<CiphertextBallotSelection> contest_selections) {
+    /**
+     * Accumulate the contest selections of an individual ballot into this tally.
+     */
+    boolean accumulate_contest(List<CiphertextBallotSelection> contest_selections) {
 
-       if (contest_selections.isEmpty()) {
-         logger.atWarning().log("accumulate cannot add missing selections for contest %s", this.object_id);
-         return false;
-       }
+      if (contest_selections.isEmpty()) {
+        logger.atWarning().log("accumulate cannot add missing selections for contest %s", this.object_id);
+        return false;
+      }
 
-       // Validate the input data by comparing the selection id's provided
-       // to the valid selection id's for this tally contest
-       List<String> selection_ids = contest_selections.stream()
-               .filter(s -> !s.is_placeholder_selection)
-               .map(s-> s.object_id)
-               .collect(Collectors.toList());
+      // Validate the input data by comparing the selection id's provided
+      // to the valid selection id's for this tally contest
+      Set<String> selection_ids = contest_selections.stream()
+              .filter(s -> !s.is_placeholder_selection)
+              .map(s -> s.object_id)
+              .collect(Collectors.toSet());
 
-       // if (any(set(this.tally_selections).difference(selection_ids))) {
-       Set<String> have = this.tally_selections.keySet();
-       if (selection_ids.stream().anyMatch(id -> have.contains(id))) {
-         logger.atWarning().log("accumulate cannot add mismatched selections for contest %s", this.object_id);
-         return false;
-       }
+      // if (any(set(this.tally_selections).difference(selection_ids))) {
+      // Set<String> have = this.tally_selections.keySet();
+      // if (!selection_ids.stream().anyMatch(id -> have.contains(id))) {
+      if (!selection_ids.equals(this.tally_selections.keySet())) {
+        logger.atWarning().log("accumulate cannot add mismatched selections for contest %s", this.object_id);
+        return false;
+      }
 
-       // iterate through the tally selections and add the new value to the total
-       List<Callable<Tuple>> tasks =
-               this.tally_selections.entrySet().stream()
-                       .map(entry -> new RunAccumulate(entry.getKey(), entry.getValue(), contest_selections))
-                       .collect(Collectors.toList());
-       Scheduler<Tuple> scheduler = new Scheduler<>();
-       List<Tuple> results = scheduler.schedule(tasks, true);
+      // iterate through the tally selections and add the new value to the total
+      List<Callable<Tuple>> tasks =
+              this.tally_selections.entrySet().stream()
+                      .map(entry -> new RunAccumulate(entry.getKey(), entry.getValue(), contest_selections))
+                      .collect(Collectors.toList());
+      Scheduler<Tuple> scheduler = new Scheduler<>();
+      List<Tuple> results = scheduler.schedule(tasks, true);
 
-       for (Tuple tuple : results){
-         if (tuple.ciphertext == null) {
-           return false;
-         } else {
-           CiphertextTallySelection selection = this.tally_selections.get(tuple.id);
-           selection.ciphertext = tuple.ciphertext;
-         }
-       }
+      for (Tuple tuple : results) {
+        if (tuple.ciphertext == null) {
+          return false;
+        } else {
+          CiphertextTallySelection selection = this.tally_selections.get(tuple.id);
+          selection.ciphertext_mutable = tuple.ciphertext;
+        }
+      }
 
-       return true;
-     }
+      return true;
+    }
 
     static class RunAccumulate implements Callable<Tuple> {
       final String id;
@@ -164,22 +172,22 @@ class Tally {
       Optional<CiphertextBallotSelection> use_selection = contest_selections.stream()
               .filter(s -> key.equals(s.object_id)).findFirst();
 
-                        // a selection on the ballot that is required was not found
-        // this should never happen when using the `CiphertextTally`
+      // a selection on the ballot that is required was not found
+      // this should never happen when using the `CiphertextTally`
       // but sanity check anyway
       if (use_selection.isEmpty()) {
         logger.atWarning().log("add cannot accumulate for missing selection %s ", key);
         return new Tuple(key, null);
       }
 
-      return new Tuple(key,selection_tally.elgamal_accumulate(use_selection.get().ciphertext));
+      return new Tuple(key, selection_tally.elgamal_accumulate(use_selection.get().ciphertext()));
     }
   }
 
   /**
    * The plaintext representation of all contests in the election
    */
-  static class PlaintextTally extends ElectionObjectBase {
+  public static class PlaintextTally extends ElectionObjectBase {
     Map<String, PlaintextTallyContest> contests;
     Map<String, Map<String, PlaintextTallyContest>> spoiled_ballots;
 
@@ -194,12 +202,13 @@ class Tally {
   /**
    * A `CiphertextTally` accepts cast and spoiled ballots and accumulates a tally on the cast ballots.
    */
-  static class CiphertextTally extends ElectionObjectBase {
+  public static class CiphertextTally extends ElectionObjectBase {
     private final Election.InternalElectionDescription _metadata;
     private final Election.CiphertextElectionContext _encryption;
 
+    // TODO TestTallyProperties needs to change this, make mutable version?
     // A local cache of ballots id's that have already been cast
-    private Set<String> _cast_ballot_ids;
+    Set<String> _cast_ballot_ids;
 
     //    A collection of each contest and selection in an election.
     //    Retains an encrypted representation of a tally for each selection
@@ -277,7 +286,7 @@ class Tally {
                   cast_ballot_selections.put(selection.object_id, new HashMap<>());
                 }
                 // cast_ballot_selections[selection.object_id][ ballot_value.object_id] = selection.ciphertext
-                cast_ballot_selections.get(selection.object_id).put(ballot.object_id, selection.ciphertext);
+                cast_ballot_selections.get(selection.object_id).put(ballot.object_id, selection.ciphertext());
               }
             }
 
@@ -403,6 +412,25 @@ class Tally {
   } // class CiphertextTally
 
   /**
+   * The published plaintext representation of all contests in the election.
+   */
+  public static class PublishedCiphertextTally extends ElectionObjectBase {
+    Map<String, CiphertextTallyContest> cast;
+
+    public PublishedCiphertextTally(String object_id, Map<String, CiphertextTallyContest> cast) {
+      super(object_id);
+      this.cast = cast;
+    }
+  }
+
+  /**
+   * Publish a ciphertext tally with simpler format.
+   */
+  public static PublishedCiphertextTally publish_ciphertext_tally(CiphertextTally tally) {
+    return new PublishedCiphertextTally(tally.object_id, tally.cast);
+  }
+
+  /**
    * Tally a ballot that is either Cast or Spoiled
    * :return: The mutated CiphertextTally or None if there is an error
    *
@@ -431,7 +459,7 @@ class Tally {
           Election.InternalElectionDescription metadata,
           Election.CiphertextElectionContext context) {
 
-    // TODO: ISSUE //14: unique Id for the tally
+    // TODO: ISSUE #14: unique Id for the tally
     CiphertextTally tally = new CiphertextTally("election-results", metadata, context);
     if (tally.batch_append(store)) {
       return Optional.of(tally);

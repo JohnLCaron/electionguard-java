@@ -3,6 +3,7 @@ package com.sunya.electionguard;
 import com.google.common.base.Preconditions;
 import com.google.common.flogger.FluentLogger;
 
+import javax.annotation.concurrent.Immutable;
 import java.math.BigInteger;
 import java.util.Formatter;
 import java.util.Optional;
@@ -15,16 +16,17 @@ class ChaumPedersen {
   /**
    * Representation of disjunctive Chaum Pederson proof.
    */
+  @Immutable
   static class DisjunctiveChaumPedersenProof extends Proof {
-    ElementModP proof_zero_pad; // a0 in the spec"""
-    ElementModP proof_zero_data; // b0 in the spec"""
-    ElementModP proof_one_pad; // a1 in the spec"""
-    ElementModP proof_one_data; // b1 in the spec"""
-    ElementModQ proof_zero_challenge; // c0 in the spec"""
-    ElementModQ proof_one_challenge; // c1 in the spec"""
-    ElementModQ challenge; // c in the spec"""
-    ElementModQ proof_zero_response; // proof_zero_response in the spec"""
-    ElementModQ proof_one_response; // proof_one_response in the spec"""
+    final ElementModP proof_zero_pad; // a0 in the spec"""
+    final ElementModP proof_zero_data; // b0 in the spec"""
+    final ElementModP proof_one_pad; // a1 in the spec"""
+    final ElementModP proof_one_data; // b1 in the spec"""
+    final ElementModQ proof_zero_challenge; // c0 in the spec"""
+    final ElementModQ proof_one_challenge; // c1 in the spec"""
+    final ElementModQ challenge; // c in the spec"""
+    final ElementModQ proof_zero_response; // proof_zero_response in the spec"""
+    final ElementModQ proof_one_response; // proof_one_response in the spec"""
 
     public DisjunctiveChaumPedersenProof(ElementModP proof_zero_pad, ElementModP proof_zero_data,
                                          ElementModP proof_one_pad, ElementModP proof_one_data, ElementModQ proof_zero_challenge,
@@ -115,6 +117,7 @@ class ChaumPedersen {
   /**
    * Representation of a generic Chaum-Pedersen Zero Knowledge proof.
    */
+  @Immutable
   static class ChaumPedersenProof extends Proof {
     final ElementModP pad; // a in the spec
     final ElementModP data; // b in the spec
@@ -198,6 +201,7 @@ class ChaumPedersen {
   /**
    * Representation of constant Chaum Pederson proof
    */
+  @Immutable
   static class ConstantChaumPedersenProof extends Proof {
     final ElementModP pad; // a in the spec"""
     final ElementModP data; // bin the spec"
@@ -293,40 +297,6 @@ class ChaumPedersen {
       }
       return success;
     }
-  }
-
-  /**
-   * Produces a proof that a given encryption corresponds to a specific total value.
-   * <p>
-   * :param message: An ElGamal ciphertext
-   * :param constant: The plaintext constant value used to make the ElGamal ciphertext (L in the spec)
-   * :param r: The aggregate nonce used creating the ElGamal ciphertext
-   * :param k: The ElGamal public key for the election
-   * :param seed: Used to generate other random values here
-   * :param hash_header: A value used when generating the challenge,
-   * usually the election extended base hash (𝑄')
-   *
-   * @return
-   */
-  static ConstantChaumPedersenProof make_constant_chaum_pedersen(
-          ElGamal.Ciphertext message,
-          int constant,
-          ElementModQ r,
-          ElementModP k,
-          ElementModQ seed,
-          ElementModQ hash_header) {
-
-    ElementModP alpha = message.pad;
-    ElementModP beta = message.data;
-
-    // Pick one random number in Q.
-    ElementModQ u = new Nonces(seed, "constant-chaum-pedersen-proof").get(0);
-    ElementModP a = g_pow_p(u);  // 𝑔^𝑢𝑖 mod 𝑝
-    ElementModP b = pow_p(k, u);  // 𝐴^𝑢𝑖 mod 𝑝
-    ElementModQ c = Hash.hash_elems(hash_header, alpha, beta, a, b); // sha256(𝑄', A, B, a, b)
-    ElementModQ v = a_plus_bc_q(u, c, r);
-
-    return new ConstantChaumPedersenProof(a, b, c, v, constant);
   }
 
   /**
@@ -478,5 +448,37 @@ class ChaumPedersen {
     ElementModQ v = a_plus_bc_q(u, c, s);  // (𝑢𝑖 + 𝑐𝑖𝑠𝑖) mod 𝑞
 
     return new ChaumPedersenProof(a, b, c, v);
+  }
+
+  /**
+   * Produces a proof that a given encryption corresponds to a specific total value.
+   * <p>
+   * :param message: An ElGamal ciphertext
+   * :param constant: The plaintext constant value used to make the ElGamal ciphertext (L in the spec)
+   * :param r: The aggregate nonce used creating the ElGamal ciphertext
+   * :param k: The ElGamal public key for the election
+   * :param seed: Used to generate other random values here
+   * :param hash_header: A value used when generating the challenge,
+   * usually the election extended base hash (𝑄')
+   */
+  static ConstantChaumPedersenProof make_constant_chaum_pedersen(
+          ElGamal.Ciphertext message,
+          int constant,
+          ElementModQ r,
+          ElementModP k,
+          ElementModQ seed,
+          ElementModQ hash_header) {
+
+    ElementModP alpha = message.pad;
+    ElementModP beta = message.data;
+
+    // Pick one random number in Q.
+    ElementModQ u = new Nonces(seed, "constant-chaum-pedersen-proof").get(0);
+    ElementModP a = g_pow_p(u);  // 𝑔^𝑢𝑖 mod 𝑝
+    ElementModP b = pow_p(k, u);  // 𝐴^𝑢𝑖 mod 𝑝
+    ElementModQ c = Hash.hash_elems(hash_header, alpha, beta, a, b); // sha256(𝑄', A, B, a, b)
+    ElementModQ v = a_plus_bc_q(u, c, r);
+
+    return new ConstantChaumPedersenProof(a, b, c, v, constant);
   }
 }
