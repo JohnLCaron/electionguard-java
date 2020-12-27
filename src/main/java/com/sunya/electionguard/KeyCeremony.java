@@ -196,8 +196,8 @@ public class KeyCeremony {
 
   /**
    * Generate election key pair, proof, and polynomial
-   * :param quorum: Quorum of guardians needed to decrypt
-   * :return: Election key pair
+   * @param quorum: Quorum of guardians needed to decrypt
+   * @return Election key pair
    */
   static ElectionKeyPair generate_election_key_pair(int quorum, @Nullable ElementModQ nonce) {
     ElectionPolynomial polynomial = ElectionPolynomial.generate_polynomial(quorum, nonce);
@@ -209,11 +209,11 @@ public class KeyCeremony {
 
   /**
    * Generate election partial key backup for sharing
-   * :param owner_id: Owner of election key
-   * :param polynomial: The owner's Election polynomial
-   * :param auxiliary_public_key: The Auxiliary public key
-   * :param encrypt: Function to encrypt using auxiliary key
-   * :return: Election partial key backup
+   * @param owner_id: Owner of election key
+   * @param polynomial: The owner's Election polynomial
+   * @param auxiliary_public_key: The Auxiliary public key
+   * @param encryptor Function to encrypt using auxiliary key
+   * @return Election partial key backup
    */
   static Optional<ElectionPartialKeyBackup> generate_election_partial_key_backup(
           String owner_id,
@@ -248,10 +248,10 @@ public class KeyCeremony {
 
   /**
    * Verify election partial key backup contain point on owners polynomial
-   * :param verifier_id: Verifier of the partial key backup
-   * :param backup: Election partial key backup
-   * :param auxiliary_key_pair: Auxiliary key pair
-   * :param decrypt: Decryption function using auxiliary key
+   * @param verifier_id: Verifier of the partial key backup
+   * @param backup: Election partial key backup
+   * @param auxiliary_key_pair: Auxiliary key pair
+   * @param decryptor Decryption function using auxiliary key
    */
   static ElectionPartialKeyVerification verify_election_partial_key_backup(
           String verifier_id,
@@ -277,9 +277,9 @@ public class KeyCeremony {
 
   /**
    * Generate challenge to a previous verification of a partial key backup
-   * :param backup: Election partial key backup in question
-   * :param poynomial: Polynomial to regenerate point
-   * :return: Election partial key verification
+   * @param backup: Election partial key backup in question
+   * @param polynomial: Polynomial to regenerate point
+   * @return Election partial key verification
    */
   static ElectionPartialKeyChallenge generate_election_partial_key_challenge(
           ElectionPartialKeyBackup backup,
@@ -296,9 +296,9 @@ public class KeyCeremony {
 
   /**
    * Verify a challenge to a previous verification of a partial key backup
-   * :param verifier_id: Verifier of the challenge
-   * :param challenge: Election partial key challenge
-   * :return: Election partial key verification
+   * @param verifier_id: Verifier of the challenge
+   * @param challenge: Election partial key challenge
+   * @return Election partial key verification
    */
   static ElectionPartialKeyVerification verify_election_partial_key_challenge(
           String verifier_id, ElectionPartialKeyChallenge challenge) {
@@ -314,7 +314,7 @@ public class KeyCeremony {
 
   /**
       Creates a joint election key from the public keys of all guardians
-    :return: Joint key for election
+    @return Joint key for election
    */
   static ElementModP combine_election_public_keys(Map<String, ElectionPublicKey> election_public_keys) {
     // public_keys = map(lambda public_key:public_key.key, election_public_keys.values())

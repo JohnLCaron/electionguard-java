@@ -17,10 +17,10 @@ public class Decryption {
   /**
    * Compute a decryptions share for a guardian
    * <p>
-   * :param guardian: The guardian who will partially decrypt the tally
-   * :param tally: The election tally to decrypt
+   * @param guardian: The guardian who will partially decrypt the tally
+   * @param tally: The election tally to decrypt
    * :context: The public election encryption context
-   * :return: a `TallyDecryptionShare` or `None` if there is an error
+   * @return a `TallyDecryptionShare` or `None` if there is an error
    */
   static Optional<TallyDecryptionShare> compute_decryption_share(
           Guardian guardian,
@@ -50,11 +50,11 @@ public class Decryption {
   /**
    * Compute a compensated decryptions share for a guardian
    * <p>
-   * :param guardian: The guardian who will partially decrypt the tally
-   * :param missing_guardian_id: the missing guardian id to compensate
-   * :param tally: The election tally to decrypt
+   * @param guardian: The guardian who will partially decrypt the tally
+   * @param missing_guardian_id: the missing guardian id to compensate
+   * @param tally: The election tally to decrypt
    * :context: The public election encryption context
-   * :return: a `TallyDecryptionShare` or `None` if there is an error
+   * @return a `TallyDecryptionShare` or `None` if there is an error
    */
   static Optional<CompensatedTallyDecryptionShare> compute_compensated_decryption_share(
           Guardian guardian,
@@ -326,10 +326,10 @@ public class Decryption {
 
   /**
    * Compute a partial decryption for a specific selection.
-   * :param guardian: The guardian who will partially decrypt the selection
-   * :param selection: The specific selection to decrypt
+   * @param guardian: The guardian who will partially decrypt the selection
+   * @param selection: The specific selection to decrypt
    * :context: The public election encryption context
-   * :return: a `CiphertextDecryptionSelection` or `None` if there is an error
+   * @return a `CiphertextDecryptionSelection` or `None` if there is an error
    */
   static Optional<CiphertextDecryptionSelection> compute_decryption_share_for_selection(
           Guardian guardian,
@@ -386,11 +386,11 @@ public class Decryption {
    * Compute a compensated decryption share for a specific selection using the
    * avialable guardian's share of the missing guardian's private key polynomial
    * <p>
-   * :param available_guardian: The available guardian that will partially decrypt the selection
-   * :param missing_guardian_id: The id of the guardian that is missing
-   * :param selection: The specific selection to decrypt
+   * @param available_guardian: The available guardian that will partially decrypt the selection
+   * @param missing_guardian_id: The id of the guardian that is missing
+   * @param selection: The specific selection to decrypt
    * :context: The public election encryption context
-   * :return: a `CiphertextCompensatedDecryptionSelection` or `None` if there is an error
+   * @return a `CiphertextCompensatedDecryptionSelection` or `None` if there is an error
    */
   static Optional<CiphertextCompensatedDecryptionSelection> compute_compensated_decryption_share_for_selection(
           Guardian available_guardian,
@@ -531,8 +531,8 @@ public class Decryption {
    * Recontruct the missing Decryption Share for a missing guardian
    * from the collection of compensated decryption shares
    * <p>
-   * :param missing_guardian_id: The guardian id for the missing guardian
-   * :param cast_tally: The collection of `CiphertextTallyContest` that is cast
+   * @param missing_guardian_id: The guardian id for the missing guardian
+   * @param cast_tally: The collection of `CiphertextTallyContest` that is cast
    * :shares: the collection of `CompensatedTallyDecryptionShare` for the missing guardian
    * :lagrange_coefficients: the lagrange coefficients corresponding to the available guardians that provided shares
    */
@@ -598,9 +598,9 @@ public class Decryption {
   /**
    * Recontruct the missing Decryption shares for a missing guardian from the collection of compensated decryption shares
    * <p>
-   * :param missing_guardian_id: The guardian id for the missing guardian
-   * :param public_key: the public key for the missing guardian
-   * :param spoiled_ballots: The collection of `CiphertextAcceptedBallot` that is spoiled
+   * @param missing_guardian_id: The guardian id for the missing guardian
+   * @param public_key: the public key for the missing guardian
+   * @param spoiled_ballots: The collection of `CiphertextAcceptedBallot` that is spoiled
    * :shares: the collection of `CompensatedTallyDecryptionShare` for the missing guardian
    * :lagrange_coefficients: the lagrange coefficients corresponding to the available guardians that provided shares
    */
@@ -646,9 +646,9 @@ public class Decryption {
   /*
       Reconstruct a missing ballot Decryption share for a missing guardian from the collection of compensated decryption shares
 
-  :param missing_guardian_id: The guardian id for the missing guardian
-  :param public_key: the public key for the missing guardian
-  :param ballots: The `CiphertextAcceptedBallot` to reconstruct
+  @param missing_guardian_id: The guardian id for the missing guardian
+  @param public_key: the public key for the missing guardian
+  @param ballots: The `CiphertextAcceptedBallot` to reconstruct
   :shares: the collection of `CompensatedBallotDecryptionShare` for the missing guardian, each keyed by the ID of the guardian that produced it
   :lagrange_coefficients: the lagrange coefficients corresponding to the available guardians that provided shares
    */

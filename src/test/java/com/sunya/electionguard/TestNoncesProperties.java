@@ -4,7 +4,6 @@ import net.jqwik.api.Example;
 import net.jqwik.api.ForAll;
 import net.jqwik.api.Property;
 import net.jqwik.api.constraints.Positive;
-import org.junit.jupiter.api.BeforeEach;
 
 import java.math.BigInteger;
 
@@ -17,7 +16,7 @@ public class TestNoncesProperties extends TestProperties {
   Nonces nonces;
 
   public TestNoncesProperties() {
-    seed = new Group.ElementModQ(Secrets.randbelow(Q));
+    seed = new Group.ElementModQ(Utils.randbelow(Q));
     nonces = new Nonces(seed);
   }
 

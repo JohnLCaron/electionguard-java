@@ -1,9 +1,12 @@
 package com.sunya.electionguard;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.flogger.FluentLogger;
 
 import javax.annotation.Nullable;
+import javax.annotation.concurrent.Immutable;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.Callable;
@@ -15,7 +18,8 @@ import static com.sunya.electionguard.Group.*;
 public class Tally {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
-  static class Tuple {
+  @Immutable
+  private static class Tuple {
     final String id;
     @Nullable
     final ElGamal.Ciphertext ciphertext;
@@ -29,14 +33,13 @@ public class Tally {
   /**
    * A plaintext Tally Selection is a decrypted selection of a contest.
    */
+  @Immutable
   static class PlaintextTallySelection extends ElectionObjectBase {
     // g^tally or M in the spec
     final BigInteger tally;
     final ElementModP value;
-
     final ElGamal.Ciphertext message;
-
-    final List<DecryptionShare.CiphertextDecryptionSelection> shares;
+    final ImmutableList<DecryptionShare.CiphertextDecryptionSelection> shares;
 
     public PlaintextTallySelection(String objectId, BigInteger tally, ElementModP value,
                                    ElGamal.Ciphertext message, List<DecryptionShare.CiphertextDecryptionSelection> shares) {
@@ -44,7 +47,7 @@ public class Tally {
       this.tally = tally;
       this.value = value;
       this.message = message;
-      this.shares = shares;
+      this.shares = ImmutableList.copyOf(shares);
     }
   }
 
@@ -78,12 +81,13 @@ public class Tally {
   /**
    * A plaintext Tally Contest is a collection of plaintext selections
    */
+  @Immutable
   static class PlaintextTallyContest extends ElectionObjectBase {
-    final Map<String, PlaintextTallySelection> selections;
+    final ImmutableMap<String, PlaintextTallySelection> selections;
 
     public PlaintextTallyContest(String object_id, Map<String, PlaintextTallySelection> selections) {
       super(object_id);
-      this.selections = selections;
+      this.selections = ImmutableMap.copyOf(selections);
     }
   }
 
@@ -91,15 +95,16 @@ public class Tally {
    * A CiphertextTallyContest is a container for associating a collection of CiphertextTallySelection
    * to a specific ContestDescription
    */
+  @Immutable
   static class CiphertextTallyContest extends ElectionObjectBase {
     final ElementModQ description_hash; // The ContestDescription hash
 
-    final Map<String, CiphertextTallySelection> tally_selections; // A collection of CiphertextTallySelection mapped by SelectionDescription.object_id
+    final ImmutableMap<String, CiphertextTallySelection> tally_selections; // A collection of CiphertextTallySelection mapped by SelectionDescription.object_id
 
     public CiphertextTallyContest(String object_id, ElementModQ description_hash, Map<String, CiphertextTallySelection> tally_selections) {
       super(object_id);
       this.description_hash = description_hash;
-      this.tally_selections = tally_selections;
+      this.tally_selections = ImmutableMap.copyOf(tally_selections);
     }
 
     /**
@@ -187,15 +192,16 @@ public class Tally {
   /**
    * The plaintext representation of all contests in the election
    */
+  @Immutable
   public static class PlaintextTally extends ElectionObjectBase {
-    Map<String, PlaintextTallyContest> contests;
-    Map<String, Map<String, PlaintextTallyContest>> spoiled_ballots;
+    final ImmutableMap<String, PlaintextTallyContest> contests;
+    final ImmutableMap<String, Map<String, PlaintextTallyContest>> spoiled_ballots;
 
     public PlaintextTally(String object_id, Map<String, PlaintextTallyContest> contests,
                           Map<String, Map<String, PlaintextTallyContest>> spoiled_ballots) {
       super(object_id);
-      this.contests = contests;
-      this.spoiled_ballots = spoiled_ballots;
+      this.contests = ImmutableMap.copyOf(contests);
+      this.spoiled_ballots = ImmutableMap.copyOf(spoiled_ballots);
     }
   } // PlaintextTally
 
@@ -223,7 +229,7 @@ public class Tally {
       this.spoiled_ballots = new HashMap<>();
 
       this._cast_ballot_ids = new HashSet<>();
-      this.cast = this._build_tally_collection(this._metadata);
+      this.cast = _build_tally_collection(this._metadata);
     }
 
     private int len() {
@@ -414,12 +420,13 @@ public class Tally {
   /**
    * The published plaintext representation of all contests in the election.
    */
+  @Immutable
   public static class PublishedCiphertextTally extends ElectionObjectBase {
-    Map<String, CiphertextTallyContest> cast;
+    final ImmutableMap<String, CiphertextTallyContest> cast;
 
     public PublishedCiphertextTally(String object_id, Map<String, CiphertextTallyContest> cast) {
       super(object_id);
-      this.cast = cast;
+      this.cast = ImmutableMap.copyOf(cast);
     }
   }
 
@@ -432,9 +439,7 @@ public class Tally {
 
   /**
    * Tally a ballot that is either Cast or Spoiled
-   * :return: The mutated CiphertextTally or None if there is an error
-   *
-   * @return
+   * @return The mutated CiphertextTally or None if there is an error
    */
   static Optional<CiphertextTally> tally_ballot(CiphertextAcceptedBallot ballot, CiphertextTally tally) {
 
@@ -452,7 +457,7 @@ public class Tally {
 
   /**
    * Tally all of the ballots in the ballot store.
-   * :return: a CiphertextTally or None if there is an error
+   * @return a CiphertextTally or None if there is an error
    */
   static Optional<CiphertextTally> tally_ballots(
           Iterable<CiphertextAcceptedBallot> store,

@@ -16,12 +16,12 @@ public class DecryptWithSecrets {
   /**
    * Decrypt the specified `CiphertextBallotSelection` within the context of the specified selection.
    * <p>
-   * :param selection: the selection to decrypt
-   * :param description: the qualified selection metadata
-   * :param public_key: the public key for the election (K)
-   * :param secret_key: the known secret key used to generate the public key for this election
-   * :param crypto_extended_base_hash: the extended base hash code (𝑄') for the election
-   * :param suppress_validity_check: do not validate the encryption prior to decrypting (useful for tests)
+   * @param selection: the selection to decrypt
+   * @param description: the qualified selection metadata
+   * @param public_key: the public key for the election (K)
+   * @param secret_key: the known secret key used to generate the public key for this election
+   * @param crypto_extended_base_hash: the extended base hash code (𝑄') for the election
+   * @param suppress_validity_check: do not validate the encryption prior to decrypting (useful for tests)
    */
   static Optional<PlaintextBallotSelection> decrypt_selection_with_secret(
           CiphertextBallotSelection selection,
@@ -51,13 +51,13 @@ public class DecryptWithSecrets {
   /**
    * Decrypt the specified `CiphertextBallotSelection` within the context of the specified selection.
    * <p>
-   * :param selection: the contest selection to decrypt
-   * :param description: the qualified selection metadata that may be a placeholder selection
-   * :param public_key: the public key for the election (K)
-   * :param crypto_extended_base_hash: the extended base hash code (𝑄') for the election
-   * :param nonce_seed: the optional nonce that was seeded to the encryption function.
+   * @param selection: the contest selection to decrypt
+   * @param description: the qualified selection metadata that may be a placeholder selection
+   * @param public_key: the public key for the election (K)
+   * @param crypto_extended_base_hash: the extended base hash code (𝑄') for the election
+   * @param nonce_seed: the optional nonce that was seeded to the encryption function.
    * if no value is provided, the nonce field from the selection is used
-   * :param suppress_validity_check: do not validate the encryption prior to decrypting (useful for tests)
+   * @param suppress_validity_check: do not validate the encryption prior to decrypting (useful for tests)
    *
    * @return
    */
@@ -111,13 +111,13 @@ public class DecryptWithSecrets {
   /**
    * Decrypt the specified `CiphertextBallotContest` within the context of the specified contest.
    * <p>
-   * :param contest: the contest to decrypt
-   * :param description: the qualified contest metadata that includes placeholder selections
-   * :param public_key: the public key for the election (K)
-   * :param secret_key: the known secret key used to generate the public key for this election
-   * :param crypto_extended_base_hash: the extended base hash code (𝑄') for the election
-   * :param suppress_validity_check: do not validate the encryption prior to decrypting (useful for tests)
-   * :param remove_placeholders: filter out placeholder ciphertext selections after decryption
+   * @param contest: the contest to decrypt
+   * @param description: the qualified contest metadata that includes placeholder selections
+   * @param public_key: the public key for the election (K)
+   * @param secret_key: the known secret key used to generate the public key for this election
+   * @param crypto_extended_base_hash: the extended base hash code (𝑄') for the election
+   * @param suppress_validity_check: do not validate the encryption prior to decrypting (useful for tests)
+   * @param remove_placeholders: filter out placeholder ciphertext selections after decryption
    */
   static Optional<PlaintextBallotContest> decrypt_contest_with_secret(
           CiphertextBallotContest contest,
@@ -161,14 +161,14 @@ public class DecryptWithSecrets {
   /**
    * Decrypt the specified `CiphertextBallotContest` within the context of the specified contest.
    * <p>
-   * :param contest: the contest to decrypt
-   * :param description: the qualified contest metadata that includes placeholder selections
-   * :param public_key: the public key for the election (K)
-   * :param crypto_extended_base_hash: the extended base hash code (𝑄') for the election
-   * :param nonce_seed: the optional nonce that was seeded to the encryption function
+   * @param contest: the contest to decrypt
+   * @param description: the qualified contest metadata that includes placeholder selections
+   * @param public_key: the public key for the election (K)
+   * @param crypto_extended_base_hash: the extended base hash code (𝑄') for the election
+   * @param nonce_seed: the optional nonce that was seeded to the encryption function
    * if no value is provided, the nonce field from the contest is used
-   * :param suppress_validity_check: do not validate the encryption prior to decrypting (useful for tests)
-   * :param remove_placeholders: filter out placeholder ciphertext selections after decryption
+   * @param suppress_validity_check: do not validate the encryption prior to decrypting (useful for tests)
+   * @param remove_placeholders: filter out placeholder ciphertext selections after decryption
    *
    * @return
    */
@@ -240,13 +240,13 @@ public class DecryptWithSecrets {
   /**
    * Decrypt the specified `CiphertextBallot` within the context of the specified election.
    * <p>
-   * :param ballot: the ballot to decrypt
-   * :param election_metadata: the qualified election metadata that includes placeholder selections
-   * :param crypto_extended_base_hash: the extended base hash code (𝑄') for the election
-   * :param public_key: the public key for the election (K)
-   * :param secret_key: the known secret key used to generate the public key for this election
-   * :param suppress_validity_check: do not validate the encryption prior to decrypting (useful for tests)
-   * :param remove_placeholders: filter out placeholder ciphertext selections after decryption
+   * @param ballot: the ballot to decrypt
+   * @param election_metadata: the qualified election metadata that includes placeholder selections
+   * @param crypto_extended_base_hash: the extended base hash code (𝑄') for the election
+   * @param public_key: the public key for the election (K)
+   * @param secret_key: the known secret key used to generate the public key for this election
+   * @param suppress_validity_check: do not validate the encryption prior to decrypting (useful for tests)
+   * @param remove_placeholders: filter out placeholder ciphertext selections after decryption
    *
    * @return
    */
@@ -294,13 +294,13 @@ public class DecryptWithSecrets {
   /**
    * Decrypt the specified `CiphertextBallot` within the context of the specified election.
    * <p>
-   * :param ballot: the ballot to decrypt
-   * :param election_metadata: the qualified election metadata that includes placeholder selections
-   * :param crypto_extended_base_hash: the extended base hash code (𝑄') for the election
-   * :param public_key: the public key for the election (K)
-   * :param nonce: the optional master ballot nonce that was either seeded to, or gernated by the encryption function
-   * :param suppress_validity_check: do not validate the encryption prior to decrypting (useful for tests)
-   * :param remove_placeholders: filter out placeholder ciphertext selections after decryption
+   * @param ballot: the ballot to decrypt
+   * @param election_metadata: the qualified election metadata that includes placeholder selections
+   * @param crypto_extended_base_hash: the extended base hash code (𝑄') for the election
+   * @param public_key: the public key for the election (K)
+   * @param nonce: the optional master ballot nonce that was either seeded to, or gernated by the encryption function
+   * @param suppress_validity_check: do not validate the encryption prior to decrypting (useful for tests)
+   * @param remove_placeholders: filter out placeholder ciphertext selections after decryption
    *
    * @return
    */

@@ -90,7 +90,7 @@ public class Ballot {
     /**
      * Represent a Truthy string as 1, or if the string is Falsy, 0
      * See: https://docs.python.org/3/distutils/apiref.html#distutils.util.strtobool
-     * :return: an integer 0 or 1 for valid data, or 0 if the data is malformed
+     * @return an integer 0 or 1 for valid data, or 0 if the data is malformed
      */
     int to_int() {
       boolean asBool = false;
@@ -624,8 +624,8 @@ public class Ballot {
 
     /**
      * Check if expected ballot style is valid
-     * :param expected_ballot_style_id: Expected ballot style id
-     * :return: True if valid
+     * @param expected_ballot_style_id: Expected ballot style id
+     * @return True if valid
      */
     boolean is_valid(String expected_ballot_style_id) {
       if (!this.ballot_style.equals(expected_ballot_style_id)) {
@@ -697,7 +697,7 @@ public class Ballot {
     }
 
     /**
-     * :return: a representation of the election and the external Id in the nonce's used
+     * @return a representation of the election and the external Id in the nonce's used
      * to derive other nonce values on the ballot
      */
     static ElementModQ nonce_seed(ElementModQ description_hash, String object_id, ElementModQ nonce) {
@@ -705,7 +705,7 @@ public class Ballot {
     }
 
     /**
-     * :return: a hash value derived from the description hash, the object id, and the nonce value
+     * @return a hash value derived from the description hash, the object id, and the nonce value
      * suitable for deriving other nonce values on the ballot
      *
      * @return
@@ -720,7 +720,8 @@ public class Ballot {
     }
 
     /**
-     * Get a tracker hash as a code in friendly readable words for sharing :return: Tracker in words or None.
+     * Get a tracker hash as a code in friendly readable words for sharing
+     * @return Tracker in words or None.
      */
     Optional<String> get_tracker_code() {
       if (this.tracking_hash.isEmpty()) {
@@ -877,14 +878,13 @@ public class Ballot {
   /**
    * Makes a `CiphertextBallot`, initially in the state where it's neither been cast nor spoiled.
    * <p>
-   * :param object_id: the object_id of this specific ballot
-   * :param ballot_style: The `object_id` of the `BallotStyle` in the `Election` Manifest
-   * :param description_hash: Hash of the election metadata
-   * :param crypto_base_hash: Hash of the cryptographic election context
-   * :param contests: List of contests for this ballot
-   * :param timestamp: Timestamp at which the ballot encryption is generated in tick
-   * :param previous_tracking_hash: Previous tracking hash or seed hash
-   * :param nonce: optional nonce used as part of the encryption process
+   * @param object_id: the object_id of this specific ballot
+   * @param ballot_style: The `object_id` of the `BallotStyle` in the `Election` Manifest
+   * @param description_hash: Hash of the election metadata
+   * @param previous_tracking_hashO: Previous tracking hash or seed hash
+   * @param contests: List of contests for this ballot
+   * @param nonce: optional nonce used as part of the encryption process
+   * @param timestamp: Timestamp at which the ballot encryption is generated in tick
    */
   public static CiphertextBallot make_ciphertext_ballot(
           String object_id,
@@ -924,13 +924,13 @@ public class Ballot {
   /**
    * Makes a `CiphertextAcceptedBallot`, ensuring that no nonces are part of the contests.
    * <p>
-   * :param object_id: the object_id of this specific ballot
-   * :param ballot_style: The `object_id` of the `BallotStyle` in the `Election` Manifest
-   * :param description_hash: Hash of the election metadata
-   * :param previous_tracking_hash: Previous tracking hash or seed hash
-   * :param contests: List of contests for this ballot
-   * :param timestamp: Timestamp at which the ballot encryption is generated in tick
-   * :param state: ballot box state
+   * @param object_id: the object_id of this specific ballot
+   * @param ballot_style: The `object_id` of the `BallotStyle` in the `Election` Manifest
+   * @param description_hash: Hash of the election metadata
+   * @param previous_tracking_hashO: Previous tracking hash or seed hash
+   * @param contests: List of contests for this ballot
+   * @param timestampO: Timestamp at which the ballot encryption is generated in tick
+   * @param state: ballot box state
    */
   static CiphertextAcceptedBallot make_ciphertext_accepted_ballot(
           String object_id,

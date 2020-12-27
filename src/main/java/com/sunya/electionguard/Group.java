@@ -315,8 +315,8 @@ public class Group {
   /**
    * Computes b^e mod q.
    * <p>
-   * :param b: An element in [0,Q).
-   * :param e: An element in [0,Q).
+   * @param b: An element in [0,Q).
+   * @param e: An element in [0,Q).
    */
   static ElementModQ pow_q(BigInteger b, BigInteger e) {
     return new ElementModQ(b.modPow(e, Q));
@@ -388,7 +388,7 @@ public class Group {
    * Generate random number between 0 and Q
    */
   static ElementModQ rand_q() {
-    BigInteger random = Secrets.randbelow(Q);
+    BigInteger random = Utils.randbelow(Q);
     return new ElementModQ(random);
   }
 
@@ -396,7 +396,7 @@ public class Group {
    * Generate random number between start and Q
    */
   static ElementModQ rand_range_q(ElementMod start) {
-    BigInteger random = Secrets.randbetween(start.getBigInt(), Q);
+    BigInteger random = Utils.randbetween(start.getBigInt(), Q);
     return new ElementModQ(random);
   }
 

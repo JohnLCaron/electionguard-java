@@ -41,11 +41,11 @@ public class Guardian extends ElectionObjectBase {
   /**
    * Initialize a guardian with the specified arguments
    * <p>
-   * :param id: the unique identifier for the guardian
-   * :param sequence_order: a unique number in [0, 256) that identifies this guardian
-   * :param number_of_guardians: the total number of guardians that will participate in the election
-   * :param quorum: the count of guardians necessary to decrypt
-   * :param nonce_seed: an optional `ElementModQ` value that can be used to generate the `ElectionKeyPair`.
+   * @param id: the unique identifier for the guardian
+   * @param sequence_order: a unique number in [0, 256) that identifies this guardian
+   * @param number_of_guardians: the total number of guardians that will participate in the election
+   * @param quorum: the count of guardians necessary to decrypt
+   * @param nonce_seed: an optional `ElementModQ` value that can be used to generate the `ElectionKeyPair`.
    * It is recommended to only use this field for testing.
    */
   public Guardian(String id,
@@ -69,8 +69,8 @@ public class Guardian extends ElectionObjectBase {
 
   /**
    * Reset guardian to initial state
-   * :param number_of_guardians: Number of guardians in election
-   * :param quorum: Quorum of guardians required to decrypt
+   * @param number_of_guardians: Number of guardians in election
+   * @param quorum: Quorum of guardians required to decrypt
    */
   void reset(int number_of_guardians, int quorum) {
     this._backups_to_share.clear();
@@ -85,8 +85,8 @@ public class Guardian extends ElectionObjectBase {
 
   /**
    * Set ceremony details for election
-   * :param number_of_guardians: Number of guardians in election
-   * :param quorum: Quorum of guardians required to decrypt
+   * @param number_of_guardians: Number of guardians in election
+   * @param quorum: Quorum of guardians required to decrypt
    */
   void set_ceremony_details(int number_of_guardians, int quorum) {
     this.ceremony_details = CeremonyDetails.create(number_of_guardians, quorum);
@@ -94,7 +94,7 @@ public class Guardian extends ElectionObjectBase {
 
   /**
    * Share public election and auxiliary keys for guardian
-   * :return: Public set of election and auxiliary keys
+   * @return Public set of election and auxiliary keys
    */
   PublicKeySet share_public_keys() {
     return PublicKeySet.create(
@@ -107,7 +107,7 @@ public class Guardian extends ElectionObjectBase {
 
   /**
    * Save public election and auxiliary keys for another guardian
-   * :param public_key_set: Public set of election and auxiliary keys
+   * @param public_key_set: Public set of election and auxiliary keys
    */
   void save_guardian_public_keys(PublicKeySet public_key_set) {
 
@@ -126,7 +126,7 @@ public class Guardian extends ElectionObjectBase {
 
   /**
    * True if all election and auxiliary public keys have been received.
-   * :return: All election and auxiliary public keys backups received
+   * @return All election and auxiliary public keys backups received
    */
   boolean all_public_keys_received() {
     return this.all_auxiliary_public_keys_received() && this.all_election_public_keys_received();
@@ -134,7 +134,6 @@ public class Guardian extends ElectionObjectBase {
 
   /**
    * Generate auxiliary key pair
-   * :param generate_auxiliary_key_pair: Function to generate auxiliary key pair
    */
   void generate_auxiliary_key_pair() {
     this._auxiliary_keys = generate_rsa_auxiliary_key_pair();
@@ -150,7 +149,7 @@ public class Guardian extends ElectionObjectBase {
 
   /**
    * True if all auxiliary public keys have been received.
-   * :return: All auxiliary public keys backups received
+   * @return All auxiliary public keys backups received
    */
   boolean all_auxiliary_public_keys_received() {
     return this._guardian_auxiliary_public_keys.size() == this.ceremony_details.number_of_guardians();
@@ -171,7 +170,7 @@ public class Guardian extends ElectionObjectBase {
     return new Auxiliary.PublicKey(this.object_id, this.sequence_order, this._auxiliary_keys.public_key);
   }
 
-  /**         Share coefficient validation set to be used for validating the coefficients post election. */
+  /** Share coefficient validation set to be used for validating the coefficients post election. */
   CoefficientValidationSet share_coefficient_validation_set() {
     return KeyCeremony.get_coefficient_validation_set(this.object_id, this._election_keys.polynomial());
   }
@@ -186,7 +185,7 @@ public class Guardian extends ElectionObjectBase {
 
   /**
    * Share election public key with another guardian
-   * :return: Election public key
+   * @return Election public key
    */
   ElectionPublicKey share_election_public_key() {
     return ElectionPublicKey.create(
@@ -204,7 +203,7 @@ public class Guardian extends ElectionObjectBase {
 
   /**
    * True if all election public keys have been received.
-   * :return: All election public keys backups received
+   * @return All election public keys backups received
    *
    * @return
    */
@@ -214,7 +213,7 @@ public class Guardian extends ElectionObjectBase {
 
   /**
    * Generate all election partial key backups based on existing public keys
-   * :param encrypt: Encryption function using auxiliary key
+   * @param encryptor Encryption function using auxiliary key
    */
   boolean generate_election_partial_key_backups(@Nullable Auxiliary.Encryptor encryptor) {
 
@@ -241,8 +240,8 @@ public class Guardian extends ElectionObjectBase {
 
   /**
    * Share election partial key backup with another guardian
-   * :param designated_id: Designated guardian
-   * :return: Election partial key backup or None.
+   * @param designated_id: Designated guardian
+   * @return Election partial key backup or None.
    */
 
   Optional<ElectionPartialKeyBackup> share_election_partial_key_backup(String designated_id) {
@@ -251,7 +250,7 @@ public class Guardian extends ElectionObjectBase {
 
   /**
    * Save election partial key backup from another guardian
-   * :param backup: Election partial key backup
+   * @param backup: Election partial key backup
    */
   void save_election_partial_key_backup(ElectionPartialKeyBackup backup) {
     this._guardian_election_partial_key_backups.put(backup.owner_id(), backup);
@@ -266,9 +265,9 @@ public class Guardian extends ElectionObjectBase {
 
   /**
    * Verify election partial key backup value is in polynomial
-   * :param guardian_id: Owner of backup to verify
-   * :param decrypt:
-   * :return: Election partial key verification or None
+   * @param guardian_id: Owner of backup to verify
+   * @param decryptor
+   * @return Election partial key verification or None
    */
   Optional<ElectionPartialKeyVerification> verify_election_partial_key_backup(
           String guardian_id,
@@ -283,8 +282,8 @@ public class Guardian extends ElectionObjectBase {
 
   /**
    * Publish election backup challenge of election partial key verification
-   * :param guardian_id: Owner of election key
-   * :return: Election partial key challenge or None
+   * @param guardian_id: Owner of election key
+   * @return Election partial key challenge or None
    *
    * @return
    */
@@ -298,8 +297,8 @@ public class Guardian extends ElectionObjectBase {
 
   /**
    * Verify challenge of previous verification of election partial key
-   * :param challenge: Election partial key challenge
-   * :return: Election partial key verification
+   * @param challenge: Election partial key challenge
+   * @return Election partial key verification
    */
   ElectionPartialKeyVerification verify_election_partial_key_challenge(ElectionPartialKeyChallenge challenge) {
     return KeyCeremony.verify_election_partial_key_challenge(this.object_id, challenge);
@@ -307,7 +306,7 @@ public class Guardian extends ElectionObjectBase {
 
   /**
    * Save election partial key verification from another guardian
-   * :param verification: Election partial key verification
+   * @param verification: Election partial key verification
    */
   void save_election_partial_key_verification(ElectionPartialKeyVerification verification) {
     this._guardian_election_partial_key_verifications.put(verification.designated_id(), verification);
@@ -315,7 +314,7 @@ public class Guardian extends ElectionObjectBase {
 
   /**
    * True if all election partial key backups have been verified.
-   * :return: All election partial key backups verified
+   * @return All election partial key backups verified
    */
   boolean all_election_partial_key_backups_verified() {
     int required = this.ceremony_details.number_of_guardians() - 1;
@@ -332,7 +331,7 @@ public class Guardian extends ElectionObjectBase {
 
   /**
    * Creates a joint election key from the public keys of all guardians
-   * :return: Optional joint key for election
+   * @return Optional joint key for election
    */
   Optional<Group.ElementModP> publish_joint_key() {
     if (!this.all_election_public_keys_received()) {
@@ -347,12 +346,12 @@ public class Guardian extends ElectionObjectBase {
   /**
    * Compute a partial decryption of an elgamal encryption
    * <p>
-   * :param elgamal: the `ElGamalCiphertext` that will be partially decrypted
-   * :param extended_base_hash: the extended base hash of the election that
+   * @param elgamal: the `ElGamalCiphertext` that will be partially decrypted
+   * @param extended_base_hash: the extended base hash of the election that
    * was used to generate t he ElGamal Ciphertext
-   * :param nonce_seed: an optional value used to generate the `ChaumPedersenProof`
+   * @param nonce_seed: an optional value used to generate the `ChaumPedersenProof`
    * if no value is provided, a random number will be used.
-   * :return: a `Tuple[ElementModP, ChaumPedersenProof]` of the decryption and its proof
+   * @return a `Tuple[ElementModP, ChaumPedersenProof]` of the decryption and its proof
    *
    * @return
    */
@@ -401,14 +400,14 @@ public class Guardian extends ElectionObjectBase {
    * Compute a compensated partial decryption of an elgamal encryption
    * on behalf of the missing guardian
    * <p>
-   * :param missing_guardian_id: the guardian
-   * :param elgamal: the `ElGamalCiphertext` that will be partially decrypted
-   * :param extended_base_hash: the extended base hash of the election that
+   * @param missing_guardian_id: the guardian
+   * @param elgamal: the `ElGamalCiphertext` that will be partially decrypted
+   * @param extended_base_hash: the extended base hash of the election that
    * was used to generate t he ElGamal Ciphertext
-   * :param nonce_seed: an optional value used to generate the `ChaumPedersenProof`
+   * @param nonce_seed: an optional value used to generate the `ChaumPedersenProof`
    * if no value is provided, a random number will be used.
-   * :param decrypt: an `AuxiliaryDecrypt` function to decrypt the missing guardina private key backup
-   * :return: a `Tuple[ElementModP, ChaumPedersenProof]` of the decryption and its proof
+   * @param decryptor an `AuxiliaryDecrypt` function to decrypt the missing guardina private key backup
+   * @return a `Tuple[ElementModP, ChaumPedersenProof]` of the decryption and its proof
    *
    * @return
    */

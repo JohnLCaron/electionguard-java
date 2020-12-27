@@ -13,7 +13,7 @@ public class Words {
    * Get word (4096 options) based on 16 bit index for use with trackers.
    *
    * @param index: index of word between 0 and 4095
-   * @return: word or None if index outside bounds.
+   * @return word or None if index outside bounds.
    */
   static Optional<String> get_word(int index) {
     if (index < MIN_INDEX || index > MAX_INDEX) {
@@ -26,14 +26,14 @@ public class Words {
    * Get the index of a word (4096 options) based on 16 bit index for use with trackers.
    *
    * @param word: word
-   * @return: index of word or None if not found.
+   * @return index of word or None if not found.
    */
   static Optional<Integer> get_index_from_word(String word) {
     int index = words.indexOf(word);
     return index >= 0 ? Optional.of(index) : Optional.empty();
   }
 
-  static private List init() {
+  static private List<String> init() {
     return List.of(
             "aardvark",
             "abacus",

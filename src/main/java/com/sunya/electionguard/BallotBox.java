@@ -35,7 +35,7 @@ public class BallotBox {
    * Accept a ballot within the context of a specified election and against an existing data store
    * Verified that the ballot is valid for the election `metadata` and `context` and
    * that the ballot has not already been cast or spoiled.
-   * :return: a `CiphertextAcceptedBallot` or `None` if there was an error
+   * @return a `CiphertextAcceptedBallot` or `None` if there was an error
    */
   Optional<CiphertextAcceptedBallot> accept_ballot(CiphertextBallot ballot, BallotBoxState state) {
     if (!BallotValidator.ballot_is_valid_for_election(ballot, _metadata, _context)) {

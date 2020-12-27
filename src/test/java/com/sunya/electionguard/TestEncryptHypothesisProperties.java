@@ -127,9 +127,9 @@ public class TestEncryptHypothesisProperties extends TestProperties {
    * <p>
    * Note that the output will include both "normal" and "placeholder" selections.
    * <p>
-   * :param encrypted_zero: an encrypted zero, used for the accumulation
-   * :param ballots: a list of encrypted ballots
-   * :return: a dict from selection object_id's to `ElGamalCiphertext` totals
+   * @param encrypted_zero: an encrypted zero, used for the accumulation
+   * @param ballots: a list of encrypted ballots
+   * @return a dict from selection object_id's to `ElGamalCiphertext` totals
    */
   private Map<String, ElGamal.Ciphertext> _accumulate_encrypted_ballots(
           ElGamal.Ciphertext encrypted_zero, List<Ballot.CiphertextBallot> ballots) {

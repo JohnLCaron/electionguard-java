@@ -52,8 +52,8 @@ public class DecryptionMediator {
    * Announce that a Guardian is present and participating in the decryption.
    * A Decryption Share will be generated for the Guardian
    * <p>
-   * :param guardian: The guardian who will participate in the decryption.
-   * :return: a `TallyDecryptionShare` for this `Guardian` or `None` if there is an error.
+   * @param guardian: The guardian who will participate in the decryption.
+   * @return a `TallyDecryptionShare` for this `Guardian` or `None` if there is an error.
    */
   Optional<TallyDecryptionShare> announce(Guardian guardian) {
     // Only allow a guardian to announce once
@@ -115,8 +115,8 @@ public class DecryptionMediator {
   /**
    * Compensate for a missing guardian by reconstructing the share using the available guardians.
    * <p>
-   * :param missing_guardian_id: the guardian that failed to `announce`.
-   * :return: a collection of `CompensatedTallyDecryptionShare` generated from all available guardians
+   * @param missing_guardian_id: the guardian that failed to `announce`.
+   * @return a collection of `CompensatedTallyDecryptionShare` generated from all available guardians
    * or `None if there is an error
    */
   Optional<List<CompensatedTallyDecryptionShare>> compensate(
@@ -175,8 +175,8 @@ public class DecryptionMediator {
    * Get the plaintext tally for the election by composing each Guardian's
    * decrypted representation of each selection into a decrypted representation
    * <p>
-   * :param recompute: Specify if the function should recompute the result, even if one already exists. default false
-   * :return: a `PlaintextTally` or `None`
+   * @param recompute: Specify if the function should recompute the result, even if one already exists. default false
+   * @return a `PlaintextTally` or `None`
    */
   Optional<PlaintextTally> get_plaintext_tally(boolean recompute, @Nullable Auxiliary.Decryptor decryptor) {
     if (decryptor == null) {

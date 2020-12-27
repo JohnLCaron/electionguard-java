@@ -202,9 +202,8 @@ public class ElectionTestHelper {
    * Generates a `BallotStyle` object, which rolls up a list of parties and
    * geopolitical units (passed as arguments), with some additional information
    * added on as well.
-   * :param draw: Hidden argument, used by Hypothesis.
-   * :param party_ids: a list of `Party` objects to be used in this ballot style
-   * :param geo_units: a list of `GeopoliticalUnit` objects to be used in this ballot style
+   * @param parties: a list of `Party` objects to be used in this ballot style
+   * @param geo_units: a list of `GeopoliticalUnit` objects to be used in this ballot style
    */
   BallotStyle ballot_styles(List<Party> parties, List<GeopoliticalUnit> geo_units) {
     List<String> geopolitical_unit_ids = geo_units.stream().map(g -> g.object_id).collect(Collectors.toList());
@@ -238,8 +237,7 @@ public class ElectionTestHelper {
   /**
    * Generates a `Candidate` object, assigning it one of the parties from `party_list` at random,
    * with a chance that there will be no party assigned at all.
-   * :param draw: Hidden argument, used by Hypothesis.
-   * :param party_list: A list of `Party` objects. If None, then the resulting `Candidate`
+   * @param party_listO: A list of `Party` objects. If None, then the resulting `Candidate`
    * will have no party.
    *
    * @return
@@ -293,14 +291,13 @@ public class ElectionTestHelper {
   /**
    * Generates a tuple: a `List[Candidate]` and a corresponding `CandidateContestDescription` for
    * an n-of-m contest.
-   * :param draw: Hidden argument, used by Hypothesis.
-   * :param sequence_order: integer describing the order of this contest; make these sequential when
+   * @param sequence_order: integer describing the order of this contest; make these sequential when
    * generating many contests.
-   * :param party_list: A list of `Party` objects; each candidate's party is drawn at random from this list.
-   * :param geo_units: A list of `GeopoliticalUnit`; one of these goes into the `electoral_district_id`
-   * :param n: optional integer, specifying a particular value for n in this n-of-m contest, otherwise
+   * @param party_list: A list of `Party` objects; each candidate's party is drawn at random from this list.
+   * @param geo_units: A list of `GeopoliticalUnit`; one of these goes into the `electoral_district_id`
+   * @param no: optional integer, specifying a particular value for n in this n-of-m contest, otherwise
    * it's varied by Hypothesis.
-   * :param m: optional integer, specifying a particular value for m in this n-of-m contest, otherwise
+   * @param mo: optional integer, specifying a particular value for m in this n-of-m contest, otherwise
    * it's varied by Hypothesis.
    *
    * @return
@@ -352,13 +349,11 @@ public class ElectionTestHelper {
   /**
    * Similar to `contest_descriptions`, but guarantees that for the n-of-m contest that n < m,
    * therefore it's possible to construct an "overvoted" plaintext, which should then fail subsequent tests.
-   * :param draw: Hidden argument, used by Hypothesis.
-   * :param sequence_order: integer describing the order of this contest; make these sequential when
-   * generating many contests.
-   * :param party_list: A list of `Party` objects; each candidate's party is drawn at random from this list.
-   * :param geo_units: A list of `GeopoliticalUnit`; one of these goes into the `electoral_district_id`
    *
-   * @return
+   * @param sequence_order: integer describing the order of this contest; make these sequential when
+   *                        generating many contests.
+   * @param party_list:     A list of `Party` objects; each candidate's party is drawn at random from this list.
+   * @param geo_units:      A list of `GeopoliticalUnit`; one of these goes into the `electoral_district_id`
    */
   CandidateTuple contest_descriptions_room_for_overvoting(
           int sequence_order,
@@ -378,10 +373,9 @@ public class ElectionTestHelper {
 
   /**
    * Generates a tuple: a list of party-less candidates and a corresponding `ReferendumContestDescription`.
-   * :param draw: Hidden argument, used by Hypothesis.
-   * :param sequence_order: integer describing the order of this contest; make these sequential when
+   * @param sequence_order: integer describing the order of this contest; make these sequential when
    * generating many contests.
-   * :param geo_units: A list of `GeopoliticalUnit`; one of these goes into the `electoral_district_id`
+   * @param geo_units: A list of `GeopoliticalUnit`; one of these goes into the `electoral_district_id`
    */
   CandidateTuple referendum_contest_descriptions(int sequence_order, List<GeopoliticalUnit> geo_units) {
     int n = 1 + random.nextInt(2);
@@ -415,12 +409,11 @@ public class ElectionTestHelper {
 
   /**
    * Generates either the result of `referendum_contest_descriptions` or `candidate_contest_descriptions`.
-   * :param draw: Hidden argument, used by Hypothesis.
-   * :param sequence_order: integer describing the order of this contest; make these sequential when
+   * @param sequence_order: integer describing the order of this contest; make these sequential when
    * generating many contests.
-   * :param party_list: A list of `Party` objects; each candidate's party is drawn at random from this list.
+   * @param party_list: A list of `Party` objects; each candidate's party is drawn at random from this list.
    * See `candidates` for details on this assignment.
-   * :param geo_units: A list of `GeopoliticalUnit`; one of these goes into the `electoral_district_id`
+   * @param geo_units: A list of `GeopoliticalUnit`; one of these goes into the `electoral_district_id`
    */
   CandidateTuple contest_descriptions(int sequence_order, List<Party> party_list, List<GeopoliticalUnit> geo_units) {
     return (random.nextBoolean()) ?
@@ -430,9 +423,8 @@ public class ElectionTestHelper {
 
   /**
    * Generates an `ElectionDescription` -- the top-level object describing an election.
-   * :param draw: Hidden argument, used by Hypothesis.
-   * :param max_num_parties: The largest number of parties that will be generated (default: 3)
-   * :param max_num_contests: The largest number of contests that will be generated (default: 3)
+   * @param num_parties: The number of parties that will be generated.
+   * @param num_contests: The  number of contests that will be generated.
    */
   ElectionDescription election_descriptions(int num_parties, int num_contests) {
     Preconditions.checkArgument(num_parties > 0, "need at least one party");
@@ -488,8 +480,7 @@ public class ElectionTestHelper {
   /**
    *     Given an `InternalElectionDescription` object, generates an arbitrary `PlaintextBallot` with the
    *     choices made randomly.
-   *     :param draw: Hidden argument, used by Hypothesis.
-   *     :param metadata: Any `InternalElectionDescription
+   *     @param metadata: Any `InternalElectionDescription
    */
   Ballot.PlaintextBallot plaintext_voted_ballot(InternalElectionDescription metadata) {
     int num_ballot_styles = metadata.ballot_styles.size();
@@ -541,9 +532,8 @@ public class ElectionTestHelper {
    *
    *     In a real election, the key ceremony would be used to generate a shared public key.
    *
-   *     :param draw: Hidden argument, used by Hypothesis.
-   *     :param election_description: An `ElectionDescription` object, with which the `CiphertextElectionContext` will be associated
-   *     :return: a tuple of a `CiphertextElectionContext` and the secret key associated with it
+   *     @param election_description: An `ElectionDescription` object, with which the `CiphertextElectionContext` will be associated
+   *     @return a tuple of a `CiphertextElectionContext` and the secret key associated with it
    */
   CIPHERTEXT_ELECTIONS_TUPLE_TYPE ciphertext_elections(ElectionDescription election_description) {
     ElGamal.KeyPair keypair = elgamal_keypairs();
@@ -581,12 +571,10 @@ public class ElectionTestHelper {
    * Every ballot will match the same ballot style. Hypothesis doesn't
    * let us declare a type hint on strategy return values, so you can use `ELECTIONS_AND_BALLOTS_TUPLE_TYPE`.
    * <p>
-   * :param draw: Hidden argument, used by Hypothesis.
-   * :param num_ballots: The number of ballots to generate (default: 3).
-   * :reeturn: a tuple of: an `InternalElectionDescription`, a list of plaintext ballots, an ElGamal secret key,
-   * and a `CiphertextElectionContext`
    *
-   * @return
+   * @param num_ballots: The number of ballots to generate (default: 3).
+   * @return: a tuple of: an `InternalElectionDescription`, a list of plaintext ballots, an ElGamal secret key,
+   * and a `CiphertextElectionContext`
    */
   EverythingTuple elections_and_ballots(int num_ballots) {
     Preconditions.checkArgument(num_ballots >= 0, "You're asking for a negative number of ballots?");

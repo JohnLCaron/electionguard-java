@@ -28,22 +28,22 @@ public class TestUtils {
 
   /** Generates an arbitrary element from [1,Q). from electionguardtest.group. */
   static ElementModQ elements_mod_q_no_zero() {
-    return new ElementModQ(Secrets.randbetween(BigInteger.ONE, Q));
+    return new ElementModQ(Utils.randbetween(BigInteger.ONE, Q));
   }
 
   /** Generates an arbitrary element from [0,Q). from electionguardtest.group. */
   static ElementModQ elements_mod_q() {
-    return new ElementModQ(Secrets.randbelow(Q));
+    return new ElementModQ(Utils.randbelow(Q));
   }
 
   /** Generates an arbitrary element from [1,P). from electionguardtest.group. */
   static ElementModP elements_mod_p_no_zero() {
-    return new ElementModP(Secrets.randbetween(BigInteger.ONE, P));
+    return new ElementModP(Utils.randbetween(BigInteger.ONE, P));
   }
 
   /** Generates an arbitrary element from [0,Q). from electionguardtest.group. */
   static ElementModP elements_mod_p() {
-    return new ElementModP(Secrets.randbelow(P));
+    return new ElementModP(Utils.randbelow(P));
   }
 
 }

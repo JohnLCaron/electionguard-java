@@ -40,9 +40,9 @@ public class ElectionPolynomial {
   /**
    *     Generates a polynomial for sharing election keys
    *
-   *     :param number_of_coefficients: Number of coefficients of polynomial
-   *     :param nonce: an optional nonce parameter that may be provided (useful for testing)
-   *     :return: Polynomial used to share election keys
+   *     @param number_of_coefficients: Number of coefficients of polynomial
+   *     @param nonce: an optional nonce parameter that may be provided (useful for testing)
+   *     @return Polynomial used to share election keys
    */
   static ElectionPolynomial generate_polynomial(int number_of_coefficients, @Nullable Group.ElementModQ nonce) {
     ArrayList<Group.ElementModQ> coefficients = new ArrayList<>();
@@ -68,12 +68,11 @@ public class ElectionPolynomial {
   /**
    * Computes a single coordinate value of the election polynomial used for sharing
    *
-   *     :param exponent_modifier: Unique modifier (usually sequence order) for exponent
-   *     :param polynomial: Election polynomial
-   *     :return: Polynomial used to share election keys
+   * @param exponent_modifier: Unique modifier (usually sequence order) for exponent
+   * @param polynomial:        Election polynomial
    * @param exponent_modifier
    * @param polynomial
-   * @return
+   * @return Polynomial used to share election keys
    */
   static ElementModQ compute_polynomial_coordinate(BigInteger exponent_modifier, ElectionPolynomial polynomial) {
     Preconditions.checkArgument(between(BigInteger.ZERO, exponent_modifier, Q), "exponent_modifier is out of range");
@@ -109,7 +108,7 @@ public class ElectionPolynomial {
    *     @param coordinate Value to be checked
    *     @param exponent_modifier Unique modifier (usually sequence order) for exponent
    *     @param coefficient_commitments Commitments for coefficients of polynomial
-   *     @return: True if verified on polynomial
+   *     @return True if verified on polynomial
    */
   static boolean verify_polynomial_coordinate(ElementModQ coordinate, BigInteger exponent_modifier, List<ElementModP> coefficient_commitments) {
     BigInteger commitment_output = BigInteger.ONE;
@@ -124,6 +123,5 @@ public class ElectionPolynomial {
     ElementModP value_output = g_pow_p(coordinate);
     return value_output.elem.equals(commitment_output);
   }
-
 
 }

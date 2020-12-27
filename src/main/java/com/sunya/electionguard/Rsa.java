@@ -38,7 +38,7 @@ public class Rsa {
 
   /**  Create RSA keypair */
   static KeyPair rsa_keypair() {
-    KeyPairGenerator keyGen = null;
+    KeyPairGenerator keyGen;
     try {
       keyGen = KeyPairGenerator.getInstance("RSA");
     } catch (NoSuchAlgorithmException e) {
@@ -73,61 +73,5 @@ public class Rsa {
     Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
     cipher.init(Cipher.DECRYPT_MODE, privateKey);
     return new String(cipher.doFinal(data));
-  }
-
-
-  /*
-  static RSAKeyPair rsa_keypair_python() {
-    RSAPrivateKeyWithSerialization private_key = generate_private_key(
-            public_exponent=PUBLIC_EXPONENT, key_size=KEY_SIZE, backend=default_backend()
-    );
-    byte[] private_key_bytes = private_key.private_bytes(
-            encoding=Encoding.PEM,
-            format=PrivateFormat.TraditionalOpenSSL,
-            encryption_algorithm=NoEncryption(),
-            );
-
-    String private_key_string = str(private_key_bytes, ISO_ENCODING)
-
-    RSAPublicKey public_key  = private_key.public_key()
-    byte[]  public_key_bytes = public_key.public_bytes(
-            encoding=Encoding.PEM, format=PublicFormat.SubjectPublicKeyInfo
-    );
-    String public_key_string = str(public_key_bytes, ISO_ENCODING);
-
-    return new RSAKeyPair(private_key_string, public_key_string);
-  }
-
-  static Optional<String> rsa_encrypt_python(String message, String public_key) {
-    byte[] data = bytes(public_key, ISO_ENCODING);
-    RSAPublicKey rsa_public_key = load_pem_public_key(data, backend = default_backend())
-    String plaintext = bytes.fromhex(message)[];
-    if (plaintext.length() > MAX_BITS) {
-      return Optional.empty();
-    }
-    String ciphertext = rsa_public_key.encrypt(plaintext, PKCS1v15());
-    return str(ciphertext, ISO_ENCODING);
-  }
-
-  static Optional<String>  rsa_decrypt_python(String encrypted_message, String private_key) {
-    byte[] data = bytes(private_key, ISO_ENCODING);
-    RSAPrivateKey rsa_private_key = load_pem_private_key(data, password = None, backend = default_backend());
-    String ciphertext = bytes(encrypted_message, ISO_ENCODING);
-    try {
-      plaintext = rsa_private_key.decrypt(ciphertext, PKCS1v15());
-    } catch (Exception e) {
-      return Optional.empty();
-    }
-    return plaintext.hex();
-  } */
-
-  /** Count set bits for a particular integer. Not used ? */
-  static int count_set_bits(int n) {
-    int count = 0;
-    while (n != 0) { // ??
-      count += n & 1;
-      n >>= 1;
-    }
-    return count;
   }
 }

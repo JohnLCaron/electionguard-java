@@ -772,8 +772,8 @@ public class Election {
 
     /**
      * Gets the description for a particular id
-     * :param selection_id: Id of Selection
-     * :return: description
+     * @param selection_id: Id of Selection
+     * @return description
      */
     Optional<SelectionDescription> selection_for(String selection_id) {
 
@@ -1154,10 +1154,10 @@ public class Election {
   /**
    * Makes a CiphertextElectionContext object.
    * <p>
-   * :param number_of_guardians: The number of guardians necessary to generate the public key
-   * :param quorum: The quorum of guardians necessary to decrypt an election.  Must be less than `number_of_guardians`
-   * :param elgamal_public_key: the public key of the election
-   * :param description_hash: the hash of the election metadata
+   * @param number_of_guardians: The number of guardians necessary to generate the public key
+   * @param quorum: The quorum of guardians necessary to decrypt an election.  Must be less than `number_of_guardians`
+   * @param elgamal_public_key: the public key of the election
+   * @param description_hash: the hash of the election metadata
    */
   public static CiphertextElectionContext make_ciphertext_election_context(
           int number_of_guardians,
@@ -1197,9 +1197,9 @@ public class Election {
 
   /**
    * Generates a placeholder selection description
-   * :param description: contest description
-   * :param placeholders: list of placeholder descriptions of selections
-   * :return: a SelectionDescription or None
+   * @param description: contest description
+   * @param placeholders: list of placeholder descriptions of selections
+   * @return a SelectionDescription or None
    */
   static ContestDescriptionWithPlaceholders contest_description_with_placeholders_from(
           ContestDescription description, List<SelectionDescription> placeholders) {
@@ -1221,8 +1221,8 @@ public class Election {
   /**
       Generates a placeholder selection description that is unique so it can be hashed
 
-    :param use_sequence_id: an optional integer unique to the contest identifying this selection's place in the contest
-    :return: a SelectionDescription or None
+    @param use_sequence_idO: an optional integer unique to the contest identifying this selection's place in the contest
+    @return a SelectionDescription or None
    */
   static Optional<SelectionDescription> generate_placeholder_selection_from(
           ContestDescription contest, Optional<Integer> use_sequence_idO) {
@@ -1252,9 +1252,9 @@ public class Election {
   /**
    * Generates the specified number of placeholder selections in ascending sequence order from the max selection sequence orderf
    * <p>
-   * :param contest: ContestDescription for input
-   * :param count: optionally specify a number of placeholders to generate
-   * :return: a collection of `SelectionDescription` objects, which may be empty
+   * @param contest: ContestDescription for input
+   * @param count: optionally specify a number of placeholders to generate
+   * @return a collection of `SelectionDescription` objects, which may be empty
    */
   static List<SelectionDescription> generate_placeholder_selections_from(ContestDescription contest, int count) {
     //  max_sequence_order = max([selection.sequence_order for selection in contest.ballot_selections]);

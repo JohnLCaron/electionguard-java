@@ -74,10 +74,10 @@ public class Encrypt {
    *     This function is useful for filling selections when a voter undervotes a ballot.
    *     It is also used to create placeholder representations when generating the `ConstantChaumPedersenProof`
    *
-   *     :param description: The `SelectionDescription` which provides the relevant `object_id`
-   *     :param is_placeholder: Mark this selection as a placeholder value
-   *     :param is_affirmative: Mark this selection as `yes`
-   *     :return: A BallotSelection
+   *     @param description: The `SelectionDescription` which provides the relevant `object_id`
+   *     @param is_placeholder: Mark this selection as a placeholder value
+   *     @param is_affirmative: Mark this selection as `yes`
+   *     @return A BallotSelection
    */
   // selection_from( description: SelectionDescription, is_placeholder: bool = False, is_affirmative: bool = False,
   static PlaintextBallotSelection selection_from(SelectionDescription description, boolean is_placeholder, boolean is_affirmative) {
@@ -88,8 +88,8 @@ public class Encrypt {
    *     Construct a `BallotContest` from a specific `ContestDescription` with all false fields.
    *     This function is useful for filling contests and selections when a voter undervotes a ballot.
    *
-   *     :param description: The `ContestDescription` used to derive the well-formed `BallotContest`
-   *     :return: a `BallotContest`
+   *     @param description: The `ContestDescription` used to derive the well-formed `BallotContest`
+   *     @return a `BallotContest`
    */
   static PlaintextBallotContest contest_from(ContestDescription description) {
     List<PlaintextBallotSelection> selections = new ArrayList<>();
@@ -104,14 +104,14 @@ public class Encrypt {
   /**
    *     Encrypt a specific `BallotSelection` in the context of a specific `BallotContest`
    *
-   *     :param selection: the selection in the valid input form
-   *     :param selection_description: the `SelectionDescription` from the `ContestDescription` which defines this selection's structure
-   *     :param elgamal_public_key: the public key (K) used to encrypt the ballot
-   *     :param crypto_extended_base_hash: the extended base hash of the election
-   *     :param nonce_seed: an `ElementModQ` used as a header to seed the `Nonce` generated for this selection.
+   *     @param selection: the selection in the valid input form
+   *     @param selection_description: the `SelectionDescription` from the `ContestDescription` which defines this selection's structure
+   *     @param elgamal_public_key: the public key (K) used to encrypt the ballot
+   *     @param crypto_extended_base_hash: the extended base hash of the election
+   *     @param nonce_seed: an `ElementModQ` used as a header to seed the `Nonce` generated for this selection.
    *                  this value can be (or derived from) the BallotContest nonce, but no relationship is required
-   *     :param is_placeholder: specifies if this is a placeholder selection
-   *     :param should_verify_proofs: specify if the proofs should be verified prior to returning (default True)
+   *     @param is_placeholder: specifies if this is a placeholder selection
+   *     @param should_verify_proofs: specify if the proofs should be verified prior to returning (default True)
    */
   static Optional<CiphertextBallotSelection> encrypt_selection(
           PlaintextBallotSelection selection,
@@ -190,13 +190,13 @@ public class Encrypt {
    *     selections to represent the number of seats available for a given contest.  By adding `placeholder`
    *     votes
    *
-   *     :param contest: the contest in the valid input form
-   *     :param contest_description: the `ContestDescriptionWithPlaceholders` from the `ContestDescription` which defines this contest's structure
-   *     :param elgamal_public_key: the public key (k) used to encrypt the ballot
-   *     :param crypto_extended_base_hash: the extended base hash of the election
-   *     :param nonce_seed: an `ElementModQ` used as a header to seed the `Nonce` generated for this contest.
+   *     @param contest: the contest in the valid input form
+   *     @param contest_description: the `ContestDescriptionWithPlaceholders` from the `ContestDescription` which defines this contest's structure
+   *     @param elgamal_public_key: the public key (k) used to encrypt the ballot
+   *     @param crypto_extended_base_hash: the extended base hash of the election
+   *     @param nonce_seed: an `ElementModQ` used as a header to seed the `Nonce` generated for this contest.
    *                  this value can be (or derived from) the Ballot nonce, but no relationship is required
-   *     :param should_verify_proofs: specify if the proofs should be verified prior to returning (default True)
+   *     @param should_verify_proofs: specify if the proofs should be verified prior to returning (default True)
    */
   static Optional<CiphertextBallotContest> encrypt_contest(
           PlaintextBallotContest contest,
@@ -357,13 +357,13 @@ public class Encrypt {
    *     This method also allows for ballots to exclude passing contests for which the voter made no selections.
    *     It will fill missing contests with `False` selections and generate `placeholder` selections that are marked `True`.
    *
-   *     :param ballot: the ballot in the valid input form
-   *     :param election_metadata: the `InternalElectionDescription` which defines this ballot's structure
-   *     :param context: all the cryptographic context for the election
-   *     :param seed_hash: Hash from previous ballot or starting hash from device
-   *     :param nonce: an optional `int` used to seed the `Nonce` generated for this contest
+   *     @param ballot: the ballot in the valid input form
+   *     @param election_metadata: the `InternalElectionDescription` which defines this ballot's structure
+   *     @param context: all the cryptographic context for the election
+   *     @param seed_hash: Hash from previous ballot or starting hash from device
+   *     @param nonce: an optional `int` used to seed the `Nonce` generated for this contest
    *                  if this value is not provided, the secret generating mechanism of the OS provides its own
-   *     :param should_verify_proofs: specify if the proofs should be verified prior to returning (default True)
+   *     @param should_verify_proofs: specify if the proofs should be verified prior to returning (default True)
    */
   // def encrypt_ballot( ballot: PlaintextBallot, election_metadata: InternalElectionDescription, context:
   //    CiphertextElectionContext, seed_hash: ElementModQ, nonce: Optional[ElementModQ] = None, should_verify_proofs:

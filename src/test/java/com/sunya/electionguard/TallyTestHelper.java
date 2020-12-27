@@ -16,8 +16,8 @@ public class TallyTestHelper {
    * `n_of_m` elections. It's not a general-purpose tallying mechanism for other
    * election types.
    * <p>
-   * :param ballots: a list of plaintext ballots
-   * :return: a dict from selection object_id's to integer totals
+   * @param ballots: a list of plaintext ballots
+   * @return a dict from selection object_id's to integer totals
    */
   static Map<String, BigInteger> accumulate_plaintext_ballots(List<Ballot.PlaintextBallot> ballots) {
 

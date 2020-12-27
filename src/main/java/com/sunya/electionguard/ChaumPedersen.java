@@ -46,10 +46,10 @@ class ChaumPedersen {
     /**
      * Validates a "disjunctive" Chaum-Pedersen (zero or one) proof.
      * <p>
-     * :param message: The ciphertext message
-     * :param k: The public key of the election
-     * :param q: The extended base hash of the election
-     * :return: True if everything is consistent. False otherwise.
+     * @param message: The ciphertext message
+     * @param k: The public key of the election
+     * @param q: The extended base hash of the election
+     * @return True if everything is consistent. False otherwise.
      */
     boolean is_valid(ElGamal.Ciphertext message, ElementModP k, ElementModQ q) {
       ElementModP alpha = message.pad;
@@ -140,12 +140,12 @@ class ChaumPedersen {
      * - The challenge value 𝑐 satisfies 𝑐 = 𝐻(𝑄, (𝐴, 𝐵), (𝑎 , 𝑏 ), 𝑀 ).
      * - that the equations 𝑔^𝑣𝑖 = 𝑎𝑖𝐾^𝑐𝑖 mod 𝑝 && 𝐴^𝑣𝑖 = 𝑏𝑖𝑀𝑖^𝑐𝑖 mod 𝑝 are satisfied.
      * <p>
-     * :param message: The ciphertext message
-     * :param k: The public key corresponding to the private key used to encrypt
+     * @param message: The ciphertext message
+     * @param k: The public key corresponding to the private key used to encrypt
      * (e.g. the Guardian public election key)
-     * :param m: The value being checked for validity
-     * :param q: The extended base hash of the election
-     * :return: True if everything is consistent. False otherwise.
+     * @param m: The value being checked for validity
+     * @param q: The extended base hash of the election
+     * @return True if everything is consistent. False otherwise.
      */
     boolean is_valid(ElGamal.Ciphertext message, ElementModP k, ElementModP m, ElementModQ q) {
       ElementModP alpha = message.pad;
@@ -222,10 +222,10 @@ class ChaumPedersen {
      * Validates a "constant" Chaum-Pedersen proof.
      * e.g. that the equations 𝑔𝑉 = 𝑎𝐴𝐶 mod 𝑝 and 𝑔𝐿𝐾𝑣 = 𝑏𝐵𝐶 mod 𝑝 are satisfied.
      * <p>
-     * :param message: The ciphertext message
-     * :param K: The public key of the election
-     * :param q: The extended base hash of the election
-     * :return: True if everything is consistent. False otherwise.
+     * @param message: The ciphertext message
+     * @param k: The public key of the election
+     * @param q: The extended base hash of the election
+     * @return True if everything is consistent. False otherwise.
      */
     boolean is_valid(ElGamal.Ciphertext message, ElementModP k, ElementModQ q) {
 
@@ -304,13 +304,13 @@ class ChaumPedersen {
    * This is just a front-end helper for `make_disjunctive_chaum_pedersen_zero` and
    * `make_disjunctive_chaum_pedersen_one`.
    * <p>
-   * :param message: An ElGamal ciphertext
-   * :param r: The nonce used creating the ElGamal ciphertext
-   * :param k: The ElGamal public key for the election
-   * :param q: A value used when generating the challenge,
+   * @param message: An ElGamal ciphertext
+   * @param r: The nonce used creating the ElGamal ciphertext
+   * @param k: The ElGamal public key for the election
+   * @param q: A value used when generating the challenge,
    * usually the election extended base hash (𝑄')
-   * :param seed: Used to generate other random values here
-   * :param plaintext: Zero or one
+   * @param seed: Used to generate other random values here
+   * @param plaintext: Zero or one
    */
   static DisjunctiveChaumPedersenProof make_disjunctive_chaum_pedersen(
           ElGamal.Ciphertext message,
@@ -342,12 +342,12 @@ class ChaumPedersen {
   /**
    * Produces a "disjunctive" proof that an encryption of zero is either an encrypted zero or one.
    * <p>
-   * :param message: An ElGamal ciphertext
-   * :param r: The nonce used creating the ElGamal ciphertext
-   * :param k: The ElGamal public key for the election
-   * :param q: A value used when generating the challenge,
+   * @param message: An ElGamal ciphertext
+   * @param r: The nonce used creating the ElGamal ciphertext
+   * @param k: The ElGamal public key for the election
+   * @param q: A value used when generating the challenge,
    * usually the election extended base hash (𝑄')
-   * :param seed: Used to generate other random values here
+   * @param seed: Used to generate other random values here
    */
   static DisjunctiveChaumPedersenProof make_disjunctive_chaum_pedersen_zero(
           ElGamal.Ciphertext message,
@@ -382,12 +382,12 @@ class ChaumPedersen {
   /**
    * Produces a "disjunctive" proof that an encryption of one is either an encrypted zero or one.
    * <p>
-   * :param message: An ElGamal ciphertext
-   * :param r: The nonce used creating the ElGamal ciphertext
-   * :param k: The ElGamal public key for the election
-   * :param q: A value used when generating the challenge,
+   * @param message: An ElGamal ciphertext
+   * @param r: The nonce used creating the ElGamal ciphertext
+   * @param k: The ElGamal public key for the election
+   * @param q: A value used when generating the challenge,
    * usually the election extended base hash (𝑄')
-   * :param seed: Used to generate other random values here
+   * @param seed: Used to generate other random values here
    */
   static DisjunctiveChaumPedersenProof make_disjunctive_chaum_pedersen_one(
           ElGamal.Ciphertext message,
@@ -422,13 +422,12 @@ class ChaumPedersen {
    *     Produces a proof that a given value corresponds to a specific encryption.
    *     computes: 𝑀 =𝐴^𝑠𝑖 mod 𝑝 and 𝐾𝑖 = 𝑔^𝑠𝑖 mod 𝑝
    *
-   *     :param message: An ElGamal ciphertext
-   *     :param s: The nonce or secret used to derive the value
-   *     :param m: The value we are trying to prove
-   *     :param seed: Used to generate other random values here
-   *     :param hash_header: A value used when generating the challenge,
+   *     @param message: An ElGamal ciphertext
+   *     @param s: The nonce or secret used to derive the value
+   *     @param m: The value we are trying to prove
+   *     @param seed: Used to generate other random values here
+   *     @param hash_header: A value used when generating the challenge,
    *                         usually the election extended base hash (𝑄')
-   * @return
    */
   static ChaumPedersenProof make_chaum_pedersen(
           ElGamal.Ciphertext message,
@@ -453,12 +452,12 @@ class ChaumPedersen {
   /**
    * Produces a proof that a given encryption corresponds to a specific total value.
    * <p>
-   * :param message: An ElGamal ciphertext
-   * :param constant: The plaintext constant value used to make the ElGamal ciphertext (L in the spec)
-   * :param r: The aggregate nonce used creating the ElGamal ciphertext
-   * :param k: The ElGamal public key for the election
-   * :param seed: Used to generate other random values here
-   * :param hash_header: A value used when generating the challenge,
+   * @param message: An ElGamal ciphertext
+   * @param constant: The plaintext constant value used to make the ElGamal ciphertext (L in the spec)
+   * @param r: The aggregate nonce used creating the ElGamal ciphertext
+   * @param k: The ElGamal public key for the election
+   * @param seed: Used to generate other random values here
+   * @param hash_header: A value used when generating the challenge,
    * usually the election extended base hash (𝑄')
    */
   static ConstantChaumPedersenProof make_constant_chaum_pedersen(

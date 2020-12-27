@@ -95,9 +95,9 @@ class DecryptionShare {
      * Verify that this CiphertextDecryptionSelection is valid for a
      * specific ElGamal key pair, public key, and election context.
      * <p>
-     * :param message: the `ElGamalCiphertext` to compare
-     * :param election_public_key: the `ElementModP Election Public Key for the Guardian
-     * :param extended_base_hash: The `ElementModQ` election extended base hash.
+     * @param message: the `ElGamalCiphertext` to compare
+     * @param election_public_key: the `ElementModP Election Public Key for the Guardian
+     * @param extended_base_hash: The `ElementModQ` election extended base hash.
      *
      * @return
      */
@@ -137,11 +137,11 @@ class DecryptionShare {
   /**
    * Create a ciphertext decryption selection
    * <p>
-   * :param object_id: Object id
-   * :param guardian_id: Guardian id
-   * :param description_hash: Description hash
-   * :param share: Share
-   * :param proof_or_recovery: Proof or recovery
+   * @param object_id: Object id
+   * @param guardian_id: Guardian id
+   * @param description_hash: Description hash
+   * @param share: Share
+   * @param proof_or_recovery: Proof or recovery
    *
    * @return
    */
