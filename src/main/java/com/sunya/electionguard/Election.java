@@ -623,17 +623,11 @@ public class Election {
       // count unique ids
       for (SelectionDescription selection : this.ballot_selections) {
         //  validate the object_id
-        if (!selection_ids.contains(selection.object_id)) {
-          selection_ids.add(selection.object_id);
-        }
+        selection_ids.add(selection.object_id);
         //  validate the sequence_order
-        if (!sequence_ids.contains(selection.sequence_order)) {
-          sequence_ids.add(selection.sequence_order);
-        }
+        sequence_ids.add(selection.sequence_order);
         //  validate the candidate id
-        if (!candidate_ids.contains(selection.candidate_id)) {
-          candidate_ids.add(selection.candidate_id);
-        }
+        candidate_ids.add(selection.candidate_id);
       }
 
       boolean selections_have_valid_candidate_ids = candidate_ids.size() == expected_selection_count;
@@ -783,9 +777,8 @@ public class Election {
         return first_match;
       }
 
-      Optional<SelectionDescription> first_placeholder = this.placeholder_selections.stream()
+      return this.placeholder_selections.stream()
               .filter(s -> s.object_id.equals(selection_id)).findFirst();
-      return first_placeholder;
     }
   }
 
@@ -1008,10 +1001,10 @@ public class Election {
   public static class InternalElectionDescription {
     final ElectionDescription description;
 
-    ImmutableList<GeopoliticalUnit> geopolitical_units;
-    ImmutableList<ContestDescriptionWithPlaceholders> contests;
-    ImmutableList<BallotStyle> ballot_styles;
-    Group.ElementModQ description_hash;
+    final ImmutableList<GeopoliticalUnit> geopolitical_units;
+    final ImmutableList<ContestDescriptionWithPlaceholders> contests;
+    final ImmutableList<BallotStyle> ballot_styles;
+    final Group.ElementModQ description_hash;
 
     public InternalElectionDescription(ElectionDescription description) {
       this.description = description;
@@ -1046,9 +1039,7 @@ public class Election {
       // gp_unit_ids = [gp_unit_id for gp_unit_id in style.geopolitical_unit_ids]
       List<String> gp_unit_ids = new ArrayList<>(style.get().geopolitical_unit_ids.get());
       // contests = list(filter(lambda i: i.electoral_district_id in gp_unit_ids, this.contests)
-      List<ContestDescriptionWithPlaceholders> result =
-              this.contests.stream().filter(c -> gp_unit_ids.contains(c.electoral_district_id)).collect(Collectors.toList());
-      return result;
+      return this.contests.stream().filter(c -> gp_unit_ids.contains(c.electoral_district_id)).collect(Collectors.toList());
     }
 
     /**

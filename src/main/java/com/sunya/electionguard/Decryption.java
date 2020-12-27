@@ -463,7 +463,7 @@ public class Decryption {
           List<KeyCeremony.PublicKeySet> all_available_guardian_keys) {
     Map<String, Group.ElementModQ> result = new HashMap<>();
 
-    all_available_guardian_keys.stream()
+    all_available_guardian_keys
             .forEach(g -> result.put(g.owner_id(),
                     compute_lagrange_coefficients_for_guardian(all_available_guardian_keys, g))
             );

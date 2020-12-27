@@ -8,7 +8,7 @@ import java.util.Objects;
  */
 public class ElectionObjectBase {
   // TODO TestTallyProperties needs to change this, make mutable version?
-  public String object_id;
+  public final String object_id;
 
   public ElectionObjectBase(String object_id) {
     this.object_id = object_id;

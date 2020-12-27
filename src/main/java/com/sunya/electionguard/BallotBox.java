@@ -8,9 +8,9 @@ import static com.sunya.electionguard.Ballot.*;
  * A stateful convenience wrapper to cache election data.
  */
 public class BallotBox {
-  private Election.InternalElectionDescription _metadata;
-  private Election.CiphertextElectionContext _context;
-  private DataStore _store;
+  private final Election.InternalElectionDescription _metadata;
+  private final Election.CiphertextElectionContext _context;
+  private final DataStore _store;
 
   public BallotBox(Election.InternalElectionDescription _metadata,
                    Election.CiphertextElectionContext _context,

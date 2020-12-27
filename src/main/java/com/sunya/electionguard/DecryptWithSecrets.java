@@ -197,7 +197,6 @@ public class DecryptWithSecrets {
       logger.atFine().log("decrypt_contest_with_nonce %n  %s%n  %s%n  %d%n%s%n",
               description.crypto_hash(), nonce_seed, description.sequence_order, result);
       nonce_seed = Optional.of(result);
-      ;
     }
 
     if (nonce_seed.isEmpty()) {

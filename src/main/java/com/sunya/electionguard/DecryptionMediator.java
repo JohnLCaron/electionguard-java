@@ -20,27 +20,27 @@ import static com.sunya.electionguard.Tally.*;
 public class DecryptionMediator {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
-  InternalElectionDescription _metadata;
-  CiphertextElectionContext _encryption;
+  final InternalElectionDescription _metadata;
+  final CiphertextElectionContext _encryption;
 
-  CiphertextTally _ciphertext_tally;
-  Optional<PlaintextTally> _plaintext_tally = Optional.empty();
+  final CiphertextTally _ciphertext_tally;
+  final Optional<PlaintextTally> _plaintext_tally = Optional.empty();
 
   // Since spoiled ballots are decrypted, they are just a special case of a tally
-  Map<String, Optional<PlaintextTally>> _plaintext_spoiled_ballots = new HashMap<>();
+  final Map<String, Optional<PlaintextTally>> _plaintext_spoiled_ballots = new HashMap<>();
 
-  Map<String, Guardian> _available_guardians = new HashMap<>();
+  final Map<String, Guardian> _available_guardians = new HashMap<>();
 
-  Map<String, KeyCeremony.ElectionPublicKey> _missing_guardians = new HashMap<>();
+  final Map<String, KeyCeremony.ElectionPublicKey> _missing_guardians = new HashMap<>();
 
   //     A collection of Decryption Shares for each Available Guardian
-  Map<String, TallyDecryptionShare> _decryption_shares = new HashMap<>();
+  final Map<String, TallyDecryptionShare> _decryption_shares = new HashMap<>();
 
   // A collection of lagrange coefficients `w_{i,j}` computed by available guardians for each missing guardian
-  Map<String, Map<String, Group.ElementModQ>> _lagrange_coefficients = new HashMap<>();
+  final Map<String, Map<String, Group.ElementModQ>> _lagrange_coefficients = new HashMap<>();
 
   // A collection of Compensated Decryption Shares for each Available Guardian
-  Map<String, Map<String, CompensatedTallyDecryptionShare>> _compensated_decryption_shares = new HashMap<>();
+  final Map<String, Map<String, CompensatedTallyDecryptionShare>> _compensated_decryption_shares = new HashMap<>();
 
   public DecryptionMediator(InternalElectionDescription metadata, CiphertextElectionContext context, CiphertextTally ciphertext_tally) {
     this._metadata = metadata;
@@ -79,16 +79,14 @@ public class DecryptionMediator {
     }
 
     // This guardian removes itself from the missing list since it generated a valid share
-    if (this._missing_guardians.containsKey(guardian.object_id)) {
-      this._missing_guardians.remove(guardian.object_id);
-    }
+    this._missing_guardians.remove(guardian.object_id);
 
     // Check this guardian's collection of public keys
     // for other guardians that have not announced
     Map<String, KeyCeremony.ElectionPublicKey> missing_guardians =
             guardian.guardian_election_public_keys().entrySet().stream()
                     .filter(e -> !this._available_guardians.containsKey(e.getKey()))
-                    .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
     // Check that the public keys match for any missing guardians already reported
     // note this check naively assumes that the first guardian to annouce is telling the truth
@@ -98,7 +96,7 @@ public class DecryptionMediator {
     for (Map.Entry<String, KeyCeremony.ElectionPublicKey> entry : missing_guardians.entrySet()) {
       String guardian_id = entry.getKey();
       KeyCeremony.ElectionPublicKey public_key = entry.getValue();
-      if (this._missing_guardians.keySet().contains(guardian_id)) {
+      if (this._missing_guardians.containsKey(guardian_id)) {
         if (!this._missing_guardians.get(guardian_id).equals(public_key)) {
           logger.atInfo().log("announce guardian: %s expected public key mismatch for missing %s", guardian.object_id, guardian_id);
           return Optional.empty();

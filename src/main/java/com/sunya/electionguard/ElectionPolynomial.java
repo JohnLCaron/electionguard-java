@@ -70,8 +70,6 @@ public class ElectionPolynomial {
    *
    * @param exponent_modifier: Unique modifier (usually sequence order) for exponent
    * @param polynomial:        Election polynomial
-   * @param exponent_modifier
-   * @param polynomial
    * @return Polynomial used to share election keys
    */
   static ElementModQ compute_polynomial_coordinate(BigInteger exponent_modifier, ElectionPolynomial polynomial) {

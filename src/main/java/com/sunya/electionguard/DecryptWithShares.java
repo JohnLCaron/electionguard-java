@@ -113,7 +113,7 @@ class DecryptWithShares {
             tally.cast, shares, context.crypto_extended_base_hash
     );
 
-    if (!contests.isPresent()) {
+    if (contests.isEmpty()) {
       return Optional.empty();
     }
 
@@ -121,11 +121,7 @@ class DecryptWithShares {
             tally.spoiled_ballots, shares, context.crypto_extended_base_hash
     );
 
-    if (!spoiled_ballots.isPresent()) {
-      return Optional.empty();
-    }
-
-    return Optional.of( new PlaintextTally(tally.object_id, contests.get(), spoiled_ballots.get()));
+    return spoiled_ballots.map(stringMapMap -> new PlaintextTally(tally.object_id, contests.get(), stringMapMap));
   }
 
   /** Try to decrypt each of the spoiled ballots using the provided decryption shares */

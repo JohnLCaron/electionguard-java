@@ -8,7 +8,7 @@ import java.util.*;
  *     state elements.
  */
 public class DataStore implements Iterable<Ballot.CiphertextAcceptedBallot> {
-  HashMap<String, Ballot.CiphertextAcceptedBallot> map = new HashMap<>();
+  final HashMap<String, Ballot.CiphertextAcceptedBallot> map = new HashMap<>();
 
   boolean containsKey(String key) {
     return map.containsKey(key);

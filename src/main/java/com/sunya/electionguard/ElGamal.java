@@ -103,20 +103,18 @@ class ElGamal {
   static Optional<KeyPair> elgamal_keypair_from_secret(ElementModQ a) {
     BigInteger secret_key_int = a.getBigInt();
     //     if secret_key_int < 2:
-    if (secret_key_int.compareTo(BigInteger.TWO) == -1) {
-      // log.error("ElGamal secret key needs to be in [2,Q).");
+    if (Group.lessThan(secret_key_int, BigInteger.TWO)) {
+      logger.atSevere().log("ElGamal secret key needs to be in [2,Q).");
       return Optional.empty();
     }
-
     return Optional.of(new KeyPair(a, g_pow_p(a)));
   }
-
 
   /**
    * Create a random elgamal keypair.
    */
   static KeyPair elgamal_keypair_random() {
-    return elgamal_keypair_from_secret(rand_range_q(TWO_MOD_Q)).orElseThrow(() -> new RuntimeException());
+    return elgamal_keypair_from_secret(rand_range_q(TWO_MOD_Q)).orElseThrow(RuntimeException::new);
   }
 
   /**

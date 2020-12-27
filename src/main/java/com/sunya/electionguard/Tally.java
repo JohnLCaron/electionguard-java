@@ -21,10 +21,9 @@ public class Tally {
   @Immutable
   private static class Tuple {
     final String id;
-    @Nullable
     final ElGamal.Ciphertext ciphertext;
 
-    public Tuple(String id, @Nullable ElGamal.Ciphertext ciphertext) {
+    public Tuple(String id, ElGamal.Ciphertext ciphertext) {
       this.id = id;
       this.ciphertext = ciphertext;
     }
@@ -178,11 +177,10 @@ public class Tally {
               .filter(s -> key.equals(s.object_id)).findFirst();
 
       // a selection on the ballot that is required was not found
-      // this should never happen when using the `CiphertextTally`
-      // but sanity check anyway
+      // this should never happen when using the `CiphertextTally`, but sanity check anyway
       if (use_selection.isEmpty()) {
         logger.atWarning().log("add cannot accumulate for missing selection %s ", key);
-        return new Tuple(key, null);
+        throw new RuntimeException("cant happen");
       }
 
       return new Tuple(key, selection_tally.elgamal_accumulate(use_selection.get().ciphertext()));
@@ -214,13 +212,13 @@ public class Tally {
 
     // TODO TestTallyProperties needs to change this, make mutable version?
     // A local cache of ballots id's that have already been cast
-    Set<String> _cast_ballot_ids;
+    final Set<String> _cast_ballot_ids;
 
     //    A collection of each contest and selection in an election.
     //    Retains an encrypted representation of a tally for each selection
-    Map<String, CiphertextTallyContest> cast;
+    final Map<String, CiphertextTallyContest> cast;
     // All of the ballots marked spoiled in the election
-    Map<String, Ballot.CiphertextAcceptedBallot> spoiled_ballots;
+    final Map<String, Ballot.CiphertextAcceptedBallot> spoiled_ballots;
 
     public CiphertextTally(String object_id, Election.InternalElectionDescription metadata, Election.CiphertextElectionContext encryption) {
       super(object_id);

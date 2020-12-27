@@ -93,7 +93,7 @@ public class Ballot {
      * @return an integer 0 or 1 for valid data, or 0 if the data is malformed
      */
     int to_int() {
-      boolean asBool = false;
+      boolean asBool;
       try {
         asBool = Utils.strtobool(vote);
       } catch (Exception e) {
@@ -218,7 +218,7 @@ public class Ballot {
         return false;
       }
 
-      if (!this.proof.isPresent()) {
+      if (this.proof.isEmpty()) {
         logger.atInfo().log("no proof exists for: %s", this.object_id);
         return false;
       }
@@ -324,7 +324,7 @@ public class Ballot {
    * while complete contests are passed into ElectionGuard when running encryption on an existing dataset.
    */
   public static class PlaintextBallotContest extends ElectionObjectBase {
-    List<PlaintextBallotSelection> ballot_selections; // Collection of ballot selections
+    final List<PlaintextBallotSelection> ballot_selections; // Collection of ballot selections
 
     public PlaintextBallotContest(String object_id, List<PlaintextBallotSelection> ballot_selections) {
       super(object_id);
@@ -405,14 +405,14 @@ public class Ballot {
    * then it is required in order to regenerate the proof.
    */
   public static class CiphertextBallotContest extends ElectionObjectBase implements Hash.CryptoHashCheckable {
-    ElementModQ description_hash; // Hash from contestDescription
-    List<CiphertextBallotSelection> ballot_selections; // Collection of ballot selections
-    ElementModQ crypto_hash; // Hash of the encrypted values
-    Optional<ElementModQ> nonce; // The nonce used to generate the encryption. Sensitive & should be treated as a secret.
+    final ElementModQ description_hash; // Hash from contestDescription
+    final List<CiphertextBallotSelection> ballot_selections; // Collection of ballot selections
+    final ElementModQ crypto_hash; // Hash of the encrypted values
+    final Optional<ElementModQ> nonce; // The nonce used to generate the encryption. Sensitive & should be treated as a secret.
 
     //     The proof demonstrates the sum of the selections does not exceed the maximum
     //    available selections for the contest, and that the proof was generated with the nonce
-    Optional<ChaumPedersen.ConstantChaumPedersenProof> proof;
+    final Optional<ChaumPedersen.ConstantChaumPedersenProof> proof;
 
     public CiphertextBallotContest(String object_id, ElementModQ description_hash,
                                    List<CiphertextBallotSelection> ballot_selections,
@@ -585,10 +585,9 @@ public class Ballot {
 
     Optional<ElementModQ> aggregate = _ciphertext_ballot_contest_aggregate_nonce(object_id, ballot_selections);
     if (proof.isEmpty()) {
-      List<CiphertextBallotSelection> finalBallot_selections = ballot_selections;
       proof = aggregate.map(ag ->
               ChaumPedersen.make_constant_chaum_pedersen(
-                      _ciphertext_ballot_elgamal_accumulate(finalBallot_selections),
+                      _ciphertext_ballot_elgamal_accumulate(ballot_selections),
                       number_elected,
                       ag,
                       elgamal_public_key,
@@ -629,7 +628,8 @@ public class Ballot {
      */
     boolean is_valid(String expected_ballot_style_id) {
       if (!this.ballot_style.equals(expected_ballot_style_id)) {
-        // f"invalid ballot_style: for: {this.object_id} expected({expected_ballot_style_id}) actual({this.ballot_style})"
+        logger.atWarning().log("invalid ballot_style: for: %s expected(%s) actual(%s)",
+          this.object_id, expected_ballot_style_id, this.ballot_style);
         return false;
       }
       return true;
@@ -707,8 +707,6 @@ public class Ballot {
     /**
      * @return a hash value derived from the description hash, the object id, and the nonce value
      * suitable for deriving other nonce values on the ballot
-     *
-     * @return
      */
     Optional<ElementModQ> hashed_ballot_nonce() {
       if (this.nonce.isEmpty()) {
@@ -829,7 +827,7 @@ public class Ballot {
   public enum BallotBoxState {
     CAST, /* A ballot that has been explicitly cast */
     SPOILED, // A ballot that has been explicitly spoiled
-    UNKNOWN; // A ballot whose state is unknown to ElectionGuard and will not be included in any election results
+    UNKNOWN // A ballot whose state is unknown to ElectionGuard and will not be included in any election results
   }
 
   /**

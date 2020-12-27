@@ -18,25 +18,25 @@ import static com.sunya.electionguard.KeyCeremony.*;
 public class Guardian extends ElectionObjectBase {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
-  int sequence_order;
+  final int sequence_order;
   CeremonyDetails ceremony_details;
   Auxiliary.KeyPair _auxiliary_keys;
   ElectionKeyPair _election_keys;
   // The collection of this guardian's partial key backups that will be shared to other guardians
-  Map<String, ElectionPartialKeyBackup> _backups_to_share;
+  final Map<String, ElectionPartialKeyBackup> _backups_to_share;
 
   //// From Other Guardians
   // The collection of other guardians' auxiliary public keys that are shared with this guardian
-  Map<String, Auxiliary.PublicKey> _guardian_auxiliary_public_keys;
+  final Map<String, Auxiliary.PublicKey> _guardian_auxiliary_public_keys;
 
   //     The collection of other guardians' election public keys that are shared with this guardian
-  Map<String, ElectionPublicKey> _guardian_election_public_keys;
+  final Map<String, ElectionPublicKey> _guardian_election_public_keys;
 
   // The collection of other guardians' partial key backups that are shared with this guardian
-  Map<String, ElectionPartialKeyBackup> _guardian_election_partial_key_backups;
+  final Map<String, ElectionPartialKeyBackup> _guardian_election_partial_key_backups;
 
   // The collection of other guardians' verifications that they shared their backups correctly
-  Map<String, ElectionPartialKeyVerification> _guardian_election_partial_key_verifications;
+  final Map<String, ElectionPartialKeyVerification> _guardian_election_partial_key_verifications;
 
   /**
    * Initialize a guardian with the specified arguments
@@ -204,8 +204,6 @@ public class Guardian extends ElectionObjectBase {
   /**
    * True if all election public keys have been received.
    * @return All election public keys backups received
-   *
-   * @return
    */
   boolean all_election_public_keys_received() {
     return this._guardian_election_public_keys.size() == this.ceremony_details.number_of_guardians();
@@ -284,8 +282,6 @@ public class Guardian extends ElectionObjectBase {
    * Publish election backup challenge of election partial key verification
    * @param guardian_id: Owner of election key
    * @return Election partial key challenge or None
-   *
-   * @return
    */
   Optional<ElectionPartialKeyChallenge> publish_election_backup_challenge(String guardian_id) {
     ElectionPartialKeyBackup backup_in_question = this._backups_to_share.get(guardian_id);
@@ -346,16 +342,14 @@ public class Guardian extends ElectionObjectBase {
   /**
    * Compute a partial decryption of an elgamal encryption
    * <p>
-   * @param elgamal: the `ElGamalCiphertext` that will be partially decrypted
-   * @param extended_base_hash: the extended base hash of the election that
-   * was used to generate t he ElGamal Ciphertext
-   * @param nonce_seed: an optional value used to generate the `ChaumPedersenProof`
-   * if no value is provided, a random number will be used.
-   * @return a `Tuple[ElementModP, ChaumPedersenProof]` of the decryption and its proof
    *
-   * @return
+   * @param elgamal:            the `ElGamalCiphertext` that will be partially decrypted
+   * @param extended_base_hash: the extended base hash of the election that
+   *                            was used to generate t he ElGamal Ciphertext
+   * @param nonce_seed:         an optional value used to generate the `ChaumPedersenProof`
+   *                            if no value is provided, a random number will be used.
+   * @return a `Tuple[ElementModP, ChaumPedersenProof]` of the decryption and its proof
    */
-
   Tuple partially_decrypt(
           ElGamal.Ciphertext elgamal,
           ElementModQ extended_base_hash,
@@ -400,16 +394,15 @@ public class Guardian extends ElectionObjectBase {
    * Compute a compensated partial decryption of an elgamal encryption
    * on behalf of the missing guardian
    * <p>
-   * @param missing_guardian_id: the guardian
-   * @param elgamal: the `ElGamalCiphertext` that will be partially decrypted
-   * @param extended_base_hash: the extended base hash of the election that
-   * was used to generate t he ElGamal Ciphertext
-   * @param nonce_seed: an optional value used to generate the `ChaumPedersenProof`
-   * if no value is provided, a random number will be used.
-   * @param decryptor an `AuxiliaryDecrypt` function to decrypt the missing guardina private key backup
-   * @return a `Tuple[ElementModP, ChaumPedersenProof]` of the decryption and its proof
    *
-   * @return
+   * @param missing_guardian_id: the guardian
+   * @param elgamal:             the `ElGamalCiphertext` that will be partially decrypted
+   * @param extended_base_hash:  the extended base hash of the election that
+   *                             was used to generate t he ElGamal Ciphertext
+   * @param nonce_seed:          an optional value used to generate the `ChaumPedersenProof`
+   *                             if no value is provided, a random number will be used.
+   * @param decryptor            an `AuxiliaryDecrypt` function to decrypt the missing guardina private key backup
+   * @return a `Tuple[ElementModP, ChaumPedersenProof]` of the decryption and its proof
    */
   Optional<Tuple> compensate_decrypt(
           String missing_guardian_id,

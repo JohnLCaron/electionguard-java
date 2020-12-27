@@ -9,7 +9,7 @@ public class Proof {
     SelectionLimit("Prove value within selection's limit"),
     SelectionValue("Prove selection's value (0 or 1)");
 
-    private String desc;
+    private final String desc;
     Usage(String desc) {
       this.desc = desc;
     }

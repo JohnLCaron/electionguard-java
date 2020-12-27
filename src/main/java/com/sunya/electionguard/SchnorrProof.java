@@ -1,11 +1,15 @@
 package com.sunya.electionguard;
 
+import com.google.common.flogger.FluentLogger;
+
 import java.util.Objects;
 
 import static com.sunya.electionguard.Group.*;
 import static com.sunya.electionguard.Proof.Usage.SecretValue;
 
 public class SchnorrProof extends Proof {
+    private static final FluentLogger logger = FluentLogger.forEnclosingClass();
+
   /** k in the spec */
   final ElementModP public_key;
   /** h in the spec */
@@ -40,7 +44,7 @@ public class SchnorrProof extends Proof {
 
     boolean success = valid_public_key && in_bounds_h && in_bounds_u && valid_proof;
     if (!success) {
-      // log_warning("found an invalid Schnorr proof: %s", this);
+      logger.atWarning().log("found an invalid Schnorr proof: %s", this);
     }
 
     return success;

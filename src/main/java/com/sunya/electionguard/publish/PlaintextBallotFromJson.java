@@ -51,7 +51,7 @@ public class PlaintextBallotFromJson {
 
   @Nullable
   <T, U> List<U> convertList(@Nullable List<T> from, Function<T, U> converter) {
-    return from == null ? null : from.stream().map(converter::apply).collect(Collectors.toList());
+    return from == null ? null : from.stream().map(converter).collect(Collectors.toList());
   }
 
   @Nullable

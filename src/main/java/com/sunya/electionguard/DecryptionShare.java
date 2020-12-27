@@ -103,7 +103,7 @@ class DecryptionShare {
      */
     boolean is_valid(ElGamal.Ciphertext message, ElementModP election_public_key, ElementModQ extended_base_hash) {
       // verify we have a proof or recovered parts
-      if (!this.proof().isPresent() && !this.recovered_parts().isPresent()) {
+      if (this.proof().isEmpty() && this.recovered_parts().isEmpty()) {
         // f"CiphertextDecryptionSelection is_valid failed for guardian: {self.guardian_id} selection: {self.object_id} with missing data"
         return false;
       }
@@ -141,9 +141,8 @@ class DecryptionShare {
    * @param guardian_id: Guardian id
    * @param description_hash: Description hash
    * @param share: Share
-   * @param proof_or_recovery: Proof or recovery
-   *
-   * @return
+   * @param proof: Proof
+   * @param recovered_parts: recovery
    */
   static CiphertextDecryptionSelection create_ciphertext_decryption_selection(
           String object_id,
