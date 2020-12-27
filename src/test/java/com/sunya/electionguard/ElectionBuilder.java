@@ -11,11 +11,11 @@ import static com.sunya.electionguard.Election.*;
  */
 public class ElectionBuilder {
 
-  public static class Tuple {
+  public static class DescriptionAndContext {
     final InternalElectionDescription description;
     final CiphertextElectionContext context;
 
-    public Tuple(InternalElectionDescription description, CiphertextElectionContext context) {
+    public DescriptionAndContext(InternalElectionDescription description, CiphertextElectionContext context) {
       this.description = description;
       this.context = context;
     }
@@ -39,7 +39,7 @@ public class ElectionBuilder {
     return this;
   }
 
-  Optional<Tuple> build() {
+  Optional<DescriptionAndContext> build() {
     if (!this.description.is_valid()) {
       return Optional.empty();
     }
@@ -48,7 +48,7 @@ public class ElectionBuilder {
       return Optional.empty();
     }
 
-    return Optional.of(new Tuple(this.internal_description,
+    return Optional.of(new DescriptionAndContext(this.internal_description,
       make_ciphertext_election_context(
               this.number_of_guardians,
               this.quorum,

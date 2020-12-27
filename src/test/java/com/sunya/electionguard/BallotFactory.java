@@ -106,19 +106,24 @@ public class BallotFactory {
   @Nullable
   List<PlaintextBallot> get_simple_ballots_from_file() throws IOException {
     String current = new java.io.File("./src/test/resources/").getCanonicalPath();
-    PlaintextBallotFromJson builder = new PlaintextBallotFromJson(current + this.simple_ballots_filename);
+    return this._get_ballots_from_file(current + "/" + this.simple_ballots_filename);
+  }
+
+  @Nullable
+  private List<PlaintextBallot> _get_ballots_from_file(String filename) throws IOException {
+    PlaintextBallotFromJson builder = new PlaintextBallotFromJson(filename);
     return builder.get_ballots_from_file();
   }
 
   @Nullable
   PlaintextBallot get_simple_ballot_from_file() throws IOException {
-    return this._get_ballot_from_file(this.simple_ballot_filename);
+    String current = new java.io.File("./src/test/resources/").getCanonicalPath();
+    return this._get_ballot_from_file(current + "/" + this.simple_ballot_filename);
   }
 
   @Nullable
   private PlaintextBallot _get_ballot_from_file(String filename) throws IOException {
-    String current = new java.io.File("./src/test/resources/").getCanonicalPath();
-    PlaintextBallotFromJson builder = new PlaintextBallotFromJson(current + filename);
+    PlaintextBallotFromJson builder = new PlaintextBallotFromJson(filename);
     return builder.get_ballot_from_file();
   }
 

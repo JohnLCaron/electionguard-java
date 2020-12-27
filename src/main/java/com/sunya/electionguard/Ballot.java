@@ -39,6 +39,14 @@ public class Ballot {
     public int hashCode() {
       return Objects.hash(value, length);
     }
+
+    @Override
+    public String toString() {
+      return "ExtendedData{" +
+              "value='" + value + '\'' +
+              ", length=" + length +
+              '}';
+    }
   }
 
   /**
@@ -113,13 +121,23 @@ public class Ballot {
       if (!super.equals(o)) return false;
       PlaintextBallotSelection that = (PlaintextBallotSelection) o;
       return is_placeholder_selection == that.is_placeholder_selection &&
-              Objects.equals(vote, that.vote) &&
-              Objects.equals(extended_data, that.extended_data);
+              vote.equals(that.vote) &&
+              extended_data.equals(that.extended_data);
     }
 
     @Override
     public int hashCode() {
       return Objects.hash(super.hashCode(), vote, is_placeholder_selection, extended_data);
+    }
+
+    @Override
+    public String toString() {
+      return "PlaintextBallotSelection{" +
+              "vote='" + vote + '\'' +
+              ", is_placeholder_selection=" + is_placeholder_selection +
+              ", extended_data=" + extended_data +
+              ", object_id='" + object_id + '\'' +
+              "}\n\n";
     }
   }
 
@@ -388,6 +406,14 @@ public class Ballot {
     public int hashCode() {
       return Objects.hash(super.hashCode(), ballot_selections);
     }
+
+    @Override
+    public String toString() {
+      return "PlaintextBallotContest{" +
+              "object_id='" + object_id + '\'' +
+              ", ballot_selections=\n " + ballot_selections +
+              '}';
+    }
   }
 
   /**
@@ -638,9 +664,9 @@ public class Ballot {
     @Override
     public String toString() {
       return "PlaintextBallot{" +
-              "ballot_style='" + ballot_style + '\'' +
+              "object_id='" + object_id + '\'' +
+              ", ballot_style='" + ballot_style + '\'' +
               ", contests=" + contests +
-              ", object_id='" + object_id + '\'' +
               '}';
     }
 

@@ -54,6 +54,7 @@ public class TestTallyProperties extends TestProperties {
     // election_description, metadata, ballots, secret_key, context = everything
     //  Tally the plaintext ballots for comparison later
     Map<String, BigInteger> plaintext_tallies = TallyTestHelper.accumulate_plaintext_ballots(everything.ballots);
+    System.out.printf("%n test_tally_spoiled_ballots_accumulates_valid_tally expected %s%n", plaintext_tallies);
 
     // encrypt each ballot
     DataStore store = new DataStore();
@@ -72,7 +73,13 @@ public class TestTallyProperties extends TestProperties {
     assertThat(result).isPresent();
 
     Map<String, BigInteger> decrypted_tallies = this._decrypt_with_secret(result.get(), everything.secret_key);
-    assertThat(plaintext_tallies).containsExactlyEntriesIn(decrypted_tallies);
+    System.out.printf("%n test_tally_spoiled_ballots_accumulates_valid_tally decrypted_tallies %s%n%n", decrypted_tallies);
+
+    // This cant be true since all ballots are spoiled ans so have a count of 0
+    // assertThat(plaintext_tallies).containsExactlyEntriesIn(decrypted_tallies);
+
+    // self.assertCountEqual(plaintext_tallies, decrypted_tallies)
+    assertThat(plaintext_tallies.keySet()).isEqualTo(decrypted_tallies.keySet());
 
     for (BigInteger value : decrypted_tallies.values()) {
       assertThat(value).isEqualTo(BigInteger.ZERO);

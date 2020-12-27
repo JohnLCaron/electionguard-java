@@ -8,6 +8,7 @@ import net.jqwik.api.ForAll;
 import net.jqwik.api.Property;
 import net.jqwik.api.ShrinkingMode;
 import net.jqwik.api.lifecycle.AfterContainer;
+import net.jqwik.api.lifecycle.AfterExample;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -72,7 +73,7 @@ public class TestDecryptionMediator extends TestProperties {
     assertThat(builder.build()).isEmpty();  // Can't build without the public key
     builder.set_public_key(this.joint_public_key);
 
-    Optional<ElectionBuilder.Tuple> tuple = builder.build();
+    Optional<ElectionBuilder.DescriptionAndContext> tuple = builder.build();
     assertThat(tuple).isPresent();
     this.metadata = tuple.get().description;
     this.context = tuple.get().context;
@@ -84,7 +85,8 @@ public class TestDecryptionMediator extends TestProperties {
     this.fake_cast_ballot = ballot_factory.get_fake_ballot(this.metadata, "some-unique-ballot-id-cast", true);
     List<PlaintextBallot> more_fake_ballots = new ArrayList<>();
     for (int i = 0; i < 10; i++) {
-      more_fake_ballots.add(ballot_factory.get_fake_ballot(this.metadata, "some-unique-ballot-id-cast" + 1, true));
+      more_fake_ballots.add(
+              ballot_factory.get_fake_ballot(this.metadata, "some-unique-ballot-id-cast" + i, true));
     }
     this.fake_spoiled_ballot = ballot_factory.get_fake_ballot(this.metadata, "some-unique-ballot-id-spoiled", true);
     List<PlaintextBallot> more_fake_spoiled_ballots = new ArrayList<>();
@@ -103,7 +105,6 @@ public class TestDecryptionMediator extends TestProperties {
     // that were not made on any ballots
     Set<String> selection_ids = this.metadata.contests.stream().flatMap(c -> c.ballot_selections.stream())
             .map(s -> s.object_id).collect(Collectors.toSet());
-
     // missing_selection_ids = selection_ids.difference( set(this.expected_plaintext_tally) )
     Sets.SetView<String> missing_selection_ids = Sets.difference(selection_ids, this.expected_plaintext_tally.keySet());
     for (String id : missing_selection_ids) {
@@ -151,7 +152,7 @@ public class TestDecryptionMediator extends TestProperties {
     this.ciphertext_tally = Tally.tally_ballots(ballot_store, this.metadata, this.context).get();
   }
 
-  @AfterContainer
+  @AfterExample
   public void tearDown() {
     this.key_ceremony.reset(CeremonyDetails.create(NUMBER_OF_GUARDIANS, QUORUM));
   }
@@ -519,7 +520,7 @@ public class TestDecryptionMediator extends TestProperties {
           @ForAll("election_description") Election.ElectionDescription description) {
 
     ElectionBuilder builder = new ElectionBuilder(NUMBER_OF_GUARDIANS, QUORUM, description);
-    Optional<ElectionBuilder.Tuple> tuple = builder.set_public_key(this.joint_public_key).build();
+    Optional<ElectionBuilder.DescriptionAndContext> tuple = builder.set_public_key(this.joint_public_key).build();
     assertThat(tuple).isPresent();
     InternalElectionDescription metadata = tuple.get().description;
     CiphertextElectionContext context = tuple.get().context;
@@ -533,15 +534,15 @@ public class TestDecryptionMediator extends TestProperties {
 
     for (Guardian guardian : this.guardians) {
       assertThat(subject.announce(guardian)).isPresent();
-
-      Optional<Tally.PlaintextTally> decrypted_tallies = subject.get_plaintext_tally(false, null);
-      assertThat(decrypted_tallies).isPresent();
-      Map<String, BigInteger> result = this._convert_to_selections(decrypted_tallies.get());
-
-      // assert
-      assertThat(result).isNotEmpty();
-      assertThat(plaintext_tallies).isEqualTo(result);
     }
+
+    Optional<Tally.PlaintextTally> decrypted_tallies = subject.get_plaintext_tally(false, null);
+    assertThat(decrypted_tallies).isPresent();
+    Map<String, BigInteger> result = this._convert_to_selections(decrypted_tallies.get());
+
+    // assert
+    assertThat(result).isNotEmpty();
+    assertThat(plaintext_tallies).isEqualTo(result);
   }
 
   Tally.CiphertextTally _generate_encrypted_tally(

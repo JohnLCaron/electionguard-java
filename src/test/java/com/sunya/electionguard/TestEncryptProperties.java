@@ -340,7 +340,7 @@ public class TestEncryptProperties extends TestProperties {
   public void test_encrypt_ballot_simple_succeeds() {
     KeyPair keypair = elgamal_keypair_from_secret(int_to_q(BigInteger.TWO).get()).get();
     Election.ElectionDescription election = election_factory.get_fake_election();
-    ElectionBuilder.Tuple tuple = election_factory.get_fake_ciphertext_election(election, keypair.public_key).get();
+    ElectionBuilder.DescriptionAndContext tuple = election_factory.get_fake_ciphertext_election(election, keypair.public_key).get();
     Election.InternalElectionDescription metadata = tuple.description;
     Election.CiphertextElectionContext context = tuple.context;
     ElementModQ nonce_seed = TWO_MOD_Q;
@@ -376,7 +376,7 @@ public class TestEncryptProperties extends TestProperties {
   public void test_encrypt_ballot_with_stateful_composer_succeeds() {
     KeyPair keypair = elgamal_keypair_from_secret(int_to_q(BigInteger.TWO).get()).get();
     Election.ElectionDescription election = election_factory.get_fake_election();
-    ElectionBuilder.Tuple tuple = election_factory.get_fake_ciphertext_election(election, keypair.public_key).get();
+    ElectionBuilder.DescriptionAndContext tuple = election_factory.get_fake_ciphertext_election(election, keypair.public_key).get();
     Election.InternalElectionDescription metadata = tuple.description;
     Election.CiphertextElectionContext context = tuple.context;
 
@@ -395,7 +395,7 @@ public class TestEncryptProperties extends TestProperties {
   public void test_encrypt_simple_ballot_from_files_succeeds() throws IOException {
     KeyPair keypair = elgamal_keypair_from_secret(int_to_q(BigInteger.TWO).get()).get();
     Election.ElectionDescription election = election_factory.get_simple_election_from_file();
-    ElectionBuilder.Tuple tuple = election_factory.get_fake_ciphertext_election(election, keypair.public_key).get();
+    ElectionBuilder.DescriptionAndContext tuple = election_factory.get_fake_ciphertext_election(election, keypair.public_key).get();
     Election.InternalElectionDescription metadata = tuple.description;
     Election.CiphertextElectionContext context = tuple.context;
 
@@ -419,7 +419,7 @@ public class TestEncryptProperties extends TestProperties {
      // TODO: Hypothesis test instead
 
      Election.ElectionDescription election = ElectionFactory.get_simple_election_from_file();
-     ElectionBuilder.Tuple tuple = ElectionFactory.get_fake_ciphertext_election(election, keypair.public_key).get();
+     ElectionBuilder.DescriptionAndContext tuple = ElectionFactory.get_fake_ciphertext_election(election, keypair.public_key).get();
      Election.InternalElectionDescription metadata = tuple.description;
      Election.CiphertextElectionContext context = tuple.context;
 

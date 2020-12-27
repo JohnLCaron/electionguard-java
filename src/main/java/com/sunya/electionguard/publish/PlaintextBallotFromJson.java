@@ -21,32 +21,24 @@ public class PlaintextBallotFromJson {
     this.filename = filename;
   }
 
-  public List<Ballot.PlaintextBallot> get_ballots_from_file() {
-    try {
-      InputStream is = new FileInputStream(this.filename);
+  public List<Ballot.PlaintextBallot> get_ballots_from_file() throws IOException {
+    try (InputStream is = new FileInputStream(this.filename)) {
       Reader reader = new InputStreamReader(is);
       Gson gson = new Gson(); // default exclude nulls
       Type listType = new TypeToken<ArrayList<PlaintextBallotPojo>>(){}.getType();
 
       List<PlaintextBallotPojo> pojo = gson.fromJson(reader, listType);
       return convertList(pojo, this::convertPlaintextBallot);
-
-    } catch (IOException ioe) {
-      throw new RuntimeException(ioe);
     }
   }
 
-  public Ballot.PlaintextBallot get_ballot_from_file() {
-    try {
-      InputStream is = new FileInputStream(this.filename);
-      Reader reader = new InputStreamReader(is);
-      Gson gson = new Gson(); // default exclude nulls
-      PlaintextBallotPojo pojo = gson.fromJson(reader, PlaintextBallotPojo.class);
-      return convertPlaintextBallot(pojo);
-
-    } catch (IOException ioe) {
-      throw new RuntimeException(ioe);
-    }
+  public Ballot.PlaintextBallot get_ballot_from_file() throws IOException {
+      try (InputStream is = new FileInputStream(this.filename)) {
+        Reader reader = new InputStreamReader(is);
+        Gson gson = new Gson(); // default exclude nulls
+        PlaintextBallotPojo pojo = gson.fromJson(reader, PlaintextBallotPojo.class);
+        return convertPlaintextBallot(pojo);
+      }
   }
 
   @Nullable

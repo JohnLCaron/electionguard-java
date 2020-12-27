@@ -87,7 +87,7 @@ public class ElectionFactory {
     return fake_election;
   }
 
-  public static Optional<ElectionBuilder.Tuple> get_fake_ciphertext_election(
+  public static Optional<ElectionBuilder.DescriptionAndContext> get_fake_ciphertext_election(
           ElectionDescription description,
           ElementModP elgamal_public_key) {
 

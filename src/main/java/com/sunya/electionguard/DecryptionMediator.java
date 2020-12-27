@@ -22,23 +22,20 @@ public class DecryptionMediator {
 
   final InternalElectionDescription _metadata;
   final CiphertextElectionContext _encryption;
-
   final CiphertextTally _ciphertext_tally;
-  final Optional<PlaintextTally> _plaintext_tally = Optional.empty();
 
+  // TODO not used?
+  final Optional<PlaintextTally> _plaintext_tally = Optional.empty();
   // Since spoiled ballots are decrypted, they are just a special case of a tally
   final Map<String, Optional<PlaintextTally>> _plaintext_spoiled_ballots = new HashMap<>();
 
+  // mutable
   final Map<String, Guardian> _available_guardians = new HashMap<>();
-
   final Map<String, KeyCeremony.ElectionPublicKey> _missing_guardians = new HashMap<>();
-
   //     A collection of Decryption Shares for each Available Guardian
   final Map<String, TallyDecryptionShare> _decryption_shares = new HashMap<>();
-
   // A collection of lagrange coefficients `w_{i,j}` computed by available guardians for each missing guardian
   final Map<String, Map<String, Group.ElementModQ>> _lagrange_coefficients = new HashMap<>();
-
   // A collection of Compensated Decryption Shares for each Available Guardian
   final Map<String, Map<String, CompensatedTallyDecryptionShare>> _compensated_decryption_shares = new HashMap<>();
 

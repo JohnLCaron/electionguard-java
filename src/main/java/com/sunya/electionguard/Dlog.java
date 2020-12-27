@@ -36,7 +36,6 @@ public class Dlog {
       dlog_max_elem = mult_pi(G, dlog_max_elem);
       cache.put(dlog_max_elem, BigInteger.valueOf(dlog_max_exp));
     }
-    System.out.printf(" from %d to %d%n", start, dlog_max_exp);
     return cache.getIfPresent(dlog_max_elem);
   }
 

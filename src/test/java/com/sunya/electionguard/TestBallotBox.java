@@ -35,7 +35,7 @@ public class TestBallotBox {
             .orElseThrow(() -> new RuntimeException());
 
     ElectionDescription election = election_factory.get_fake_election();
-    Optional<ElectionBuilder.Tuple> tupleO = election_factory.get_fake_ciphertext_election(election, keypair.public_key);
+    Optional<ElectionBuilder.DescriptionAndContext> tupleO = election_factory.get_fake_ciphertext_election(election, keypair.public_key);
     assertThat(tupleO.isEmpty()).isFalse();
     metadata = tupleO.get().description;
     context = tupleO.get().context;

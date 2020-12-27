@@ -46,21 +46,22 @@ class DecryptWithShares {
     ElementModP all_shares_product_M = new ElementModP(mult_p(decryption_shares));
 
     // Calculate 𝑀 = 𝐵⁄(∏𝑀𝑖)mod 𝑝.
-    Group.ElementModP M = div_p(selection.ciphertext().data, all_shares_product_M);
-    BigInteger dlogM = Dlog.discrete_log(M);
+    Group.ElementModP decrypted_value = div_p(selection.ciphertext().data, all_shares_product_M);
+    BigInteger dlogM = Dlog.discrete_log(decrypted_value);
 
     // [share for (guardian_id, (public_key, share))in shares.items()],
     List<CiphertextDecryptionSelection> selections = shares.values().stream().map(t -> t.decryption).collect(Collectors.toList());
     return Optional.of( new Tally.PlaintextTallySelection(
             selection.object_id,
             dlogM,
-            M,
+            decrypted_value,
             selection.ciphertext(),
             selections
           ));
   }
 
-  /**
+  /**    // generate encrypted tally
+
    *     Decrypt the specified tally within the context of the specified Decryption Shares
    *
    *     @param tally: the encrypted tally of contests

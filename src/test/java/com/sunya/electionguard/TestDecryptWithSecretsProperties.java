@@ -353,7 +353,7 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
     // TODO: Hypothesis test instead
 
     Election.ElectionDescription election = ElectionFactory.get_simple_election_from_file();
-    Optional<ElectionBuilder.Tuple> celection = ElectionFactory.get_fake_ciphertext_election(election, keypair.public_key);
+    Optional<ElectionBuilder.DescriptionAndContext> celection = ElectionFactory.get_fake_ciphertext_election(election, keypair.public_key);
     Election.InternalElectionDescription metadata = celection.get().description;
     Election.CiphertextElectionContext context = celection.get().context;
 
@@ -479,7 +479,7 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
           @ForAll("elgamal_keypairs") ElGamal.KeyPair keypair) throws IOException {
 
     Election.ElectionDescription election = ElectionFactory.get_simple_election_from_file();
-    Optional<ElectionBuilder.Tuple> celection = ElectionFactory.get_fake_ciphertext_election(election, keypair.public_key);
+    Optional<ElectionBuilder.DescriptionAndContext> celection = ElectionFactory.get_fake_ciphertext_election(election, keypair.public_key);
     Election.InternalElectionDescription metadata = celection.get().description;
     Election.CiphertextElectionContext context = celection.get().context;
 
