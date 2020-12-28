@@ -51,7 +51,7 @@ class DecryptWithShares {
 
     // [share for (guardian_id, (public_key, share))in shares.items()],
     List<CiphertextDecryptionSelection> selections = shares.values().stream().map(t -> t.decryption).collect(Collectors.toList());
-    return Optional.of( new Tally.PlaintextTallySelection(
+    return Optional.of( Tally.PlaintextTallySelection.create(
             selection.object_id,
             dlogM,
             decrypted_value,
@@ -80,7 +80,7 @@ class DecryptWithShares {
     for (CiphertextTallyContest contest : tally.values()) {
       HashMap<String, PlaintextTallySelection> selections = new HashMap<>();
 
-      for (CiphertextTallySelection selection : contest.tally_selections.values()) {
+      for (CiphertextTallySelection selection : contest.tally_selections().values()) {
         Map<String, KeyAndSelection> tally_shares = get_tally_shares_for_selection(selection.object_id, shares);
         Optional<Tally.PlaintextTallySelection> plaintext_selectionO = decrypt_selection_with_decryption_shares(
                 selection, tally_shares, extended_base_hash, false);
@@ -89,10 +89,10 @@ class DecryptWithShares {
           return Optional.empty();
         }
         Tally.PlaintextTallySelection plaintext_selection = plaintext_selectionO.get();
-        selections.put(plaintext_selection.object_id, plaintext_selection);
+        selections.put(plaintext_selection.object_id(), plaintext_selection);
       }
 
-      contests.put(contest.object_id, new PlaintextTallyContest(contest.object_id, selections));
+      contests.put(contest.object_id(), PlaintextTallyContest.create(contest.object_id(), selections));
     }
 
     return Optional.of(contests);
@@ -122,7 +122,7 @@ class DecryptWithShares {
             tally.spoiled_ballots, shares, context.crypto_extended_base_hash
     );
 
-    return spoiled_ballots.map(stringMapMap -> new PlaintextTally(tally.object_id, contests.get(), stringMapMap));
+    return spoiled_ballots.map(stringMapMap -> PlaintextTally.create(tally.object_id, contests.get(), stringMapMap));
   }
 
   /** Try to decrypt each of the spoiled ballots using the provided decryption shares */
@@ -173,11 +173,11 @@ class DecryptWithShares {
           return Optional.empty();
         } else {
           Tally.PlaintextTallySelection plaintext_selection = plaintext_selectionO.get();
-          selections.put(plaintext_selection.object_id, plaintext_selection);
+          selections.put(plaintext_selection.object_id(), plaintext_selection);
         }
       }
 
-      contests.put(contest.object_id, new PlaintextTallyContest(contest.object_id, selections));
+      contests.put(contest.object_id, PlaintextTallyContest.create(contest.object_id, selections));
     }
 
     return Optional.of(contests);

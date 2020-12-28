@@ -4,6 +4,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -451,8 +453,8 @@ public class ElectionTestHelper {
     BallotStyle styles = ballot_styles(parties, geo_units);
 
     //maybe later on we'll do something more complicated with dates
-    LocalDate start_date = LocalDate.now();
-    LocalDate end_date = start_date;
+    OffsetDateTime start_date = OffsetDateTime.now();
+    OffsetDateTime end_date = start_date;
 
     return new ElectionDescription(
             rstr("election_scope_id"),

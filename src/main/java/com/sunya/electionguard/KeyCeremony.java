@@ -1,6 +1,8 @@
 package com.sunya.electionguard;
 
 import com.google.auto.value.AutoValue;
+import com.google.gson.Gson;
+import com.google.gson.TypeAdapter;
 
 import javax.annotation.Nullable;
 import java.math.BigInteger;
@@ -142,6 +144,11 @@ public class KeyCeremony {
 
     public static CoefficientValidationSet create(String owner_id, List<ElementModP> coefficient_commitments, List<SchnorrProof> coefficient_proofs) {
       return new AutoValue_KeyCeremony_CoefficientValidationSet(owner_id, coefficient_commitments, coefficient_proofs);
+    }
+
+    // TODO I was hoping not to expose GSON here.
+    public static TypeAdapter<CoefficientValidationSet> typeAdapter(Gson gson) {
+      return new AutoValue_KeyCeremony_CoefficientValidationSet.GsonTypeAdapter(gson);
     }
   }
 

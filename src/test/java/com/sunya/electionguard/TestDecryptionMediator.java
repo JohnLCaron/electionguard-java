@@ -7,7 +7,6 @@ import net.jqwik.api.Example;
 import net.jqwik.api.ForAll;
 import net.jqwik.api.Property;
 import net.jqwik.api.ShrinkingMode;
-import net.jqwik.api.lifecycle.AfterContainer;
 import net.jqwik.api.lifecycle.AfterExample;
 
 import java.math.BigInteger;
@@ -179,7 +178,7 @@ public class TestDecryptionMediator extends TestProperties {
   @Example
   public void test_compute_selection() {
     Tally.CiphertextTallySelection first_selection =
-            this.ciphertext_tally.cast.values().stream().flatMap(contest -> contest.tally_selections.values().stream())
+            this.ciphertext_tally.cast.values().stream().flatMap(contest -> contest.tally_selections().values().stream())
                     .findFirst().orElseThrow(RuntimeException::new);
 
     Optional<DecryptionShare.CiphertextDecryptionSelection> result =
@@ -190,7 +189,7 @@ public class TestDecryptionMediator extends TestProperties {
   @Example
   public void test_compute_compensated_selection_failure() {
     Tally.CiphertextTallySelection first_selection =
-            this.ciphertext_tally.cast.values().stream().flatMap(contest -> contest.tally_selections.values().stream())
+            this.ciphertext_tally.cast.values().stream().flatMap(contest -> contest.tally_selections().values().stream())
                     .findFirst().orElseThrow(RuntimeException::new);
 
     this.guardians.get(0)._guardian_election_partial_key_backups.remove(this.guardians.get(2).object_id);
@@ -215,7 +214,7 @@ public class TestDecryptionMediator extends TestProperties {
   @Example
   public void test_compute_compensated_selection() {
     Tally.CiphertextTallySelection first_selection =
-            this.ciphertext_tally.cast.values().stream().flatMap(contest -> contest.tally_selections.values().stream())
+            this.ciphertext_tally.cast.values().stream().flatMap(contest -> contest.tally_selections().values().stream())
                     .findFirst().orElseThrow(RuntimeException::new);
 
     // Compute lagrange coefficients for the guardians that are present
@@ -315,7 +314,7 @@ public class TestDecryptionMediator extends TestProperties {
 
     assertThat(result).isPresent();
     BigInteger expected = this.expected_plaintext_tally.get(first_selection.object_id);
-    BigInteger actual = result.get().tally;
+    BigInteger actual = result.get().tally();
     assertThat(actual).isEqualTo(expected);
   }
 
@@ -324,7 +323,7 @@ public class TestDecryptionMediator extends TestProperties {
 
     // find the first selection
     Tally.CiphertextTallyContest first_contest = this.ciphertext_tally.cast.values().stream().findFirst().orElseThrow(IllegalStateException::new);
-    Tally.CiphertextTallySelection first_selection = first_contest.tally_selections.values().stream().findFirst().orElseThrow(IllegalStateException::new);
+    Tally.CiphertextTallySelection first_selection = first_contest.tally_selections().values().stream().findFirst().orElseThrow(IllegalStateException::new);
 
     // precompute decryption shares for the guardians
     DecryptionShare.TallyDecryptionShare first_share = compute_decryption_share(this.guardians.get(0), this.ciphertext_tally, this.context).get();
@@ -336,21 +335,21 @@ public class TestDecryptionMediator extends TestProperties {
 
     shares.put(this.guardians.get(0).object_id, new DecryptionShare.KeyAndSelection(
             this.guardians.get(0).share_election_public_key().key(),
-            first_share.contests().get(first_contest.object_id).selections().get(first_selection.object_id)));
+            first_share.contests().get(first_contest.object_id()).selections().get(first_selection.object_id)));
 
     shares.put(this.guardians.get(1).object_id, new DecryptionShare.KeyAndSelection(
             this.guardians.get(1).share_election_public_key().key(),
-            second_share.contests().get(first_contest.object_id).selections().get(first_selection.object_id)));
+            second_share.contests().get(first_contest.object_id()).selections().get(first_selection.object_id)));
 
     shares.put(this.guardians.get(2).object_id, new DecryptionShare.KeyAndSelection(
             this.guardians.get(2).share_election_public_key().key(),
-            third_share.contests().get(first_contest.object_id).selections().get(first_selection.object_id)));
+            third_share.contests().get(first_contest.object_id()).selections().get(first_selection.object_id)));
 
     Optional<Tally.PlaintextTallySelection> result = DecryptWithShares.decrypt_selection_with_decryption_shares(
             first_selection, shares, this.context.crypto_extended_base_hash, false);
 
     assertThat(result).isPresent();
-    assertThat(this.expected_plaintext_tally.get(first_selection.object_id)).isEqualTo(result.get().tally);
+    assertThat(this.expected_plaintext_tally.get(first_selection.object_id)).isEqualTo(result.get().tally());
   }
 
   @Example
@@ -374,7 +373,7 @@ public class TestDecryptionMediator extends TestProperties {
     for (PlaintextBallotContest contest : plaintext_ballot.contests) {
       for (PlaintextBallotSelection selection : contest.ballot_selections) {
         int expected_tally = selection.vote.equalsIgnoreCase("False") ? 0 : 1;
-        BigInteger actual_tally = result.get(contest.object_id).selections.get(selection.object_id).tally;
+        BigInteger actual_tally = result.get(contest.object_id).selections().get(selection.object_id).tally();
         assertThat(expected_tally).isEqualTo(actual_tally.intValue());
       }
     }
@@ -435,7 +434,7 @@ public class TestDecryptionMediator extends TestProperties {
     for (PlaintextBallotContest contest : plaintext_ballot.contests) {
       for (PlaintextBallotSelection selection : contest.ballot_selections) {
         int expected_tally = selection.vote.equalsIgnoreCase("False") ? 0 : 1;
-        BigInteger actual_tally = result.get(contest.object_id).selections.get(selection.object_id).tally;
+        BigInteger actual_tally = result.get(contest.object_id).selections().get(selection.object_id).tally();
         assertThat(expected_tally).isEqualTo(actual_tally.intValue());
       }
     }
@@ -466,9 +465,9 @@ public class TestDecryptionMediator extends TestProperties {
 
     for (PlaintextBallotContest contest : this.fake_spoiled_ballot.contests) {
       for (PlaintextBallotSelection selection : contest.ballot_selections) {
-        BigInteger actual_tally = spoiled_ballot.get(contest.object_id).selections.get(selection.object_id).tally;
+        BigInteger actual_tally = spoiled_ballot.get(contest.object_id).selections().get(selection.object_id).tally();
         BigInteger expected_tally = result.get(this.fake_spoiled_ballot.object_id).get(contest.object_id)
-                .selections.get(selection.object_id).tally;
+                .selections().get(selection.object_id).tally();
         assertThat(expected_tally).isEqualTo(actual_tally);
       }
     }
@@ -569,9 +568,9 @@ public class TestDecryptionMediator extends TestProperties {
 
   private Map<String, BigInteger> _convert_to_selections(Tally.PlaintextTally tally) {
     Map<String, BigInteger> plaintext_selections = new HashMap<>();
-    for (Tally.PlaintextTallyContest contest : tally.contests.values()) {
-      for (Map.Entry<String, Tally.PlaintextTallySelection> entry : contest.selections.entrySet()) {
-        plaintext_selections.put(entry.getKey(), entry.getValue().tally);
+    for (Tally.PlaintextTallyContest contest : tally.contests().values()) {
+      for (Map.Entry<String, Tally.PlaintextTallySelection> entry : contest.selections().entrySet()) {
+        plaintext_selections.put(entry.getKey(), entry.getValue().tally());
       }
     }
 

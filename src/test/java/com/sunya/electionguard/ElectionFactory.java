@@ -6,6 +6,8 @@ import com.sunya.electionguard.publish.ElectionDescriptionFromJson;
 import javax.annotation.Nullable;
 import java.io.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -74,7 +76,7 @@ public class ElectionFactory {
 
     ElectionDescription fake_election = new ElectionDescription(
             "some-scope-id",
-            ElectionType.unknown, LocalDate.now(), LocalDate.now(),
+            ElectionType.unknown, OffsetDateTime.now(), OffsetDateTime.now(),
             ImmutableList.of(new GeopoliticalUnit("some-geopoltical-unit-id", "some-gp-unit-name", ReportingUnitType.unknown, null)),
             ImmutableList.of(new Party("some-party-id-1"), new Party("some-party-id-2")),
             ImmutableList.of(new Candidate("some-candidate-id-1"),
@@ -119,7 +121,11 @@ public class ElectionFactory {
   }
 
   private static ElectionDescription _get_election_from_file(String filename) throws IOException {
-    ElectionDescriptionFromJson builder = new ElectionDescriptionFromJson(filename);
+    String current = new java.io.File("./src/test/resources/").getCanonicalPath();
+    System.out.printf("Current '%s'%n", current);
+
+    String absFilename = current + "/" + filename;
+    ElectionDescriptionFromJson builder = new ElectionDescriptionFromJson(absFilename);
     return builder.build();
   }
 

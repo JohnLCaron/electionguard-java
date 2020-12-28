@@ -5,6 +5,7 @@ import com.google.common.flogger.FluentLogger;
 import javax.annotation.concurrent.Immutable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import static com.sunya.electionguard.Ballot.*;
@@ -30,6 +31,20 @@ public class Encrypt {
 
     ElementModQ get_hash() {
       return Hash.hash_elems(uuid, location);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      EncryptionDevice that = (EncryptionDevice) o;
+      return uuid.equals(that.uuid) &&
+              location.equals(that.location);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(uuid, location);
     }
   }
 

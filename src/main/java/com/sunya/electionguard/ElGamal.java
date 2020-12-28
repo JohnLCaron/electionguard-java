@@ -6,6 +6,7 @@ import com.google.common.flogger.FluentLogger;
 import javax.annotation.concurrent.Immutable;
 import java.math.BigInteger;
 import java.util.Collection;
+import java.util.Objects;
 import java.util.Optional;
 
 import static com.sunya.electionguard.Dlog.discrete_log;
@@ -43,6 +44,20 @@ class ElGamal {
     public Ciphertext(ElementModP pad, ElementModP data) {
       this.pad = pad;
       this.data = data;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      Ciphertext that = (Ciphertext) o;
+      return pad.equals(that.pad) &&
+              data.equals(that.data);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(pad, data);
     }
 
     /**

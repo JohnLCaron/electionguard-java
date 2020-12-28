@@ -381,9 +381,9 @@ public class TestDecryptionMediatorProblem extends TestProperties {
 
   private Map<String, BigInteger> _convert_to_selections(Tally.PlaintextTally tally) {
     Map<String, BigInteger> plaintext_selections = new HashMap<>();
-    for (Tally.PlaintextTallyContest contest : tally.contests.values()) {
-      for (Map.Entry<String, Tally.PlaintextTallySelection> entry : contest.selections.entrySet()) {
-        plaintext_selections.put(entry.getKey(), entry.getValue().tally);
+    for (Tally.PlaintextTallyContest contest : tally.contests().values()) {
+      for (Map.Entry<String, Tally.PlaintextTallySelection> entry : contest.selections().entrySet()) {
+        plaintext_selections.put(entry.getKey(), entry.getValue().tally());
       }
     }
 

@@ -98,7 +98,7 @@ public class Decryption {
 
       // [(guardian, selection, context) for (_, selection) in contest.tally_selections.items()],
       List<Callable<Optional<CiphertextDecryptionSelection>>> tasks =
-              contest.tally_selections.values().stream().map(selection ->
+              contest.tally_selections().values().stream().map(selection ->
                       new RunComputeDecryptionShareForSelection(guardian, selection, context)).collect(Collectors.toList());
 
       Scheduler<Optional<CiphertextDecryptionSelection>> scheduler = new Scheduler<>();
@@ -108,14 +108,14 @@ public class Decryption {
       for (Optional<CiphertextDecryptionSelection> decryption : selection_decryptions) {
         if (decryption.isEmpty()) {
           logger.atInfo().log("could not compute share for guardian %s contest %s",
-                  guardian.object_id, contest.object_id);
+                  guardian.object_id, contest.object_id());
           return Optional.empty();
         }
         selections.put(decryption.get().object_id(), decryption.get());
       }
 
-      contests.put(contest.object_id, CiphertextDecryptionContest.create(
-              contest.object_id, guardian.object_id, contest.description_hash, selections));
+      contests.put(contest.object_id(), CiphertextDecryptionContest.create(
+              contest.object_id(), guardian.object_id, contest.description_hash(), selections));
     }
 
     return Optional.of(contests);
@@ -137,7 +137,7 @@ public class Decryption {
       // [ (guardian, missing_guardian_id, selection, context, decrypt)
       //          for (_, selection) in contest.tally_selections.items() ],
       List<Callable<Optional<CiphertextCompensatedDecryptionSelection>>> tasks =
-              contest.tally_selections.values().stream()
+              contest.tally_selections().values().stream()
                       .map(selection -> new RunComputeCompensatedDecryptionShareForSelection(
                               guardian, missing_guardian_id, selection, context, decryptor))
                       .collect(Collectors.toList());
@@ -150,17 +150,17 @@ public class Decryption {
       // verify the decryptions are received and add them to the collection
       for (Optional<CiphertextCompensatedDecryptionSelection> decryption : selection_decryptions) {
         if (decryption.isEmpty()) {
-          logger.atInfo().log("could not compute share for guardian %s contest %s", guardian.object_id, contest.object_id);
+          logger.atInfo().log("could not compute share for guardian %s contest %s", guardian.object_id, contest.object_id());
           return Optional.empty();
         }
         selections.put(decryption.get().object_id(), decryption.get());
       }
 
-      contests.put(contest.object_id, CiphertextCompensatedDecryptionContest.create(
-              contest.object_id,
+      contests.put(contest.object_id(), CiphertextCompensatedDecryptionContest.create(
+              contest.object_id(),
               guardian.object_id,
               missing_guardian_id,
-              contest.description_hash,
+              contest.description_hash(),
               selections));
     }
     return Optional.of(contests);
@@ -552,11 +552,11 @@ public class Decryption {
       for (Map.Entry<String, CompensatedTallyDecryptionShare> entry2 : shares.entrySet()) {
         String available_guardian_id = entry2.getKey();
         CompensatedTallyDecryptionShare compensated_share = entry2.getValue();
-        contest_shares.put(available_guardian_id, compensated_share.contests().get(tally_contest.object_id));
+        contest_shares.put(available_guardian_id, compensated_share.contests().get(tally_contest.object_id()));
       }
 
       Map<String, CiphertextDecryptionSelection> selections = new HashMap<>();
-      for (Map.Entry<String, CiphertextTallySelection> entry3 : tally_contest.tally_selections.entrySet()) {
+      for (Map.Entry<String, CiphertextTallySelection> entry3 : tally_contest.tally_selections().entrySet()) {
         String selection_id = entry3.getKey();
         CiphertextTallySelection tally_selection = entry3.getValue();
 
@@ -588,7 +588,7 @@ public class Decryption {
       contests.put(contest_id, CiphertextDecryptionContest.create(
               contest_id,
               missing_guardian_id,
-              tally_contest.description_hash,
+              tally_contest.description_hash(),
               selections));
     }
 

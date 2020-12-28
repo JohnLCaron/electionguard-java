@@ -2,6 +2,8 @@ package com.sunya.electionguard;
 
 import com.google.auto.value.AutoValue;
 import com.google.common.flogger.FluentLogger;
+import com.google.gson.Gson;
+import com.google.gson.TypeAdapter;
 
 import javax.annotation.concurrent.Immutable;
 import java.util.HashMap;
@@ -10,7 +12,7 @@ import java.util.Optional;
 
 import static com.sunya.electionguard.Group.*;
 
-class DecryptionShare {
+public class DecryptionShare {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   /**
@@ -41,6 +43,9 @@ class DecryptionShare {
       return new AutoValue_DecryptionShare_CiphertextCompensatedDecryptionSelection(object_id, guardian_id, missing_guardian_id, description_hash, share, recovery_key, proof);
     }
 
+    public static TypeAdapter<CiphertextCompensatedDecryptionSelection> typeAdapter(Gson gson) {
+      return new AutoValue_DecryptionShare_CiphertextCompensatedDecryptionSelection.GsonTypeAdapter(gson);
+    }
   }
 
   /**
@@ -55,7 +60,7 @@ class DecryptionShare {
    * by each available guardian.
    */
   @AutoValue
-  static abstract class CiphertextDecryptionSelection implements ElectionObjectBaseIF {
+  public static abstract class CiphertextDecryptionSelection implements ElectionObjectBaseIF {
     /**
      * The Available Guardian that this share belongs to
      */
@@ -89,6 +94,10 @@ class DecryptionShare {
             Optional<ChaumPedersen.ChaumPedersenProof> proof,
             Optional<Map<String, CiphertextCompensatedDecryptionSelection>> recovered_parts) {
       return new AutoValue_DecryptionShare_CiphertextDecryptionSelection(object_id, guardian_id, description_hash, share, proof, recovered_parts);
+    }
+
+    public static TypeAdapter<CiphertextDecryptionSelection> typeAdapter(Gson gson) {
+      return new AutoValue_DecryptionShare_CiphertextDecryptionSelection.GsonTypeAdapter(gson);
     }
 
     /**

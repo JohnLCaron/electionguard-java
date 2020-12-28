@@ -46,7 +46,7 @@ public class ConvertToJson {
   }
 
   public static void write(KeyCeremony.CoefficientValidationSet object, Path where) throws IOException {
-    Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    Gson gson = new GsonBuilder().setPrettyPrinting().registerTypeAdapterFactory(AutoValueGsonTypeAdapterFactory.create()).create();
     Type type = new TypeToken<KeyCeremony.CoefficientValidationSet>(){}.getType();
     try (FileWriter writer = new FileWriter(where.toFile())) {
       gson.toJson(object, type, writer);
@@ -62,7 +62,7 @@ public class ConvertToJson {
   }
 
   public static void write(Tally.PublishedCiphertextTally  object, Path where) throws IOException {
-    Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    Gson gson = new GsonBuilder().setPrettyPrinting().registerTypeAdapterFactory(AutoValueGsonTypeAdapterFactory.create()).create();
     Type type = new TypeToken<Tally.PublishedCiphertextTally >(){}.getType();
     try (FileWriter writer = new FileWriter(where.toFile())) {
       gson.toJson(object, type, writer);
@@ -70,7 +70,7 @@ public class ConvertToJson {
   }
 
   public static void write(Tally.PlaintextTally object, Path where) throws IOException {
-    Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    Gson gson = new GsonBuilder().setPrettyPrinting().registerTypeAdapterFactory(AutoValueGsonTypeAdapterFactory.create()).create();
     Type type = new TypeToken<Tally.PlaintextTally>(){}.getType();
     try (FileWriter writer = new FileWriter(where.toFile())) {
       gson.toJson(object, type, writer);

@@ -14,14 +14,13 @@ import org.junit.rules.TemporaryFolder;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.sunya.electionguard.Election.*;
 import static com.sunya.electionguard.Group.*;
-
 
 public class TestPublish {
 
@@ -36,7 +35,7 @@ public class TestPublish {
 
   @Example
   public void test_publish() throws IOException {
-    LocalDate now = LocalDate.now();
+    OffsetDateTime now = OffsetDateTime.now();
     ElectionDescription description = new ElectionDescription(
             "", ElectionType.unknown, now, now, ImmutableList.of(), ImmutableList.of(),
             ImmutableList.of(), ImmutableList.of(), ImmutableList.of(), null, null);
@@ -45,12 +44,13 @@ public class TestPublish {
     CiphertextElectionContext context = make_ciphertext_election_context(1, 1, ONE_MOD_P, ONE_MOD_Q);
     List<KeyCeremony.CoefficientValidationSet> coefficients = ImmutableList.of(
             KeyCeremony.CoefficientValidationSet.create("", ImmutableList.of(), ImmutableList.of()));
-    Tally.PlaintextTally plaintext_tally = new Tally.PlaintextTally("", ImmutableMap.of(), ImmutableMap.of());
+    Tally.PlaintextTally plaintext_tally = Tally.PlaintextTally.create("", ImmutableMap.of(), ImmutableMap.of());
 
     Tally.PublishedCiphertextTally ciphertext_tally = Tally.publish_ciphertext_tally(
             new Tally.CiphertextTally("", metadata, context));
 
-    Publish.publish(
+    Publisher publisher = new Publisher(outputDir);
+    publisher.write(
             description,
             context,
             new ElectionConstants(),
@@ -59,10 +59,9 @@ public class TestPublish {
             ImmutableList.of(),
             ciphertext_tally,
             plaintext_tally,
-            coefficients,
-            outputDir);
+            coefficients);
 
-    File testFile = new File(outputDir, Publish.DEVICES_DIR);
+    File testFile = new File(outputDir, Publisher.DEVICES_DIR);
     assertThat(testFile.exists()).isTrue();
   }
 
@@ -75,12 +74,13 @@ public class TestPublish {
 
     List<Guardian> guardians = ImmutableList.of( new Guardian("", 1, 1, 1, null));
 
-    Publish.publish_private_data(
+    Publisher publisher = new Publisher(outputDir);
+    publisher.publish_private_data(
             plaintext_ballots,
             encrypted_ballots,
-            guardians, outputDir);
+            guardians);
 
-    File testFile = new File(outputDir, Publish.PRIVATE_DIR);
+    File testFile = new File(outputDir, Publisher.PRIVATE_DIR);
     assertThat(testFile.exists()).isTrue();
   }
 

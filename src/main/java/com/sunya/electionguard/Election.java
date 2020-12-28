@@ -8,6 +8,8 @@ import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import java.math.BigInteger;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -93,8 +95,8 @@ public class Election {
    */
   @Immutable
   public static class AnnotatedString implements Hash.CryptoHashable {
-    final String annotation;
-    final String value;
+    public final String annotation;
+    public final String value;
 
     public AnnotatedString(String annotation, String value) {
       this.annotation = annotation;
@@ -127,8 +129,8 @@ public class Election {
    */
   @Immutable
   public static class Language implements Hash.CryptoHashable {
-    final String value;
-    final String language;
+    public final String value;
+    public final String language;
 
     public Language(String value, String language) {
       this.value = value;
@@ -161,7 +163,7 @@ public class Election {
    */
   @Immutable
   public static class InternationalizedText implements Hash.CryptoHashable {
-    final ImmutableList<Language> text;
+    public final ImmutableList<Language> text;
 
     public InternationalizedText(@Nullable List<Language> text) {
       this.text = toImmutableList(text);
@@ -192,10 +194,10 @@ public class Election {
    */
   @Immutable
   public static class ContactInformation implements Hash.CryptoHashable {
-    final Optional<ImmutableList<String>> address_line;
-    final Optional<ImmutableList<AnnotatedString>> email;
-    final Optional<ImmutableList<AnnotatedString>> phone;
-    final Optional<String> name;
+    public final Optional<ImmutableList<String>> address_line;
+    public final Optional<ImmutableList<AnnotatedString>> email;
+    public final Optional<ImmutableList<AnnotatedString>> phone;
+    public final Optional<String> name;
 
     public ContactInformation(@Nullable List<String> address_line,
                               @Nullable List<AnnotatedString> email,
@@ -237,9 +239,9 @@ public class Election {
    */
   @Immutable
   public static class GeopoliticalUnit extends ElectionObjectBase implements Hash.CryptoHashable {
-    final String name;
-    final ReportingUnitType type;
-    final Optional<ContactInformation> contact_information;
+    public final String name;
+    public final ReportingUnitType type;
+    public final Optional<ContactInformation> contact_information;
 
     public GeopoliticalUnit(String object_id,
                             String name,
@@ -278,9 +280,9 @@ public class Election {
    */
   @Immutable
   public static class BallotStyle extends ElectionObjectBase implements Hash.CryptoHashable {
-    final Optional<ImmutableList<String>> geopolitical_unit_ids;
-    final Optional<ImmutableList<String>> party_ids;
-    final Optional<String> image_uri;
+    public  final Optional<ImmutableList<String>> geopolitical_unit_ids;
+    public final Optional<ImmutableList<String>> party_ids;
+    public final Optional<String> image_uri;
 
     public BallotStyle(String object_id,
                        @Nullable List<String> geopolitical_unit_ids,
@@ -322,10 +324,10 @@ public class Election {
    */
   @Immutable
   public static class Party extends ElectionObjectBase implements Hash.CryptoHashable {
-    final InternationalizedText ballot_name;
-    final Optional<String> abbreviation;
-    final Optional<String> color;
-    final Optional<String> logo_uri;
+    public final InternationalizedText ballot_name;
+    public final Optional<String> abbreviation;
+    public final Optional<String> color;
+    public final Optional<String> logo_uri;
 
     public Party(String object_id) {
       super(object_id);
@@ -390,10 +392,10 @@ public class Election {
    */
   @Immutable
   public static class Candidate extends ElectionObjectBase implements Hash.CryptoHashable {
-    final InternationalizedText ballot_name;
-    final Optional<String> party_id;
-    final Optional<String> image_uri;
-    final Optional<Boolean> is_write_in;
+    public final InternationalizedText ballot_name;
+    public final Optional<String> party_id;
+    public final Optional<String> image_uri;
+    public final Optional<Boolean> is_write_in;
 
     public Candidate(String object_id) {
       super(object_id);
@@ -458,14 +460,14 @@ public class Election {
    */
   @Immutable
   public static class SelectionDescription extends ElectionObjectBase implements Hash.CryptoHashable {
-    final String candidate_id;
+    public final String candidate_id;
     /**
      * Used for ordering selections in a contest to ensure various encryption primitives are deterministic.
      * The sequence order must be unique and should be representative of how the contests are represnted
      * on a "master" ballot in an external system.  The sequence order is not required to be in the order
      * in which they are displayed to a voter.  Any acceptable range of integer values may be provided.
      */
-    final int sequence_order;
+    public final int sequence_order;
 
     public SelectionDescription(String object_id, String candidate_id, int sequence_order) {
       super(object_id);
@@ -517,36 +519,36 @@ public class Election {
   @Immutable
   public static class ContestDescription extends ElectionObjectBase implements Hash.CryptoHashable {
 
-    final String electoral_district_id;
+    public final String electoral_district_id;
     /**
      * Used for ordering contests in a ballot to ensure various encryption primitives are deterministic.
      * The sequence order must be unique and should be representative of how the contests are represnted
      * on a "master" ballot in an external system.  The sequence order is not required to be in the order
      * in which they are displayed to a voter.  Any acceptable range of integer values may be provided.
      */
-    final int sequence_order;
+    public final int sequence_order;
 
-    final VoteVariationType vote_variation;
+    public final VoteVariationType vote_variation;
 
     // Number of candidates that are elected in the contest ("n" of n-of-m).
     // Note: a referendum is considered a specific case of 1-of-m in ElectionGuard
-    final int number_elected;
+    public final int number_elected;
 
     // Maximum number of votes/write-ins per voter in this contest. Used in cumulative voting
     // to indicate how many total votes a voter can spread around. In n-of-m elections, this will be None.
-    final Optional<Integer> votes_allowed;
+    public final Optional<Integer> votes_allowed;
 
     //Name of the contest, not necessarily as it appears on the ballot.
-    final String name;
+    public final String name;
 
     // For associating a ballot selection for the contest, i.e., a candidate, a ballot measure.
-    final ImmutableList<SelectionDescription> ballot_selections;
+    public final ImmutableList<SelectionDescription> ballot_selections;
 
     // Title of the contest as it appears on the ballot.
-    final Optional<InternationalizedText> ballot_title;
+    public final Optional<InternationalizedText> ballot_title;
 
     // Subtitle of the contest as it appears on the ballot.
-    final Optional<InternationalizedText> ballot_subtitle;
+    public final Optional<InternationalizedText> ballot_subtitle;
 
     public ContestDescription(String object_id,
                               String electoral_district_id,
@@ -796,23 +798,22 @@ public class Election {
    */
   @Immutable
   public static class ElectionDescription implements Hash.CryptoHashable {
-    final String election_scope_id;
-    final ElectionType type;
-    final LocalDate start_date;
-    final LocalDate end_date;
-    final ImmutableList<GeopoliticalUnit> geopolitical_units;
-    final ImmutableList<Party> parties;
-    final ImmutableList<Candidate> candidates;
-    final ImmutableList<ContestDescription> contests;
-    final ImmutableList<BallotStyle> ballot_styles;
-    final Optional<InternationalizedText> name;
-    final Optional<ContactInformation> contact_information;
+    public final String election_scope_id;
+    public final ElectionType type;
+    public final OffsetDateTime start_date;
+    public final OffsetDateTime end_date;
+    public final ImmutableList<GeopoliticalUnit> geopolitical_units;
+    public final ImmutableList<Party> parties;
+    public final ImmutableList<Candidate> candidates;
+    public final ImmutableList<ContestDescription> contests;
+    public final ImmutableList<BallotStyle> ballot_styles;
+    public final Optional<InternationalizedText> name;
+    public final Optional<ContactInformation> contact_information;
 
-    // TODO maybe use a Builder?
     public ElectionDescription(String election_scope_id,
                                ElectionType type,
-                               LocalDate start_date,
-                               LocalDate end_date,
+                               OffsetDateTime start_date,
+                               OffsetDateTime end_date,
                                List<GeopoliticalUnit> geopolitical_units,
                                List<Party> parties,
                                List<Candidate> candidates,
@@ -1080,10 +1081,26 @@ public class Election {
    */
   @Immutable
   public static class ElectionConstants {
-    public static final BigInteger large_prime = Group.P; // large prime or p"""
-    public static final BigInteger small_prime = Group.Q; // small prime or q"""
-    public static final BigInteger cofactor = Group.R; // cofactor or r"""
-    public static final BigInteger generator = Group.G; // generator or g"""
+    public final BigInteger large_prime = Group.P; // large prime or p"""
+    public final BigInteger small_prime = Group.Q; // small prime or q"""
+    public final BigInteger cofactor = Group.R; // cofactor or r"""
+    public final BigInteger generator = Group.G; // generator or g"""
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      ElectionConstants that = (ElectionConstants) o;
+      return large_prime.equals(that.large_prime) &&
+              small_prime.equals(that.small_prime) &&
+              cofactor.equals(that.cofactor) &&
+              generator.equals(that.generator);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(large_prime, small_prime, cofactor, generator);
+    }
   }
 
   /**
