@@ -10,7 +10,7 @@ import java.util.Optional;
 
 import static com.sunya.electionguard.Group.*;
 
-class ChaumPedersen {
+public class ChaumPedersen {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   /**
@@ -118,7 +118,7 @@ class ChaumPedersen {
    * Representation of a generic Chaum-Pedersen Zero Knowledge proof.
    */
   @Immutable
-  static class ChaumPedersenProof extends Proof {
+  public static class ChaumPedersenProof extends Proof {
     final ElementModP pad; // a in the spec
     final ElementModP data; // b in the spec
     final ElementModQ challenge; // c in the spec

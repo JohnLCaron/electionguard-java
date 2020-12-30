@@ -867,7 +867,7 @@ public class Ballot {
    * Do not make this class directly. Use `make_ciphertext_accepted_ballot` or `from_ciphertext_ballot` instead.
    */
   public static class CiphertextAcceptedBallot extends CiphertextBallot {
-    // TODO TestTallyProperties needs to change this, make mutable version?
+    // TODO TestTallyProperties wants to change this, make mutable version?
     BallotBoxState state;
 
     public CiphertextAcceptedBallot(String object_id,

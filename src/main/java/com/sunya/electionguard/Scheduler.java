@@ -35,9 +35,8 @@ public class Scheduler<T> {
       return results.get();
     } catch (InterruptedException | ExecutionException e) {
       logger.atWarning().withCause(e).log("Scheduler got exception %s", e.getMessage());
+      throw new RuntimeException(e);
     }
-    // TODO What else could we do ?
-    return null;
   }
 
   public static void shutdown() {

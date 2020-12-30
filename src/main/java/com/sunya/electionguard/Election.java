@@ -7,8 +7,6 @@ import com.google.common.flogger.FluentLogger;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import java.math.BigInteger;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -280,7 +278,7 @@ public class Election {
    */
   @Immutable
   public static class BallotStyle extends ElectionObjectBase implements Hash.CryptoHashable {
-    public  final Optional<ImmutableList<String>> geopolitical_unit_ids;
+    public final Optional<ImmutableList<String>> geopolitical_unit_ids;
     public final Optional<ImmutableList<String>> party_ids;
     public final Optional<String> image_uri;
 
@@ -722,7 +720,7 @@ public class Election {
 
   /**
    * ContestDescriptionWithPlaceholders is a `ContestDescription` with ElectionGuard `placeholder_selections`.
-   * (The ElectionGuard spec requires for n-of-m elections that there be *exactly* n counters that are one
+   * (The ElectionGuard spec requires for n-of-m elections that there be *exactly* n counters that are one,
    * with the rest zero, so if a voter deliberately undervotes, one or more of the placeholder counters will
    * become one. This allows the `ConstantChaumPedersenProof` to verify correctly for undervoted contests.)
    */
@@ -855,6 +853,23 @@ public class Election {
     @Override
     public int hashCode() {
       return Objects.hash(election_scope_id, type, start_date, end_date, geopolitical_units, parties, candidates, contests, ballot_styles, name, contact_information);
+    }
+
+    @Override
+    public String toString() {
+      return "ElectionDescription{" +
+              "election_scope_id='" + election_scope_id + '\'' +
+              ", type=" + type +
+              ", start_date=" + start_date +
+              ", end_date=" + end_date +
+              ", geopolitical_units=" + geopolitical_units +
+              ", parties=" + parties +
+              ", candidates=" + candidates +
+              ", contests=" + contests +
+              ", ballot_styles=" + ballot_styles +
+              ", name=" + name +
+              ", contact_information=" + contact_information +
+              '}';
     }
 
     @Override
@@ -1101,6 +1116,16 @@ public class Election {
     public int hashCode() {
       return Objects.hash(large_prime, small_prime, cofactor, generator);
     }
+
+    @Override
+    public String toString() {
+      return "ElectionConstants{" +
+              "\n large_prime= " + large_prime +
+              "\n small_prime= " + small_prime +
+              "\n cofactor= " + cofactor +
+              "\n generator= " + generator +
+              "}";
+    }
   }
 
   /**
@@ -1111,9 +1136,10 @@ public class Election {
    * are populated with election-specific information necessary for encrypting the election.
    * Refer to the [Electionguard Specification](https://github.com/microsoft/electionguard) for more information.
    * <p>
-   * To make an instance of this class, don't construct it directly. Use
-   * `make_ciphertext_election_context` instead.
+   * To make an instance of this class, don't construct it directly. Use `make_ciphertext_election_context` instead.
+   * TODO: put in its own class
    */
+  @Immutable
   public static class CiphertextElectionContext {
     final int number_of_guardians; // The number of guardians necessary to generate the public key
     final int quorum; // The quorum of guardians necessary to decrypt an election.  Must be less than `number_of_guardians`

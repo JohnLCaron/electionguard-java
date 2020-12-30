@@ -36,7 +36,7 @@ public class Group {
       return new ElementModP(elem.modInverse(P));
     }
 
-    BigInteger getBigInt() {
+    public BigInteger getBigInt() {
       return elem;
     }
 
@@ -80,8 +80,8 @@ public class Group {
   }
 
   @Immutable
-  static class ElementModQ extends ElementMod {
-    ElementModQ(BigInteger elem) {
+  public static class ElementModQ extends ElementMod {
+    public ElementModQ(BigInteger elem) {
       super(elem);
     }
 
@@ -107,8 +107,8 @@ public class Group {
   }
 
   @Immutable
-  static class ElementModP extends ElementMod {
-    ElementModP(BigInteger elem) {
+  public static class ElementModP extends ElementMod {
+    public ElementModP(BigInteger elem) {
       super(elem);
     }
 

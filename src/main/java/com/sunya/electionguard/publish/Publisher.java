@@ -4,6 +4,7 @@ import com.sunya.electionguard.*;
 
 import javax.annotation.Nullable;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -53,7 +54,7 @@ public class Publisher {
     Files.createDirectories(devicesDirPath);
   }
 
-  public Path descriptionFile() {
+  public Path electionFile() {
     return publishDirectory.resolve(DESCRIPTION_FILE_NAME).toAbsolutePath();
   }
 
@@ -78,9 +79,17 @@ public class Publisher {
     return devicesDirPath.resolve(fileName);
   }
 
+  public File[] deviceFiles() {
+    return devicesDirPath.toFile().listFiles();
+  }
+
   public Path coefficientsFile(String id) {
     String fileName = COEFFICIENT_PREFIX + id + SUFFIX;
     return coefficientsDirPath.resolve(fileName);
+  }
+
+  public File[] coefficientsFiles() {
+    return coefficientsDirPath.toFile().listFiles();
   }
 
   public Path ballotFile(String id) {
@@ -88,11 +97,17 @@ public class Publisher {
     return ballotsDirPath.resolve(fileName);
   }
 
+  public File[] ballotFiles() {
+    return ballotsDirPath.toFile().listFiles();
+  }
+
   public Path spoiledFile(String id) {
     String fileName = BALLOT_PREFIX + id + SUFFIX;
     return spoiledDirPath.resolve(fileName);
   }
-
+  public File[] spoiledFiles() {
+    return spoiledDirPath.toFile().listFiles();
+  }
 
   /** Publishes the election record as json. */
   public void write(
@@ -106,9 +121,7 @@ public class Publisher {
           Tally.PlaintextTally plaintext_tally,
           @Nullable Iterable<KeyCeremony.CoefficientValidationSet> coefficient_validation_sets) throws IOException {
 
-    ElectionDescriptionToJson writer = new ElectionDescriptionToJson(descriptionFile().toString());
-    writer.write(description);
-
+    ConvertToJson.write(description, this.electionFile());
     ConvertToJson.write(context, this.contextFile());
     ConvertToJson.write(constants, this.constantsFile());
 

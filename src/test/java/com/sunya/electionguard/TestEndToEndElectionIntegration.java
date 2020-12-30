@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
+import static com.google.common.truth.Truth.assertWithMessage;
 import static com.sunya.electionguard.Ballot.*;
 import static com.sunya.electionguard.Election.*;
 
@@ -318,7 +319,7 @@ public class TestEndToEndElectionIntegration {
   // Verify results of election
   void verify_results(Publisher publisher) throws IOException {
     ElectionDescriptionFromJson builder = new ElectionDescriptionFromJson(
-            publisher.descriptionFile().toString());
+            publisher.electionFile().toString());
     ElectionDescription description_from_file = builder.build();
     assertThat(description_from_file).isEqualTo(this.description);
 
@@ -334,11 +335,11 @@ public class TestEndToEndElectionIntegration {
             publisher.deviceFile(this.device.uuid).toString());
     assertThat(device_from_file).isEqualTo(this.device);
 
-
     for (CiphertextAcceptedBallot ballot : this.ballot_store) {
       CiphertextAcceptedBallot ballot_from_file = ConvertFromJson.readBallot(
               publisher.ballotFile(ballot.object_id).toString());
-      assertThat(ballot_from_file).isEqualTo(ballot);
+      assertWithMessage(publisher.ballotFile(ballot.object_id).toString())
+              .that(ballot_from_file).isEqualTo(ballot);
     }
 
     for (CiphertextAcceptedBallot spoiled_ballot : this.ciphertext_tally.spoiled_ballots.values()) {
