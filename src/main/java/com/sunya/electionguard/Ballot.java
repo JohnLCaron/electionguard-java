@@ -181,7 +181,7 @@ public class Ballot {
    * By keeping the `nonce`, or deriving the selection nonce from the ballot nonce, an external system can
    * regenerate the proofs on demand.  This is useful for storage or memory constrained systems.
    * <p>
-   * By keeping the `proof` the nonce is not required fotor verify the encrypted selection.
+   * By keeping the `proof` the nonce is not required to verify the encrypted selection.
    */
   @Immutable
   public static class CiphertextBallotSelection extends CiphertextSelection {
@@ -689,8 +689,8 @@ public class Ballot {
   /**
    * A CiphertextBallot represents a voters encrypted selections for a given ballot and ballot style.
    * <p>
-   * When a ballot is in it's complete, encrypted state, the `nonce` is the master nonce
-   * from which all other nonces can be derived to encrypt the ballot.  Allong with the `nonce`
+   * When a ballot is in its complete, encrypted state, the `nonce` is the master nonce
+   * from which all other nonces can be derived to encrypt the ballot.  Along with the `nonce`
    * fields on `Ballotcontest` and `BallotSelection`, this value is sensitive.
    * <p>
    * Don't make this directly. Use `make_ciphertext_ballot` instead.

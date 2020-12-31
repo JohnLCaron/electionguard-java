@@ -307,8 +307,7 @@ public class ChaumPedersen {
    * @param message: An ElGamal ciphertext
    * @param r: The nonce used creating the ElGamal ciphertext
    * @param k: The ElGamal public key for the election
-   * @param q: A value used when generating the challenge,
-   * usually the election extended base hash (𝑄')
+   * @param q: A value used when generating the challenge, usually the election extended base hash (𝑄')
    * @param seed: Used to generate other random values here
    * @param plaintext: Zero or one
    */

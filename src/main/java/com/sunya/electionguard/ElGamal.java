@@ -133,22 +133,22 @@ class ElGamal {
   }
 
   /**
-   *     Combine multiple elgamal public keys into a joint key-> ElementModP:
+   * Combine multiple elgamal public keys into a joint key-> ElementModP:
    *
-   *     @param keys: list of public elgamal keys
-   *     @return joint key of elgamal keys
+   * @param keys: list of public elgamal keys
+   * @return joint key of elgamal keys
    */
   static ElementModP elgamal_combine_public_keys(Collection<ElementModP> keys) {
                   return Group.mult_p(keys);
   }
 
   /**
-   Encrypts a message with a given random nonce and an ElGamal public key.
-
-   @param m Message to elgamal_encrypt; must be an integer in [0,Q).
-   @param nonce Randomly chosen nonce in [1,Q).
-   @param public_key ElGamal public key.
-   @return A ciphertext tuple.
+   * Encrypts a message with a given random nonce and an ElGamal public key.
+   *
+   * @param m          Message to elgamal_encrypt; must be an integer in [0,Q).
+   * @param nonce      Randomly chosen nonce in [1,Q).
+   * @param public_key ElGamal public key.
+   * @return A ciphertext tuple.
    */
   static Optional<Ciphertext> elgamal_encrypt(int m, ElementModQ nonce, ElementModP public_key) {
     if (nonce.equals(ZERO_MOD_Q)) {
@@ -160,8 +160,8 @@ class ElGamal {
   }
 
   /**
-   *     Homomorphically accumulates one or more ElGamal ciphertexts by pairwise multiplication. The exponents
-   *     of vote counters will add.
+   * Homomorphically accumulates one or more ElGamal ciphertexts by pairwise multiplication. The exponents
+   * of vote counters will add.
    */
   static Ciphertext elgamal_add(Ciphertext... ciphertexts) {
     Preconditions.checkArgument(ciphertexts.length > 0, "Must have one or more ciphertexts for elgamal_add");

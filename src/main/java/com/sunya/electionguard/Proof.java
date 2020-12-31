@@ -2,7 +2,8 @@ package com.sunya.electionguard;
 
 import java.util.Objects;
 
-public class Proof {
+/** superclass of Proofs. */
+public abstract class Proof {
   enum Usage {
     Unknown("Unknown"),
     SecretValue("Prove knowledge of secret value"),
@@ -22,7 +23,7 @@ public class Proof {
   final String name;
   final Usage usage;
 
-  public Proof(String name, Usage usage) {
+  protected Proof(String name, Usage usage) {
     this.name = name;
     this.usage = usage;
   }

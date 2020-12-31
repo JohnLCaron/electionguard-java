@@ -2,7 +2,7 @@ package com.sunya.electionguard.publish;
 
 import java.util.List;
 
-/** POJO'S for reading Election metadata in using Gson. */
+/** Helper class for conversion of Election metadata to/from Json. */
 public class ElectionDescriptionPojo {
   public InternationalizedText name;
   public String election_scope_id;

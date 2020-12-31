@@ -11,6 +11,7 @@ import java.lang.reflect.Type;
 import java.nio.file.Path;
 
 // TODO, match python json, remove private fields
+/** Static helper methods for writing serialized classes to json files. */
 public class ConvertToJson {
   private static final Gson enhancedGson = enhancedGson();
 

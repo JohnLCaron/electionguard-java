@@ -7,6 +7,7 @@ import java.util.List;
 import static com.sunya.electionguard.Ballot.*;
 import static com.sunya.electionguard.Election.*;
 
+/** Static helper methods for ballot validation. */
 public class BallotValidator {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 

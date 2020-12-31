@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 
 import static com.sunya.electionguard.Group.*;
 
+/** Election metadata. */
 public class Election {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
@@ -461,7 +462,7 @@ public class Election {
     public final String candidate_id;
     /**
      * Used for ordering selections in a contest to ensure various encryption primitives are deterministic.
-     * The sequence order must be unique and should be representative of how the contests are represnted
+     * The sequence order must be unique and should be representative of how the contests are represented
      * on a "master" ballot in an external system.  The sequence order is not required to be in the order
      * in which they are displayed to a voter.  Any acceptable range of integer values may be provided.
      */
@@ -520,7 +521,7 @@ public class Election {
     public final String electoral_district_id;
     /**
      * Used for ordering contests in a ballot to ensure various encryption primitives are deterministic.
-     * The sequence order must be unique and should be representative of how the contests are represnted
+     * The sequence order must be unique and should be representative of how the contests are represented
      * on a "master" ballot in an external system.  The sequence order is not required to be in the order
      * in which they are displayed to a voter.  Any acceptable range of integer values may be provided.
      */
@@ -1253,10 +1254,10 @@ public class Election {
   }
 
   /**
-      Generates a placeholder selection description that is unique so it can be hashed
-
-    @param use_sequence_idO: an optional integer unique to the contest identifying this selection's place in the contest
-    @return a SelectionDescription or None
+   * Generates a placeholder selection description that is unique so it can be hashed
+   *
+   * @param use_sequence_idO: an optional integer unique to the contest identifying this selection's place in the contest
+   * @return a SelectionDescription or None
    */
   static Optional<SelectionDescription> generate_placeholder_selection_from(
           ContestDescription contest, Optional<Integer> use_sequence_idO) {
@@ -1284,7 +1285,7 @@ public class Election {
   }
 
   /**
-   * Generates the specified number of placeholder selections in ascending sequence order from the max selection sequence orderf
+   * Generates the specified number of placeholder selections in ascending sequence order from the max selection sequence order
    * <p>
    * @param contest: ContestDescription for input
    * @param count: optionally specify a number of placeholders to generate
@@ -1296,7 +1297,8 @@ public class Election {
     List<SelectionDescription> selections = new ArrayList<>();
     for (int i = 0; i < count; i++) {
       int sequence_order = max_sequence_order + 1 + i;
-      selections.add(generate_placeholder_selection_from(contest, Optional.of(sequence_order)).get());
+      Optional<SelectionDescription> sd = generate_placeholder_selection_from(contest, Optional.of(sequence_order));
+      selections.add(sd.orElseThrow(IllegalStateException::new));
     }
     return selections;
   }

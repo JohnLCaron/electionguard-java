@@ -3,8 +3,8 @@ package com.sunya.electionguard;
 import java.util.Objects;
 
 /**
- *     A base object to derive other election objects
- *     that is both serializable and identifiable by objectId
+ * A base object to derive other election objects
+ * that is both serializable and identifiable by objectId
  */
 public class ElectionObjectBase {
   // TODO TestTallyProperties needs to change this, make mutable version?

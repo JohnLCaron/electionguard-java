@@ -14,6 +14,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/** Conversion of PlaintextBallot from Json. */
 public class PlaintextBallotFromJson {
   private final String filename;
 

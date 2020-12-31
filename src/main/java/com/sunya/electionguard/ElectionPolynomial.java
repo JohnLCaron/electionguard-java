@@ -14,10 +14,10 @@ import java.util.stream.Collectors;
 import static com.sunya.electionguard.Group.*;
 
 /**
- *     A polynomial defined by coefficients
- *
- *     The 0-index coefficient is used for a secret key which can
- *     be discovered by a quorum of n guardians corresponding to n coefficients.
+ * A polynomial defined by coefficients
+ * <p>
+ * The 0-index coefficient is used for a secret key which can
+ * be discovered by a quorum of n guardians corresponding to n coefficients.
  */
 @Immutable
 public class ElectionPolynomial {
@@ -28,7 +28,7 @@ public class ElectionPolynomial {
   /** The public keys `K_ij`generated from secret coefficients. */
   final ImmutableList<Group.ElementModP> coefficient_commitments;
 
-  /** A proof of posession of the private key for each secret coefficient. */
+  /** A proof of possession of the private key for each secret coefficient. */
   final ImmutableList<SchnorrProof> coefficient_proofs;
 
   ElectionPolynomial(List<Group.ElementModQ> coefficients, List<Group.ElementModP> coefficient_commitments, List<SchnorrProof> coefficient_proofs) {
@@ -38,11 +38,11 @@ public class ElectionPolynomial {
   }
 
   /**
-   *     Generates a polynomial for sharing election keys
+   * Generates a polynomial for sharing election keys
    *
-   *     @param number_of_coefficients: Number of coefficients of polynomial
-   *     @param nonce: an optional nonce parameter that may be provided (useful for testing)
-   *     @return Polynomial used to share election keys
+   * @param number_of_coefficients: Number of coefficients of polynomial
+   * @param nonce:                  an optional nonce parameter that may be provided (useful for testing)
+   * @return Polynomial used to share election keys
    */
   static ElectionPolynomial generate_polynomial(int number_of_coefficients, @Nullable Group.ElementModQ nonce) {
     ArrayList<Group.ElementModQ> coefficients = new ArrayList<>();
@@ -54,7 +54,7 @@ public class ElectionPolynomial {
       // this method should be called without the nonce in production.
       Group.ElementModQ coefficient = (nonce == null) ? rand_q() : add_qi(nonce.elem, BigInteger.valueOf(i));
       Group.ElementModP commitment = g_pow_p(coefficient);
-      // TODO Alternate schnoor proof method that doesn 't need KeyPair
+      // TODO Alternate schnorr proof method that doesn't need KeyPair
       SchnorrProof proof = SchnorrProof.make_schnorr_proof(new ElGamal.KeyPair(coefficient, commitment), rand_q());
 
       coefficients.add(coefficient);
@@ -87,10 +87,11 @@ public class ElectionPolynomial {
   }
 
   /**
-   *     Compute the lagrange coefficient for a specific coordinate against N degrees.
-   *     @param coordinate: the coordinate to plot, usually a Guardian's Sequence Order
-   *     @param degrees: the degrees across which to plot, usually the collection of
-   *                     available Guardians' Sequence Orders
+   * Compute the lagrange coefficient for a specific coordinate against N degrees.
+   *
+   * @param coordinate: the coordinate to plot, usually a Guardian's Sequence Order
+   * @param degrees:    the degrees across which to plot, usually the collection of
+   *                    available Guardians' Sequence Orders
    */
   static ElementModQ compute_lagrange_coefficient(BigInteger coordinate, List<BigInteger> degrees) {
     ElementModQ numerator = mult_q(Iterables.toArray(degrees, BigInteger.class));
@@ -101,12 +102,12 @@ public class ElectionPolynomial {
   }
 
   /**
-   *     Verify a polynomial coordinate value is in fact on the polynomial's curve
+   * Verify a polynomial coordinate value is in fact on the polynomial's curve
    *
-   *     @param coordinate Value to be checked
-   *     @param exponent_modifier Unique modifier (usually sequence order) for exponent
-   *     @param coefficient_commitments Commitments for coefficients of polynomial
-   *     @return True if verified on polynomial
+   * @param coordinate              Value to be checked
+   * @param exponent_modifier       Unique modifier (usually sequence order) for exponent
+   * @param coefficient_commitments Commitments for coefficients of polynomial
+   * @return True if verified on polynomial
    */
   static boolean verify_polynomial_coordinate(ElementModQ coordinate, BigInteger exponent_modifier, List<ElementModP> coefficient_commitments) {
     BigInteger commitment_output = BigInteger.ONE;

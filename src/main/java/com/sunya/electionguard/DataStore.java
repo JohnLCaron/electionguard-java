@@ -3,9 +3,9 @@ package com.sunya.electionguard;
 import java.util.*;
 
 /**
- *     A lightweight convenience wrapper around a dictionary for data storage.
- *     This implementation defines the common interface used to access stored
- *     state elements.
+ * A lightweight convenience wrapper around a dictionary for data storage.
+ * This implementation defines the common interface used to access stored
+ * state elements.
  */
 public class DataStore implements Iterable<Ballot.CiphertextAcceptedBallot> {
   final HashMap<String, Ballot.CiphertextAcceptedBallot> map = new HashMap<>();

@@ -14,6 +14,7 @@ import static com.sunya.electionguard.KeyCeremony.CoefficientValidationSet;
 import static com.sunya.electionguard.DecryptionShare.CiphertextDecryptionSelection;
 
 // TODO make compatible with python, eg ElementModQ
+/** Static helper methods for reading serialized classes from json files. */
 public class ConvertFromJson {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
   private static final Gson enhancedGson = enhancedGson();
@@ -111,10 +112,6 @@ public class ConvertFromJson {
     public Group.ElementModQ deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
             throws JsonParseException {
       String content = json.getAsJsonPrimitive().getAsString();
-      if (content.equals("None")) {
-        System.out.printf("HEY ModQDeserializer");
-        return null;
-      }
       return new Group.ElementModQ(new BigInteger(content));
     }
   }

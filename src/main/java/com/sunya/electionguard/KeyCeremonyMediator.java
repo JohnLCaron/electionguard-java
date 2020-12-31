@@ -101,7 +101,7 @@ public class KeyCeremonyMediator {
    * Verify that the guardians correctly shared keys
    *
    * @param decryptor: Auxiliary decrypt function
-   * @return True if verification succeds, else False
+   * @return True if verification succeeds, else False
    */
   boolean verify(@Nullable Auxiliary.Decryptor decryptor) {
     if (decryptor == null) {

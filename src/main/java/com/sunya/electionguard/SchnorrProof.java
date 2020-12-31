@@ -28,8 +28,8 @@ public class SchnorrProof extends Proof {
   }
 
   /**
-   *         Check validity of the `proof` for proving possession of the private key corresponding to `public_key`.
-   *         @return true if the transcript is valid, false if anything is wrong
+   * Check validity of the `proof` for proving possession of the private key corresponding to `public_key`.
+   * @return true if the transcript is valid, false if anything is wrong
    */
   boolean is_valid() {
     ElementModP k = this.public_key;
@@ -68,10 +68,10 @@ public class SchnorrProof extends Proof {
   }
 
   /**
-   *     Given an ElGamal keypair and a nonce, generates a proof that the prover knows the secret key without revealing it.
+   * Given an ElGamal keypair and a nonce, generates a proof that the prover knows the secret key without revealing it.
    *
-   *     @param keypair An ElGamal keypair.
-   *     @param r A random element in [0,Q).
+   * @param keypair An ElGamal keypair.
+   * @param r       A random element in [0,Q).
    */
   static SchnorrProof make_schnorr_proof(ElGamal.KeyPair keypair, ElementModQ r) {
     ElementModP k = keypair.public_key;

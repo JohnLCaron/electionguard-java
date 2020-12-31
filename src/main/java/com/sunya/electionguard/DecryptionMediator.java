@@ -20,11 +20,11 @@ import static com.sunya.electionguard.Tally.*;
 public class DecryptionMediator {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
-  final InternalElectionDescription _metadata;
   final CiphertextElectionContext _encryption;
   final CiphertextTally _ciphertext_tally;
 
   // TODO not used?
+  final InternalElectionDescription _metadata;
   final Optional<PlaintextTally> _plaintext_tally = Optional.empty();
   // Since spoiled ballots are decrypted, they are just a special case of a tally
   final Map<String, Optional<PlaintextTally>> _plaintext_spoiled_ballots = new HashMap<>();
@@ -86,7 +86,7 @@ public class DecryptionMediator {
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
     // Check that the public keys match for any missing guardians already reported
-    // note this check naively assumes that the first guardian to annouce is telling the truth
+    // note this check naively assumes that the first guardian to announce is telling the truth
     // but for this implementation it is simply a sanity check on the input data.
     // a consuming application should implement better validation of the guardian state
     // before announcing a guardian is available for decryption.

@@ -12,7 +12,6 @@ import java.util.Arrays;
  *     being used for, to avoid various kinds of subtle cryptographic attacks.
  */
 public class Nonces {
-
   private final Group.ElementModQ seed;
 
   Nonces(Group.ElementModQ seed, Object... headers) {

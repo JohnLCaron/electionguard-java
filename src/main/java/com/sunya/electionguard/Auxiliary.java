@@ -6,6 +6,7 @@ import javax.annotation.concurrent.Immutable;
 import java.util.Arrays;
 import java.util.Optional;
 
+/** Wrapper around java.security.PrivateKey. */
 public class Auxiliary {
 
   /** A tuple of a secret key and public key. */

@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
 
+/** Wraps all computations on BigInteger. Could use GMP as alternate implementation. */
 public class Group {
   // Q: Final[int] = pow(2, 256) - 189
   static final BigInteger Q = BigInteger.TWO.pow(256).subtract(BigInteger.valueOf(189));
@@ -421,6 +422,7 @@ public class Group {
     return x.compareTo(b) >= 0;
   }
 
+  // is x < b ?
   static boolean lessThan(BigInteger x, BigInteger b) {
     return x.compareTo(b) < 0;
   }

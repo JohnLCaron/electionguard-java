@@ -11,7 +11,7 @@ import java.util.Optional;
 import static com.sunya.electionguard.Group.*;
 
 public class Tracker {
-  private static final String DEFAULT_SEPERATOR = "-";
+  private static final String DEFAULT_SEPARATOR = "-";
 
   /**
    *     Get starting hash for given device
@@ -39,9 +39,9 @@ public class Tracker {
    *     @param tracker_hash: Tracker hash
    *     @return Human readable tracker string or None
    */
-  static Optional<String> tracker_hash_to_words(ElementModQ tracker_hash, @Nullable String seperator) {
-    if (seperator == null) {
-      seperator = DEFAULT_SEPERATOR;
+  static Optional<String> tracker_hash_to_words(ElementModQ tracker_hash, @Nullable String separator) {
+    if (separator == null) {
+      separator = DEFAULT_SEPARATOR;
     }
 
     byte[] segments = tracker_hash.to_bytes();
@@ -72,7 +72,7 @@ public class Tracker {
 
     // FIXME ISSUE //82 Minimize length of tracker
 
-    return Optional.of(String.join(seperator, words));
+    return Optional.of(String.join(separator, words));
   }
 
   private static final String hexchars = "0123456789ABCDEF";

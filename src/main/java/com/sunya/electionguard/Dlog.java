@@ -28,9 +28,8 @@ public class Dlog {
     return discrete_log_internal(elem.elem);
   }
 
-  // TODO need synch?
+  // TODO need sync?
   private static BigInteger discrete_log_internal(BigInteger e) {
-    int start = dlog_max_exp;
     while (!e.equals(dlog_max_elem)) {
       dlog_max_exp = dlog_max_exp + 1;
       dlog_max_elem = mult_pi(G, dlog_max_elem);

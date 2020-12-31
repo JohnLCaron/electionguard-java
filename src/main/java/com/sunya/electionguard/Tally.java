@@ -1,8 +1,6 @@
 package com.sunya.electionguard;
 
 import com.google.auto.value.AutoValue;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.flogger.FluentLogger;
 import com.google.gson.Gson;
@@ -376,7 +374,7 @@ public class Tally {
       return cast_collection;
     }
 
-    // Allow _accumulate to be run in parellel
+    //// Allow _accumulate to be run in parallel
 
     static class RunAccumulate implements Callable<Tuple> {
       final String id;

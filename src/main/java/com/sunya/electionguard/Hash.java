@@ -8,6 +8,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
 
+/** Given zero or more elements, calculate their cryptographic hash using SHA256. */
 public class Hash {
 
   interface CryptoHashable {
@@ -19,15 +20,16 @@ public class Hash {
   }
 
   /**
-   *     Given zero or more elements, calculate their cryptographic hash
-   *     using SHA256. Allowed element types are `ElementModP`, `ElementModQ`,
-   *     `str`, or `int`, anything implementing `CryptoHashable`, and lists
-   *     or optionals of any of those types.
+   * Given zero or more elements, calculate their cryptographic hash
+   * using SHA256. Allowed element types are `ElementModP`, `ElementModQ`,
+   * `str`, or `int`, anything implementing `CryptoHashable`, and lists
+   * or optionals of any of those types.
    *
-   *     @param a Zero or more elements of any of the accepted types.
-   *     @return A cryptographic hash of these elements, concatenated.
-   *
+   * @param a Zero or more elements of any of the accepted types.
+   * @return A cryptographic hash of these elements, concatenated.
+   * <p>
    * TODO does this have to agree exactly with python code ?
+   * TODO add tests.
    */
   static Group.ElementModQ hash_elems(Object... a) {
     // TODO is Guava Hashing.sha256() better?

@@ -7,6 +7,7 @@ import javax.crypto.NoSuchPaddingException;
 import java.security.*;
 import java.util.Optional;
 
+/** Wrapper for java RSA encryption. */
 public class Rsa {
   private static final int PUBLIC_EXPONENT = 65537;
   private static final int KEY_SIZE = 4096;

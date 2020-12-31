@@ -22,7 +22,6 @@ public class KeyCeremony {
   @AutoValue
   abstract static class CeremonyDetails {
     abstract int number_of_guardians();
-
     abstract int quorum();
 
     public static CeremonyDetails create(int number_of_guardians, int quorum) {
@@ -36,9 +35,7 @@ public class KeyCeremony {
   @AutoValue
   abstract static class ElectionKeyPair {
     abstract ElGamal.KeyPair key_pair();
-
     abstract SchnorrProof proof();
-
     abstract ElectionPolynomial polynomial();
 
     public static ElectionKeyPair create(ElGamal.KeyPair key_pair, SchnorrProof proof, ElectionPolynomial polynomial) {
@@ -52,9 +49,7 @@ public class KeyCeremony {
   @AutoValue
   abstract static class ElectionPublicKey {
     abstract String owner_id();
-
     abstract SchnorrProof proof();
-
     abstract ElementModP key();
 
     public static ElectionPublicKey create(String owner_id, SchnorrProof proof, ElementModP key) {
@@ -68,13 +63,9 @@ public class KeyCeremony {
   @AutoValue
   abstract static class PublicKeySet {
     abstract String owner_id();
-
     abstract int sequence_order();
-
     abstract java.security.PublicKey auxiliary_public_key();
-
     abstract ElementModP election_public_key();
-
     abstract SchnorrProof election_public_key_proof();
 
     public static PublicKeySet create(String owner_id, int sequence_order, java.security.PublicKey auxiliary_public_key,
@@ -91,7 +82,6 @@ public class KeyCeremony {
   @AutoValue
   abstract static class GuardianPair {
     abstract String owner_id();
-
     abstract String designated_id();
 
     public static GuardianPair create(String owner_id, String designated_id) {
@@ -105,16 +95,11 @@ public class KeyCeremony {
   @AutoValue
   abstract static class ElectionPartialKeyBackup {
     abstract String owner_id(); // The Id of the guardian that generated this backup
-
     abstract String designated_id(); // The Id of the guardian to receive this backup
-
     abstract int designated_sequence_order(); // The sequence order of the designated guardian
-
     abstract Auxiliary.ByteString encrypted_value(); // The encrypted coordinate corresponding to a secret election polynomial
-
     abstract List<ElementModP> coefficient_commitments(); // The public keys `K_ij`generated from the election polynomial coefficients
-
-    abstract List<SchnorrProof> coefficient_proofs(); // the proofs of posession of the private keys for the election polynomial secret coefficients
+    abstract List<SchnorrProof> coefficient_proofs(); // the proofs of possession of the private keys for the election polynomial secret coefficients
 
     public static ElectionPartialKeyBackup create(String owner_id,
                                                   String designated_id,
@@ -137,9 +122,7 @@ public class KeyCeremony {
   @AutoValue
   public abstract static class CoefficientValidationSet {
     public abstract String owner_id();
-
     abstract List<ElementModP> coefficient_commitments();
-
     abstract List<SchnorrProof> coefficient_proofs();
 
     public static CoefficientValidationSet create(String owner_id, List<ElementModP> coefficient_commitments, List<SchnorrProof> coefficient_proofs) {
@@ -158,11 +141,8 @@ public class KeyCeremony {
   @AutoValue
   abstract static class ElectionPartialKeyVerification {
     abstract String owner_id();
-
     abstract String designated_id();
-
     abstract String verifier_id();
-
     abstract boolean verified();
 
     public static ElectionPartialKeyVerification create(String owner_id, String designated_id, String verifier_id, boolean verified) {
@@ -176,21 +156,15 @@ public class KeyCeremony {
   @AutoValue
   abstract static class ElectionPartialKeyChallenge {
     abstract String owner_id();
-
     abstract String designated_id();
-
     abstract int designated_sequence_order(); // The sequence order of the designated guardian
-
     abstract ElementModQ value();
-
     abstract List<ElementModP> coefficient_commitments();
-
     abstract List<SchnorrProof> coefficient_proofs();
 
     public static ElectionPartialKeyChallenge create(String owner_id, String designated_id, int designated_sequence_order, ElementModQ value, List<ElementModP> coefficient_commitments, List<SchnorrProof> coefficient_proofs) {
       return new AutoValue_KeyCeremony_ElectionPartialKeyChallenge(owner_id, designated_id, designated_sequence_order, value, coefficient_commitments, coefficient_proofs);
     }
-
   }
 
   /**
@@ -273,7 +247,7 @@ public class KeyCeremony {
     if (decrypted_value.isEmpty()) {
       return ElectionPartialKeyVerification.create(backup.owner_id(), backup.designated_id(), verifier_id, false);
     }
-    ElementModQ value = Group.hex_to_q(decrypted_value.get()).get();
+    ElementModQ value = Group.hex_to_q(decrypted_value.get()).orElseThrow(IllegalStateException::new);
     return ElectionPartialKeyVerification.create(
             backup.owner_id(),
             backup.designated_id(),

@@ -7,19 +7,16 @@ import com.google.gson.reflect.TypeToken;
 import com.sunya.electionguard.ChaumPedersen;
 import com.sunya.electionguard.Group;
 
-import javax.annotation.Nullable;
 import java.io.*;
 import java.lang.reflect.Type;
 import java.math.BigInteger;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static com.sunya.electionguard.DecryptionShare.CiphertextDecryptionSelection;
 import static com.sunya.electionguard.DecryptionShare.CiphertextCompensatedDecryptionSelection;
 
+/** Conversion of CiphertextDecryptionSelection to/from Json. */
 public class CiphertextDecryptionSelectionPojo {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
@@ -59,11 +56,6 @@ public class CiphertextDecryptionSelectionPojo {
     pojo.proof = org.proof().orElse(null);
     pojo.recovered_parts = org.recovered_parts().orElse(null);
     return pojo;
-  }
-
-  @Nullable
-  <T, U> List<U> convertList(@Nullable List<T> from, Function<T, U> converter) {
-    return from == null ? null : from.stream().map(converter).collect(Collectors.toList());
   }
 
   //////////////////////////////////////

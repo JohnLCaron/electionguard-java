@@ -29,7 +29,7 @@ public class Guardian extends ElectionObjectBase {
   // The collection of other guardians' auxiliary public keys that are shared with this guardian
   final Map<String, Auxiliary.PublicKey> _guardian_auxiliary_public_keys;
 
-  //     The collection of other guardians' election public keys that are shared with this guardian
+  // The collection of other guardians' election public keys that are shared with this guardian
   final Map<String, ElectionPublicKey> _guardian_election_public_keys;
 
   // The collection of other guardians' partial key backups that are shared with this guardian
@@ -235,13 +235,11 @@ public class Guardian extends ElectionObjectBase {
     return true;
   }
 
-
   /**
    * Share election partial key backup with another guardian
    * @param designated_id: Designated guardian
    * @return Election partial key backup or None.
    */
-
   Optional<ElectionPartialKeyBackup> share_election_partial_key_backup(String designated_id) {
     return Optional.ofNullable(this._backups_to_share.get(designated_id));
   }
@@ -341,7 +339,6 @@ public class Guardian extends ElectionObjectBase {
 
   /**
    * Compute a partial decryption of an elgamal encryption
-   * <p>
    *
    * @param elgamal:            the `ElGamalCiphertext` that will be partially decrypted
    * @param extended_base_hash: the extended base hash of the election that
@@ -401,7 +398,7 @@ public class Guardian extends ElectionObjectBase {
    *                             was used to generate t he ElGamal Ciphertext
    * @param nonce_seed:          an optional value used to generate the `ChaumPedersenProof`
    *                             if no value is provided, a random number will be used.
-   * @param decryptor            an `AuxiliaryDecrypt` function to decrypt the missing guardina private key backup
+   * @param decryptor            an `AuxiliaryDecrypt` function to decrypt the missing guardian private key backup
    * @return a `Tuple[ElementModP, ChaumPedersenProof]` of the decryption and its proof
    */
   Optional<Tuple> compensate_decrypt(
@@ -428,7 +425,7 @@ public class Guardian extends ElectionObjectBase {
               this.object_id, missing_guardian_id);
       return Optional.empty();
     }
-    ElementModQ partial_secret_key = hex_to_q(decrypted_value.get()).get();
+    ElementModQ partial_secret_key = hex_to_q(decrypted_value.get()).orElseThrow(IllegalStateException::new);
 
     // 𝑀_{𝑖,l} = 𝐴^P𝑖_{l}
     ElementModP partial_decryption = elgamal.partial_decrypt(partial_secret_key);

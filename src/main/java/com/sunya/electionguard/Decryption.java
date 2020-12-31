@@ -381,10 +381,9 @@ public class Decryption {
     }
   }
 
-
   /**
    * Compute a compensated decryption share for a specific selection using the
-   * avialable guardian's share of the missing guardian's private key polynomial
+   * available guardian's share of the missing guardian's private key polynomial
    * <p>
    * @param available_guardian: The available guardian that will partially decrypt the selection
    * @param missing_guardian_id: The id of the guardian that is missing
@@ -528,7 +527,7 @@ public class Decryption {
   }
 
   /**
-   * Recontruct the missing Decryption Share for a missing guardian
+   * Reconstruct the missing Decryption Share for a missing guardian
    * from the collection of compensated decryption shares
    * <p>
    * @param missing_guardian_id: The guardian id for the missing guardian
@@ -596,7 +595,7 @@ public class Decryption {
   }
 
   /**
-   * Recontruct the missing Decryption shares for a missing guardian from the collection of compensated decryption shares
+   * Reconstruct the missing Decryption shares for a missing guardian from the collection of compensated decryption shares
    * <p>
    * @param missing_guardian_id: The guardian id for the missing guardian
    * @param public_key: the public key for the missing guardian
@@ -643,14 +642,14 @@ public class Decryption {
     return spoiled_ballot_shares;
   }
 
-  /*
-      Reconstruct a missing ballot Decryption share for a missing guardian from the collection of compensated decryption shares
-
-  @param missing_guardian_id: The guardian id for the missing guardian
-  @param public_key: the public key for the missing guardian
-  @param ballots: The `CiphertextAcceptedBallot` to reconstruct
-  :shares: the collection of `CompensatedBallotDecryptionShare` for the missing guardian, each keyed by the ID of the guardian that produced it
-  :lagrange_coefficients: the lagrange coefficients corresponding to the available guardians that provided shares
+  /**
+   * Reconstruct a missing ballot Decryption share for a missing guardian from the collection of compensated decryption shares
+   *
+   * @param missing_guardian_id   The guardian id for the missing guardian
+   * @param public_key            the public key for the missing guardian
+   * @param ballot                The `CiphertextAcceptedBallot` to reconstruct
+   * @param shares                the collection of `CompensatedBallotDecryptionShare` for the missing guardian, each keyed by the ID of the guardian that produced it
+   * @param lagrange_coefficients the lagrange coefficients corresponding to the available guardians that provided shares
    */
   static BallotDecryptionShare reconstruct_decryption_ballot(
           String missing_guardian_id,
