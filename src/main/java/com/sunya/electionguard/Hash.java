@@ -31,7 +31,7 @@ public class Hash {
    * TODO does this have to agree exactly with python code ?
    * TODO add tests.
    */
-  static Group.ElementModQ hash_elems(Object... a) {
+  public static Group.ElementModQ hash_elems(Object... a) {
     // TODO is Guava Hashing.sha256() better?
     MessageDigest digest;
     try {

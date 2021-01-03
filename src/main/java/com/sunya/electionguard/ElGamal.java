@@ -12,7 +12,7 @@ import java.util.Optional;
 import static com.sunya.electionguard.Dlog.discrete_log;
 import static com.sunya.electionguard.Group.*;
 
-class ElGamal {
+public class ElGamal {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   /**
@@ -35,11 +35,11 @@ class ElGamal {
    * Decrypt using one of the supplied instance methods.
    */
   @Immutable
-  static class Ciphertext {
+  public static class Ciphertext {
     /** pad or alpha. */
-    final ElementModP pad;
+    public final ElementModP pad;
     /** encrypted data or beta. */
-    final ElementModP data;
+    public final ElementModP data;
 
     public Ciphertext(ElementModP pad, ElementModP data) {
       this.pad = pad;

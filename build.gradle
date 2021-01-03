@@ -3,7 +3,7 @@ plugins {
 }
 
 group 'com.sunya.electionguard'
-version '0.1-SNAPSHOT'
+version '0.2-SNAPSHOT'
 
 repositories {
     // Prefer JCenter to Maven Central. See

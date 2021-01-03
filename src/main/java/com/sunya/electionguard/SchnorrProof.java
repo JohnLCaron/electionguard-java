@@ -8,16 +8,16 @@ import static com.sunya.electionguard.Group.*;
 import static com.sunya.electionguard.Proof.Usage.SecretValue;
 
 public class SchnorrProof extends Proof {
-    private static final FluentLogger logger = FluentLogger.forEnclosingClass();
+  private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   /** k in the spec */
-  final ElementModP public_key;
+  public final ElementModP public_key;
   /** h in the spec */
-  final ElementModP commitment;
+  public final ElementModP commitment;
   /** c in the spec */
-  final ElementModQ challenge;
+  public final ElementModQ challenge;
   /** u in the spec */
-  final ElementModQ response;
+  public final ElementModQ response;
 
   SchnorrProof(ElementModP public_key, ElementModP commitment, ElementModQ challenge, ElementModQ response) {
     super("SchnorrProof", SecretValue);

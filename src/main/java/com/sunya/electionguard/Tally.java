@@ -36,10 +36,10 @@ public class Tally {
   @AutoValue
   public static abstract class PlaintextTallySelection implements ElectionObjectBaseIF {
     // g^tally or M in the spec
-    abstract BigInteger tally();
-    abstract ElementModP value();
-    abstract ElGamal.Ciphertext message();
-    abstract List<DecryptionShare.CiphertextDecryptionSelection> shares();
+    public abstract BigInteger tally();
+    public abstract ElementModP value();
+    public abstract ElGamal.Ciphertext message();
+    public abstract List<DecryptionShare.CiphertextDecryptionSelection> shares();
 
     public static PlaintextTallySelection create(String object_id, BigInteger tally, ElementModP value, ElGamal.Ciphertext message, List<DecryptionShare.CiphertextDecryptionSelection> shares) {
       return new AutoValue_Tally_PlaintextTallySelection(object_id, tally, value, message, shares);
@@ -82,7 +82,7 @@ public class Tally {
    */
   @AutoValue
   public static abstract class PlaintextTallyContest implements ElectionObjectBaseIF {
-    abstract Map<String, PlaintextTallySelection> selections();
+    public abstract Map<String, PlaintextTallySelection> selections();
 
     public static PlaintextTallyContest create(String object_id, Map<String, PlaintextTallySelection> selections) {
       return new AutoValue_Tally_PlaintextTallyContest(object_id, selections);
@@ -195,8 +195,8 @@ public class Tally {
    */
   @AutoValue
   public static abstract class PlaintextTally implements ElectionObjectBaseIF {
-    abstract Map<String, PlaintextTallyContest> contests();
-    abstract Map<String, Map<String, PlaintextTallyContest>> spoiled_ballots();
+    public abstract Map<String, PlaintextTallyContest> contests();
+    public abstract Map<String, Map<String, PlaintextTallyContest>> spoiled_ballots();
 
     public static PlaintextTally create(String object_id, Map<String, PlaintextTallyContest> contests, Map<String, Map<String, PlaintextTallyContest>> spoiled_ballots) {
       return new AutoValue_Tally_PlaintextTally(object_id, contests, spoiled_ballots);
@@ -429,7 +429,7 @@ public class Tally {
    */
   @AutoValue
   public static abstract class PublishedCiphertextTally implements ElectionObjectBaseIF {
-    abstract Map<String, CiphertextTallyContest> cast();
+    public abstract Map<String, CiphertextTallyContest> cast();
 
     public static PublishedCiphertextTally create(String object_id, Map<String, CiphertextTallyContest> cast) {
       return new AutoValue_Tally_PublishedCiphertextTally(object_id, cast);

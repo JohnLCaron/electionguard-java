@@ -91,4 +91,13 @@ public class TestReadPythonJson {
     }
   }
 
+  @Example
+  public void testProblemPythonJson() throws IOException {
+    String filename = "/home/snake/dev/github/electionguard-java/src/test/data/5-ballots/encrypted_ballots/ballot_ballot-1acfef78-029b-11eb-9852-acde48001122.json";
+      System.out.printf(" testCoefficientsPythonJson %s%n", filename);
+      Ballot.CiphertextAcceptedBallot fromPython = ConvertFromJson.readBallot(filename);
+      assertThat(fromPython).isNotNull();
+      System.out.printf("%s%n", fromPython);
+  }
+
 }

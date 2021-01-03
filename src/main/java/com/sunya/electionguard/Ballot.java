@@ -146,8 +146,8 @@ public class Ballot {
    */
   @Immutable
   public static class CiphertextSelection extends ElectionObjectBase {
-    final ElementModQ description_hash;
-    private final ElGamal.Ciphertext ciphertext;
+    public final ElementModQ description_hash;
+    public final ElGamal.Ciphertext ciphertext;
 
     CiphertextSelection(String object_id, ElementModQ description_hash, ElGamal.Ciphertext ciphertext) {
       super(object_id);
@@ -185,11 +185,11 @@ public class Ballot {
    */
   @Immutable
   public static class CiphertextBallotSelection extends CiphertextSelection {
-    final ElementModQ crypto_hash;
-    final boolean is_placeholder_selection;
-    final Optional<ElementModQ> nonce;
-    final Optional<ChaumPedersen.DisjunctiveChaumPedersenProof> proof;
-    final Optional<ElGamal.Ciphertext> extended_data;
+    public final ElementModQ crypto_hash;
+    public final boolean is_placeholder_selection;
+    public final Optional<ElementModQ> nonce;
+    public final Optional<ChaumPedersen.DisjunctiveChaumPedersenProof> proof;
+    public final Optional<ElGamal.Ciphertext> extended_data;
 
     CiphertextBallotSelection(String object_id, ElementModQ description_hash, ElGamal.Ciphertext ciphertext,
                               ElementModQ crypto_hash, boolean is_placeholder_selection, Optional<ElementModQ> nonce,
@@ -431,14 +431,14 @@ public class Ballot {
    * then it is required in order to regenerate the proof.
    */
   public static class CiphertextBallotContest extends ElectionObjectBase implements Hash.CryptoHashCheckable {
-    final ElementModQ description_hash; // Hash from contestDescription
-    final List<CiphertextBallotSelection> ballot_selections; // Collection of ballot selections
-    final ElementModQ crypto_hash; // Hash of the encrypted values
-    final Optional<ElementModQ> nonce; // The nonce used to generate the encryption. Sensitive & should be treated as a secret.
+    public final ElementModQ description_hash; // Hash from contestDescription
+    public final List<CiphertextBallotSelection> ballot_selections; // Collection of ballot selections
+    public final ElementModQ crypto_hash; // Hash of the encrypted values
+    public final Optional<ElementModQ> nonce; // The nonce used to generate the encryption. Sensitive & should be treated as a secret.
 
     //     The proof demonstrates the sum of the selections does not exceed the maximum
     //    available selections for the contest, and that the proof was generated with the nonce
-    final Optional<ChaumPedersen.ConstantChaumPedersenProof> proof;
+    public final Optional<ChaumPedersen.ConstantChaumPedersenProof> proof;
 
     public CiphertextBallotContest(String object_id, ElementModQ description_hash,
                                    List<CiphertextBallotSelection> ballot_selections,
@@ -698,14 +698,14 @@ public class Ballot {
    */
   @Immutable
   public static class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoHashCheckable {
-    final String ballot_style;
-    final ElementModQ description_hash;
-    final ElementModQ previous_tracking_hash;
-    final List<CiphertextBallotContest> contests;
-    final Optional<ElementModQ> tracking_hash;
-    final long timestamp; // TODO something better
-    final ElementModQ crypto_hash;
-    final Optional<ElementModQ> nonce;
+    public final String ballot_style;
+    public final ElementModQ description_hash;
+    public final ElementModQ previous_tracking_hash;
+    public final List<CiphertextBallotContest> contests;
+    public final Optional<ElementModQ> tracking_hash;
+    public final long timestamp; // TODO something better
+    public final ElementModQ crypto_hash;
+    public final Optional<ElementModQ> nonce;
 
     public CiphertextBallot(String object_id, String ballot_style, ElementModQ description_hash,
                             ElementModQ previous_tracking_hash, List<CiphertextBallotContest> contests,
@@ -868,7 +868,7 @@ public class Ballot {
    */
   public static class CiphertextAcceptedBallot extends CiphertextBallot {
     // TODO TestTallyProperties wants to change this, make mutable version?
-    BallotBoxState state;
+    public BallotBoxState state;
 
     public CiphertextAcceptedBallot(String object_id,
                                     String ballot_style,

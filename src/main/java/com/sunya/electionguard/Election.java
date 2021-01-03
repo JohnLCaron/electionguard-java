@@ -13,7 +13,10 @@ import java.util.stream.Collectors;
 
 import static com.sunya.electionguard.Group.*;
 
-/** Election metadata. */
+/**
+ * Election metadata.
+ * TODO https://github.com/microsoft/electionguard/wiki does not exist 01/02/2020
+ */
 public class Election {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
@@ -1093,14 +1096,25 @@ public class Election {
   }
 
   /**
-   * The constants for mathematical functions during the election.
+   * The constants for mathematical functions used for this election.
    */
   @Immutable
   public static class ElectionConstants {
-    public final BigInteger large_prime = Group.P; // large prime or p"""
-    public final BigInteger small_prime = Group.Q; // small prime or q"""
-    public final BigInteger cofactor = Group.R; // cofactor or r"""
-    public final BigInteger generator = Group.G; // generator or g"""
+    public final BigInteger large_prime; // large prime or p
+    public final BigInteger small_prime; // small prime or q
+    public final BigInteger cofactor;    // cofactor or r
+    public final BigInteger generator;   // generator or g
+
+    public ElectionConstants() {
+      this(Group.P, Group.Q, Group.R, Group.G);
+    }
+
+    public ElectionConstants(BigInteger large_prime, BigInteger small_prime, BigInteger cofactor, BigInteger generator) {
+      this.large_prime = large_prime;
+      this.small_prime = small_prime;
+      this.cofactor = cofactor;
+      this.generator = generator;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -1142,20 +1156,20 @@ public class Election {
    */
   @Immutable
   public static class CiphertextElectionContext {
-    final int number_of_guardians; // The number of guardians necessary to generate the public key
-    final int quorum; // The quorum of guardians necessary to decrypt an election.  Must be less than `number_of_guardians`
+    public final int number_of_guardians; // The number of guardians necessary to generate the public key
+    public final int quorum; // The quorum of guardians necessary to decrypt an election.  Must be less than `number_of_guardians`
 
     // the `joint public key (K)` in the [ElectionGuard Spec](https://github.com/microsoft/electionguard/wiki)
-    final Group.ElementModP elgamal_public_key;
+    public final Group.ElementModP elgamal_public_key;
 
     // The hash of the election metadata
-    final Group.ElementModQ description_hash;
+    public final Group.ElementModQ description_hash;
 
     // the `base hash code (𝑄)` in the [ElectionGuard Spec](https://github.com/microsoft/electionguard/wiki)
-    final Group.ElementModQ crypto_base_hash;
+    public final Group.ElementModQ crypto_base_hash;
 
     // the `extended base hash code (𝑄')` in the [ElectionGuard Spec](https://github.com/microsoft/electionguard/wiki)
-    final Group.ElementModQ crypto_extended_base_hash;
+    public final Group.ElementModQ crypto_extended_base_hash;
 
     public CiphertextElectionContext(int number_of_guardians, int quorum, ElementModP elgamal_public_key,
                                      ElementModQ description_hash, ElementModQ crypto_base_hash, ElementModQ crypto_extended_base_hash) {

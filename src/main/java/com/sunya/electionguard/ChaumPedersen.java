@@ -17,16 +17,16 @@ public class ChaumPedersen {
    * Representation of disjunctive Chaum Pederson proof.
    */
   @Immutable
-  static class DisjunctiveChaumPedersenProof extends Proof {
-    final ElementModP proof_zero_pad; // a0 in the spec"""
-    final ElementModP proof_zero_data; // b0 in the spec"""
-    final ElementModP proof_one_pad; // a1 in the spec"""
-    final ElementModP proof_one_data; // b1 in the spec"""
-    final ElementModQ proof_zero_challenge; // c0 in the spec"""
-    final ElementModQ proof_one_challenge; // c1 in the spec"""
-    final ElementModQ challenge; // c in the spec"""
-    final ElementModQ proof_zero_response; // proof_zero_response in the spec"""
-    final ElementModQ proof_one_response; // proof_one_response in the spec"""
+  public static class DisjunctiveChaumPedersenProof extends Proof {
+    public final ElementModP proof_zero_pad; // a0 in the spec"""
+    public final ElementModP proof_zero_data; // b0 in the spec"""
+    public final ElementModP proof_one_pad; // a1 in the spec"""
+    public final ElementModP proof_one_data; // b1 in the spec"""
+    public final ElementModQ proof_zero_challenge; // c0 in the spec"""
+    public final ElementModQ proof_one_challenge; // c1 in the spec"""
+    public final ElementModQ challenge; // c in the spec"""
+    public final ElementModQ proof_zero_response; // proof_zero_response in the spec"""
+    public final ElementModQ proof_one_response; // proof_one_response in the spec"""
 
     public DisjunctiveChaumPedersenProof(ElementModP proof_zero_pad, ElementModP proof_zero_data,
                                          ElementModP proof_one_pad, ElementModP proof_one_data, ElementModQ proof_zero_challenge,
@@ -119,10 +119,10 @@ public class ChaumPedersen {
    */
   @Immutable
   public static class ChaumPedersenProof extends Proof {
-    final ElementModP pad; // a in the spec
-    final ElementModP data; // b in the spec
-    final ElementModQ challenge; // c in the spec
-    final ElementModQ response; // v in the spec 
+    public final ElementModP pad; // a in the spec
+    public final ElementModP data; // b in the spec
+    public final ElementModQ challenge; // c in the spec
+    public final ElementModQ response; // v in the spec
 
     public ChaumPedersenProof(ElementModP pad, ElementModP data, ElementModQ challenge, ElementModQ response) {
       super("ChaumPedersenProof", Proof.Usage.SecretValue);
@@ -202,12 +202,12 @@ public class ChaumPedersen {
    * Representation of constant Chaum Pederson proof
    */
   @Immutable
-  static class ConstantChaumPedersenProof extends Proof {
-    final ElementModP pad; // a in the spec"""
-    final ElementModP data; // bin the spec"
-    final ElementModQ challenge; // "c in the spec"
-    final ElementModQ response; // "v in the spec"
-    final int constant; // constant value"""
+  public static class ConstantChaumPedersenProof extends Proof {
+    public final ElementModP pad; // a in the spec"""
+    public final ElementModP data; // bin the spec"
+    public final ElementModQ challenge; // "c in the spec"
+    public final ElementModQ response; // "v in the spec"
+    public final int constant; // constant value"""
 
     public ConstantChaumPedersenProof(ElementModP pad, ElementModP data, ElementModQ challenge, ElementModQ response, int constant) {
       super("ConstantChaumPedersenProof", Proof.Usage.SelectionLimit);
@@ -456,8 +456,7 @@ public class ChaumPedersen {
    * @param r: The aggregate nonce used creating the ElGamal ciphertext
    * @param k: The ElGamal public key for the election
    * @param seed: Used to generate other random values here
-   * @param hash_header: A value used when generating the challenge,
-   * usually the election extended base hash (𝑄')
+   * @param crypto_extended_base_hash: usually the election extended base hash (𝑄')
    */
   static ConstantChaumPedersenProof make_constant_chaum_pedersen(
           ElGamal.Ciphertext message,
@@ -465,7 +464,7 @@ public class ChaumPedersen {
           ElementModQ r,
           ElementModP k,
           ElementModQ seed,
-          ElementModQ hash_header) {
+          ElementModQ crypto_extended_base_hash) {
 
     ElementModP alpha = message.pad;
     ElementModP beta = message.data;
@@ -474,7 +473,7 @@ public class ChaumPedersen {
     ElementModQ u = new Nonces(seed, "constant-chaum-pedersen-proof").get(0);
     ElementModP a = g_pow_p(u);  // 𝑔^𝑢𝑖 mod 𝑝
     ElementModP b = pow_p(k, u);  // 𝐴^𝑢𝑖 mod 𝑝
-    ElementModQ c = Hash.hash_elems(hash_header, alpha, beta, a, b); // sha256(𝑄', A, B, a, b)
+    ElementModQ c = Hash.hash_elems(crypto_extended_base_hash, alpha, beta, a, b); // sha256(𝑄', A, B, a, b)
     ElementModQ v = a_plus_bc_q(u, c, r);
 
     return new ConstantChaumPedersenProof(a, b, c, v, constant);

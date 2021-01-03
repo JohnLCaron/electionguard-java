@@ -122,11 +122,11 @@ public class KeyCeremony {
   @AutoValue
   public abstract static class CoefficientValidationSet {
     public abstract String owner_id();
-    abstract List<ElementModP> coefficient_commitments();
-    abstract List<SchnorrProof> coefficient_proofs();
+    public abstract List<ElementModP> coefficient_commitments();
+    public abstract List<SchnorrProof> coefficient_proofs();
 
-    public static CoefficientValidationSet create(String owner_id, List<ElementModP> coefficient_commitments, List<SchnorrProof> coefficient_proofs) {
-      return new AutoValue_KeyCeremony_CoefficientValidationSet(owner_id, coefficient_commitments, coefficient_proofs);
+    public static CoefficientValidationSet create(String guardian_id, List<ElementModP> coefficient_commitments, List<SchnorrProof> coefficient_proofs) {
+      return new AutoValue_KeyCeremony_CoefficientValidationSet(guardian_id, coefficient_commitments, coefficient_proofs);
     }
 
     // TODO I was hoping not to expose GSON here.
@@ -222,9 +222,9 @@ public class KeyCeremony {
 
   /** Get coefficient validation set from polynomial. */
    static CoefficientValidationSet get_coefficient_validation_set(
-          String owner_id,
+          String guardian_id,
           ElectionPolynomial polynomial) {
-     return CoefficientValidationSet.create(owner_id, polynomial.coefficient_commitments, polynomial.coefficient_proofs);
+     return CoefficientValidationSet.create(guardian_id, polynomial.coefficient_commitments, polynomial.coefficient_proofs);
    }
 
   /**

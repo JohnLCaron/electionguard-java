@@ -30,18 +30,14 @@ public class CiphertextDecryptionSelectionPojo {
   public static JsonElement serialize(CiphertextDecryptionSelection src) {
     Gson gson = ConvertFromJson.enhancedGson();
     CiphertextDecryptionSelectionPojo pojo = convert(src);
-    Type typeOfSrc = new TypeToken<CiphertextDecryptionSelectionPojo>() {
-    }.getType();
-    JsonElement json = gson.toJsonTree(pojo, typeOfSrc);
-    System.out.printf("CiphertextDecryptionSelectionPojo serialize %n%s%n", json);
-    return json;
+    Type typeOfSrc = new TypeToken<CiphertextDecryptionSelectionPojo>() {}.getType();
+    return gson.toJsonTree(pojo, typeOfSrc);
   }
 
   public static void write(String pathname, CiphertextDecryptionSelection src) throws IOException {
     Gson gson = ConvertFromJson.enhancedGson();
     CiphertextDecryptionSelectionPojo pojo = convert(src);
-    Type type = new TypeToken<CiphertextDecryptionSelectionPojo>() {
-    }.getType();
+    Type type = new TypeToken<CiphertextDecryptionSelectionPojo>() {}.getType();
     try (FileWriter writer = new FileWriter(pathname)) {
       gson.toJson(pojo, type, writer);
     }
@@ -62,7 +58,6 @@ public class CiphertextDecryptionSelectionPojo {
 
   public static CiphertextDecryptionSelection deserialize(JsonElement jsonElem) {
     Gson gson = ConvertFromJson.enhancedGson();
-    System.out.printf("  deserialize %n%s%n", jsonElem);
     CiphertextDecryptionSelectionPojo pojo = gson.fromJson(jsonElem, CiphertextDecryptionSelectionPojo.class);
     return convert(pojo);
   }
