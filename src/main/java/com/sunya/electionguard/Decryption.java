@@ -263,9 +263,7 @@ public class Decryption {
     return Optional.of(spoiled_ballots);
   }
 
-  /**
-   * Compute the decryption for a single ballot.
-   */
+  /** Compute the decryption for a single ballot. */
   static Optional<BallotDecryptionShare> compute_decryption_share_for_ballot(
           Guardian guardian,
           Ballot.CiphertextAcceptedBallot ballot,

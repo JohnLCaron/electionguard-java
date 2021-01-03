@@ -170,7 +170,7 @@ public class DecryptionValidation {
     if (error) {
       logger.atSevere().log(field_name + " [box 6 & 9] decryption verification failure. ");
     } else {
-      logger.atInfo().log(field_name + " [box 6 & 9] decryption verification success. ");
+      System.out.printf("Decryption verification success.%n");
     }
 
     return !error;
@@ -333,7 +333,7 @@ public class DecryptionValidation {
      * :param public_key: public key of a guardian, Ki
      * :param challenge: challenge of a share, ci
      */
-    private boolean check_equation1(ElementModQ pad, ElementModP response, ElementModQ challenge, ElementModP public_key) {
+    private boolean check_equation1(ElementModQ response, ElementModP pad, ElementModQ challenge, ElementModP public_key) {
       // g ^ vi = ai * (Ki ^ ci) mod p
       BigInteger left = grp.pow_p(electionParameters.generator(), response.getBigInt());
       BigInteger right = grp.mult_p(pad.getBigInt(), grp.pow_p(public_key.getBigInt(), challenge.getBigInt()));
@@ -343,7 +343,7 @@ public class DecryptionValidation {
         System.out.printf("equation 1 error.%n");
       }
 
-      return true; // TODO  res;
+      return res;
     }
 
     /**

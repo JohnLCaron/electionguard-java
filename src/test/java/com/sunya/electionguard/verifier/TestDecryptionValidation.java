@@ -87,6 +87,7 @@ public class TestDecryptionValidation {
   private void make_all_contest_verification(Tally.PlaintextTally tally) {
     for (Tally.PlaintextTallyContest contest : tally.contests().values()) {
       for (Tally.PlaintextTallySelection selection : contest.selections().values()) {
+        System.out.printf(" make_all_contest_verification contest = '%s' selection = '%s'%n", contest.object_id(), selection.object_id());
         Group.ElementModP selection_pad = selection.message().pad;
         Group.ElementModP selection_data = selection.message().data;
         List<DecryptionShare.CiphertextDecryptionSelection> shares = selection.shares();
@@ -98,12 +99,10 @@ public class TestDecryptionValidation {
   void verify_all_shares(List<DecryptionShare.CiphertextDecryptionSelection> shares,
                          Group.ElementModP selection_pad, Group.ElementModP selection_data) {
     ImmutableMap<String, Group.ElementModP> public_keys = electionParameters.public_keys_of_all_guardians();
-    int index = 0;
     for (DecryptionShare.CiphertextDecryptionSelection share : shares) {
-      System.out.printf(" verify_all_shares guardian = %s%n", share.guardian_id());
+      System.out.printf(" verify_all_shares guardian = '%s'%n", share.guardian_id());
       Group.ElementModP curr_public_key = public_keys.get(share.guardian_id()); // any chance we arent matching the right share?
       verify_a_share(share, curr_public_key, selection_pad, selection_data);
-      index++;
     }
   }
 
@@ -142,13 +141,11 @@ public class TestDecryptionValidation {
    * :param public_key: public key of a guardian, Ki
    * :param challenge: challenge of a share, ci
    */
-  private void check_equation1(Group.ElementModQ pad, Group.ElementModP response, Group.ElementModQ challenge, Group.ElementModP public_key) {
+  private void check_equation1(Group.ElementModQ response, Group.ElementModP pad, Group.ElementModQ challenge, Group.ElementModP public_key) {
     // g ^ vi = ai * (Ki ^ ci) mod p
     BigInteger left = grp.pow_p(electionParameters.generator(), response.getBigInt());
     BigInteger right = grp.mult_p(pad.getBigInt(), grp.pow_p(public_key.getBigInt(), challenge.getBigInt()));
-    boolean ok = left.equals(right);
-    System.out.printf("check_equation1 = %s%n", ok);
-    // TODO assertThat(left).isEqualTo(right);
+    assertThat(left).isEqualTo(right);
   }
 
   /**
