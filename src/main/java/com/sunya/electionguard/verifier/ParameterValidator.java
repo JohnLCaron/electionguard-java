@@ -9,13 +9,13 @@ import java.math.BigInteger;
  * This module is for checking the given baseline parameters, as mentioned in the specification document in green box 1.
  * Baseline parameters include p, q, r, g which are used across the whole election verification process.
  */
-public class ParameterValidation {
+public class ParameterValidator {
   private static final int NUMBER_OF_ITERATIONS = 5;
 
   private final ElectionParameters electionParameters;
   private final Grp grp;
 
-  ParameterValidation(ElectionParameters electionParameters) {
+  ParameterValidator(ElectionParameters electionParameters) {
     this.electionParameters = electionParameters;
     this.grp = new Grp(electionParameters.large_prime(), electionParameters.small_prime());
   }

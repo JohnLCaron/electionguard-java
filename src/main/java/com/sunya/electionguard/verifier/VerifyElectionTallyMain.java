@@ -16,22 +16,22 @@ public class VerifyElectionTallyMain {
 
     // baseline parameter check
     System.out.println(" ------------ [box 1] baseline parameter check ------------");
-    ParameterValidation blv = new ParameterValidation(electionParameters);
+    ParameterValidator blv = new ParameterValidator(electionParameters);
     boolean blvOk = blv.verify_all_params();
 
     // key generation check
     System.out.println(" ------------ [box 2] key generation parameter check ------------");
-    GuardianPublicKeyValidation kgv = new GuardianPublicKeyValidation(electionParameters);
+    GuardianPublicKeyValidator kgv = new GuardianPublicKeyValidator(electionParameters);
     boolean kgvOk = kgv.verify_all_guardians();
 
     // all ballot check
     System.out.println(" ------------ [box 3, 4, 5] ballot encryption check ------------");
-    EncyrptionValidation abv = new EncyrptionValidation(electionParameters, consumer);
+    EncyrptionValidator abv = new EncyrptionValidator(electionParameters, consumer);
     boolean abvOk = abv.verify_all_ballots();
 
     // tally and spoiled ballot check
     System.out.println(" ------------ [box 6, 9] cast ballot tally check ------------");
-    DecryptionValidation dv = new DecryptionValidation(electionParameters, consumer);
+    DecryptionValidator dv = new DecryptionValidator(electionParameters, consumer);
     boolean dvOk = dv.verify_cast_ballot_tallies();
 
     System.out.println(" ------------ [box 10] spoiled ballot check ------------");

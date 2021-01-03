@@ -24,12 +24,12 @@ import static com.sunya.electionguard.Group.ElementModP;
  * This class checks ballot encryption correctness on both spoiled and cast (box 3, 4), and verifies the correctness
  * of tracking hash chain (box 5).
  */
-public class EncyrptionValidation {
+public class EncyrptionValidator {
   private final ElectionParameters electionParameters;
   private final Consumer consumer;
   private final Grp grp;
 
-  EncyrptionValidation(ElectionParameters electionParameters, Consumer consumer) {
+  EncyrptionValidator(ElectionParameters electionParameters, Consumer consumer) {
     this.electionParameters = electionParameters;
     this.consumer = consumer;
     this.grp = new Grp(electionParameters.large_prime(), electionParameters.small_prime());

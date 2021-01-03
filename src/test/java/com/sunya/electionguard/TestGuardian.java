@@ -1,7 +1,6 @@
 package com.sunya.electionguard;
 
 import net.jqwik.api.Example;
-import org.junit.Test;
 
 import java.util.Optional;
 

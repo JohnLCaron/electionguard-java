@@ -33,7 +33,7 @@ import static com.sunya.electionguard.Group.ElementModP;
  *     Note: user can check one single spoiled ballot or all the spoiled ballots in the folder by calling
  *     verify_a_spoiled_ballot(str) and verify_all_spoiled_ballots(), respectively
  */
-public class DecryptionValidation {
+public class DecryptionValidator {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   final ElectionParameters electionParameters;
@@ -41,7 +41,7 @@ public class DecryptionValidation {
   final Tally.PlaintextTally tally;
   final Grp grp;
 
-  DecryptionValidation(ElectionParameters electionParameters, Consumer consumer) throws IOException {
+  DecryptionValidator(ElectionParameters electionParameters, Consumer consumer) throws IOException {
     this.electionParameters = electionParameters;
     this.consumer = consumer;
     this.tally = consumer.plaintextTally();

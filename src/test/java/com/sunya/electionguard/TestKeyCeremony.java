@@ -1,7 +1,6 @@
 package com.sunya.electionguard;
 
 import net.jqwik.api.Example;
-import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,7 +15,6 @@ public class TestKeyCeremony {
   private static final String SENDER_GUARDIAN_ID = "Test Guardian 1";
   private static final String RECIPIENT_GUARDIAN_ID = "Test Guardian 2";
   private static final String ALTERNATE_VERIFIER_GUARDIAN_ID = "Test Guardian 3";
-  private static final int SENDER_SEQUENCE_ORDER = 1;
   private static final int RECIPIENT_SEQUENCE_ORDER = 2;
   private static final int NUMBER_OF_GUARDIANS = 5;
   private static final int QUORUM = 3;

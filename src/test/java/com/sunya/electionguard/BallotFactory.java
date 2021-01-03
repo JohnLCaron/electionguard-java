@@ -21,10 +21,10 @@ public class BallotFactory {
   }
 
   /**
-   *         Get a randomly filled contest for the given description that
-   *         may be undervoted and may include explicitly false votes.
-   *         Since this is only used for testing, the random number generator
-   *         (`random`) must be provided to make this function deterministic.
+   * Get a randomly filled contest for the given description that
+   * may be undervoted and may include explicitly false votes.
+   * Since this is only used for testing, the random number generator
+   * (`random`) must be provided to make this function deterministic.
    */
   PlaintextBallotContest get_random_contest_from(
           ContestDescription description,
@@ -63,9 +63,7 @@ public class BallotFactory {
     return new PlaintextBallotContest(description.object_id, selections);
   }
 
-  /**
-   * Get a single Fake Ballot object that is manually constructed with default vaules .
-   */
+  /** Get a single Fake Ballot object that is manually constructed with default vaules . */
   PlaintextBallot get_fake_ballot(
           InternalElectionDescription election,
           @Nullable String ballot_id,

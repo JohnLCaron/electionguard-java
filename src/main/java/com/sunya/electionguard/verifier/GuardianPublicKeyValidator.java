@@ -14,11 +14,11 @@ import static com.sunya.electionguard.Group.ElementModP;
 /**
  * This class checks the key generation information are given correctly for each guardian. (box 2).
  */
-public class GuardianPublicKeyValidation {
+public class GuardianPublicKeyValidator {
   private final ElectionParameters electionParameters;
   private final Grp grp;
 
-  GuardianPublicKeyValidation(ElectionParameters electionParameters) {
+  GuardianPublicKeyValidator(ElectionParameters electionParameters) {
     this.electionParameters = electionParameters;
     this.grp = new Grp(electionParameters.large_prime(), electionParameters.small_prime());
   }

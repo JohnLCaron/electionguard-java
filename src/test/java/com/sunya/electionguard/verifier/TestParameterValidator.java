@@ -7,7 +7,7 @@ import java.io.IOException;
 
 import static com.google.common.truth.Truth.assertThat;
 
-public class TestParameterValidation {
+public class TestParameterValidator {
 
   @Example
   public void testJavaGenerated() throws IOException {
@@ -20,7 +20,7 @@ public class TestParameterValidation {
 
     // baseline parameter check
     System.out.println(" ------------ [box 1] baseline parameter check ------------");
-    ParameterValidation blv = new ParameterValidation(electionParameters);
+    ParameterValidator blv = new ParameterValidator(electionParameters);
     boolean blvOk = blv.verify_all_params();
     assertThat(blvOk).isTrue();
   }

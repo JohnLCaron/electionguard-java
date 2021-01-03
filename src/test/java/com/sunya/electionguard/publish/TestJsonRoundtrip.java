@@ -76,12 +76,6 @@ public class TestJsonRoundtrip {
     // file.deleteOnExit();
     String outputFile = file.getAbsolutePath();
 
-    // String object_id,
-    // ElementModQ description_hash,
-    //                                   List<CiphertextBallotSelection> ballot_selections,
-    //                                   ElementModQ crypto_hash,
-    //                                   Optional<ElementModQ> nonce,
-    //                                   Optional<ChaumPedersen.ConstantChaumPedersenProof> proof
     Ballot.CiphertextBallotContest contest = new Ballot.CiphertextBallotContest(
             "testContestRoundtrip",
             Group.ONE_MOD_Q,
@@ -90,17 +84,6 @@ public class TestJsonRoundtrip {
             Optional.of(Group.ONE_MOD_Q),
             Optional.empty());
 
-    // original
-    // String object_id,
-    //                                    String ballot_style,
-    //                                    ElementModQ description_hash,
-    //                                    ElementModQ previous_tracking_hash,
-    //                                    List<CiphertextBallotContest> contests,
-    //                                    Optional<ElementModQ> tracking_hash,
-    //                                    long timestamp,
-    //                                    ElementModQ crypto_hash,
-    //                                    Optional<ElementModQ> nonce,
-    //                                    BallotBoxState state
     Ballot.CiphertextAcceptedBallot org = new Ballot.CiphertextAcceptedBallot(
             "testBallotRoundtrip",
             "ballotStyle",
@@ -156,12 +139,6 @@ public class TestJsonRoundtrip {
 
   @Example
   public void testCiphertextDecryptionSelectionEmpty() {
-    // String object_id,
-    //            String guardian_id,
-    //            ElementModQ description_hash,
-    //            ElementModP share,
-    //            Optional<ChaumPedersen.ChaumPedersenProof> proof,
-    //            Optional<Map<String, CiphertextCompensatedDecryptionSelection>> recovered_parts
     CiphertextDecryptionSelection select = CiphertextDecryptionSelection.create(
             "testCiphertextDecryptionSelectionRoundtrip",
             "guardian_id",
@@ -187,12 +164,6 @@ public class TestJsonRoundtrip {
             Group.ONE_MOD_Q
             );
 
-    // String object_id,
-    //            String guardian_id,
-    //            ElementModQ description_hash,
-    //            ElementModP share,
-    //            Optional<ChaumPedersen.ChaumPedersenProof> proof,
-    //            Optional<Map<String, CiphertextCompensatedDecryptionSelection>> recovered_parts
     CiphertextDecryptionSelection select = CiphertextDecryptionSelection.create(
             "testCiphertextDecryptionSelectionRoundtrip",
             "guardian_id",

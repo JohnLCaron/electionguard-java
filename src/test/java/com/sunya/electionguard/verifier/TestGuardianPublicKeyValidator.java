@@ -7,13 +7,12 @@ import net.jqwik.api.lifecycle.BeforeContainer;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
 
-public class TestGuardianPublicKeyValidation {
+public class TestGuardianPublicKeyValidator {
   static ElectionParameters electionParameters;
-  static GuardianPublicKeyValidation kgv;
+  static GuardianPublicKeyValidator kgv;
   static Grp grp;
 
 
@@ -28,7 +27,7 @@ public class TestGuardianPublicKeyValidation {
 
     // key generation check
     System.out.println(" ------------ [box 2] key generation parameter check ------------");
-    kgv = new GuardianPublicKeyValidation(electionParameters);
+    kgv = new GuardianPublicKeyValidator(electionParameters);
 
     grp = new Grp(electionParameters.large_prime(), electionParameters.small_prime());
   }

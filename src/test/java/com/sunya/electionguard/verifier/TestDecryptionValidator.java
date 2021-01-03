@@ -14,10 +14,10 @@ import java.util.Map;
 
 import static com.google.common.truth.Truth.assertThat;
 
-public class TestDecryptionValidation {
+public class TestDecryptionValidator {
   static ElectionParameters electionParameters;
   static Consumer consumer;
-  static DecryptionValidation validator;
+  static DecryptionValidator validator;
   static Grp grp;
 
   @BeforeContainer
@@ -30,7 +30,7 @@ public class TestDecryptionValidation {
     System.out.println("set up finished. ");
 
     System.out.println(" ------------ [box 3, 4, 5] ballot encryption check ------------");
-    validator = new DecryptionValidation(electionParameters, consumer);
+    validator = new DecryptionValidator(electionParameters, consumer);
     grp = new Grp(electionParameters.large_prime(), electionParameters.small_prime());
   }
 

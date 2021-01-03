@@ -2,7 +2,7 @@
 
 This is a port of https://github.com/microsoft/electionguard-python/ to Java.
 It  closely follows the classes, naming and file structure of the original, to facilitate 
-line-by-line comparisions.
+line-by-line comparison.
 
 It is offered under the same license to be freely used, modified, developed, etc. 
 Im also happy to donate it to another organization for hosting, etc.
@@ -20,11 +20,12 @@ Im also happy to donate it to another organization for hosting, etc.
  
 ## TODO
 
-  * Add an offical "Validator".
+  * Finish validation step 7, 8.
   * Review mutable classes.
   * Not yet compatible with Python library JSON serialization, due to different ways to serialize Optional.
   * Consider Moshi instead of Gson, esp if it solves the Optional problem.
   * Look at BigInteger performance, consider using GMP through jni or jna.
+  * Measure performance.
 
 ## License
 

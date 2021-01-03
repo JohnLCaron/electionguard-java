@@ -6,7 +6,7 @@ import java.util.Random;
 import static com.sunya.electionguard.Group.*;
 
 public class TestUtils {
-  private static Random random = new Random(System.currentTimeMillis());
+  private static final Random random = new Random(System.currentTimeMillis());
 
   static boolean randomBool() {
     return random.nextBoolean();

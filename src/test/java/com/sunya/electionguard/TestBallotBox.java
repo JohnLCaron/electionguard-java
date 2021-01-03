@@ -80,7 +80,7 @@ public class TestBallotBox {
     CiphertextAcceptedBallot result = resultO.get();
 
           //Assert
-    CiphertextAcceptedBallot expected = store.get(source.object_id).orElse(null);;
+    CiphertextAcceptedBallot expected = store.get(source.object_id).orElse(null);
     assertThat(expected).isNotNull();
 
     assertThat(expected.state).isEqualTo(BallotBoxState.SPOILED);

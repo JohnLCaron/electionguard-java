@@ -77,7 +77,6 @@ public class TestTracker {
     assertThat(tracker_words.get()).isEqualTo(expected_words);
   }
 
-
   @Example
   public void test_hash_to_words() {
     String h = hash_to_words(10, 11, 2, 6, 2);

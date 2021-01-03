@@ -5,8 +5,6 @@ import com.sunya.electionguard.publish.ElectionDescriptionFromJson;
 
 import javax.annotation.Nullable;
 import java.io.*;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,14 +22,14 @@ public class ElectionFactory {
     return _get_election_from_file(simple_election_manifest_filename);
   }
 
-  public ElectionDescription get_hamilton_election_from_file() throws IOException {
+  public static ElectionDescription get_hamilton_election_from_file() throws IOException {
     return _get_election_from_file(hamilton_election_manifest_filename);
   }
 
   /**
    * Get a single Fake Election object that is manually constructed with default values.
    */
-  public ElectionDescription get_fake_election() {
+  public static ElectionDescription get_fake_election() {
 
     BallotStyle fake_ballot_style = new BallotStyle("some-ballot-style-id",
             ImmutableList.of("some-geopoltical-unit-id"), null, null);
@@ -101,9 +99,9 @@ public class ElectionFactory {
   /**
    * Get a single Fake Ballot object that is manually constructed with default vaules.
    */
-  Ballot.PlaintextBallot get_fake_ballot(@Nullable ElectionDescription election, @Nullable String ballot_id) {
+  static Ballot.PlaintextBallot get_fake_ballot(@Nullable ElectionDescription election, @Nullable String ballot_id) {
     if (election == null) {
-      election = this.get_fake_election();
+      election = get_fake_election();
     }
 
     if (ballot_id == null) {

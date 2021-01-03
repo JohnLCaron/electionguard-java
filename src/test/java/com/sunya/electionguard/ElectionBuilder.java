@@ -4,10 +4,9 @@ import java.util.Optional;
 
 import static com.sunya.electionguard.Election.*;
 
-
 /**
- *     `ElectionBuilder` is a stateful builder object that constructs `CiphertextElectionContext` objects
- *     following the initialization process that ElectionGuard Expects.
+ * `ElectionBuilder` is a stateful builder object that constructs `CiphertextElectionContext` objects
+ * following the initialization process that ElectionGuard Expects.
  */
 public class ElectionBuilder {
 

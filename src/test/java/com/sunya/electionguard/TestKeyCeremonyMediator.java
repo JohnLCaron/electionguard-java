@@ -2,7 +2,6 @@ package com.sunya.electionguard;
 
 import com.google.common.collect.Iterables;
 import net.jqwik.api.Example;
-import org.junit.Test;
 
 import java.util.List;
 import java.util.Optional;
