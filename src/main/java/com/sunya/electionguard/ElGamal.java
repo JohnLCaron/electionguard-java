@@ -15,9 +15,7 @@ import static com.sunya.electionguard.Group.*;
 public class ElGamal {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
-  /**
-   * A tuple of an ElGamal secret key and public key.
-   */
+  /** A tuple of an ElGamal secret key and public key. */
   @Immutable
   static class KeyPair {
     final ElementModQ secret_key;
@@ -103,9 +101,7 @@ public class ElGamal {
       return Group.pow_p(this.pad, secretKey);
     }
 
-    /**
-     * Computes a cryptographic hash of this ciphertext.
-     */
+    /** Computes a cryptographic hash of this ciphertext. */
     ElementModQ crypto_hash() {
       return Hash.hash_elems(this.pad, this.data);
     }
@@ -125,9 +121,7 @@ public class ElGamal {
     return Optional.of(new KeyPair(a, g_pow_p(a)));
   }
 
-  /**
-   * Create a random elgamal keypair.
-   */
+  /** Create a random elgamal keypair. */
   static KeyPair elgamal_keypair_random() {
     return elgamal_keypair_from_secret(rand_range_q(TWO_MOD_Q)).orElseThrow(RuntimeException::new);
   }

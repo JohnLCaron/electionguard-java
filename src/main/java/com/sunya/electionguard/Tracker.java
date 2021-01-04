@@ -14,30 +14,30 @@ public class Tracker {
   private static final String DEFAULT_SEPARATOR = "-";
 
   /**
-   *     Get starting hash for given device
-   *     @param uuid: Unique identifier of device
-   *     @param location: Location of device
-   *     @return Starting hash of device
+   * Get starting hash for given device.
+   * @param uuid:     Unique identifier of device
+   * @param location: Location of device
+   * @return Starting hash of device
    */
   static ElementModQ get_hash_for_device(String uuid, String location) {
     return Hash.hash_elems(uuid, location);
   }
 
   /**
-   *     Get the rotated tracker hash for a particular ballot.
-   *     @param prev_hash: Previous hash or starting hash from device
-   *     @param timestamp: Timestamp in ticks
-   *     @param ballot_hash: Hash of ballot to track
-   *     @return Tracker hash
+   * Get the rotated tracker hash for a particular ballot.
+   * @param prev_hash:   Previous hash or starting hash from device
+   * @param timestamp:   Timestamp in ticks
+   * @param ballot_hash: Hash of ballot to track
+   * @return Tracker hash
    */
   static ElementModQ get_rotating_tracker_hash(ElementModQ prev_hash, long timestamp, ElementModQ ballot_hash) {
     return Hash.hash_elems(prev_hash, timestamp, ballot_hash);
   }
 
   /**
-   *     Convert tracker hash to human readable / friendly words
-   *     @param tracker_hash: Tracker hash
-   *     @return Human readable tracker string or None
+   * Convert tracker hash to human readable / friendly words.
+   * @param tracker_hash: Tracker hash
+   * @return Human readable tracker string or None
    */
   static Optional<String> tracker_hash_to_words(ElementModQ tracker_hash, @Nullable String separator) {
     if (separator == null) {

@@ -25,7 +25,6 @@ import static com.sunya.electionguard.Group.*;
 
 public class TestEncryptProperties extends TestProperties {
   static final ElementModQ SEED_HASH = new EncryptionDevice("Location").get_hash();
-  static final ElectionFactory election_factory = new ElectionFactory();
   static final BallotFactory ballot_factory = new BallotFactory();
 
   @Example
@@ -339,14 +338,14 @@ public class TestEncryptProperties extends TestProperties {
   @Example
   public void test_encrypt_ballot_simple_succeeds() {
     KeyPair keypair = elgamal_keypair_from_secret(int_to_q(BigInteger.TWO).get()).get();
-    Election.ElectionDescription election = election_factory.get_fake_election();
-    ElectionBuilder.DescriptionAndContext tuple = election_factory.get_fake_ciphertext_election(election, keypair.public_key).get();
+    Election.ElectionDescription election = ElectionFactory.get_fake_election();
+    ElectionBuilder.DescriptionAndContext tuple = ElectionFactory.get_fake_ciphertext_election(election, keypair.public_key).get();
     Election.InternalElectionDescription metadata = tuple.description;
     Election.CiphertextElectionContext context = tuple.context;
     ElementModQ nonce_seed = TWO_MOD_Q;
 
     // TODO:Ballot Factory
-    PlaintextBallot subject = election_factory.get_fake_ballot(metadata.description, null);
+    PlaintextBallot subject = ElectionFactory.get_fake_ballot(metadata.description, null);
     assertThat(subject.is_valid(metadata.ballot_styles.get(0).object_id)).isTrue();
 
     Optional<CiphertextBallot> resultO = encrypt_ballot(subject, metadata, context, SEED_HASH, Optional.empty(), true);
@@ -375,12 +374,12 @@ public class TestEncryptProperties extends TestProperties {
   @Example
   public void test_encrypt_ballot_with_stateful_composer_succeeds() {
     KeyPair keypair = elgamal_keypair_from_secret(int_to_q(BigInteger.TWO).get()).get();
-    Election.ElectionDescription election = election_factory.get_fake_election();
-    ElectionBuilder.DescriptionAndContext tuple = election_factory.get_fake_ciphertext_election(election, keypair.public_key).get();
+    Election.ElectionDescription election = ElectionFactory.get_fake_election();
+    ElectionBuilder.DescriptionAndContext tuple = ElectionFactory.get_fake_ciphertext_election(election, keypair.public_key).get();
     Election.InternalElectionDescription metadata = tuple.description;
     Election.CiphertextElectionContext context = tuple.context;
 
-    PlaintextBallot data = election_factory.get_fake_ballot(metadata.description, null);
+    PlaintextBallot data = ElectionFactory.get_fake_ballot(metadata.description, null);
     assertThat(data.is_valid(metadata.ballot_styles.get(0).object_id)).isTrue();
 
     EncryptionDevice device = new EncryptionDevice("Location");
@@ -394,8 +393,8 @@ public class TestEncryptProperties extends TestProperties {
   @Example
   public void test_encrypt_simple_ballot_from_files_succeeds() throws IOException {
     KeyPair keypair = elgamal_keypair_from_secret(int_to_q(BigInteger.TWO).get()).get();
-    Election.ElectionDescription election = election_factory.get_simple_election_from_file();
-    ElectionBuilder.DescriptionAndContext tuple = election_factory.get_fake_ciphertext_election(election, keypair.public_key).get();
+    Election.ElectionDescription election = ElectionFactory.get_simple_election_from_file();
+    ElectionBuilder.DescriptionAndContext tuple = ElectionFactory.get_fake_ciphertext_election(election, keypair.public_key).get();
     Election.InternalElectionDescription metadata = tuple.description;
     Election.CiphertextElectionContext context = tuple.context;
 

@@ -1,7 +1,6 @@
 package com.sunya.electionguard;
 
 import net.jqwik.api.Example;
-import net.jqwik.api.lifecycle.BeforeContainer;
 
 import java.math.BigInteger;
 import java.util.Optional;
@@ -15,12 +14,6 @@ import static com.google.common.truth.Truth8.assertThat;
 
 public class TestBallotBox {
   private static final ElementModQ SEED_HASH = new Encrypt.EncryptionDevice("Location").get_hash();
-  static ElectionFactory election_factory;
-
-  @BeforeContainer
-  public static void setup() {
-    election_factory = new ElectionFactory();
-  }
 
   InternalElectionDescription metadata;
   CiphertextElectionContext context;
@@ -32,15 +25,15 @@ public class TestBallotBox {
   public TestBallotBox() {
     // Arrange
     ElGamal.KeyPair keypair = ElGamal.elgamal_keypair_from_secret(int_to_q_unchecked(BigInteger.TWO))
-            .orElseThrow(() -> new RuntimeException());
+            .orElseThrow(RuntimeException::new);
 
-    ElectionDescription election = election_factory.get_fake_election();
-    Optional<ElectionBuilder.DescriptionAndContext> tupleO = election_factory.get_fake_ciphertext_election(election, keypair.public_key);
+    ElectionDescription election = ElectionFactory.get_fake_election();
+    Optional<ElectionBuilder.DescriptionAndContext> tupleO = ElectionFactory.get_fake_ciphertext_election(election, keypair.public_key);
     assertThat(tupleO.isEmpty()).isFalse();
     metadata = tupleO.get().description;
     context = tupleO.get().context;
 
-    source = election_factory.get_fake_ballot(metadata.description, null);
+    source = ElectionFactory.get_fake_ballot(metadata.description, null);
     assertThat(metadata.ballot_styles.isEmpty()).isFalse();
     assertThat(source.is_valid(metadata.ballot_styles.get(0).object_id)).isTrue();
 

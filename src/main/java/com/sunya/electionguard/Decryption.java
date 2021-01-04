@@ -15,11 +15,11 @@ public class Decryption {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   /**
-   * Compute a decryptions share for a guardian
+   * Compute a decryptions share for a guardian.
    * <p>
    * @param guardian: The guardian who will partially decrypt the tally
    * @param tally: The election tally to decrypt
-   * :context: The public election encryption context
+   * @param context: The public election encryption context
    * @return a `TallyDecryptionShare` or `None` if there is an error
    */
   static Optional<TallyDecryptionShare> compute_decryption_share(
@@ -48,12 +48,12 @@ public class Decryption {
   }
 
   /**
-   * Compute a compensated decryptions share for a guardian
+   * Compute a compensated decryptions share for a guardian.
    * <p>
    * @param guardian: The guardian who will partially decrypt the tally
    * @param missing_guardian_id: the missing guardian id to compensate
    * @param tally: The election tally to decrypt
-   * :context: The public election encryption context
+   * @param context: The public election encryption context
    * @return a `TallyDecryptionShare` or `None` if there is an error
    */
   static Optional<CompensatedTallyDecryptionShare> compute_compensated_decryption_share(
@@ -191,9 +191,7 @@ public class Decryption {
     return Optional.of(spoiled_ballots);
   }
 
-  /**
-   * Compute the decryption for a single ballot.
-   */
+  /** Compute the decryption for a single ballot. */
   static Optional<CompensatedBallotDecryptionShare> compute_compensated_decryption_share_for_ballot(
           Guardian guardian,
           String missing_guardian_id,
@@ -326,7 +324,7 @@ public class Decryption {
    * Compute a partial decryption for a specific selection.
    * @param guardian: The guardian who will partially decrypt the selection
    * @param selection: The specific selection to decrypt
-   * :context: The public election encryption context
+   * @param context: The public election encryption context
    * @return a `CiphertextDecryptionSelection` or `None` if there is an error
    */
   static Optional<CiphertextDecryptionSelection> compute_decryption_share_for_selection(
@@ -381,12 +379,12 @@ public class Decryption {
 
   /**
    * Compute a compensated decryption share for a specific selection using the
-   * available guardian's share of the missing guardian's private key polynomial
+   * available guardian's share of the missing guardian's private key polynomial.
    * <p>
    * @param available_guardian: The available guardian that will partially decrypt the selection
    * @param missing_guardian_id: The id of the guardian that is missing
    * @param selection: The specific selection to decrypt
-   * :context: The public election encryption context
+   * @param context: The public election encryption context
    * @return a `CiphertextCompensatedDecryptionSelection` or `None` if there is an error
    */
   static Optional<CiphertextCompensatedDecryptionSelection> compute_compensated_decryption_share_for_selection(
@@ -438,9 +436,7 @@ public class Decryption {
     }
   }
 
-  /**
-   * Produce a Lagrange coefficient for a single Guardian, to be used when reconstructing a missing share. .
-   */
+  /** Produce a Lagrange coefficient for a single Guardian, to be used when reconstructing a missing share. */
   static Group.ElementModQ compute_lagrange_coefficients_for_guardian(
           List<KeyCeremony.PublicKeySet> all_available_guardian_keys, KeyCeremony.PublicKeySet guardian_keys) {
 
@@ -453,23 +449,18 @@ public class Decryption {
             other_guardian_orders);
   }
 
-  /**
-   * Produce all Lagrange coefficients for a collection of available Guardians, to be used when reconstructing a missing share.
-   */
+  /** Produce all Lagrange coefficients for a collection of available Guardians, used when reconstructing a missing share. */
   static Map<String, Group.ElementModQ> compute_lagrange_coefficients_for_guardians(
           List<KeyCeremony.PublicKeySet> all_available_guardian_keys) {
-    Map<String, Group.ElementModQ> result = new HashMap<>();
 
+    Map<String, Group.ElementModQ> result = new HashMap<>();
     all_available_guardian_keys
             .forEach(g -> result.put(g.owner_id(),
-                    compute_lagrange_coefficients_for_guardian(all_available_guardian_keys, g))
-            );
+                    compute_lagrange_coefficients_for_guardian(all_available_guardian_keys, g)));
     return result;
   }
 
-  /**
-   * Use all available guardians to reconstruct the missing shares for all missing guardians .
-   */
+  /** Use all available guardians to reconstruct the missing shares for all missing guardians. */
   static Optional<Map<String, TallyDecryptionShare>> reconstruct_missing_tally_decryption_shares(
           CiphertextTally ciphertext_tally,
           Map<String, KeyCeremony.ElectionPublicKey> missing_guardians,
@@ -526,12 +517,12 @@ public class Decryption {
 
   /**
    * Reconstruct the missing Decryption Share for a missing guardian
-   * from the collection of compensated decryption shares
+   * from the collection of compensated decryption shares.
    * <p>
    * @param missing_guardian_id: The guardian id for the missing guardian
    * @param cast_tally: The collection of `CiphertextTallyContest` that is cast
-   * :shares: the collection of `CompensatedTallyDecryptionShare` for the missing guardian
-   * :lagrange_coefficients: the lagrange coefficients corresponding to the available guardians that provided shares
+   * @param shares: the collection of `CompensatedTallyDecryptionShare` for the missing guardian
+   * @param lagrange_coefficients: the lagrange coefficients corresponding to the available guardians that provided shares
    */
   static Map<String, CiphertextDecryptionContest> reconstruct_decryption_contests(
           String missing_guardian_id,
@@ -593,13 +584,13 @@ public class Decryption {
   }
 
   /**
-   * Reconstruct the missing Decryption shares for a missing guardian from the collection of compensated decryption shares
+   * Reconstruct the missing Decryption shares for a missing guardian from the collection of compensated decryption shares.
    * <p>
    * @param missing_guardian_id: The guardian id for the missing guardian
    * @param public_key: the public key for the missing guardian
    * @param spoiled_ballots: The collection of `CiphertextAcceptedBallot` that is spoiled
-   * :shares: the collection of `CompensatedTallyDecryptionShare` for the missing guardian
-   * :lagrange_coefficients: the lagrange coefficients corresponding to the available guardians that provided shares
+   * @param shares: the collection of `CompensatedTallyDecryptionShare` for the missing guardian
+   * @param lagrange_coefficients: the lagrange coefficients corresponding to the available guardians that provided shares
    */
   static Map<String, BallotDecryptionShare> reconstruct_decryption_ballots(
           String missing_guardian_id,
@@ -641,7 +632,7 @@ public class Decryption {
   }
 
   /**
-   * Reconstruct a missing ballot Decryption share for a missing guardian from the collection of compensated decryption shares
+   * Reconstruct a missing ballot Decryption share for a missing guardian from the collection of compensated decryption shares.
    *
    * @param missing_guardian_id   The guardian id for the missing guardian
    * @param public_key            the public key for the missing guardian

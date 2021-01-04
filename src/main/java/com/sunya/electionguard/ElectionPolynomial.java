@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 import static com.sunya.electionguard.Group.*;
 
 /**
- * A polynomial defined by coefficients
+ * A polynomial defined by coefficients.
  * <p>
  * The 0-index coefficient is used for a secret key which can
  * be discovered by a quorum of n guardians corresponding to n coefficients.
@@ -38,7 +38,7 @@ public class ElectionPolynomial {
   }
 
   /**
-   * Generates a polynomial for sharing election keys
+   * Generates a polynomial for sharing election keys.
    *
    * @param number_of_coefficients: Number of coefficients of polynomial
    * @param nonce:                  an optional nonce parameter that may be provided (useful for testing)
@@ -66,7 +66,7 @@ public class ElectionPolynomial {
   }
 
   /**
-   * Computes a single coordinate value of the election polynomial used for sharing
+   * Computes a single coordinate value of the election polynomial used for sharing.
    *
    * @param exponent_modifier: Unique modifier (usually sequence order) for exponent
    * @param polynomial:        Election polynomial
@@ -102,7 +102,7 @@ public class ElectionPolynomial {
   }
 
   /**
-   * Verify a polynomial coordinate value is in fact on the polynomial's curve
+   * Verify a polynomial coordinate value is in fact on the polynomial's curve.
    *
    * @param coordinate              Value to be checked
    * @param exponent_modifier       Unique modifier (usually sequence order) for exponent

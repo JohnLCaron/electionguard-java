@@ -1286,7 +1286,7 @@ public class Election {
     } else {
       use_sequence_id = use_sequence_idO.get();
       if (sequence_ids.contains(use_sequence_id)) {
-        // log_warning(f"mismatched placeholder selection {use_sequence_id} already exists")
+        logger.atWarning().log("mismatched placeholder selection %s already exists", use_sequence_id);
         return Optional.empty();
       }
     }

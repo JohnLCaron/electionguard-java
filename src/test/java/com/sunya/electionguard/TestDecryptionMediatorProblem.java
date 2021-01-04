@@ -1,13 +1,7 @@
 package com.sunya.electionguard;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import net.jqwik.api.Example;
-import net.jqwik.api.ForAll;
-import net.jqwik.api.Property;
-import net.jqwik.api.ShrinkingMode;
-import net.jqwik.api.lifecycle.AfterContainer;
 import net.jqwik.api.lifecycle.AfterExample;
 
 import java.math.BigInteger;
@@ -17,7 +11,6 @@ import java.util.stream.Collectors;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 import static com.sunya.electionguard.Ballot.*;
-import static com.sunya.electionguard.Decryption.*;
 import static com.sunya.electionguard.Election.*;
 import static com.sunya.electionguard.Group.*;
 import static com.sunya.electionguard.KeyCeremony.*;
@@ -29,7 +22,6 @@ public class TestDecryptionMediatorProblem extends TestProperties {
 
   static Auxiliary.Decryptor identity_auxiliary_decrypt = (m, k) -> Optional.of(new String(m.getBytes()));
   static Auxiliary.Encryptor identity_auxiliary_encrypt = (m, k) -> Optional.of(new Auxiliary.ByteString(m.getBytes()));
-  static ElectionFactory election_factory = new ElectionFactory();
   static BallotFactory ballot_factory = new BallotFactory();
 
   KeyCeremonyMediator key_ceremony;
@@ -39,11 +31,11 @@ public class TestDecryptionMediatorProblem extends TestProperties {
   CiphertextElectionContext context;
   Map<String, BigInteger> expected_plaintext_tally;
 
-  // PlaintextBallot fake_cast_ballot;
-  // PlaintextBallot fake_spoiled_ballot;
-  // CiphertextAcceptedBallot encrypted_fake_cast_ballot;
-  // CiphertextAcceptedBallot encrypted_fake_spoiled_ballot;
-  // Tally.CiphertextTally ciphertext_tally;
+  PlaintextBallot fake_cast_ballot;
+  PlaintextBallot fake_spoiled_ballot;
+  CiphertextAcceptedBallot encrypted_fake_cast_ballot;
+  CiphertextAcceptedBallot encrypted_fake_spoiled_ballot;
+  Tally.CiphertextTally ciphertext_tally;
 
   public TestDecryptionMediatorProblem() {
 
@@ -68,7 +60,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
     this.joint_public_key = joinKeyO.get();
 
     // setup the election
-    ElectionDescription election = election_factory.get_fake_election();
+    ElectionDescription election = ElectionFactory.get_fake_election();
     ElectionBuilder builder = new ElectionBuilder(NUMBER_OF_GUARDIANS, QUORUM, election);
     assertThat(builder.build()).isEmpty();  // Can't build without the public key
     builder.set_public_key(this.joint_public_key);
@@ -78,8 +70,6 @@ public class TestDecryptionMediatorProblem extends TestProperties {
     this.metadata = tuple.get().description;
     this.context = tuple.get().context;
 
-
-    /*
     Encrypt.EncryptionDevice encryption_device = new Encrypt.EncryptionDevice("location");
     Encrypt.EncryptionMediator ballot_marking_device = new Encrypt.EncryptionMediator(this.metadata, this.context, encryption_device);
 
@@ -152,7 +142,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
     }
 
     // generate encrypted tally
-    this.ciphertext_tally = Tally.tally_ballots(ballot_store, this.metadata, this.context).get(); */
+    this.ciphertext_tally = Tally.tally_ballots(ballot_store, this.metadata, this.context).get();
   }
 
   @AfterExample
@@ -386,7 +376,6 @@ public class TestDecryptionMediatorProblem extends TestProperties {
         plaintext_selections.put(entry.getKey(), entry.getValue().tally());
       }
     }
-
     return plaintext_selections;
   }
 

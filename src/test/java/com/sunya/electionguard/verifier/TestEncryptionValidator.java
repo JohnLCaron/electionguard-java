@@ -352,7 +352,7 @@ public class TestEncryptionValidator {
     }
 
     // withdraw this test for now
-    // boolean trackOk = verify_tracking_hashes(prev_hashes, curr_hashes);
+    boolean trackOk = verify_tracking_hashes(prev_hashes, curr_hashes);
     // assertThat(trackOk).isTrue();
   }
 
@@ -382,8 +382,8 @@ public class TestEncryptionValidator {
     }
 
     /*
-    The zero_hash is given to the EncryptionMediator. For TestEndtoEndElectionIntegration, this is random hash.
-    I dont think this is captures in the ElectionCOntext, so cant be tested.
+    TODO: The zero_hash is given to the EncryptionMediator. For TestEndtoEndElectionIntegration, this is the deci hash.
+    I dont think this is captured in the ElectionCntext, so cant be tested.
      */
 
     // verify the first hash H0 = H(Q-bar)
@@ -392,9 +392,7 @@ public class TestEncryptionValidator {
       error = true;
     }
 
-        /*
-    "CLOSE" is not used, any way its impossible for last_hash = Hash.hash_elems(last_hash, "CLOSE")
-     */
+    /* TODO "CLOSE" is not used in library; anyway, its impossible for last_hash = Hash.hash_elems(last_hash, "CLOSE") */
 
     // verify the closing hash, H-bar = H(Hl, 'CLOSE')
     Group.ElementModQ closing_hash_computed = Hash.hash_elems(last_hash, "CLOSE");

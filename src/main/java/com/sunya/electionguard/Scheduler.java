@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
 
+/** A scheduler for concurrent task execution. */
 // TODO make a Singleton
 public class Scheduler<T> {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
@@ -39,6 +40,7 @@ public class Scheduler<T> {
     }
   }
 
+  // TODO call this
   public static void shutdown() {
     service.shutdown();
   }

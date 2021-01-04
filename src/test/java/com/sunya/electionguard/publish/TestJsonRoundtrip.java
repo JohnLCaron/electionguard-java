@@ -28,8 +28,7 @@ public class TestJsonRoundtrip {
     String outputFile = file.getAbsolutePath();
 
     // read json
-    ElectionFactory election_factory = new ElectionFactory();
-    Election.ElectionDescription description = election_factory.get_hamilton_election_from_file();
+    Election.ElectionDescription description = ElectionFactory.get_hamilton_election_from_file();
     // write json
     ElectionDescriptionToJson writer = new ElectionDescriptionToJson(outputFile);
     writer.write(description);

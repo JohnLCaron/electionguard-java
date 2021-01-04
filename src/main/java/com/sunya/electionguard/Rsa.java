@@ -1,5 +1,7 @@
 package com.sunya.electionguard;
 
+import com.google.common.flogger.FluentLogger;
+
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
@@ -9,6 +11,8 @@ import java.util.Optional;
 
 /** Wrapper for java RSA encryption. */
 public class Rsa {
+  private static final FluentLogger logger = FluentLogger.forEnclosingClass();
+
   private static final int PUBLIC_EXPONENT = 65537;
   private static final int KEY_SIZE = 4096;
   private static final int PADDING = 11;
@@ -20,8 +24,8 @@ public class Rsa {
     try {
       return Optional.of(new Auxiliary.ByteString(rsa_encrypt(message, public_key)));
     } catch (Exception e) {
-      // log
-      return Optional.empty();
+      logger.atSevere().withCause(e).log("rsa_encrypt failed");
+      throw new RuntimeException(e);
     }
   }
 
@@ -29,8 +33,8 @@ public class Rsa {
     try {
       return Optional.of(rsa_decrypt(encrypted_message.getBytes(), secret_key));
     } catch (Exception e) {
-      // log
-      return Optional.empty();
+      logger.atSevere().withCause(e).log("rsa_decrypt failed");
+      throw new RuntimeException(e);
     }
   }
 

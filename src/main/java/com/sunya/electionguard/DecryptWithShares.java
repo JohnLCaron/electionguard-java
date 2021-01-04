@@ -1,5 +1,7 @@
 package com.sunya.electionguard;
 
+import com.google.common.flogger.FluentLogger;
+
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
@@ -12,6 +14,7 @@ import static com.sunya.electionguard.DecryptionShare.*;
 import static com.sunya.electionguard.Tally.*;
 
 class DecryptWithShares {
+  private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   /**
    * Decrypt the specified `CiphertextTallySelection` with the collection of `ElementModP` decryption shares.
@@ -84,7 +87,7 @@ class DecryptWithShares {
         Optional<Tally.PlaintextTallySelection> plaintext_selectionO = decrypt_selection_with_decryption_shares(
                 selection, tally_shares, extended_base_hash, false);
         if (plaintext_selectionO.isEmpty()) {
-          // f"could not decrypt tally for contest {contest.object_id}")
+          logger.atWarning().log("could not decrypt tally for contest %s", contest.object_id());
           return Optional.empty();
         }
         Tally.PlaintextTallySelection plaintext_selection = plaintext_selectionO.get();
@@ -133,7 +136,6 @@ class DecryptWithShares {
 
     HashMap<String, Map<String, Tally.PlaintextTallyContest>> plaintext_spoiled_ballots = new HashMap<>();
     for (Ballot.CiphertextAcceptedBallot spoiled_ballot : spoiled_ballots.values()) {
-
       HashMap<String, BallotDecryptionShare> ballot_shares = new HashMap<>();
       for (Map.Entry<String, TallyDecryptionShare> entry : shares.entrySet()) {
         TallyDecryptionShare share = entry.getValue();
@@ -147,7 +149,6 @@ class DecryptWithShares {
         return Optional.empty();
       }
     }
-
     return Optional.of(plaintext_spoiled_ballots);
   }
 
@@ -169,17 +170,16 @@ class DecryptWithShares {
 
         // verify the plaintext values are received and add them to the collection
         if (plaintext_selectionO.isEmpty()) {
-          // f"could not decrypt ballot {ballot.object_id} for contest {contest.object_id} selection {selection.object_id}"
+          logger.atWarning().log("could not decrypt ballot %s for contest %s selection %s",
+              ballot.object_id, contest.object_id, selection.object_id);
           return Optional.empty();
         } else {
           Tally.PlaintextTallySelection plaintext_selection = plaintext_selectionO.get();
           selections.put(plaintext_selection.object_id(), plaintext_selection);
         }
       }
-
       contests.put(contest.object_id, PlaintextTallyContest.create(contest.object_id, selections));
     }
-
     return Optional.of(contests);
   }
 }

@@ -30,9 +30,7 @@ public class Tally {
     }
   }
 
-  /**
-   * A plaintext Tally Selection is a decrypted selection of a contest.
-   */
+  /** A plaintext Tally Selection is a decrypted selection of a contest. */
   @AutoValue
   public static abstract class PlaintextTallySelection implements ElectionObjectBaseIF {
     // g^tally or M in the spec
@@ -51,7 +49,7 @@ public class Tally {
   }
 
   /**
-   * a CiphertextTallySelection is a homomorphic accumulation of all of the
+   * A CiphertextTallySelection is a homomorphic accumulation of all of the
    * CiphertextBallotSelection instances for a specific selection in an election.
    */
   static class CiphertextTallySelection extends CiphertextSelection {
@@ -67,9 +65,7 @@ public class Tally {
       return ciphertext_mutable;
     }
 
-    /**
-     * Homomorphically add the specified value to the message.
-     */
+    /** Homomorphically add the specified value to the message. */
     ElGamal.Ciphertext elgamal_accumulate(ElGamal.Ciphertext elgamal_ciphertext) {
       // Note not immutable
       this.ciphertext_mutable = ElGamal.elgamal_add(this.ciphertext_mutable, elgamal_ciphertext);
@@ -77,9 +73,7 @@ public class Tally {
     }
   }
 
-  /**
-   * A plaintext Tally Contest is a collection of plaintext selections
-   */
+  /** A plaintext Tally Contest is a collection of plaintext selections. */
   @AutoValue
   public static abstract class PlaintextTallyContest implements ElectionObjectBaseIF {
     public abstract Map<String, PlaintextTallySelection> selections();
@@ -95,7 +89,7 @@ public class Tally {
 
   /**
    * A CiphertextTallyContest is a container for associating a collection of CiphertextTallySelection
-   * to a specific ContestDescription
+   * to a specific ContestDescription.
    */
   @AutoValue
   public static abstract class CiphertextTallyContest implements ElectionObjectBaseIF {
@@ -110,9 +104,7 @@ public class Tally {
       return new AutoValue_Tally_CiphertextTallyContest.GsonTypeAdapter(gson);
     }
 
-    /**
-     * Accumulate the contest selections of an individual ballot into this tally.
-     */
+    /** Accumulate the contest selections of an individual ballot into this tally. */
     boolean accumulate_contest(List<CiphertextBallotSelection> contest_selections) {
       if (contest_selections.isEmpty()) {
         logger.atWarning().log("accumulate cannot add missing selections for contest %s", this.object_id());
@@ -190,9 +182,7 @@ public class Tally {
     }
   }
 
-  /**
-   * The plaintext representation of all contests in the election
-   */
+  /** The plaintext representation of all contests in the election. */
   @AutoValue
   public static abstract class PlaintextTally implements ElectionObjectBaseIF {
     public abstract Map<String, PlaintextTallyContest> contests();
@@ -207,9 +197,7 @@ public class Tally {
 
   } // PlaintextTally
 
-  /**
-   * A `CiphertextTally` accepts cast and spoiled ballots and accumulates a tally on the cast ballots.
-   */
+  /** A `CiphertextTally` accepts cast and spoiled ballots and accumulates a tally on the cast ballots. */
   public static class CiphertextTally extends ElectionObjectBase {
     private final Election.InternalElectionDescription _metadata;
     private final Election.CiphertextElectionContext _encryption;
@@ -239,7 +227,7 @@ public class Tally {
     }
 
     /** Get a Count of the cast ballots. */
-     int count() {
+    int count() {
       return this._cast_ballot_ids.size();
     }
 
@@ -251,9 +239,7 @@ public class Tally {
       return this._cast_ballot_ids.contains(ballot.object_id) || this.spoiled_ballots.containsKey(ballot.object_id);
     }
 
-    /**
-     * Append a ballot to the tally and recalculate the tally. .
-     */
+    /** Append a ballot to the tally and recalculate the tally. */
     boolean append(CiphertextAcceptedBallot ballot) {
       if (ballot.state == BallotBoxState.UNKNOWN) {
         logger.atWarning().log("append cannot add %s with invalid state", ballot.object_id);
@@ -282,9 +268,7 @@ public class Tally {
       return false;
     }
 
-    /**
-     * Append a collection of Ballots to the tally and recalculate.
-     */
+    /** Append a collection of Ballots to the tally and recalculate. */
     boolean batch_append(Iterable<CiphertextAcceptedBallot> ballots) {
       Map<String, Map<String, ElGamal.Ciphertext>> cast_ballot_selections = new HashMap<>();
 
@@ -322,9 +306,7 @@ public class Tally {
       return false;
     }
 
-    /**
-     * Add a cast ballot to the tally, synchronously.
-     */
+    /** Add a cast ballot to the tally, synchronously. */
     boolean _add_cast(CiphertextAcceptedBallot ballot) {
 
       // iterate through the contests and elgamal add
@@ -347,17 +329,13 @@ public class Tally {
     }
 
 
-    /**
-     * Add a spoiled ballot.
-     */
+    /** Add a spoiled ballot. */
     boolean _add_spoiled(CiphertextAcceptedBallot ballot) {
       this.spoiled_ballots.put(ballot.object_id, ballot);
       return true;
     }
 
-    /**
-     * Build the object graph for the tally from the InternalElectionDescription.
-     */
+    /** Build the object graph for the tally from the InternalElectionDescription. */
     static Map<String, CiphertextTallyContest> _build_tally_collection(Election.InternalElectionDescription description) {
 
       Map<String, CiphertextTallyContest> cast_collection = new HashMap<>();
@@ -424,9 +402,7 @@ public class Tally {
 
   } // class CiphertextTally
 
-  /**
-   * The published Ciphertext representation of all contests in the election.
-   */
+  /** The published Ciphertext representation of all contests in the election. */
   @AutoValue
   public static abstract class PublishedCiphertextTally implements ElectionObjectBaseIF {
     public abstract Map<String, CiphertextTallyContest> cast();
@@ -440,15 +416,13 @@ public class Tally {
     }
   }
 
-  /**
-   * Publish a ciphertext tally with simpler format.
-   */
+  /** Publish a ciphertext tally with simpler format. */
   public static PublishedCiphertextTally publish_ciphertext_tally(CiphertextTally tally) {
     return PublishedCiphertextTally.create(tally.object_id, tally.cast);
   }
 
   /**
-   * Tally a ballot that is either Cast or Spoiled
+   * Tally a ballot that is either Cast or Spoiled.
    * @return The mutated CiphertextTally or None if there is an error
    */
   static Optional<CiphertextTally> tally_ballot(CiphertextAcceptedBallot ballot, CiphertextTally tally) {

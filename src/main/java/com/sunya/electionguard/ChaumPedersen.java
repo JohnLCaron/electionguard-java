@@ -13,9 +13,7 @@ import static com.sunya.electionguard.Group.*;
 public class ChaumPedersen {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
-  /**
-   * Representation of disjunctive Chaum Pederson proof.
-   */
+  /** Representation of disjunctive Chaum Pederson proof. */
   @Immutable
   public static class DisjunctiveChaumPedersenProof extends Proof {
     public final ElementModP proof_zero_pad; // a0 in the spec"""
@@ -49,7 +47,6 @@ public class ChaumPedersen {
      * @param message: The ciphertext message
      * @param k: The public key of the election
      * @param q: The extended base hash of the election
-     * @return True if everything is consistent. False otherwise.
      */
     boolean is_valid(ElGamal.Ciphertext message, ElementModP k, ElementModQ q) {
       ElementModP alpha = message.pad;
@@ -114,9 +111,7 @@ public class ChaumPedersen {
     }
   }
 
-  /**
-   * Representation of a generic Chaum-Pedersen Zero Knowledge proof.
-   */
+  /** Representation of a generic Chaum-Pedersen Zero Knowledge proof. */
   @Immutable
   public static class ChaumPedersenProof extends Proof {
     public final ElementModP pad; // a in the spec
@@ -145,7 +140,6 @@ public class ChaumPedersen {
      * (e.g. the Guardian public election key)
      * @param m: The value being checked for validity
      * @param q: The extended base hash of the election
-     * @return True if everything is consistent. False otherwise.
      */
     boolean is_valid(ElGamal.Ciphertext message, ElementModP k, ElementModP m, ElementModQ q) {
       ElementModP alpha = message.pad;
@@ -198,9 +192,7 @@ public class ChaumPedersen {
     }
   }
 
-  /**
-   * Representation of constant Chaum Pederson proof
-   */
+  /** Representation of constant Chaum Pederson proof */
   @Immutable
   public static class ConstantChaumPedersenProof extends Proof {
     public final ElementModP pad; // a in the spec"""
@@ -225,7 +217,6 @@ public class ChaumPedersen {
      * @param message: The ciphertext message
      * @param k: The public key of the election
      * @param q: The extended base hash of the election
-     * @return True if everything is consistent. False otherwise.
      */
     boolean is_valid(ElGamal.Ciphertext message, ElementModP k, ElementModQ q) {
 

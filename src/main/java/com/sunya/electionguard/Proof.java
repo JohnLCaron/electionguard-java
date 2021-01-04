@@ -2,7 +2,7 @@ package com.sunya.electionguard;
 
 import java.util.Objects;
 
-/** superclass of Proofs. */
+/** Superclass of Proofs. */
 public abstract class Proof {
   enum Usage {
     Unknown("Unknown"),

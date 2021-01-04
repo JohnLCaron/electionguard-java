@@ -40,6 +40,7 @@ public class Auxiliary {
     }
   }
 
+  /** An immutable byte array. */
   @Immutable
   public static final class ByteString {
     private final byte[] bytes;

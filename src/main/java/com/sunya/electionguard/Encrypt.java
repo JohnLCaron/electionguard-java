@@ -16,9 +16,7 @@ import static com.sunya.electionguard.Group.*;
 public class Encrypt {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
-  /**
-   * Metadata for encryption device.
-   */
+  /** Metadata for encryption device. */
   @Immutable
   public static class EncryptionDevice {
     public final String uuid;
@@ -117,7 +115,7 @@ public class Encrypt {
   }
 
   /**
-   * Encrypt a specific `BallotSelection` in the context of a specific `BallotContest`
+   * Encrypt a specific `BallotSelection` in the context of a specific `BallotContest`.
    *
    * @param selection:                 the selection in the valid input form
    * @param selection_description:     the `SelectionDescription` from the `ContestDescription` which defines this selection's structure

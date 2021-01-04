@@ -2,9 +2,14 @@ package com.sunya.electionguard;
 
 import java.math.BigInteger;
 
+/** Eventual replacement for Group that allows the primes to be set. */
 public class Grp {
   private final BigInteger q; // small prime
   private final BigInteger p; // large prime
+
+  public Grp() {
+    this(Group.P, Group.Q);
+  }
 
   public Grp(BigInteger large_prime, BigInteger small_prime) {
     this.p = large_prime;
@@ -66,16 +71,8 @@ public class Grp {
     return a.mod(b).equals(BigInteger.ZERO);
   }
 
-  private final static BigInteger THREE = BigInteger.valueOf(3);
   private final static BigInteger FOUR = BigInteger.valueOf(4);
 
-  /**
-   * implements Miller-Rabin algorithm to test the primality of a number
-   * :param num: a positive integer
-   * :param k: the number of iterations, impacting accuracy; the larger the number, the higher accuracy will be.
-   * set default as 5
-   * :return: True if it's a prime, False otherwise
-   */
   public static boolean is_prime(BigInteger num, int numberOfIterations) {
     // Corner cases
     if (Group.lessThan(num, BigInteger.TWO) || num.equals(FOUR)) {
@@ -84,8 +81,6 @@ public class Grp {
     if (Group.lessThan(num, FOUR)) {
       return true;
     }
-
-
     return num.isProbablePrime(numberOfIterations);
   }
 

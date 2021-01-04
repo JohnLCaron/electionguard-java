@@ -30,7 +30,7 @@ public class DecryptWithSecrets {
           ElementModQ secret_key,
           ElementModQ crypto_extended_base_hash,
           boolean suppress_validity_check // default false
-  ) {
+    ) {
 
     if (!suppress_validity_check &&
             !selection.is_valid_encryption(description.crypto_hash(), public_key, crypto_extended_base_hash)) {
@@ -56,7 +56,7 @@ public class DecryptWithSecrets {
    * @param public_key: the public key for the election (K)
    * @param crypto_extended_base_hash: the extended base hash code (𝑄') for the election
    * @param nonce_seed: the optional nonce that was seeded to the encryption function.
-   * if no value is provided, the nonce field from the selection is used
+   *                    if no value is provided, the nonce field from the selection is used
    * @param suppress_validity_check: do not validate the encryption prior to decrypting (useful for tests)
    */
   static Optional<PlaintextBallotSelection> decrypt_selection_with_nonce(
@@ -66,7 +66,7 @@ public class DecryptWithSecrets {
           ElementModQ crypto_extended_base_hash,
           Optional<ElementModQ> nonce_seed,
           boolean suppress_validity_check // default false
-  ) {
+    ) {
 
     if (!suppress_validity_check &&
             !selection.is_valid_encryption(description.crypto_hash(), public_key, crypto_extended_base_hash)) {
@@ -125,7 +125,7 @@ public class DecryptWithSecrets {
           ElementModQ crypto_extended_base_hash,
           boolean suppress_validity_check, // default false
           boolean remove_placeholders // default true
-  ) {
+    ) {
 
     if (!suppress_validity_check &&
             !contest.is_valid_encryption(description.crypto_hash(), public_key, crypto_extended_base_hash)) {
@@ -177,7 +177,7 @@ public class DecryptWithSecrets {
           Optional<ElementModQ> nonce_seed,
           boolean suppress_validity_check, // default false,
           boolean remove_placeholders // default True,
-  ) {
+    ) {
 
     if (!suppress_validity_check && !contest.is_valid_encryption(
             description.crypto_hash(), public_key, crypto_extended_base_hash)) {
@@ -245,7 +245,6 @@ public class DecryptWithSecrets {
    * @param suppress_validity_check: do not validate the encryption prior to decrypting (useful for tests)
    * @param remove_placeholders: filter out placeholder ciphertext selections after decryption
    */
-
   static Optional<PlaintextBallot> decrypt_ballot_with_secret(
           CiphertextBallot ballot,
           Election.InternalElectionDescription election_metadata,
@@ -254,7 +253,7 @@ public class DecryptWithSecrets {
           ElementModQ secret_key,
           boolean suppress_validity_check, // default False,
           boolean remove_placeholders // default  True,
-  ) {
+    ) {
 
     if (!suppress_validity_check && !ballot.is_valid_encryption(
             election_metadata.description_hash, public_key, crypto_extended_base_hash)) {
@@ -306,7 +305,7 @@ public class DecryptWithSecrets {
           Optional<ElementModQ> nonce,
           boolean suppress_validity_check, // default False,
           boolean remove_placeholders // default True,
-  ) {
+    ) {
 
     if (!suppress_validity_check && !ballot.is_valid_encryption(
             election_metadata.description_hash, public_key, crypto_extended_base_hash)) {

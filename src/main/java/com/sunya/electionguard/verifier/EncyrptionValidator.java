@@ -74,10 +74,10 @@ public class EncyrptionValidator {
       System.out.printf("[Box 3 & 4] All ballot verification success.%n");
     }
 
-    // TODO this test does not work see notes in TestSelectionEncryptionValidation
-    // if (!this.verify_tracking_hashes(prev_hashes, curr_hashes)) {
-    //  error = true;
-    // }
+    // TODO this test does not work see notes in TestEncryptionValidator
+    if (!this.verify_tracking_hashes(prev_hashes, curr_hashes)) {
+      // error = true;
+    }
 
     if (error) {
       System.out.printf("[Box 5] Tracking hashes verification failure.%n");

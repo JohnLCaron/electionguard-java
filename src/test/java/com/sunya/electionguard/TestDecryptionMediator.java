@@ -29,7 +29,6 @@ public class TestDecryptionMediator extends TestProperties {
 
   static Auxiliary.Decryptor identity_auxiliary_decrypt = (m, k) -> Optional.of(new String(m.getBytes()));
   static Auxiliary.Encryptor identity_auxiliary_encrypt = (m, k) -> Optional.of(new Auxiliary.ByteString(m.getBytes()));
-  static ElectionFactory election_factory = new ElectionFactory();
   static BallotFactory ballot_factory = new BallotFactory();
 
   KeyCeremonyMediator key_ceremony;
@@ -67,7 +66,7 @@ public class TestDecryptionMediator extends TestProperties {
     this.joint_public_key = joinKeyO.get();
 
     // setup the election
-    ElectionDescription election = election_factory.get_fake_election();
+    ElectionDescription election = ElectionFactory.get_fake_election();
     ElectionBuilder builder = new ElectionBuilder(NUMBER_OF_GUARDIANS, QUORUM, election);
     assertThat(builder.build()).isEmpty();  // Can't build without the public key
     builder.set_public_key(this.joint_public_key);

@@ -1,13 +1,15 @@
 package com.sunya.electionguard;
 
+import com.google.common.flogger.FluentLogger;
+
 import java.util.Optional;
 
 import static com.sunya.electionguard.Ballot.*;
 
-/**
- * A stateful convenience wrapper to cache election data.
- */
+/** A stateful convenience wrapper to cache election data. */
 public class BallotBox {
+  private static final FluentLogger logger = FluentLogger.forEnclosingClass();
+
   private final Election.InternalElectionDescription _metadata;
   private final Election.CiphertextElectionContext _context;
   private final DataStore _store;
@@ -24,17 +26,14 @@ public class BallotBox {
     return accept_ballot(ballot, BallotBoxState.CAST);
   }
 
-  /**
-   * Spoil a specific encrypted `CiphertextBallot` .
-   */
+  /** Spoil a specific encrypted `CiphertextBallot` . */
   Optional<CiphertextAcceptedBallot> spoil(CiphertextBallot ballot) {
     return accept_ballot(ballot, BallotBoxState.SPOILED);
   }
 
   /**
-   * Accept a ballot within the context of a specified election and against an existing data store
-   * Verified that the ballot is valid for the election `metadata` and `context` and
-   * that the ballot has not already been cast or spoiled.
+   * Accept a ballot within the context of a specified election and against an existing data store.
+   * Verify that the ballot is valid for the election and the ballot has not already been cast or spoiled.
    * @return a `CiphertextAcceptedBallot` or `None` if there was an error
    */
   Optional<CiphertextAcceptedBallot> accept_ballot(CiphertextBallot ballot, BallotBoxState state) {
@@ -43,7 +42,9 @@ public class BallotBox {
     }
 
     if (_store.containsKey(ballot.object_id)) {
-      // log_warning(f"error accepting ballot, {ballot.object_id} already exists with state: {existing_ballot.state}")
+      Ballot.CiphertextAcceptedBallot existingBallot = _store.get(ballot.object_id).orElseThrow(IllegalStateException::new);
+      logger.atWarning().log("error accepting ballot, %s already exists with state: %s",
+          ballot.object_id, existingBallot.state);
       return Optional.empty();
     }
 

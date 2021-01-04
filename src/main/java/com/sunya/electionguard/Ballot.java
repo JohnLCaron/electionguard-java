@@ -141,9 +141,7 @@ public class Ballot {
     }
   }
 
-  /**
-   * Encrypted selection.
-   */
+  /** Encrypted selection. */
   @Immutable
   public static class CiphertextSelection extends ElectionObjectBase {
     public final ElementModQ description_hash;
@@ -202,9 +200,7 @@ public class Ballot {
       this.extended_data = extended_data;
     }
 
-    /**
-     * Remove nonce and return new object.
-     */
+    /** Remove nonce and return new object without the nonce. */
     CiphertextBallotSelection removeNonce() {
       return new CiphertextBallotSelection(this.object_id, this.description_hash, this.ciphertext(),
               this.crypto_hash, this.is_placeholder_selection, Optional.empty(),
@@ -453,9 +449,7 @@ public class Ballot {
       this.proof = proof;
     }
 
-    /**
-     * Remove nonces and return new object.
-     */
+    /** Remove nonces from selections and return new contest. */
     CiphertextBallotContest removeNonces() {
       // new_selections = [replace(selection, nonce = None) for selection in contest.ballot_selections]
       List<CiphertextBallotSelection> new_selections =
@@ -561,7 +555,7 @@ public class Ballot {
           List<CiphertextBallotSelection> ballot_selections,
           ElementModQ seed_hash) {
     if (ballot_selections.size() == 0) {
-      //f"mismatching ballot_selections state: {object_id} expected(some), actual(none)"
+      logger.atWarning().log("mismatching ballot_selections state: %s expected(some), actual(none)", object_id);
       return ZERO_MOD_Q;
     }
 
@@ -765,7 +759,7 @@ public class Ballot {
     @Override
     public ElementModQ crypto_hash_with(ElementModQ seed_hash) {
       if (this.contests.size() == 0) {
-        // f"mismatching contests state: {this.object_id} expected(some), actual(none)"
+        logger.atWarning().log("mismatching contests state: %s expected(some), actual(none)", object_id);
         return ZERO_MOD_Q;
       }
 

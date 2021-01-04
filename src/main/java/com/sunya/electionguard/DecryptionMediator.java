@@ -12,7 +12,6 @@ import static com.sunya.electionguard.DecryptionShare.*;
 import static com.sunya.electionguard.Election.*;
 import static com.sunya.electionguard.Tally.*;
 
-
 /**
  * The Decryption Mediator composes partial decryptions from each Guardian
  * to form a decrypted representation of an election tally.
@@ -47,7 +46,7 @@ public class DecryptionMediator {
 
   /**
    * Announce that a Guardian is present and participating in the decryption.
-   * A Decryption Share will be generated for the Guardian
+   * A Decryption Share will be generated for the Guardian.
    * <p>
    * @param guardian: The guardian who will participate in the decryption.
    * @return a `TallyDecryptionShare` for this `Guardian` or `None` if there is an error.
@@ -168,7 +167,7 @@ public class DecryptionMediator {
 
   /**
    * Get the plaintext tally for the election by composing each Guardian's
-   * decrypted representation of each selection into a decrypted representation
+   * decrypted representation of each selection into a decrypted representation.
    * <p>
    * @param recompute: Specify if the function should recompute the result, even if one already exists. default false
    * @return a `PlaintextTally` or `None`
@@ -233,9 +232,7 @@ public class DecryptionMediator {
     return DecryptWithShares.decrypt_tally(this._ciphertext_tally, merged_decryption_shares, this._encryption);
   }
 
-  /**
-   * Submit the decryption share to be used in the decryption.
-   */
+  /** Submit the decryption share to be used in the decryption. */
   boolean _submit_decryption_share(TallyDecryptionShare share) {
     if (this._decryption_shares.containsKey(share.guardian_id())) {
       logger.atInfo().log("cannot submit for guardian %s that already decrypted", share.guardian_id());
@@ -246,9 +243,7 @@ public class DecryptionMediator {
     return true;
   }
 
-  /**
-   * Submit compensated decryption shares to be used in the decryption.
-   */
+  /** Submit compensated decryption shares to be used in the decryption. */
   boolean _submit_compensated_decryption_shares(List<CompensatedTallyDecryptionShare> shares) {
 
     List<Boolean> ok = shares.stream().map(this::_submit_compensated_decryption_share).
@@ -257,9 +252,7 @@ public class DecryptionMediator {
     return ok.stream().allMatch(b -> b);
   }
 
-  /**
-   * Submit compensated decryption share to be used in the decryption.
-   */
+  /** Submit compensated decryption share to be used in the decryption. */
   boolean _submit_compensated_decryption_share(CompensatedTallyDecryptionShare share) {
 
     Map<String, CompensatedTallyDecryptionShare> shareMap =

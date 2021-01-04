@@ -11,9 +11,7 @@ import static com.sunya.electionguard.Election.*;
 public class BallotValidator {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
-  /**
-   * Determine if a ballot is valid for a given election .
-   */
+  /** Determine if a ballot is valid for a given election . */
   static boolean ballot_is_valid_for_election(
           CiphertextBallot ballot,
           InternalElectionDescription metadata,
@@ -33,9 +31,7 @@ public class BallotValidator {
     return true;
   }
 
-  /**
-   * Determine if selection is valid for ballot style.
-   */
+  /** Determine if selection is valid for ballot style. */
   static boolean selection_is_valid_for_style(
           CiphertextBallotSelection selection, SelectionDescription description) {
 
@@ -48,9 +44,7 @@ public class BallotValidator {
     return true;
   }
 
-  /**
-   * Determine if contest is valid for ballot style.
-   */
+  /** Determine if contest is valid for ballot style. */
   static boolean contest_is_valid_for_style(
           CiphertextBallotContest contest, ContestDescriptionWithPlaceholders description) {
 
@@ -71,9 +65,7 @@ public class BallotValidator {
     return true;
   }
 
-  /**
-   * Determine if ballot is valid for ballot style.
-   */
+  /** Determine if ballot is valid for ballot style. */
   static boolean ballot_is_valid_for_style(CiphertextBallot ballot, InternalElectionDescription metadata) {
 
     List<ContestDescriptionWithPlaceholders> descriptions = metadata.get_contests_for(ballot.ballot_style);

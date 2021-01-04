@@ -16,9 +16,7 @@ import static com.sunya.electionguard.Group.*;
 
 public class KeyCeremony {
 
-  /**
-   * Details of key ceremony.
-   */
+  /** Details of key ceremony. */
   @AutoValue
   abstract static class CeremonyDetails {
     abstract int number_of_guardians();
@@ -29,9 +27,7 @@ public class KeyCeremony {
     }
   }
 
-  /**
-   * A tuple of election key pair, proof and polynomial
-   */
+  /** A tuple of election key pair, proof and polynomial */
   @AutoValue
   abstract static class ElectionKeyPair {
     abstract ElGamal.KeyPair key_pair();
@@ -43,9 +39,7 @@ public class KeyCeremony {
     }
   }
 
-  /**
-   * A tuple of election public key and owner information.
-   */
+  /** A tuple of election public key and owner information. */
   @AutoValue
   abstract static class ElectionPublicKey {
     abstract String owner_id();
@@ -57,9 +51,7 @@ public class KeyCeremony {
     }
   }
 
-  /**
-   * Public key set of auxiliary and election keys and owner information.
-   */
+  /** Public key set of auxiliary and election keys and owner information. */
   @AutoValue
   abstract static class PublicKeySet {
     abstract String owner_id();
@@ -73,12 +65,9 @@ public class KeyCeremony {
       return new AutoValue_KeyCeremony_PublicKeySet(
               owner_id, sequence_order, auxiliary_public_key, election_public_key, election_public_key_proof);
     }
-
   }
 
-  /**
-   * Pair of guardians involved in sharing.
-   */
+  /** Pair of guardians involved in sharing. */
   @AutoValue
   abstract static class GuardianPair {
     abstract String owner_id();
@@ -89,9 +78,7 @@ public class KeyCeremony {
     }
   }
 
-  /**
-   * Election partial key backup used for key sharing.
-   */
+  /** Election partial key backup used for key sharing. */
   @AutoValue
   abstract static class ElectionPartialKeyBackup {
     abstract String owner_id(); // The Id of the guardian that generated this backup
@@ -116,9 +103,7 @@ public class KeyCeremony {
     }
   }
 
-  /**
-   * Set of validation pieces for election key coefficients.
-   */
+  /** Set of validation pieces for election key coefficients. */
   @AutoValue
   public abstract static class CoefficientValidationSet {
     public abstract String owner_id();
@@ -135,9 +120,7 @@ public class KeyCeremony {
     }
   }
 
-  /**
-   * verification of election partial key used in key sharing.
-   */
+  /** Verification of election partial key used in key sharing. */
   @AutoValue
   abstract static class ElectionPartialKeyVerification {
     abstract String owner_id();
@@ -150,9 +133,7 @@ public class KeyCeremony {
     }
   }
 
-  /**
-   * Challenge of election partial key used in key sharing.
-   */
+  /** Challenge of election partial key used in key sharing. */
   @AutoValue
   abstract static class ElectionPartialKeyChallenge {
     abstract String owner_id();
@@ -167,16 +148,14 @@ public class KeyCeremony {
     }
   }
 
-  /**
-   * Generate auxiliary key pair using RSA .
-   */
+  /** Generate auxiliary key pair using RSA . */
   static Auxiliary.KeyPair generate_rsa_auxiliary_key_pair() {
     KeyPair rsa_key_pair = Rsa.rsa_keypair();
     return new Auxiliary.KeyPair(rsa_key_pair.getPrivate(), rsa_key_pair.getPublic());
   }
 
   /**
-   * Generate election key pair, proof, and polynomial
+   * Generate election key pair, proof, and polynomial.
    * @param quorum: Quorum of guardians needed to decrypt
    * @return Election key pair
    */
@@ -189,7 +168,7 @@ public class KeyCeremony {
   }
 
   /**
-   * Generate election partial key backup for sharing
+   * Generate election partial key backup for sharing.
    * @param owner_id: Owner of election key
    * @param polynomial: The owner's Election polynomial
    * @param auxiliary_public_key: The Auxiliary public key
@@ -228,7 +207,7 @@ public class KeyCeremony {
    }
 
   /**
-   * Verify election partial key backup contain point on owners polynomial
+   * Verify election partial key backup contain point on owners polynomial.
    * @param verifier_id: Verifier of the partial key backup
    * @param backup: Election partial key backup
    * @param auxiliary_key_pair: Auxiliary key pair
@@ -257,7 +236,7 @@ public class KeyCeremony {
   }
 
   /**
-   * Generate challenge to a previous verification of a partial key backup
+   * Generate challenge to a previous verification of a partial key backup.
    * @param backup: Election partial key backup in question
    * @param polynomial: Polynomial to regenerate point
    * @return Election partial key verification
@@ -276,7 +255,7 @@ public class KeyCeremony {
   }
 
   /**
-   * Verify a challenge to a previous verification of a partial key backup
+   * Verify a challenge to a previous verification of a partial key backup.
    * @param verifier_id: Verifier of the challenge
    * @param challenge: Election partial key challenge
    * @return Election partial key verification
@@ -294,8 +273,8 @@ public class KeyCeremony {
   }
 
   /**
-      Creates a joint election key from the public keys of all guardians
-    @return Joint key for election
+   * Creates a joint election key from the public keys of all guardians.
+   * @return Joint key for election
    */
   static ElementModP combine_election_public_keys(Map<String, ElectionPublicKey> election_public_keys) {
     // public_keys = map(lambda public_key:public_key.key, election_public_keys.values())
