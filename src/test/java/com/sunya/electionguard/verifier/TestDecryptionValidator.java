@@ -22,7 +22,8 @@ public class TestDecryptionValidator {
 
   @BeforeContainer
   public static void setUp() throws IOException {
-    String topdir = "src/test/data/testEndToEnd";
+    String topdir = "src/test/data/python-modified";
+    // String topdir = "/home/snake/tmp/testEndToEnd";
 
     // set up
     consumer = new Consumer(topdir);
@@ -80,7 +81,6 @@ public class TestDecryptionValidator {
         }
       }
     }
-
     return (!error);
   }
 
@@ -205,10 +205,20 @@ public class TestDecryptionValidator {
    * :return: True if the given Ci equals to the ci computed using hash
    */
   void check_challenge(Group.ElementModQ challenge, Group.ElementModP pad, Group.ElementModP data,
-                          Group.ElementModP partial_decrypt, Group.ElementModP selection_pad, Group.ElementModP selection_data) {
+                       Group.ElementModP partial_decrypt, Group.ElementModP selection_pad, Group.ElementModP selection_data) {
     Group.ElementModQ challenge_computed = Hash.hash_elems(electionParameters.extended_hash(),
             selection_pad, selection_data, pad, data, partial_decrypt);
 
+    boolean ok = challenge.equals(challenge_computed);
+    if (!ok) {
+      System.out.printf("-------check_challenge %s%n", ok);
+      System.out.printf("  extended_base_hash %s%n", electionParameters.extended_hash());
+      System.out.printf("  elgamal.pad %s%n", selection_pad);
+      System.out.printf("  elgamal.data %s%n", selection_data);
+      System.out.printf("  partial_decryption %s%n", partial_decrypt);
+      System.out.printf("  pad %s%n", pad);
+      System.out.printf("  data %s%n", data);
+    }
     assertThat(challenge).isEqualTo(challenge_computed);
   }
 }

@@ -42,17 +42,28 @@ public class Publisher {
   private final Path ballotsDirPath;
   private final Path spoiledDirPath;
 
-  public Publisher(String where) throws IOException {
+  public Publisher(String where, boolean removeAllFiles) throws IOException {
     this.publishDirectory = Path.of(where);
     this.devicesDirPath = publishDirectory.resolve(DEVICES_DIR);
     this.coefficientsDirPath = publishDirectory.resolve(COEFFICIENTS_DIR);
     this.ballotsDirPath = publishDirectory.resolve(BALLOTS_DIR);
     this.spoiledDirPath = publishDirectory.resolve(SPOILED_DIR);
 
+    if (removeAllFiles) {
+      removeAllFiles();
+    }
     Files.createDirectories(spoiledDirPath);
     Files.createDirectories(ballotsDirPath);
     Files.createDirectories(coefficientsDirPath);
     Files.createDirectories(devicesDirPath);
+  }
+
+  /** Delete everything in the output directory. */
+  public void removeAllFiles() throws IOException {
+    Files.walk(publishDirectory)
+            .map(Path::toFile)
+            .sorted((o1, o2) -> -o1.compareTo(o2))
+            .forEach(File::delete);
   }
 
   public Path electionFile() {

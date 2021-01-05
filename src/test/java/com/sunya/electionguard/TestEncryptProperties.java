@@ -10,6 +10,7 @@ import net.jqwik.api.constraints.IntRange;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -223,7 +224,7 @@ public class TestEncryptProperties extends TestProperties {
     assertThat(missing_proof.is_valid_encryption(description.crypto_hash(), keypair.public_key, ONE_MOD_Q)).isFalse();
   }
 
-  /*
+  /*  Fails - Dont know what the fix is.
   @Property(tries = 10, shrinking = ShrinkingMode.OFF)
   public void test_encrypt_contest_overvote_fails(
           @ForAll("contest_description_well_formed") Election.ContestDescriptionWithPlaceholders description,
@@ -240,10 +241,9 @@ public class TestEncryptProperties extends TestProperties {
       // extra = ballot_factory.get_random_selection_from( description.ballot_selections[0], random )
       PlaintextBallotSelection extra = ballot_factory.get_random_selection_from(description.ballot_selections.get(0));
       // PlaintextBallotSelection extraModified = new Election.SelectionDescription(extra.object_id, extra.vote, extra.is_placeholder_selection, extra.extended_data);
-      extra.sequence_order = highest_sequence + i + 1 // TODO there is no extra.sequence_order field
-      extra_ballot_selections.add(extraModified);
+      // extra.sequence_order = highest_sequence + i + 1 // TODO there is no extra.sequence_order field
+      extra_ballot_selections.add(extra);
     }
-
 
     Optional<CiphertextBallotContest> result = encrypt_contest(subject, description, keypair.public_key, ONE_MOD_Q, seed, true);
     assertThat(result).isEmpty();

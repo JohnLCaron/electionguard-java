@@ -10,6 +10,10 @@ import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
 
+/**
+ * This captures problem with Optional and AutoValue plugins for Gson.
+ * Will go away when we have a solution.
+ */
 public class TestOptionalWithAutoValue {
   private static final Gson gson = new GsonBuilder().serializeNulls()
           // doesnt matter which order these are registered in

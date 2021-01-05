@@ -43,7 +43,7 @@ public class BallotFactory {
     int voted = 0;
 
     for (SelectionDescription selection_description : description.ballot_selections) {
-      PlaintextBallotSelection selection = this.get_random_selection_from(selection_description);
+      PlaintextBallotSelection selection = get_random_selection_from(selection_description);
           // the caller may force a true value
       voted += selection.to_int();
       if (with_trues && voted <= 1 && selection.to_int() == 1) {
@@ -63,7 +63,7 @@ public class BallotFactory {
     return new PlaintextBallotContest(description.object_id, selections);
   }
 
-  /** Get a single Fake Ballot object that is manually constructed with default vaules . */
+  /** Get a single Fake Ballot object that is manually constructed with default values . */
   PlaintextBallot get_fake_ballot(
           InternalElectionDescription election,
           @Nullable String ballot_id,
@@ -101,25 +101,21 @@ public class BallotFactory {
 
   //////////////////////////////////////////////////////////////////////////////////////
 
-  @Nullable
   List<PlaintextBallot> get_simple_ballots_from_file() throws IOException {
     String current = new java.io.File("./src/test/resources/").getCanonicalPath();
-    return this._get_ballots_from_file(current + "/" + this.simple_ballots_filename);
+    return this._get_ballots_from_file(current + "/" + simple_ballots_filename);
   }
 
-  @Nullable
   private List<PlaintextBallot> _get_ballots_from_file(String filename) throws IOException {
     PlaintextBallotFromJson builder = new PlaintextBallotFromJson(filename);
     return builder.get_ballots_from_file();
   }
 
-  @Nullable
   PlaintextBallot get_simple_ballot_from_file() throws IOException {
     String current = new java.io.File("./src/test/resources/").getCanonicalPath();
-    return this._get_ballot_from_file(current + "/" + this.simple_ballot_filename);
+    return this._get_ballot_from_file(current + "/" + simple_ballot_filename);
   }
 
-  @Nullable
   private PlaintextBallot _get_ballot_from_file(String filename) throws IOException {
     PlaintextBallotFromJson builder = new PlaintextBallotFromJson(filename);
     return builder.get_ballot_from_file();

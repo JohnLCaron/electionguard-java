@@ -342,11 +342,6 @@ public class Guardian extends ElectionObjectBase {
     // 𝑀_i = 𝐴^𝑠𝑖 mod 𝑝
     ElementModP partial_decryption = elgamal.partial_decrypt(this._election_keys.key_pair().secret_key);
 
-    // ElGamal.Ciphertext message,
-    //          ElementModQ s,
-    //          ElementModP m,
-    //          ElementModQ seed,
-    //          ElementModQ hash_header
     // 𝑀_i = 𝐴^𝑠𝑖 mod 𝑝 and 𝐾𝑖 = 𝑔^𝑠𝑖 mod 𝑝
     ChaumPedersen.ChaumPedersenProof proof = ChaumPedersen.make_chaum_pedersen(
             elgamal,

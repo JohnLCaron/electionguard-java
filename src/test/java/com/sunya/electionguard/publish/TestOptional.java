@@ -11,6 +11,7 @@ import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
 
+
 public class TestOptional {
   private static final Gson gson = new GsonBuilder().serializeNulls()
           // doesnt matter which order these are registered in

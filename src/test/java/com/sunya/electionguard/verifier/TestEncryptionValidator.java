@@ -22,7 +22,7 @@ public class TestEncryptionValidator {
 
   @BeforeContainer
   public static void setUp() throws IOException {
-    String topdir = "src/test/data/testEndToEnd";
+    String topdir = "src/test/data/java-publish";
 
     // set up
     consumer = new Consumer(topdir);

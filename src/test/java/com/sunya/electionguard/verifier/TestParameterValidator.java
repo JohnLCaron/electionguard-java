@@ -11,7 +11,7 @@ public class TestParameterValidator {
 
   @Example
   public void testJavaGenerated() throws IOException {
-    String topdir = "src/test/data/testEndToEnd";
+    String topdir = "src/test/data/python-modified";
 
     // set up
     Consumer consumer = new Consumer(topdir);

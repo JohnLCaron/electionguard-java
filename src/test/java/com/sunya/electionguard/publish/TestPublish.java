@@ -8,12 +8,12 @@ import com.sunya.electionguard.KeyCeremony;
 import com.sunya.electionguard.Tally;
 import net.jqwik.api.Example;
 import net.jqwik.api.lifecycle.BeforeProperty;
-import org.junit.Rule;
-import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -23,14 +23,15 @@ import static com.sunya.electionguard.Election.*;
 import static com.sunya.electionguard.Group.*;
 
 public class TestPublish {
-
-  @Rule
-  public static TemporaryFolder tempFolder = new TemporaryFolder();
   String outputDir;
 
   @BeforeProperty
   public void setUp() throws IOException {
-    outputDir = "/home/snake/tmp/testPublish"; // tempFolder.newFile().getAbsolutePath();
+    Path tempPath = Files.createTempDirectory("electionguardPublish.");
+    File tempDir = tempPath.toFile();
+    tempDir.deleteOnExit();
+    outputDir = tempDir.getAbsolutePath(); // "/home/snake/tmp/testPublish";
+    System.out.printf("outputDir %s%n", outputDir);
   }
 
   @Example
@@ -49,7 +50,7 @@ public class TestPublish {
     Tally.PublishedCiphertextTally ciphertext_tally = Tally.publish_ciphertext_tally(
             new Tally.CiphertextTally("", metadata, context));
 
-    Publisher publisher = new Publisher(outputDir);
+    Publisher publisher = new Publisher(outputDir, false);
     publisher.write(
             description,
             context,
@@ -74,7 +75,7 @@ public class TestPublish {
 
     List<Guardian> guardians = ImmutableList.of( new Guardian("", 1, 1, 1, null));
 
-    Publisher publisher = new Publisher(outputDir);
+    Publisher publisher = new Publisher(outputDir, false);
     publisher.publish_private_data(
             plaintext_ballots,
             encrypted_ballots,

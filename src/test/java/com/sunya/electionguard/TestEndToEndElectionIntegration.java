@@ -26,7 +26,7 @@ import static com.google.common.truth.Truth8.assertThat;
 public class TestEndToEndElectionIntegration {
   private static final int NUMBER_OF_GUARDIANS = 5;
   private static final int QUORUM = 3;
-  private static Random random = new Random(System.currentTimeMillis());
+  private static final Random random = new Random(System.currentTimeMillis());
 
   String outputDir;
 
@@ -34,7 +34,8 @@ public class TestEndToEndElectionIntegration {
   public void setUp() throws IOException {
     Path tmp = Files.createTempDirectory(null);
     tmp.toFile().deleteOnExit();
-    outputDir = "/home/snake/tmp/testEndToEnd"; // tmp.toAbsolutePath().toString();
+    // outputDir = "/home/snake/tmp/testEndToEnd";
+    outputDir = tmp.toAbsolutePath().toString();
   }
 
   // Step 0 - Configure Election
@@ -158,7 +159,7 @@ public class TestEndToEndElectionIntegration {
   }
 
   // Move on to encrypting ballots
-//         Using the `CiphertextElectionContext` encrypt ballots for the election
+  // Using the `CiphertextElectionContext` encrypt ballots for the election
   void step_2_encrypt_votes() throws IOException {
 
     // Configure the Encryption Device
@@ -300,7 +301,7 @@ public class TestEndToEndElectionIntegration {
   // Publish and verify steps of the election
   void step_5_publish_and_verify() throws IOException {
     System.out.printf("%n5. publish%n");
-    Publisher publisher = new Publisher(outputDir);
+    Publisher publisher = new Publisher(outputDir, true);
     publisher.write(
             this.description,
             this.context,

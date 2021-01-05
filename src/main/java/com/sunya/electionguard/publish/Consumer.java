@@ -11,7 +11,7 @@ import java.util.List;
 public class Consumer {
   private final Publisher publisher;
   public Consumer(String topDir) throws IOException {
-    publisher = new Publisher(topDir);
+    publisher = new Publisher(topDir, false);
   }
 
   public Election.ElectionDescription election() throws IOException {

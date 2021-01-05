@@ -10,12 +10,13 @@ import java.io.IOException;
 import static com.google.common.truth.Truth.assertThat;
 
 public class TestReadPythonJson {
-  private static final String topDir = "src/test/data/python_results/";
+  private static final String pythonPublish = "src/test/data/python-publish/";
+  private static final String pythonModified = "src/test/data/python-modified/";
   private static Publisher publisher;
 
   @BeforeContainer
   public static void setup() throws IOException {
-    publisher = new Publisher(topDir);
+    publisher = new Publisher(pythonModified, false);
   }
 
   @Example
@@ -93,11 +94,12 @@ public class TestReadPythonJson {
 
   @Example
   public void testProblemPythonJson() throws IOException {
-    String filename = "/home/snake/dev/github/electionguard-java/src/test/data/5-ballots/encrypted_ballots/ballot_ballot-1acfef78-029b-11eb-9852-acde48001122.json";
-      System.out.printf(" testCoefficientsPythonJson %s%n", filename);
-      Ballot.CiphertextAcceptedBallot fromPython = ConvertFromJson.readBallot(filename);
-      assertThat(fromPython).isNotNull();
-      System.out.printf("%s%n", fromPython);
+    // this is failing because Optional is encoded as "None".
+    String filename = pythonPublish + "/encrypted_ballots/ballot_03a29d15-667c-4ac8-afd7-549f19b8e4eb.json";
+    System.out.printf(" testCoefficientsPythonJson %s%n", filename);
+    Ballot.CiphertextAcceptedBallot fromPython = ConvertFromJson.readBallot(filename);
+    assertThat(fromPython).isNotNull();
+    System.out.printf("%s%n", fromPython);
   }
 
 }

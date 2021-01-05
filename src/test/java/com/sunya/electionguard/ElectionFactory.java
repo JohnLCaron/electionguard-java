@@ -120,8 +120,6 @@ public class ElectionFactory {
 
   private static ElectionDescription _get_election_from_file(String filename) throws IOException {
     String current = new java.io.File("./src/test/resources/").getCanonicalPath();
-    System.out.printf("Current '%s'%n", current);
-
     String absFilename = current + "/" + filename;
     ElectionDescriptionFromJson builder = new ElectionDescriptionFromJson(absFilename);
     return builder.build();

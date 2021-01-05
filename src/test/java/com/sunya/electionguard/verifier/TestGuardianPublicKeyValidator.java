@@ -18,7 +18,8 @@ public class TestGuardianPublicKeyValidator {
 
   @BeforeContainer
   public static void setUp() throws IOException {
-    String topdir = "src/test/data/testEndToEnd";
+    String topdir = "src/test/data/python-modified";
+    // String topdir = "src/test/data/java-publish";
 
     // set up
     Consumer consumer = new Consumer(topdir);
@@ -73,6 +74,9 @@ public class TestGuardianPublicKeyValidator {
 
   /** computes challenge c_i = H(base hash, public key, commitment) % q. */
   private Group.ElementModQ compute_guardian_challenge_threshold_separated(Group.ElementModP public_key, Group.ElementModP commitment) {
+    Group.ElementModQ hash = Hash.hash_elems(electionParameters.base_hash(), public_key, commitment);
+    BigInteger hashp = hash.getBigInt().mod(Group.P);
+
     // TODO election-verifier-python has
     //  return mod_p(hash_elems(self.base_hash, public_key, commitment))
     //  which i translate as
