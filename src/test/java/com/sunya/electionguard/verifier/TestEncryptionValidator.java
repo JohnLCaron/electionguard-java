@@ -382,7 +382,7 @@ public class TestEncryptionValidator {
     }
 
     /*
-    TODO: The zero_hash is given to the EncryptionMediator. For TestEndtoEndElectionIntegration, this is the deci hash.
+    TODO: The zero_hash is given to the EncryptionMediator. For TestEndtoEndElectionIntegration, this is the device hash.
     I dont think this is captured in the ElectionCntext, so cant be tested.
      */
 
