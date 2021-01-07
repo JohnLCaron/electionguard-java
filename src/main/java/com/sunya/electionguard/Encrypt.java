@@ -59,7 +59,7 @@ public class Encrypt {
                               EncryptionDevice encryption_device) {
       this._metadata = metadata;
       this._encryption = encryption;
-      // LOOK does not follow validation spec 5.1, should be Q crypto_base_hash
+      // LOOK does not follow validation spec 5.1, should be Q = crypto_base_hash
       this._last_hash = encryption_device.get_hash();
     }
 

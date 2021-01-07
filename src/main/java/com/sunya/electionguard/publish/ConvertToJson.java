@@ -76,7 +76,6 @@ public class ConvertToJson {
     }
   }
 
-  // private
   public static void write(Guardian guardian, Path where) throws IOException {
     Type type = new TypeToken<Guardian>(){}.getType();
     try (FileWriter writer = new FileWriter(where.toFile())) {

@@ -13,29 +13,29 @@ import static com.sunya.electionguard.KeyCeremony.*;
 
 
 /** Guardian of election, responsible for safeguarding information and decrypting results. */
-// LOOK review mutability
 public class Guardian extends ElectionObjectBase {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
-  final int sequence_order;
-  CeremonyDetails ceremony_details;
-  Auxiliary.KeyPair _auxiliary_keys;
-  ElectionKeyPair _election_keys;
+  private final int sequence_order;
+  private final CeremonyDetails ceremony_details;
+  private final Auxiliary.KeyPair _auxiliary_keys;
+  private final ElectionKeyPair _election_keys;
+
   // The collection of this guardian's partial key backups that will be shared to other guardians
-  final Map<String, ElectionPartialKeyBackup> _backups_to_share;
+  private final Map<String, ElectionPartialKeyBackup> _backups_to_share;
 
   //// From Other Guardians
   // The collection of other guardians' auxiliary public keys that are shared with this guardian
-  final Map<String, Auxiliary.PublicKey> _guardian_auxiliary_public_keys;
+  private final Map<String, Auxiliary.PublicKey> _guardian_auxiliary_public_keys;
 
   // The collection of other guardians' election public keys that are shared with this guardian
-  final Map<String, ElectionPublicKey> _guardian_election_public_keys;
+  private final Map<String, ElectionPublicKey> _guardian_election_public_keys;
 
   // The collection of other guardians' partial key backups that are shared with this guardian
-  final Map<String, ElectionPartialKeyBackup> _guardian_election_partial_key_backups;
+  private final Map<String, ElectionPartialKeyBackup> _guardian_election_partial_key_backups;
 
   // The collection of other guardians' verifications that they shared their backups correctly
-  final Map<String, ElectionPartialKeyVerification> _guardian_election_partial_key_verifications;
+  private final Map<String, ElectionPartialKeyVerification> _guardian_election_partial_key_verifications;
 
   /**
    * Initialize a guardian with the specified arguments.
@@ -55,22 +55,33 @@ public class Guardian extends ElectionObjectBase {
 
     super(id);
     this.sequence_order = sequence_order;
-    this.set_ceremony_details(number_of_guardians, quorum);
+    this.ceremony_details = CeremonyDetails.create(number_of_guardians, quorum);
+    this._auxiliary_keys = KeyCeremony.generate_rsa_auxiliary_key_pair();
+    this._election_keys =  KeyCeremony.generate_election_key_pair(this.ceremony_details.quorum(), nonce_seed);
+
     this._backups_to_share = new HashMap<>();
     this._guardian_auxiliary_public_keys = new HashMap<>();
     this._guardian_election_public_keys = new HashMap<>();
     this._guardian_election_partial_key_backups = new HashMap<>();
     this._guardian_election_partial_key_verifications = new HashMap<>();
 
-    this.generate_auxiliary_key_pair();
-    this.generate_election_key_pair(nonce_seed);
+    this.save_auxiliary_public_key(this.share_auxiliary_public_key());
+    this.save_election_public_key(this.share_election_public_key());
   }
 
-  /**
+  CeremonyDetails ceremony_details() {
+    return ceremony_details;
+  }
+
+  int sequence_order() {
+    return sequence_order;
+  }
+
+  /*
    * Reset guardian to initial state.
    * @param number_of_guardians: Number of guardians in election
    * @param quorum: Quorum of guardians required to decrypt
-   */
+   *
   void reset(int number_of_guardians, int quorum) {
     this._backups_to_share.clear();
     this._guardian_auxiliary_public_keys.clear();
@@ -82,14 +93,14 @@ public class Guardian extends ElectionObjectBase {
     this.generate_election_key_pair(null);
   }
 
-  /**
+  /*
    * Set ceremony details for election.
    * @param number_of_guardians: Number of guardians in election
    * @param quorum: Quorum of guardians required to decrypt
-   */
-  void set_ceremony_details(int number_of_guardians, int quorum) {
+   *
+  private void set_ceremony_details(int number_of_guardians, int quorum) {
     this.ceremony_details = CeremonyDetails.create(number_of_guardians, quorum);
-  }
+  } */
 
   /**
    * Share public election and auxiliary keys for guardian.
@@ -131,7 +142,7 @@ public class Guardian extends ElectionObjectBase {
     return this.all_auxiliary_public_keys_received() && this.all_election_public_keys_received();
   }
 
-  /** Generate auxiliary key pair. */
+  /* Generate auxiliary key pair.
   void generate_auxiliary_key_pair() {
     this._auxiliary_keys = generate_rsa_auxiliary_key_pair();
     this.save_auxiliary_public_key(this.share_auxiliary_public_key());
@@ -165,11 +176,11 @@ public class Guardian extends ElectionObjectBase {
     return KeyCeremony.get_coefficient_validation_set(this.object_id, this._election_keys.polynomial());
   }
 
-  /** Generate election key pair for encrypting/decrypting election. */
+  /* Generate election key pair for encrypting/decrypting election.
   void generate_election_key_pair(@Nullable Group.ElementModQ nonce) {
     this._election_keys = KeyCeremony.generate_election_key_pair(this.ceremony_details.quorum(), nonce);
     this.save_election_public_key(this.share_election_public_key());
-  }
+  } */
 
   /**
    * Share election public key with another guardian.

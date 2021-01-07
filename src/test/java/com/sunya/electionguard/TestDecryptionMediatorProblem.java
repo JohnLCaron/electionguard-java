@@ -2,7 +2,6 @@ package com.sunya.electionguard;
 
 import com.google.common.collect.Sets;
 import net.jqwik.api.Example;
-import net.jqwik.api.lifecycle.AfterExample;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -143,11 +142,6 @@ public class TestDecryptionMediatorProblem extends TestProperties {
 
     // generate encrypted tally
     this.ciphertext_tally = Tally.tally_ballots(ballot_store, this.metadata, this.context).get();
-  }
-
-  @AfterExample
-  public void tearDown() {
-    this.key_ceremony.reset(CeremonyDetails.create(NUMBER_OF_GUARDIANS, QUORUM));
   }
 
   @Example

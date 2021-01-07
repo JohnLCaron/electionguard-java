@@ -8,7 +8,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 
 public class TestGuardian {
-
   private static final String SENDER_GUARDIAN_ID = "Test Guardian 1";
   private static final String RECIPIENT_GUARDIAN_ID = "Test Guardian 2";
   private static final String ALTERNATE_VERIFIER_GUARDIAN_ID = "Test Guardian 3";
@@ -21,29 +20,31 @@ public class TestGuardian {
   static Auxiliary.Decryptor identity_auxiliary_decryptor = (m, k) -> Optional.of(new String(m.getBytes()));
   static Auxiliary.Encryptor identity_auxiliary_encryptor = (m, k) -> Optional.of(new Auxiliary.ByteString(m.getBytes()));
 
-  @Example
+  /* @Example
   public void test_reset() {
     Guardian guardian = new Guardian(SENDER_GUARDIAN_ID, SENDER_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
     int expected_number_of_guardians = 10;
     int expected_quorum = 4;
 
+    // Look mutating
     guardian.reset(expected_number_of_guardians, expected_quorum);
 
-    assertThat(expected_number_of_guardians).isEqualTo(guardian.ceremony_details.number_of_guardians());
-    assertThat(expected_quorum).isEqualTo(guardian.ceremony_details.quorum());
-  }
+    assertThat(expected_number_of_guardians).isEqualTo(guardian.ceremony_details().number_of_guardians());
+    assertThat(expected_quorum).isEqualTo(guardian.ceremony_details().quorum());
+  } */
 
-  @Example
+  /* @Example
   public void test_set_ceremony_details() {
     Guardian guardian = new Guardian(SENDER_GUARDIAN_ID, SENDER_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
     int expected_number_of_guardians = 10;
     int expected_quorum = 4;
 
+    // Look mutating
     guardian.set_ceremony_details(expected_number_of_guardians, expected_quorum);
 
-    assertThat(expected_number_of_guardians).isEqualTo(guardian.ceremony_details.number_of_guardians());
-    assertThat(expected_quorum).isEqualTo(guardian.ceremony_details.quorum());
-  }
+    assertThat(expected_number_of_guardians).isEqualTo(guardian.ceremony_details().number_of_guardians());
+    assertThat(expected_quorum).isEqualTo(guardian.ceremony_details().quorum());
+  } */
 
   @Example
   public void test_share_public_keys() {
@@ -84,18 +85,19 @@ public class TestGuardian {
     assertThat(guardian.all_public_keys_received()).isTrue();
   }
 
-  @Example
+  /* @Example
   public void test_generate_auxiliary_key_pair() {
     Guardian guardian = new Guardian(SENDER_GUARDIAN_ID, SENDER_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
     Auxiliary.PublicKey first_public_key = guardian.share_auxiliary_public_key();
 
+    // Look mutating
     guardian.generate_auxiliary_key_pair();
     Auxiliary.PublicKey second_public_key = guardian.share_auxiliary_public_key();
 
     assertThat(second_public_key).isNotNull();
     assertThat(second_public_key.key).isNotNull();
     assertThat(first_public_key.key).isNotEqualTo(second_public_key.key);
-  }
+  } */
 
   @Example
   public void test_share_auxiliary_public_key() {
@@ -132,18 +134,19 @@ public class TestGuardian {
     assertThat(guardian.all_auxiliary_public_keys_received()).isTrue();
   }
 
-  @Example
+  /* @Example
   public void test_generate_election_key_pair() {
     Guardian guardian = new Guardian(SENDER_GUARDIAN_ID, SENDER_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
     KeyCeremony.ElectionPublicKey first_public_key = guardian.share_election_public_key();
 
+    // Look mutating
     guardian.generate_election_key_pair(null);
     KeyCeremony.ElectionPublicKey second_public_key = guardian.share_election_public_key();
 
     assertThat(second_public_key).isNotNull();
     assertThat(second_public_key.key()).isNotNull();
     assertThat(first_public_key.key()).isNotEqualTo(second_public_key.key());
-  }
+  } */
 
   @Example
   public void test_share_election_public_key() {

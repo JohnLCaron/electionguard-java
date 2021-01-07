@@ -110,7 +110,7 @@ public class TestEndToEndElectionIntegration {
     }
 
     // Setup Mediator
-    this.mediator = new KeyCeremonyMediator(this.guardians.get(0).ceremony_details);
+    this.mediator = new KeyCeremonyMediator(this.guardians.get(0).ceremony_details());
 
     // Attendance (Public Key Share)
     for (Guardian guardian : this.guardians) {

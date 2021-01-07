@@ -34,14 +34,15 @@ public class TestKeyCeremonyMediator {
     GUARDIAN_2.generate_election_partial_key_backups(identity_auxiliary_encrypt);
   }
 
-  @Example
+  /* @Example
   public void test_reset() {
     KeyCeremonyMediator mediator = new KeyCeremonyMediator(CEREMONY_DETAILS);
     CeremonyDetails new_ceremony_details = CeremonyDetails.create(3, 3);
 
+    // Look mutating
     mediator.reset(new_ceremony_details);
     assertThat(mediator.ceremony_details).isEqualTo(new_ceremony_details);
-  }
+  } */
 
   @Example
   public void test_mediator_takes_attendance() {

@@ -15,28 +15,30 @@ import static com.sunya.electionguard.Tally.*;
 /**
  * The Decryption Mediator composes partial decryptions from each Guardian
  * to form a decrypted representation of an election tally.
- * LOOK review mutability
  */
 public class DecryptionMediator {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
-  final CiphertextElectionContext _encryption;
-  final CiphertextTally _ciphertext_tally;
+  private final CiphertextElectionContext _encryption;
+  private final CiphertextTally _ciphertext_tally;
+  private final InternalElectionDescription _metadata;
 
-  final InternalElectionDescription _metadata;
-  final Optional<PlaintextTally> _plaintext_tally = Optional.empty();
-  // Since spoiled ballots are decrypted, they are just a special case of a tally
-  final Map<String, Optional<PlaintextTally>> _plaintext_spoiled_ballots = new HashMap<>();
+  private final Map<String, Guardian> _available_guardians = new HashMap<>();
+  private final Map<String, KeyCeremony.ElectionPublicKey> _missing_guardians = new HashMap<>();
 
-  // mutable
-  final Map<String, Guardian> _available_guardians = new HashMap<>();
-  final Map<String, KeyCeremony.ElectionPublicKey> _missing_guardians = new HashMap<>();
-  //     A collection of Decryption Shares for each Available Guardian
-  final Map<String, TallyDecryptionShare> _decryption_shares = new HashMap<>();
-  // A collection of lagrange coefficients `w_{i,j}` computed by available guardians for each missing guardian
-  final Map<String, Map<String, Group.ElementModQ>> _lagrange_coefficients = new HashMap<>();
-  // A collection of Compensated Decryption Shares for each Available Guardian
-  final Map<String, Map<String, CompensatedTallyDecryptionShare>> _compensated_decryption_shares = new HashMap<>();
+  private final Optional<PlaintextTally> _plaintext_tally = Optional.empty();
+
+  /** Since spoiled ballots are decrypted, they are just a special case of a tally. */
+  private final Map<String, Optional<PlaintextTally>> _plaintext_spoiled_ballots = new HashMap<>();
+
+  /** A collection of Decryption Shares for each Available Guardian. */
+  private final Map<String, TallyDecryptionShare> _decryption_shares = new HashMap<>();
+
+  /** A collection of lagrange coefficients `w_{i,j}` computed by available guardians for each missing guardian. */
+  private final Map<String, Map<String, Group.ElementModQ>> _lagrange_coefficients = new HashMap<>();
+
+  /** A collection of Compensated Decryption Shares for each Available Guardian. */
+  private final Map<String, Map<String, CompensatedTallyDecryptionShare>> _compensated_decryption_shares = new HashMap<>();
 
   public DecryptionMediator(InternalElectionDescription metadata, CiphertextElectionContext context, CiphertextTally ciphertext_tally) {
     this._metadata = metadata;
@@ -134,10 +136,10 @@ public class DecryptionMediator {
       //  *[guardian.sequence_order for guardian in this._available_guardians.values()
       //     if guardian.object_id != available_guardian.object_id]
       List<BigInteger> seq_orders = this._available_guardians.values().stream().filter(g -> !g.object_id.equals(available_guardian.object_id))
-              .map(g -> BigInteger.valueOf(g.sequence_order)).collect(Collectors.toList());
+              .map(g -> BigInteger.valueOf(g.sequence_order())).collect(Collectors.toList());
       lagrange_coefficients.put(
               available_guardian.object_id,
-              ElectionPolynomial.compute_lagrange_coefficient(BigInteger.valueOf(available_guardian.sequence_order), seq_orders));
+              ElectionPolynomial.compute_lagrange_coefficient(BigInteger.valueOf(available_guardian.sequence_order()), seq_orders));
 
       // Compute the decryption shares
       Optional<CompensatedTallyDecryptionShare> share = Decryption.compute_compensated_decryption_share(
@@ -238,23 +240,19 @@ public class DecryptionMediator {
       logger.atInfo().log("cannot submit for guardian %s that already decrypted", share.guardian_id());
       return false;
     }
-
     this._decryption_shares.put(share.guardian_id(), share);
     return true;
   }
 
   /** Submit compensated decryption shares to be used in the decryption. */
   boolean _submit_compensated_decryption_shares(List<CompensatedTallyDecryptionShare> shares) {
-
     List<Boolean> ok = shares.stream().map(this::_submit_compensated_decryption_share).
             collect(Collectors.toList());
-
     return ok.stream().allMatch(b -> b);
   }
 
   /** Submit compensated decryption share to be used in the decryption. */
   boolean _submit_compensated_decryption_share(CompensatedTallyDecryptionShare share) {
-
     Map<String, CompensatedTallyDecryptionShare> shareMap =
             this._compensated_decryption_shares.get(share.missing_guardian_id());
     if (this._compensated_decryption_shares.containsKey(share.missing_guardian_id()) &&

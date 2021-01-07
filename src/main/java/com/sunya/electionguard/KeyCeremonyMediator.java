@@ -7,17 +7,17 @@ import java.util.*;
 
 import static com.sunya.electionguard.KeyCeremony.*;
 
-/** LOOK mutable KeyCeremonyMediator for assisting communication between guardians. */
+/** KeyCeremonyMediator for assisting communication between guardians. */
 public class KeyCeremonyMediator {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
-  CeremonyDetails ceremony_details;
-  final Map<String, Auxiliary.PublicKey> _auxiliary_public_keys;
-  final Map<String, ElectionPublicKey> _election_public_keys;
-  final Map<GuardianPair, ElectionPartialKeyBackup> _election_partial_key_backups;
-  final Map<GuardianPair, ElectionPartialKeyVerification> _election_partial_key_verifications;
-  final Map<GuardianPair, ElectionPartialKeyChallenge> _election_partial_key_challenges;
-  final List<Guardian> _guardians;
+  private final CeremonyDetails ceremony_details;
+  private final Map<String, Auxiliary.PublicKey> _auxiliary_public_keys;
+  private final Map<String, ElectionPublicKey> _election_public_keys;
+  private final Map<GuardianPair, ElectionPartialKeyBackup> _election_partial_key_backups;
+  private final Map<GuardianPair, ElectionPartialKeyVerification> _election_partial_key_verifications;
+  private final Map<GuardianPair, ElectionPartialKeyChallenge> _election_partial_key_challenges;
+  private final List<Guardian> _guardians;
 
   KeyCeremonyMediator(CeremonyDetails ceremony_details) {
     this.ceremony_details = ceremony_details;
@@ -123,10 +123,10 @@ public class KeyCeremonyMediator {
             this.all_election_partial_key_backups_verified();
   }
 
-  /**
+  /*
    * Reset mediator to initial state.
    * @param ceremony_details: Ceremony details of election
-   */
+   *
   void reset(CeremonyDetails ceremony_details) {
     this.ceremony_details = ceremony_details;
     this._auxiliary_public_keys.clear();
@@ -135,7 +135,7 @@ public class KeyCeremonyMediator {
     this._election_partial_key_challenges.clear();
     this._election_partial_key_verifications.clear();
     this._guardians.clear();
-  }
+  } */
 
   /**
    * Confirm presence of guardian by passing their public key set.

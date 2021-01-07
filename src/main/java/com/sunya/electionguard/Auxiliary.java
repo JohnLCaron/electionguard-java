@@ -22,6 +22,7 @@ public class Auxiliary {
   }
 
   /** A tuple of auxiliary public key and owner information. */
+  // LOOK does this need hash/equals ?
   @Immutable
   public static class PublicKey {
     /** The unique identifier of the guardian. */
