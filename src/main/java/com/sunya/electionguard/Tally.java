@@ -48,8 +48,8 @@ public class Tally {
     // Note not immutable
     private ElGamal.Ciphertext ciphertext_accumulate; // default=ElGamalCiphertext(ONE_MOD_P, ONE_MOD_P)
 
-    public CiphertextTallySelection(String selection_id, ElementModQ description_hash, @Nullable ElGamal.Ciphertext ciphertext) {
-      super(selection_id, description_hash, ciphertext == null ? new ElGamal.Ciphertext(ONE_MOD_P, ONE_MOD_P) : ciphertext);
+    public CiphertextTallySelection(String selectionDescriptionId, ElementModQ description_hash, @Nullable ElGamal.Ciphertext ciphertext) {
+      super(selectionDescriptionId, description_hash, ciphertext == null ? new ElGamal.Ciphertext(ONE_MOD_P, ONE_MOD_P) : ciphertext);
       this.ciphertext_accumulate = (ciphertext == null) ? new ElGamal.Ciphertext(ONE_MOD_P, ONE_MOD_P) : ciphertext;
     }
 
@@ -59,7 +59,7 @@ public class Tally {
     }
 
     /** Homomorphically add the specified value to the message. */
-    ElGamal.Ciphertext elgamal_accumulate(ElGamal.Ciphertext elgamal_ciphertext) {
+    private synchronized ElGamal.Ciphertext elgamal_accumulate(ElGamal.Ciphertext elgamal_ciphertext) {
       this.ciphertext_accumulate = ElGamal.elgamal_add(this.ciphertext_accumulate, elgamal_ciphertext);
       return this.ciphertext();
     }
@@ -105,7 +105,7 @@ public class Tally {
     }
 
     /** Accumulate the contest selections of an individual ballot into this tally. */
-    boolean accumulate_contest(List<CiphertextBallotSelection> contest_selections) {
+    private boolean accumulate_contest(List<CiphertextBallotSelection> contest_selections) {
       if (contest_selections.isEmpty()) {
         logger.atWarning().log("accumulate cannot add missing selections for contest %s", this.object_id);
         return false;
@@ -127,14 +127,16 @@ public class Tally {
       }
 
       // Accumulate the tally selections in parallel tasks
-      List<Callable<AccumSelections>> tasks =
+      List<Callable<AccumSelectionsTuple>> tasks =
               this.tally_selections.entrySet().stream()
-                      .map(entry -> new RunAccumulate(entry.getKey(), entry.getValue(), contest_selections))
+                      .map(entry -> new RunAccumulateSelections(entry.getKey(), entry.getValue(), contest_selections))
                       .collect(Collectors.toList());
-      Scheduler<AccumSelections> scheduler = new Scheduler<>();
-      List<AccumSelections> results = scheduler.schedule(tasks, true);
 
-      for (AccumSelections tuple : results) {
+      Scheduler<AccumSelectionsTuple> scheduler = new Scheduler<>();
+      // this line is the only parallel processing
+      List<AccumSelectionsTuple> results = scheduler.schedule(tasks, true);
+
+      for (AccumSelectionsTuple tuple : results) {
         if (tuple.ciphertext == null) {
           return false;
         } else {
@@ -147,29 +149,29 @@ public class Tally {
     }
 
     @Immutable
-    private static class AccumSelections {
+    private static class AccumSelectionsTuple {
       final String selection_id;
       final ElGamal.Ciphertext ciphertext;
 
-      public AccumSelections(String selection_id, ElGamal.Ciphertext ciphertext) {
+      public AccumSelectionsTuple(String selection_id, ElGamal.Ciphertext ciphertext) {
         this.selection_id = selection_id;
         this.ciphertext = ciphertext;
       }
     }
 
-    static class RunAccumulate implements Callable<AccumSelections> {
+    static class RunAccumulateSelections implements Callable<AccumSelectionsTuple> {
       final String selection_id;
       final CiphertextTallySelection selection_tally;
       final List<CiphertextBallotSelection> contest_selections;
 
-      public RunAccumulate(String id, CiphertextTallySelection selection_tally, List<CiphertextBallotSelection> contest_selections) {
+      public RunAccumulateSelections(String id, CiphertextTallySelection selection_tally, List<CiphertextBallotSelection> contest_selections) {
         this.selection_id = id;
         this.selection_tally = selection_tally;
         this.contest_selections = contest_selections;
       }
 
       @Override
-      public AccumSelections call() {
+      public AccumSelectionsTuple call() {
         Optional<CiphertextBallotSelection> use_selection = contest_selections.stream()
                 .filter(s -> selection_id.equals(s.object_id)).findFirst();
 
@@ -180,9 +182,9 @@ public class Tally {
           throw new RuntimeException("cant happen");
         }
 
-        // LOOK LOOK it seems that selection_tally.ciphertext_accumulate is being accessed by seperate threads?
+        // LOOK LOOK it seems that selection_tally.ciphertext_accumulate could be accessed by separate threads.
         ElGamal.Ciphertext ciphertext = selection_tally.elgamal_accumulate(use_selection.get().ciphertext());
-        return new AccumSelections(selection_id, ciphertext);
+        return new AccumSelectionsTuple(selection_id, ciphertext);
       }
     }
 
@@ -295,9 +297,11 @@ public class Tally {
     }
 
     /** Append a collection of Ballots to the tally and recalculate. */
-    boolean batch_append(Iterable<CiphertextAcceptedBallot> ballots) {
+    private boolean batch_append(Iterable<CiphertextAcceptedBallot> ballots) {
+      // Map(SELECTION_ID, Map(BALLOT_ID, Ciphertext)
       Map<String, Map<String, ElGamal.Ciphertext>> cast_ballot_selections = new HashMap<>();
 
+      // Find all the ballots for each selection.
       for (CiphertextAcceptedBallot ballot : ballots) {
         if (!this.contains(ballot) &&
                 BallotValidator.ballot_is_valid_for_election(ballot, this._metadata, this._encryption)) {
@@ -317,20 +321,22 @@ public class Tally {
         }
       }
 
+      // LOOK i dont think this is being tested.
       // cache the cast ballot id's so they are not double counted
       if (this._execute_accumulate(cast_ballot_selections)) {
         for (CiphertextAcceptedBallot ballot : ballots) {
           if (ballot.state == BallotBoxState.CAST) {
             this._cast_ballot_ids.add(ballot.object_id);
           }
-          return true;
         }
+        return true;
       }
+
       return false;
     }
 
-    /** Add a cast ballot to the tally, synchronously. */
-    boolean _add_cast(CiphertextAcceptedBallot ballot) {
+    /** Add a single cast ballot to the tally, synchronously. */
+    private boolean _add_cast(CiphertextAcceptedBallot ballot) {
       // iterate through the contests and elgamal add
       for (CiphertextBallotContest contest : ballot.contests) {
         // This should never happen since the ballot is validated against the election metadata
@@ -374,57 +380,68 @@ public class Tally {
     }
 
     @Immutable
-    private static class AccumBallots {
-      final String ballot_id;
-      final ElGamal.Ciphertext ciphertext;
+    private static class AccumOverBallotsTuple {
+      final String selection_id;
+      final ElGamal.Ciphertext ciphertext; // accumulation over ballots
 
-      public AccumBallots(String ballot_id, ElGamal.Ciphertext ciphertext) {
-        this.ballot_id = ballot_id;
+      public AccumOverBallotsTuple(String selection_id, ElGamal.Ciphertext ciphertext) {
+        this.selection_id = selection_id;
         this.ciphertext = ciphertext;
       }
     } // AccumBallots
 
     //// Allow _accumulate to be run in parallel
-    static class RunAccumulate implements Callable<AccumBallots> {
-      final String ballot_id;
-      final Map<String, ElGamal.Ciphertext> ballot_selections;
+    static class RunAccumulateOverBallots implements Callable<AccumOverBallotsTuple> {
+      final String selection_id;
+      final Map<String, ElGamal.Ciphertext> ballot_selections; // Map(BALLOT_ID, Ciphertext)
 
-      public RunAccumulate(String ballot_id, Map<String, ElGamal.Ciphertext> ballot_selections) {
-        this.ballot_id = ballot_id;
+      public RunAccumulateOverBallots(String selection_id, Map<String, ElGamal.Ciphertext> ballot_selections) {
+        this.selection_id = selection_id;
         this.ballot_selections = ballot_selections;
       }
 
       @Override
-      public AccumBallots call() {
+      public AccumOverBallotsTuple call() {
+        // ok to do this is parallel , all state is local to this class
         ElGamal.Ciphertext ciphertext =  ElGamal.elgamal_add(Iterables.toArray(ballot_selections.values(), ElGamal.Ciphertext.class));
-        return new AccumBallots(ballot_id, ciphertext);
+        return new AccumOverBallotsTuple(selection_id, ciphertext);
       }
     } // RunAccumulate
 
+    /**
+     * Called from batch_append(), process each inner map asynchronously.
+     * @param ciphertext_selections_by_selection_id For each selection, the set of ballots for that selection.
+     *                                              Map(SELECTION_ID, Map(BALLOT_ID, Ciphertext)
+     * @return always return true.
+     */
     boolean _execute_accumulate(
             Map<String, Map<String, ElGamal.Ciphertext>> ciphertext_selections_by_selection_id) {
 
-      List<Callable<AccumBallots>> tasks =
+      List<Callable<AccumOverBallotsTuple>> tasks =
               ciphertext_selections_by_selection_id.entrySet().stream()
-                      .map(entry -> new RunAccumulate(entry.getKey(), entry.getValue()))
+                      .map(entry -> new RunAccumulateOverBallots(entry.getKey(), entry.getValue()))
                       .collect(Collectors.toList());
-      Scheduler<AccumBallots> scheduler = new Scheduler<>();
-      List<AccumBallots> result_set = scheduler.schedule(tasks, true);
 
+      Scheduler<AccumOverBallotsTuple> scheduler = new Scheduler<>();
+      // This line is the only parallel processing
+      List<AccumOverBallotsTuple> result_set = scheduler.schedule(tasks, true);
+
+      // Turn result_set into a Map(SELECTION_ID, Ciphertext)
       Map<String, ElGamal.Ciphertext> result_dict = result_set.stream()
-              .collect(Collectors.toMap(t -> t.ballot_id, t -> t.ciphertext));
+              .collect(Collectors.toMap(t -> t.selection_id, t -> t.ciphertext));
 
       for (CiphertextTallyContest contest : this.cast.values()) {
         for (Map.Entry<String, CiphertextTallySelection> entry2 : contest.tally_selections().entrySet()) {
           String selection_id = entry2.getKey();
           CiphertextTallySelection selection = entry2.getValue();
           if (result_dict.containsKey(selection_id)) {
+            // LOOK this mutates selection.ciphertext_accumulate.
             selection.elgamal_accumulate(result_dict.get(selection_id));
           }
         }
       }
 
-      return true;
+      return true; // always true
     }
 
   } // class CiphertextTally
