@@ -83,7 +83,7 @@ class DecryptWithShares {
     for (CiphertextTallyContest contest : tally.values()) {
       HashMap<String, PlaintextTallySelection> selections = new HashMap<>();
 
-      for (CiphertextTallySelection selection : contest.tally_selections.values()) {
+      for (CiphertextTallySelection selection : contest.tally_selections().values()) {
         Map<String, KeyAndSelection> tally_shares = get_tally_shares_for_selection(selection.object_id, shares);
         Optional<Tally.PlaintextTallySelection> plaintext_selectionO = decrypt_selection_with_decryption_shares(
                 selection, tally_shares, extended_base_hash, false);
@@ -115,7 +115,7 @@ class DecryptWithShares {
           Election.CiphertextElectionContext context
           ) {
     Optional<Map<String, Tally.PlaintextTallyContest>> contests = decrypt_tally_contests_with_decryption_shares(
-            tally.cast, shares, context.crypto_extended_base_hash
+            tally.cast(), shares, context.crypto_extended_base_hash
     );
 
     if (contests.isEmpty()) {
@@ -123,7 +123,7 @@ class DecryptWithShares {
     }
 
     Optional<Map<String, Map<String, Tally.PlaintextTallyContest>>> spoiled_ballots = decrypt_spoiled_ballots(
-            tally.spoiled_ballots, shares, context.crypto_extended_base_hash
+            tally.spoiled_ballots(), shares, context.crypto_extended_base_hash
     );
 
     return spoiled_ballots.map(stringMapMap -> PlaintextTally.create(tally.object_id, contests.get(), stringMapMap));

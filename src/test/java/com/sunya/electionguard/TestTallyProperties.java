@@ -84,7 +84,7 @@ public class TestTallyProperties extends TestProperties {
     for (BigInteger value : decrypted_tallies.values()) {
       assertThat(value).isEqualTo(BigInteger.ZERO);
     }
-    assertThat(result.get().spoiled_ballots.size()).isEqualTo(everything.ballots.size());
+    assertThat(result.get().spoiled_ballots().size()).isEqualTo(everything.ballots.size());
   }
 
   /*
@@ -169,8 +169,8 @@ public class TestTallyProperties extends TestProperties {
    */
   private Map<String, BigInteger> _decrypt_with_secret(CiphertextTally tally, Group.ElementModQ secret_key) {
     Map<String, BigInteger> plaintext_selections = new HashMap<>();
-    for (CiphertextTallyContest contest : tally.cast.values()) {
-      for (Map.Entry<String, CiphertextTallySelection> entry : contest.tally_selections.entrySet()) {
+    for (CiphertextTallyContest contest : tally.cast().values()) {
+      for (Map.Entry<String, CiphertextTallySelection> entry : contest.tally_selections().entrySet()) {
         BigInteger plaintext_tally = entry.getValue().ciphertext().decrypt(secret_key);
         plaintext_selections.put(entry.getKey(), plaintext_tally);
       }

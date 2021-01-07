@@ -214,7 +214,7 @@ public class TestEndToEndElectionIntegration {
 
     System.out.printf("%n4. cast %d spoiled %d total %d%n",
             this.ciphertext_tally.count(),
-            this.ciphertext_tally.spoiled_ballots.size(),
+            this.ciphertext_tally.spoiled_ballots().size(),
             this.ciphertext_tally.len());
 
     // Configure the Decryption
@@ -273,7 +273,7 @@ public class TestEndToEndElectionIntegration {
     }
 
     // Compare the expected values for each spoiled ballot
-    for (Map.Entry<String, Ballot.CiphertextAcceptedBallot> entry : this.ciphertext_tally.spoiled_ballots.entrySet()) {
+    for (Map.Entry<String, Ballot.CiphertextAcceptedBallot> entry : this.ciphertext_tally.spoiled_ballots().entrySet()) {
       String ballot_id = entry.getKey();
       Ballot.CiphertextAcceptedBallot accepted_ballot = entry.getValue();
       if (accepted_ballot.state == BallotBoxState.SPOILED) {
@@ -308,7 +308,7 @@ public class TestEndToEndElectionIntegration {
             this.constants,
             ImmutableList.of(this.device),
             this.ballot_store,
-            this.ciphertext_tally.spoiled_ballots.values(),
+            this.ciphertext_tally.spoiled_ballots().values(),
             Tally.publish_ciphertext_tally(this.ciphertext_tally),
             this.plaintext_tally,
             this.coefficient_validation_sets);
@@ -343,7 +343,7 @@ public class TestEndToEndElectionIntegration {
               .that(ballot_from_file).isEqualTo(ballot);
     }
 
-    for (CiphertextAcceptedBallot spoiled_ballot : this.ciphertext_tally.spoiled_ballots.values()) {
+    for (CiphertextAcceptedBallot spoiled_ballot : this.ciphertext_tally.spoiled_ballots().values()) {
       CiphertextAcceptedBallot ballot_from_file = ConvertFromJson.readBallot(
               publisher.spoiledFile(spoiled_ballot.object_id).toString());
       assertThat(ballot_from_file).isEqualTo(spoiled_ballot);

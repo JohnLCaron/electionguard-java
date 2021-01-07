@@ -176,7 +176,7 @@ public class TestDecryptionMediator extends TestProperties {
   @Example
   public void test_compute_selection() {
     Tally.CiphertextTallySelection first_selection =
-            this.ciphertext_tally.cast.values().stream().flatMap(contest -> contest.tally_selections.values().stream())
+            this.ciphertext_tally.cast().values().stream().flatMap(contest -> contest.tally_selections().values().stream())
                     .findFirst().orElseThrow(RuntimeException::new);
 
     Optional<DecryptionShare.CiphertextDecryptionSelection> result =
@@ -213,7 +213,7 @@ public class TestDecryptionMediator extends TestProperties {
   @Example
   public void test_compute_compensated_selection() {
     Tally.CiphertextTallySelection first_selection =
-            this.ciphertext_tally.cast.values().stream().flatMap(contest -> contest.tally_selections.values().stream())
+            this.ciphertext_tally.cast().values().stream().flatMap(contest -> contest.tally_selections().values().stream())
                     .findFirst().orElseThrow(RuntimeException::new);
 
     // Compute lagrange coefficients for the guardians that are present
@@ -321,8 +321,10 @@ public class TestDecryptionMediator extends TestProperties {
   public void test_decrypt_selection_all_present() {
 
     // find the first selection
-    Tally.CiphertextTallyContest first_contest = this.ciphertext_tally.cast.values().stream().findFirst().orElseThrow(IllegalStateException::new);
-    Tally.CiphertextTallySelection first_selection = first_contest.tally_selections.values().stream().findFirst().orElseThrow(IllegalStateException::new);
+    Tally.CiphertextTallyContest first_contest =
+            this.ciphertext_tally.cast().values().stream().findFirst().orElseThrow(IllegalStateException::new);
+    Tally.CiphertextTallySelection first_selection =
+            first_contest.tally_selections().values().stream().findFirst().orElseThrow(IllegalStateException::new);
 
     // precompute decryption shares for the guardians
     DecryptionShare.TallyDecryptionShare first_share = compute_decryption_share(this.guardians.get(0), this.ciphertext_tally, this.context).get();
@@ -452,7 +454,7 @@ public class TestDecryptionMediator extends TestProperties {
     shares.put(this.guardians.get(2).object_id, third_share);
 
     Optional<Map<String, Map<String, Tally.PlaintextTallyContest>>> resultO = DecryptWithShares.decrypt_spoiled_ballots(
-            this.ciphertext_tally.spoiled_ballots,
+            this.ciphertext_tally.spoiled_ballots(),
             shares,
             this.context.crypto_extended_base_hash);
     assertThat(resultO).isPresent();
