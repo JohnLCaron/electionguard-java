@@ -1,19 +1,24 @@
 package com.sunya.electionguard.publish;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.flogger.FluentLogger;
+import com.google.common.reflect.TypeParameter;
+import com.google.common.reflect.TypeToken;
 import com.google.gson.*;
 import com.sunya.electionguard.*;
 import net.dongliu.gson.GsonJava8TypeAdapterFactory;
 
 import java.io.*;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.math.BigInteger;
+import java.util.List;
 
 import static com.sunya.electionguard.Election.*;
 import static com.sunya.electionguard.KeyCeremony.CoefficientValidationSet;
 import static com.sunya.electionguard.DecryptionShare.CiphertextDecryptionSelection;
 
-// TODO make compatible with python, eg ElementModQ
+// LOOK make compatible with python, eg ElementModQ
 /** Static helper methods for reading serialized classes from json files. */
 public class ConvertFromJson {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
@@ -50,7 +55,7 @@ public class ConvertFromJson {
   }
 
   public static ElectionDescription readElection(String pathname) throws IOException {
-    // Here we are using our own conversion, TODO investigate using standard Gson
+    // Here we are using our own conversion, LOOK investigate using standard Gson
     ElectionDescriptionFromJson reader = new ElectionDescriptionFromJson(pathname);
     return reader.build();
   }
@@ -105,6 +110,7 @@ public class ConvertFromJson {
             .registerTypeAdapter(Group.ElementModP.class, new ModPSerializer())
             .registerTypeAdapter(CiphertextDecryptionSelection.class, new CiphertextDecryptionSelectionSerializer())
             .registerTypeAdapter(CiphertextDecryptionSelection.class, new CiphertextDecryptionSelectionDeserializer())
+            .registerTypeAdapter(ImmutableList.class, new ImmutableListDeserializer())
             .create();
   }
 
@@ -149,6 +155,22 @@ public class ConvertFromJson {
     public CiphertextDecryptionSelection deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
             throws JsonParseException {
       return CiphertextDecryptionSelectionPojo.deserialize(json);
+    }
+  }
+
+  @SuppressWarnings("UnstableApiUsage")
+  public static final class ImmutableListDeserializer implements JsonDeserializer<ImmutableList<?>> {
+    @Override
+    public ImmutableList<?> deserialize(final JsonElement json, final Type type, final JsonDeserializationContext context) throws JsonParseException {
+      final Type[] typeArguments = ((ParameterizedType) type).getActualTypeArguments();
+      final Type parameterizedType = listOf(typeArguments[0]).getType();
+      final List<?> list = context.deserialize(json, parameterizedType);
+      return ImmutableList.copyOf(list);
+    }
+
+    private <E> TypeToken<List<E>> listOf(final Type arg) {
+      return new TypeToken<List<E>>() {}
+              .where(new TypeParameter<E>() {}, (TypeToken<E>) TypeToken.of(arg));
     }
   }
 

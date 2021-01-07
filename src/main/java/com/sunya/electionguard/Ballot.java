@@ -1,5 +1,6 @@
 package com.sunya.electionguard;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.flogger.FluentLogger;
 
@@ -145,7 +146,7 @@ public class Ballot {
   @Immutable
   public static class CiphertextSelection extends ElectionObjectBase {
     public final ElementModQ description_hash;
-    public final ElGamal.Ciphertext ciphertext;
+    private final ElGamal.Ciphertext ciphertext; // only accessed through ciphertext(), so subclass can override
 
     CiphertextSelection(String object_id, ElementModQ description_hash, ElGamal.Ciphertext ciphertext) {
       super(object_id);
@@ -153,21 +154,18 @@ public class Ballot {
       this.ciphertext = ciphertext;
     }
 
-    ElGamal.Ciphertext ciphertext() {
+    public ElGamal.Ciphertext ciphertext() {
       return ciphertext;
     }
   }
 
   /**
    * A CiphertextBallotSelection represents an individual encrypted selection on a ballot.
-   * <p>
-   * This class accepts a `description_hash` and a `ciphertext` as required parameters
+   * This class requires a `description_hash` and a `ciphertext` as required parameters
    * in its constructor.
    * <p>
    * When a selection is encrypted, the `description_hash` and `ciphertext` required fields must
    * be populated at construction however the `nonce` is also usually provided by convention.
-   * <p>
-   * After construction, the `crypto_hash` field is populated automatically in the `__post_init__` cycle
    * <p>
    * A consumer of this object has the option to discard the `nonce` and/or discard the `proof`,
    * or keep both values.
@@ -216,7 +214,7 @@ public class Ballot {
      * @param seed_hash:             the hash of the SelectionDescription, or
      *                               whatever `ElementModQ` was used to populate the `description_hash` field.
      * @param elgamelPublicKey:      The election key
-     * @param cryptoExtendedBaseHash
+     * @param cryptoExtendedBaseHash crypto_base_hash for the election (Q)
      */
     boolean is_valid_encryption(ElementModQ seed_hash, ElementModP elgamelPublicKey, ElementModQ cryptoExtendedBaseHash) {
       if (!seed_hash.equals(this.description_hash)) {
@@ -337,12 +335,13 @@ public class Ballot {
    * Typically partial contests are passed into Electionguard for memory constrained systems,
    * while complete contests are passed into ElectionGuard when running encryption on an existing dataset.
    */
+  @Immutable
   public static class PlaintextBallotContest extends ElectionObjectBase {
-    final List<PlaintextBallotSelection> ballot_selections; // Collection of ballot selections
+    final ImmutableList<PlaintextBallotSelection> ballot_selections; // Collection of ballot selections
 
     public PlaintextBallotContest(String object_id, List<PlaintextBallotSelection> ballot_selections) {
       super(object_id);
-      this.ballot_selections = ballot_selections;
+      this.ballot_selections = ImmutableList.copyOf(ballot_selections);
     }
 
     /**
@@ -426,9 +425,10 @@ public class Ballot {
    * master nonce, both values can be regenerated.  If the `nonce` for this contest is completely random,
    * then it is required in order to regenerate the proof.
    */
+  @Immutable
   public static class CiphertextBallotContest extends ElectionObjectBase implements Hash.CryptoHashCheckable {
     public final ElementModQ description_hash; // Hash from contestDescription
-    public final List<CiphertextBallotSelection> ballot_selections; // Collection of ballot selections
+    public final ImmutableList<CiphertextBallotSelection> ballot_selections; // Collection of ballot selections
     public final ElementModQ crypto_hash; // Hash of the encrypted values
     public final Optional<ElementModQ> nonce; // The nonce used to generate the encryption. Sensitive & should be treated as a secret.
 
@@ -443,7 +443,7 @@ public class Ballot {
                                    Optional<ChaumPedersen.ConstantChaumPedersenProof> proof) {
       super(object_id);
       this.description_hash = description_hash;
-      this.ballot_selections = ballot_selections;
+      this.ballot_selections = ImmutableList.copyOf(ballot_selections);
       this.crypto_hash = crypto_hash;
       this.nonce = nonce;
       this.proof = proof;
@@ -633,12 +633,12 @@ public class Ballot {
   @Immutable
   public static class PlaintextBallot extends ElectionObjectBase {
     final String ballot_style; // The `object_id` of the `BallotStyle` in the `Election` Manifest"""
-    final List<PlaintextBallotContest> contests; // The list of contests for this ballot
+    final ImmutableList<PlaintextBallotContest> contests; // The list of contests for this ballot
 
     public PlaintextBallot(String object_id, String ballot_style, List<PlaintextBallotContest> contests) {
       super(object_id);
       this.ballot_style = ballot_style;
-      this.contests = contests;
+      this.contests = ImmutableList.copyOf(contests);
     }
 
     /**
@@ -695,13 +695,13 @@ public class Ballot {
     public final String ballot_style;
     public final ElementModQ description_hash;
     public final ElementModQ previous_tracking_hash;
-    public final List<CiphertextBallotContest> contests;
+    public final ImmutableList<CiphertextBallotContest> contests;
     public final Optional<ElementModQ> tracking_hash;
     public final long timestamp; // TODO something better
     public final ElementModQ crypto_hash;
     public final Optional<ElementModQ> nonce;
 
-    public CiphertextBallot(String object_id, String ballot_style, ElementModQ description_hash,
+    CiphertextBallot(String object_id, String ballot_style, ElementModQ description_hash,
                             ElementModQ previous_tracking_hash, List<CiphertextBallotContest> contests,
                             Optional<ElementModQ> tracking_hash, long timestamp, ElementModQ crypto_hash,
                             Optional<ElementModQ> nonce) {
@@ -709,7 +709,7 @@ public class Ballot {
       this.ballot_style = ballot_style;
       this.description_hash = description_hash;
       this.previous_tracking_hash = previous_tracking_hash;
-      this.contests = contests;
+      this.contests = ImmutableList.copyOf(contests);
       this.tracking_hash = tracking_hash;
       this.timestamp = timestamp;
       this.crypto_hash = crypto_hash;
@@ -860,9 +860,9 @@ public class Ballot {
    * <p>
    * Do not make this class directly. Use `make_ciphertext_accepted_ballot` or `from_ciphertext_ballot` instead.
    */
+  @Immutable
   public static class CiphertextAcceptedBallot extends CiphertextBallot {
-    // TODO TestTallyProperties wants to change this, make mutable version?
-    public BallotBoxState state;
+    public final BallotBoxState state;
 
     public CiphertextAcceptedBallot(String object_id,
                                     String ballot_style,

@@ -10,6 +10,7 @@ import java.util.Optional;
 import static com.sunya.electionguard.Ballot.*;
 import static com.sunya.electionguard.Group.*;
 
+/** Static methods for decryption. */
 public class DecryptWithSecrets {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 

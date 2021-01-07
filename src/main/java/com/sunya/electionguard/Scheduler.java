@@ -11,11 +11,11 @@ import java.util.List;
 import java.util.concurrent.*;
 
 /** A scheduler for concurrent task execution. */
-// TODO make a Singleton
+// LOOK make a Singleton
 public class Scheduler<T> {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
   private final static int DEFAULT_NTHREADS = 11;
-  // TODO probably want to inject this
+  // LOOK probably want to inject this
   private final static ListeningExecutorService service = MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(DEFAULT_NTHREADS));
 
   /**
@@ -40,7 +40,7 @@ public class Scheduler<T> {
     }
   }
 
-  // TODO call this
+  // LOOK call this
   public static void shutdown() {
     service.shutdown();
   }

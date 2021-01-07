@@ -2,11 +2,13 @@ package com.sunya.electionguard;
 
 import com.google.common.flogger.FluentLogger;
 
+import javax.annotation.concurrent.Immutable;
 import java.util.Objects;
 
 import static com.sunya.electionguard.Group.*;
 import static com.sunya.electionguard.Proof.Usage.SecretValue;
 
+@Immutable
 public class SchnorrProof extends Proof {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 

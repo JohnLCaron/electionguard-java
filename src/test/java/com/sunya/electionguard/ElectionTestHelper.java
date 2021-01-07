@@ -495,11 +495,11 @@ public class ElectionTestHelper {
     List<Ballot.PlaintextBallotContest> voted_contests = new ArrayList<>();
     for (ContestDescriptionWithPlaceholders contest : contests) {
       assertWithMessage("every contest needs to be valid").that(contest.is_valid()).isTrue();
-      // TODO dont really understand "we need exactly this many 1 's, and the rest 0' s"
+      // LOOK dont understand "we need exactly this many 1 's, and the rest 0' s"
       int n = contest.number_elected ; // we need exactly this many 1 's, and the rest 0' s
       ArrayList<SelectionDescription> ballot_selections = new ArrayList(contest.ballot_selections);
       assertThat(ballot_selections.size() >= n).isTrue();
-      // TODO shuffle leave this out for now.
+      // LOOK shuffle leave this out for now.
       // Collections.shuffle(ballot_selections);
 
       int cut_point = random.nextInt(n + 1); // a number between 0 and n, inclusive

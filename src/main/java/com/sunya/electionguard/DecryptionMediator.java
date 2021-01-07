@@ -15,6 +15,7 @@ import static com.sunya.electionguard.Tally.*;
 /**
  * The Decryption Mediator composes partial decryptions from each Guardian
  * to form a decrypted representation of an election tally.
+ * LOOK review mutability
  */
 public class DecryptionMediator {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
@@ -22,7 +23,6 @@ public class DecryptionMediator {
   final CiphertextElectionContext _encryption;
   final CiphertextTally _ciphertext_tally;
 
-  // TODO not used?
   final InternalElectionDescription _metadata;
   final Optional<PlaintextTally> _plaintext_tally = Optional.empty();
   // Since spoiled ballots are decrypted, they are just a special case of a tally

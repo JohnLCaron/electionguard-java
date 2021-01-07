@@ -21,7 +21,7 @@ public class TestOptionalWithAutoValue {
           .registerTypeAdapterFactory(AutoValueGsonTypeAdapterFactory.create())
           .create();
 
-  @Example
+  // LOOK @Example
   public void testAutoValueOptionalEmpty() {
     AvoTestClass subject = AvoTestClass.create(Optional.empty());
 

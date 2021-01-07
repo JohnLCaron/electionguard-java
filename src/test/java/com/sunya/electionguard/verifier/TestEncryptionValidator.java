@@ -59,8 +59,8 @@ public class TestEncryptionValidator {
     BigInteger selection_beta_product = BigInteger.ONE;
 
     for (Ballot.CiphertextBallotSelection selection : contest.ballot_selections) {
-      Group.ElementModP this_pad = selection.ciphertext.pad;
-      Group.ElementModP this_data = selection.ciphertext.data;
+      Group.ElementModP this_pad = selection.ciphertext().pad;
+      Group.ElementModP this_data = selection.ciphertext().data;
 
       // get alpha, beta products
       selection_alpha_product = grp.mult_p(selection_alpha_product, this_pad.getBigInt());
@@ -106,12 +106,12 @@ public class TestEncryptionValidator {
 
   boolean verify_selection_validity(Ballot.CiphertextBallotSelection selection) {
     boolean error = false;
-    Group.ElementModP this_pad = selection.ciphertext.pad;
-    Group.ElementModP this_data = selection.ciphertext.data;
+    Group.ElementModP this_pad = selection.ciphertext().pad;
+    Group.ElementModP this_data = selection.ciphertext().data;
 
     // get dictionaries
     ChaumPedersen.DisjunctiveChaumPedersenProof proof = selection.proof.orElseThrow();
-    ElGamal.Ciphertext cipher = selection.ciphertext;
+    ElGamal.Ciphertext cipher = selection.ciphertext();
 
     // get values
     String selection_id = selection.object_id;
@@ -268,8 +268,8 @@ public class TestEncryptionValidator {
    * check if a selection's a and b are in set Zrp - box 4, limit check
    */
   boolean verify_selection_limit(Ballot.CiphertextBallotSelection selection) {
-    Group.ElementModP this_pad = selection.ciphertext.pad;
-    Group.ElementModP this_data = selection.ciphertext.data;
+    Group.ElementModP this_pad = selection.ciphertext().pad;
+    Group.ElementModP this_data = selection.ciphertext().data;
 
     boolean a_res = grp.is_within_set_zrp(this_pad.getBigInt());
     boolean b_res = grp.is_within_set_zrp(this_data.getBigInt());
@@ -382,7 +382,7 @@ public class TestEncryptionValidator {
     }
 
     /*
-    TODO: The zero_hash is given to the EncryptionMediator. For TestEndtoEndElectionIntegration, this is the device hash.
+    LOOK: The zero_hash is given to the EncryptionMediator. For TestEndtoEndElectionIntegration, this is the device hash.
     I dont think this is captured in the ElectionCntext, so cant be tested.
      */
 
@@ -392,7 +392,7 @@ public class TestEncryptionValidator {
       error = true;
     }
 
-    /* TODO "CLOSE" is not used in library; anyway, its impossible for last_hash = Hash.hash_elems(last_hash, "CLOSE") */
+    /* LOOK "CLOSE" is not used in library; anyway, its impossible for last_hash = Hash.hash_elems(last_hash, "CLOSE") */
 
     // verify the closing hash, H-bar = H(Hl, 'CLOSE')
     Group.ElementModQ closing_hash_computed = Hash.hash_elems(last_hash, "CLOSE");

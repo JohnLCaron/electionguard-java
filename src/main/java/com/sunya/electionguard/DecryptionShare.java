@@ -1,6 +1,7 @@
 package com.sunya.electionguard;
 
 import com.google.auto.value.AutoValue;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.flogger.FluentLogger;
 import com.google.gson.Gson;
 import com.google.gson.TypeAdapter;
@@ -38,13 +39,14 @@ public class DecryptionShare {
             ElementModP share,
             ElementModP recovery_key,
             ChaumPedersen.ChaumPedersenProof proof) {
-      return new AutoValue_DecryptionShare_CiphertextCompensatedDecryptionSelection(object_id, guardian_id, missing_guardian_id, description_hash, share, recovery_key, proof);
+      return new AutoValue_DecryptionShare_CiphertextCompensatedDecryptionSelection(object_id, guardian_id, missing_guardian_id,
+              description_hash, share, recovery_key, proof);
     }
 
     public static TypeAdapter<CiphertextCompensatedDecryptionSelection> typeAdapter(Gson gson) {
       return new AutoValue_DecryptionShare_CiphertextCompensatedDecryptionSelection.GsonTypeAdapter(gson);
     }
-  }
+  } // CiphertextCompensatedDecryptionSelection
 
   /**
    * A Guardian's Partial Decryption of a selection.  A CiphertextDecryptionSelection
@@ -72,7 +74,7 @@ public class DecryptionShare {
     public abstract Optional<ChaumPedersen.ChaumPedersenProof> proof();
 
     /** the recovered parts of the decryption provided by available guardians, if the guardian was missing from decryption. */
-    public abstract Optional<Map<String, CiphertextCompensatedDecryptionSelection>> recovered_parts();
+    public abstract Optional<ImmutableMap<String, CiphertextCompensatedDecryptionSelection>> recovered_parts();
 
     public static CiphertextDecryptionSelection create(
             String object_id,
@@ -81,10 +83,10 @@ public class DecryptionShare {
             ElementModP share,
             Optional<ChaumPedersen.ChaumPedersenProof> proof,
             Optional<Map<String, CiphertextCompensatedDecryptionSelection>> recovered_parts) {
-      return new AutoValue_DecryptionShare_CiphertextDecryptionSelection(object_id, guardian_id, description_hash, share, proof, recovered_parts);
+      return new AutoValue_DecryptionShare_CiphertextDecryptionSelection(object_id, guardian_id, description_hash, share,
+              proof, recovered_parts.map(ImmutableMap::copyOf));
     }
 
-    // TODO get AutoValue and Optional working together
     public static TypeAdapter<CiphertextDecryptionSelection> typeAdapter(Gson gson) {
       return new AutoValue_DecryptionShare_CiphertextDecryptionSelection.GsonTypeAdapter(gson);
     }
@@ -132,7 +134,7 @@ public class DecryptionShare {
       }
       return true;
     }
-  }
+  } // CiphertextDecryptionSelection
 
   /**
    * Create a ciphertext decryption selection
@@ -164,21 +166,24 @@ public class DecryptionShare {
   /** A Guardian's Partial Decryption of a contest. */
   @AutoValue
   static abstract class CiphertextDecryptionContest implements ElectionObjectBaseIF {
-    abstract String guardian_id(); // The Available Guardian that this share belongs to
+    /** The Available Guardian that this share belongs to. */
+    abstract String guardian_id();
 
-    abstract ElementModQ description_hash(); // The ContestDescription Hash
+    /** The ContestDescription Hash. */
+    abstract ElementModQ description_hash();
 
-    abstract Map<String, CiphertextDecryptionSelection> selections(); // the collection of decryption shares for this contest's selections
+    /** the collection of decryption shares for this contest's selections */
+    abstract ImmutableMap<String, CiphertextDecryptionSelection> selections();
 
     public static CiphertextDecryptionContest create(
             String object_id,
             String guardian_id,
             ElementModQ description_hash,
             Map<String, CiphertextDecryptionSelection> selections) {
-      return new AutoValue_DecryptionShare_CiphertextDecryptionContest(object_id, guardian_id, description_hash, selections);
+      return new AutoValue_DecryptionShare_CiphertextDecryptionContest(object_id, guardian_id, description_hash,
+              ImmutableMap.copyOf(selections));
     }
-
-  }
+  } // CiphertextDecryptionContest
 
   /** A Guardian's Partial Decryption of a contest. */
   @AutoValue
@@ -193,7 +198,7 @@ public class DecryptionShare {
     abstract ElementModQ description_hash();
 
     /** the collection of decryption shares for this contest's selections. */
-    abstract Map<String, CiphertextCompensatedDecryptionSelection> selections();
+    abstract ImmutableMap<String, CiphertextCompensatedDecryptionSelection> selections();
 
     public static CiphertextCompensatedDecryptionContest create(
             String object_id,
@@ -201,9 +206,10 @@ public class DecryptionShare {
             String missing_guardian_id,
             ElementModQ description_hash,
             Map<String, CiphertextCompensatedDecryptionSelection> selections) {
-      return new AutoValue_DecryptionShare_CiphertextCompensatedDecryptionContest(object_id, guardian_id, missing_guardian_id, description_hash, selections);
+      return new AutoValue_DecryptionShare_CiphertextCompensatedDecryptionContest(object_id, guardian_id, missing_guardian_id,
+              description_hash, ImmutableMap.copyOf(selections));
     }
-  }
+  } // CiphertextCompensatedDecryptionContest
 
   /** A Guardian's Partial Decryption Share of a specific ballot (e.g. of a spoiled ballot) */
   @AutoValue
@@ -214,15 +220,16 @@ public class DecryptionShare {
 
     abstract String ballot_id(); // The Ballot Id that this Decryption Share belongs to
 
-    abstract Map<String, CiphertextDecryptionContest> contests(); //  The collection of all contests in the ballot
+    abstract ImmutableMap<String, CiphertextDecryptionContest> contests(); //  The collection of all contests in the ballot
 
     public static BallotDecryptionShare create(
             String guardian_id,
             ElementModP public_key,
             String ballot_id, Map<String, CiphertextDecryptionContest> contests) {
-      return new AutoValue_DecryptionShare_BallotDecryptionShare(guardian_id, public_key, ballot_id, contests);
+      return new AutoValue_DecryptionShare_BallotDecryptionShare(guardian_id, public_key, ballot_id,
+              ImmutableMap.copyOf(contests));
     }
-  }
+  } // BallotDecryptionShare
 
   /** A Compensated Partial Decryption Share generated by an available guardian on behalf of a missing guardian */
   @AutoValue
@@ -235,12 +242,13 @@ public class DecryptionShare {
 
     abstract String ballot_id(); // The Ballot Id that this Decryption Share belongs to
 
-    abstract Map<String, CiphertextCompensatedDecryptionContest> contests();
+    abstract ImmutableMap<String, CiphertextCompensatedDecryptionContest> contests();
 
     public static CompensatedBallotDecryptionShare create(String guardian_id, String missing_guardian_id, ElementModP public_key, String ballot_id, Map<String, CiphertextCompensatedDecryptionContest> contests) {
-      return new AutoValue_DecryptionShare_CompensatedBallotDecryptionShare(guardian_id, missing_guardian_id, public_key, ballot_id, contests);
+      return new AutoValue_DecryptionShare_CompensatedBallotDecryptionShare(guardian_id, missing_guardian_id, public_key, ballot_id,
+              ImmutableMap.copyOf(contests));
     }
-  }
+  } // CompensatedBallotDecryptionShare
 
   /** A Compensated Partial Decryption Share generated by an available guardian on behalf of a missing guardian */
   @AutoValue
@@ -255,17 +263,18 @@ public class DecryptionShare {
     abstract ElementModP public_key();
 
     /** The collection of decryption shares for all contests in the election. */
-    abstract Map<String, CiphertextCompensatedDecryptionContest> contests();
+    abstract ImmutableMap<String, CiphertextCompensatedDecryptionContest> contests();
 
     /** The collection of decryption shares for all spoiled ballots in the election. */
-    abstract Map<String, CompensatedBallotDecryptionShare> spoiled_ballots();
+    abstract ImmutableMap<String, CompensatedBallotDecryptionShare> spoiled_ballots();
 
     public static CompensatedTallyDecryptionShare create(String guardian_id,
                                                          String missing_guardian_id,
                                                          ElementModP public_key,
                                                          Map<String, CiphertextCompensatedDecryptionContest> contests,
                                                          Map<String, CompensatedBallotDecryptionShare> spoiled_ballots) {
-      return new AutoValue_DecryptionShare_CompensatedTallyDecryptionShare(guardian_id, missing_guardian_id, public_key, contests, spoiled_ballots);
+      return new AutoValue_DecryptionShare_CompensatedTallyDecryptionShare(guardian_id, missing_guardian_id, public_key,
+              ImmutableMap.copyOf(contests), ImmutableMap.copyOf(spoiled_ballots));
     }
 
   } // class CompensatedTallyDecryptionShare
@@ -288,18 +297,19 @@ public class DecryptionShare {
 
     abstract ElementModP public_key(); // The election public key for the guardian
 
-    abstract Map<String, CiphertextDecryptionContest> contests(); // The collection of decryption shares for all contests in the election
+    abstract ImmutableMap<String, CiphertextDecryptionContest> contests(); // The collection of decryption shares for all contests in the election
 
-    abstract Map<String, BallotDecryptionShare> spoiled_ballots(); // The collection of decryption shares for all spoiled ballots in the election
+    abstract ImmutableMap<String, BallotDecryptionShare> spoiled_ballots(); // The collection of decryption shares for all spoiled ballots in the election
 
     public static TallyDecryptionShare create(
             String guardian_id,
             ElementModP public_key,
             Map<String, CiphertextDecryptionContest> contests,
             Map<String, BallotDecryptionShare> spoiled_ballots) {
-      return new AutoValue_DecryptionShare_TallyDecryptionShare(guardian_id, public_key, contests, spoiled_ballots);
+      return new AutoValue_DecryptionShare_TallyDecryptionShare(guardian_id, public_key,
+                 ImmutableMap.copyOf(contests), ImmutableMap.copyOf(spoiled_ballots));
     }
-  }
+  } // TallyDecryptionShare
 
   /** Get all of the cast shares for a specific selection */
   static Map<String, KeyAndSelection> get_tally_shares_for_selection(String selection_id, Map<String, TallyDecryptionShare> shares) {

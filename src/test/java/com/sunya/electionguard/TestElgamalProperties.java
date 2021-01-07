@@ -40,7 +40,7 @@ public class TestElgamalProperties extends TestProperties {
             .isEqualTo(pow_p(public_key.getBigInt(), nonce.getBigInt()));
 
     BigInteger plaintext = ciphertext.decrypt(keypair.secret_key);
-    assertThat(plaintext).isEqualTo(BigInteger.ZERO); // TODO FAILS
+    assertThat(plaintext).isEqualTo(BigInteger.ZERO);
   }
 
   @Property
@@ -95,7 +95,7 @@ public class TestElgamalProperties extends TestProperties {
     Ciphertext c2 = elgamal_encrypt(m2, r2, keypair.public_key).get();
     Ciphertext c_sum = elgamal_add(c1, c2);
     BigInteger total = c_sum.decrypt(keypair.secret_key);
-    assertThat(total).isEqualTo(BigInteger.valueOf(m1 + m2)); // TODO FAILS
+    assertThat(total).isEqualTo(BigInteger.valueOf(m1 + m2));
   }
 
   @Example

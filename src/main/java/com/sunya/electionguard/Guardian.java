@@ -13,7 +13,7 @@ import static com.sunya.electionguard.KeyCeremony.*;
 
 
 /** Guardian of election, responsible for safeguarding information and decrypting results. */
-// TODO review mutability
+// LOOK review mutability
 public class Guardian extends ElectionObjectBase {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
@@ -151,7 +151,7 @@ public class Guardian extends ElectionObjectBase {
 
   /** Get a read-only view of the Guardian Election Public Keys shared with this Guardian. */
   Map<String, ElectionPublicKey> guardian_election_public_keys() {
-          // TODO make readonly
+          // LOOK make readonly
           return _guardian_election_public_keys;
   }
 

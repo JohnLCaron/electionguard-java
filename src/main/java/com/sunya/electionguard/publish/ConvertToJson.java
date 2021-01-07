@@ -1,19 +1,19 @@
 package com.sunya.electionguard.publish;
 
+import com.google.common.reflect.TypeToken;
 import com.google.gson.*;
-import com.google.gson.reflect.TypeToken;
 import com.sunya.electionguard.*;
-import net.dongliu.gson.GsonJava8TypeAdapterFactory;
 
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.file.Path;
 
-// TODO, match python json, remove private fields
+// LOOK, match python json, remove private fields
 /** Static helper methods for writing serialized classes to json files. */
+@SuppressWarnings("UnstableApiUsage")
 public class ConvertToJson {
-  private static final Gson enhancedGson = enhancedGson();
+  private static final Gson enhancedGson = ConvertFromJson.enhancedGson();
 
   public static void write(Election.ElectionDescription object, Path where) throws IOException {
     // Here we are using our own conversion
@@ -98,6 +98,7 @@ public class ConvertToJson {
     }
   }
 
+  /*
   private static Gson enhancedGson() {
     return new GsonBuilder().setPrettyPrinting().serializeNulls()
             .registerTypeAdapterFactory(AutoValueGsonTypeAdapterFactory.create())
@@ -119,6 +120,6 @@ public class ConvertToJson {
     public JsonElement serialize(Group.ElementModP src, Type typeOfSrc, JsonSerializationContext context) {
       return new JsonPrimitive(src.getBigInt().toString());
     }
-  }
+  } */
 
 }

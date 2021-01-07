@@ -67,7 +67,7 @@ public class Group {
      * This is preferable to directly accessing `elem`, whose representation might change.
      */
     byte[] to_bytes() {
-      return Utils.b16decode(this.to_hex(), false);
+      return Utils.b16decode(this.to_hex());
     }
 
     @Override

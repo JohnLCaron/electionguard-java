@@ -13,6 +13,7 @@ import static com.sunya.electionguard.Group.*;
 import static com.sunya.electionguard.DecryptionShare.*;
 import static com.sunya.electionguard.Tally.*;
 
+/** Static methods for decryption. */
 class DecryptWithShares {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
@@ -82,19 +83,19 @@ class DecryptWithShares {
     for (CiphertextTallyContest contest : tally.values()) {
       HashMap<String, PlaintextTallySelection> selections = new HashMap<>();
 
-      for (CiphertextTallySelection selection : contest.tally_selections().values()) {
+      for (CiphertextTallySelection selection : contest.tally_selections.values()) {
         Map<String, KeyAndSelection> tally_shares = get_tally_shares_for_selection(selection.object_id, shares);
         Optional<Tally.PlaintextTallySelection> plaintext_selectionO = decrypt_selection_with_decryption_shares(
                 selection, tally_shares, extended_base_hash, false);
         if (plaintext_selectionO.isEmpty()) {
-          logger.atWarning().log("could not decrypt tally for contest %s", contest.object_id());
+          logger.atWarning().log("could not decrypt tally for contest %s", contest.object_id);
           return Optional.empty();
         }
         Tally.PlaintextTallySelection plaintext_selection = plaintext_selectionO.get();
         selections.put(plaintext_selection.object_id(), plaintext_selection);
       }
 
-      contests.put(contest.object_id(), PlaintextTallyContest.create(contest.object_id(), selections));
+      contests.put(contest.object_id, PlaintextTallyContest.create(contest.object_id, selections));
     }
 
     return Optional.of(contests);

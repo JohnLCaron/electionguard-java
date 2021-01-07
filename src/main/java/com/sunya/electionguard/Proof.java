@@ -1,8 +1,10 @@
 package com.sunya.electionguard;
 
+import javax.annotation.concurrent.Immutable;
 import java.util.Objects;
 
 /** Superclass of Proofs. */
+@Immutable
 public abstract class Proof {
   enum Usage {
     Unknown("Unknown"),
@@ -20,8 +22,8 @@ public abstract class Proof {
     }
   }
 
-  final String name;
-  final Usage usage;
+  public final String name;
+  public final Usage usage;
 
   protected Proof(String name, Usage usage) {
     this.name = name;

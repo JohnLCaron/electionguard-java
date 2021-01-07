@@ -1,13 +1,17 @@
 package com.sunya.electionguard;
 
+import com.google.common.collect.ImmutableList;
+
+import javax.annotation.concurrent.Immutable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@Immutable
 public class Words {
   private static final int MIN_INDEX = 0;
   private static final int MAX_INDEX = 4095;
-  private static final ArrayList<String> words = new ArrayList<>(init());
+  private static final ImmutableList<String> words = init();
 
   /**
    * Get word (4096 options) based on 16 bit index for use with trackers.
@@ -33,8 +37,8 @@ public class Words {
     return index >= 0 ? Optional.of(index) : Optional.empty();
   }
 
-  static private List<String> init() {
-    return List.of(
+  static private ImmutableList<String> init() {
+    return ImmutableList.of(
             "aardvark",
             "abacus",
             "abbey",

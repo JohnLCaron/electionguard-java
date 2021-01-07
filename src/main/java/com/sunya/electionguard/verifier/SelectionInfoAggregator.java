@@ -140,8 +140,8 @@ public class SelectionInfoAggregator {
 
             // ignore placeholders
             if (!is_placeholder_selection) {
-              ElementModP pad = selection.ciphertext.pad;
-              ElementModP data = selection.ciphertext.data;
+              ElementModP pad = selection.ciphertext().pad;
+              ElementModP data = selection.ciphertext().data;
               get_accum_product(curr_pad_dic, selection_name, pad);
               get_accum_product(curr_data_dic, selection_name, data);
             }
@@ -158,7 +158,7 @@ public class SelectionInfoAggregator {
    * :param num: a number being multiplied to get the final product
    */
   private static void get_accum_product(Map<String, ElementModP> dic, String selection_name, ElementModP num) {
-    ElementModP current = dic.get(selection_name); // TODO use merge?
+    ElementModP current = dic.get(selection_name); // LOOK use merge?
     if (current == null) {
       dic.put(selection_name, num);
     } else {

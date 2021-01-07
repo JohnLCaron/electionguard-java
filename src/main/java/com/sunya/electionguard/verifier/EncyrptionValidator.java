@@ -74,7 +74,7 @@ public class EncyrptionValidator {
       System.out.printf("[Box 3 & 4] All ballot verification success.%n");
     }
 
-    // TODO this test does not work see notes in TestEncryptionValidator
+    // LOOK this test does not work see notes in TestEncryptionValidator
     if (!this.verify_tracking_hashes(prev_hashes, curr_hashes)) {
       // error = true;
     }
@@ -88,7 +88,7 @@ public class EncyrptionValidator {
   }
 
   /**
-   * TODO this test does not work see notes in TestSelectionEncryptionValidation
+   * LOOK this test does not work see notes in TestSelectionEncryptionValidation
    * verifies the tracking hash chain correctness
    * NOTE: didn't check the first and closing hashes
    * :param hashes_dic: a dictionary of "previous tracking - current tracking " hash code pairs
@@ -368,8 +368,8 @@ public class EncyrptionValidator {
 
     BallotSelectionVerifier(CiphertextBallotSelection selection) {
       this.selection = selection;
-      this.pad = selection.ciphertext.pad;
-      this.data = selection.ciphertext.data;
+      this.pad = selection.ciphertext().pad;
+      this.data = selection.ciphertext().data;
     }
 
     boolean is_placeholder_selection() {
@@ -384,7 +384,7 @@ public class EncyrptionValidator {
 
       // get dictionaries
       ChaumPedersen.DisjunctiveChaumPedersenProof proof = this.selection.proof.orElseThrow();
-      ElGamal.Ciphertext cipher = this.selection.ciphertext;
+      ElGamal.Ciphertext cipher = this.selection.ciphertext();
 
       // get values
       String selection_id = this.selection.object_id;

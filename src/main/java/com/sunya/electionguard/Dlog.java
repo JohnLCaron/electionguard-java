@@ -28,7 +28,7 @@ public class Dlog {
     return discrete_log_internal(elem.elem);
   }
 
-  // TODO need sync?
+  // LOOK need sync?
   private static BigInteger discrete_log_internal(BigInteger e) {
     while (!e.equals(dlog_max_elem)) {
       dlog_max_exp = dlog_max_exp + 1;

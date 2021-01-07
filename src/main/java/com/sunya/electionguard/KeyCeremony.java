@@ -1,6 +1,7 @@
 package com.sunya.electionguard;
 
 import com.google.auto.value.AutoValue;
+import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import com.google.gson.TypeAdapter;
 
@@ -85,8 +86,8 @@ public class KeyCeremony {
     abstract String designated_id(); // The Id of the guardian to receive this backup
     abstract int designated_sequence_order(); // The sequence order of the designated guardian
     abstract Auxiliary.ByteString encrypted_value(); // The encrypted coordinate corresponding to a secret election polynomial
-    abstract List<ElementModP> coefficient_commitments(); // The public keys `K_ij`generated from the election polynomial coefficients
-    abstract List<SchnorrProof> coefficient_proofs(); // the proofs of possession of the private keys for the election polynomial secret coefficients
+    abstract ImmutableList<ElementModP> coefficient_commitments(); // The public keys `K_ij`generated from the election polynomial coefficients
+    abstract ImmutableList<SchnorrProof> coefficient_proofs(); // the proofs of possession of the private keys for the election polynomial secret coefficients
 
     public static ElectionPartialKeyBackup create(String owner_id,
                                                   String designated_id,
@@ -98,8 +99,8 @@ public class KeyCeremony {
               designated_id,
               designated_sequence_order,
               encrypted_value,
-              coefficient_commitments,
-              coefficient_proofs);
+              ImmutableList.copyOf(coefficient_commitments),
+              ImmutableList.copyOf(coefficient_proofs));
     }
   }
 
@@ -107,14 +108,15 @@ public class KeyCeremony {
   @AutoValue
   public abstract static class CoefficientValidationSet {
     public abstract String owner_id();
-    public abstract List<ElementModP> coefficient_commitments();
-    public abstract List<SchnorrProof> coefficient_proofs();
+    public abstract ImmutableList<ElementModP> coefficient_commitments();
+    public abstract ImmutableList<SchnorrProof> coefficient_proofs();
 
     public static CoefficientValidationSet create(String guardian_id, List<ElementModP> coefficient_commitments, List<SchnorrProof> coefficient_proofs) {
-      return new AutoValue_KeyCeremony_CoefficientValidationSet(guardian_id, coefficient_commitments, coefficient_proofs);
+      return new AutoValue_KeyCeremony_CoefficientValidationSet(guardian_id,
+              ImmutableList.copyOf(coefficient_commitments), ImmutableList.copyOf(coefficient_proofs));
     }
 
-    // TODO I was hoping not to expose GSON here.
+    // LOOK I was hoping not to expose GSON here.
     public static TypeAdapter<CoefficientValidationSet> typeAdapter(Gson gson) {
       return new AutoValue_KeyCeremony_CoefficientValidationSet.GsonTypeAdapter(gson);
     }
@@ -140,11 +142,12 @@ public class KeyCeremony {
     abstract String designated_id();
     abstract int designated_sequence_order(); // The sequence order of the designated guardian
     abstract ElementModQ value();
-    abstract List<ElementModP> coefficient_commitments();
-    abstract List<SchnorrProof> coefficient_proofs();
+    abstract ImmutableList<ElementModP> coefficient_commitments();
+    abstract ImmutableList<SchnorrProof> coefficient_proofs();
 
     public static ElectionPartialKeyChallenge create(String owner_id, String designated_id, int designated_sequence_order, ElementModQ value, List<ElementModP> coefficient_commitments, List<SchnorrProof> coefficient_proofs) {
-      return new AutoValue_KeyCeremony_ElectionPartialKeyChallenge(owner_id, designated_id, designated_sequence_order, value, coefficient_commitments, coefficient_proofs);
+      return new AutoValue_KeyCeremony_ElectionPartialKeyChallenge(owner_id, designated_id, designated_sequence_order, value,
+              ImmutableList.copyOf(coefficient_commitments), ImmutableList.copyOf(coefficient_proofs));
     }
   }
 

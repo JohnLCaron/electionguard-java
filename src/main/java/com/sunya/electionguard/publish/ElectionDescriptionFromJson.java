@@ -46,7 +46,7 @@ public class ElectionDescriptionFromJson {
   }
 
   ElectionDescription convert(ElectionDescriptionPojo pojo) {
-    // TODO going to throw an Exception if these arent present or invalid format
+    // LOOK going to throw an Exception if these arent present or invalid format
     OffsetDateTime startLocalDate = OffsetDateTime.parse(pojo.start_date);
     OffsetDateTime endLocalDate = OffsetDateTime.parse(pojo.end_date);
 

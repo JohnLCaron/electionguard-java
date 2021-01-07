@@ -47,29 +47,28 @@ public class Encrypt {
   }
 
   /**
-   * An object for caching election and encryption state.
-   * <p>
-   * It composes Elections and Ballots.
+   * An object for caching election and encryption state. It composes Elections and Ballots.
+   * LOOK mutable, since it has to keep track of the last hash
    */
   public static class EncryptionMediator {
     private final InternalElectionDescription _metadata;
     private final CiphertextElectionContext _encryption;
-    private ElementModQ _seed_hash; // LOOK mutable
+    private ElementModQ _last_hash;
 
     public EncryptionMediator(InternalElectionDescription metadata, CiphertextElectionContext encryption,
                               EncryptionDevice encryption_device) {
       this._metadata = metadata;
       this._encryption = encryption;
-      this._seed_hash = encryption_device.get_hash();
+      // LOOK does not follow validation spec 5.1, should be Q crypto_base_hash
+      this._last_hash = encryption_device.get_hash();
     }
 
     /** Encrypt the specified ballot using the cached election context. */
     Optional<CiphertextBallot> encrypt(PlaintextBallot ballot) {
       Optional<CiphertextBallot> encrypted_ballot =
-              encrypt_ballot(ballot, this._metadata, this._encryption, this._seed_hash, Optional.empty(), true);
+              encrypt_ballot(ballot, this._metadata, this._encryption, this._last_hash, Optional.empty(), true);
       if (encrypted_ballot.isPresent() && encrypted_ballot.get().tracking_hash.isPresent()) {
-        // TODO mutable why?
-        this._seed_hash = encrypted_ballot.get().tracking_hash.get();
+        this._last_hash = encrypted_ballot.get().tracking_hash.get();
       }
       return encrypted_ballot;
     }
@@ -238,7 +237,7 @@ public class Encrypt {
     ElementModQ contest_description_hash = contest_description.crypto_hash();
     Nonces nonce_sequence = new Nonces(contest_description_hash, nonce_seed);
     ElementModQ contest_nonce = nonce_sequence.get(contest_description.sequence_order);
-    // TODO correct?   chaum_pedersen_nonce = next(iter(nonce_sequence)) the one following contest_nonce? the first ??
+    // LOOK correct?   chaum_pedersen_nonce = next(iter(nonce_sequence)) the one following contest_nonce? the first ??
     ElementModQ chaum_pedersen_nonce = nonce_sequence.get(0);
 
     List<CiphertextBallotSelection> encrypted_selections = new ArrayList<>();

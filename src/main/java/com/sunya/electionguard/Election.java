@@ -15,7 +15,7 @@ import static com.sunya.electionguard.Group.*;
 
 /**
  * Election metadata.
- * TODO https://github.com/microsoft/electionguard/wiki does not exist 01/02/2020
+ * LOOK https://github.com/microsoft/electionguard/wiki does not exist 01/02/2020
  */
 public class Election {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
@@ -213,7 +213,7 @@ public class Election {
 
     @Override
     public Group.ElementModQ crypto_hash() {
-      // TODO hash Optional
+      // LOOK hash Optional
       return Hash.hash_elems(this.name, this.address_line, this.email, this.phone);
     }
 
@@ -1152,7 +1152,7 @@ public class Election {
    * Refer to the [Electionguard Specification](https://github.com/microsoft/electionguard) for more information.
    * <p>
    * To make an instance of this class, don't construct it directly. Use `make_ciphertext_election_context` instead.
-   * TODO: put in its own class
+   * LOOK: put in its own class
    */
   @Immutable
   public static class CiphertextElectionContext {

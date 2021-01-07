@@ -28,8 +28,6 @@ public class Hash {
    * @param a Zero or more elements of any of the accepted types.
    * @return A cryptographic hash of these elements, concatenated.
    * <p>
-   * TODO does this have to agree exactly with python code ?
-   * TODO add tests.
    */
   public static Group.ElementModQ hash_elems(Object... a) {
     // TODO is Guava Hashing.sha256() better?

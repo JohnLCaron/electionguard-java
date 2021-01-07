@@ -77,15 +77,15 @@ public class TestGuardianPublicKeyValidator {
     Group.ElementModQ hash = Hash.hash_elems(electionParameters.base_hash(), public_key, commitment);
     BigInteger hashp = hash.getBigInt().mod(Group.P);
 
-    // TODO election-verifier-python has
+    // LOOK LOOK election-verifier-python has
     //  return mod_p(hash_elems(self.base_hash, public_key, commitment))
     //  which i translate as
     //  Group.ElementModQ hash = Hash.hash_elems(electionParameters.base_hash(), public_key, commitment);
     //  return grp.mod_q(hash.getBigInt())
     //  which fails to validate
     //
-    // but this works, see SchnoorProof.make_schnorr_proof
-    // Note that hash does BigInteger biggy = new BigInteger(bytes).mod(Group.Q_MINUS_ONE);
+    //  but this works, see SchnoorProof.make_schnorr_proof
+    //  Note that hash does BigInteger biggy = new BigInteger(bytes).mod(Group.Q_MINUS_ONE);
     Group.ElementModQ hash2 = Hash.hash_elems(public_key, commitment);
     // Note that EG.Verifier.Construction has ci=HQ,Ki,0,Ki,1,Ki,2,…,Ki,k-1,hi,0,hi,1,hi,2,…hi,k-1 mod q.
     return hash2;

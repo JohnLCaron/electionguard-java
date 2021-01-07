@@ -177,7 +177,6 @@ public class TestEncryptProperties extends TestProperties {
 
     PlaintextBallotContest subject = ballot_factory.get_random_contest_from(description, false, false);
 
-    // TODO want ContestDescriptionWithPlaceholders, has ContestDescription
     Optional<CiphertextBallotContest> resultO = encrypt_contest(subject, description, keypair.public_key, ONE_MOD_Q, nonce_seed, true);
     assertThat(resultO).isPresent();
     CiphertextBallotContest result = resultO.get();
@@ -344,7 +343,6 @@ public class TestEncryptProperties extends TestProperties {
     Election.CiphertextElectionContext context = tuple.context;
     ElementModQ nonce_seed = TWO_MOD_Q;
 
-    // TODO:Ballot Factory
     PlaintextBallot subject = ElectionFactory.get_fake_ballot(metadata.description, null);
     assertThat(subject.is_valid(metadata.ballot_styles.get(0).object_id)).isTrue();
 

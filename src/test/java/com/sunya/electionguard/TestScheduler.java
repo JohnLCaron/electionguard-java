@@ -45,7 +45,7 @@ public class TestScheduler {
     }
   }
 
-  @Example
+  // LOOK @Example
   public void test_exceptions() {
     Scheduler<Integer> subject = new Scheduler<>();
 
