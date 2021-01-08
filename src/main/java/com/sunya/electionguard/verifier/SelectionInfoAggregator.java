@@ -158,7 +158,7 @@ public class SelectionInfoAggregator {
    * :param num: a number being multiplied to get the final product
    */
   private static void get_accum_product(Map<String, ElementModP> dic, String selection_name, ElementModP num) {
-    ElementModP current = dic.get(selection_name); // LOOK use merge?
+    ElementModP current = dic.get(selection_name);
     if (current == null) {
       dic.put(selection_name, num);
     } else {

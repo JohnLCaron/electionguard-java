@@ -15,7 +15,7 @@ import static com.sunya.electionguard.Group.*;
 
 /**
  * Election metadata.
- * LOOK https://github.com/microsoft/electionguard/wiki does not exist 01/02/2020
+ * TODO replace [ElectionGuard Spec](https://github.com/microsoft/electionguard/wiki) when available.
  */
 public class Election {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
@@ -213,7 +213,6 @@ public class Election {
 
     @Override
     public Group.ElementModQ crypto_hash() {
-      // LOOK hash Optional
       return Hash.hash_elems(this.name, this.address_line, this.email, this.phone);
     }
 

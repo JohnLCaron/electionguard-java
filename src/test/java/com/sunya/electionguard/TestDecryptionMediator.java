@@ -407,7 +407,7 @@ public class TestDecryptionMediator extends TestProperties {
             .collect(Collectors.toList());
     Map<String, Group.ElementModQ> lagrange_coefficients = compute_lagrange_coefficients_for_guardians(all_keys);
 
-    ElectionPublicKey public_key = available_guardians.get(0).guardian_election_public_keys().get(missing_guardian_id);
+    ElectionPublicKey public_key = available_guardians.get(0).otherGuardianPublicKey(missing_guardian_id);
 
     DecryptionShare.BallotDecryptionShare reconstructed_share = reconstruct_decryption_ballot(
             missing_guardian_id,

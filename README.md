@@ -21,11 +21,10 @@ Im also happy to donate it to another organization for hosting, etc.
 ## TODO
 
   * Finish validation step 7, 8.
-  * Review mutable classes.
   * Not yet compatible with Python library JSON serialization, due to different ways to serialize Optional.
-  * Consider Moshi instead of Gson, esp if it solves the Optional problem.
   * Look at BigInteger performance, consider using GMP through jni or jna.
   * Measure performance.
+  * Investigate parallelization strategies.
 
 ## License
 

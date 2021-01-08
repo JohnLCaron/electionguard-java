@@ -82,7 +82,7 @@ public class DecryptionMediator {
     // Check this guardian's collection of public keys
     // for other guardians that have not announced
     Map<String, KeyCeremony.ElectionPublicKey> missing_guardians =
-            guardian.guardian_election_public_keys().entrySet().stream()
+            guardian.otherGuardianPublicKeys().entrySet().stream()
                     .filter(e -> !this._available_guardians.containsKey(e.getKey()))
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 

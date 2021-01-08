@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.concurrent.*;
 
 /** A scheduler for concurrent task execution. */
-// LOOK make a Singleton
 public class Scheduler<T> {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
   private final static int DEFAULT_NTHREADS = 11;

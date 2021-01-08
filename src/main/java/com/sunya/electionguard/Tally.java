@@ -58,7 +58,10 @@ public class Tally {
       return ciphertext_accumulate;
     }
 
-    /** Homomorphically add the specified value to the message. */
+    /**
+     * Homomorphically add the specified value to the message.
+     * Note that this method is called by separate threads.
+     */
     private synchronized ElGamal.Ciphertext elgamal_accumulate(ElGamal.Ciphertext elgamal_ciphertext) {
       this.ciphertext_accumulate = ElGamal.elgamal_add(this.ciphertext_accumulate, elgamal_ciphertext);
       return this.ciphertext();
@@ -182,7 +185,6 @@ public class Tally {
           throw new RuntimeException("cant happen");
         }
 
-        // LOOK LOOK it seems that selection_tally.ciphertext_accumulate could be accessed by separate threads.
         ElGamal.Ciphertext ciphertext = selection_tally.elgamal_accumulate(use_selection.get().ciphertext());
         return new AccumSelectionsTuple(selection_id, ciphertext);
       }
@@ -435,7 +437,6 @@ public class Tally {
           String selection_id = entry2.getKey();
           CiphertextTallySelection selection = entry2.getValue();
           if (result_dict.containsKey(selection_id)) {
-            // LOOK this mutates selection.ciphertext_accumulate.
             selection.elgamal_accumulate(result_dict.get(selection_id));
           }
         }

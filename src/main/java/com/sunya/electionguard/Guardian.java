@@ -1,5 +1,6 @@
 package com.sunya.electionguard;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.flogger.FluentLogger;
 
 import javax.annotation.Nullable;
@@ -22,20 +23,20 @@ public class Guardian extends ElectionObjectBase {
   private final ElectionKeyPair _election_keys;
 
   // The collection of this guardian's partial key backups that will be shared to other guardians
-  private final Map<String, ElectionPartialKeyBackup> _backups_to_share;
+  private final Map<String, ElectionPartialKeyBackup> _backups_to_share; // Map(GUARDIAN_ID, ElectionPartialKeyBackup)
 
   //// From Other Guardians
   // The collection of other guardians' auxiliary public keys that are shared with this guardian
-  private final Map<String, Auxiliary.PublicKey> _guardian_auxiliary_public_keys;
+  private final Map<String, Auxiliary.PublicKey> _guardian_auxiliary_public_keys; // map(GUARDIAN_ID, Auxiliary.PublicKey)
 
   // The collection of other guardians' election public keys that are shared with this guardian
-  private final Map<String, ElectionPublicKey> _guardian_election_public_keys;
+  private final Map<String, ElectionPublicKey> otherGuardianPublicKeys; // map(GUARDIAN_ID, ElectionPublicKey)
 
   // The collection of other guardians' partial key backups that are shared with this guardian
-  private final Map<String, ElectionPartialKeyBackup> _guardian_election_partial_key_backups;
+  private final Map<String, ElectionPartialKeyBackup> _guardian_election_partial_key_backups; // Map(GUARDIAN_ID, ElectionPartialKeyBackup)
 
   // The collection of other guardians' verifications that they shared their backups correctly
-  private final Map<String, ElectionPartialKeyVerification> _guardian_election_partial_key_verifications;
+  private final Map<String, ElectionPartialKeyVerification> _guardian_election_partial_key_verifications; // Map(GUARDIAN_ID, ElectionPartialKeyVerification)
 
   /**
    * Initialize a guardian with the specified arguments.
@@ -61,7 +62,7 @@ public class Guardian extends ElectionObjectBase {
 
     this._backups_to_share = new HashMap<>();
     this._guardian_auxiliary_public_keys = new HashMap<>();
-    this._guardian_election_public_keys = new HashMap<>();
+    this.otherGuardianPublicKeys = new HashMap<>();
     this._guardian_election_partial_key_backups = new HashMap<>();
     this._guardian_election_partial_key_verifications = new HashMap<>();
 
@@ -161,9 +162,13 @@ public class Guardian extends ElectionObjectBase {
   // guardian_auxiliary_public_keys() not used
 
   /** Get a read-only view of the Guardian Election Public Keys shared with this Guardian. */
-  Map<String, ElectionPublicKey> guardian_election_public_keys() {
-          // LOOK make readonly
-          return _guardian_election_public_keys;
+  ImmutableMap<String, ElectionPublicKey> otherGuardianPublicKeys() {
+    return ImmutableMap.copyOf(otherGuardianPublicKeys);
+  }
+
+  /** From the Guardian Election Public Keys shared with this Guardian, find the ElectionPublicKey by guardian_id. */
+  @Nullable ElectionPublicKey otherGuardianPublicKey(String guardian_id) {
+    return otherGuardianPublicKeys.get(guardian_id);
   }
 
   /** Share auxiliary public key with another guardian. */
@@ -195,12 +200,12 @@ public class Guardian extends ElectionObjectBase {
 
   /** Save a guardians election public key. */
   void save_election_public_key(ElectionPublicKey key) {
-    this._guardian_election_public_keys.put(key.owner_id(), key);
+    this.otherGuardianPublicKeys.put(key.owner_id(), key);
   }
 
   /** True if all election public keys have been received. */
   boolean all_election_public_keys_received() {
-    return this._guardian_election_public_keys.size() == this.ceremony_details.number_of_guardians();
+    return this.otherGuardianPublicKeys.size() == this.ceremony_details.number_of_guardians();
   }
 
   /**
@@ -326,7 +331,7 @@ public class Guardian extends ElectionObjectBase {
     if (!this.all_election_partial_key_backups_verified()) {
       return Optional.empty();
     }
-    return Optional.of(KeyCeremony.combine_election_public_keys(this._guardian_election_public_keys));
+    return Optional.of(KeyCeremony.combine_election_public_keys(this.otherGuardianPublicKeys));
   }
 
   /**

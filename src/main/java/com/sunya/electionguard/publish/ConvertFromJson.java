@@ -18,7 +18,6 @@ import static com.sunya.electionguard.Election.*;
 import static com.sunya.electionguard.KeyCeremony.CoefficientValidationSet;
 import static com.sunya.electionguard.DecryptionShare.CiphertextDecryptionSelection;
 
-// LOOK make compatible with python, eg ElementModQ
 /** Static helper methods for reading serialized classes from json files. */
 public class ConvertFromJson {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
