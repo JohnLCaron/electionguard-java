@@ -16,7 +16,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 
 import static com.sunya.electionguard.Ballot.*;
-import static com.sunya.electionguard.Decryption.*;
+import static com.sunya.electionguard.Decryptions.*;
 import static com.sunya.electionguard.Election.*;
 import static com.sunya.electionguard.Group.*;
 import static com.sunya.electionguard.KeyCeremony.*;
@@ -363,7 +363,7 @@ public class TestDecryptionMediator extends TestProperties {
     for (int i = 0; i < 3; i++) {
       Guardian guardian = this.guardians.get(i);
       shares.put(guardian.object_id,
-              Decryption.compute_decryption_share_for_ballot(guardian, encrypted_ballot, this.context).get());
+              Decryptions.compute_decryption_share_for_ballot(guardian, encrypted_ballot, this.context).get());
     }
 
     Optional<Map<String, Tally.PlaintextTallyContest>> resultO = DecryptWithShares.decrypt_ballot(
@@ -393,13 +393,13 @@ public class TestDecryptionMediator extends TestProperties {
     Map<String, DecryptionShare.BallotDecryptionShare> shares = new HashMap<>();
     for (Guardian guardian : available_guardians) {
       shares.put(guardian.object_id,
-              Decryption.compute_decryption_share_for_ballot(guardian, encrypted_ballot, this.context).get());
+              Decryptions.compute_decryption_share_for_ballot(guardian, encrypted_ballot, this.context).get());
     }
 
     Map<String, DecryptionShare.CompensatedBallotDecryptionShare> compensated_shares = new HashMap<>();
     for (Guardian guardian : available_guardians) {
       compensated_shares.put(guardian.object_id,
-              Decryption.compute_compensated_decryption_share_for_ballot(
+              Decryptions.compute_compensated_decryption_share_for_ballot(
                       guardian, missing_guardian_id, encrypted_ballot, this.context, identity_auxiliary_decrypt).get());
     }
 
@@ -407,7 +407,7 @@ public class TestDecryptionMediator extends TestProperties {
             .collect(Collectors.toList());
     Map<String, Group.ElementModQ> lagrange_coefficients = compute_lagrange_coefficients_for_guardians(all_keys);
 
-    ElectionPublicKey public_key = available_guardians.get(0).otherGuardianPublicKey(missing_guardian_id);
+    ElectionPublicKey public_key = available_guardians.get(0).otherGuardianElectionKey(missing_guardian_id);
 
     DecryptionShare.BallotDecryptionShare reconstructed_share = reconstruct_decryption_ballot(
             missing_guardian_id,

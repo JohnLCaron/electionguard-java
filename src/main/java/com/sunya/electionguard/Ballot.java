@@ -15,7 +15,7 @@ public class Ballot {
 
   /**
    * ExtendedData represents any arbitrary data expressible as a string with a length.
-   * This class is used primarily as a field on a selection to indicate a write-in candidate text value.
+   * This is used primarily as a field on a selection to indicate a write-in candidate text value.
    */
   @Immutable
   public static class ExtendedData {
@@ -53,13 +53,13 @@ public class Ballot {
   /**
    * A BallotSelection represents an individual selection on a ballot.
    * <p>
-   * This class accepts a `vote` string field which has no constraints
+   * This accepts a `vote` string field which has no constraints
    * in the ElectionGuard Data Specification, but is constrained logically
    * in the application to resolve to `True` or `False`.  This implies that the
    * data specification supports passing any string that can be represented as
    * an integer, however only 0 and 1 is supported for now.
    * <p>
-   * This class can also be designated as `is_placeholder_selection` which has no
+   * This can also be designated as `is_placeholder_selection` which has no
    * context to the data specification but is useful for running validity checks internally
    * <p>
    * an `extended_data` field exists to support any arbitrary data to be associated
@@ -161,8 +161,7 @@ public class Ballot {
 
   /**
    * A CiphertextBallotSelection represents an individual encrypted selection on a ballot.
-   * This class requires a `description_hash` and a `ciphertext` as required parameters
-   * in its constructor.
+   * This requires a `description_hash` and a `ciphertext` as required parameters in its constructor.
    * <p>
    * When a selection is encrypted, the `description_hash` and `ciphertext` required fields must
    * be populated at construction however the `nonce` is also usually provided by convention.
@@ -324,9 +323,9 @@ public class Ballot {
   }
 
   /**
-   * A PlaintextBallotContest represents the selections made by a voter for a specific ContestDescription
+   * A PlaintextBallotContest represents the selections made by a voter for a specific ContestDescription.
    * <p>
-   * this class can be either a partial or a complete representation of a contest dataset.  Specifically,
+   * This can be either a partial or a complete representation of a contest dataset.  Specifically,
    * a partial representation must include at a minimum the "affirmative" selections of a contest.
    * A complete representation of a ballot must include both affirmative and negative selections of
    * the contest, AND the placeholder selections necessary to satisfy the ConstantChaumPedersen proof
@@ -627,12 +626,12 @@ public class Ballot {
   }
 
   /**
-   * A PlaintextBallot represents a voters selections for a given ballot and ballot style
-   * :field object_id: A unique Ballot ID that is relevant to the external system
+   * A PlaintextBallot represents a voters selections for a given ballot and ballot style.
+   * The field object_id is a unique Ballot ID that is relevant to the external system.
    */
   @Immutable
   public static class PlaintextBallot extends ElectionObjectBase {
-    final String ballot_style; // The `object_id` of the `BallotStyle` in the `Election` Manifest"""
+    final String ballot_style; // The `object_id` of the `BallotStyle` in the `Election` Manifest
     final ImmutableList<PlaintextBallotContest> contests; // The list of contests for this ballot
 
     public PlaintextBallot(String object_id, String ballot_style, List<PlaintextBallotContest> contests) {
@@ -688,7 +687,7 @@ public class Ballot {
    * fields on `Ballotcontest` and `BallotSelection`, this value is sensitive.
    * <p>
    * Don't make this directly. Use `make_ciphertext_ballot` instead.
-   * :field object_id: A unique Ballot ID that is relevant to the external system
+   * The field object_id is a unique Ballot ID that is relevant to the external system
    */
   @Immutable
   public static class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoHashCheckable {
@@ -841,24 +840,24 @@ public class Ballot {
     }
   }
 
-  /**
-   * Enumeration used when marking a ballot as cast or spoiled
-   */
+  /** Enumeration used when marking a ballot as cast or spoiled. */
   public enum BallotBoxState {
-    CAST, /* A ballot that has been explicitly cast */
-    SPOILED, // A ballot that has been explicitly spoiled
-    UNKNOWN // A ballot whose state is unknown to ElectionGuard and will not be included in any election results
+    /** A ballot that has been explicitly cast */
+    CAST,
+    /** A ballot that has been explicitly spoiled */
+    SPOILED,
+    /** A ballot whose state is unknown to ElectionGuard and will not be included in any election results. */
+    UNKNOWN
   }
 
   /**
    * A `CiphertextAcceptedBallot` represents a ballot that is accepted for inclusion in election results.
    * An accepted ballot is or is about to be either cast or spoiled.
-   * The state supports the `BallotBoxState.UNKNOWN` enumeration to indicate that this object is mutable
-   * and has not yet been explicitly assigned a specific state.
+   * Note that this class is immutable, and the state cannot be changed.
    * <p>
    * Note, additionally, this ballot includes all proofs but no nonces.
    * <p>
-   * Do not make this class directly. Use `make_ciphertext_accepted_ballot` or `from_ciphertext_ballot` instead.
+   * Do not construct directly. Use `make_ciphertext_accepted_ballot` or `from_ciphertext_ballot` instead.
    */
   @Immutable
   public static class CiphertextAcceptedBallot extends CiphertextBallot {

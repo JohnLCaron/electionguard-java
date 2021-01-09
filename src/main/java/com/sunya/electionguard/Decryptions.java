@@ -12,7 +12,7 @@ import static com.sunya.electionguard.Election.*;
 import static com.sunya.electionguard.Tally.*;
 
 /** Static methods for decryption. */
-public class Decryption {
+public class Decryptions {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   /**
@@ -332,7 +332,7 @@ public class Decryption {
           Ballot.CiphertextSelection selection,
           CiphertextElectionContext context) {
 
-    Guardian.Tuple tuple = guardian.partially_decrypt(selection.ciphertext(), context.crypto_extended_base_hash, null);
+    Guardian.DecryptionProofTuple tuple = guardian.partially_decrypt(selection.ciphertext(), context.crypto_extended_base_hash, null);
 
     if (tuple.proof.is_valid(selection.ciphertext(), guardian.share_election_public_key().key(),
             tuple.decryption, context.crypto_extended_base_hash)) {
@@ -395,7 +395,7 @@ public class Decryption {
           Auxiliary.Decryptor decryptor) {
 
 
-    Optional<Guardian.Tuple> compensated = available_guardian.compensate_decrypt(
+    Optional<Guardian.DecryptionProofTuple> compensated = available_guardian.compensate_decrypt(
             missing_guardian_id,
             selection.ciphertext(),
             context.crypto_extended_base_hash,
@@ -406,7 +406,7 @@ public class Decryption {
               available_guardian.object_id, missing_guardian_id, selection.object_id);
       return Optional.empty();
     }
-    Guardian.Tuple tuple = compensated.get();
+    Guardian.DecryptionProofTuple tuple = compensated.get();
 
     Optional<Group.ElementModP> recovery_public_key = available_guardian.recovery_public_key_for(missing_guardian_id);
     if (recovery_public_key.isEmpty()) {

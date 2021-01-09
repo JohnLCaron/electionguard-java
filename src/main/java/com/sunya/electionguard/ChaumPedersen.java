@@ -16,15 +16,15 @@ public class ChaumPedersen {
   /** Representation of disjunctive Chaum Pederson proof. */
   @Immutable
   public static class DisjunctiveChaumPedersenProof extends Proof {
-    public final ElementModP proof_zero_pad; // a0 in the spec"""
-    public final ElementModP proof_zero_data; // b0 in the spec"""
-    public final ElementModP proof_one_pad; // a1 in the spec"""
-    public final ElementModP proof_one_data; // b1 in the spec"""
-    public final ElementModQ proof_zero_challenge; // c0 in the spec"""
-    public final ElementModQ proof_one_challenge; // c1 in the spec"""
-    public final ElementModQ challenge; // c in the spec"""
-    public final ElementModQ proof_zero_response; // proof_zero_response in the spec"""
-    public final ElementModQ proof_one_response; // proof_one_response in the spec"""
+    public final ElementModP proof_zero_pad; // a0 in the spec
+    public final ElementModP proof_zero_data; // b0 in the spec
+    public final ElementModP proof_one_pad; // a1 in the spec
+    public final ElementModP proof_one_data; // b1 in the spec
+    public final ElementModQ proof_zero_challenge; // c0 in the spec
+    public final ElementModQ proof_one_challenge; // c1 in the spec
+    public final ElementModQ challenge; // c in the spec
+    public final ElementModQ proof_zero_response; // proof_zero_response in the spec
+    public final ElementModQ proof_one_response; // proof_one_response in the spec
 
     public DisjunctiveChaumPedersenProof(ElementModP proof_zero_pad, ElementModP proof_zero_data,
                                          ElementModP proof_one_pad, ElementModP proof_one_data, ElementModQ proof_zero_challenge,
@@ -195,11 +195,11 @@ public class ChaumPedersen {
   /** Representation of constant Chaum Pederson proof */
   @Immutable
   public static class ConstantChaumPedersenProof extends Proof {
-    public final ElementModP pad; // a in the spec"""
+    public final ElementModP pad; // a in the spec
     public final ElementModP data; // bin the spec"
     public final ElementModQ challenge; // "c in the spec"
     public final ElementModQ response; // "v in the spec"
-    public final int constant; // constant value"""
+    public final int constant; // constant value
 
     public ConstantChaumPedersenProof(ElementModP pad, ElementModP data, ElementModQ challenge, ElementModQ response, int constant) {
       super("ConstantChaumPedersenProof", Proof.Usage.SelectionLimit);

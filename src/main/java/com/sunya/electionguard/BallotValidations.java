@@ -8,7 +8,7 @@ import static com.sunya.electionguard.Ballot.*;
 import static com.sunya.electionguard.Election.*;
 
 /** Static helper methods for ballot validation. */
-public class BallotValidator {
+public class BallotValidations {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   /** Determine if a ballot is valid for a given election . */
@@ -67,7 +67,6 @@ public class BallotValidator {
 
   /** Determine if ballot is valid for ballot style. */
   static boolean ballot_is_valid_for_style(CiphertextBallot ballot, InternalElectionDescription metadata) {
-
     List<ContestDescriptionWithPlaceholders> descriptions = metadata.get_contests_for(ballot.ballot_style);
 
     for (ContestDescriptionWithPlaceholders description : descriptions) {

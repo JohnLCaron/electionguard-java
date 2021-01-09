@@ -38,10 +38,6 @@ public class Group {
       this.elem = elem;
     }
 
-    BigInteger powMod(BigInteger exponent, BigInteger mod) {
-      return elem.modPow(exponent, mod);
-    }
-
     ElementModP modInverseP() {
       return new ElementModP(elem.modInverse(P));
     }
@@ -95,15 +91,9 @@ public class Group {
       super(elem);
     }
 
-    ElementModQ powMod(BigInteger exponent) {
-      return new ElementModQ(powMod(exponent, Q));
-    }
-
-    /**
-     * Validates that the element is actually within the bounds of [0,Q).
-     */
+    /** Validates that the element is actually within the bounds of [0,Q). */
     boolean is_in_bounds() {
-      //         return 0 <= this.elem < Q;
+      // return 0 <= this.elem < Q;
       if (this.elem.compareTo(BigInteger.ZERO) < 0) {
         return false;
       }
@@ -122,13 +112,7 @@ public class Group {
       super(elem);
     }
 
-    ElementModP powMod(BigInteger exponent) {
-      return new ElementModP(powMod(exponent, P));
-    }
-
-    /**
-     * Validates that the element is actually within the bounds of [0,P).
-     */
+    /** Validates that the element is actually within the bounds of [0,P). */
     boolean is_in_bounds() {
       //         return 0 <= this.elem < P;
       if (this.elem.compareTo(BigInteger.ZERO) < 0) {
@@ -204,9 +188,7 @@ public class Group {
     return new ElementModQ(biggy);
   }
 
-  /**
-   * Adds together one or more elements in Q, returns the sum mod Q
-   */
+  /** Adds together one or more elements in Q, returns the sum mod Q */
   static ElementModQ add_qi(BigInteger... elems) {
     BigInteger t = BigInteger.ZERO;
     for (BigInteger e : elems) {
@@ -223,78 +205,64 @@ public class Group {
     return new ElementModQ(t);
   }
 
-  /**
-   * Computes (a-b) mod q.
-   */
+  /** Computes (a-b) mod q. */
   static ElementModQ a_minus_b_q(ElementModQ a, ElementModQ b) {
-    BigInteger r1 = a.elem.subtract(b.elem);
-    BigInteger r2 = r1.mod(Q);
-    ElementModQ r3 = new ElementModQ(r2);
-
     return new ElementModQ(a.elem.subtract(b.elem).mod(Q));
   }
 
+  /** Computes (a-b) mod q. */
   static ElementModQ a_minus_b_q(BigInteger a, BigInteger b) {
     return new ElementModQ(a.subtract(b).mod(Q));
   }
 
-  /**
-   * Computes a/b mod p
-   */
+  /** Computes a/b mod p */
   static ElementModP div_p(ElementMod a, ElementMod b) {
     return div_p(a.elem, b.elem);
   }
 
-  /**
-   * Computes a/b mod p
-   */
+  /** Computes a/b mod p */
   static ElementModP div_p(BigInteger a, BigInteger b) {
     BigInteger inverse = b.modInverse(P);
     return new ElementModP(mult_pi(a, inverse));
   }
 
-  /**
-   * Computes a/b mod q
-   */
+  /** Computes a/b mod q */
   static ElementModQ div_q(ElementMod a, ElementMod b) {
     BigInteger inverse = b.elem.modInverse(Q);
     return mult_q(a, int_to_q_unchecked(inverse));
   }
 
+  /** Computes a/b mod q */
   static ElementModQ div_q(BigInteger a, BigInteger b) {
     BigInteger inverse = b.modInverse(Q);
     return mult_q(a, inverse);
   }
 
-  /**
-   * Computes (Q - a) mod q.
-   */
+  /** Computes (Q - a) mod q. */
   static ElementModQ negate_q(ElementModQ a) {
     return new ElementModQ(Q.subtract(a.elem));
   }
 
-  /**
-   * Computes (a + b * c) mod q.
-   */
+  /** Computes (a + b * c) mod q. */
   static ElementModQ a_plus_bc_q(ElementModQ a, ElementModQ b, ElementModQ c) {
     BigInteger product = b.elem.multiply(c.elem);
     BigInteger sum = a.elem.add(product);
     return new ElementModQ(sum.mod(Q));
   }
 
+  /** Computes (a + b * c) mod q. */
   static ElementModQ a_plus_bc_q(BigInteger a, BigInteger b, BigInteger c) {
     BigInteger product = b.multiply(c);
     BigInteger sum = a.add(product);
     return new ElementModQ(sum.mod(Q));
   }
 
-  /**
-   * Computes the multiplicative inverse mod p.
-   */
+  /** Computes the multiplicative inverse mod p. */
   static ElementModP mult_inv_p(ElementMod elem) {
     return elem.modInverseP();
   }
 
+  /** Computes the multiplicative inverse mod p. */
   static public BigInteger mult_inv_p(BigInteger b) {
     return b.modInverse(P);
   }
@@ -306,9 +274,10 @@ public class Group {
    * @param e: An element in [0,P).
    */
   static ElementModP pow_p(ElementMod b, ElementMod e) {
-    return new ElementModP(b.powMod(e.elem, P));
+    return new ElementModP(b.elem.modPow(e.elem, P));
   }
 
+  /** Computes b^e mod p. */
   static public BigInteger pow_p(BigInteger b, BigInteger e) {
     return b.modPow(e, P);
   }

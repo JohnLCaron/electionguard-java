@@ -1,5 +1,6 @@
 package com.sunya.electionguard;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.flogger.FluentLogger;
 
@@ -14,30 +15,35 @@ import static com.sunya.electionguard.Tally.*;
 
 /**
  * The Decryption Mediator composes partial decryptions from each Guardian
- * to form a decrypted representation of an election tally.
+ * to form a decrypted representation of an election tally. Mutable.
  */
 public class DecryptionMediator {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
+  private final InternalElectionDescription _metadata;
   private final CiphertextElectionContext _encryption;
   private final CiphertextTally _ciphertext_tally;
-  private final InternalElectionDescription _metadata;
-
-  private final Map<String, Guardian> _available_guardians = new HashMap<>();
-  private final Map<String, KeyCeremony.ElectionPublicKey> _missing_guardians = new HashMap<>();
-
   private final Optional<PlaintextTally> _plaintext_tally = Optional.empty();
 
   /** Since spoiled ballots are decrypted, they are just a special case of a tally. */
-  private final Map<String, Optional<PlaintextTally>> _plaintext_spoiled_ballots = new HashMap<>();
+  private final Map<String, Optional<PlaintextTally>> _plaintext_spoiled_ballots = new HashMap<>(); // Map(BALLOT_ID, PlaintextTally)
+
+  private final Map<String, Guardian> _available_guardians = new HashMap<>(); // Map(AVAILABLE_GUARDIAN_ID, Guardian)
+  private final Map<String, KeyCeremony.ElectionPublicKey> _missing_guardians = new HashMap<>(); // Map(MISSING_GUARDIAN_ID, Guardian)
 
   /** A collection of Decryption Shares for each Available Guardian. */
-  private final Map<String, TallyDecryptionShare> _decryption_shares = new HashMap<>();
+  private final Map<String, TallyDecryptionShare> _decryption_shares = new HashMap<>(); // Map(AVAILABLE_GUARDIAN_ID, TallyDecryptionShare)
 
-  /** A collection of lagrange coefficients `w_{i,j}` computed by available guardians for each missing guardian. */
+  /**
+   * A collection of lagrange coefficients `w_{i,j}` computed by available guardians for each missing guardian.
+   * Map( MISSING_GUARDIAN_ID, Map(AVAILABLE_GUARDIAN_ID, ElementModQ))
+   */
   private final Map<String, Map<String, Group.ElementModQ>> _lagrange_coefficients = new HashMap<>();
 
-  /** A collection of Compensated Decryption Shares for each Available Guardian. */
+  /**
+   * A collection of Compensated Decryption Shares for each Available Guardian.
+   * Map( MISSING_GUARDIAN_ID, Map(AVAILABLE_GUARDIAN_ID, CompensatedTallyDecryptionShare))
+   */
   private final Map<String, Map<String, CompensatedTallyDecryptionShare>> _compensated_decryption_shares = new HashMap<>();
 
   public DecryptionMediator(InternalElectionDescription metadata, CiphertextElectionContext context, CiphertextTally ciphertext_tally) {
@@ -62,7 +68,7 @@ public class DecryptionMediator {
 
     // Compute the Decryption Share for the guardian
     Optional<TallyDecryptionShare> share =
-            Decryption.compute_decryption_share(guardian, this._ciphertext_tally, this._encryption);
+            Decryptions.compute_decryption_share(guardian, this._ciphertext_tally, this._encryption);
     if (share.isEmpty()) {
       logger.atInfo().log("announce could not generate decryption share for %s", guardian.object_id);
       return Optional.empty();
@@ -82,7 +88,7 @@ public class DecryptionMediator {
     // Check this guardian's collection of public keys
     // for other guardians that have not announced
     Map<String, KeyCeremony.ElectionPublicKey> missing_guardians =
-            guardian.otherGuardianPublicKeys().entrySet().stream()
+            guardian.otherGuardianElectionKeys().entrySet().stream()
                     .filter(e -> !this._available_guardians.containsKey(e.getKey()))
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
@@ -115,6 +121,7 @@ public class DecryptionMediator {
    * @return a collection of `CompensatedTallyDecryptionShare` generated from all available guardians
    * or `None if there is an error
    */
+  @VisibleForTesting
   Optional<List<CompensatedTallyDecryptionShare>> compensate(
           String missing_guardian_id, @Nullable Auxiliary.Decryptor decryptor) {
 
@@ -142,7 +149,7 @@ public class DecryptionMediator {
               ElectionPolynomial.compute_lagrange_coefficient(BigInteger.valueOf(available_guardian.sequence_order()), seq_orders));
 
       // Compute the decryption shares
-      Optional<CompensatedTallyDecryptionShare> share = Decryption.compute_compensated_decryption_share(
+      Optional<CompensatedTallyDecryptionShare> share = Decryptions.compute_compensated_decryption_share(
               available_guardian,
               missing_guardian_id,
               this._ciphertext_tally,
@@ -205,7 +212,7 @@ public class DecryptionMediator {
 
     // Reconstruct the missing partial decryptions from the compensation shares
     Optional<Map<String, TallyDecryptionShare>> missing_decryption_shares =
-            Decryption.reconstruct_missing_tally_decryption_shares(
+            Decryptions.reconstruct_missing_tally_decryption_shares(
                     this._ciphertext_tally,
                     this._missing_guardians,
                     this._compensated_decryption_shares,
@@ -235,6 +242,7 @@ public class DecryptionMediator {
   }
 
   /** Submit the decryption share to be used in the decryption. */
+  @VisibleForTesting
   boolean _submit_decryption_share(TallyDecryptionShare share) {
     if (this._decryption_shares.containsKey(share.guardian_id())) {
       logger.atInfo().log("cannot submit for guardian %s that already decrypted", share.guardian_id());
@@ -245,14 +253,14 @@ public class DecryptionMediator {
   }
 
   /** Submit compensated decryption shares to be used in the decryption. */
-  boolean _submit_compensated_decryption_shares(List<CompensatedTallyDecryptionShare> shares) {
+  private boolean _submit_compensated_decryption_shares(List<CompensatedTallyDecryptionShare> shares) {
     List<Boolean> ok = shares.stream().map(this::_submit_compensated_decryption_share).
             collect(Collectors.toList());
     return ok.stream().allMatch(b -> b);
   }
 
   /** Submit compensated decryption share to be used in the decryption. */
-  boolean _submit_compensated_decryption_share(CompensatedTallyDecryptionShare share) {
+  private boolean _submit_compensated_decryption_share(CompensatedTallyDecryptionShare share) {
     Map<String, CompensatedTallyDecryptionShare> shareMap =
             this._compensated_decryption_shares.get(share.missing_guardian_id());
     if (this._compensated_decryption_shares.containsKey(share.missing_guardian_id()) &&

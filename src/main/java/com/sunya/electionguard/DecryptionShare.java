@@ -198,7 +198,7 @@ public class DecryptionShare {
     abstract ElementModQ description_hash();
 
     /** the collection of decryption shares for this contest's selections. */
-    abstract ImmutableMap<String, CiphertextCompensatedDecryptionSelection> selections();
+    abstract ImmutableMap<String, CiphertextCompensatedDecryptionSelection> selections(); // Map(SELECTION_ID, CiphertextCompensatedDecryptionSelection)
 
     public static CiphertextCompensatedDecryptionContest create(
             String object_id,
@@ -263,10 +263,10 @@ public class DecryptionShare {
     abstract ElementModP public_key();
 
     /** The collection of decryption shares for all contests in the election. */
-    abstract ImmutableMap<String, CiphertextCompensatedDecryptionContest> contests();
+    abstract ImmutableMap<String, CiphertextCompensatedDecryptionContest> contests(); // Map(CONTEST_ID, CiphertextCompensatedDecryptionContest)
 
     /** The collection of decryption shares for all spoiled ballots in the election. */
-    abstract ImmutableMap<String, CompensatedBallotDecryptionShare> spoiled_ballots();
+    abstract ImmutableMap<String, CompensatedBallotDecryptionShare> spoiled_ballots(); // Map(BALLOT_ID, CompensatedBallotDecryptionShare)
 
     public static CompensatedTallyDecryptionShare create(String guardian_id,
                                                          String missing_guardian_id,
@@ -293,13 +293,17 @@ public class DecryptionShare {
   /** A Guardian's Partial Decryption Share of an election tally. */
   @AutoValue
   static abstract class TallyDecryptionShare {
-    abstract String guardian_id(); // The Available Guardian that this share belongs to
+    /** The Available Guardian that this share belongs to. */
+    abstract String guardian_id();
 
-    abstract ElementModP public_key(); // The election public key for the guardian
+    /** The election public key for the guardian. */
+    abstract ElementModP public_key();
 
-    abstract ImmutableMap<String, CiphertextDecryptionContest> contests(); // The collection of decryption shares for all contests in the election
+    /** The collection of decryption shares for all contests in the election . */
+    abstract ImmutableMap<String, CiphertextDecryptionContest> contests();
 
-    abstract ImmutableMap<String, BallotDecryptionShare> spoiled_ballots(); // The collection of decryption shares for all spoiled ballots in the election
+    /** // The collection of decryption shares for all spoiled ballots in the election. */
+    abstract ImmutableMap<String, BallotDecryptionShare> spoiled_ballots();
 
     public static TallyDecryptionShare create(
             String guardian_id,

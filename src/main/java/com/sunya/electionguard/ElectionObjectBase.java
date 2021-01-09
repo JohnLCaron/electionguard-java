@@ -2,7 +2,7 @@ package com.sunya.electionguard;
 
 import java.util.Objects;
 
-/** A base object to derive other election objects that is identifiable by object_id. */
+/** Superclass for election objects that are identifiable by object_id. */
 public class ElectionObjectBase {
   public final String object_id;
 

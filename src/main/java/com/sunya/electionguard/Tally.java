@@ -1,6 +1,7 @@
 package com.sunya.electionguard;
 
 import com.google.auto.value.AutoValue;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.flogger.FluentLogger;
@@ -27,10 +28,10 @@ public class Tally {
     public abstract BigInteger tally();
     public abstract ElementModP value();
     public abstract ElGamal.Ciphertext message();
-    public abstract List<DecryptionShare.CiphertextDecryptionSelection> shares();
+    public abstract ImmutableList<DecryptionShare.CiphertextDecryptionSelection> shares();
 
     public static PlaintextTallySelection create(String object_id, BigInteger tally, ElementModP value, ElGamal.Ciphertext message, List<DecryptionShare.CiphertextDecryptionSelection> shares) {
-      return new AutoValue_Tally_PlaintextTallySelection(object_id, tally, value, message, shares);
+      return new AutoValue_Tally_PlaintextTallySelection(object_id, tally, value, message, ImmutableList.copyOf(shares));
     }
 
     public static TypeAdapter<PlaintextTallySelection> typeAdapter(Gson gson) {
@@ -71,10 +72,10 @@ public class Tally {
   /** A plaintext Tally Contest is a collection of plaintext selections. */
   @AutoValue
   public static abstract class PlaintextTallyContest implements ElectionObjectBaseIF {
-    public abstract Map<String, PlaintextTallySelection> selections();
+    public abstract ImmutableMap<String, PlaintextTallySelection> selections();
 
     public static PlaintextTallyContest create(String object_id, Map<String, PlaintextTallySelection> selections) {
-      return new AutoValue_Tally_PlaintextTallyContest(object_id, selections);
+      return new AutoValue_Tally_PlaintextTallyContest(object_id, ImmutableMap.copyOf(selections));
     }
 
     public static TypeAdapter<PlaintextTallyContest> typeAdapter(Gson gson) {
@@ -84,19 +85,19 @@ public class Tally {
 
   /**
    * A CiphertextTallyContest is a container for associating a collection of CiphertextTallySelection
-   * to a specific ContestDescription.
+   * to a specific ContestDescription. The CiphertextTallySelections are mutable.
    */
   public static class CiphertextTallyContest extends ElectionObjectBase {
     /** The ContestDescription hash. */
     private final ElementModQ description_hash;
 
     /** A collection of CiphertextTallySelection mapped by SelectionDescription.object_id. */
-    private final Map<String, CiphertextTallySelection> tally_selections;
+    private final ImmutableMap<String, CiphertextTallySelection> tally_selections;
 
     public CiphertextTallyContest(String object_id, ElementModQ description_hash, Map<String, CiphertextTallySelection> tally_selections) {
       super(object_id);
       this.description_hash = description_hash;
-      this.tally_selections = tally_selections;
+      this.tally_selections = ImmutableMap.copyOf(tally_selections);
     }
 
     ElementModQ description_hash() {
@@ -162,15 +163,16 @@ public class Tally {
       }
     }
 
+    @Immutable
     static class RunAccumulateSelections implements Callable<AccumSelectionsTuple> {
       final String selection_id;
       final CiphertextTallySelection selection_tally;
-      final List<CiphertextBallotSelection> contest_selections;
+      final ImmutableList<CiphertextBallotSelection> contest_selections;
 
       public RunAccumulateSelections(String id, CiphertextTallySelection selection_tally, List<CiphertextBallotSelection> contest_selections) {
         this.selection_id = id;
         this.selection_tally = selection_tally;
-        this.contest_selections = contest_selections;
+        this.contest_selections = ImmutableList.copyOf(contest_selections);
       }
 
       @Override
@@ -209,11 +211,11 @@ public class Tally {
   /** The plaintext representation of all contests in the election. */
   @AutoValue
   public static abstract class PlaintextTally implements ElectionObjectBaseIF {
-    public abstract Map<String, PlaintextTallyContest> contests();
-    public abstract Map<String, Map<String, PlaintextTallyContest>> spoiled_ballots();
+    public abstract ImmutableMap<String, PlaintextTallyContest> contests();
+    public abstract ImmutableMap<String, Map<String, PlaintextTallyContest>> spoiled_ballots();
 
     public static PlaintextTally create(String object_id, Map<String, PlaintextTallyContest> contests, Map<String, Map<String, PlaintextTallyContest>> spoiled_ballots) {
-      return new AutoValue_Tally_PlaintextTally(object_id, contests, spoiled_ballots);
+      return new AutoValue_Tally_PlaintextTally(object_id, ImmutableMap.copyOf(contests), ImmutableMap.copyOf(spoiled_ballots));
     }
     public static TypeAdapter<PlaintextTally> typeAdapter(Gson gson) {
       return new AutoValue_Tally_PlaintextTally.GsonTypeAdapter(gson);
@@ -221,7 +223,7 @@ public class Tally {
 
   } // PlaintextTally
 
-  /** A `CiphertextTally` accepts cast and spoiled ballots and accumulates a tally on the cast ballots. */
+  /** A `CiphertextTally` accepts cast and spoiled ballots and accumulates a tally on the cast ballots. Mutable. */
   public static class CiphertextTally extends ElectionObjectBase {
     private final Election.InternalElectionDescription _metadata;
     private final Election.CiphertextElectionContext _encryption;
@@ -282,7 +284,7 @@ public class Tally {
         return false;
       }
 
-      if (!BallotValidator.ballot_is_valid_for_election(ballot, this._metadata, this._encryption)) {
+      if (!BallotValidations.ballot_is_valid_for_election(ballot, this._metadata, this._encryption)) {
         return false;
       }
 
@@ -306,7 +308,7 @@ public class Tally {
       // Find all the ballots for each selection.
       for (CiphertextAcceptedBallot ballot : ballots) {
         if (!this.contains(ballot) &&
-                BallotValidator.ballot_is_valid_for_election(ballot, this._metadata, this._encryption)) {
+                BallotValidations.ballot_is_valid_for_election(ballot, this._metadata, this._encryption)) {
 
           if (ballot.state == BallotBoxState.CAST) {
             // collect the selections so they can can be accumulated in parallel
@@ -358,7 +360,6 @@ public class Tally {
       return true;
     }
 
-
     /** Add a spoiled ballot. */
     boolean _add_spoiled(CiphertextAcceptedBallot ballot) {
       this.spoiled_ballots.put(ballot.object_id, ballot);
@@ -393,13 +394,14 @@ public class Tally {
     } // AccumBallots
 
     //// Allow _accumulate to be run in parallel
+    @Immutable
     static class RunAccumulateOverBallots implements Callable<AccumOverBallotsTuple> {
       final String selection_id;
-      final Map<String, ElGamal.Ciphertext> ballot_selections; // Map(BALLOT_ID, Ciphertext)
+      final ImmutableMap<String, ElGamal.Ciphertext> ballot_selections; // Map(BALLOT_ID, Ciphertext)
 
       public RunAccumulateOverBallots(String selection_id, Map<String, ElGamal.Ciphertext> ballot_selections) {
         this.selection_id = selection_id;
-        this.ballot_selections = ballot_selections;
+        this.ballot_selections = ImmutableMap.copyOf(ballot_selections);
       }
 
       @Override
@@ -447,13 +449,16 @@ public class Tally {
 
   } // class CiphertextTally
 
-  /** The published Ciphertext representation of all contests in the election. */
+  /**
+   * The published Ciphertext representation of all contests in the election.
+   * LOOK not really immutable, because CiphertextTallySelection is not.
+   */
   @AutoValue
   public static abstract class PublishedCiphertextTally implements ElectionObjectBaseIF {
-    public abstract Map<String, CiphertextTallyContest> cast();
+    public abstract ImmutableMap<String, CiphertextTallyContest> cast();
 
     public static PublishedCiphertextTally create(String object_id, Map<String, CiphertextTallyContest> cast) {
-      return new AutoValue_Tally_PublishedCiphertextTally(object_id, cast);
+      return new AutoValue_Tally_PublishedCiphertextTally(object_id, ImmutableMap.copyOf(cast));
     }
 
     public static TypeAdapter<PublishedCiphertextTally> typeAdapter(Gson gson) {
@@ -463,7 +468,6 @@ public class Tally {
 
 
   //////////////////////////////////////////////////////////////////////////////
-  // testing
 
   /** Publish a ciphertext tally with simpler format. */
   public static PublishedCiphertextTally publish_ciphertext_tally(CiphertextTally tally) {
@@ -475,7 +479,6 @@ public class Tally {
    * @return The mutated CiphertextTally or None if there is an error
    */
   static Optional<CiphertextTally> tally_ballot(CiphertextAcceptedBallot ballot, CiphertextTally tally) {
-
     if (ballot.state == BallotBoxState.UNKNOWN) {
       logger.atWarning().log("tally ballots error tallying unknown state for ballot %s", ballot.object_id);
       return Optional.empty();

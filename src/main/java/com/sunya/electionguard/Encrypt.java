@@ -12,7 +12,6 @@ import static com.sunya.electionguard.Ballot.*;
 import static com.sunya.electionguard.Election.*;
 import static com.sunya.electionguard.Group.*;
 
-
 public class Encrypt {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
@@ -48,7 +47,8 @@ public class Encrypt {
 
   /**
    * An object for caching election and encryption state. It composes Elections and Ballots.
-   * LOOK mutable, since it has to keep track of the last hash
+   * LOOK mutable, since it has to keep track of the last hash. If all the ballots were passed in at once,
+   *  it could be immutable. Also I wonder if encrypt_ballot() is costly and should be parallelized?
    */
   public static class EncryptionMediator {
     private final InternalElectionDescription _metadata;
@@ -356,8 +356,8 @@ public class Encrypt {
   }
 
   // TODO: ISSUE #57: add the device hash to the function interface so it can be propagated with the ballot.
-  // also propagate the seed hash so that the ballot tracking id's can be regenerated
-  // by traversing the collection of ballots encrypted by a specific device
+  //  also propagate the seed hash so that the ballot tracking id's can be regenerated
+  //  by traversing the collection of ballots encrypted by a specific device
 
   /**
    * Encrypt a specific `Ballot` in the context of a specific `CiphertextElectionContext`.

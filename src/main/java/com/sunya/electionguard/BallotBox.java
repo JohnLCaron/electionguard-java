@@ -6,7 +6,7 @@ import java.util.Optional;
 
 import static com.sunya.electionguard.Ballot.*;
 
-/** A stateful convenience wrapper to cache election data. */
+/** A mutable object to cache election data. */
 public class BallotBox {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
@@ -37,7 +37,7 @@ public class BallotBox {
    * @return a `CiphertextAcceptedBallot` or `None` if there was an error
    */
   Optional<CiphertextAcceptedBallot> accept_ballot(CiphertextBallot ballot, BallotBoxState state) {
-    if (!BallotValidator.ballot_is_valid_for_election(ballot, _metadata, _context)) {
+    if (!BallotValidations.ballot_is_valid_for_election(ballot, _metadata, _context)) {
       return Optional.empty();
     }
 

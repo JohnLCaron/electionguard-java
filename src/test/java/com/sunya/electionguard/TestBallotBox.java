@@ -47,7 +47,7 @@ public class TestBallotBox {
   @Example
   public void test_ballot_box_cast_ballot() {
     // Act
-    assertThat(BallotValidator.ballot_is_valid_for_election(data, metadata, context)).isTrue();
+    assertThat(BallotValidations.ballot_is_valid_for_election(data, metadata, context)).isTrue();
 
     Optional<CiphertextAcceptedBallot> resultO = subject.cast(data);
     assertThat(resultO).isPresent();

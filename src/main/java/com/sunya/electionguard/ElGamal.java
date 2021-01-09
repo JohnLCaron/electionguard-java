@@ -121,7 +121,7 @@ public class ElGamal {
     return Optional.of(new KeyPair(a, g_pow_p(a)));
   }
 
-  /** Create a random elgamal keypair. */
+  /** Create a random elgamal keypair. LOOK Move to test. */
   static KeyPair elgamal_keypair_random() {
     return elgamal_keypair_from_secret(rand_range_q(TWO_MOD_Q)).orElseThrow(RuntimeException::new);
   }

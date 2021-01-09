@@ -57,7 +57,7 @@ public class KeyCeremony {
   abstract static class PublicKeySet {
     abstract String owner_id();
     abstract int sequence_order();
-    abstract java.security.PublicKey auxiliary_public_key();
+    abstract java.security.PublicKey auxiliary_public_key(); // LOOK can we hide java.security.PublicKey?
     abstract ElementModP election_public_key();
     abstract SchnorrProof election_public_key_proof();
 

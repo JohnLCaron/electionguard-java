@@ -65,7 +65,6 @@ public class Grp {
     return is_within_set_zstarp(num) && pow_p(num, q).equals(BigInteger.ONE);
   }
 
-
   /** check if a is a divisor of b. */
   public static boolean is_divisor(BigInteger a, BigInteger b) {
     return a.mod(b).equals(BigInteger.ZERO);

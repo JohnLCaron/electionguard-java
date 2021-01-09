@@ -7,13 +7,13 @@ import java.util.*;
 
 import static com.sunya.electionguard.KeyCeremony.*;
 
-/** KeyCeremonyMediator for assisting communication between guardians. */
+/** KeyCeremonyMediator for assisting communication between guardians. Mutable. */
 public class KeyCeremonyMediator {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   private final CeremonyDetails ceremony_details;
-  private final Map<String, Auxiliary.PublicKey> _auxiliary_public_keys;
-  private final Map<String, ElectionPublicKey> _election_public_keys;
+  private final Map<String, Auxiliary.PublicKey> _auxiliary_public_keys; // Map(GUARDIAN_ID, Auxiliary.PublicKey)
+  private final Map<String, ElectionPublicKey> _election_public_keys;  // Map(GUARDIAN_ID, ElectionPublicKey)
   private final Map<GuardianPair, ElectionPartialKeyBackup> _election_partial_key_backups;
   private final Map<GuardianPair, ElectionPartialKeyVerification> _election_partial_key_verifications;
   private final Map<GuardianPair, ElectionPartialKeyChallenge> _election_partial_key_challenges;
@@ -47,9 +47,9 @@ public class KeyCeremonyMediator {
   }
 
   /**
-   * Orchestrate the KLey Ceremony by sharing keys among the announced guardians.
+   * Orchestrate the Key Ceremony by sharing keys among the announced guardians.
    *
-   * @param encryptor: Auxiliary encrypt function
+   * @param encryptor: Auxiliary encrypt function, or null for default.
    * @return a collection of guardians, or None if there is an error
    */
   Optional<List<Guardian>> orchestrate(@Nullable Auxiliary.Encryptor encryptor) {

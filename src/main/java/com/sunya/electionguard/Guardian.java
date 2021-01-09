@@ -13,7 +13,7 @@ import static com.sunya.electionguard.Group.*;
 import static com.sunya.electionguard.KeyCeremony.*;
 
 
-/** Guardian of election, responsible for safeguarding information and decrypting results. */
+/** Guardian of election, responsible for safeguarding information and decrypting results. Mutable. */
 public class Guardian extends ElectionObjectBase {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
@@ -27,10 +27,10 @@ public class Guardian extends ElectionObjectBase {
 
   //// From Other Guardians
   // The collection of other guardians' auxiliary public keys that are shared with this guardian
-  private final Map<String, Auxiliary.PublicKey> _guardian_auxiliary_public_keys; // map(GUARDIAN_ID, Auxiliary.PublicKey)
+  private final Map<String, Auxiliary.PublicKey> otherGuardianAuxiliaryKeys; // map(GUARDIAN_ID, Auxiliary.PublicKey)
 
   // The collection of other guardians' election public keys that are shared with this guardian
-  private final Map<String, ElectionPublicKey> otherGuardianPublicKeys; // map(GUARDIAN_ID, ElectionPublicKey)
+  private final Map<String, ElectionPublicKey> otherGuardianElectionKeys; // map(GUARDIAN_ID, ElectionPublicKey)
 
   // The collection of other guardians' partial key backups that are shared with this guardian
   private final Map<String, ElectionPartialKeyBackup> _guardian_election_partial_key_backups; // Map(GUARDIAN_ID, ElectionPartialKeyBackup)
@@ -61,8 +61,8 @@ public class Guardian extends ElectionObjectBase {
     this._election_keys =  KeyCeremony.generate_election_key_pair(this.ceremony_details.quorum(), nonce_seed);
 
     this._backups_to_share = new HashMap<>();
-    this._guardian_auxiliary_public_keys = new HashMap<>();
-    this.otherGuardianPublicKeys = new HashMap<>();
+    this.otherGuardianAuxiliaryKeys = new HashMap<>();
+    this.otherGuardianElectionKeys = new HashMap<>();
     this._guardian_election_partial_key_backups = new HashMap<>();
     this._guardian_election_partial_key_verifications = new HashMap<>();
 
@@ -151,24 +151,24 @@ public class Guardian extends ElectionObjectBase {
 
   /** Save a guardians auxiliary public key. */
   void save_auxiliary_public_key(Auxiliary.PublicKey key) {
-    this._guardian_auxiliary_public_keys.put(key.owner_id, key);
+    this.otherGuardianAuxiliaryKeys.put(key.owner_id, key);
   }
 
   /** True if all auxiliary public keys have been received. */
   boolean all_auxiliary_public_keys_received() {
-    return this._guardian_auxiliary_public_keys.size() == this.ceremony_details.number_of_guardians();
+    return this.otherGuardianAuxiliaryKeys.size() == this.ceremony_details.number_of_guardians();
   }
 
   // guardian_auxiliary_public_keys() not used
 
   /** Get a read-only view of the Guardian Election Public Keys shared with this Guardian. */
-  ImmutableMap<String, ElectionPublicKey> otherGuardianPublicKeys() {
-    return ImmutableMap.copyOf(otherGuardianPublicKeys);
+  ImmutableMap<String, ElectionPublicKey> otherGuardianElectionKeys() {
+    return ImmutableMap.copyOf(otherGuardianElectionKeys);
   }
 
   /** From the Guardian Election Public Keys shared with this Guardian, find the ElectionPublicKey by guardian_id. */
-  @Nullable ElectionPublicKey otherGuardianPublicKey(String guardian_id) {
-    return otherGuardianPublicKeys.get(guardian_id);
+  @Nullable ElectionPublicKey otherGuardianElectionKey(String guardian_id) {
+    return otherGuardianElectionKeys.get(guardian_id);
   }
 
   /** Share auxiliary public key with another guardian. */
@@ -200,12 +200,12 @@ public class Guardian extends ElectionObjectBase {
 
   /** Save a guardians election public key. */
   void save_election_public_key(ElectionPublicKey key) {
-    this.otherGuardianPublicKeys.put(key.owner_id(), key);
+    this.otherGuardianElectionKeys.put(key.owner_id(), key);
   }
 
   /** True if all election public keys have been received. */
   boolean all_election_public_keys_received() {
-    return this.otherGuardianPublicKeys.size() == this.ceremony_details.number_of_guardians();
+    return this.otherGuardianElectionKeys.size() == this.ceremony_details.number_of_guardians();
   }
 
   /**
@@ -213,14 +213,13 @@ public class Guardian extends ElectionObjectBase {
    * @param encryptor Encryption function using auxiliary key
    */
   boolean generate_election_partial_key_backups(@Nullable Auxiliary.Encryptor encryptor) {
-
     if (!this.all_auxiliary_public_keys_received()) {
       logger.atInfo().log("guardian; %s could not generate election partial key backups: missing auxiliary keys",
               this.object_id);
       return false;
     }
 
-    for (Auxiliary.PublicKey auxiliary_key : this._guardian_auxiliary_public_keys.values()) {
+    for (Auxiliary.PublicKey auxiliary_key : this.otherGuardianAuxiliaryKeys.values()) {
       Optional<ElectionPartialKeyBackup> backup =
               generate_election_partial_key_backup(this.object_id, this._election_keys.polynomial(), auxiliary_key, encryptor);
       if (backup.isEmpty()) {
@@ -331,7 +330,7 @@ public class Guardian extends ElectionObjectBase {
     if (!this.all_election_partial_key_backups_verified()) {
       return Optional.empty();
     }
-    return Optional.of(KeyCeremony.combine_election_public_keys(this.otherGuardianPublicKeys));
+    return Optional.of(KeyCeremony.combine_election_public_keys(this.otherGuardianElectionKeys));
   }
 
   /**
@@ -344,7 +343,7 @@ public class Guardian extends ElectionObjectBase {
    *                            if no value is provided, a random number will be used.
    * @return a `Tuple[ElementModP, ChaumPedersenProof]` of the decryption and its proof
    */
-  Tuple partially_decrypt(
+  DecryptionProofTuple partially_decrypt(
           ElGamal.Ciphertext elgamal,
           ElementModQ extended_base_hash,
           @Nullable ElementModQ nonce_seed) {
@@ -366,14 +365,14 @@ public class Guardian extends ElectionObjectBase {
             nonce_seed,
             extended_base_hash);
 
-    return new Tuple(partial_decryption, proof);
+    return new DecryptionProofTuple(partial_decryption, proof);
   }
 
-  static class Tuple {
+  static class DecryptionProofTuple {
     final ElementModP decryption;
     final ChaumPedersen.ChaumPedersenProof proof;
 
-    Tuple(ElementModP partial_decryption, ChaumPedersen.ChaumPedersenProof proof) {
+    DecryptionProofTuple(ElementModP partial_decryption, ChaumPedersen.ChaumPedersenProof proof) {
       this.decryption = partial_decryption;
       this.proof = proof;
     }
@@ -382,17 +381,15 @@ public class Guardian extends ElectionObjectBase {
   /**
    * Compute a compensated partial decryption of an elgamal encryption on behalf of the missing guardian.
    * <p>
-   *
    * @param missing_guardian_id: the guardian
    * @param elgamal:             the `ElGamalCiphertext` that will be partially decrypted
-   * @param extended_base_hash:  the extended base hash of the election that
-   *                             was used to generate t he ElGamal Ciphertext
+   * @param extended_base_hash:  the extended base hash of the election used to generate the ElGamal Ciphertext
    * @param nonce_seed:          an optional value used to generate the `ChaumPedersenProof`
    *                             if no value is provided, a random number will be used.
    * @param decryptor            an `AuxiliaryDecrypt` function to decrypt the missing guardian private key backup
-   * @return a `Tuple[ElementModP, ChaumPedersenProof]` of the decryption and its proof
+   * @return the decryption and its proof
    */
-  Optional<Tuple> compensate_decrypt(
+  Optional<DecryptionProofTuple> compensate_decrypt(
           String missing_guardian_id,
           ElGamal.Ciphertext elgamal,
           ElementModQ extended_base_hash,
@@ -429,7 +426,7 @@ public class Guardian extends ElectionObjectBase {
             nonce_seed,
             extended_base_hash);
 
-    return Optional.of(new Tuple(partial_decryption, proof));
+    return Optional.of(new DecryptionProofTuple(partial_decryption, proof));
   }
 
   /** Compute the recovery public key for a given guardian. */
