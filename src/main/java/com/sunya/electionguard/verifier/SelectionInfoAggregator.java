@@ -71,7 +71,7 @@ public class SelectionInfoAggregator {
    * get contest names, its corresponding sequence, and its corresponding selection names from description,
    * (1) order_names_dic : key - sequence order, value - contest name
    * (2) contest_selection_names: key - contest name, value - a list of selection names
-   * :return: None
+   * @return None
    */
   void fill_in_contest_dicts(Election.ElectionDescription election) {
     for (Election.ContestDescription contest : election.contests) {
@@ -153,9 +153,9 @@ public class SelectionInfoAggregator {
 
   /**
    * get the accumulative product of alpha/pad and beta/data for all the selections
-   * :param dic: the dictionary alpha or beta values are being added into
-   * :param selection_name: name of a selection, noted as "object id" under a selection
-   * :param num: a number being multiplied to get the final product
+   * @param dic: the dictionary alpha or beta values are being added into
+   * @param selection_name: name of a selection, noted as "object id" under a selection
+   * @param num: a number being multiplied to get the final product
    */
   private static void get_accum_product(Map<String, ElementModP> dic, String selection_name, ElementModP num) {
     ElementModP current = dic.get(selection_name);
@@ -169,7 +169,7 @@ public class SelectionInfoAggregator {
 
   /**
    * get the whole list of dictionaries of contest selection information
-   * :return:a list of dictionaries of contest selection information
+   * @returna list of dictionaries of contest selection information
    */
   List<Map<String, ElementModP>> get_dics() {
     return this.dics_by_contest;
@@ -177,9 +177,9 @@ public class SelectionInfoAggregator {
 
   /**
    * get the corresponding dictionary id in the dictionary list by the name of contest
-   * :param contest_name: name of a contest, noted as "object id" under contest
-   * :param type: a or b, a stands for alpha, b stands for beta, to denote what values the target dictionary contains
-   * :return: a dictionary of alpha or beta values of all the selections of a specific contest.
+   * @param contest_name: name of a contest, noted as "object id" under contest
+   * @param type: a or b, a stands for alpha, b stands for beta, to denote what values the target dictionary contains
+   * @return a dictionary of alpha or beta values of all the selections of a specific contest.
    */
   int get_dic_id_by_contest_name(String contest_name, String type) {
     if (type.equals("a")) {
@@ -192,7 +192,7 @@ public class SelectionInfoAggregator {
 
   /**
    * get the total alpha/pad of tallies of all contests
-   * :return: a dictionary of alpha/pad of tallies of all contests
+   * @return a dictionary of alpha/pad of tallies of all contests
    */
   Map<String, Map<String, ElementModP>> get_total_pad() {
      return this.total_pad_dic;
@@ -200,7 +200,7 @@ public class SelectionInfoAggregator {
 
   /**
    * get the total beta/data of tallies of all contests
-   * :return: a dictionary of beta/data of tallies of all contests
+   * @return a dictionary of beta/data of tallies of all contests
    */
   Map<String, Map<String, ElementModP>> get_total_data() {
      return this.total_data_dic;

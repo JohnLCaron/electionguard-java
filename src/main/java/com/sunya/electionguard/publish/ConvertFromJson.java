@@ -110,6 +110,7 @@ public class ConvertFromJson {
             .registerTypeAdapter(CiphertextDecryptionSelection.class, new CiphertextDecryptionSelectionSerializer())
             .registerTypeAdapter(CiphertextDecryptionSelection.class, new CiphertextDecryptionSelectionDeserializer())
             .registerTypeAdapter(ImmutableList.class, new ImmutableListDeserializer())
+            // .registerTypeAdapter(ImmutableMap.class, new ImmutableMapDeserializer())
             .create();
   }
 
@@ -172,5 +173,21 @@ public class ConvertFromJson {
               .where(new TypeParameter<E>() {}, (TypeToken<E>) TypeToken.of(arg));
     }
   }
+
+  /*
+  public static final class ImmutableMapDeserializer implements JsonDeserializer<ImmutableMap<?, ?>> {
+    @Override
+    public ImmutableMap<?, ?> deserialize(final JsonElement json, final Type type, final JsonDeserializationContext context) throws JsonParseException {
+      final Type[] typeArguments = ((ParameterizedType) type).getActualTypeArguments();
+      final Type parameterizedType = mapOf(typeArguments[0]).getType();
+      final Map<?, ?> map = context.deserialize(json, parameterizedType);
+      return ImmutableMap.copyOf(map);
+    }
+
+    private <K, V, E> TypeToken<Map<K, V>> mapOf(final Type arg) {
+      return new TypeToken<Map<K, V>>() {}
+              .where(new TypeParameter<E>() {}, (TypeToken<E>) TypeToken.of(arg));
+    }
+  } */
 
 }

@@ -20,20 +20,21 @@ import static com.sunya.electionguard.Group.ElementModP;
 
 /**
  * This module does the decryption work on cast ballot tallies and each spoiled ballots.
- *
- * For both cast ballot tallies and individual spoiled ballots, the decryption goes down from ballot, contest, selection, 
- * to guardian share-level. To mimic such hierarchy, the following 4 classes, DecryptionVerifier, 
- * DecryptionContestVerifier, DecryptionSelectionVerifier, and ShareVerifier, are created. 
- * 
- *     This class is responsible for checking ballot decryption, its major work include,
- *     1. checking box 6, cast ballot tally decryption, where the verifier will check the total
- *     tallies of ballot selections match the actual selections.
- *     2. checking box 9, confirm two equations for each (non-dummy) option in each contest in the ballot coding file.
- *     3. checking box 10, spoiled ballot decryption, where spoiled ballots need to be checked individually.
- *     Note: user can check one single spoiled ballot or all the spoiled ballots in the folder by calling
- *     verify_a_spoiled_ballot(str) and verify_all_spoiled_ballots(), respectively
+ * <p>
+ * For both cast ballot tallies and individual spoiled ballots, the decryption goes down from ballot, contest, selection,
+ * to guardian share-level. To mimic such hierarchy, the following 4 classes, DecryptionVerifier,
+ * DecryptionContestVerifier, DecryptionSelectionVerifier, and ShareVerifier, are created.
+ * <p>
+ * This class is responsible for checking ballot decryption, its major work includes:
+ * <ol>
+ * <li> Verify box 6, "Correctness of Ballot Aggregation and Partial Decryptions".</li>
+ * <li> Verify box 9, "Validation of Correct Decryption of Tallies".</li>
+ * <li> Verify box 10, spoiled ballot decryption, where spoiled ballots need to be checked individually.</li>
+ * </ol>
+ * Note: user can check one single spoiled ballot or all the spoiled ballots in the folder by calling
+ * verify_a_spoiled_ballot(str) and verify_all_spoiled_ballots(), respectively
  */
-public class DecryptionValidator {
+public class DecryptionVerifier {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   final ElectionParameters electionParameters;
@@ -41,7 +42,7 @@ public class DecryptionValidator {
   final Tally.PlaintextTally tally;
   final Grp grp;
 
-  DecryptionValidator(ElectionParameters electionParameters, Consumer consumer) throws IOException {
+  DecryptionVerifier(ElectionParameters electionParameters, Consumer consumer) throws IOException {
     this.electionParameters = electionParameters;
     this.consumer = consumer;
     this.tally = consumer.plaintextTally();
@@ -49,19 +50,23 @@ public class DecryptionValidator {
   }
 
   /**
-   * check if the ballot tally satisfies the equations in box 6, including:
-   * confirming for each (non-dummy) option in each contest in the ballot coding file that the aggregate encryption,
+   * Check if the ballot tally satisfies the equations in box 6, "Correctness of Ballot Aggregation and Partial Decryptions".
+   * <ol>
+   * <li>Confirm for each (non-dummy) option in each contest in the ballot coding file that the aggregate encryption,
    * (𝐴, 𝐵) satisfies 𝐴 = ∏ 𝛼 and 𝐵 = ∏ 𝛽 where the (𝛼 , 𝛽) are the corresponding encryptions on all cast ballots
-   * in the election record;
-   * confirming for each (non-dummy) option in each contest in the ballot coding file the
-   * following for each decrypting trustee 𝑇i, including:
-   * the given value vi is in set Zq,
-   * ai and bi are both in Zrp,
-   * challenge ci = H(Q-bar, (A,B), (ai, bi), Mi))
-   * equations g ^ vi = ai * Ki ^ ci mod p and A ^ vi = bi * Mi ^ ci mod p
-   * :return: true if all the above requirements are satisfied, false if any hasn't been satisfied
+   * in the election record.</li>
+   * <li>Confirm for each (non-dummy) option in each contest in the ballot coding file, for each decrypting trustee 𝑇i:
+   * <ol>
+   * <li>The given value vi is in set Zq,</li>
+   * <li>The given values ai and bi are both in Zrp,</li>
+   * <li>the challenge ci = H(Q-bar, (A,B), (ai, bi), Mi))</li>
+   * <li>The equations g ^ vi = ai * Ki ^ ci mod p and A ^ vi = bi * Mi ^ ci mod p are satisfied</li>
+   * </ol>
+   * </li>
+   * </ol>
+   * @return true if all the above requirements are satisfied, false otherwise
    */
-  boolean verify_cast_ballot_tallies() throws IOException {
+  boolean verify_box6() throws IOException {
     boolean total_error = false;
     boolean share_error = false;
 
@@ -86,10 +91,9 @@ public class DecryptionValidator {
   }
 
   /**
-   * matching the given tallies with accumulative products calculated across all ballots
-   * :param aggregator: a SelectionInfoAggregator instance for accessing information of a selection
-   * :param contest_names: a list of unique contest names, listed as "object_id" under contests
-   * :return: true if all the tallies match, false if not
+   * Match the given tallies with accumulative products calculated across all ballots.
+   * @param aggregator a SelectionInfoAggregator instance for accessing information of a selection
+   * @return true if all the tallies match, false if not
    */
   private boolean match_total_across_ballots(SelectionInfoAggregator aggregator) {
     boolean error = false;
@@ -126,8 +130,8 @@ public class DecryptionValidator {
   }
 
   /**
-   * verify all the spoiled ballots in the spoiled_ballots folder by checking each one individually
-   * :return true if all the spoiled ballots are verified as valid, false otherwise
+   * Verify all the spoiled ballots in the spoiled_ballots folder by checking each one individually.
+   * @return true if all the spoiled ballots are verified as valid, false otherwise
    */
   boolean verify_all_spoiled_ballots() {
     boolean error = false;
@@ -143,19 +147,16 @@ public class DecryptionValidator {
     } else {
       System.out.printf("Spoiled ballot decryption success. %n");
     }
-
     return !error;
   }
 
   /**
-   * helper function used in verify_cast_ballot_tallies() and verify_a_spoiled_ballot(str),
-   * verifying all contests in a ballot by calling the DecryptionContestVerifier
-   * :param contest_dic: the dictionary read from the given dataset, containing all the ballot tally or
-   * spoiled ballot info
-   * :param contest_names: a list of all the contest names in this election
-   * :param field_name: 'object_id' under the cast ballot tallies or each individual spoiled ballot,
+   * Verify all contests in a ballot by calling the DecryptionContestVerifier.
+   * @param field_name 'object_id' under the cast ballot tallies or each individual spoiled ballot,
    * used as an identifier to signal whether this is a check for the cast ballot tallies or spoiled ballots
-   * :return: true if no error has been found in any contest verification in this cast ballot tallies or
+   * @param contests the dictionary read from the given dataset, containing all the ballot tally or
+   * spoiled ballot info
+   * @return true if no error has been found in any contest verification in this cast ballot tallies or
    * spoiled ballot check, false otherwise
    */
   private boolean make_all_contest_verification(String field_name, Map<String, Tally.PlaintextTallyContest> contests) {
@@ -172,17 +173,16 @@ public class DecryptionValidator {
     } else {
       System.out.printf("Decryption verification success.%n");
     }
-
     return !error;
   }
 
   /**
-   *     This class is responsible for checking a contest in the decryption process.
-   *
-   *     Contest is the first level under each ballot. Contest data exist in individual cast ballots, cast ballot tallies,
-   *     and individual spoiled ballots. Therefore, DecryptionContestVerifier will also be used in the aforementioned places
-   *     where contest data exist. Aggregates the selection checks done by DecryptionSelectionVerifier,
-   *     used in DecryptionVerifier.
+   * This class is responsible for checking a contest in the decryption process.
+   * <p>
+   * Contest is the first level under each ballot. Contest data exists in individual cast ballots, cast ballot tallies,
+   * and individual spoiled ballots. Therefore, DecryptionContestVerifier will also be used in the aforementioned places
+   * where contest data exist. Aggregates the selection checks done by DecryptionSelectionVerifier,
+   * used in DecryptionVerifier.
    */
   class DecryptionContestVerifier {
     Tally.PlaintextTallyContest contest;
@@ -192,9 +192,9 @@ public class DecryptionValidator {
     }
 
     /**
-     * Verifies one contest inside the cast ballot tallies or a spoiled ballot at a time.
+     * Verify one contest inside the cast ballot tallies or a spoiled ballot at a time.
      * It combines all the error checks for all the selections under this contest.
-     * :return: true if all the selection checks are passed, false otherwise
+     * @return true if all the selection checks are passed, false otherwise
      */
     boolean verify_a_contest() {
       boolean error = false;
@@ -208,17 +208,16 @@ public class DecryptionValidator {
       if (error) {
         System.out.printf(" %s tally decryption failure. ", this.contest.object_id());
       }
-
       return !error;
     }
   }
 
   /**
-   *     This class works on handling selection decryption.
-   *
-   *     Selection is the layer under contest and above guardian shares. Methods in this class provides public access to
-   *     a selection"s pad and data values for convenience and aggregates the guardian share check conducted by
-   *     ShareVerifier. Used in DecryptionContestVerifier.
+   * Handles selection decryption.
+   * <p>
+   * Selection is the layer under contest and above guardian shares. Methods in this class provides public access to
+   * a selection"s pad and data values for convenience and aggregates the guardian share check conducted by
+   * ShareVerifier. Used in DecryptionContestVerifier.
    */
   class DecryptionSelectionVerifier {
     final Tally.PlaintextTallySelection selection;
@@ -233,9 +232,7 @@ public class DecryptionValidator {
       this.data = selection.message().data;
     }
 
-    /**
-     * verifies a selection at a time. It combines all the checks separated by guardian shares.
-     */
+    /** Verify a selection at a time. Combine all the checks separated by guardian shares. */
     boolean verify_a_selection() {
       List<CiphertextDecryptionSelection> shares = this.selection.shares();
       ShareVerifier sv = new ShareVerifier(shares, this.pad, this.data);
@@ -248,10 +245,10 @@ public class DecryptionValidator {
   }
 
   /**
-   *     This class is used to check shares of decryption under each selections in cast ballot tallies and spoiled ballots.
-   *
-   *     The share level is the deepest level the data of cast ballot tallies and spoiled ballots can go, therefore, most of
-   *     the computation needed for decryption happen here.
+   * Check shares of decryption under each selections in cast ballot tallies and spoiled ballots.
+   * <p>
+   * The share level is the deepest level the data of cast ballot tallies and spoiled ballots can go, therefore, most of
+   * the computation needed for decryption happens here.
    */
   private class ShareVerifier {
     List<CiphertextDecryptionSelection> shares;
@@ -266,10 +263,7 @@ public class DecryptionValidator {
       this.public_keys = electionParameters.public_keys_of_all_guardians();
     }
 
-    /**
-     * verify all shares of a tally decryption
-     * :return: True if no error occur in any share, False if some error
-     */
+    /** Verify all shares of a tally decryption */
     boolean verify_all_shares() {
       boolean error = false;
       int index = 0;
@@ -285,11 +279,10 @@ public class DecryptionValidator {
     }
 
     /**
-     * verify one share at a time, check box 6 requirements,
+     * Verify one share at a time, check box 6 requirements,
      * (1) if the response vi is in the set Zq
      * (2) if the given ai, bi are both in set Zrp
-     * :param share_dic: a specific share inside the shares list
-     * :return: True if no error found in share partial decryption, False if any error
+     * @param share a specific share inside the shares list
      */
     private boolean verify_a_share(CiphertextDecryptionSelection share, ElementModP public_key) {
       boolean error = false;
@@ -321,17 +314,16 @@ public class DecryptionValidator {
         error = true;
         System.out.printf("partial decryption failure.%n");
       }
-
       return !error;
     }
 
     /**
-     * check if equation g ^ vi = ai * (Ki ^ ci) mod p is satisfied.
+     * Check if equation g ^ vi = ai * (Ki ^ ci) mod p is satisfied.
      * <p>
-     * :param response: response of a share, vi
-     * :param pad: pad of a share, ai
-     * :param public_key: public key of a guardian, Ki
-     * :param challenge: challenge of a share, ci
+     * @param response: response of a share, vi
+     * @param pad: pad of a share, ai
+     * @param public_key: public key of a guardian, Ki
+     * @param challenge: challenge of a share, ci
      */
     private boolean check_equation1(ElementModQ response, ElementModP pad, ElementModQ challenge, ElementModP public_key) {
       // g ^ vi = ai * (Ki ^ ci) mod p
@@ -342,17 +334,16 @@ public class DecryptionValidator {
       if (!res) {
         System.out.printf("equation 1 error.%n");
       }
-
       return res;
     }
 
     /**
-     * check if equation A ^ vi = bi * (Mi^ ci) mod p is satisfied.
+     * Check if equation A ^ vi = bi * (Mi^ ci) mod p is satisfied.
      * <p>
-     * :param response: response of a share, vi
-     * :param data: data of a share, bi
-     * :param challenge: challenge of a share, ci
-     * :param partial_decrypt: partial decryption of a guardian, Mi
+     * @param response: response of a share, vi
+     * @param data: data of a share, bi
+     * @param challenge: challenge of a share, ci
+     * @param partial_decrypt: partial decryption of a guardian, Mi
      */
     boolean check_equation2(ElementModQ response, ElementModP data, ElementModQ challenge, ElementModP partial_decrypt) {
       // A ^ vi = bi * (Mi^ ci) mod p
@@ -367,9 +358,9 @@ public class DecryptionValidator {
     }
 
   /**
-   * check if the share response vi is in the set Zq
-   * :param response: response value vi of a share
-   * :return: True if the response is in set Zq, False if not
+   * Check if the share response vi is in the set Zq
+   * @param response: response value vi of a share
+   * @return True if the response is in set Zq, False if not
    */
     boolean check_response(ElementModQ response) {
       boolean res = grp.is_within_set_zq(response.getBigInt());
@@ -380,9 +371,9 @@ public class DecryptionValidator {
     }
 
   /**
-   * check if the given ai/pad of a share is in set Zrp
-   * :param pad: a pad value ai of a share
-   * :return: True if this value is in set Zrp, False if not
+   * Check if the given ai/pad of a share is in set Zrp
+   * @param pad: a pad value ai of a share
+   * @return True if this value is in set Zrp, False if not
    */
     boolean check_pad(ElementModP pad) {
       boolean res = grp.is_within_set_zrp(pad.getBigInt());
@@ -394,9 +385,9 @@ public class DecryptionValidator {
     }
 
   /**
-   * check if the given bi/data of a share is in set Zrp
-   * :param data: a data value bi of a share
-   * :return: True if this value is in set Zrp, False if not
+   * Check if the given bi/data of a share is in set Zrp
+   * @param data: a data value bi of a share
+   * @return True if this value is in set Zrp, False if not
    */
     boolean check_data(ElementModP data) {
       boolean res = grp.is_within_set_zrp(data.getBigInt());
@@ -407,12 +398,12 @@ public class DecryptionValidator {
     }
 
   /**
-   * check if the given challenge values Ci satisfies ci = H(Q-bar, (A,B), (ai, bi), Mi)
-   * :param challenge: given challenge of a share, Ci, for comparison
-   * :param pad: pad of a share, ai
-   * :param data: data number of a share, bi
-   * :param partial_decrypt: partial decryption of a guardian, Mi
-   * :return: True if the given Ci equals to the ci computed using hash
+   * Check if the given challenge values Ci satisfies ci = H(Q-bar, (A,B), (ai, bi), Mi)
+   * @param challenge: given challenge of a share, Ci, for comparison
+   * @param pad: pad of a share, ai
+   * @param data: data number of a share, bi
+   * @param partial_decrypt: partial decryption of a guardian, Mi
+   * @return True if the given Ci equals to the ci computed using hash
    */
     boolean check_challenge(ElementModQ challenge, ElementModP pad, ElementModP data, ElementModP partial_decrypt) {
       ElementModQ challenge_computed = Hash.hash_elems(electionParameters.extended_hash(),

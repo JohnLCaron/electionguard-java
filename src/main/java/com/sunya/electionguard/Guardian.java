@@ -33,10 +33,10 @@ public class Guardian extends ElectionObjectBase {
   private final Map<String, ElectionPublicKey> otherGuardianElectionKeys; // map(GUARDIAN_ID, ElectionPublicKey)
 
   // The collection of other guardians' partial key backups that are shared with this guardian
-  private final Map<String, ElectionPartialKeyBackup> _guardian_election_partial_key_backups; // Map(GUARDIAN_ID, ElectionPartialKeyBackup)
+  private final Map<String, ElectionPartialKeyBackup> otherGuardianPartialKeyBackups; // Map(GUARDIAN_ID, ElectionPartialKeyBackup)
 
   // The collection of other guardians' verifications that they shared their backups correctly
-  private final Map<String, ElectionPartialKeyVerification> _guardian_election_partial_key_verifications; // Map(GUARDIAN_ID, ElectionPartialKeyVerification)
+  private final Map<String, ElectionPartialKeyVerification> otherGuardianVerifications; // Map(GUARDIAN_ID, ElectionPartialKeyVerification)
 
   /**
    * Initialize a guardian with the specified arguments.
@@ -63,8 +63,8 @@ public class Guardian extends ElectionObjectBase {
     this._backups_to_share = new HashMap<>();
     this.otherGuardianAuxiliaryKeys = new HashMap<>();
     this.otherGuardianElectionKeys = new HashMap<>();
-    this._guardian_election_partial_key_backups = new HashMap<>();
-    this._guardian_election_partial_key_verifications = new HashMap<>();
+    this.otherGuardianPartialKeyBackups = new HashMap<>();
+    this.otherGuardianVerifications = new HashMap<>();
 
     this.save_auxiliary_public_key(this.share_auxiliary_public_key());
     this.save_election_public_key(this.share_election_public_key());
@@ -247,12 +247,12 @@ public class Guardian extends ElectionObjectBase {
    * @param backup: Election partial key backup
    */
   void save_election_partial_key_backup(ElectionPartialKeyBackup backup) {
-    this._guardian_election_partial_key_backups.put(backup.owner_id(), backup);
+    this.otherGuardianPartialKeyBackups.put(backup.owner_id(), backup);
   }
 
   /** True if all election partial key backups have been received. */
   boolean all_election_partial_key_backups_received() {
-    return this._guardian_election_partial_key_backups.size() == this.ceremony_details.number_of_guardians() - 1;
+    return this.otherGuardianPartialKeyBackups.size() == this.ceremony_details.number_of_guardians() - 1;
   }
 
   /**
@@ -265,7 +265,7 @@ public class Guardian extends ElectionObjectBase {
           String guardian_id,
           @Nullable Auxiliary.Decryptor decryptor) {
 
-    ElectionPartialKeyBackup backup = this._guardian_election_partial_key_backups.get(guardian_id);
+    ElectionPartialKeyBackup backup = this.otherGuardianPartialKeyBackups.get(guardian_id);
     if (backup == null) {
       return Optional.empty();
     }
@@ -299,7 +299,7 @@ public class Guardian extends ElectionObjectBase {
    * @param verification: Election partial key verification
    */
   void save_election_partial_key_verification(ElectionPartialKeyVerification verification) {
-    this._guardian_election_partial_key_verifications.put(verification.designated_id(), verification);
+    this.otherGuardianVerifications.put(verification.designated_id(), verification);
   }
 
   /**
@@ -308,10 +308,10 @@ public class Guardian extends ElectionObjectBase {
    */
   boolean all_election_partial_key_backups_verified() {
     int required = this.ceremony_details.number_of_guardians() - 1;
-    if (this._guardian_election_partial_key_verifications.size() != required) {
+    if (this.otherGuardianVerifications.size() != required) {
       return false;
     }
-    for (ElectionPartialKeyVerification verified : this._guardian_election_partial_key_verifications.values()) {
+    for (ElectionPartialKeyVerification verified : this.otherGuardianVerifications.values()) {
       if (!verified.verified()) {
         return false;
       }
@@ -400,7 +400,7 @@ public class Guardian extends ElectionObjectBase {
       nonce_seed = rand_q();
     }
 
-    ElectionPartialKeyBackup backup = this._guardian_election_partial_key_backups.get(missing_guardian_id);
+    ElectionPartialKeyBackup backup = this.otherGuardianPartialKeyBackups.get(missing_guardian_id);
     if (backup == null) {
       logger.atInfo().log("compensate decrypt guardian %s missing backup for %s",
               this.object_id, missing_guardian_id);
@@ -431,7 +431,7 @@ public class Guardian extends ElectionObjectBase {
 
   /** Compute the recovery public key for a given guardian. */
   Optional<ElementModP> recovery_public_key_for(String missing_guardian_id) {
-    ElectionPartialKeyBackup backup = this._guardian_election_partial_key_backups.get(missing_guardian_id);
+    ElectionPartialKeyBackup backup = this.otherGuardianPartialKeyBackups.get(missing_guardian_id);
     if (backup == null) {
       logger.atInfo().log("compensate decrypt guardian %s missing backup for %s",
               this.object_id, missing_guardian_id);

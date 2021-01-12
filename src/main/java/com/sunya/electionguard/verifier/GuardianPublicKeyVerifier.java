@@ -14,11 +14,11 @@ import static com.sunya.electionguard.Group.ElementModP;
 /**
  * This class checks the key generation information are given correctly for each guardian. (box 2).
  */
-public class GuardianPublicKeyValidator {
+public class GuardianPublicKeyVerifier {
   private final ElectionParameters electionParameters;
   private final Grp grp;
 
-  GuardianPublicKeyValidator(ElectionParameters electionParameters) {
+  GuardianPublicKeyVerifier(ElectionParameters electionParameters) {
     this.electionParameters = electionParameters;
     this.grp = new Grp(electionParameters.large_prime(), electionParameters.small_prime());
   }
@@ -78,9 +78,9 @@ public class GuardianPublicKeyValidator {
   /**
    * computes challenge (c_ij) with hash, H(cij) = H(base hash, public key, commitment) % q.
    * Each guardian has quorum number of these challenges.
-   * :param public_key: public key, under each guardian, previously listed as k
-   * :param commitment: commitment, under each guardian, previously listed as h
-   * :return: a challenge value of a guardian, separated by quorum
+   * @param public_key: public key, under each guardian, previously listed as k
+   * @param commitment: commitment, under each guardian, previously listed as h
+   * @return a challenge value of a guardian, separated by quorum
    */
   ElementModQ compute_guardian_challenge_threshold_separated(ElementModP public_key, ElementModP commitment) {
     //ElementModQ hash = Hash.hash_elems(this.electionParameters.base_hash(), public_key, commitment);
@@ -91,11 +91,11 @@ public class GuardianPublicKeyValidator {
 
   /**
    * check the equation = generator ^ response mod p = (commitment * public key ^ challenge) mod p
-   * :param response: response given by a guardian, ui,j
-   * :param commitment: commitment given by a guardian, hi,j
-   * :param public_key: public key of a guardian, Ki,j
-   * :param challenge: challenge of a guardian, ci,j
-   * :return: True if both sides of the equations are equal, False otherwise
+   * @param response: response given by a guardian, ui,j
+   * @param commitment: commitment given by a guardian, hi,j
+   * @param public_key: public key of a guardian, Ki,j
+   * @param challenge: challenge of a guardian, ci,j
+   * @return True if both sides of the equations are equal, False otherwise
    */
   boolean verify_individual_key_computation(ElementModQ response, ElementModP commitment, ElementModP public_key, ElementModQ challenge) {
     BigInteger left = grp.pow_p(this.electionParameters.generator(), response.getBigInt());

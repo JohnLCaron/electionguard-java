@@ -12,7 +12,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 public class TestGuardianPublicKeyValidator {
   static ElectionParameters electionParameters;
-  static GuardianPublicKeyValidator kgv;
+  static GuardianPublicKeyVerifier kgv;
   static Grp grp;
 
 
@@ -28,7 +28,7 @@ public class TestGuardianPublicKeyValidator {
 
     // key generation check
     System.out.println(" ------------ [box 2] key generation parameter check ------------");
-    kgv = new GuardianPublicKeyValidator(electionParameters);
+    kgv = new GuardianPublicKeyVerifier(electionParameters);
 
     grp = new Grp(electionParameters.large_prime(), electionParameters.small_prime());
   }

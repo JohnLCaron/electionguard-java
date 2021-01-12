@@ -24,12 +24,12 @@ import static com.sunya.electionguard.Group.ElementModP;
  * This class checks ballot encryption correctness on both spoiled and cast (box 3, 4), and verifies the correctness
  * of tracking hash chain (box 5).
  */
-public class EncyrptionValidator {
+public class EncyrptionVerifier {
   private final ElectionParameters electionParameters;
   private final Consumer consumer;
   private final Grp grp;
 
-  EncyrptionValidator(ElectionParameters electionParameters, Consumer consumer) {
+  EncyrptionVerifier(ElectionParameters electionParameters, Consumer consumer) {
     this.electionParameters = electionParameters;
     this.consumer = consumer;
     this.grp = new Grp(electionParameters.large_prime(), electionParameters.small_prime());
@@ -91,8 +91,9 @@ public class EncyrptionValidator {
    * LOOK this test does not work see notes in TestSelectionEncryptionValidation
    * verifies the tracking hash chain correctness
    * NOTE: didn't check the first and closing hashes
-   * :param hashes_dic: a dictionary of "previous tracking - current tracking " hash code pairs
-   * :return: True if all the tracking hashes satisfy Bi, Hi = H(Hi-1, D, T, Bi)
+   * @param prev_hashes: the set of "previous tracking" hash codes
+   * @param curr_hashes: the set of "current tracking" hash codes
+   * @return True if all the tracking hashes satisfy Bi, Hi = H(Hi-1, D, T, Bi)
    */
   private boolean verify_tracking_hashes(Set<ElementModQ> prev_hashes, Set<ElementModQ> curr_hashes) {
     boolean error = false;
@@ -155,7 +156,7 @@ public class EncyrptionValidator {
 
     /**
      * verify all the contests within a ballot and check if there are any encryption or limit error
-     * :return: True if all contests checked out/no error, False if any error in any selection
+     * @return True if all contests checked out/no error, False if any error in any selection
      */
     boolean verify_all_contests() {
       boolean encrypt_error = false;
@@ -190,7 +191,7 @@ public class EncyrptionValidator {
 
     /**
      * verify all the middle (index 1 to n) tracking hash
-     * :return: true if all the tracking hashes are correct, false otherwise
+     * @return true if all the tracking hashes are correct, false otherwise
      */
     boolean verify_tracking_hash() {
       ElementModQ crypto_hash = this.ballot.crypto_hash;
@@ -302,8 +303,8 @@ public class EncyrptionValidator {
      * check if equation g ^ v = a * A ^ c mod p is satisfied,
      * This function checks the first part of aggregate encryption, A in (A, B), is used together with
      * check_cp_proof_beta() to form a pair-wise check on a complete encryption value pair (A,B)
-     * :param alpha_product: the accumulative product of all the alpha/pad values on all selections within a contest
-     * :return: True if the equation is satisfied, False if not
+     * @param alpha_product: the accumulative product of all the alpha/pad values on all selections within a contest
+     * @return True if the equation is satisfied, False if not
      */
     private boolean check_cp_proof_alpha(BigInteger alpha_product) {
       BigInteger left = grp.pow_p(electionParameters.generator(), this.contest_response.getBigInt());
@@ -321,9 +322,9 @@ public class EncyrptionValidator {
      * check if equation g ^ (L * c) * K ^ v = b * B ^ C mod p is satisfied
      * This function checks the second part of aggregate encryption, B in (A, B), is used together with
      * __check_cp_proof_alpha() to form a pair-wise check on a complete encryption value pair (A,B)
-     * :param beta_product: the accumalative product of pad/beta values of all the selections within a contest
-     * :param votes_allowed: the maximum votes allowed for this contest
-     * :return: True if the equation is satisfied, False if not
+     * @param beta_product: the accumalative product of pad/beta values of all the selections within a contest
+     * @param votes_allowed: the maximum votes allowed for this contest
+     * @return True if the equation is satisfied, False if not
      */
     private boolean check_cp_proof_beta(BigInteger beta_product, BigInteger votes_allowed) {
       BigInteger leftTerm1 = grp.pow_p(electionParameters.generator(), grp.mult_q(votes_allowed, this.contest_challenge.getBigInt()));
@@ -341,9 +342,9 @@ public class EncyrptionValidator {
 
     /**
      * match the placeholder numbers in each contest with the maximum votes allowed
-     * :param contest_name: name/id of the contest
-     * :param num_of_placeholders: number of placeholders appear in this contest
-     * :return: True if vote limit and the placeholder numbers are equaled, False if not
+     * @param contest_name: name/id of the contest
+     * @param num_of_placeholders: number of placeholders appear in this contest
+     * @return True if vote limit and the placeholder numbers are equaled, False if not
      */
     private boolean match_vote_limit_by_contest(String contest_name, int num_of_placeholders) {
       int vote_limit = electionParameters.getVoteLimitForContest(contest_name);
@@ -459,13 +460,13 @@ public class EncyrptionValidator {
      * In the verification process, the challenge c of a selection is allowed to be broken into two components
      * in any way as long as c = (c0 + c1) mod p, c0 here is the first component broken from c.
      * <p>
-     * :param pad: alpha of a selection
-     * :param data: beta of a selection
-     * :param zero_pad: zero_pad of a selection
-     * :param zero_data: zero_data of a selection
-     * :param zero_chal: zero_challenge of a selection
-     * :param zero_res: zero_response of a selection
-     * :return: True if both equations of the zero proof are satisfied, False if either is not satisfied
+     * @param pad: alpha of a selection
+     * @param data: beta of a selection
+     * @param zero_pad: zero_pad of a selection
+     * @param zero_data: zero_data of a selection
+     * @param zero_chal: zero_challenge of a selection
+     * @param zero_res: zero_response of a selection
+     * @return True if both equations of the zero proof are satisfied, False if either is not satisfied
      */
     private boolean check_cp_proof_zero_proof(ElementModP pad, ElementModP data, ElementModP zero_pad, ElementModP zero_data,
                                               ElementModQ zero_chal, ElementModQ zero_res) {
@@ -493,13 +494,13 @@ public class EncyrptionValidator {
      * In the verification process, the challenge c of a selection is allowed to be broken into two components
      * in any way as long as c = (c0 + c1) mod p, c1 here is the second component broken from c.
      * <p>
-     * :param pad: alpha of a selection
-     * :param data: beta of a selection
-     * :param one_pad: one_pad of a selection
-     * :param one_data: one_data of a selection
-     * :param one_chal: one_challenge of a selection
-     * :param one_res: one_response of a selection
-     * :return: True if both equations of the one proof are satisfied, False if either is not satisfied
+     * @param pad: alpha of a selection
+     * @param data: beta of a selection
+     * @param one_pad: one_pad of a selection
+     * @param one_data: one_data of a selection
+     * @param one_chal: one_challenge of a selection
+     * @param one_res: one_response of a selection
+     * @return True if both equations of the one proof are satisfied, False if either is not satisfied
      */
     private boolean check_cp_proof_one_proof(ElementModP pad, ElementModP data, ElementModP one_pad, ElementModP one_data,
                                              ElementModQ one_chal, ElementModQ one_res) {
@@ -523,9 +524,9 @@ public class EncyrptionValidator {
 
     /**
      * check if the hash computation is correct, equation c = c0 + c1 mod q is satisfied.
-     * :param chal: challenge of a selection
-     * :param zero_chal: zero_challenge of a selection
-     * :param one_chal: one_challenge of a selection
+     * @param chal: challenge of a selection
+     * @param zero_chal: zero_challenge of a selection
+     * @param one_chal: one_challenge of a selection
      */
     private boolean check_hash_comp(BigInteger chal, BigInteger zero_chal, BigInteger one_chal) {
       // calculated expected challenge value: c0 + c1 mod q

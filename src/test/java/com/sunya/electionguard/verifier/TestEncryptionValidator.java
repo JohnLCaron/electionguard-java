@@ -17,7 +17,7 @@ import static com.google.common.truth.Truth.assertThat;
 public class TestEncryptionValidator {
   static ElectionParameters electionParameters;
   static Consumer consumer;
-  static EncyrptionValidator sev;
+  static EncyrptionVerifier sev;
   static Grp grp;
 
   @BeforeContainer
@@ -30,7 +30,7 @@ public class TestEncryptionValidator {
     System.out.println("set up finished. ");
 
     System.out.println(" ------------ [box 3, 4, 5] ballot encryption check ------------");
-    sev = new EncyrptionValidator(electionParameters, consumer);
+    sev = new EncyrptionVerifier(electionParameters, consumer);
 
     grp = new Grp(electionParameters.large_prime(), electionParameters.small_prime());
   }
@@ -186,13 +186,13 @@ public class TestEncryptionValidator {
    * In the verification process, the challenge c of a selection is allowed to be broken into two components
    * in any way as long as c = (c0 + c1) mod p, c0 here is the first component broken from c.
    * <p>
-   * :param pad: alpha of a selection
-   * :param data: beta of a selection
-   * :param zero_pad: zero_pad of a selection
-   * :param zero_data: zero_data of a selection
-   * :param zero_chal: zero_challenge of a selection
-   * :param zero_res: zero_response of a selection
-   * :return: True if both equations of the zero proof are satisfied, False if either is not satisfied
+   * @param pad: alpha of a selection
+   * @param data: beta of a selection
+   * @param zero_pad: zero_pad of a selection
+   * @param zero_data: zero_data of a selection
+   * @param zero_chal: zero_challenge of a selection
+   * @param zero_res: zero_response of a selection
+   * @return True if both equations of the zero proof are satisfied, False if either is not satisfied
    */
   private boolean check_cp_proof_zero_proof(Group.ElementModP pad, Group.ElementModP data, Group.ElementModP zero_pad, Group.ElementModP zero_data,
                                             Group.ElementModQ zero_chal, Group.ElementModQ zero_res) {
@@ -220,13 +220,13 @@ public class TestEncryptionValidator {
    * In the verification process, the challenge c of a selection is allowed to be broken into two components
    * in any way as long as c = (c0 + c1) mod p, c1 here is the second component broken from c.
    * <p>
-   * :param pad: alpha of a selection
-   * :param data: beta of a selection
-   * :param one_pad: one_pad of a selection
-   * :param one_data: one_data of a selection
-   * :param one_chal: one_challenge of a selection
-   * :param one_res: one_response of a selection
-   * :return: True if both equations of the one proof are satisfied, False if either is not satisfied
+   * @param pad: alpha of a selection
+   * @param data: beta of a selection
+   * @param one_pad: one_pad of a selection
+   * @param one_data: one_data of a selection
+   * @param one_chal: one_challenge of a selection
+   * @param one_res: one_response of a selection
+   * @return True if both equations of the one proof are satisfied, False if either is not satisfied
    */
   private boolean check_cp_proof_one_proof(Group.ElementModP pad, Group.ElementModP data, Group.ElementModP one_pad, Group.ElementModP one_data,
                                            Group.ElementModQ one_chal, Group.ElementModQ one_res) {
@@ -250,9 +250,9 @@ public class TestEncryptionValidator {
 
   /**
    * check if the hash computation is correct, equation c = c0 + c1 mod q is satisfied.
-   * :param chal: challenge of a selection
-   * :param zero_chal: zero_challenge of a selection
-   * :param one_chal: one_challenge of a selection
+   * @param chal: challenge of a selection
+   * @param zero_chal: zero_challenge of a selection
+   * @param one_chal: one_challenge of a selection
    */
   private boolean check_hash_comp(BigInteger chal, BigInteger zero_chal, BigInteger one_chal) {
     // calculated expected challenge value: c0 + c1 mod q
@@ -297,8 +297,8 @@ public class TestEncryptionValidator {
    * check if equation g ^ v = a * A ^ c mod p is satisfied,
    * This function checks the first part of aggregate encryption, A in (A, B), is used together with
    * check_cp_proof_beta() to form a pair-wise check on a complete encryption value pair (A,B)
-   * :param alpha_product: the accumulative product of all the alpha/pad values on all selections within a contest
-   * :return: True if the equation is satisfied, False if not
+   * @param alpha_product: the accumulative product of all the alpha/pad values on all selections within a contest
+   * @return True if the equation is satisfied, False if not
    */
   private boolean check_cp_proof_alpha(Ballot.CiphertextBallotContest contest, BigInteger alpha_product) {
     ChaumPedersen.ConstantChaumPedersenProof proof = contest.proof.orElseThrow(IllegalStateException::new);
@@ -318,9 +318,9 @@ public class TestEncryptionValidator {
    * check if equation g ^ (L * c) * K ^ v = b * B ^ C mod p is satisfied
    * This function checks the second part of aggregate encryption, B in (A, B), is used together with
    * __check_cp_proof_alpha() to form a pair-wise check on a complete encryption value pair (A,B)
-   * :param beta_product: the accumalative product of pad/beta values of all the selections within a contest
-   * :param votes_allowed: the maximum votes allowed for this contest
-   * :return: True if the equation is satisfied, False if not
+   * @param beta_product: the accumalative product of pad/beta values of all the selections within a contest
+   * @param votes_allowed: the maximum votes allowed for this contest
+   * @return True if the equation is satisfied, False if not
    */
   private boolean check_cp_proof_beta(Ballot.CiphertextBallotContest contest, BigInteger beta_product, BigInteger votes_allowed) {
     ChaumPedersen.ConstantChaumPedersenProof proof = contest.proof.orElseThrow(IllegalStateException::new);

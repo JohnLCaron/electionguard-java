@@ -17,7 +17,7 @@ import static com.google.common.truth.Truth.assertThat;
 public class TestDecryptionValidator {
   static ElectionParameters electionParameters;
   static Consumer consumer;
-  static DecryptionValidator validator;
+  static DecryptionVerifier validator;
   static Grp grp;
 
   @BeforeContainer
@@ -31,13 +31,13 @@ public class TestDecryptionValidator {
     System.out.println("set up finished. ");
 
     System.out.println(" ------------ [box 3, 4, 5] ballot encryption check ------------");
-    validator = new DecryptionValidator(electionParameters, consumer);
+    validator = new DecryptionVerifier(electionParameters, consumer);
     grp = new Grp(electionParameters.large_prime(), electionParameters.small_prime());
   }
 
   @Example
   public void testSelectionEncryptionValidation() throws IOException {
-    boolean sevOk = validator.verify_cast_ballot_tallies();
+    boolean sevOk = validator.verify_box6();
     assertThat(sevOk).isTrue();
   }
 
@@ -136,10 +136,10 @@ public class TestDecryptionValidator {
   /**
    * check if equation g ^ vi = ai * (Ki ^ ci) mod p is satisfied.
    * <p>
-   * :param response: response of a share, vi
-   * :param pad: pad of a share, ai
-   * :param public_key: public key of a guardian, Ki
-   * :param challenge: challenge of a share, ci
+   * @param response: response of a share, vi
+   * @param pad: pad of a share, ai
+   * @param public_key: public key of a guardian, Ki
+   * @param challenge: challenge of a share, ci
    */
   private void check_equation1(Group.ElementModQ response, Group.ElementModP pad, Group.ElementModQ challenge, Group.ElementModP public_key) {
     // g ^ vi = ai * (Ki ^ ci) mod p
@@ -151,11 +151,11 @@ public class TestDecryptionValidator {
   /**
    * check if equation A ^ vi = bi * (Mi^ ci) mod p is satisfied.
    * <p>
-   * :param response: response of a share, vi
-   * :param data: data of a share, bi
-   * :param challenge: challenge of a share, ci
-   * :param partial_decrypt: partial decryption of a guardian, Mi
-   * :return True if the equation is satisfied, False if not
+   * @param response: response of a share, vi
+   * @param data: data of a share, bi
+   * @param challenge: challenge of a share, ci
+   * @param partial_decrypt: partial decryption of a guardian, Mi
+   * @return True if the equation is satisfied, False if not
    */
   void check_equation2(Group.ElementModQ response, Group.ElementModP data, Group.ElementModQ challenge,
                           Group.ElementModP partial_decrypt, Group.ElementModP selection_pad) {
@@ -168,8 +168,8 @@ public class TestDecryptionValidator {
 
   /**
    * check if the share response vi is in the set Zq
-   * :param response: response value vi of a share
-   * :return: True if the response is in set Zq, False if not
+   * @param response: response value vi of a share
+   * @return True if the response is in set Zq, False if not
    */
   void check_response(Group.ElementModQ response) {
     boolean res = grp.is_within_set_zq(response.getBigInt());
@@ -178,8 +178,8 @@ public class TestDecryptionValidator {
 
   /**
    * check if the given ai/pad of a share is in set Zrp
-   * :param pad: a pad value ai of a share
-   * :return: True if this value is in set Zrp, False if not
+   * @param pad: a pad value ai of a share
+   * @return True if this value is in set Zrp, False if not
    */
   void check_pad(Group.ElementModP pad) {
     boolean res = grp.is_within_set_zrp(pad.getBigInt());
@@ -188,8 +188,8 @@ public class TestDecryptionValidator {
 
   /**
    * check if the given bi/data of a share is in set Zrp
-   * :param data: a data value bi of a share
-   * :return: True if this value is in set Zrp, False if not
+   * @param data: a data value bi of a share
+   * @return True if this value is in set Zrp, False if not
    */
   void check_data(Group.ElementModP data) {
     boolean res = grp.is_within_set_zrp(data.getBigInt());
@@ -198,11 +198,11 @@ public class TestDecryptionValidator {
 
   /**
    * check if the given challenge values Ci satisfies ci = H(Q-bar, (A,B), (ai, bi), Mi)
-   * :param challenge: given challenge of a share, Ci, for comparison
-   * :param pad: pad of a share, ai
-   * :param data: data number of a share, bi
-   * :param partial_decrypt: partial decryption of a guardian, Mi
-   * :return: True if the given Ci equals to the ci computed using hash
+   * @param challenge: given challenge of a share, Ci, for comparison
+   * @param pad: pad of a share, ai
+   * @param data: data number of a share, bi
+   * @param partial_decrypt: partial decryption of a guardian, Mi
+   * @return True if the given Ci equals to the ci computed using hash
    */
   void check_challenge(Group.ElementModQ challenge, Group.ElementModP pad, Group.ElementModP data,
                        Group.ElementModP partial_decrypt, Group.ElementModP selection_pad, Group.ElementModP selection_data) {

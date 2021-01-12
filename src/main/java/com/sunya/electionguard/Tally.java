@@ -72,10 +72,10 @@ public class Tally {
   /** A plaintext Tally Contest is a collection of plaintext selections. */
   @AutoValue
   public static abstract class PlaintextTallyContest implements ElectionObjectBaseIF {
-    public abstract ImmutableMap<String, PlaintextTallySelection> selections();
+    public abstract Map<String, PlaintextTallySelection> selections();
 
     public static PlaintextTallyContest create(String object_id, Map<String, PlaintextTallySelection> selections) {
-      return new AutoValue_Tally_PlaintextTallyContest(object_id, ImmutableMap.copyOf(selections));
+      return new AutoValue_Tally_PlaintextTallyContest(object_id, selections);
     }
 
     public static TypeAdapter<PlaintextTallyContest> typeAdapter(Gson gson) {
@@ -92,12 +92,12 @@ public class Tally {
     private final ElementModQ description_hash;
 
     /** A collection of CiphertextTallySelection mapped by SelectionDescription.object_id. */
-    private final ImmutableMap<String, CiphertextTallySelection> tally_selections;
+    private final Map<String, CiphertextTallySelection> tally_selections;
 
     public CiphertextTallyContest(String object_id, ElementModQ description_hash, Map<String, CiphertextTallySelection> tally_selections) {
       super(object_id);
       this.description_hash = description_hash;
-      this.tally_selections = ImmutableMap.copyOf(tally_selections);
+      this.tally_selections = tally_selections;
     }
 
     ElementModQ description_hash() {
@@ -211,11 +211,11 @@ public class Tally {
   /** The plaintext representation of all contests in the election. */
   @AutoValue
   public static abstract class PlaintextTally implements ElectionObjectBaseIF {
-    public abstract ImmutableMap<String, PlaintextTallyContest> contests();
-    public abstract ImmutableMap<String, Map<String, PlaintextTallyContest>> spoiled_ballots();
+    public abstract Map<String, PlaintextTallyContest> contests();
+    public abstract Map<String, Map<String, PlaintextTallyContest>> spoiled_ballots();
 
     public static PlaintextTally create(String object_id, Map<String, PlaintextTallyContest> contests, Map<String, Map<String, PlaintextTallyContest>> spoiled_ballots) {
-      return new AutoValue_Tally_PlaintextTally(object_id, ImmutableMap.copyOf(contests), ImmutableMap.copyOf(spoiled_ballots));
+      return new AutoValue_Tally_PlaintextTally(object_id, contests, spoiled_ballots);
     }
     public static TypeAdapter<PlaintextTally> typeAdapter(Gson gson) {
       return new AutoValue_Tally_PlaintextTally.GsonTypeAdapter(gson);
@@ -455,10 +455,10 @@ public class Tally {
    */
   @AutoValue
   public static abstract class PublishedCiphertextTally implements ElectionObjectBaseIF {
-    public abstract ImmutableMap<String, CiphertextTallyContest> cast();
+    public abstract Map<String, CiphertextTallyContest> cast();
 
     public static PublishedCiphertextTally create(String object_id, Map<String, CiphertextTallyContest> cast) {
-      return new AutoValue_Tally_PublishedCiphertextTally(object_id, ImmutableMap.copyOf(cast));
+      return new AutoValue_Tally_PublishedCiphertextTally(object_id, cast);
     }
 
     public static TypeAdapter<PublishedCiphertextTally> typeAdapter(Gson gson) {

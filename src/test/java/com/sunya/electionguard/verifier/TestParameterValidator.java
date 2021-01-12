@@ -20,7 +20,7 @@ public class TestParameterValidator {
 
     // baseline parameter check
     System.out.println(" ------------ [box 1] baseline parameter check ------------");
-    ParameterValidator blv = new ParameterValidator(electionParameters);
+    ParameterVerifier blv = new ParameterVerifier(electionParameters);
     boolean blvOk = blv.verify_all_params();
     assertThat(blvOk).isTrue();
   }
