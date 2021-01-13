@@ -69,10 +69,10 @@ public class TestPublish {
   @Example
   public void test_publish_private_data() throws IOException {
     List<Ballot.PlaintextBallot> plaintext_ballots = ImmutableList.of(
-            new Ballot.PlaintextBallot("PlaintextBallotId", "ballot_style",ImmutableList.of()));
+            new Ballot.PlaintextBallot("PlaintextBallotId", "ballot_style", ImmutableList.of()));
     List<Ballot.CiphertextBallot> encrypted_ballots = ImmutableList.of(
             Ballot.make_ciphertext_ballot("CipherTextBallotId", "ballot_style", int_to_q_unchecked(BigInteger.ZERO),
-                    Optional.of(int_to_q_unchecked(BigInteger.ZERO)), ImmutableList.of(), Optional.empty(),Optional.empty(),Optional.empty()));
+                    Optional.of(int_to_q_unchecked(BigInteger.ZERO)), ImmutableList.of(), Optional.empty(),Optional.empty(), Optional.empty()));
 
     List<Guardian> guardians = ImmutableList.of( new Guardian("GuardianId", 1, 1, 1, null));
 
