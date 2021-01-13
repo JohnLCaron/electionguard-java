@@ -5,7 +5,6 @@ import net.jqwik.api.Property;
 import net.jqwik.api.ShrinkingMode;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -14,8 +13,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 
 import static com.sunya.electionguard.Ballot.*;
-import static com.sunya.electionguard.Tally.*;
-
 
 public class TestTallyProperties extends TestProperties {
 
@@ -23,9 +20,9 @@ public class TestTallyProperties extends TestProperties {
   public void test_tally_cast_ballots_accumulates_valid_tally(
           @ForAll("elections_and_ballots") ElectionTestHelper.EverythingTuple everything) {
 
-    // election_description, metadata, ballots, secret_key, context = everything
     // Tally the plaintext ballots for comparison later
-    Map<String, BigInteger> plaintext_tallies = TallyTestHelper.accumulate_plaintext_ballots(everything.ballots);
+    Map<String, Integer> plaintext_tallies = TallyTestHelper.accumulate_plaintext_ballots(everything.ballots);
+    System.out.printf("%n test_tally_cast_ballots_accumulates_valid_tally expected %s%n", plaintext_tallies);
 
     // encrypt each ballot
     DataStore store = new DataStore();
@@ -40,10 +37,11 @@ public class TestTallyProperties extends TestProperties {
       store.put(encrypted_ballot.object_id, from_ciphertext_ballot(encrypted_ballot, BallotBoxState.CAST));
     }
 
-    Optional<CiphertextTally> result = tally_ballots(store, everything.internal_election_description, everything.context);
+    Optional<Tally.CiphertextTally> result = Tally.tally_ballots(store, everything.internal_election_description, everything.context);
     assertThat(result).isPresent();
 
-    Map<String, BigInteger> decrypted_tallies = this._decrypt_with_secret(result.get(), everything.secret_key);
+    Map<String, Integer> decrypted_tallies = this._decrypt_with_secret(result.get(), everything.secret_key);
+    System.out.printf("%n test_tally_cast_ballots_accumulates_valid_tally actual %s%n", decrypted_tallies);
     assertThat(plaintext_tallies).isEqualTo(decrypted_tallies);
   }
 
@@ -51,9 +49,8 @@ public class TestTallyProperties extends TestProperties {
   public void test_tally_spoiled_ballots_accumulates_valid_tally(
           @ForAll("elections_and_ballots") ElectionTestHelper.EverythingTuple everything) {
 
-    // election_description, metadata, ballots, secret_key, context = everything
     //  Tally the plaintext ballots for comparison later
-    Map<String, BigInteger> plaintext_tallies = TallyTestHelper.accumulate_plaintext_ballots(everything.ballots);
+    Map<String, Integer> plaintext_tallies = TallyTestHelper.accumulate_plaintext_ballots(everything.ballots);
     System.out.printf("%n test_tally_spoiled_ballots_accumulates_valid_tally expected %s%n", plaintext_tallies);
 
     // encrypt each ballot
@@ -69,25 +66,22 @@ public class TestTallyProperties extends TestProperties {
       store.put(encrypted_ballot.object_id, from_ciphertext_ballot(encrypted_ballot, BallotBoxState.SPOILED));
     }
 
-    Optional<CiphertextTally> result = tally_ballots(store, everything.internal_election_description, everything.context);
+    Optional<Tally.CiphertextTally> result = Tally.tally_ballots(store, everything.internal_election_description, everything.context);
     assertThat(result).isPresent();
 
-    Map<String, BigInteger> decrypted_tallies = this._decrypt_with_secret(result.get(), everything.secret_key);
+    Map<String, Integer> decrypted_tallies = this._decrypt_with_secret(result.get(), everything.secret_key);
     System.out.printf("%n test_tally_spoiled_ballots_accumulates_valid_tally decrypted_tallies %s%n%n", decrypted_tallies);
 
-    // This cant be true since all ballots are spoiled ans so have a count of 0
-    // assertThat(plaintext_tallies).containsExactlyEntriesIn(decrypted_tallies);
-
-    // self.assertCountEqual(plaintext_tallies, decrypted_tallies)
+     // self.assertCountEqual(plaintext_tallies, decrypted_tallies)
     assertThat(plaintext_tallies.keySet()).isEqualTo(decrypted_tallies.keySet());
 
-    for (BigInteger value : decrypted_tallies.values()) {
-      assertThat(value).isEqualTo(BigInteger.ZERO);
+    for (Integer value : decrypted_tallies.values()) {
+      assertThat(value).isEqualTo(0);
     }
     assertThat(result.get().spoiled_ballots().size()).isEqualTo(everything.ballots.size());
   }
 
-  /*
+  /* LOOK this assumes mutability, must be rewritten
   @Property(tries = 3, shrinking = ShrinkingMode.OFF)
   public void test_tally_ballot_invalid_input_fails(
           @ForAll("elections_and_ballots") ElectionTestHelper.EverythingTuple everything) {
@@ -107,7 +101,7 @@ public class TestTallyProperties extends TestProperties {
       store.put(encrypted_ballot.object_id, from_ciphertext_ballot(encrypted_ballot, BallotBoxState.CAST));
     }
 
-    CiphertextTally subject = new CiphertextTally("my-tally", everything.internal_election_description, everything.context);
+    Tally.CiphertextTally subject = new Tally.CiphertextTally("my-tally", everything.internal_election_description, everything.context);
 
     CiphertextAcceptedBallot first_ballot = store.iterator().next();
     first_ballot.state = BallotBoxState.UNKNOWN;
@@ -130,7 +124,7 @@ public class TestTallyProperties extends TestProperties {
     }
 
     // LOOK Im guessing this means remove the ballot with the given id, so that it can be added again
-    //  LOOK pop the cast ballot
+    // pop the cast ballot
     subject._cast_ballot_ids.remove(first_ballot.object_id);
 
     //  reset to cast
@@ -149,8 +143,8 @@ public class TestTallyProperties extends TestProperties {
     first_ballot.state = BallotBoxState.CAST;
     assertThat(subject.append(first_ballot)).isFalse();
 
-    // TODO Im guessing this means remove the ballot with the given id, so that it can be added again
-    //  pop the spoiled ballot
+    // LOOK Im guessing this means remove the ballot with the given id, so that it can be added again
+    // pop the spoiled ballot
     subject.spoiled_ballots.remove(first_ballot.object_id);
 
     //  verify a cast ballot cannot be added twice
@@ -164,23 +158,21 @@ public class TestTallyProperties extends TestProperties {
   } */
 
 
-  /**
-   * Demonstrates how to decrypt a tally with a known secret key.
-   */
-  private Map<String, BigInteger> _decrypt_with_secret(CiphertextTally tally, Group.ElementModQ secret_key) {
-    Map<String, BigInteger> plaintext_selections = new HashMap<>();
-    for (CiphertextTallyContest contest : tally.cast().values()) {
-      for (Map.Entry<String, CiphertextTallySelection> entry : contest.tally_selections().entrySet()) {
-        BigInteger plaintext_tally = entry.getValue().ciphertext().decrypt(secret_key);
+  /** Demonstrates how to decrypt a tally with a known secret key. */
+  private Map<String, Integer> _decrypt_with_secret(Tally.CiphertextTally tally, Group.ElementModQ secret_key) {
+    Map<String, Integer> plaintext_selections = new HashMap<>();
+    for (Tally.CiphertextTallyContest contest : tally.cast().values()) {
+      for (Map.Entry<String, Tally.CiphertextTallySelection> entry : contest.tally_selections().entrySet()) {
+        Integer plaintext_tally = entry.getValue().ciphertext().decrypt(secret_key);
         plaintext_selections.put(entry.getKey(), plaintext_tally);
       }
     }
     return plaintext_selections;
   }
 
-  // LOOK this assumes mutability, fix
+  // LOOK this assumes mutability, must be rewritten
   private boolean _cannot_erroneously_mutate_state(
-          CiphertextTally subject,
+          Tally.CiphertextTally subject,
           CiphertextAcceptedBallot ballot,
           BallotBoxState state_to_test) {
 

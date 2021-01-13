@@ -2,13 +2,9 @@ package com.sunya.electionguard;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableList;
-import com.sunya.electionguard.publish.Consumer;
 import com.sunya.electionguard.publish.ConvertFromJson;
 import com.sunya.electionguard.publish.ElectionDescriptionFromJson;
 import com.sunya.electionguard.publish.Publisher;
-import com.sunya.electionguard.verifier.ElectionParameters;
-import net.jqwik.api.Example;
-import net.jqwik.api.lifecycle.BeforeProperty;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -276,8 +272,8 @@ public class TimeEncryptBallots {
       if (this.ballot_store.get(ballot.object_id).get().state == BallotBoxState.CAST) {
         for (PlaintextBallotContest contest : ballot.contests) {
           for (PlaintextBallotSelection selection : contest.ballot_selections) {
-            Integer value = expected_plaintext_tally.get(selection.object_id);
-            expected_plaintext_tally.put(selection.object_id, value + selection.to_int()); // use merge
+            Integer value = expected_plaintext_tally.get(selection.selection_id);
+            expected_plaintext_tally.put(selection.selection_id, value + selection.to_int()); // use merge
           }
         }
       }
@@ -303,8 +299,8 @@ public class TimeEncryptBallots {
               for (PlaintextBallotSelection selection : contest.ballot_selections) {
                 int expected = selection.to_int();
                 Tally.PlaintextTallySelection decrypted_selection = (
-                        this.plaintext_tally.spoiled_ballots().get(ballot_id).get(contest.object_id)
-                                .selections().get(selection.object_id));
+                        this.plaintext_tally.spoiled_ballots().get(ballot_id).get(contest.contest_id)
+                                .selections().get(selection.selection_id));
                 assertThat(expected).isEqualTo(decrypted_selection.tally().intValue());
               }
             }

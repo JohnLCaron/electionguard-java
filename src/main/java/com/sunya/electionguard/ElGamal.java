@@ -9,7 +9,6 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
 
-import static com.sunya.electionguard.Dlog.discrete_log;
 import static com.sunya.electionguard.Group.*;
 
 public class ElGamal {
@@ -64,17 +63,17 @@ public class ElGamal {
      * @param product: The known product (blinding factor).
      * @return An exponentially encoded plaintext message.
      */
-    BigInteger decrypt_known_product(ElementModP product) {
-      return discrete_log(Group.mult_p(this.data, Group.mult_inv_p(product)));
+    Integer decrypt_known_product(ElementModP product) {
+      return Dlog.discrete_log(Group.mult_p(this.data, Group.mult_inv_p(product)));
     }
 
     /**
-     * Decrypt an ElGamal ciphertext using a known ElGamal secret key.
+     * Decrypt an ElGamal ciphertext using the given ElGamal secret key.
      *
      * @param secretKey : The corresponding ElGamal secret key.
      * @return An exponentially encoded plaintext message.
      */
-    BigInteger decrypt(ElementModQ secretKey) {
+    Integer decrypt(ElementModQ secretKey) {
       return decrypt_known_product(Group.pow_p(this.pad, secretKey));
     }
 
@@ -85,7 +84,7 @@ public class ElGamal {
      * @param nonce :     The secret nonce used to create the ciphertext.
      * @return An exponentially encoded plaintext message.
      */
-    BigInteger decrypt_known_nonce(ElementModP publicKey, ElementModQ nonce) {
+    Integer decrypt_known_nonce(ElementModP publicKey, ElementModQ nonce) {
       return decrypt_known_product(Group.pow_p(publicKey, nonce));
     }
 

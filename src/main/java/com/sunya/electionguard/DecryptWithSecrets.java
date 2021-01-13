@@ -38,7 +38,7 @@ public class DecryptWithSecrets {
       return Optional.empty();
     }
 
-    BigInteger plaintext_vote = selection.ciphertext().decrypt(secret_key);
+    Integer plaintext_vote = selection.ciphertext().decrypt(secret_key);
 
     // TODO: ISSUE #47: handle decryption of the extradata field if needed
 
@@ -96,7 +96,7 @@ public class DecryptWithSecrets {
       return Optional.empty();
     }
 
-    BigInteger plaintext_vote = selection.ciphertext().decrypt_known_nonce(public_key, nonce.get());
+    Integer plaintext_vote = selection.ciphertext().decrypt_known_nonce(public_key, nonce.get());
 
     // TODO: ISSUE #35: encrypt/decrypt: handle decryption of the extradata field if needed
 

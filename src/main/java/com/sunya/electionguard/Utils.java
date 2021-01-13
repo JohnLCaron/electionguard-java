@@ -31,6 +31,10 @@ public class Utils {
     return val.equals(BigInteger.ZERO) ? "false" : "true";
   }
 
+  static String isTrue(Integer val) {
+    return val == 0 ? "false" : "true";
+  }
+
   /** Return a random BigInteger in the range [0, n). */
   static BigInteger randbelow(BigInteger exclusive_upper_bound) {
     Preconditions.checkArgument(BigInteger.ZERO.compareTo(exclusive_upper_bound) <= 0);

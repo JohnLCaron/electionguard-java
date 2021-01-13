@@ -160,7 +160,7 @@ public class Encrypt {
 
     // Create the return object
     CiphertextBallotSelection encrypted_selection = make_ciphertext_ballot_selection(
-            selection.object_id,
+            selection.selection_id,
             selection_description_hash,
             elgamal_encryption.get(),
             elgamal_public_key,
@@ -255,7 +255,7 @@ public class Encrypt {
         // false is entered instead and the selection_count is not incremented
         // this allows consumers to only pass in the relevant selections made by a voter
         for (PlaintextBallotSelection selection : contest.ballot_selections) {
-          if (selection.object_id.equals(description.object_id)) {
+          if (selection.selection_id.equals(description.object_id)) {
             // track the selection count so we can append the
             // appropriate number of true placeholder votes
             has_selection = true;
@@ -321,7 +321,7 @@ public class Encrypt {
     }
 
     CiphertextBallotContest encrypted_contest = make_ciphertext_ballot_contest(
-        contest.object_id,
+        contest.contest_id,
         contest_description_hash,
         encrypted_selections,
         elgamal_public_key,
@@ -405,7 +405,7 @@ public class Encrypt {
     for (ContestDescriptionWithPlaceholders description : election_metadata.get_contests_for(ballot.ballot_style)) {
       PlaintextBallotContest use_contest = null;
       for (PlaintextBallotContest contest : ballot.contests) {
-        if (contest.object_id.equals(description.object_id)) {
+        if (contest.contest_id.equals(description.object_id)) {
           use_contest = contest;
           break;
         }

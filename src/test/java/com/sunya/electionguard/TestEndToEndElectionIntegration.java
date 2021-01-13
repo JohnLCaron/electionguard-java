@@ -272,8 +272,8 @@ public class TestEndToEndElectionIntegration {
       if (this.ballot_store.get(ballot.object_id).get().state == BallotBoxState.CAST) {
         for (PlaintextBallotContest contest : ballot.contests) {
           for (PlaintextBallotSelection selection : contest.ballot_selections) {
-            Integer value = expected_plaintext_tally.get(selection.object_id);
-            expected_plaintext_tally.put(selection.object_id, value + selection.to_int()); // use merge
+            Integer value = expected_plaintext_tally.get(selection.selection_id);
+            expected_plaintext_tally.put(selection.selection_id, value + selection.to_int()); // use merge
           }
         }
       }
@@ -300,14 +300,14 @@ public class TestEndToEndElectionIntegration {
           if (ballot_id == plaintext_ballot.object_id) {
             System.out.printf("%nSpoiled Ballot: %s%n", ballot_id);
             for (PlaintextBallotContest contest : plaintext_ballot.contests) {
-              System.out.printf("%nContest: %s%n", contest.object_id);
+              System.out.printf("%nContest: %s%n", contest.contest_id);
               for (PlaintextBallotSelection selection : contest.ballot_selections) {
                 int expected = selection.to_int();
                 Tally.PlaintextTallySelection decrypted_selection = (
-                        this.plaintext_tally.spoiled_ballots().get(ballot_id).get(contest.object_id)
-                                .selections().get(selection.object_id));
+                        this.plaintext_tally.spoiled_ballots().get(ballot_id).get(contest.contest_id)
+                                .selections().get(selection.selection_id));
                 System.out.printf("   - Selection: %s expected: %d, actual: %d%n",
-                        selection.object_id, expected, decrypted_selection.tally());
+                        selection.selection_id, expected, decrypted_selection.tally());
                 assertThat(expected).isEqualTo(decrypted_selection.tally().intValue());
               }
             }

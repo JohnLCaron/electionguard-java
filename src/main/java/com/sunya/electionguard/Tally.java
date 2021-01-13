@@ -25,12 +25,12 @@ public class Tally {
   @AutoValue
   public static abstract class PlaintextTallySelection implements ElectionObjectBaseIF {
     /** g^tally or M in the spec. LOOK check is this note talking about tally or value? */
-    public abstract BigInteger tally();
+    public abstract Integer tally();
     public abstract ElementModP value();
     public abstract ElGamal.Ciphertext message();
     public abstract ImmutableList<DecryptionShare.CiphertextDecryptionSelection> shares();
 
-    public static PlaintextTallySelection create(String object_id, BigInteger tally, ElementModP value, ElGamal.Ciphertext message, List<DecryptionShare.CiphertextDecryptionSelection> shares) {
+    public static PlaintextTallySelection create(String object_id, Integer tally, ElementModP value, ElGamal.Ciphertext message, List<DecryptionShare.CiphertextDecryptionSelection> shares) {
       return new AutoValue_Tally_PlaintextTallySelection(object_id, tally, value, message, ImmutableList.copyOf(shares));
     }
 

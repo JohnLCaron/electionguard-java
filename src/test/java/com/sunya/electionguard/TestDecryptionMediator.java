@@ -39,7 +39,7 @@ public class TestDecryptionMediator extends TestProperties {
   PlaintextBallot fake_spoiled_ballot;
   CiphertextAcceptedBallot encrypted_fake_cast_ballot;
   CiphertextAcceptedBallot encrypted_fake_spoiled_ballot;
-  Map<String, BigInteger> expected_plaintext_tally;
+  Map<String, Integer> expected_plaintext_tally;
   Tally.CiphertextTally ciphertext_tally;
 
   public TestDecryptionMediator() {
@@ -104,7 +104,7 @@ public class TestDecryptionMediator extends TestProperties {
     // missing_selection_ids = selection_ids.difference( set(this.expected_plaintext_tally) )
     Sets.SetView<String> missing_selection_ids = Sets.difference(selection_ids, this.expected_plaintext_tally.keySet());
     for (String id : missing_selection_ids) {
-      this.expected_plaintext_tally.put(id, BigInteger.ZERO);
+      this.expected_plaintext_tally.put(id, 0);
     }
 
     // Encrypt
@@ -312,8 +312,8 @@ public class TestDecryptionMediator extends TestProperties {
     System.out.printf("%s%n", result);
 
     assertThat(result).isPresent();
-    BigInteger expected = this.expected_plaintext_tally.get(first_selection.object_id);
-    BigInteger actual = result.get().tally();
+    Integer expected = this.expected_plaintext_tally.get(first_selection.object_id);
+    Integer actual = result.get().tally();
     assertThat(actual).isEqualTo(expected);
   }
 
@@ -374,7 +374,7 @@ public class TestDecryptionMediator extends TestProperties {
     for (PlaintextBallotContest contest : plaintext_ballot.contests) {
       for (PlaintextBallotSelection selection : contest.ballot_selections) {
         int expected_tally = selection.vote.equalsIgnoreCase("False") ? 0 : 1;
-        BigInteger actual_tally = result.get(contest.object_id).selections().get(selection.object_id).tally();
+        Integer actual_tally = result.get(contest.contest_id).selections().get(selection.selection_id).tally();
         assertThat(expected_tally).isEqualTo(actual_tally.intValue());
       }
     }
@@ -435,8 +435,8 @@ public class TestDecryptionMediator extends TestProperties {
     for (PlaintextBallotContest contest : plaintext_ballot.contests) {
       for (PlaintextBallotSelection selection : contest.ballot_selections) {
         int expected_tally = selection.vote.equalsIgnoreCase("False") ? 0 : 1;
-        BigInteger actual_tally = result.get(contest.object_id).selections().get(selection.object_id).tally();
-        assertThat(expected_tally).isEqualTo(actual_tally.intValue());
+        Integer actual_tally = result.get(contest.contest_id).selections().get(selection.selection_id).tally();
+        assertThat(expected_tally).isEqualTo(actual_tally);
       }
     }
   }
@@ -466,9 +466,9 @@ public class TestDecryptionMediator extends TestProperties {
 
     for (PlaintextBallotContest contest : this.fake_spoiled_ballot.contests) {
       for (PlaintextBallotSelection selection : contest.ballot_selections) {
-        BigInteger actual_tally = spoiled_ballot.get(contest.object_id).selections().get(selection.object_id).tally();
-        BigInteger expected_tally = result.get(this.fake_spoiled_ballot.object_id).get(contest.object_id)
-                .selections().get(selection.object_id).tally();
+        Integer actual_tally = spoiled_ballot.get(contest.contest_id).selections().get(selection.selection_id).tally();
+        Integer expected_tally = result.get(this.fake_spoiled_ballot.object_id).get(contest.contest_id)
+                .selections().get(selection.selection_id).tally();
         assertThat(expected_tally).isEqualTo(actual_tally);
       }
     }
@@ -484,7 +484,7 @@ public class TestDecryptionMediator extends TestProperties {
 
     Optional<Tally.PlaintextTally> decrypted_tallies = subject.get_plaintext_tally(false, null);
     assertThat(decrypted_tallies).isPresent();
-    Map<String, BigInteger> result = this._convert_to_selections(decrypted_tallies.get());
+    Map<String, Integer> result = this._convert_to_selections(decrypted_tallies.get());
 
     assertThat(result).isNotEmpty();
     assertThat(result).isEqualTo(this.expected_plaintext_tally);
@@ -508,7 +508,7 @@ public class TestDecryptionMediator extends TestProperties {
 
     Optional<Tally.PlaintextTally> decrypted_tallies = subject.get_plaintext_tally(false, null);
     assertThat(decrypted_tallies).isPresent();
-    Map<String, BigInteger> result = this._convert_to_selections(decrypted_tallies.get());
+    Map<String, Integer> result = this._convert_to_selections(decrypted_tallies.get());
 
     // assert
     assertThat(result).isNotEmpty();
@@ -528,7 +528,7 @@ public class TestDecryptionMediator extends TestProperties {
     ElectionTestHelper helper = new ElectionTestHelper(random);
     List<Ballot.PlaintextBallot> plaintext_ballots = helper.plaintext_voted_ballots(metadata, 3 + random.nextInt(3));
 
-    Map<String, BigInteger> plaintext_tallies = TallyTestHelper.accumulate_plaintext_ballots(plaintext_ballots);
+    Map<String, Integer> plaintext_tallies = TallyTestHelper.accumulate_plaintext_ballots(plaintext_ballots);
     Tally.CiphertextTally encrypted_tally = this._generate_encrypted_tally(metadata, context, plaintext_ballots);
     DecryptionMediator subject = new DecryptionMediator(metadata, context, encrypted_tally);
 
@@ -538,7 +538,7 @@ public class TestDecryptionMediator extends TestProperties {
 
     Optional<Tally.PlaintextTally> decrypted_tallies = subject.get_plaintext_tally(false, null);
     assertThat(decrypted_tallies).isPresent();
-    Map<String, BigInteger> result = this._convert_to_selections(decrypted_tallies.get());
+    Map<String, Integer> result = this._convert_to_selections(decrypted_tallies.get());
 
     // assert
     assertThat(result).isNotEmpty();
@@ -567,8 +567,8 @@ public class TestDecryptionMediator extends TestProperties {
     return tally.get();
   }
 
-  private Map<String, BigInteger> _convert_to_selections(Tally.PlaintextTally tally) {
-    Map<String, BigInteger> plaintext_selections = new HashMap<>();
+  private Map<String, Integer> _convert_to_selections(Tally.PlaintextTally tally) {
+    Map<String, Integer> plaintext_selections = new HashMap<>();
     for (Tally.PlaintextTallyContest contest : tally.contests().values()) {
       for (Map.Entry<String, Tally.PlaintextTallySelection> entry : contest.selections().entrySet()) {
         plaintext_selections.put(entry.getKey(), entry.getValue().tally());

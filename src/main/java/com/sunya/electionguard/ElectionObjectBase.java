@@ -1,5 +1,8 @@
 package com.sunya.electionguard;
 
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
+
 import java.util.Objects;
 
 /** Superclass for election objects that are identifiable by object_id. */
@@ -8,6 +11,7 @@ public class ElectionObjectBase {
   public final String object_id;
 
   public ElectionObjectBase(String object_id) {
+    Preconditions.checkArgument(!Strings.isNullOrEmpty(object_id));
     this.object_id = object_id;
   }
 

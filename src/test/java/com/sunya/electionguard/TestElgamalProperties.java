@@ -39,8 +39,8 @@ public class TestElgamalProperties extends TestProperties {
     assertThat(ciphertext.data.getBigInt())
             .isEqualTo(pow_p(public_key.getBigInt(), nonce.getBigInt()));
 
-    BigInteger plaintext = ciphertext.decrypt(keypair.secret_key);
-    assertThat(plaintext).isEqualTo(BigInteger.ZERO);
+    Integer plaintext = ciphertext.decrypt(keypair.secret_key);
+    assertThat(plaintext).isEqualTo(0);
   }
 
   @Property
@@ -62,8 +62,8 @@ public class TestElgamalProperties extends TestProperties {
           @ForAll @IntRange(min = 0, max = 100) int message,
           @ForAll("elements_mod_q_no_zero") ElementModQ nonce) {
       Ciphertext ciphertext = elgamal_encrypt(message, nonce, keypair.public_key).get();
-      BigInteger plaintext = ciphertext.decrypt(keypair.secret_key);
-      assertThat(plaintext).isEqualTo(BigInteger.valueOf(message));
+      Integer plaintext = ciphertext.decrypt(keypair.secret_key);
+      assertThat(plaintext).isEqualTo(message);
   }
 
   @Property
@@ -72,8 +72,8 @@ public class TestElgamalProperties extends TestProperties {
           @ForAll @IntRange(min = 0, max = 100) int message,
           @ForAll("elements_mod_q_no_zero") ElementModQ nonce) {
       Ciphertext ciphertext = elgamal_encrypt(message, nonce, keypair.public_key).get();
-      BigInteger plaintext = ciphertext.decrypt_known_nonce(keypair.public_key, nonce);
-      assertThat(plaintext).isEqualTo(BigInteger.valueOf(message)); // TODO FAILS
+      Integer plaintext = ciphertext.decrypt_known_nonce(keypair.public_key, nonce);
+      assertThat(plaintext).isEqualTo(message); // TODO FAILS
   }
 
   @Property
@@ -94,8 +94,8 @@ public class TestElgamalProperties extends TestProperties {
     Ciphertext c1 = elgamal_encrypt(m1, r1, keypair.public_key).get();
     Ciphertext c2 = elgamal_encrypt(m2, r2, keypair.public_key).get();
     Ciphertext c_sum = elgamal_add(c1, c2);
-    BigInteger total = c_sum.decrypt(keypair.secret_key);
-    assertThat(total).isEqualTo(BigInteger.valueOf(m1 + m2));
+    Integer total = c_sum.decrypt(keypair.secret_key);
+    assertThat(total).isEqualTo(m1 + m2);
   }
 
   @Example

@@ -13,26 +13,27 @@ import static com.sunya.electionguard.Group.*;
  * Performance will degrade if it's much larger.
  */
 public class Dlog {
-  private static final Cache<BigInteger, BigInteger> cache = CacheBuilder.newBuilder().build();
+  private static final Cache<BigInteger, Integer> cache = CacheBuilder.newBuilder().build();
   static {
-    cache.put(BigInteger.ONE, BigInteger.ZERO);
+    cache.put(BigInteger.ONE, 0);
   }
   private static BigInteger dlog_max_elem = BigInteger.ONE;
   private static int dlog_max_exp = 0;
 
-  static BigInteger discrete_log(ElementModP elem) {
-    BigInteger result = cache.getIfPresent(elem.elem);
+  static Integer discrete_log(ElementModP elem) {
+    Integer result = cache.getIfPresent(elem.elem);
     if (result != null) {
       return result;
     }
     return discrete_log_internal(elem.elem);
   }
 
-  private static synchronized BigInteger discrete_log_internal(BigInteger e) {
+  // store all integer values up to dlog_max_elem, which increases as needed.
+  private static synchronized Integer discrete_log_internal(BigInteger e) {
     while (!e.equals(dlog_max_elem)) {
       dlog_max_exp = dlog_max_exp + 1;
       dlog_max_elem = mult_pi(G, dlog_max_elem);
-      cache.put(dlog_max_elem, BigInteger.valueOf(dlog_max_exp));
+      cache.put(dlog_max_elem, dlog_max_exp);
     }
     return cache.getIfPresent(dlog_max_elem);
   }

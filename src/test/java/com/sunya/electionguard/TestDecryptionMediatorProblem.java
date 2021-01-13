@@ -3,7 +3,6 @@ package com.sunya.electionguard;
 import com.google.common.collect.Sets;
 import net.jqwik.api.Example;
 
-import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -28,7 +27,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
   ElementModP joint_public_key;
   InternalElectionDescription metadata;
   CiphertextElectionContext context;
-  Map<String, BigInteger> expected_plaintext_tally;
+  Map<String, Integer> expected_plaintext_tally;
 
   PlaintextBallot fake_cast_ballot;
   PlaintextBallot fake_spoiled_ballot;
@@ -100,7 +99,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
     // missing_selection_ids = selection_ids.difference( set(this.expected_plaintext_tally) )
     Sets.SetView<String> missing_selection_ids = Sets.difference(selection_ids, this.expected_plaintext_tally.keySet());
     for (String id : missing_selection_ids) {
-      this.expected_plaintext_tally.put(id, BigInteger.ZERO);
+      this.expected_plaintext_tally.put(id, 0);
     }
 
     // Encrypt
@@ -151,7 +150,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
     for (int i = 0; i < 10; i++) {
       castBallots.add(ballot_factory.get_fake_ballot(this.metadata, "some-unique-ballot-id-cast" + i, true));
     }
-    Map<String, BigInteger> expected_tally = TallyTestHelper.accumulate_plaintext_ballots(castBallots);
+    Map<String, Integer> expected_tally = TallyTestHelper.accumulate_plaintext_ballots(castBallots);
     System.out.printf("%n testProblemWithSpoiledBallots expected %s%n", expected_tally);
 
     // these are spoiled
@@ -168,7 +167,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
     // missing_selection_ids = selection_ids.difference( set(this.expected_plaintext_tally) )
     Sets.SetView<String> missing_selection_ids = Sets.difference(selection_ids, expected_tally.keySet());
     for (String id : missing_selection_ids) {
-      expected_tally.put(id, BigInteger.ZERO);
+      expected_tally.put(id, 0);
     }
 
     // encrypt ballots
@@ -206,7 +205,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
     Optional<Tally.PlaintextTally> decrypted_tallies = decryptionMediator.get_plaintext_tally(false, null);
     assertThat(decrypted_tallies).isNotNull();
 
-    Map<String, BigInteger> result = this._convert_to_selections(decrypted_tallies.get());
+    Map<String, Integer> result = this._convert_to_selections(decrypted_tallies.get());
     System.out.printf("%n==================%ntestProblem result %s%n", result);
     assertThat(result).isEqualTo(expected_tally);
   }
@@ -218,7 +217,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
     for (int i = 0; i < 10; i++) {
       castBallots.add(ballot_factory.get_fake_ballot(this.metadata, "some-unique-ballot-id-cast" + i, true));
     }
-    Map<String, BigInteger> expected = TallyTestHelper.accumulate_plaintext_ballots(castBallots);
+    Map<String, Integer> expected = TallyTestHelper.accumulate_plaintext_ballots(castBallots);
     System.out.printf("%n testProblemWithSpoiledBallots expected %s%n", expected);
 
     // these are spoiled
@@ -263,7 +262,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
     Optional<Tally.PlaintextTally> decrypted_tallies = decryptionMediator.get_plaintext_tally(false, null);
     assertThat(decrypted_tallies).isNotNull();
 
-    Map<String, BigInteger> result = this._convert_to_selections(decrypted_tallies.get());
+    Map<String, Integer> result = this._convert_to_selections(decrypted_tallies.get());
     System.out.printf("%n==================%ntestProblem result %s%n", result);
     assertThat(result).isEqualTo(expected);
   }
@@ -274,7 +273,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
     for (int i = 0; i < 10; i++) {
       allPlaintextBallots.add(ballot_factory.get_fake_ballot(this.metadata, "some-unique-ballot-id-cast" + i, true));
     }
-    Map<String, BigInteger> expected_tally = TallyTestHelper.accumulate_plaintext_ballots(allPlaintextBallots);
+    Map<String, Integer> expected_tally = TallyTestHelper.accumulate_plaintext_ballots(allPlaintextBallots);
     System.out.printf("%n testProblem expected %s%n", expected_tally);
 
     // Fill in the expected values with any missing selections
@@ -284,7 +283,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
     // missing_selection_ids = selection_ids.difference( set(this.expected_plaintext_tally) )
     Sets.SetView<String> missing_selection_ids = Sets.difference(selection_ids, expected_tally.keySet());
     for (String id : missing_selection_ids) {
-      expected_tally.put(id, BigInteger.ZERO);
+      expected_tally.put(id, 0);
     }
 
     Encrypt.EncryptionDevice encryption_device = new Encrypt.EncryptionDevice("location");
@@ -314,7 +313,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
     Optional<Tally.PlaintextTally> decrypted_tallies = decryptionMediator.get_plaintext_tally(false, null);
     assertThat(decrypted_tallies).isNotNull();
 
-    Map<String, BigInteger> result = this._convert_to_selections(decrypted_tallies.get());
+    Map<String, Integer> result = this._convert_to_selections(decrypted_tallies.get());
     System.out.printf("%n==================%ntestProblem result %s%n", result);
     assertThat(result).isEqualTo(expected_tally);
   }
@@ -327,7 +326,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
 
     ArrayList<PlaintextBallot> all = new ArrayList<>();
     all.add(castBallot);
-    Map<String, BigInteger> expected_tally = TallyTestHelper.accumulate_plaintext_ballots(all);
+    Map<String, Integer> expected_tally = TallyTestHelper.accumulate_plaintext_ballots(all);
     System.out.printf("%n testProblem expected %s%n", expected_tally);
 
     // Fill in the expected values with any missing selections
@@ -337,7 +336,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
     // missing_selection_ids = selection_ids.difference( set(this.expected_plaintext_tally) )
     Sets.SetView<String> missing_selection_ids = Sets.difference(selection_ids, expected_tally.keySet());
     for (String id : missing_selection_ids) {
-      expected_tally.put(id, BigInteger.ZERO);
+      expected_tally.put(id, 0);
     }
 
     Encrypt.EncryptionDevice encryption_device = new Encrypt.EncryptionDevice("location");
@@ -358,13 +357,13 @@ public class TestDecryptionMediatorProblem extends TestProperties {
     Optional<Tally.PlaintextTally> decrypted_tallies = decryptionMediator.get_plaintext_tally(false, null);
     assertThat(decrypted_tallies).isNotNull();
 
-    Map<String, BigInteger> result = this._convert_to_selections(decrypted_tallies.get());
+    Map<String, Integer> result = this._convert_to_selections(decrypted_tallies.get());
     System.out.printf("%n==================%ntestProblem result %s%n", result);
     assertThat(result).isEqualTo(expected_tally);
   }
 
-  private Map<String, BigInteger> _convert_to_selections(Tally.PlaintextTally tally) {
-    Map<String, BigInteger> plaintext_selections = new HashMap<>();
+  private Map<String, Integer> _convert_to_selections(Tally.PlaintextTally tally) {
+    Map<String, Integer> plaintext_selections = new HashMap<>();
     for (Tally.PlaintextTallyContest contest : tally.contests().values()) {
       for (Map.Entry<String, Tally.PlaintextTallySelection> entry : contest.selections().entrySet()) {
         plaintext_selections.put(entry.getKey(), entry.getValue().tally());

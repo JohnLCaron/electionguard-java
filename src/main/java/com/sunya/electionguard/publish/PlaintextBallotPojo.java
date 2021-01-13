@@ -2,7 +2,7 @@ package com.sunya.electionguard.publish;
 
 import java.util.List;
 
-/** Conversion of PlaintextBallot to Json. */
+/** Conversion between PlaintextBallot and Json, using python's object model. */
 public class PlaintextBallotPojo {
   public String object_id;
   public String ballot_style;

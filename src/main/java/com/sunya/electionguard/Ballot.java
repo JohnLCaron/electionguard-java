@@ -1,5 +1,7 @@
 package com.sunya.electionguard;
 
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.flogger.FluentLogger;
@@ -29,11 +31,12 @@ public class Ballot {
    */
   @Immutable
   public static class PlaintextBallot extends ElectionObjectBase {
-    final String ballot_style; // The `object_id` of the `BallotStyle` in the `Election` Manifest
+    final String ballot_style; // The `object_id` of the Election.BallotStyle
     final ImmutableList<PlaintextBallotContest> contests; // The list of contests for this ballot
 
     public PlaintextBallot(String object_id, String ballot_style, List<PlaintextBallotContest> contests) {
       super(object_id);
+      Preconditions.checkArgument(!Strings.isNullOrEmpty(ballot_style));
       this.ballot_style = ballot_style;
       this.contests = ImmutableList.copyOf(contests);
     }
@@ -41,7 +44,6 @@ public class Ballot {
     /**
      * Check if expected ballot style is valid
      * @param expected_ballot_style_id: Expected ballot style id
-     * @return True if valid
      */
     boolean is_valid(String expected_ballot_style_id) {
       if (!this.ballot_style.equals(expected_ballot_style_id)) {
@@ -78,8 +80,7 @@ public class Ballot {
   }
 
   /**
-   * A PlaintextBallotContest represents the selections made by a voter for a specific ContestDescription,
-   * matched on by object_id. LOOK prefer contest_id?
+   * A PlaintextBallotContest represents the selections made by a voter for a specific ContestDescription.
    * <p>
    * This can be either a partial or a complete representation of a contest dataset.  Specifically,
    * a partial representation must include at a minimum the "affirmative" selections of a contest.
@@ -91,11 +92,13 @@ public class Ballot {
    * while complete contests are passed into ElectionGuard when running encryption on an existing dataset.
    */
   @Immutable
-  public static class PlaintextBallotContest extends ElectionObjectBase {
+  public static class PlaintextBallotContest {
+    final String contest_id; // matches the ContestDescription.object_id
     final ImmutableList<PlaintextBallotSelection> ballot_selections; // Collection of ballot selections
 
-    public PlaintextBallotContest(String object_id, List<PlaintextBallotSelection> ballot_selections) {
-      super(object_id); // matches the ContestDescription.object_id
+    public PlaintextBallotContest(String contest_id, List<PlaintextBallotSelection> ballot_selections) {
+      Preconditions.checkArgument(!Strings.isNullOrEmpty(contest_id));
+      this.contest_id = contest_id;
       this.ballot_selections = ImmutableList.copyOf(ballot_selections);
     }
 
@@ -104,13 +107,13 @@ public class Ballot {
      * Note: because this class supports partial representations, undervotes are considered a valid state.
      */
     boolean is_valid(
-            String expected_object_id,
+            String expected_contest_id,
             int expected_number_selections,
             int expected_number_elected,
             Optional<Integer> votes_allowed) {
 
-      if (!this.object_id.equals(expected_object_id)) {
-        logger.atInfo().log("invalid object_id: expected(%s) actual(%s)", expected_object_id, this.object_id);
+      if (!this.contest_id.equals(expected_contest_id)) {
+        logger.atInfo().log("invalid contest_id: expected(%s) actual(%s)", expected_contest_id, this.contest_id);
         return false;
       }
 
@@ -143,32 +146,32 @@ public class Ballot {
       return true;
     }
 
+
     @Override
     public boolean equals(Object o) {
       if (this == o) return true;
       if (o == null || getClass() != o.getClass()) return false;
-      if (!super.equals(o)) return false;
       PlaintextBallotContest that = (PlaintextBallotContest) o;
-      return ballot_selections.equals(that.ballot_selections);
+      return contest_id.equals(that.contest_id) &&
+              ballot_selections.equals(that.ballot_selections);
     }
 
     @Override
     public int hashCode() {
-      return Objects.hash(super.hashCode(), ballot_selections);
+      return Objects.hash(contest_id, ballot_selections);
     }
 
     @Override
     public String toString() {
       return "PlaintextBallotContest{" +
-              "object_id='" + object_id + '\'' +
-              ", ballot_selections=\n " + ballot_selections +
+              "contest_id='" + contest_id + '\'' +
+              ", ballot_selections=" + ballot_selections +
               '}';
     }
   }
 
   /**
-   * A BallotSelection represents an individual selection on a ballot, its object_id must
-   * match the SelectionDescription object_id. LOOK prefer selection_id.
+   * A BallotSelection represents an individual selection on a ballot.
    * <p>
    * This accepts a `vote` string field which has no constraints
    * in the ElectionGuard Data Specification, but is constrained logically
@@ -185,22 +188,24 @@ public class Ballot {
    * discarded when encrypting.
    */
   @Immutable
-  public static class PlaintextBallotSelection extends ElectionObjectBase {
+  public static class PlaintextBallotSelection {
+    final String selection_id; // matches the SelectionDescription.object_id
     final String vote;
     final boolean is_placeholder_selection; // default false
     final Optional<ExtendedData> extended_data; // default None
 
-    public PlaintextBallotSelection(String object_id, String vote, boolean is_placeholder_selection, Optional<ExtendedData> extended_data) {
-      super(object_id); // matches SelectionDescription.object_id
+    public PlaintextBallotSelection(String selection_id, String vote, boolean is_placeholder_selection, Optional<ExtendedData> extended_data) {
+      Preconditions.checkArgument(!Strings.isNullOrEmpty(selection_id));
+      this.selection_id = selection_id;
       this.vote = vote;
       this.is_placeholder_selection = is_placeholder_selection;
       this.extended_data = extended_data;
     }
 
-    boolean is_valid(String expected_object_id) {
-      if (!expected_object_id.equals(object_id)) {
-        logger.atInfo().log("invalid object_id: expected %s actual %s",
-                expected_object_id, this.object_id);
+    boolean is_valid(String expected_selection_id) {
+      if (!expected_selection_id.equals(selection_id)) {
+        logger.atInfo().log("invalid selection_id: expected %s actual %s",
+                expected_selection_id, this.selection_id);
         return false;
       }
       int choice = to_int();
@@ -234,26 +239,26 @@ public class Ballot {
     public boolean equals(Object o) {
       if (this == o) return true;
       if (o == null || getClass() != o.getClass()) return false;
-      if (!super.equals(o)) return false;
       PlaintextBallotSelection that = (PlaintextBallotSelection) o;
       return is_placeholder_selection == that.is_placeholder_selection &&
+              selection_id.equals(that.selection_id) &&
               vote.equals(that.vote) &&
               extended_data.equals(that.extended_data);
     }
 
     @Override
     public int hashCode() {
-      return Objects.hash(super.hashCode(), vote, is_placeholder_selection, extended_data);
+      return Objects.hash(selection_id, vote, is_placeholder_selection, extended_data);
     }
 
     @Override
     public String toString() {
       return "PlaintextBallotSelection{" +
-              "vote='" + vote + '\'' +
+              "selection_id='" + selection_id + '\'' +
+              ", vote='" + vote + '\'' +
               ", is_placeholder_selection=" + is_placeholder_selection +
               ", extended_data=" + extended_data +
-              ", object_id='" + object_id + '\'' +
-              "}\n\n";
+              '}';
     }
   }
 

@@ -227,16 +227,16 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
     for (Election.SelectionDescription selection_description : description.ballot_selections) {
 
       Ballot.PlaintextBallotSelection key_selection = result_from_key.get().ballot_selections.stream()
-              .filter(s -> s.object_id.equals(selection_description.object_id)).findFirst().orElseThrow(IllegalStateException::new);
+              .filter(s -> s.selection_id.equals(selection_description.object_id)).findFirst().orElseThrow(IllegalStateException::new);
 
       Ballot.PlaintextBallotSelection nonce_selection = result_from_nonce.get().ballot_selections.stream()
-              .filter(s -> s.object_id.equals(selection_description.object_id)).findFirst().orElseThrow(IllegalStateException::new);
+              .filter(s -> s.selection_id.equals(selection_description.object_id)).findFirst().orElseThrow(IllegalStateException::new);
 
       Ballot.PlaintextBallotSelection seed_selection = result_from_nonce_seed.get().ballot_selections.stream()
-              .filter(s -> s.object_id.equals(selection_description.object_id)).findFirst().orElseThrow(IllegalStateException::new);
+              .filter(s -> s.selection_id.equals(selection_description.object_id)).findFirst().orElseThrow(IllegalStateException::new);
 
       List<Ballot.PlaintextBallotSelection> data_selections_exist = data.ballot_selections.stream()
-              .filter(s -> s.object_id.equals(selection_description.object_id)).collect(Collectors.toList());
+              .filter(s -> s.selection_id.equals(selection_description.object_id)).collect(Collectors.toList());
 
 
       // It 's possible there are no selections in the original data collection
@@ -398,20 +398,19 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
     assertThat(data.object_id).isEqualTo(result_from_nonce_seed.get().object_id);
 
     for (Election.ContestDescriptionWithPlaceholders description : metadata.get_contests_for(data.ballot_style)) {
-
       int expected_entries = description.ballot_selections.size() + description.number_elected;
 
       Ballot.PlaintextBallotContest key_contest = result_from_key.get().contests.stream()
-              .filter(c -> c.object_id.equals(description.object_id)).findFirst().orElseThrow(IllegalStateException::new);
+              .filter(c -> c.contest_id.equals(description.object_id)).findFirst().orElseThrow(IllegalStateException::new);
 
       Ballot.PlaintextBallotContest nonce_contest = result_from_nonce.get().contests.stream()
-              .filter(c -> c.object_id.equals(description.object_id)).findFirst().orElseThrow(IllegalStateException::new);
+              .filter(c -> c.contest_id.equals(description.object_id)).findFirst().orElseThrow(IllegalStateException::new);
 
       Ballot.PlaintextBallotContest seed_contest = result_from_nonce_seed.get().contests.stream()
-              .filter(c -> c.object_id.equals(description.object_id)).findFirst().orElseThrow(IllegalStateException::new);
+              .filter(c -> c.contest_id.equals(description.object_id)).findFirst().orElseThrow(IllegalStateException::new);
 
       List<Ballot.PlaintextBallotContest> data_contest_exists = data.contests.stream()
-              .filter(c -> c.object_id.equals(description.object_id)).collect(Collectors.toList());
+              .filter(c -> c.contest_id.equals(description.object_id)).collect(Collectors.toList());
 
 
       // Contests may not be voted on the ballot
@@ -442,20 +441,20 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
       for (Election.SelectionDescription selection_description : description.ballot_selections) {
 
         Ballot.PlaintextBallotSelection key_selection = key_contest.ballot_selections.stream()
-                .filter(s -> s.object_id.equals(selection_description.object_id)).findFirst().orElseThrow(IllegalStateException::new);
+                .filter(s -> s.selection_id.equals(selection_description.object_id)).findFirst().orElseThrow(IllegalStateException::new);
 
         Ballot.PlaintextBallotSelection nonce_selection = nonce_contest.ballot_selections.stream()
-                .filter(s -> s.object_id.equals(selection_description.object_id)).findFirst().orElseThrow(IllegalStateException::new);
+                .filter(s -> s.selection_id.equals(selection_description.object_id)).findFirst().orElseThrow(IllegalStateException::new);
 
         Ballot.PlaintextBallotSelection seed_selection = seed_contest.ballot_selections.stream()
-                .filter(s -> s.object_id.equals(selection_description.object_id)).findFirst().orElseThrow(IllegalStateException::new);
+                .filter(s -> s.selection_id.equals(selection_description.object_id)).findFirst().orElseThrow(IllegalStateException::new);
 
         // Selections may be undervoted for a specific contest
         List<Ballot.PlaintextBallotSelection> data_selection_exist = new ArrayList<>();
         ;
         if (data_contest != null) {
           data_selection_exist = data_contest.ballot_selections.stream()
-                  .filter(s -> s.object_id.equals(selection_description.object_id)).collect(Collectors.toList());
+                  .filter(s -> s.selection_id.equals(selection_description.object_id)).collect(Collectors.toList());
         }
 
         if (!data_selection_exist.isEmpty()) {

@@ -1,6 +1,5 @@
 package com.sunya.electionguard.publish;
 
-import com.google.common.flogger.FluentLogger;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
@@ -18,14 +17,14 @@ import static com.sunya.electionguard.DecryptionShare.CiphertextCompensatedDecry
 
 /** Conversion of CiphertextDecryptionSelection to/from Json. */
 public class CiphertextDecryptionSelectionPojo {
-  private static final FluentLogger logger = FluentLogger.forEnclosingClass();
-
   public String object_id;
   public String guardian_id;
   public BigInteger description_hash;
   public BigInteger share;
   public ChaumPedersen.ChaumPedersenProof proof; // Optional
   public Map<String, CiphertextCompensatedDecryptionSelection> recovered_parts; // Optional
+
+  //////////////////////////////////////
 
   public static JsonElement serialize(CiphertextDecryptionSelection src) {
     Gson gson = ConvertFromJson.enhancedGson();

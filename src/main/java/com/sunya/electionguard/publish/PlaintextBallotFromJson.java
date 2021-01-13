@@ -14,7 +14,10 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-/** Conversion of PlaintextBallot from Json. */
+/**
+ * Conversion of PlaintextBallot from Json.
+ * LOOK: what to do about malformed fields?
+ */
 public class PlaintextBallotFromJson {
   private final String filename;
 

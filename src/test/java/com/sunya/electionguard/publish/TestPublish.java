@@ -48,7 +48,7 @@ public class TestPublish {
     Tally.PlaintextTally plaintext_tally = Tally.PlaintextTally.create("", ImmutableMap.of(), ImmutableMap.of());
 
     Tally.PublishedCiphertextTally ciphertext_tally = Tally.publish_ciphertext_tally(
-            new Tally.CiphertextTally("", metadata, context));
+            new Tally.CiphertextTally("CiphertextTallyId", metadata, context));
 
     Publisher publisher = new Publisher(outputDir, false);
     publisher.write(
@@ -68,12 +68,13 @@ public class TestPublish {
 
   @Example
   public void test_publish_private_data() throws IOException {
-    List<Ballot.PlaintextBallot> plaintext_ballots = ImmutableList.of(new Ballot.PlaintextBallot("", "",ImmutableList.of()));
+    List<Ballot.PlaintextBallot> plaintext_ballots = ImmutableList.of(
+            new Ballot.PlaintextBallot("PlaintextBallotId", "ballot_style",ImmutableList.of()));
     List<Ballot.CiphertextBallot> encrypted_ballots = ImmutableList.of(
-            Ballot.make_ciphertext_ballot("", "", int_to_q_unchecked(BigInteger.ZERO),
+            Ballot.make_ciphertext_ballot("CipherTextBallotId", "ballot_style", int_to_q_unchecked(BigInteger.ZERO),
                     Optional.of(int_to_q_unchecked(BigInteger.ZERO)), ImmutableList.of(), Optional.empty(),Optional.empty(),Optional.empty()));
 
-    List<Guardian> guardians = ImmutableList.of( new Guardian("", 1, 1, 1, null));
+    List<Guardian> guardians = ImmutableList.of( new Guardian("GuardianId", 1, 1, 1, null));
 
     Publisher publisher = new Publisher(outputDir, false);
     publisher.publish_private_data(

@@ -10,7 +10,6 @@ import net.jqwik.api.constraints.IntRange;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -460,7 +459,7 @@ public class TestEncryptProperties extends TestProperties {
 
        for (CiphertextBallotSelection selection : contest.ballot_selections) {
          // Since we know the nonce, we can decrypt the plaintext
-         BigInteger representation = selection.ciphertext().decrypt_known_nonce(keypair.public_key, selection.nonce.get());
+         Integer representation = selection.ciphertext().decrypt_known_nonce(keypair.public_key, selection.nonce.get());
 
          // one could also decrypt with the secret key:
          // representation = selection.message.decrypt(keypair.secret_key)
@@ -472,6 +471,7 @@ public class TestEncryptProperties extends TestProperties {
                  context.crypto_extended_base_hash,
                  add_q(selection.nonce.get(), TWO_MOD_Q),
                  representation);
+
          assertThat(regenerated_disjuctive.is_valid(selection.ciphertext(), keypair.public_key, context.crypto_extended_base_hash))
                  .isTrue();
        }

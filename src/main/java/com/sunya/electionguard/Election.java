@@ -276,9 +276,7 @@ public class Election {
     }
   }
 
-  /**
-   * A BallotStyle works as a key to uniquely specify a set of contests. See also `ContestDescription`.
-   */
+  /** A BallotStyle works as a key to uniquely specify a set of contests. */
   @Immutable
   public static class BallotStyle extends ElectionObjectBase implements Hash.CryptoHashable {
     public final Optional<ImmutableList<String>> geopolitical_unit_ids;
@@ -1028,7 +1026,7 @@ public class Election {
     public InternalElectionDescription(ElectionDescription description) {
       this.description = description;
       this.geopolitical_units = description.geopolitical_units;
-      this.contests = _generate_contests_with_placeholders(description);
+      this.contests = generate_contests_with_placeholders(description);
       this.ballot_styles = description.ballot_styles;
       this.description_hash = description.crypto_hash();
     }
@@ -1037,19 +1035,12 @@ public class Election {
       return contests.stream().filter(c -> c.object_id.equals(contest_id)).findFirst();
     }
 
-    /**
-     * Find the ballot style for a specified ballot_style_id
-     */
+    /** Find the ballot style for a specified ballot_style_id */
     Optional<BallotStyle> get_ballot_style(String ballot_style_id) {
       return ballot_styles.stream().filter(bs -> bs.object_id.equals(ballot_style_id)).findFirst();
     }
 
-    /**
-     * Get contests for a ballot style
-     *
-     * @param ballot_style_id: ballot style id
-     * @return contest descriptions
-     */
+    /** Get contests that have the given ballot style. */
     List<ContestDescriptionWithPlaceholders> get_contests_for(String ballot_style_id) {
       Optional<BallotStyle> style = this.get_ballot_style(ballot_style_id);
       if (style.isEmpty() || style.get().geopolitical_unit_ids.isEmpty()) {
@@ -1065,7 +1056,7 @@ public class Election {
      * For each contest, append the `number_elected` number
      * of placeholder selections to the end of the contest collection.
      */
-    private ImmutableList<ContestDescriptionWithPlaceholders> _generate_contests_with_placeholders(
+    private ImmutableList<ContestDescriptionWithPlaceholders> generate_contests_with_placeholders(
             ElectionDescription description) {
 
       List<ContestDescriptionWithPlaceholders> contests = new ArrayList<>();
@@ -1081,8 +1072,7 @@ public class Election {
       if (this == o) return true;
       if (o == null || getClass() != o.getClass()) return false;
       InternalElectionDescription that = (InternalElectionDescription) o;
-      return Objects.equals(description, that.description) &&
-              Objects.equals(geopolitical_units, that.geopolitical_units) &&
+      return Objects.equals(geopolitical_units, that.geopolitical_units) &&
               Objects.equals(contests, that.contests) &&
               Objects.equals(ballot_styles, that.ballot_styles) &&
               Objects.equals(description_hash, that.description_hash);
@@ -1090,13 +1080,11 @@ public class Election {
 
     @Override
     public int hashCode() {
-      return Objects.hash(description, geopolitical_units, contests, ballot_styles, description_hash);
+      return Objects.hash(geopolitical_units, contests, ballot_styles, description_hash);
     }
   }
 
-  /**
-   * The constants for mathematical functions used for this election.
-   */
+  /** The constants for mathematical functions used for this election. */
   @Immutable
   public static class ElectionConstants {
     public final BigInteger large_prime; // large prime or p
@@ -1143,7 +1131,8 @@ public class Election {
   }
 
   /**
-   * `CiphertextElectionContext` is the ElectionGuard representation of a specific election
+   * `CiphertextElectionContext` is the ElectionGuard representation of a specific election.
+   * <p>
    * Note: The ElectionGuard Data Spec deviates from the NIST model in that
    * this object includes fields that are populated in the course of encrypting an election
    * Specifically, `crypto_base_hash`, `crypto_extended_base_hash` and `elgamal_public_key`
@@ -1232,8 +1221,6 @@ public class Election {
     ElementModQ crypto_base_hash = Hash.hash_elems(P, Q, G, number_of_guardians, quorum, description_hash);
     ElementModQ crypto_extended_base_hash = Hash.hash_elems(crypto_base_hash, elgamal_public_key);
 
-    // int number_of_guardians, int quorum, ElementModP elgamal_public_key,
-    //          ElementModQ description_hash, ElementModQ crypto_base_hash, ElementModQ crypto_extended_base_hash
     return new CiphertextElectionContext(
             number_of_guardians,
             quorum,
@@ -1244,7 +1231,7 @@ public class Election {
   }
 
   /**
-   * Generates a placeholder selection description
+   * Generates a placeholder selection description.
    * @param description: contest description
    * @param placeholders: list of placeholder descriptions of selections
    * @return a SelectionDescription or None
@@ -1267,7 +1254,7 @@ public class Election {
   }
 
   /**
-   * Generates a placeholder selection description that is unique so it can be hashed
+   * Generates a placeholder selection description that is unique so it can be hashed.
    *
    * @param use_sequence_idO: an optional integer unique to the contest identifying this selection's place in the contest
    * @return a SelectionDescription or None
@@ -1275,7 +1262,7 @@ public class Election {
   static Optional<SelectionDescription> generate_placeholder_selection_from(
           ContestDescription contest, Optional<Integer> use_sequence_idO) {
 
-    //     sequence_ids = [selection.sequence_order for selection in contest.ballot_selections]
+    // sequence_ids = [selection.sequence_order for selection in contest.ballot_selections]
     List<Integer> sequence_ids = contest.ballot_selections.stream().map(s -> s.sequence_order).collect(Collectors.toList());
 
     int use_sequence_id;

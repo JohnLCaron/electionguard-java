@@ -43,7 +43,7 @@ public class TestEncryptHypothesisProperties extends TestProperties {
     Election.CiphertextElectionContext context = everything.context;
 
     // Tally the plaintext ballots for comparison later
-    Map<String, BigInteger> plaintext_tallies = TallyTestHelper.accumulate_plaintext_ballots(ballots);
+    Map<String, Integer> plaintext_tallies = TallyTestHelper.accumulate_plaintext_ballots(ballots);
     int num_ballots = ballots.size();
     int num_contests = metadata.contests.size();
 
@@ -87,7 +87,7 @@ public class TestEncryptHypothesisProperties extends TestProperties {
     // homomorphically accumulate the encrypted ballot representations
     Map<String, ElGamal.Ciphertext> encrypted_tallies = _accumulate_encrypted_ballots(encrypted_zero.get(), encrypted_ballots);
 
-    Map<String, BigInteger> decrypted_tallies = new HashMap<>();
+    Map<String, Integer> decrypted_tallies = new HashMap<>();
     for (String object_id : encrypted_tallies.keySet()) {
       decrypted_tallies.put(object_id, encrypted_tallies.get(object_id).decrypt(secret_key));
     }
@@ -99,21 +99,22 @@ public class TestEncryptHypothesisProperties extends TestProperties {
       assertThat(contest.ballot_selections).isNotEmpty();
       assertThat(contest.placeholder_selections).isNotEmpty();
 
-      List<BigInteger> decrypted_selection_tallies = contest.ballot_selections.stream()
+      List<Integer> decrypted_selection_tallies = contest.ballot_selections.stream()
               .map(s -> decrypted_tallies.get(s.object_id)).collect(Collectors.toList());
 
-      List<BigInteger> decrypted_placeholder_tallies = contest.placeholder_selections.stream()
+      List<Integer> decrypted_placeholder_tallies = contest.placeholder_selections.stream()
               .map(p -> decrypted_tallies.get(p.object_id)).collect(Collectors.toList());
 
-      List<BigInteger> plaintext_tally_values = contest.ballot_selections.stream()
+      List<Integer> plaintext_tally_values = contest.ballot_selections.stream()
               .map(s -> plaintext_tallies.get(s.object_id)).collect(Collectors.toList());
 
       // verify the plaintext tallies match the decrypted tallies
       assertThat(decrypted_selection_tallies).isEqualTo(plaintext_tally_values);
 
       // validate the right number of selections including placeholders across all ballots
-      BigInteger total = Group.sum(decrypted_selection_tallies).add(Group.sum(decrypted_placeholder_tallies));
-      assertThat(contest.number_elected * num_ballots).isEqualTo(total.intValue());
+      Integer total = decrypted_selection_tallies.stream().mapToInt(Integer::intValue).sum() +
+                      decrypted_placeholder_tallies.stream().mapToInt(Integer::intValue).sum();
+      assertThat(contest.number_elected * num_ballots).isEqualTo(total);
     }
   }
 

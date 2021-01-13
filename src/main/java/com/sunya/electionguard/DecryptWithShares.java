@@ -51,7 +51,7 @@ class DecryptWithShares {
 
     // Calculate 𝑀 = 𝐵⁄(∏𝑀𝑖)mod 𝑝.
     Group.ElementModP decrypted_value = div_p(selection.ciphertext().data, all_shares_product_M);
-    BigInteger dlogM = Dlog.discrete_log(decrypted_value);
+    Integer dlogM = Dlog.discrete_log(decrypted_value);
 
     // [share for (guardian_id, (public_key, share))in shares.items()],
     List<CiphertextDecryptionSelection> selections = shares.values().stream().map(t -> t.decryption).collect(Collectors.toList());
