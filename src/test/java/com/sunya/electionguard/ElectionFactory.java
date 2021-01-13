@@ -96,9 +96,7 @@ public class ElectionFactory {
     return builder.build();
   }
 
-  /**
-   * Get a single Fake Ballot object that is manually constructed with default vaules.
-   */
+  /** Get a single Fake Ballot object that is manually constructed with default values. */
   static Ballot.PlaintextBallot get_fake_ballot(@Nullable ElectionDescription election, @Nullable String ballot_id) {
     if (election == null) {
       election = get_fake_election();

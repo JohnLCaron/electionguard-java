@@ -13,46 +13,162 @@ import static com.sunya.electionguard.Group.*;
 public class Ballot {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
+  /** Enumeration used when marking a ballot as cast or spoiled. */
+  public enum BallotBoxState {
+    /** A ballot that has been explicitly cast */
+    CAST,
+    /** A ballot that has been explicitly spoiled */
+    SPOILED,
+    /** A ballot whose state is unknown to ElectionGuard and will not be included in any election results. */
+    UNKNOWN
+  }
+
   /**
-   * ExtendedData represents any arbitrary data expressible as a string with a length.
-   * This is used primarily as a field on a selection to indicate a write-in candidate text value.
+   * A PlaintextBallot represents a voters selections for a given ballot and ballot style.
+   * The object_id is a unique Ballot ID created by the external system.
    */
   @Immutable
-  public static class ExtendedData {
-    final String value;
-    final int length;
+  public static class PlaintextBallot extends ElectionObjectBase {
+    final String ballot_style; // The `object_id` of the `BallotStyle` in the `Election` Manifest
+    final ImmutableList<PlaintextBallotContest> contests; // The list of contests for this ballot
 
-    public ExtendedData(String value, int length) {
-      this.value = value;
-      this.length = length;
+    public PlaintextBallot(String object_id, String ballot_style, List<PlaintextBallotContest> contests) {
+      super(object_id);
+      this.ballot_style = ballot_style;
+      this.contests = ImmutableList.copyOf(contests);
+    }
+
+    /**
+     * Check if expected ballot style is valid
+     * @param expected_ballot_style_id: Expected ballot style id
+     * @return True if valid
+     */
+    boolean is_valid(String expected_ballot_style_id) {
+      if (!this.ballot_style.equals(expected_ballot_style_id)) {
+        logger.atWarning().log("invalid ballot_style: for: %s expected(%s) actual(%s)",
+                this.object_id, expected_ballot_style_id, this.ballot_style);
+        return false;
+      }
+      return true;
+    }
+
+    @Override
+    public String toString() {
+      return "PlaintextBallot{" +
+              "object_id='" + object_id + '\'' +
+              ", ballot_style='" + ballot_style + '\'' +
+              ", contests=" + contests +
+              '}';
     }
 
     @Override
     public boolean equals(Object o) {
       if (this == o) return true;
       if (o == null || getClass() != o.getClass()) return false;
-      ExtendedData that = (ExtendedData) o;
-      return length == that.length &&
-              value.equals(that.value);
+      if (!super.equals(o)) return false;
+      PlaintextBallot that = (PlaintextBallot) o;
+      return ballot_style.equals(that.ballot_style) &&
+              contests.equals(that.contests);
     }
 
     @Override
     public int hashCode() {
-      return Objects.hash(value, length);
+      return Objects.hash(super.hashCode(), ballot_style, contests);
+    }
+  }
+
+  /**
+   * A PlaintextBallotContest represents the selections made by a voter for a specific ContestDescription,
+   * matched on by object_id. LOOK prefer contest_id?
+   * <p>
+   * This can be either a partial or a complete representation of a contest dataset.  Specifically,
+   * a partial representation must include at a minimum the "affirmative" selections of a contest.
+   * A complete representation of a ballot must include both affirmative and negative selections of
+   * the contest, AND the placeholder selections necessary to satisfy the ConstantChaumPedersen proof
+   * in the CiphertextBallotContest.
+   * <p>
+   * Typically partial contests are passed into Electionguard for memory constrained systems,
+   * while complete contests are passed into ElectionGuard when running encryption on an existing dataset.
+   */
+  @Immutable
+  public static class PlaintextBallotContest extends ElectionObjectBase {
+    final ImmutableList<PlaintextBallotSelection> ballot_selections; // Collection of ballot selections
+
+    public PlaintextBallotContest(String object_id, List<PlaintextBallotSelection> ballot_selections) {
+      super(object_id); // matches the ContestDescription.object_id
+      this.ballot_selections = ImmutableList.copyOf(ballot_selections);
+    }
+
+    /**
+     * Given a PlaintextBallotContest returns true if the state is representative of the expected values.
+     * Note: because this class supports partial representations, undervotes are considered a valid state.
+     */
+    boolean is_valid(
+            String expected_object_id,
+            int expected_number_selections,
+            int expected_number_elected,
+            Optional<Integer> votes_allowed) {
+
+      if (!this.object_id.equals(expected_object_id)) {
+        logger.atInfo().log("invalid object_id: expected(%s) actual(%s)", expected_object_id, this.object_id);
+        return false;
+      }
+
+      if (this.ballot_selections.size() > expected_number_selections) {
+        logger.atInfo().log("invalid number_selections: expected(%s) actual(%s)", expected_number_selections, this.ballot_selections);
+        return false;
+      }
+
+      int number_elected = 0;
+      int votes = 0;
+
+      // Verify the selections are well-formed
+      for (PlaintextBallotSelection selection : this.ballot_selections) {
+        int selection_count = selection.to_int();
+        votes += selection_count;
+        if (selection_count >= 1) {
+          number_elected += 1;
+        }
+      }
+
+      if (number_elected > expected_number_elected) {
+        logger.atInfo().log("invalid number_elected: expected(%s) actual(%s)", expected_number_elected, number_elected);
+        return false;
+      }
+
+      if (votes_allowed.isPresent() && votes > votes_allowed.get()) {
+        logger.atInfo().log("invalid votes: expected(%s) actual(%s)", votes_allowed, votes);
+        return false;
+      }
+      return true;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      if (!super.equals(o)) return false;
+      PlaintextBallotContest that = (PlaintextBallotContest) o;
+      return ballot_selections.equals(that.ballot_selections);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(super.hashCode(), ballot_selections);
     }
 
     @Override
     public String toString() {
-      return "ExtendedData{" +
-              "value='" + value + '\'' +
-              ", length=" + length +
+      return "PlaintextBallotContest{" +
+              "object_id='" + object_id + '\'' +
+              ", ballot_selections=\n " + ballot_selections +
               '}';
     }
   }
 
   /**
    * A BallotSelection represents an individual selection on a ballot, its object_id must
-   * match the SelectionDescription object_id.
+   * match the SelectionDescription object_id. LOOK prefer selection_id.
    * <p>
    * This accepts a `vote` string field which has no constraints
    * in the ElectionGuard Data Specification, but is constrained logically
@@ -75,7 +191,7 @@ public class Ballot {
     final Optional<ExtendedData> extended_data; // default None
 
     public PlaintextBallotSelection(String object_id, String vote, boolean is_placeholder_selection, Optional<ExtendedData> extended_data) {
-      super(object_id);
+      super(object_id); // matches SelectionDescription.object_id
       this.vote = vote;
       this.is_placeholder_selection = is_placeholder_selection;
       this.extended_data = extended_data;
@@ -110,7 +226,7 @@ public class Ballot {
       }
 
       // TODO: ISSUE #33: If the boolean coercion above fails, support integer votes
-      // greater than 1 for cases such as cumulative voting
+      //  greater than 1 for cases such as cumulative voting
       return asBool ? 1 : 0;
     }
 
@@ -138,6 +254,43 @@ public class Ballot {
               ", extended_data=" + extended_data +
               ", object_id='" + object_id + '\'' +
               "}\n\n";
+    }
+  }
+
+  /**
+   * ExtendedData represents any arbitrary data expressible as a string with a length.
+   * This is used primarily as a field on a selection to indicate a write-in candidate text value.
+   */
+  @Immutable
+  public static class ExtendedData {
+    final String value;
+    final int length;
+
+    public ExtendedData(String value, int length) {
+      this.value = value;
+      this.length = length;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      ExtendedData that = (ExtendedData) o;
+      return length == that.length &&
+              value.equals(that.value);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(value, length);
+    }
+
+    @Override
+    public String toString() {
+      return "ExtendedData{" +
+              "value='" + value + '\'' +
+              ", length=" + length +
+              '}';
     }
   }
 
@@ -321,94 +474,7 @@ public class Ballot {
             extended_data);
   }
 
-  /**
-   * A PlaintextBallotContest represents the selections made by a voter for a specific ContestDescription,
-   * matched on by object_id. LOOK prefer contest_id?
-   * <p>
-   * This can be either a partial or a complete representation of a contest dataset.  Specifically,
-   * a partial representation must include at a minimum the "affirmative" selections of a contest.
-   * A complete representation of a ballot must include both affirmative and negative selections of
-   * the contest, AND the placeholder selections necessary to satisfy the ConstantChaumPedersen proof
-   * in the CiphertextBallotContest.
-   * <p>
-   * Typically partial contests are passed into Electionguard for memory constrained systems,
-   * while complete contests are passed into ElectionGuard when running encryption on an existing dataset.
-   */
-  @Immutable
-  public static class PlaintextBallotContest extends ElectionObjectBase {
-    final ImmutableList<PlaintextBallotSelection> ballot_selections; // Collection of ballot selections
 
-    public PlaintextBallotContest(String object_id, List<PlaintextBallotSelection> ballot_selections) {
-      super(object_id);
-      this.ballot_selections = ImmutableList.copyOf(ballot_selections);
-    }
-
-    /**
-     * Given a PlaintextBallotContest returns true if the state is representative of the expected values.
-     * Note: because this class supports partial representations, undervotes are considered a valid state.
-     */
-    boolean is_valid(
-            String expected_object_id,
-            int expected_number_selections,
-            int expected_number_elected,
-            Optional<Integer> votes_allowed) {
-
-      if (!this.object_id.equals(expected_object_id)) {
-        logger.atInfo().log("invalid object_id: expected(%s) actual(%s)", expected_object_id, this.object_id);
-        return false;
-      }
-
-      if (this.ballot_selections.size() > expected_number_selections) {
-        logger.atInfo().log("invalid number_selections: expected(%s) actual(%s)", expected_number_selections, this.ballot_selections);
-        return false;
-      }
-
-      int number_elected = 0;
-      int votes = 0;
-
-      // Verify the selections are well-formed
-      for (PlaintextBallotSelection selection : this.ballot_selections) {
-        int selection_count = selection.to_int();
-        votes += selection_count;
-        if (selection_count >= 1) {
-          number_elected += 1;
-        }
-      }
-
-      if (number_elected > expected_number_elected) {
-        logger.atInfo().log("invalid number_elected: expected(%s) actual(%s)", expected_number_elected, number_elected);
-        return false;
-      }
-
-      if (votes_allowed.isPresent() && votes > votes_allowed.get()) {
-        logger.atInfo().log("invalid votes: expected(%s) actual(%s)", votes_allowed, votes);
-        return false;
-      }
-      return true;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) return true;
-      if (o == null || getClass() != o.getClass()) return false;
-      if (!super.equals(o)) return false;
-      PlaintextBallotContest that = (PlaintextBallotContest) o;
-      return ballot_selections.equals(that.ballot_selections);
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(super.hashCode(), ballot_selections);
-    }
-
-    @Override
-    public String toString() {
-      return "PlaintextBallotContest{" +
-              "object_id='" + object_id + '\'' +
-              ", ballot_selections=\n " + ballot_selections +
-              '}';
-    }
-  }
 
   /**
    * A CiphertextBallotContest represents the selections made by a voter for a specific ContestDescription
@@ -626,60 +692,6 @@ public class Ballot {
   }
 
   /**
-   * A PlaintextBallot represents a voters selections for a given ballot and ballot style.
-   * The object_id is a unique Ballot ID created by the external system.
-   */
-  @Immutable
-  public static class PlaintextBallot extends ElectionObjectBase {
-    final String ballot_style; // The `object_id` of the `BallotStyle` in the `Election` Manifest
-    final ImmutableList<PlaintextBallotContest> contests; // The list of contests for this ballot
-
-    public PlaintextBallot(String object_id, String ballot_style, List<PlaintextBallotContest> contests) {
-      super(object_id);
-      this.ballot_style = ballot_style;
-      this.contests = ImmutableList.copyOf(contests);
-    }
-
-    /**
-     * Check if expected ballot style is valid
-     * @param expected_ballot_style_id: Expected ballot style id
-     * @return True if valid
-     */
-    boolean is_valid(String expected_ballot_style_id) {
-      if (!this.ballot_style.equals(expected_ballot_style_id)) {
-        logger.atWarning().log("invalid ballot_style: for: %s expected(%s) actual(%s)",
-          this.object_id, expected_ballot_style_id, this.ballot_style);
-        return false;
-      }
-      return true;
-    }
-
-    @Override
-    public String toString() {
-      return "PlaintextBallot{" +
-              "object_id='" + object_id + '\'' +
-              ", ballot_style='" + ballot_style + '\'' +
-              ", contests=" + contests +
-              '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) return true;
-      if (o == null || getClass() != o.getClass()) return false;
-      if (!super.equals(o)) return false;
-      PlaintextBallot that = (PlaintextBallot) o;
-      return ballot_style.equals(that.ballot_style) &&
-              contests.equals(that.contests);
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(super.hashCode(), ballot_style, contests);
-    }
-  }
-
-  /**
    * A CiphertextBallot represents a voters encrypted selections for a given ballot and ballot style.
    * <p>
    * When a ballot is in its complete, encrypted state, the `nonce` is the master nonce
@@ -696,7 +708,7 @@ public class Ballot {
     public final ElementModQ previous_tracking_hash;
     public final ImmutableList<CiphertextBallotContest> contests;
     public final Optional<ElementModQ> tracking_hash;
-    public final long timestamp; // TODO something better
+    public final long timestamp; // LOOK something better
     public final ElementModQ crypto_hash;
     public final Optional<ElementModQ> nonce;
 
@@ -840,20 +852,9 @@ public class Ballot {
     }
   }
 
-  /** Enumeration used when marking a ballot as cast or spoiled. */
-  public enum BallotBoxState {
-    /** A ballot that has been explicitly cast */
-    CAST,
-    /** A ballot that has been explicitly spoiled */
-    SPOILED,
-    /** A ballot whose state is unknown to ElectionGuard and will not be included in any election results. */
-    UNKNOWN
-  }
-
   /**
    * A `CiphertextAcceptedBallot` represents a ballot that is accepted for inclusion in election results.
-   * An accepted ballot is or is about to be either cast or spoiled.
-   * Note that this class is immutable, and the state cannot be changed.
+   * An accepted ballot is either cast or spoiled. Note that this class is immutable, and the state cannot be changed.
    * <p>
    * Note, additionally, this ballot includes all proofs but no nonces.
    * <p>

@@ -137,7 +137,7 @@ public class ElectionTestHelper {
   }
 
   // random string
-  String rstr(String root) {
+  String randomString(String root) {
     return String.format("%s-%d", root, random.nextInt());
   }
 
@@ -171,7 +171,7 @@ public class ElectionTestHelper {
   //     Generates a `Language` object with an arbitrary two-letter string as the code and something messier for
   //     the text ostensibly written in that language.
   Language languages() {
-    return new Language(rstr("text"), two_letter_codes());
+    return new Language(randomString("text"), two_letter_codes());
   }
 
   //     Generates a `Language` object with an arbitrary two-letter string as the code and a human name for the
@@ -208,7 +208,7 @@ public class ElectionTestHelper {
   BallotStyle ballot_styles(List<Party> parties, List<GeopoliticalUnit> geo_units) {
     List<String> geopolitical_unit_ids = geo_units.stream().map(g -> g.object_id).collect(Collectors.toList());
     List<String> party_ids = parties.stream().map(p -> p.get_party_id()).collect(Collectors.toList());
-    return new BallotStyle(rstr("BallotStyle"), geopolitical_unit_ids, party_ids, urls());
+    return new BallotStyle(randomString("BallotStyle"), geopolitical_unit_ids, party_ids, urls());
   }
 
   List<Party> party_lists(int num_parties) {
@@ -217,7 +217,7 @@ public class ElectionTestHelper {
       String partyName = String.format("Party%d", i);
       String partyAbbrv = String.format("P%d", i);
       result.add(new Party(
-              rstr("Party"),
+              randomString("Party"),
               new InternationalizedText(ImmutableList.of(new Language(partyName, "en"))),
               partyAbbrv,
               null,
@@ -228,8 +228,8 @@ public class ElectionTestHelper {
 
   GeopoliticalUnit geopolitical_units() {
     return new GeopoliticalUnit(
-            rstr("GeopoliticalUnit"),
-            rstr("name"),
+            randomString("GeopoliticalUnit"),
+            randomString("name"),
             reporting_unit_types(),
             contact_infos());
   }
@@ -260,7 +260,7 @@ public class ElectionTestHelper {
                      @Nullable Boolean is_write_in
      */
     return new Candidate(
-            rstr("Candidate"),
+            randomString("Candidate"),
             internationalized_human_names(),
             party_id,
             random.nextBoolean() ? null : urls(),
@@ -332,13 +332,13 @@ public class ElectionTestHelper {
     return new CandidateTuple(
             contest_candidates,
             new CandidateContestDescription(
-                    rstr("CandidateContestDescription"),
+                    randomString("CandidateContestDescription"),
                     drawList(geo_units).object_id,
                     sequence_order,
                     vote_variation,
                     n,
                     n,  // should this be None or n?
-                    rstr("Name"),
+                    randomString("Name"),
                     selection_descriptions,
                     internationalized_texts(),
                     internationalized_texts(),
@@ -395,13 +395,13 @@ public class ElectionTestHelper {
     return new CandidateTuple(
             contest_candidates,
             new ReferendumContestDescription(
-                    rstr("CandidateContestDescription"),
+                    randomString("CandidateContestDescription"),
                     drawList(geo_units).object_id,
                     sequence_order,
                     VoteVariationType.one_of_m,
                     1,
                     1,  // should this be None or n?
-                    rstr("Name"),
+                    randomString("Name"),
                     selection_descriptions,
                     internationalized_texts(),
                     internationalized_texts()));
@@ -455,7 +455,7 @@ public class ElectionTestHelper {
     OffsetDateTime end_date = start_date;
 
     return new ElectionDescription(
-            rstr("election_scope_id"),
+            randomString("election_scope_id"),
             ElectionType.general,  // good enough for now
             start_date,
             end_date,
@@ -515,7 +515,7 @@ public class ElectionTestHelper {
       voted_contests.add(new Ballot.PlaintextBallotContest(contest.object_id, voted_selections));
     }
 
-    return new Ballot.PlaintextBallot(rstr("PlaintextBallot"), ballot_style.object_id, voted_contests);
+    return new Ballot.PlaintextBallot(randomString("PlaintextBallot"), ballot_style.object_id, voted_contests);
   }
 
   static class CIPHERTEXT_ELECTIONS_TUPLE_TYPE {

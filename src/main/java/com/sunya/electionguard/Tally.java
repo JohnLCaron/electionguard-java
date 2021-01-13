@@ -24,7 +24,7 @@ public class Tally {
   /** A plaintext Tally Selection is a decrypted selection of a contest. */
   @AutoValue
   public static abstract class PlaintextTallySelection implements ElectionObjectBaseIF {
-    // g^tally or M in the spec
+    /** g^tally or M in the spec. LOOK check is this note talking about tally or value? */
     public abstract BigInteger tally();
     public abstract ElementModP value();
     public abstract ElGamal.Ciphertext message();
@@ -47,7 +47,7 @@ public class Tally {
    */
   static class CiphertextTallySelection extends CiphertextSelection {
     // Note not immutable
-    private ElGamal.Ciphertext ciphertext_accumulate; // default=ElGamalCiphertext(ONE_MOD_P, ONE_MOD_P)
+    private ElGamal.Ciphertext ciphertext_accumulate; // default = ElGamalCiphertext(ONE_MOD_P, ONE_MOD_P)
 
     public CiphertextTallySelection(String selectionDescriptionId, ElementModQ description_hash, @Nullable ElGamal.Ciphertext ciphertext) {
       super(selectionDescriptionId, description_hash, ciphertext == null ? new ElGamal.Ciphertext(ONE_MOD_P, ONE_MOD_P) : ciphertext);
@@ -72,7 +72,7 @@ public class Tally {
   /** A plaintext Tally Contest is a collection of plaintext selections. */
   @AutoValue
   public static abstract class PlaintextTallyContest implements ElectionObjectBaseIF {
-    public abstract Map<String, PlaintextTallySelection> selections();
+    public abstract Map<String, PlaintextTallySelection> selections(); // Map(SELECTION_ID, PlaintextTallySelection)
 
     public static PlaintextTallyContest create(String object_id, Map<String, PlaintextTallySelection> selections) {
       return new AutoValue_Tally_PlaintextTallyContest(object_id, selections);
@@ -92,7 +92,7 @@ public class Tally {
     private final ElementModQ description_hash;
 
     /** A collection of CiphertextTallySelection mapped by SelectionDescription.object_id. */
-    private final Map<String, CiphertextTallySelection> tally_selections;
+    private final Map<String, CiphertextTallySelection> tally_selections; // Map(SELECTION_ID, CiphertextTallySelection)
 
     public CiphertextTallyContest(String object_id, ElementModQ description_hash, Map<String, CiphertextTallySelection> tally_selections) {
       super(object_id);
@@ -211,8 +211,8 @@ public class Tally {
   /** The plaintext representation of all contests in the election. */
   @AutoValue
   public static abstract class PlaintextTally implements ElectionObjectBaseIF {
-    public abstract Map<String, PlaintextTallyContest> contests();
-    public abstract Map<String, Map<String, PlaintextTallyContest>> spoiled_ballots();
+    public abstract Map<String, PlaintextTallyContest> contests(); // Map(CONTEST_ID, PlaintextTallyContest)
+    public abstract Map<String, Map<String, PlaintextTallyContest>> spoiled_ballots(); // Map(BALLOT_ID, Map(CONTEST_ID, PlaintextTallyContest))
 
     public static PlaintextTally create(String object_id, Map<String, PlaintextTallyContest> contests, Map<String, Map<String, PlaintextTallyContest>> spoiled_ballots) {
       return new AutoValue_Tally_PlaintextTally(object_id, contests, spoiled_ballots);
@@ -455,7 +455,7 @@ public class Tally {
    */
   @AutoValue
   public static abstract class PublishedCiphertextTally implements ElectionObjectBaseIF {
-    public abstract Map<String, CiphertextTallyContest> cast();
+    public abstract Map<String, CiphertextTallyContest> cast(); // Map(CONTEST_ID, CiphertextTallyContest)
 
     public static PublishedCiphertextTally create(String object_id, Map<String, CiphertextTallyContest> cast) {
       return new AutoValue_Tally_PublishedCiphertextTally(object_id, cast);

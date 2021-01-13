@@ -47,8 +47,7 @@ public class Encrypt {
 
   /**
    * An object for caching election and encryption state. It composes Elections and Ballots.
-   * LOOK mutable, since it has to keep track of the last hash. If all the ballots were passed in at once,
-   *  it could be immutable. Also I wonder if encrypt_ballot() is costly and should be parallelized?
+   * LOOK mutable, since it has to keep track of the last hash for ballot chaining.
    */
   public static class EncryptionMediator {
     private final InternalElectionDescription _metadata;
@@ -76,6 +75,7 @@ public class Encrypt {
 
   /**
    * Get unique identifier for device.
+   * LOOK is this sufficient? Is it actually tied to the device? Perhaps should be externally supplied?
    */
   private static String generate_device_uuid() {
     return java.util.UUID.randomUUID().toString();
@@ -89,7 +89,6 @@ public class Encrypt {
    * @param description:    The `SelectionDescription` which provides the relevant `object_id`
    * @param is_placeholder: Mark this selection as a placeholder value
    * @param is_affirmative: Mark this selection as `yes`
-   * @return A BallotSelection
    */
   // selection_from( description: SelectionDescription, is_placeholder: bool = False, is_affirmative: bool = False,
   static PlaintextBallotSelection selection_from(SelectionDescription description, boolean is_placeholder, boolean is_affirmative) {
@@ -101,7 +100,6 @@ public class Encrypt {
    * This function is useful for filling contests and selections when a voter undervotes a ballot.
    *
    * @param description: The `ContestDescription` used to derive the well-formed `BallotContest`
-   * @return a `BallotContest`
    */
   static PlaintextBallotContest contest_from(ContestDescription description) {
     List<PlaintextBallotSelection> selections = new ArrayList<>();
@@ -109,12 +107,11 @@ public class Encrypt {
     for (SelectionDescription selection_description : description.ballot_selections) {
       selections.add(selection_from(selection_description, false, false));
     }
-
     return new PlaintextBallotContest(description.object_id, selections);
   }
 
   /**
-   * Encrypt a specific `BallotSelection` in the context of a specific `BallotContest`.
+   * Encrypt a PlaintextBallotSelection in the context of a specific SelectionDescription.
    *
    * @param selection:                 the selection in the valid input form
    * @param selection_description:     the `SelectionDescription` from the `ContestDescription` which defines this selection's structure
@@ -195,7 +192,7 @@ public class Encrypt {
   }
 
   /**
-   * Encrypt a specific `BallotContest` in the context of a specific `Ballot`.
+   * Encrypt a PlaintextBallotContest in the context of a specific Election.ContestDescription.
    * <p>
    * This method accepts a contest representation that only includes `True` selections.
    * It will fill missing selections for a contest with `False` values, and generate `placeholder`
@@ -218,7 +215,7 @@ public class Encrypt {
           ElementModQ nonce_seed,
           boolean should_verify_proofs /* default true */) {
 
-    //Validate Input
+    // Validate Input
     if (!contest.is_valid(
           contest_description.object_id,
           contest_description.ballot_selections.size(),
@@ -245,8 +242,8 @@ public class Encrypt {
     int selection_count = 0;
 
     // TODO: ISSUE #54 this code could be inefficient if we had a contest
-    // with a lot of choices, although the O(n^2) iteration here is small
-    // compared to the huge cost of doing the cryptography.
+    //  with a lot of choices, although the O(n^2) iteration here is small
+    //  compared to the huge cost of doing the cryptography.
 
     //  Generate the encrypted selections
     for (SelectionDescription description : contest_description.ballot_selections) {
@@ -292,8 +289,7 @@ public class Encrypt {
         encrypted_selections.add(encrypted_selection.get());
       }
 
-    // Handle Placeholder selections
-    // After we loop through all of the real selections on the ballot,
+    // Handle Placeholder selections. After we loop through all of the real selections on the ballot,
     // we loop through each placeholder value and determine if it should be filled in
 
     // Add a placeholder selection for each possible seat in the contest
@@ -319,8 +315,7 @@ public class Encrypt {
       encrypted_selections.add(encrypted_selection.get());
     }
 
-    // TODO: ISSUE #33: support other cases such as cumulative voting
-    // (individual selections being an encryption of > 1)
+    // TODO: ISSUE #33: support other cases such as cumulative voting (individual selections being an encryption of > 1)
     if (contest_description.votes_allowed.isPresent() && (selection_count < contest_description.votes_allowed.get())) {
       logger.atInfo().log("mismatching selection count: only n-of-m style elections are currently supported");
     }
@@ -338,7 +333,7 @@ public class Encrypt {
         Optional.of(contest_nonce));
 
     if (encrypted_contest.proof.isEmpty()){
-        return Optional.empty();  // log will have happened earlier
+        return Optional.empty();  // log error will have happened earlier
       }
 
     if (!should_verify_proofs) {
@@ -360,7 +355,7 @@ public class Encrypt {
   //  by traversing the collection of ballots encrypted by a specific device
 
   /**
-   * Encrypt a specific `Ballot` in the context of a specific `CiphertextElectionContext`.
+   * Encrypt a PlaintextBallotin the context of a specific InternalElectionDescription.
    * <p>
    * This method accepts a ballot representation that only includes `True` selections.
    * It will fill missing selections for a contest with `False` values, and generate `placeholder`
@@ -454,7 +449,7 @@ public class Encrypt {
     if (encrypted_ballot.is_valid_encryption(election_metadata.description_hash, context.elgamal_public_key, context.crypto_extended_base_hash)) {
       return Optional.of(encrypted_ballot);
     } else {
-      return Optional.empty(); // log will have happened earlier
+      return Optional.empty(); // log error will have happened earlier
     }
   }
 }

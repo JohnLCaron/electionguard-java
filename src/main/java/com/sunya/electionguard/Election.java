@@ -451,6 +451,7 @@ public class Election {
    * Data entity for the ballot selections in a contest,
    * for example linking candidates and parties to their vote counts.
    * See: https://developers.google.com/elections-data/reference/ballot-selection
+   * <p>
    * Note: The ElectionGuard Data Spec deviates from the NIST model in that
    * there is no difference for different types of selections.
    * The ElectionGuard Data Spec deviates from the NIST model in that
