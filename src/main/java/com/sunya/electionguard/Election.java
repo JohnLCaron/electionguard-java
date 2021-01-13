@@ -476,7 +476,6 @@ public class Election {
       this.sequence_order = sequence_order;
     }
 
-
     @Override
     public Group.ElementModQ crypto_hash() {
       return Hash.hash_elems(this.object_id, this.sequence_order, this.candidate_id);

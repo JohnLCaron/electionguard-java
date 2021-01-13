@@ -51,7 +51,8 @@ public class Ballot {
   }
 
   /**
-   * A BallotSelection represents an individual selection on a ballot.
+   * A BallotSelection represents an individual selection on a ballot, its object_id must
+   * match the SelectionDescription object_id.
    * <p>
    * This accepts a `vote` string field which has no constraints
    * in the ElectionGuard Data Specification, but is constrained logically
@@ -62,7 +63,7 @@ public class Ballot {
    * This can also be designated as `is_placeholder_selection` which has no
    * context to the data specification but is useful for running validity checks internally
    * <p>
-   * an `extended_data` field exists to support any arbitrary data to be associated
+   * An `extended_data` field exists to support any arbitrary data to be associated
    * with the selection.  In practice, this field is the cleartext representation
    * of a write-in candidate value.  In the current implementation these values are
    * discarded when encrypting.
@@ -86,13 +87,11 @@ public class Ballot {
                 expected_object_id, this.object_id);
         return false;
       }
-
       int choice = to_int();
       if (choice < 0 || choice > 1) {
         logger.atInfo().log("Currently only supporting choices of 0 or 1: %s", this);
         return false;
       }
-
       return true;
     }
 
@@ -323,7 +322,8 @@ public class Ballot {
   }
 
   /**
-   * A PlaintextBallotContest represents the selections made by a voter for a specific ContestDescription.
+   * A PlaintextBallotContest represents the selections made by a voter for a specific ContestDescription,
+   * matched on by object_id. LOOK prefer contest_id?
    * <p>
    * This can be either a partial or a complete representation of a contest dataset.  Specifically,
    * a partial representation must include at a minimum the "affirmative" selections of a contest.
@@ -627,7 +627,7 @@ public class Ballot {
 
   /**
    * A PlaintextBallot represents a voters selections for a given ballot and ballot style.
-   * The field object_id is a unique Ballot ID that is relevant to the external system.
+   * The object_id is a unique Ballot ID created by the external system.
    */
   @Immutable
   public static class PlaintextBallot extends ElectionObjectBase {

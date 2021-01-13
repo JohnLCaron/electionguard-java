@@ -1,6 +1,7 @@
 package com.sunya.electionguard;
 
 import com.google.common.truth.Truth;
+import com.sunya.electionguard.verifier.Grp;
 import net.jqwik.api.Example;
 
 public class TestGrp {

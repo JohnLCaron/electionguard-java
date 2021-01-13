@@ -1,8 +1,13 @@
-package com.sunya.electionguard;
+package com.sunya.electionguard.verifier;
+
+import com.sunya.electionguard.Group;
 
 import java.math.BigInteger;
 
-/** Eventual replacement for Group that allows the primes to be set. */
+/**
+ * Eventual replacement for Group that allows the primes to be set.
+ * LOOK seems likely that we are using Q and P in validation.
+ */
 public class Grp {
   private final BigInteger q; // small prime
   private final BigInteger p; // large prime
@@ -49,18 +54,18 @@ public class Grp {
     return b.modPow(e, p);
   }
 
-  /** check if a number is within set Zq, Z𝑝 ={0,1,2,...,q−1} the additive group of the integers modulo q. */
+  /** check if a number is within set Zq ={ 0,1,2,...,q−1} the additive group of the integers modulo q. */
   public boolean is_within_set_zq(BigInteger num) {
     return Group.between(BigInteger.ZERO, num, q);
   }
 
-  /** check if a number is within set Z*p, Z*𝑝 ={1,2,...,𝑝−1} is the multiplicative subgroup of Zp */
+  /** check if a number is within set Z*p, Z*𝑝 ={1,2,...,𝑝−1}, the multiplicative subgroup of Zp */
   public boolean is_within_set_zstarp(BigInteger num) {
     // exclusive bounds, set lower bound to -1
     return Group.between(BigInteger.ONE, num, p);
   }
 
-  /** check if a number is within set Zrp, 0 < num < p and num ^ q mod p = 1 */
+  /** check if a number is within set Zrp, 1 < num < p and num ^ q mod p = 1 */
   public boolean is_within_set_zrp(BigInteger num) {
     return is_within_set_zstarp(num) && pow_p(num, q).equals(BigInteger.ONE);
   }

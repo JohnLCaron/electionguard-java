@@ -91,8 +91,8 @@ public class TestEncryptionValidator {
     Group.ElementModQ this_contest_challenge = proof.challenge;
     Group.ElementModQ challenge_computed =
             Hash.hash_elems(electionParameters.extended_hash(),
-                    new Group.ElementModP(selection_alpha_product),
-                    new Group.ElementModP(selection_beta_product), a, b);
+                    Group.int_to_p_unchecked(selection_alpha_product),
+                    Group.int_to_p_unchecked(selection_beta_product), a, b);
 
     // check if given contest challenge matches the computation
     assertThat(challenge_computed).isEqualTo(this_contest_challenge);
@@ -371,8 +371,8 @@ public class TestEncryptionValidator {
     Set<Group.ElementModQ> differenceSet = Sets.symmetricDifference(prev_hashes, curr_hashes);
 
     // find the first and last hash
-    Group.ElementModQ first_hash = new Group.ElementModQ(BigInteger.ZERO);
-    Group.ElementModQ last_hash = new Group.ElementModQ(BigInteger.ZERO);
+    Group.ElementModQ first_hash = Group.int_to_q_unchecked(BigInteger.ZERO);
+    Group.ElementModQ last_hash = Group.int_to_q_unchecked(BigInteger.ZERO);
     for (Group.ElementModQ h : differenceSet) {
       if (prev_hashes.contains(h)){
         first_hash = h;

@@ -4,7 +4,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.flogger.FluentLogger;
 import com.sunya.electionguard.ChaumPedersen;
-import com.sunya.electionguard.Grp;
 import com.sunya.electionguard.Hash;
 import com.sunya.electionguard.Tally;
 import com.sunya.electionguard.publish.Consumer;
@@ -302,10 +301,12 @@ public class DecryptionVerifier {
       // check if the given ai, bi are both in set Zrp
       boolean pad_data_correctness = check_data(data) && check_pad(pad);
 
-      // check if challenge is correctly computed
-      boolean challenge_correctness = check_challenge(challenge, pad, data, partial_decryption);
+      // Check if the given challenge ci = H(Q-bar, (A,B), (ai, bi), Mi)
+      ElementModQ challenge_computed = Hash.hash_elems(electionParameters.extended_hash(),
+              this.selection_pad, this.selection_data, pad, data, partial_decryption);
+      boolean challenge_correctness = challenge_computed.equals(challenge);
 
-      // check equations
+      // check equations g^vi=ai * Ki^ci mod p and A^vi=bi * Mi ^ ci mod p are satisfied.
       boolean equ1_correctness = this.check_equation1(response, pad, challenge, public_key);
       boolean equ2_correctness = this.check_equation2(response, data, challenge, partial_decryption);
 
@@ -393,25 +394,6 @@ public class DecryptionVerifier {
       boolean res = grp.is_within_set_zrp(data.getBigInt());
       if (!res) {
         System.out.printf("b/data value error.%n");
-      }
-      return res;
-    }
-
-  /**
-   * Check if the given challenge values Ci satisfies ci = H(Q-bar, (A,B), (ai, bi), Mi)
-   * @param challenge: given challenge of a share, Ci, for comparison
-   * @param pad: pad of a share, ai
-   * @param data: data number of a share, bi
-   * @param partial_decrypt: partial decryption of a guardian, Mi
-   * @return True if the given Ci equals to the ci computed using hash
-   */
-    boolean check_challenge(ElementModQ challenge, ElementModP pad, ElementModP data, ElementModP partial_decrypt) {
-      ElementModQ challenge_computed = Hash.hash_elems(electionParameters.extended_hash(),
-              this.selection_pad, this.selection_data, pad, data, partial_decrypt);
-
-      boolean res = challenge.equals(challenge_computed);
-      if (!res) {
-        System.out.printf("challenge value error.%n");
       }
       return res;
     }

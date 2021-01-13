@@ -210,11 +210,11 @@ public class KeyCeremony {
    }
 
   /**
-   * Verify election partial key backup contain point on owners polynomial.
+   * Verify election partial key backup contains point on owners polynomial.
    * @param verifier_id: Verifier of the partial key backup
    * @param backup: Election partial key backup
    * @param auxiliary_key_pair: Auxiliary key pair
-   * @param decryptor Decryption function using auxiliary key
+   * @param decryptor Decryption function using auxiliary key, or null for default.
    */
   static ElectionPartialKeyVerification verify_election_partial_key_backup(
           String verifier_id,

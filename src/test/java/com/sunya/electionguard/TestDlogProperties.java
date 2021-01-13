@@ -11,7 +11,6 @@ import static com.sunya.electionguard.Group.*;
 
 
 public class TestDlogProperties {
-  static final ElementModP g_inv = int_to_p_unchecked(mult_inv_p(G));
 
   @Property
   public void test_cached(@ForAll @IntRange(min = 0, max = 10000) int exp) {

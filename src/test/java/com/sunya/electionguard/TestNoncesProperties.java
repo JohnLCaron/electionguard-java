@@ -16,7 +16,7 @@ public class TestNoncesProperties extends TestProperties {
   Nonces nonces;
 
   public TestNoncesProperties() {
-    seed = new Group.ElementModQ(Utils.randbelow(Q));
+    seed = Group.int_to_q_unchecked(Utils.randbelow(Q));
     nonces = new Nonces(seed);
   }
 
@@ -50,9 +50,9 @@ public class TestNoncesProperties extends TestProperties {
 
   @Example
   public void test_arraysAsList() {
-    Group.ElementModQ contest_description_hash = new Group.ElementModQ(
+    Group.ElementModQ contest_description_hash = Group.int_to_q_unchecked(
             new BigInteger("23323337622785956586624352149596102740126789838719230463210351477786424874750"));
-    Group.ElementModQ nonce_seed = new Group.ElementModQ(
+    Group.ElementModQ nonce_seed = Group.int_to_q_unchecked(
             new BigInteger("43908801192069419615255659718413032744597964462237265386133198243091690982198"));
     int seq = 7;
     Nonces nonce_sequence = new Nonces(contest_description_hash, nonce_seed);

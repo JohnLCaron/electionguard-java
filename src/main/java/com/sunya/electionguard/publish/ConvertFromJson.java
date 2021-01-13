@@ -118,7 +118,7 @@ public class ConvertFromJson {
     public Group.ElementModQ deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
             throws JsonParseException {
       String content = json.getAsJsonPrimitive().getAsString();
-      return new Group.ElementModQ(new BigInteger(content));
+      return Group.int_to_q(new BigInteger(content)).orElseThrow(RuntimeException::new);
     }
   }
 
@@ -126,7 +126,7 @@ public class ConvertFromJson {
     public Group.ElementModP deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
             throws JsonParseException {
       String content = json.getAsJsonPrimitive().getAsString();
-      return new Group.ElementModP(new BigInteger(content));
+      return Group.int_to_p(new BigInteger(content)).orElseThrow(RuntimeException::new);
     }
   }
 

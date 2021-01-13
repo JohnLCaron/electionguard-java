@@ -102,8 +102,8 @@ public class EncyrptionVerifier {
     Set<ElementModQ> differenceSet = Sets.symmetricDifference(prev_hashes, curr_hashes);
 
     // find the first and last hash
-    ElementModQ first_hash = new ElementModQ(BigInteger.ZERO);
-    ElementModQ last_hash = new ElementModQ(BigInteger.ZERO);
+    ElementModQ first_hash = Group.int_to_q_unchecked(BigInteger.ZERO);
+    ElementModQ last_hash = Group.int_to_q_unchecked(BigInteger.ZERO);
     for (ElementModQ h : differenceSet) {
       if (prev_hashes.contains(h)){
         first_hash = h;
@@ -272,8 +272,8 @@ public class EncyrptionVerifier {
       Group.ElementModP b = proof.data;
       Group.ElementModQ challenge_computed =
               Hash.hash_elems(electionParameters.extended_hash(),
-                      new Group.ElementModP(selection_alpha_product),
-                      new Group.ElementModP(selection_beta_product), a, b);
+                      Group.int_to_p_unchecked(selection_alpha_product), // LOOK BigInteger or ModP ?
+                      Group.int_to_p_unchecked(selection_beta_product), a, b);
 
       // check if given contest challenge matches the computation
       boolean challenge_match = challenge_computed.equals(this.contest_challenge);

@@ -4,6 +4,8 @@ import net.jqwik.api.ForAll;
 import net.jqwik.api.Property;
 import net.jqwik.api.constraints.IntRange;
 
+import java.math.BigInteger;
+
 import static com.google.common.truth.Truth.assertThat;
 import static com.sunya.electionguard.ChaumPedersen.*;
 import static com.sunya.electionguard.Group.*;
@@ -73,10 +75,11 @@ public class TestChaumPedersenProperties extends TestProperties {
     if (constant == bad_constant) {
       bad_constant = constant + 1;
     }
+    ElementModP badP = Group.int_to_p_unchecked(BigInteger.valueOf(bad_constant));
     ElGamal.Ciphertext message = ElGamal.elgamal_encrypt(constant, nonce, keypair.public_key).get();
     ElementModP decryption = message.partial_decrypt(keypair.secret_key);
     ChaumPedersenProof proof = make_chaum_pedersen(message, keypair.secret_key, decryption, seed, ONE_MOD_Q);
-    ChaumPedersenProof bad_proof = make_chaum_pedersen(message, keypair.secret_key, TWO_MOD_P, seed, ONE_MOD_Q);
+    ChaumPedersenProof bad_proof = make_chaum_pedersen(message, keypair.secret_key, badP, seed, ONE_MOD_Q);
 
     assertThat(proof.is_valid(message, keypair.public_key, decryption, ONE_MOD_Q)).isTrue();
     assertThat(bad_proof.is_valid(message, keypair.public_key, decryption, ONE_MOD_Q)).isFalse();

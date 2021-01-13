@@ -75,8 +75,8 @@ public class CiphertextDecryptionSelectionPojo {
     return CiphertextDecryptionSelection.create(
             pojo.object_id,
             pojo.guardian_id,
-            new Group.ElementModQ(pojo.description_hash),
-            new Group.ElementModP(pojo.share),
+            Group.int_to_q(pojo.description_hash).orElseThrow(RuntimeException::new),
+            Group.int_to_p(pojo.share).orElseThrow(RuntimeException::new),
             Optional.ofNullable(pojo.proof),
             Optional.ofNullable(pojo.recovered_parts));
   }

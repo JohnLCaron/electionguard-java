@@ -46,8 +46,8 @@ class DecryptWithShares {
 
     // accumulate all of the shares calculated for the selection
     // all_shares_product_M = mult_p( *[decryption.share for (_, decryption) in shares.values()]);
-    List<BigInteger> decryption_shares = shares.values().stream().map(t -> t.decryption.share().elem).collect(Collectors.toList());
-    ElementModP all_shares_product_M = new ElementModP(mult_p(decryption_shares));
+    List<ElementModP> decryption_shares = shares.values().stream().map(t -> t.decryption.share()).collect(Collectors.toList());
+    ElementModP all_shares_product_M = Group.mult_p(decryption_shares);
 
     // Calculate 𝑀 = 𝐵⁄(∏𝑀𝑖)mod 𝑝.
     Group.ElementModP decrypted_value = div_p(selection.ciphertext().data, all_shares_product_M);

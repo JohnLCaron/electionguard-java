@@ -1,7 +1,6 @@
 package com.sunya.electionguard.verifier;
 
 import com.sunya.electionguard.Group;
-import com.sunya.electionguard.Grp;
 
 import java.math.BigInteger;
 

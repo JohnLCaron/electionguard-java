@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.sunya.electionguard.Group.*;
+import static com.sunya.electionguard.Group.ElementModP;
 
 /**
  * This SelectionInfoAggregator class aims at collecting and storing all the selection information across contest
@@ -71,7 +71,6 @@ public class SelectionInfoAggregator {
    * get contest names, its corresponding sequence, and its corresponding selection names from description,
    * (1) order_names_dic : key - sequence order, value - contest name
    * (2) contest_selection_names: key - contest name, value - a list of selection names
-   * @return None
    */
   void fill_in_contest_dicts(Election.ElectionDescription election) {
     for (Election.ContestDescription contest : election.contests) {
@@ -157,7 +156,7 @@ public class SelectionInfoAggregator {
    * @param selection_name: name of a selection, noted as "object id" under a selection
    * @param num: a number being multiplied to get the final product
    */
-  private static void get_accum_product(Map<String, ElementModP> dic, String selection_name, ElementModP num) {
+  private void get_accum_product(Map<String, ElementModP> dic, String selection_name, ElementModP num) {
     ElementModP current = dic.get(selection_name);
     if (current == null) {
       dic.put(selection_name, num);

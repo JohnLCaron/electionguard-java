@@ -18,8 +18,7 @@ public class Group {
 
   // R: Final[int] = ((P - 1) * pow(Q, -1, P)) % P
   static final BigInteger P_MINUS_ONE = P.subtract(BigInteger.ONE);
-  static final BigInteger QINV_MODP = mult_inv_p(Q);
-  static final BigInteger R = P_MINUS_ONE.multiply(QINV_MODP).mod(P);
+  static final BigInteger R = P_MINUS_ONE.multiply(Q.modInverse(P)).mod(P);
 
   // Common constants
   static final ElementModQ ZERO_MOD_Q = new ElementModQ(BigInteger.ZERO);
@@ -32,14 +31,10 @@ public class Group {
 
   @Immutable
   static class ElementMod {
-    final BigInteger elem; // maybe this is just an integer?
+    final BigInteger elem;
 
     ElementMod(BigInteger elem) {
       this.elem = elem;
-    }
-
-    ElementModP modInverseP() {
-      return new ElementModP(elem.modInverse(P));
     }
 
     public BigInteger getBigInt() {
@@ -87,17 +82,13 @@ public class Group {
 
   @Immutable
   public static class ElementModQ extends ElementMod {
-    public ElementModQ(BigInteger elem) {
+    private ElementModQ(BigInteger elem) {
       super(elem);
     }
 
     /** Validates that the element is actually within the bounds of [0,Q). */
     boolean is_in_bounds() {
-      // return 0 <= this.elem < Q;
-      if (this.elem.compareTo(BigInteger.ZERO) < 0) {
-        return false;
-      }
-      return this.elem.compareTo(Q) < 0;
+      return between(BigInteger.ZERO, elem, Q);
     }
 
     @Override
@@ -108,25 +99,22 @@ public class Group {
 
   @Immutable
   public static class ElementModP extends ElementMod {
-    public ElementModP(BigInteger elem) {
+    private ElementModP(BigInteger elem) {
       super(elem);
     }
 
     /** Validates that the element is actually within the bounds of [0,P). */
     boolean is_in_bounds() {
-      //         return 0 <= this.elem < P;
-      if (this.elem.compareTo(BigInteger.ZERO) < 0) {
-        return false;
-      }
-      return this.elem.compareTo(P) < 0;
+      return between(BigInteger.ZERO, elem, P);
     }
 
     /**
      * Validates that this element is in Z^r_p.
-     * Returns true if all is good, false if something's wrong.
+     * y ∈ Z^r_p if and only if y^q mod p = 1
      */
     boolean is_valid_residue() {
-      boolean residue = pow_p(this, new ElementModQ(Q)).equals(ONE_MOD_P);
+      boolean residue = elem.modPow(Q, P).equals(BigInteger.ONE);
+      // LOOK should be between 1 and P?
       return this.is_in_bounds() && residue;
     }
 
@@ -151,10 +139,10 @@ public class Group {
   }
 
   /**
-   * Given a Python integer, returns an ElementModP.
+   * Given a BigInteger, returns an ElementModP.
    * Returns `None` if the number is out of the allowed [0,P) range.
    */
-  static Optional<ElementModP> int_to_p(BigInteger biggy) {
+  public static Optional<ElementModP> int_to_p(BigInteger biggy) {
     if (between(BigInteger.ZERO, biggy, P)) {
       return Optional.of(new ElementModP(biggy));
     } else {
@@ -163,10 +151,10 @@ public class Group {
   }
 
   /**
-   * Given a Python integer, returns an ElementModQ.
+   * Given a BigInteger, returns an ElementModQ.
    * Returns `None` if the number is out of the allowed [0,Q) range.
    */
-  static Optional<ElementModQ> int_to_q(BigInteger biggy) {
+  public static Optional<ElementModQ> int_to_q(BigInteger biggy) {
     if (between(BigInteger.ZERO, biggy, Q)) {
       return Optional.of(new ElementModQ(biggy));
     } else {
@@ -175,12 +163,12 @@ public class Group {
   }
 
   /**
-   * Given a Python integer, returns an ElementModP. Allows
+   * Given a BigInteger, returns an ElementModP. Allows
    * for the input to be out-of-bounds, and thus creating an invalid
    * element (i.e., outside of [0,P)). Useful for tests or if
    * you're absolutely, positively, certain the input is in-bounds.
    */
-  static ElementModP int_to_p_unchecked(BigInteger biggy) {
+  public static ElementModP int_to_p_unchecked(BigInteger biggy) {
     return new ElementModP(biggy);
   }
 
@@ -188,93 +176,59 @@ public class Group {
     return new ElementModQ(biggy);
   }
 
+  // If it is known that a, b ∈ Z n , then one can choose to avoid the division normally inherent in
+  // the modular reduction and just use (a + b) mod n = a + b (if a + b < n) or a + b − n (if a + b ≥ n).
   /** Adds together one or more elements in Q, returns the sum mod Q */
-  static ElementModQ add_qi(BigInteger... elems) {
-    BigInteger t = BigInteger.ZERO;
-    for (BigInteger e : elems) {
-      t = t.add(e).mod(Q);
-    }
-    return new ElementModQ(t);
-  }
-
   static ElementModQ add_q(ElementModQ... elems) {
     BigInteger t = BigInteger.ZERO;
     for (ElementModQ e : elems) {
-      t = t.add(e.elem).mod(Q);
+      t = t.add(e.elem).mod(Q); // LOOK can we forgo the mod(Q) and just do it at the end?
     }
-    return new ElementModQ(t);
+    return int_to_q_unchecked(t);
   }
 
   /** Computes (a-b) mod q. */
   static ElementModQ a_minus_b_q(ElementModQ a, ElementModQ b) {
-    return new ElementModQ(a.elem.subtract(b.elem).mod(Q));
-  }
-
-  /** Computes (a-b) mod q. */
-  static ElementModQ a_minus_b_q(BigInteger a, BigInteger b) {
-    return new ElementModQ(a.subtract(b).mod(Q));
+    return int_to_q_unchecked(a.elem.subtract(b.elem).mod(Q));
   }
 
   /** Computes a/b mod p */
   static ElementModP div_p(ElementMod a, ElementMod b) {
-    return div_p(a.elem, b.elem);
-  }
-
-  /** Computes a/b mod p */
-  static ElementModP div_p(BigInteger a, BigInteger b) {
-    BigInteger inverse = b.modInverse(P);
-    return new ElementModP(mult_pi(a, inverse));
+    BigInteger inverse = b.elem.modInverse(P);
+    BigInteger product = a.elem.multiply(inverse);
+    return int_to_p_unchecked(product.mod(P));
   }
 
   /** Computes a/b mod q */
   static ElementModQ div_q(ElementMod a, ElementMod b) {
     BigInteger inverse = b.elem.modInverse(Q);
-    return mult_q(a, int_to_q_unchecked(inverse));
-  }
-
-  /** Computes a/b mod q */
-  static ElementModQ div_q(BigInteger a, BigInteger b) {
-    BigInteger inverse = b.modInverse(Q);
-    return mult_q(a, inverse);
+    BigInteger product = a.elem.multiply(inverse);
+    return int_to_q_unchecked(product.mod(Q));
   }
 
   /** Computes (Q - a) mod q. */
   static ElementModQ negate_q(ElementModQ a) {
-    return new ElementModQ(Q.subtract(a.elem));
+    return int_to_q_unchecked(Q.subtract(a.elem));
   }
 
   /** Computes (a + b * c) mod q. */
   static ElementModQ a_plus_bc_q(ElementModQ a, ElementModQ b, ElementModQ c) {
-    BigInteger product = b.elem.multiply(c.elem);
+    BigInteger product = b.elem.multiply(c.elem).mod(Q);
     BigInteger sum = a.elem.add(product);
-    return new ElementModQ(sum.mod(Q));
-  }
-
-  /** Computes (a + b * c) mod q. */
-  static ElementModQ a_plus_bc_q(BigInteger a, BigInteger b, BigInteger c) {
-    BigInteger product = b.multiply(c);
-    BigInteger sum = a.add(product);
-    return new ElementModQ(sum.mod(Q));
+    return int_to_q_unchecked(sum.mod(Q));
   }
 
   /** Computes the multiplicative inverse mod p. */
   static ElementModP mult_inv_p(ElementMod elem) {
-    return elem.modInverseP();
+    return int_to_p_unchecked(elem.elem.modInverse(P));
   }
 
-  /** Computes the multiplicative inverse mod p. */
-  static public BigInteger mult_inv_p(BigInteger b) {
-    return b.modInverse(P);
-  }
+  // To compute a^b mod n, one can compute (a mod n)^b mod n, but one should not perform a modular
+  // reduction on the exponent.
 
-  /**
-   * Computes b^e mod p.
-   *
-   * @param b: An element in [0,P).
-   * @param e: An element in [0,P).
-   */
+  /** Computes b^e mod p. */
   static ElementModP pow_p(ElementMod b, ElementMod e) {
-    return new ElementModP(b.elem.modPow(e.elem, P));
+    return int_to_p_unchecked(pow_p(b.elem.mod(P), e.elem));
   }
 
   /** Computes b^e mod p. */
@@ -282,19 +236,13 @@ public class Group {
     return b.modPow(e, P);
   }
 
-  /**
-   * Computes b^e mod q.
-   * <p>
-   * @param b: An element in [0,Q).
-   * @param e: An element in [0,Q).
-   */
+  /** Computes b^e mod q. */
   static ElementModQ pow_q(BigInteger b, BigInteger e) {
-    return new ElementModQ(b.modPow(e, Q));
+    return int_to_q_unchecked(b.modPow(e, Q));
   }
 
   /**
    * Computes the product, mod p, of all elements.
-   *
    * @param elems: Zero or more elements in [0,P).
    */
   static ElementModP mult_p(Collection<ElementModP> elems) {
@@ -306,16 +254,12 @@ public class Group {
     for (ElementModP x : elems) {
       product = product.multiply(x.elem).mod(P);
     }
-    return new ElementModP(product);
+    return int_to_p_unchecked(product);
   }
 
   public static ElementModP mult_p(ElementMod p1, ElementMod p2) {
     BigInteger product = p1.elem.multiply(p2.elem).mod(P);
-    return new ElementModP(product);
-  }
-
-  public static BigInteger mult_p(Iterable<BigInteger> elems) {
-    return mult_pi(Iterables.toArray(elems, BigInteger.class));
+    return int_to_p_unchecked(product);
   }
 
   public static BigInteger mult_pi(BigInteger... elems) {
@@ -328,15 +272,14 @@ public class Group {
 
   /**
    * Computes the product, mod q, of all elements.
-   *
-   * @param elems Zero or more elements in [0,P).
+   * @param elems Zero or more elements in [0,Q).
    */
   static ElementModQ mult_q(ElementMod... elems) {
     BigInteger product = BigInteger.ONE;
     for (ElementMod x : elems) {
       product = product.multiply(x.elem).mod(Q);
     }
-    return new ElementModQ(product);
+    return int_to_q_unchecked(product);
   }
 
   static ElementModQ mult_q(BigInteger... elems) {
@@ -344,14 +287,12 @@ public class Group {
     for (BigInteger x : elems) {
       product = product.multiply(x).mod(Q);
     }
-    return new ElementModQ(product);
+    return int_to_q_unchecked(product);
   }
 
-  /**
-   * Computes g^e mod p.
-   */
+  /** Computes g^e mod p. */
   static ElementModP g_pow_p(ElementMod e) {
-    return new ElementModP(pow_p(G, e.getBigInt()));
+    return int_to_p_unchecked(pow_p(G, e.elem));
   }
 
   /**
@@ -359,7 +300,7 @@ public class Group {
    */
   static ElementModQ rand_q() {
     BigInteger random = Utils.randbelow(Q);
-    return new ElementModQ(random);
+    return int_to_q_unchecked(random);
   }
 
   /**
@@ -367,11 +308,11 @@ public class Group {
    */
   static ElementModQ rand_range_q(ElementMod start) {
     BigInteger random = Utils.randbetween(start.getBigInt(), Q);
-    return new ElementModQ(random);
+    return int_to_q_unchecked(random);
   }
 
   // is lower <= x < upper, ie is x in [lower, upper) ?
-  static boolean between(BigInteger inclusive_lower_bound, BigInteger x, BigInteger exclusive_upper_bound) {
+  public static boolean between(BigInteger inclusive_lower_bound, BigInteger x, BigInteger exclusive_upper_bound) {
     if (x.compareTo(inclusive_lower_bound) < 0) {
       return false;
     }
@@ -392,7 +333,7 @@ public class Group {
   }
 
   // is x < b ?
-  static boolean lessThan(BigInteger x, BigInteger b) {
+  public static boolean lessThan(BigInteger x, BigInteger b) {
     return x.compareTo(b) < 0;
   }
 

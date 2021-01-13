@@ -76,7 +76,7 @@ public class Hash {
     }
 
     // return int_to_q_unchecked(int.from_bytes(h.digest(), byteorder = "big") % Q_MINUS_ONE);
-    return new Group.ElementModQ(new BigInteger(1, digest.digest()).mod(Group.Q_MINUS_ONE));
+    return Group.int_to_q_unchecked(new BigInteger(1, digest.digest()).mod(Group.Q_MINUS_ONE));
     /* byte[] bb = digest.digest();
     System.out.printf("bb = %s%n", UnsignedBytes.join("-", bb));
     BigInteger ibb = new BigInteger(1, bb);

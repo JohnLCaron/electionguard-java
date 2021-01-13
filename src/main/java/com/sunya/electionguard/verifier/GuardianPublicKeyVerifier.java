@@ -1,6 +1,5 @@
 package com.sunya.electionguard.verifier;
 
-import com.sunya.electionguard.Grp;
 import com.sunya.electionguard.Hash;
 import com.sunya.electionguard.KeyCeremony;
 import com.sunya.electionguard.SchnorrProof;
@@ -11,9 +10,7 @@ import java.util.List;
 import static com.sunya.electionguard.Group.ElementModQ;
 import static com.sunya.electionguard.Group.ElementModP;
 
-/**
- * This class checks the key generation information are given correctly for each guardian. (box 2).
- */
+/** This class checks the key generation information are given correctly for each guardian. (box 2). */
 public class GuardianPublicKeyVerifier {
   private final ElectionParameters electionParameters;
   private final Grp grp;
@@ -23,9 +20,7 @@ public class GuardianPublicKeyVerifier {
     this.grp = new Grp(electionParameters.large_prime(), electionParameters.small_prime());
   }
 
-  /**
-   * verify all guardians" key generation info by examining challenge values and equations.
-   */
+  /** verify all guardians" key generation info by examining challenge values and equations. */
   boolean verify_all_guardians() {
     boolean error = false;
 
