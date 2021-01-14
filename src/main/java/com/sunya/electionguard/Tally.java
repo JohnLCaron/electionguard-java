@@ -10,7 +10,6 @@ import com.google.gson.TypeAdapter;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
-import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
@@ -18,14 +17,19 @@ import java.util.stream.Collectors;
 import static com.sunya.electionguard.Ballot.*;
 import static com.sunya.electionguard.Group.*;
 
+/** A Tally accumulates the results of many ballots, contests, and selections. */
 public class Tally {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
-  /** A plaintext Tally Selection is a decrypted selection of a contest. */
+  /**
+   * The plaintext representation of the counts of one selection of one contest in the election.
+   * The object_id is the same as the encrypted selection (Ballot.CiphertextSelection) object_id.
+   */
   @AutoValue
   public static abstract class PlaintextTallySelection implements ElectionObjectBaseIF {
-    /** g^tally or M in the spec. LOOK check is this note talking about tally or value? */
+    /** The actual count. */
     public abstract Integer tally();
+    /** g^tally or M in the spec. */
     public abstract ElementModP value();
     public abstract ElGamal.Ciphertext message();
     public abstract ImmutableList<DecryptionShare.CiphertextDecryptionSelection> shares();
@@ -40,36 +44,9 @@ public class Tally {
   } // PlaintextTallySelection
 
   /**
-   * A CiphertextTallySelection is a homomorphic accumulation of all of the
-   * CiphertextBallotSelection instances for a specific selection in an election.
-   * The object_id is the Election.SelectionDescription.object_id of the selection.
-   * Note this class is mutable, since we need to accumulate the ciphertext.
+   * The plaintext representation of the counts of one contest in the election.
+   * The object_id is the same as the CiphertextTallyContest or Ballot.CiphertextBallotContest object_id.
    */
-  static class CiphertextTallySelection extends CiphertextSelection {
-    // Note not immutable
-    private ElGamal.Ciphertext ciphertext_accumulate; // default = ElGamalCiphertext(ONE_MOD_P, ONE_MOD_P)
-
-    public CiphertextTallySelection(String selectionDescriptionId, ElementModQ description_hash, @Nullable ElGamal.Ciphertext ciphertext) {
-      super(selectionDescriptionId, description_hash, ciphertext == null ? new ElGamal.Ciphertext(ONE_MOD_P, ONE_MOD_P) : ciphertext);
-      this.ciphertext_accumulate = (ciphertext == null) ? new ElGamal.Ciphertext(ONE_MOD_P, ONE_MOD_P) : ciphertext;
-    }
-
-    @Override
-    public ElGamal.Ciphertext ciphertext() {
-      return ciphertext_accumulate;
-    }
-
-    /**
-     * Homomorphically add the specified value to the message.
-     * Note that this method is called by separate threads.
-     */
-    private synchronized ElGamal.Ciphertext elgamal_accumulate(ElGamal.Ciphertext elgamal_ciphertext) {
-      this.ciphertext_accumulate = ElGamal.elgamal_add(this.ciphertext_accumulate, elgamal_ciphertext);
-      return this.ciphertext();
-    }
-  } // CiphertextTallySelection
-
-  /** A plaintext Tally Contest is a collection of plaintext selections. */
   @AutoValue
   public static abstract class PlaintextTallyContest implements ElectionObjectBaseIF {
     public abstract Map<String, PlaintextTallySelection> selections(); // Map(SELECTION_ID, PlaintextTallySelection)
@@ -84,8 +61,58 @@ public class Tally {
   } // PlaintextTallyContest
 
   /**
-   * A CiphertextTallyContest is a container for associating a collection of CiphertextTallySelection
-   * to a specific ContestDescription. The CiphertextTallySelections are mutable.
+   * The plaintext representation of the counts of all contests in the election.
+   * The object_id is the same as the CiphertextTally object_id.
+   */
+  @AutoValue
+  public static abstract class PlaintextTally implements ElectionObjectBaseIF {
+    public abstract Map<String, PlaintextTallyContest> contests(); // Map(CONTEST_ID, PlaintextTallyContest)
+    public abstract Map<String, Map<String, PlaintextTallyContest>> spoiled_ballots(); // Map(BALLOT_ID, Map(CONTEST_ID, PlaintextTallyContest))
+
+    public static PlaintextTally create(String object_id, Map<String, PlaintextTallyContest> contests, Map<String, Map<String, PlaintextTallyContest>> spoiled_ballots) {
+      return new AutoValue_Tally_PlaintextTally(object_id, contests, spoiled_ballots);
+    }
+    public static TypeAdapter<PlaintextTally> typeAdapter(Gson gson) {
+      return new AutoValue_Tally_PlaintextTally.GsonTypeAdapter(gson);
+    }
+
+  } // PlaintextTally
+
+  //////////////////////////////////////////////////////////////////////////////////////////////
+
+  /**
+   * A CiphertextTallySelection is a homomorphic accumulation of all of the
+   * CiphertextBallotSelection instances for a specific selection and contest in an election.
+   * The object_id is the Election.SelectionDescription.object_id.
+   * Note this class is mutable, since we need to do the accumulation here.
+   */
+  static class CiphertextTallySelection extends CiphertextSelection {
+    // Note mutable
+    private ElGamal.Ciphertext ciphertext_accumulate; // default = ElGamalCiphertext(ONE_MOD_P, ONE_MOD_P)
+
+    public CiphertextTallySelection(String selectionDescriptionId, ElementModQ description_hash, @Nullable ElGamal.Ciphertext ciphertext) {
+      super(selectionDescriptionId, description_hash, ciphertext == null ? new ElGamal.Ciphertext(ONE_MOD_P, ONE_MOD_P) : ciphertext);
+      this.ciphertext_accumulate = (ciphertext == null) ? new ElGamal.Ciphertext(ONE_MOD_P, ONE_MOD_P) : ciphertext;
+    }
+
+    @Override
+    public ElGamal.Ciphertext ciphertext() {
+      return ciphertext_accumulate;
+    }
+
+    /**
+     * Homomorphically add the specified value to the accumulation.
+     * Note that this method may be called in separate threads.
+     */
+    private synchronized ElGamal.Ciphertext elgamal_accumulate(ElGamal.Ciphertext elgamal_ciphertext) {
+      this.ciphertext_accumulate = ElGamal.elgamal_add(this.ciphertext_accumulate, elgamal_ciphertext);
+      return this.ciphertext();
+    }
+  } // CiphertextTallySelection
+
+  /**
+   * A CiphertextTallyContest groups the CiphertextTallySelection's for a specific Election.ContestDescription.
+   * The object_id is the same as the ContestDescription.
    */
   public static class CiphertextTallyContest extends ElectionObjectBase {
     /** The ContestDescription hash. */
@@ -148,7 +175,6 @@ public class Tally {
           selection.ciphertext_accumulate = tuple.ciphertext;
         }
       }
-
       return true;
     }
 
@@ -208,22 +234,7 @@ public class Tally {
     }
   } // CiphertextTallyContest
 
-  /** The plaintext representation of all contests in the election. */
-  @AutoValue
-  public static abstract class PlaintextTally implements ElectionObjectBaseIF {
-    public abstract Map<String, PlaintextTallyContest> contests(); // Map(CONTEST_ID, PlaintextTallyContest)
-    public abstract Map<String, Map<String, PlaintextTallyContest>> spoiled_ballots(); // Map(BALLOT_ID, Map(CONTEST_ID, PlaintextTallyContest))
-
-    public static PlaintextTally create(String object_id, Map<String, PlaintextTallyContest> contests, Map<String, Map<String, PlaintextTallyContest>> spoiled_ballots) {
-      return new AutoValue_Tally_PlaintextTally(object_id, contests, spoiled_ballots);
-    }
-    public static TypeAdapter<PlaintextTally> typeAdapter(Gson gson) {
-      return new AutoValue_Tally_PlaintextTally.GsonTypeAdapter(gson);
-    }
-
-  } // PlaintextTally
-
-  /** A `CiphertextTally` accepts cast and spoiled ballots and accumulates a tally on the cast ballots. Mutable. */
+  /** This accumulates the encrypted counts (aka tallies) for an Election. Mutable. */
   public static class CiphertextTally extends ElectionObjectBase {
     private final Election.InternalElectionDescription _metadata;
     private final Election.CiphertextElectionContext _encryption;
@@ -232,10 +243,10 @@ public class Tally {
     private final Set<String> _cast_ballot_ids;
 
     /** A collection of each contest and selection in an election. Retains an encrypted representation of a tally for each selection. */
-    private final Map<String, CiphertextTallyContest> cast;
+    private final Map<String, CiphertextTallyContest> cast; // Map(CONTEST_ID, CiphertextTallyContest)
 
     /** All of the ballots marked spoiled in the election. */
-    private final Map<String, Ballot.CiphertextAcceptedBallot> spoiled_ballots;
+    private final Map<String, Ballot.CiphertextAcceptedBallot> spoiled_ballots; // Map(BALLOT_ID, CiphertextTallyContest)
 
     public CiphertextTally(String object_id, Election.InternalElectionDescription metadata, Election.CiphertextElectionContext encryption) {
       super(object_id);
@@ -245,6 +256,22 @@ public class Tally {
 
       this._cast_ballot_ids = new HashSet<>();
       this.cast = _build_tally_collection(this._metadata);
+    }
+
+    /** Build the object graph for the tally from the InternalElectionDescription. */
+    private static Map<String, CiphertextTallyContest> _build_tally_collection(Election.InternalElectionDescription description) {
+      Map<String, CiphertextTallyContest> cast_collection = new HashMap<>();
+      for (Election.ContestDescriptionWithPlaceholders contest : description.contests) {
+        // build a collection of valid selections for the contest description
+        // note: we explicitly ignore the Placeholder Selections.
+        Map<String, CiphertextTallySelection> contest_selections = new HashMap<>();
+        for (Election.SelectionDescription selection : contest.ballot_selections) {
+          contest_selections.put(selection.object_id,
+                  new CiphertextTallySelection(selection.object_id, selection.crypto_hash(), null));
+        }
+        cast_collection.put(contest.object_id, new CiphertextTallyContest(contest.object_id, contest.crypto_hash(), contest_selections));
+      }
+      return cast_collection;
     }
 
     ImmutableMap<String, CiphertextTallyContest> cast() {
@@ -259,7 +286,7 @@ public class Tally {
       return this._cast_ballot_ids.size() + this.spoiled_ballots.size();
     }
 
-    /** Get a Count of the cast ballots. */
+    /** Get the number of cast ballots (just the count, not the tally). */
     int count() {
       return this._cast_ballot_ids.size();
     }
@@ -270,6 +297,49 @@ public class Tally {
       }
       CiphertextAcceptedBallot ballot = (CiphertextAcceptedBallot) item;
       return this._cast_ballot_ids.contains(ballot.object_id) || this.spoiled_ballots.containsKey(ballot.object_id);
+    }
+
+    /** Publish a ciphertext tally with simpler format. */
+    public PublishedCiphertextTally publish_ciphertext_tally() {
+      return PublishedCiphertextTally.create(object_id, cast);
+    }
+
+    /** Append a collection of Ballots to the tally and recalculate. */
+    private boolean batch_append(Iterable<CiphertextAcceptedBallot> ballots) {
+      // Map(SELECTION_ID, Map(BALLOT_ID, Ciphertext)
+      Map<String, Map<String, ElGamal.Ciphertext>> cast_ballot_selections = new HashMap<>();
+
+      // Find all the ballots for each selection.
+      for (CiphertextAcceptedBallot ballot : ballots) {
+        if (!this.contains(ballot) &&
+                BallotValidations.ballot_is_valid_for_election(ballot, this._metadata, this._encryption)) {
+
+          if (ballot.state == BallotBoxState.CAST) {
+            // collect the selections so they can can be accumulated in parallel
+            for (CiphertextBallotContest contest : ballot.contests) {
+              for (CiphertextBallotSelection selection : contest.ballot_selections) {
+                Map<String, ElGamal.Ciphertext> map2 = cast_ballot_selections.computeIfAbsent(selection.object_id, map1 -> new HashMap<>());
+                map2.put(ballot.object_id, selection.ciphertext());
+              }
+            }
+          } else if (ballot.state == BallotBoxState.SPOILED) {
+            // just append the spoiled ballots
+            this._add_spoiled(ballot);
+          }
+        }
+      }
+
+      // cache the cast ballot id's so they are not double counted
+      if (this._execute_accumulate(cast_ballot_selections)) {
+        for (CiphertextAcceptedBallot ballot : ballots) {
+          if (ballot.state == BallotBoxState.CAST) {
+            this._cast_ballot_ids.add(ballot.object_id);
+          }
+        }
+        return true;
+      }
+
+      return false;
     }
 
     /** Append a ballot to the tally and recalculate the tally. */
@@ -300,45 +370,6 @@ public class Tally {
       return false;
     }
 
-    /** Append a collection of Ballots to the tally and recalculate. */
-    private boolean batch_append(Iterable<CiphertextAcceptedBallot> ballots) {
-      // Map(SELECTION_ID, Map(BALLOT_ID, Ciphertext)
-      Map<String, Map<String, ElGamal.Ciphertext>> cast_ballot_selections = new HashMap<>();
-
-      // Find all the ballots for each selection.
-      for (CiphertextAcceptedBallot ballot : ballots) {
-        if (!this.contains(ballot) &&
-                BallotValidations.ballot_is_valid_for_election(ballot, this._metadata, this._encryption)) {
-
-          if (ballot.state == BallotBoxState.CAST) {
-            // collect the selections so they can can be accumulated in parallel
-            for (CiphertextBallotContest contest : ballot.contests) {
-              for (CiphertextBallotSelection selection : contest.ballot_selections) {
-                Map<String, ElGamal.Ciphertext> map2 = cast_ballot_selections.computeIfAbsent(selection.object_id, map1 -> new HashMap<>());
-                map2.put(ballot.object_id, selection.ciphertext());
-              }
-            }
-          } else if (ballot.state == BallotBoxState.SPOILED) {
-            // just append the spoiled ballots
-            this._add_spoiled(ballot);
-          }
-        }
-      }
-
-      // LOOK i dont think this is being tested.
-      // cache the cast ballot id's so they are not double counted
-      if (this._execute_accumulate(cast_ballot_selections)) {
-        for (CiphertextAcceptedBallot ballot : ballots) {
-          if (ballot.state == BallotBoxState.CAST) {
-            this._cast_ballot_ids.add(ballot.object_id);
-          }
-        }
-        return true;
-      }
-
-      return false;
-    }
-
     /** Add a single cast ballot to the tally, synchronously. */
     private boolean _add_cast(CiphertextAcceptedBallot ballot) {
       // iterate through the contests and elgamal add
@@ -364,22 +395,6 @@ public class Tally {
     boolean _add_spoiled(CiphertextAcceptedBallot ballot) {
       this.spoiled_ballots.put(ballot.object_id, ballot);
       return true;
-    }
-
-    /** Build the object graph for the tally from the InternalElectionDescription. */
-    static Map<String, CiphertextTallyContest> _build_tally_collection(Election.InternalElectionDescription description) {
-      Map<String, CiphertextTallyContest> cast_collection = new HashMap<>();
-      for (Election.ContestDescriptionWithPlaceholders contest : description.contests) {
-        // build a collection of valid selections for the contest description
-        // note: we explicitly ignore the Placeholder Selections.
-        Map<String, CiphertextTallySelection> contest_selections = new HashMap<>();
-        for (Election.SelectionDescription selection : contest.ballot_selections) {
-          contest_selections.put(selection.object_id,
-                  new CiphertextTallySelection(selection.object_id, selection.crypto_hash(), null));
-        }
-        cast_collection.put(contest.object_id, new CiphertextTallyContest(contest.object_id, contest.crypto_hash(), contest_selections));
-      }
-      return cast_collection;
     }
 
     @Immutable
@@ -413,12 +428,12 @@ public class Tally {
     } // RunAccumulate
 
     /**
-     * Called from batch_append(), process each inner map asynchronously.
+     * Called from batch_append(), process each inner map in parallel.
      * @param ciphertext_selections_by_selection_id For each selection, the set of ballots for that selection.
      *                                              Map(SELECTION_ID, Map(BALLOT_ID, Ciphertext)
      * @return always return true.
      */
-    boolean _execute_accumulate(
+    private boolean _execute_accumulate(
             Map<String, Map<String, ElGamal.Ciphertext>> ciphertext_selections_by_selection_id) {
 
       List<Callable<AccumOverBallotsTuple>> tasks =
@@ -451,10 +466,12 @@ public class Tally {
 
   /**
    * The published Ciphertext representation of all contests in the election.
-   * LOOK not really immutable, because CiphertextTallySelection is not.
+   * The object_id is the same as from the CiphertextTally
+   * LOOK not immutable, because CiphertextTallySelection is not: make an immutable version of it.
    */
   @AutoValue
   public static abstract class PublishedCiphertextTally implements ElectionObjectBaseIF {
+    // LOOK should be Immutable, fix json serialization
     public abstract Map<String, CiphertextTallyContest> cast(); // Map(CONTEST_ID, CiphertextTallyContest)
 
     public static PublishedCiphertextTally create(String object_id, Map<String, CiphertextTallyContest> cast) {
@@ -469,27 +486,8 @@ public class Tally {
 
   //////////////////////////////////////////////////////////////////////////////
 
-  /** Publish a ciphertext tally with simpler format. */
-  public static PublishedCiphertextTally publish_ciphertext_tally(CiphertextTally tally) {
-    return PublishedCiphertextTally.create(tally.object_id, tally.cast);
-  }
-
-  /**
-   * Tally a ballot that is either Cast or Spoiled.
-   * @return The mutated CiphertextTally or None if there is an error
-   */
-  static Optional<CiphertextTally> tally_ballot(CiphertextAcceptedBallot ballot, CiphertextTally tally) {
-    if (ballot.state == BallotBoxState.UNKNOWN) {
-      logger.atWarning().log("tally ballots error tallying unknown state for ballot %s", ballot.object_id);
-      return Optional.empty();
-    }
-
-    if (tally.append(ballot)) {
-      return Optional.of(tally);
-    }
-
-    return Optional.empty();
-  }
+  // static publish_ciphertext_tally use CiphertextTally.publish_ciphertext_tally().
+  // tally_ballot use CiphertextTally.append().
 
   /**
    * Tally all of the ballots in the ballot store.

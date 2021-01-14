@@ -45,10 +45,10 @@ public class TestPublish {
     CiphertextElectionContext context = make_ciphertext_election_context(1, 1, ONE_MOD_P, ONE_MOD_Q);
     List<KeyCeremony.CoefficientValidationSet> coefficients = ImmutableList.of(
             KeyCeremony.CoefficientValidationSet.create("", ImmutableList.of(), ImmutableList.of()));
-    Tally.PlaintextTally plaintext_tally = Tally.PlaintextTally.create("", ImmutableMap.of(), ImmutableMap.of());
+    Tally.PlaintextTally plaintext_tally = Tally.PlaintextTally.create("PlaintextTallyId", ImmutableMap.of(), ImmutableMap.of());
 
-    Tally.PublishedCiphertextTally ciphertext_tally = Tally.publish_ciphertext_tally(
-            new Tally.CiphertextTally("CiphertextTallyId", metadata, context));
+    Tally.PublishedCiphertextTally ciphertext_tally =
+            new Tally.CiphertextTally("CiphertextTallyId", metadata, context).publish_ciphertext_tally();
 
     Publisher publisher = new Publisher(outputDir, false);
     publisher.write(

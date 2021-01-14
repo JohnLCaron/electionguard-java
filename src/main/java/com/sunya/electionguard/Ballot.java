@@ -896,6 +896,13 @@ public class Ballot {
     public int hashCode() {
       return Objects.hash(super.hashCode(), state);
     }
+
+    @Override
+    public String toString() {
+      return "CiphertextAcceptedBallot{" +
+              "state=" + state +
+              "} " + super.toString();
+    }
   }
 
   /**

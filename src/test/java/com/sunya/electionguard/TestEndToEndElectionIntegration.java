@@ -328,7 +328,7 @@ public class TestEndToEndElectionIntegration {
             ImmutableList.of(this.device),
             this.ballot_store,
             this.ciphertext_tally.spoiled_ballots().values(),
-            Tally.publish_ciphertext_tally(this.ciphertext_tally),
+            this.ciphertext_tally.publish_ciphertext_tally(),
             this.plaintext_tally,
             this.coefficient_validation_sets);
 
@@ -376,7 +376,7 @@ public class TestEndToEndElectionIntegration {
 
     Tally.PublishedCiphertextTally ciphertext_tally_from_file = ConvertFromJson.readCiphertextTally(
             publisher.encryptedTallyFile().toString());
-    assertThat(ciphertext_tally_from_file).isEqualTo(Tally.publish_ciphertext_tally(this.ciphertext_tally));
+    assertThat(ciphertext_tally_from_file).isEqualTo(this.ciphertext_tally.publish_ciphertext_tally());
 
     Tally.PlaintextTally plainttext_tally_from_file = ConvertFromJson.readPlaintextTally(
             publisher.tallyFile().toString());

@@ -12,7 +12,7 @@ public abstract class TestProperties {
   @Provide
   Arbitrary<ElectionTestHelper.EverythingTuple> elections_and_ballots() {
     ElectionTestHelper helper = new ElectionTestHelper(random);
-    return Arbitraries.of(helper.elections_and_ballots(1 + random.nextInt(2)));
+    return Arbitraries.of(helper.elections_and_ballots(3 + random.nextInt(2)));
   }
 
   @Provide
