@@ -8,31 +8,26 @@ import java.io.IOException;
 
 import static com.google.common.truth.Truth.assertThat;
 
-public class TestPartialDecryptionsVerifier {
+public class TestElectionPublicKeyVerifier {
+
   static ElectionParameters electionParameters;
   static Consumer consumer;
-  static PartialDecryptionsVerifier validator;
-  static Grp grp;
+  static ElectionPublicKeyVerifier validator;
 
   @BeforeContainer
   public static void setUp() throws IOException {
     String topdir = TestParameterVerifier.topdir;
 
+    // set up
     consumer = new Consumer(topdir);
     electionParameters = new ElectionParameters(consumer);
-    validator = new PartialDecryptionsVerifier(electionParameters, consumer);
-    grp = new Grp(electionParameters.large_prime(), electionParameters.small_prime());
+    validator = new ElectionPublicKeyVerifier(electionParameters);
   }
 
   @Example
-  public void testSelectionEncryptionValidation() throws IOException {
-    boolean sevOk = validator.verify_cast_ballot_tallies();
+  public void testVerifyPublicKeys() throws IOException {
+    boolean sevOk = validator.verify_public_keys();
     assertThat(sevOk).isTrue();
   }
 
-  @Example
-  public void testSelectionSpoiledBallots() throws IOException {
-    boolean sevOk = validator.verify_spoiled_ballots();
-    assertThat(sevOk).isTrue();
-  }
 }

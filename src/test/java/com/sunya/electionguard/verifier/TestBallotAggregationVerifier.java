@@ -16,26 +16,17 @@ public class TestBallotAggregationVerifier {
 
   @BeforeContainer
   public static void setUp() throws IOException {
-    // String topdir = "src/test/data/python-modified";
-    String topdir = "/home/snake/tmp/testEndToEnd";
+    String topdir = TestParameterVerifier.topdir;
 
     // set up
     consumer = new Consumer(topdir);
     electionParameters = new ElectionParameters(consumer);
-    System.out.println("set up finished. ");
-
     validator = new BallotAggregationVerifier(electionParameters, consumer);
   }
 
   @Example
   public void testVerifyBallotAggregation() throws IOException {
     boolean sevOk = validator.verify_ballot_aggregation();
-    assertThat(sevOk).isTrue();
-  }
-
-  @Example
-  public void testMatchTotalsAcrossBallots() throws IOException {
-    boolean sevOk = validator.match_total_across_ballots();
     assertThat(sevOk).isTrue();
   }
 

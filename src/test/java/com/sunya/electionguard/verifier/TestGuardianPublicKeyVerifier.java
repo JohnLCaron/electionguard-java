@@ -18,18 +18,11 @@ public class TestGuardianPublicKeyVerifier {
 
   @BeforeContainer
   public static void setUp() throws IOException {
-    String topdir = "src/test/data/python-modified";
-    // String topdir = "src/test/data/java-publish";
+    String topdir = TestParameterVerifier.topdir;
 
-    // set up
     Consumer consumer = new Consumer(topdir);
     electionParameters = new ElectionParameters(consumer);
-    System.out.println("set up finished. ");
-
-    // key generation check
-    System.out.println(" ------------ [box 2] key generation parameter check ------------");
     kgv = new GuardianPublicKeyVerifier(electionParameters);
-
     grp = new Grp(electionParameters.large_prime(), electionParameters.small_prime());
   }
 

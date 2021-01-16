@@ -16,15 +16,11 @@ public class TestBallotChainingVerifier {
 
   @BeforeContainer
   public static void setUp() throws IOException {
-    // String topdir = "src/test/data/python-modified";
-    String topdir = "/home/snake/tmp/testEndToEnd";
+    String topdir = TestParameterVerifier.topdir;
 
     // set up
     consumer = new Consumer(topdir);
     electionParameters = new ElectionParameters(consumer);
-    System.out.println("set up finished. ");
-
-    System.out.println(" ------------ [box 3, 4, 5] ballot encryption check ------------");
     validator = new BallotChainingVerifier(electionParameters, consumer);
   }
 

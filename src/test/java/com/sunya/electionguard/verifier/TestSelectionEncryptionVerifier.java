@@ -22,16 +22,11 @@ public class TestSelectionEncryptionVerifier {
 
   @BeforeContainer
   public static void setUp() throws IOException {
-    String topdir = "src/test/data/java-publish";
+    String topdir = TestParameterVerifier.topdir;
 
-    // set up
     consumer = new Consumer(topdir);
     electionParameters = new ElectionParameters(consumer);
-    System.out.println("set up finished. ");
-
-    System.out.println(" ------------ [box 3, 4, 5] ballot encryption check ------------");
     sev = new SelectionEncyrptionVerifier(electionParameters, consumer);
-
     grp = new Grp(electionParameters.large_prime(), electionParameters.small_prime());
   }
 
