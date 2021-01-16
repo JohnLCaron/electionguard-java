@@ -14,7 +14,8 @@ import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
-import static com.sunya.electionguard.Ballot.*;
+import static com.sunya.electionguard.Ballot.BallotBoxState;
+import static com.sunya.electionguard.Ballot.CiphertextAcceptedBallot;
 import static com.sunya.electionguard.Group.*;
 
 /** A Tally accumulates the results of many ballots, contests, and selections. */
@@ -45,7 +46,7 @@ public class Tally {
 
   /**
    * The plaintext representation of the counts of one contest in the election.
-   * The object_id is the same as the CiphertextTallyContest or Ballot.CiphertextBallotContest object_id.
+   * The object_id is the same as the Election.ContestDescription.object_id or PlaintextBallotContest object_id.
    */
   @AutoValue
   public static abstract class PlaintextTallyContest implements ElectionObjectBaseIF {
@@ -66,7 +67,9 @@ public class Tally {
    */
   @AutoValue
   public static abstract class PlaintextTally implements ElectionObjectBaseIF {
+    /** The cast ballots. */
     public abstract Map<String, PlaintextTallyContest> contests(); // Map(CONTEST_ID, PlaintextTallyContest)
+    /** The spoiled ballots. */
     public abstract Map<String, Map<String, PlaintextTallyContest>> spoiled_ballots(); // Map(BALLOT_ID, Map(CONTEST_ID, PlaintextTallyContest))
 
     public static PlaintextTally create(String object_id, Map<String, PlaintextTallyContest> contests, Map<String, Map<String, PlaintextTallyContest>> spoiled_ballots) {
@@ -86,7 +89,7 @@ public class Tally {
    * The object_id is the Election.SelectionDescription.object_id.
    * Note this class is mutable, since we need to do the accumulation here.
    */
-  static class CiphertextTallySelection extends CiphertextSelection {
+  static class CiphertextTallySelection extends Ballot.CiphertextSelection {
     // Note mutable
     private ElGamal.Ciphertext ciphertext_accumulate; // default = ElGamalCiphertext(ONE_MOD_P, ONE_MOD_P)
 
@@ -102,7 +105,7 @@ public class Tally {
 
     /**
      * Homomorphically add the specified value to the accumulation.
-     * Note that this method may be called in separate threads.
+     * Note that this method may be called by multiple threads.
      */
     private synchronized ElGamal.Ciphertext elgamal_accumulate(ElGamal.Ciphertext elgamal_ciphertext) {
       this.ciphertext_accumulate = ElGamal.elgamal_add(this.ciphertext_accumulate, elgamal_ciphertext);
@@ -112,7 +115,7 @@ public class Tally {
 
   /**
    * A CiphertextTallyContest groups the CiphertextTallySelection's for a specific Election.ContestDescription.
-   * The object_id is the same as the ContestDescription.
+   * The object_id is the Election.ContestDescription.object_id.
    */
   public static class CiphertextTallyContest extends ElectionObjectBase {
     /** The ContestDescription hash. */
@@ -136,7 +139,7 @@ public class Tally {
     }
 
     /** Accumulate the contest selections of an individual ballot into this tally. */
-    private boolean accumulate_contest(List<CiphertextBallotSelection> contest_selections) {
+    private boolean accumulate_contest(List<Ballot.CiphertextBallotSelection> contest_selections) {
       if (contest_selections.isEmpty()) {
         logger.atWarning().log("accumulate cannot add missing selections for contest %s", this.object_id);
         return false;
@@ -193,9 +196,9 @@ public class Tally {
     static class RunAccumulateSelections implements Callable<AccumSelectionsTuple> {
       final String selection_id;
       final CiphertextTallySelection selection_tally;
-      final ImmutableList<CiphertextBallotSelection> contest_selections;
+      final ImmutableList<Ballot.CiphertextBallotSelection> contest_selections;
 
-      public RunAccumulateSelections(String id, CiphertextTallySelection selection_tally, List<CiphertextBallotSelection> contest_selections) {
+      public RunAccumulateSelections(String id, CiphertextTallySelection selection_tally, List<Ballot.CiphertextBallotSelection> contest_selections) {
         this.selection_id = id;
         this.selection_tally = selection_tally;
         this.contest_selections = ImmutableList.copyOf(contest_selections);
@@ -203,7 +206,7 @@ public class Tally {
 
       @Override
       public AccumSelectionsTuple call() {
-        Optional<CiphertextBallotSelection> use_selection = contest_selections.stream()
+        Optional<Ballot.CiphertextBallotSelection> use_selection = contest_selections.stream()
                 .filter(s -> selection_id.equals(s.object_id)).findFirst();
 
         // a selection on the ballot that is required was not found
@@ -246,7 +249,7 @@ public class Tally {
     private final Map<String, CiphertextTallyContest> cast; // Map(CONTEST_ID, CiphertextTallyContest)
 
     /** All of the ballots marked spoiled in the election. */
-    private final Map<String, Ballot.CiphertextAcceptedBallot> spoiled_ballots; // Map(BALLOT_ID, CiphertextTallyContest)
+    private final Map<String, CiphertextAcceptedBallot> spoiled_ballots; // Map(BALLOT_ID, CiphertextTallyContest)
 
     public CiphertextTally(String object_id, Election.InternalElectionDescription metadata, Election.CiphertextElectionContext encryption) {
       super(object_id);
@@ -278,7 +281,7 @@ public class Tally {
       return ImmutableMap.copyOf(cast);
     }
 
-    ImmutableMap<String, Ballot.CiphertextAcceptedBallot> spoiled_ballots() {
+    ImmutableMap<String, CiphertextAcceptedBallot> spoiled_ballots() {
       return ImmutableMap.copyOf(spoiled_ballots);
     }
 
@@ -316,8 +319,8 @@ public class Tally {
 
           if (ballot.state == BallotBoxState.CAST) {
             // collect the selections so they can can be accumulated in parallel
-            for (CiphertextBallotContest contest : ballot.contests) {
-              for (CiphertextBallotSelection selection : contest.ballot_selections) {
+            for (Ballot.CiphertextBallotContest contest : ballot.contests) {
+              for (Ballot.CiphertextBallotSelection selection : contest.ballot_selections) {
                 Map<String, ElGamal.Ciphertext> map2 = cast_ballot_selections.computeIfAbsent(selection.object_id, map1 -> new HashMap<>());
                 map2.put(ballot.object_id, selection.ciphertext());
               }
@@ -373,7 +376,7 @@ public class Tally {
     /** Add a single cast ballot to the tally, synchronously. */
     private boolean _add_cast(CiphertextAcceptedBallot ballot) {
       // iterate through the contests and elgamal add
-      for (CiphertextBallotContest contest : ballot.contests) {
+      for (Ballot.CiphertextBallotContest contest : ballot.contests) {
         // This should never happen since the ballot is validated against the election metadata
         // but it's possible the local dictionary was modified so we double check.
         if (!this.cast.containsKey(contest.object_id)) {

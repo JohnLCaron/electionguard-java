@@ -2,7 +2,6 @@ package com.sunya.electionguard;
 
 import com.google.common.flogger.FluentLogger;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -10,7 +9,7 @@ import java.util.Optional;
 import static com.sunya.electionguard.Ballot.*;
 import static com.sunya.electionguard.Group.*;
 
-/** Static methods for decryption. */
+/** Static methods for decryption when you know the secret keys. */
 public class DecryptWithSecrets {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 

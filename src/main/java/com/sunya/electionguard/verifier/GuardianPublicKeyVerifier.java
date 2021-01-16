@@ -29,13 +29,13 @@ public class GuardianPublicKeyVerifier {
       boolean res = this.verify_one_guardian(coeff);
       if (!res) {
         error = true;
-        System.out.printf("Guardian %d key generation verification failure. %n", count);
+        System.out.printf(" Guardian %d key generation verification failure. %n", count);
       }
       count++;
     }
 
     if (!error) {
-      System.out.printf("All guardians: key generation verification success. %n");
+      System.out.printf(" All guardians: key generation verification success. %n");
     }
     return !error;
   }

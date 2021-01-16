@@ -38,13 +38,13 @@ public class ParameterVerifier {
       // if not, use Miller-Rabin algorithm to check the primality of p and q, 5 iterations by default
       if (!Grp.is_prime(electionParameters.large_prime(), NUMBER_OF_ITERATIONS)) {
         error = true;
-        System.out.printf("Large prime value error. %n");
+        System.out.printf(" Large prime value error. %n");
       }
     }
     if (!electionParameters.small_prime().equals(Group.Q)) {
       if (!Grp.is_prime(electionParameters.small_prime(), NUMBER_OF_ITERATIONS)) {
         error = true;
-        System.out.printf("Small prime value error. %n");
+        System.out.printf(" Small prime value error. %n");
       }
     }
 
@@ -52,33 +52,33 @@ public class ParameterVerifier {
     BigInteger cofactor = electionParameters.cofactor();
     if (!(electionParameters.large_prime().subtract(BigInteger.ONE)).equals(electionParameters.small_prime().multiply(cofactor))) {
       error = true;
-      System.out.printf("p - 1 is not equal to r * q.%n");
+      System.out.printf(" p - 1 is not equal to r * q.%n");
     }
 
     // check q is not a divisor of r
     if (Grp.is_divisor(electionParameters.small_prime(), cofactor)) {
       error = true;
-      System.out.printf("q is a divisor of r.%n");
+      System.out.printf(" q is a divisor of r.%n");
     }
 
     // check 1 < g < p
     BigInteger generator = electionParameters.generator();
     if (!grp.is_within_set_zstarp(generator)) {
       error = true;
-      System.out.printf("g is not in the range of 1 to p. %n");
+      System.out.printf(" g is not in the range of 1 to p. %n");
     }
 
     // check g^q mod p = 1
     BigInteger product = generator.modPow(electionParameters.small_prime(), electionParameters.large_prime());
     if (!product.equals(BigInteger.ONE)) {
       error = true;
-      System.out.printf("g^q mod p does not equal to 1. %n");
+      System.out.printf(" g^q mod p does not equal to 1. %n");
     }
 
     if (error) {
-      System.out.printf("Baseline parameter check failure%n");
+      System.out.printf(" ***Baseline parameter check failure%n");
     } else {
-      System.out.printf("Baseline parameter check success%n");
+      System.out.printf(" Baseline parameter check success%n");
     }
     return !error;
   }

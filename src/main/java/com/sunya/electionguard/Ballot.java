@@ -293,6 +293,7 @@ public class Ballot {
   /** Encrypted selection. */
   @Immutable
   public static class CiphertextSelection extends ElectionObjectBase {
+    /** SelectionDescription.crypto_hash(). */
     public final ElementModQ description_hash;
     private final ElGamal.Ciphertext ciphertext; // only accessed through ciphertext(), so subclass can override
 
@@ -471,7 +472,8 @@ public class Ballot {
   }
 
   /**
-   * A CiphertextBallotContest represents the selections made by a voter for a specific ContestDescription
+   * A CiphertextBallotContest represents the selections made by a voter for a specific ContestDescription.
+   * The object_id is the PlaintextBallotContest.object_id.
    * <p>
    * CiphertextBallotContest can only be a complete representation of a contest dataset.  While
    * PlaintextBallotContest supports a partial representation, a CiphertextBallotContest includes all data

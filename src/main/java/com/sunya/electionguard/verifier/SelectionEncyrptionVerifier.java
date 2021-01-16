@@ -38,9 +38,9 @@ public class SelectionEncyrptionVerifier {
     }
 
     if (error) {
-      System.out.printf("[Box 4] Selection Encryptions failure.%n");
+      System.out.printf(" ***Selection Encryptions failure.%n");
     } else {
-      System.out.printf("[Box 4] All Selection Encryptions validate: success.%n");
+      System.out.printf(" All Selection Encryptions validate: success.%n");
     }
     return !error;
   }

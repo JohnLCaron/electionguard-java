@@ -54,9 +54,9 @@ public class BallotChainingVerifier {
     }
 
     if (error) {
-      System.out.printf("[Box 6] Ballot Chaining failed on %d ballots.%n", countFail);
+      System.out.printf(" ***Ballot Chaining failed on %d ballots.%n", countFail);
     } else {
-      System.out.printf("[Box 6] Ballot Chaining success.%n");
+      System.out.printf(" Ballot Chaining success.%n");
     }
     return !error;
   }

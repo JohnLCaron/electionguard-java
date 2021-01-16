@@ -156,7 +156,7 @@ public class ElGamal {
    * Homomorphically accumulates one or more ElGamal ciphertexts by pairwise multiplication. The exponents
    * of vote counters will add.
    */
-  static Ciphertext elgamal_add(Ciphertext... ciphertexts) {
+  public static Ciphertext elgamal_add(Ciphertext... ciphertexts) {
     Preconditions.checkArgument(ciphertexts.length > 0, "Must have one or more ciphertexts for elgamal_add");
 
     Ciphertext result = ciphertexts[0];

@@ -245,7 +245,7 @@ public class Group {
    * Computes the product, mod p, of all elements.
    * @param elems: Zero or more elements in [0,P).
    */
-  static ElementModP mult_p(Collection<ElementModP> elems) {
+  public static ElementModP mult_p(Collection<ElementModP> elems) {
     return mult_p(Iterables.toArray(elems, ElementModP.class));
   }
 

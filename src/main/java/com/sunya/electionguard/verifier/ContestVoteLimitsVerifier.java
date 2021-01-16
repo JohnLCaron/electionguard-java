@@ -44,9 +44,9 @@ public class ContestVoteLimitsVerifier {
     }
 
     if (error) {
-      System.out.printf("[Box 5] Adherence to Vote Limits failure.%n");
+      System.out.printf(" ***Adherence to Vote Limits failure.%n");
     } else {
-      System.out.printf("[Box 5] Adherence to Vote Limits success.%n");
+      System.out.printf(" Adherence to Vote Limits success.%n");
     }
     return !error;
   }

@@ -26,17 +26,17 @@ public class ElectionPublicKeyVerifier {
 
     // Equation 3.B
     if (!public_key.equals(expected_public_key)) {
-      System.out.printf("Expected Public key does not match.%n");
+      System.out.printf(" ***Expected Public key does not match.%n");
       return false;
     }
 
     // Equation 3.A LOOK probably wrong, see issue #279.
     ElementModQ expectedExtendedHash = Hash.hash_elems(this.electionParameters.base_hash(), public_key);
     if (!this.electionParameters.extended_hash().equals(expectedExtendedHash)) {
-      System.out.printf("Expected extended hash does not match.%n");
+      System.out.printf(" ***Expected extended hash does not match.%n");
       return false;
     }
-    System.out.printf("Public key validation success.%n");
+    System.out.printf(" Public key validation success.%n");
     return true;
   }
 

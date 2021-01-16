@@ -13,18 +13,18 @@ import java.util.Map;
 import static com.sunya.electionguard.Group.ElementModP;
 
 /**
- * This SelectionInfoAggregator class aims at collecting and storing all the selection information across contest
+ * This SelectionInfoAggregator class collects all the selection information across contest
  * in one place. Its final purpose is to create a list of dictionaries, each dictionary stands for a contest, inside a
  * dictionary are corresponding selection name and its alpha or beta values. Used in decryption verifier.
  */
 public class SelectionInfoAggregator {
-  Map<String, Integer> order_names_dic;
-  Map<Integer, String> names_order_dic;
-  Map<String, List<String>> contest_selection_names; // Contest name, list of selection names
+  Map<String, Integer> order_names_dic; // Map(contest_name, contest_sequence)
+  Map<Integer, String> names_order_dic; // Map(contest_sequence, contest_name)
+  Map<String, List<String>> contest_selection_names; // Map(contest_name, List(selection_name))
 
   List<Map<String, ElementModP>> dics_by_contest;
-  Map<String, Map<String, ElementModP>> total_pad_dic;
-  Map<String, Map<String, ElementModP>> total_data_dic;
+  Map<String, Map<String, ElementModP>> total_pad_dic; // Map(contest_name, Map(selection_name, pad))
+  Map<String, Map<String, ElementModP>> total_data_dic; // Map(contest_name, Map(selection_name, data))
 
   SelectionInfoAggregator(Tally.PlaintextTally tally, List<Ballot.CiphertextAcceptedBallot> ballots,
                           Election.ElectionDescription election) {
@@ -47,6 +47,7 @@ public class SelectionInfoAggregator {
    * store these alphas and betas in the corresponding contest dictionary
    */
   private void fill_total_pad_data(Tally.PlaintextTally tally) {
+    // tally.contests() contain just the cast ballots.
     for (Map.Entry<String, Tally.PlaintextTallyContest> contestEntry : tally.contests().entrySet()) {
       String contest_name = contestEntry.getKey();
       Tally.PlaintextTallyContest contest = contestEntry.getValue();
@@ -67,22 +68,13 @@ public class SelectionInfoAggregator {
     }
   }
 
-  /**
-   * get contest names, its corresponding sequence, and its corresponding selection names from description,
-   * (1) order_names_dic : key - sequence order, value - contest name
-   * (2) contest_selection_names: key - contest name, value - a list of selection names
-   */
   void fill_in_contest_dicts(Election.ElectionDescription election) {
     for (Election.ContestDescription contest : election.contests) {
-      // fill in order_names_dic dict
-      // get contest names
       String contest_name = contest.object_id;
-      // get contest sequence
       int contest_sequence = contest.sequence_order;
-      this.order_names_dic.put(contest_name, contest_sequence);
+      this.order_names_dic.put(contest_name, contest_sequence); // BiMap ?
       this.names_order_dic.put(contest_sequence, contest_name);
 
-      // fill in contest_selection_names dict
       List<String> curr_list = new ArrayList<>();
       for (Election.SelectionDescription selection : contest.ballot_selections) {
         String selection_name = selection.object_id;
@@ -93,8 +85,8 @@ public class SelectionInfoAggregator {
   }
 
   /**
-   *         create 2 * contest names number of dicts. Two for each contest, one for storing pad values,
-   *         one for storing data values. Fill in column names with selections in that specific contest
+   * create 2 * contest names number of dicts. Two for each contest, one for storing pad values,
+   * one for storing data values. Fill in column names with selections in that specific contest
    */
   private void create_inner_dic() {
      int num = this.order_names_dic.size();
@@ -117,12 +109,7 @@ public class SelectionInfoAggregator {
     }
   }
 
-  /**
-   * loop over encrypted ballots, go through every ballot to get the selection
-   * alpha/pad and beta/data
-   */
   private void fill_in_dics(List<Ballot.CiphertextAcceptedBallot> ballots) {
-    // loop over every ballot file
     for (Ballot.CiphertextAcceptedBallot ballot : ballots) {
       // ignore spoiled ballots
       if (ballot.state == Ballot.BallotBoxState.CAST) {

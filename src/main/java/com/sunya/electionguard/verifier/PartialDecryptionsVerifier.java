@@ -19,7 +19,7 @@ import static com.sunya.electionguard.Group.ElementModP;
 
 /**
  * This verifies specification section "8. Correctness of Partial Decryptions" and section 12
- * "Correct Decryption od Spoiled Ballots"
+ * "Correct Decryption of Spoiled Ballots"
  */
 public class PartialDecryptionsVerifier {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
@@ -37,7 +37,7 @@ public class PartialDecryptionsVerifier {
   }
 
   /**
-   * Confirm for each (non-dummy) option in each contest in the ballot coding file, for each decrypting trustee 𝑇i:
+   * 8. Confirm for each (non-dummy) option in each contest in the ballot coding file, for each decrypting trustee 𝑇i:
    * <ol>
    * <li>The given value vi is in set Zq,</li>
    * <li>The given values ai and bi are both in Zrp,</li>
@@ -48,24 +48,24 @@ public class PartialDecryptionsVerifier {
    * </ol>
    */
   boolean verify_cast_ballot_tallies() {
-    boolean share_error = false;
+    boolean error = false;
 
     String tally_name = this.tally.object_id();
 
     // 8. confirm for each decrypting trustee Ti
-    boolean share_res = this.make_all_contest_verification(tally_name, this.tally.contests());
-    if (!share_res) {
-      share_error = true;
+    if (!this.make_all_contest_verification(tally_name, this.tally.contests())) {
+      System.out.printf(" ***Partial decryptions of cast ballots failure. %n");
+    } else {
+      System.out.printf(" Partial decryptions of cast ballots success. %n");
     }
-
-    return !share_error;
+    return !error;
   }
 
   /**
-   * Verify all the spoiled ballots in the spoiled_ballots folder by checking each one individually.
-   * @return true if all the spoiled ballots are verified as valid, false otherwise
+   * 12. An election verifier should confirm the correct decryption of each spoiled ballot using the same
+   * process that was used to confirm the election tallies.
    */
-  boolean verify_all_spoiled_ballots() {
+  boolean verify_spoiled_ballots() {
     boolean error = false;
 
     for (Map.Entry<String, Map<String, Tally.PlaintextTallyContest>> entry : this.tally.spoiled_ballots().entrySet()) {
@@ -75,47 +75,25 @@ public class PartialDecryptionsVerifier {
     }
 
     if (error) {
-      System.out.printf("Spoiled ballot decryption failure. %n");
+      System.out.printf(" ***Spoiled ballot decryption failure. %n");
     } else {
-      System.out.printf("Spoiled ballot decryption success. %n");
+      System.out.printf(" Spoiled ballot decryption success. %n");
     }
     return !error;
   }
 
-  /**
-   * Verify all contests in a ballot by calling the DecryptionContestVerifier.
-   * @param field_name 'object_id' under the cast ballot tallies or each individual spoiled ballot,
-   * used as an identifier to signal whether this is a check for the cast ballot tallies or spoiled ballots
-   * @param contests the dictionary read from the given dataset, containing all the ballot tally or
-   * spoiled ballot info
-   * @return true if no error has been found in any contest verification in this cast ballot tallies or
-   * spoiled ballot check, false otherwise
-   */
-  private boolean make_all_contest_verification(String field_name, Map<String, Tally.PlaintextTallyContest> contests) {
+  private boolean make_all_contest_verification(String name, Map<String, Tally.PlaintextTallyContest> contests) {
     boolean error = false;
     for (Tally.PlaintextTallyContest contest : contests.values()) {
       DecryptionContestVerifier tcv = new DecryptionContestVerifier(contest);
       if (!tcv.verify_a_contest()) {
+        System.out.printf(" Contest %s decryption failure for %s. %n", contest.object_id(), name);
         error = true;
       }
-    }
-
-    if (error) {
-      logger.atSevere().log(field_name + " [box 6 & 9] decryption verification failure. ");
-    } else {
-      System.out.printf("Decryption verification success.%n");
     }
     return !error;
   }
 
-  /**
-   * This class is responsible for checking a contest in the decryption process.
-   * <p>
-   * Contest is the first level under each ballot. Contest data exists in individual cast ballots, cast ballot tallies,
-   * and individual spoiled ballots. Therefore, DecryptionContestVerifier will also be used in the aforementioned places
-   * where contest data exist. Aggregates the selection checks done by DecryptionSelectionVerifier,
-   * used in DecryptionVerifier.
-   */
   class DecryptionContestVerifier {
     Tally.PlaintextTallyContest contest;
 
@@ -123,22 +101,14 @@ public class PartialDecryptionsVerifier {
       this.contest = contest;
     }
 
-    /**
-     * Verify one contest inside the cast ballot tallies or a spoiled ballot at a time.
-     * It combines all the error checks for all the selections under this contest.
-     * @return true if all the selection checks are passed, false otherwise
-     */
     boolean verify_a_contest() {
       boolean error = false;
       for (Tally.PlaintextTallySelection selection : this.contest.selections().values()) {
         DecryptionSelectionVerifier tsv = new DecryptionSelectionVerifier(selection);
         if (!tsv.verify_a_selection()) {
+          System.out.printf("  Selection %s decryption failure.%n", selection.object_id());
           error = true;
         }
-      }
-
-      if (error) {
-        System.out.printf(" %s tally decryption failure. ", this.contest.object_id());
       }
       return !error;
     }
