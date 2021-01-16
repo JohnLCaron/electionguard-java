@@ -18,22 +18,10 @@ import static com.sunya.electionguard.Group.ElementModQ;
 import static com.sunya.electionguard.Group.ElementModP;
 
 /**
- * This module does the decryption work on cast ballot tallies and each spoiled ballots.
- * <p>
- * For both cast ballot tallies and individual spoiled ballots, the decryption goes down from ballot, contest, selection,
- * to guardian share-level. To mimic such hierarchy, the following 4 classes, DecryptionVerifier,
- * DecryptionContestVerifier, DecryptionSelectionVerifier, and ShareVerifier, are created.
- * <p>
- * This class is responsible for checking ballot decryption, its major work includes:
- * <ol>
- * <li> Verify box 6, "Correctness of Ballot Aggregation and Partial Decryptions".</li>
- * <li> Verify box 9, "Validation of Correct Decryption of Tallies".</li>
- * <li> Verify box 10, spoiled ballot decryption, where spoiled ballots need to be checked individually.</li>
- * </ol>
- * Note: user can check one single spoiled ballot or all the spoiled ballots in the folder by calling
- * verify_a_spoiled_ballot(str) and verify_all_spoiled_ballots(), respectively
+ * This verifies specification section "8. Correctness of Partial Decryptions" and section 12
+ * "Correct Decryption od Spoiled Ballots"
  */
-public class DecryptionVerifier {
+public class PartialDecryptionsVerifier {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   final ElectionParameters electionParameters;
@@ -41,7 +29,7 @@ public class DecryptionVerifier {
   final Tally.PlaintextTally tally;
   final Grp grp;
 
-  DecryptionVerifier(ElectionParameters electionParameters, Consumer consumer) throws IOException {
+  PartialDecryptionsVerifier(ElectionParameters electionParameters, Consumer consumer) throws IOException {
     this.electionParameters = electionParameters;
     this.consumer = consumer;
     this.tally = consumer.plaintextTally();
@@ -49,12 +37,7 @@ public class DecryptionVerifier {
   }
 
   /**
-   * Check if the ballot tally satisfies the equations in box 6, "Correctness of Ballot Aggregation and Partial Decryptions".
-   * <ol>
-   * <li>Confirm for each (non-dummy) option in each contest in the ballot coding file that the aggregate encryption,
-   * (𝐴, 𝐵) satisfies 𝐴 = ∏ 𝛼 and 𝐵 = ∏ 𝛽 where the (𝛼 , 𝛽) are the corresponding encryptions on all cast ballots
-   * in the election record.</li>
-   * <li>Confirm for each (non-dummy) option in each contest in the ballot coding file, for each decrypting trustee 𝑇i:
+   * Confirm for each (non-dummy) option in each contest in the ballot coding file, for each decrypting trustee 𝑇i:
    * <ol>
    * <li>The given value vi is in set Zq,</li>
    * <li>The given values ai and bi are both in Zrp,</li>
@@ -63,69 +46,19 @@ public class DecryptionVerifier {
    * </ol>
    * </li>
    * </ol>
-   * @return true if all the above requirements are satisfied, false otherwise
    */
-  boolean verify_box6() throws IOException {
-    boolean total_error = false;
+  boolean verify_cast_ballot_tallies() {
     boolean share_error = false;
 
     String tally_name = this.tally.object_id();
 
-    // confirm that the aggregate encryption are the accumulative product of all
-    // corresponding encryption on all cast ballots
-    SelectionInfoAggregator aggregator = new SelectionInfoAggregator(consumer.plaintextTally(),
-            consumer.ballots(), consumer.election());
-    boolean total_res = this.match_total_across_ballots(aggregator);
-    if (!total_res) {
-      total_error = true;
-    }
-
-    // confirm for each decrypting trustee Ti
+    // 8. confirm for each decrypting trustee Ti
     boolean share_res = this.make_all_contest_verification(tally_name, this.tally.contests());
     if (!share_res) {
       share_error = true;
     }
 
-    return !total_error && !share_error;
-  }
-
-  /**
-   * Match the given tallies with accumulative products calculated across all ballots.
-   * @param aggregator a SelectionInfoAggregator instance for accessing information of a selection
-   * @return true if all the tallies match, false if not
-   */
-  private boolean match_total_across_ballots(SelectionInfoAggregator aggregator) {
-    boolean error = false;
-
-    List<Map<String, ElementModP>> dics_by_contest = aggregator.get_dics();
-    Map<String, Map<String, ElementModP>> total_data_dic = aggregator.get_total_data();
-    Map<String, Map<String, ElementModP>> total_pad_dic = aggregator.get_total_pad();
-
-    for (String contest_name : tally.contests().keySet()) {
-      //get the corresponding index of pad and data dictionaries given contest name
-      int pad_dic_idx = aggregator.get_dic_id_by_contest_name(contest_name, "a");
-      int data_dic_idx = aggregator.get_dic_id_by_contest_name(contest_name, "b");
-      Map<String, ElementModP> pad_dic = dics_by_contest.get(pad_dic_idx);
-      Map<String, ElementModP> data_dic = dics_by_contest.get(data_dic_idx);
-
-      for (String selection_name : pad_dic.keySet()) {
-        ElementModP accum_pad = pad_dic.get(selection_name);
-        ElementModP tally_pad = total_pad_dic.get(contest_name).get(selection_name);
-        ElementModP accum_data = data_dic.get(selection_name);
-        ElementModP tally_data = total_data_dic.get(contest_name).get(selection_name);
-        if (!accum_pad.equals(tally_pad)) {
-          error = true;
-        }
-        if (!accum_data.equals(tally_data)) {
-          error = true;
-        }
-      }
-      if (error) {
-        logger.atSevere().log("Tally error.");
-      }
-    }
-
-    return (!error);
+    return !share_error;
   }
 
   /**
@@ -211,13 +144,6 @@ public class DecryptionVerifier {
     }
   }
 
-  /**
-   * Handles selection decryption.
-   * <p>
-   * Selection is the layer under contest and above guardian shares. Methods in this class provides public access to
-   * a selection"s pad and data values for convenience and aggregates the guardian share check conducted by
-   * ShareVerifier. Used in DecryptionContestVerifier.
-   */
   class DecryptionSelectionVerifier {
     final Tally.PlaintextTallySelection selection;
     final String selection_id;
@@ -243,12 +169,7 @@ public class DecryptionVerifier {
     }
   }
 
-  /**
-   * Check shares of decryption under each selections in cast ballot tallies and spoiled ballots.
-   * <p>
-   * The share level is the deepest level the data of cast ballot tallies and spoiled ballots can go, therefore, most of
-   * the computation needed for decryption happens here.
-   */
+  // section 8
   private class ShareVerifier {
     List<CiphertextDecryptionSelection> shares;
     ElementModP selection_pad;
@@ -277,12 +198,6 @@ public class DecryptionVerifier {
       return !error;
     }
 
-    /**
-     * Verify one share at a time, check box 6 requirements,
-     * (1) if the response vi is in the set Zq
-     * (2) if the given ai, bi are both in set Zrp
-     * @param share a specific share inside the shares list
-     */
     private boolean verify_a_share(CiphertextDecryptionSelection share, ElementModP public_key) {
       boolean error = false;
 
@@ -295,23 +210,27 @@ public class DecryptionVerifier {
       ElementModQ challenge = proof.challenge;
       ElementModP partial_decryption = share.share();
 
-      // check if the response vi is in the set Zq
-      boolean response_correctness = check_response(response);
+      // 8.A check if the response vi is in the set Zq
+      boolean response_correctness = grp.is_within_set_zq(response.getBigInt());
 
-      // check if the given ai, bi are both in set Zrp
-      boolean pad_data_correctness = check_data(data) && check_pad(pad);
+      // 8.B check if the given ai, bi are both in set Zrp
+      boolean pad_correct = grp.is_within_set_zrp(pad.getBigInt());
+      boolean data_correct = grp.is_within_set_zrp(data.getBigInt());
 
-      // Check if the given challenge ci = H(Q-bar, (A,B), (ai, bi), Mi)
+      // 8.C Check if the given challenge ci = H(Q-bar, (A,B), (ai, bi), Mi)
       ElementModQ challenge_computed = Hash.hash_elems(electionParameters.extended_hash(),
               this.selection_pad, this.selection_data, pad, data, partial_decryption);
       boolean challenge_correctness = challenge_computed.equals(challenge);
 
-      // check equations g^vi=ai * Ki^ci mod p and A^vi=bi * Mi ^ ci mod p are satisfied.
+      // 8.D g^vi mod p = ai * Ki^ci mod p
       boolean equ1_correctness = this.check_equation1(response, pad, challenge, public_key);
+
+      // 8.E A^vi mod p = bi * Mi ^ ci mod p
       boolean equ2_correctness = this.check_equation2(response, data, challenge, partial_decryption);
 
       // error check
-      if (!(response_correctness && pad_data_correctness && challenge_correctness && equ1_correctness && equ2_correctness)){
+      if (!(response_correctness && pad_correct &&  data_correct && challenge_correctness &&
+              equ1_correctness && equ2_correctness)){
         error = true;
         System.out.printf("partial decryption failure.%n");
       }
@@ -319,7 +238,7 @@ public class DecryptionVerifier {
     }
 
     /**
-     * Check if equation g ^ vi = ai * (Ki ^ ci) mod p is satisfied.
+     * 8.D Check if equation g ^ vi mod p = ai * (Ki ^ ci) mod p is satisfied.
      * <p>
      * @param response: response of a share, vi
      * @param pad: pad of a share, ai
@@ -339,7 +258,7 @@ public class DecryptionVerifier {
     }
 
     /**
-     * Check if equation A ^ vi = bi * (Mi^ ci) mod p is satisfied.
+     * 8.E Check if equation A ^ vi = bi * (Mi^ ci) mod p is satisfied.
      * <p>
      * @param response: response of a share, vi
      * @param data: data of a share, bi
@@ -354,46 +273,6 @@ public class DecryptionVerifier {
       boolean res = left.equals(right);
       if (!res) {
         System.out.printf("equation 2 error.%n");
-      }
-      return res;
-    }
-
-  /**
-   * Check if the share response vi is in the set Zq
-   * @param response: response value vi of a share
-   * @return True if the response is in set Zq, False if not
-   */
-    boolean check_response(ElementModQ response) {
-      boolean res = grp.is_within_set_zq(response.getBigInt());
-      if (!res) {
-        System.out.printf("response error.%n");
-      }
-      return res;
-    }
-
-  /**
-   * Check if the given ai/pad of a share is in set Zrp
-   * @param pad: a pad value ai of a share
-   * @return True if this value is in set Zrp, False if not
-   */
-    boolean check_pad(ElementModP pad) {
-      boolean res = grp.is_within_set_zrp(pad.getBigInt());
-      if (!res) {
-        System.out.printf("a/pad value error.%n");
-      }
-
-      return res;
-    }
-
-  /**
-   * Check if the given bi/data of a share is in set Zrp
-   * @param data: a data value bi of a share
-   * @return True if this value is in set Zrp, False if not
-   */
-    boolean check_data(ElementModP data) {
-      boolean res = grp.is_within_set_zrp(data.getBigInt());
-      if (!res) {
-        System.out.printf("b/data value error.%n");
       }
       return res;
     }

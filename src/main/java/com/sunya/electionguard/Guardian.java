@@ -13,14 +13,14 @@ import static com.sunya.electionguard.Group.*;
 import static com.sunya.electionguard.KeyCeremony.*;
 
 
-/** Guardian of election, responsible for safeguarding information and decrypting results. Mutable. */
+/** Guardian of election (aka Trustee), responsible for safeguarding information and decrypting results. Mutable. */
 public class Guardian extends ElectionObjectBase {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   private final int sequence_order;
   private final CeremonyDetails ceremony_details;
   private final Auxiliary.KeyPair _auxiliary_keys;
-  private final ElectionKeyPair _election_keys;
+  private final ElectionKeyPair _election_keys; // Ki = election keypair for ith Guardian
 
   // The collection of this guardian's partial key backups that will be shared to other guardians
   private final Map<String, ElectionPartialKeyBackup> _backups_to_share; // Map(GUARDIAN_ID, ElectionPartialKeyBackup)
@@ -45,8 +45,9 @@ public class Guardian extends ElectionObjectBase {
    * @param sequence_order: a unique number in [0, 256) that identifies this guardian
    * @param number_of_guardians: the total number of guardians that will participate in the election
    * @param quorum: the count of guardians necessary to decrypt
-   * @param nonce_seed: an optional `ElementModQ` value that can be used to generate the `ElectionKeyPair`.
-   * It is recommended to only use this field for testing.
+   * @param nonce_seed: an optional `ElementModQ` value that can be used to generate the `ElectionKeyPair`,
+   *                    recommended to only use this field for testing.
+   * LOOK cant get a Guardian without generating a random key for it. No use case for a Guardian with a given key?
    */
   public Guardian(String id,
            int sequence_order,

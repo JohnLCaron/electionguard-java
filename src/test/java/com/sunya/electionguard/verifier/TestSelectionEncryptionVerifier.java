@@ -14,10 +14,10 @@ import java.util.Set;
 
 import static com.google.common.truth.Truth.assertThat;
 
-public class TestEncryptionValidator {
+public class TestSelectionEncryptionVerifier {
   static ElectionParameters electionParameters;
   static Consumer consumer;
-  static EncyrptionVerifier sev;
+  static SelectionEncyrptionVerifier sev;
   static Grp grp;
 
   @BeforeContainer
@@ -30,14 +30,14 @@ public class TestEncryptionValidator {
     System.out.println("set up finished. ");
 
     System.out.println(" ------------ [box 3, 4, 5] ballot encryption check ------------");
-    sev = new EncyrptionVerifier(electionParameters, consumer);
+    sev = new SelectionEncyrptionVerifier(electionParameters, consumer);
 
     grp = new Grp(electionParameters.large_prime(), electionParameters.small_prime());
   }
 
   @Example
   public void testSelectionEncryptionValidation() throws IOException {
-    boolean sevOk = sev.verify_all_ballots();
+    boolean sevOk = sev.verify_all_selections();
     assertThat(sevOk).isTrue();
   }
 

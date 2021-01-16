@@ -13,9 +13,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.List;
 
-/**
- * Access to global parameters.
- */
+/** Global election parameters, contained in constants, context, description, and coefficients files. */
 @Immutable
 public class ElectionParameters {
   private final Election.ElectionConstants constants;
@@ -39,8 +37,9 @@ public class ElectionParameters {
     ImmutableMap.Builder<String, Integer> builder = ImmutableMap.builder();
       for (Election.ContestDescription contest : election.contests) {
         builder.put(contest.object_id,
+                // LOOK why optional? comment says "In n-of-m elections, this will be None."
                 contest.votes_allowed.orElseThrow(() -> new IllegalStateException(
-                String.format("Contest %s does not has number of allowed votes", contest.object_id))));
+                String.format("Contest description %s does not have number of allowed votes", contest.object_id))));
       }
     contest_vote_limits = builder.build();
   }

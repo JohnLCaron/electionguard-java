@@ -10,7 +10,7 @@ import java.util.List;
 import static com.sunya.electionguard.Group.ElementModQ;
 import static com.sunya.electionguard.Group.ElementModP;
 
-/** This class checks the key generation information are given correctly for each guardian. (box 2). */
+/** This verifies specification section "2. Guardian Public-Key Validation". */
 public class GuardianPublicKeyVerifier {
   private final ElectionParameters electionParameters;
   private final Grp grp;
@@ -29,15 +29,14 @@ public class GuardianPublicKeyVerifier {
       boolean res = this.verify_one_guardian(coeff);
       if (!res) {
         error = true;
-        System.out.printf("guardian %d key generation verification failure. %n", count);
+        System.out.printf("Guardian %d key generation verification failure. %n", count);
       }
       count++;
     }
 
     if (!error) {
-      System.out.printf("All guardians key generation verification success. %n");
+      System.out.printf("All guardians: key generation verification success. %n");
     }
-
     return !error;
   }
 
@@ -53,18 +52,17 @@ public class GuardianPublicKeyVerifier {
       ElementModQ challenge = proof.challenge;   // c
       ElementModQ response = proof.response;     // u
 
-      // compute challenge
+      // compute challenge 2.A
       ElementModQ challenge_computed = this.compute_guardian_challenge_threshold_separated(public_key, commitment);
-
-      // check if the computed challenge value matches the given
       if (!challenge_computed.equals(challenge)) {
         error = true;
-        System.out.printf("guardian %d challenge number error. %n", i);
+        System.out.printf("guardian %d challenge number error on equation 2A.%n", i);
       }
-      // check equation
+
+      // check equation 2.B
       if (!this.verify_individual_key_computation(response, commitment, public_key, challenge)) {
         error = true;
-        System.out.printf("guardian %d equation error. %n", i);
+        System.out.printf("guardian %d equation error on equation 2B.%n", i);
       }
     }
     return !error;
@@ -78,9 +76,7 @@ public class GuardianPublicKeyVerifier {
    * @return a challenge value of a guardian, separated by quorum
    */
   ElementModQ compute_guardian_challenge_threshold_separated(ElementModP public_key, ElementModP commitment) {
-    //ElementModQ hash = Hash.hash_elems(this.electionParameters.base_hash(), public_key, commitment);
-    // return grp.mod_q(hash.getBigInt());
-
+    // LOOK should be return Hash.hash_elems(this.electionParameters.base_hash(), public_key, commitment);
     return Hash.hash_elems(public_key, commitment);
   }
 
@@ -97,4 +93,5 @@ public class GuardianPublicKeyVerifier {
     BigInteger right = grp.mult_p(commitment.getBigInt(), grp.pow_p(public_key.getBigInt(), challenge.getBigInt()));
     return left.equals(right);
   }
+
 }

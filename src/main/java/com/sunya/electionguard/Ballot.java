@@ -14,16 +14,7 @@ import static com.sunya.electionguard.Group.*;
 
 public class Ballot {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
-
-  /** Enumeration used when marking a ballot as cast or spoiled. */
-  public enum BallotBoxState {
-    /** A ballot that has been explicitly cast */
-    CAST,
-    /** A ballot that has been explicitly spoiled */
-    SPOILED,
-    /** A ballot whose state is unknown to ElectionGuard and will not be included in any election results. */
-    UNKNOWN
-  }
+  private static boolean first = false;
 
   /**
    * A PlaintextBallot represents a voters selections for a given ballot and ballot style.
@@ -479,8 +470,6 @@ public class Ballot {
             extended_data);
   }
 
-
-
   /**
    * A CiphertextBallotContest represents the selections made by a voter for a specific ContestDescription
    * <p>
@@ -502,8 +491,8 @@ public class Ballot {
     public final ElementModQ crypto_hash; // Hash of the encrypted values
     public final Optional<ElementModQ> nonce; // The nonce used to generate the encryption. Sensitive & should be treated as a secret.
 
-    //     The proof demonstrates the sum of the selections does not exceed the maximum
-    //    available selections for the contest, and that the proof was generated with the nonce
+    // The proof demonstrates the sum of the selections does not exceed the maximum
+    // available selections for the contest, and that the proof was generated with the nonce
     public final Optional<ChaumPedersen.ConstantChaumPedersenProof> proof;
 
     public CiphertextBallotContest(String object_id, ElementModQ description_hash,
@@ -519,7 +508,7 @@ public class Ballot {
       this.proof = proof;
     }
 
-    /** Remove nonces from selections and return new contest. */
+    /** Remove nonces from selections and return new contest. LOOK problem? */
     CiphertextBallotContest removeNonces() {
       // new_selections = [replace(selection, nonce = None) for selection in contest.ballot_selections]
       List<CiphertextBallotSelection> new_selections =
@@ -611,11 +600,10 @@ public class Ballot {
     }
   }
 
-  private static ElGamal.Ciphertext _ciphertext_ballot_elgamal_accumulate(
-          List<CiphertextBallotSelection> ballot_selections) {
+  private static ElGamal.Ciphertext _ciphertext_ballot_elgamal_accumulate(List<CiphertextBallotSelection> ballot_selections) {
     // return elgamal_add(*[selection.ciphertext for selection in ballot_selections]);
     List<ElGamal.Ciphertext> texts = ballot_selections.stream()
-            .map(selection -> selection.ciphertext())
+            .map(CiphertextSelection::ciphertext)
             .collect(Collectors.toList());
     return ElGamal.elgamal_add(Iterables.toArray(texts, ElGamal.Ciphertext.class));
   }
@@ -686,6 +674,18 @@ public class Ballot {
               )
       );
     }
+    if (first) {
+      List<ElGamal.Ciphertext> texts = ballot_selections.stream()
+              .map(CiphertextSelection::ciphertext)
+              .collect(Collectors.toList());
+      for (ElGamal.Ciphertext text : texts) {
+        System.out.printf("     alpha %s%n", text.pad);
+        System.out.printf("     beta %s%n%n", text.data);
+      }
+      ElGamal.elgamal_add_show(Iterables.toArray(texts, ElGamal.Ciphertext.class));
+      System.out.printf("  make_ciphertext_ballot_contest pad=%s data=%s%n", proof.get().pad, proof.get().data);
+      first = false;
+    }
 
     return new CiphertextBallotContest(
             object_id,
@@ -697,7 +697,7 @@ public class Ballot {
   }
 
   /**
-   * A CiphertextBallot represents a voters encrypted selections for a given ballot and ballot style.
+   * A CiphertextBallot represents a voter's encrypted selections for a given ballot and ballot style.
    * <p>
    * When a ballot is in its complete, encrypted state, the `nonce` is the master nonce
    * from which all other nonces can be derived to encrypt the ballot.  Along with the `nonce`
@@ -713,7 +713,7 @@ public class Ballot {
     public final ElementModQ previous_tracking_hash;
     public final ImmutableList<CiphertextBallotContest> contests;
     public final Optional<ElementModQ> tracking_hash;
-    public final long timestamp; // LOOK something better
+    public final long timestamp; // LOOK something better?
     public final ElementModQ crypto_hash;
     public final Optional<ElementModQ> nonce;
 
@@ -733,8 +733,8 @@ public class Ballot {
     }
 
     /**
-     * @return a representation of the election and the external Id in the nonce's used
-     * to derive other nonce values on the ballot
+     * @return a hash of the election, the external objext_id and nonce, used
+     * to derive other nonce values on the ballot.
      */
     static ElementModQ nonce_seed(ElementModQ description_hash, String object_id, ElementModQ nonce) {
       return Hash.hash_elems(description_hash, object_id, nonce);
@@ -855,6 +855,16 @@ public class Ballot {
     public int hashCode() {
       return Objects.hash(super.hashCode(), ballot_style, description_hash, previous_tracking_hash, contests, tracking_hash, timestamp, crypto_hash, nonce);
     }
+  }
+
+  /** Enumeration used when marking a ballot as cast or spoiled. */
+  public enum BallotBoxState {
+    /** A ballot that has been explicitly cast */
+    CAST,
+    /** A ballot that has been explicitly spoiled */
+    SPOILED,
+    /** A ballot whose state is unknown to ElectionGuard and will not be included in any election results. */
+    UNKNOWN
   }
 
   /**

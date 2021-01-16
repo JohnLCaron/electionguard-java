@@ -78,6 +78,7 @@ public class SchnorrProof extends Proof {
   static SchnorrProof make_schnorr_proof(ElGamal.KeyPair keypair, ElementModQ r) {
     ElementModP k = keypair.public_key;
     ElementModP h = g_pow_p(r);
+    // LOOK does not follow validation spec 2.A, should be c = Hash.hash_elems(crypto_base_hash, k, h). see issue #278
     ElementModQ c = Hash.hash_elems(k, h);
     ElementModQ u = a_plus_bc_q(r, keypair.secret_key, c);
 

@@ -31,7 +31,8 @@ public class ElectionPolynomial {
   /** A proof of possession of the private key for each secret coefficient. */
   final ImmutableList<SchnorrProof> coefficient_proofs;
 
-  ElectionPolynomial(List<Group.ElementModQ> coefficients, List<Group.ElementModP> coefficient_commitments, List<SchnorrProof> coefficient_proofs) {
+  ElectionPolynomial(List<Group.ElementModQ> coefficients, List<Group.ElementModP> coefficient_commitments,
+                     List<SchnorrProof> coefficient_proofs) {
     this.coefficients = ImmutableList.copyOf(coefficients);
     this.coefficient_commitments = ImmutableList.copyOf(coefficient_commitments);
     this.coefficient_proofs = ImmutableList.copyOf(coefficient_proofs);
@@ -108,7 +109,6 @@ public class ElectionPolynomial {
    * @param coordinate              Value to be checked
    * @param exponent_modifier       Unique modifier (usually sequence order) for exponent
    * @param coefficient_commitments Commitments for coefficients of polynomial
-   * @return True if verified on polynomial
    */
   static boolean verify_polynomial_coordinate(ElementModQ coordinate, BigInteger exponent_modifier, List<ElementModP> coefficient_commitments) {
     BigInteger commitment_output = BigInteger.ONE;

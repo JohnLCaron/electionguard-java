@@ -196,9 +196,9 @@ public class ChaumPedersen {
   @Immutable
   public static class ConstantChaumPedersenProof extends Proof {
     public final ElementModP pad; // a in the spec
-    public final ElementModP data; // bin the spec"
-    public final ElementModQ challenge; // "c in the spec"
-    public final ElementModQ response; // "v in the spec"
+    public final ElementModP data; // b in the spec
+    public final ElementModQ challenge; // c in the spec
+    public final ElementModQ response; // v in the spec
     public final int constant; // constant value
 
     public ConstantChaumPedersenProof(ElementModP pad, ElementModP data, ElementModQ challenge, ElementModQ response, int constant) {

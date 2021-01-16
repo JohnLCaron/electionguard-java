@@ -26,9 +26,7 @@ public class ElectionFactory {
     return _get_election_from_file(hamilton_election_manifest_filename);
   }
 
-  /**
-   * Get a single Fake Election object that is manually constructed with default values.
-   */
+  /** Get a single Fake Election object that is manually constructed with default values. */
   public static ElectionDescription get_fake_election() {
 
     BallotStyle fake_ballot_style = new BallotStyle("some-ballot-style-id",

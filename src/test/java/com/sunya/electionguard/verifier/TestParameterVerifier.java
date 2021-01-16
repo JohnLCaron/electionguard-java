@@ -7,7 +7,7 @@ import java.io.IOException;
 
 import static com.google.common.truth.Truth.assertThat;
 
-public class TestParameterValidator {
+public class TestParameterVerifier {
 
   @Example
   public void testJavaGenerated() throws IOException {

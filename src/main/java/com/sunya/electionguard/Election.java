@@ -506,13 +506,13 @@ public class Election {
   }
 
   /**
-   * Use this data entity for describing a contest and linking the contest
-   * to the associated candidates and parties.
+   * Use to describe a contest and link the contest to the associated candidates and parties.
    * See: https://developers.google.com/elections-data/reference/contest
+   * <p>
    * Note: The ElectionGuard Data Spec deviates from the NIST model in that
    * `sequence_order` is a required field since it is used for ordering selections
    * in a contest to ensure various encryption primitives are deterministic.
-   * For a given election, the sequence of contests displayed to a user may be different
+   * For a given election, the sequence of contests displayed to a user may be different,
    * however that information is not captured by default when encrypting a specific ballot.
    */
   @Immutable
@@ -529,24 +529,24 @@ public class Election {
 
     public final VoteVariationType vote_variation;
 
-    // Number of candidates that are elected in the contest ("n" of n-of-m).
+    /** Number of candidates that are elected in the contest ("n" of n-of-m). */
     // Note: a referendum is considered a specific case of 1-of-m in ElectionGuard
     public final int number_elected;
 
-    // Maximum number of votes/write-ins per voter in this contest. Used in cumulative voting
-    // to indicate how many total votes a voter can spread around. In n-of-m elections, this will be None.
+    /** Maximum number of votes/write-ins per voter in this contest. Used in cumulative voting
+        to indicate how many total votes a voter can spread around. In n-of-m elections, this will be None. */
     public final Optional<Integer> votes_allowed;
 
-    //Name of the contest, not necessarily as it appears on the ballot.
+    /** Name of the contest, not necessarily as it appears on the ballot. */
     public final String name;
 
-    // For associating a ballot selection for the contest, i.e., a candidate, a ballot measure.
+    /** For associating a ballot selection for the contest, i.e., a candidate, a ballot measure. */
     public final ImmutableList<SelectionDescription> ballot_selections;
 
-    // Title of the contest as it appears on the ballot.
+    /** Title of the contest as it appears on the ballot. */
     public final Optional<InternationalizedText> ballot_title;
 
-    // Subtitle of the contest as it appears on the ballot.
+    /** Subtitle of the contest as it appears on the ballot. */
     public final Optional<InternationalizedText> ballot_subtitle;
 
     public ContestDescription(String object_id,
@@ -554,7 +554,7 @@ public class Election {
                               int sequence_order,
                               VoteVariationType vote_variation,
                               int number_elected,
-                              @Nullable Integer votes_allowed,
+                              @Nullable Integer votes_allowed, // LOOK why optional ?
                               String name,
                               List<SelectionDescription> ballot_selections,
                               @Nullable InternationalizedText ballot_title,
@@ -873,13 +873,15 @@ public class Election {
               '}';
     }
 
+    // LOOK this isnt going to generate the same hash as the python code. So when reading in a published Election,
+    //  take Election.crypto_hash as given.
     @Override
     public Group.ElementModQ crypto_hash() {
       return Hash.hash_elems(
               this.election_scope_id,
               this.type.name(),
-              this.start_date,
-              this.end_date,
+              this.start_date.toEpochSecond(), // to_ticks(self.start_date), number of seconds since the unix epoch
+              this.end_date.toEpochSecond(),
               this.name,
               this.contact_information,
               this.geopolitical_units,
@@ -1159,7 +1161,7 @@ public class Election {
     // the `extended base hash code (𝑄')` in the [ElectionGuard Spec](https://github.com/microsoft/electionguard/wiki)
     public final Group.ElementModQ crypto_extended_base_hash;
 
-    public CiphertextElectionContext(int number_of_guardians, int quorum, ElementModP elgamal_public_key,
+    CiphertextElectionContext(int number_of_guardians, int quorum, ElementModP elgamal_public_key,
                                      ElementModQ description_hash, ElementModQ crypto_base_hash, ElementModQ crypto_extended_base_hash) {
       this.number_of_guardians = number_of_guardians;
       this.quorum = quorum;

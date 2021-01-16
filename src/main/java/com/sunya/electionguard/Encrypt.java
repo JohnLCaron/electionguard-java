@@ -14,6 +14,7 @@ import static com.sunya.electionguard.Group.*;
 
 public class Encrypt {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
+  private static final boolean show = false;
 
   /** Metadata for encryption device. */
   @Immutable
@@ -246,6 +247,7 @@ public class Encrypt {
     //  compared to the huge cost of doing the cryptography.
 
     //  Generate the encrypted selections
+    if (show) System.out.printf(" Contest %s.%n", contest.contest_id);
     for (SelectionDescription description : contest_description.ballot_selections) {
         boolean has_selection = false;
         Optional<CiphertextBallotSelection> encrypted_selection = Optional.empty();
@@ -287,7 +289,8 @@ public class Encrypt {
           return Optional.empty(); // log will have happened earlier
         }
         encrypted_selections.add(encrypted_selection.get());
-      }
+        if (show) System.out.printf("  Selection %s.%n", encrypted_selection.get().object_id);
+    }
 
     // Handle Placeholder selections. After we loop through all of the real selections on the ballot,
     // we loop through each placeholder value and determine if it should be filled in
@@ -313,6 +316,7 @@ public class Encrypt {
         return Optional.empty(); // log will have happened earlier
       }
       encrypted_selections.add(encrypted_selection.get());
+      if (show) System.out.printf("  Selection %s.%n", encrypted_selection.get().object_id);
     }
 
     // TODO: ISSUE #33: support other cases such as cumulative voting (individual selections being an encryption of > 1)
@@ -402,6 +406,7 @@ public class Encrypt {
     List<CiphertextBallotContest> encrypted_contests = new ArrayList<>();
 
     // only iterate on contests for this specific ballot style
+    if (show) System.out.printf("Ballot %s.%n", ballot.object_id);
     for (ContestDescriptionWithPlaceholders description : election_metadata.get_contests_for(ballot.ballot_style)) {
       PlaintextBallotContest use_contest = null;
       for (PlaintextBallotContest contest : ballot.contests) {

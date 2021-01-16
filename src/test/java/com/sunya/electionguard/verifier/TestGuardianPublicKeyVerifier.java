@@ -10,7 +10,7 @@ import java.math.BigInteger;
 
 import static com.google.common.truth.Truth.assertThat;
 
-public class TestGuardianPublicKeyValidator {
+public class TestGuardianPublicKeyVerifier {
   static ElectionParameters electionParameters;
   static GuardianPublicKeyVerifier kgv;
   static Grp grp;
@@ -31,6 +31,11 @@ public class TestGuardianPublicKeyValidator {
     kgv = new GuardianPublicKeyVerifier(electionParameters);
 
     grp = new Grp(electionParameters.large_prime(), electionParameters.small_prime());
+  }
+
+  @Example
+  public void testVerifyAllGuardians() {
+    assertThat(kgv.verify_all_guardians()).isTrue();
   }
 
   @Example

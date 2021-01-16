@@ -151,7 +151,10 @@ public class KeyCeremony {
     }
   }
 
-  /** Generate auxiliary key pair using RSA . */
+  /**
+   * Generate auxiliary key pair using RSA .
+   * LOOK move to Guardian?
+   */
   static Auxiliary.KeyPair generate_rsa_auxiliary_key_pair() {
     KeyPair rsa_key_pair = Rsa.rsa_keypair();
     return new Auxiliary.KeyPair(rsa_key_pair.getPrivate(), rsa_key_pair.getPublic());
@@ -160,10 +163,14 @@ public class KeyCeremony {
   /**
    * Generate election key pair, proof, and polynomial.
    * @param quorum: Quorum of guardians needed to decrypt
-   * @return Election key pair
+   * @param nonce: Optional nonce for testing, do not use in production.
+   * LOOK move to Guardian?
    */
   static ElectionKeyPair generate_election_key_pair(int quorum, @Nullable ElementModQ nonce) {
     ElectionPolynomial polynomial = ElectionPolynomial.generate_polynomial(quorum, nonce);
+    // the 0th coefficient is the secret s for the ith Guardian
+    // the 0th commitment is the public key = g^s mod p
+    // The key_pair is Ki = election keypair for ith Guardian
     ElGamal.KeyPair key_pair = new ElGamal.KeyPair(
             polynomial.coefficients.get(0), polynomial.coefficient_commitments.get(0));
     SchnorrProof proof = SchnorrProof.make_schnorr_proof(key_pair, rand_q());
