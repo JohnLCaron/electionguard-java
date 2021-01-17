@@ -394,7 +394,6 @@ public class Decryptions {
           CiphertextElectionContext context,
           Auxiliary.Decryptor decryptor) {
 
-
     Optional<Guardian.DecryptionProofTuple> compensated = available_guardian.compensate_decrypt(
             missing_guardian_id,
             selection.ciphertext(),
@@ -437,7 +436,7 @@ public class Decryptions {
   }
 
   /** Produce a Lagrange coefficient for a single Guardian, to be used when reconstructing a missing share. */
-  static Group.ElementModQ compute_lagrange_coefficients_for_guardian(
+  private static Group.ElementModQ compute_lagrange_coefficients_for_guardian(
           List<KeyCeremony.PublicKeySet> all_available_guardian_keys, KeyCeremony.PublicKeySet guardian_keys) {
 
     List<BigInteger> other_guardian_orders = all_available_guardian_keys.stream()

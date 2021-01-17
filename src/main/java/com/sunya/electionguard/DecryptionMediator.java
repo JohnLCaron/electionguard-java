@@ -35,8 +35,9 @@ public class DecryptionMediator {
   private final Map<String, TallyDecryptionShare> _decryption_shares = new HashMap<>(); // Map(AVAILABLE_GUARDIAN_ID, TallyDecryptionShare)
 
   /**
-   * A collection of lagrange coefficients `w_{i,j}` computed by available guardians for each missing guardian.
-   * Map( MISSING_GUARDIAN_ID, Map(AVAILABLE_GUARDIAN_ID, ElementModQ))
+   * A collection of lagrange coefficients w_ij computed by available guardians for each missing guardian.
+   * Map(MISSING_GUARDIAN_ID, Map(AVAILABLE_GUARDIAN_ID, ElementModQ))
+   * So _lagrange_coefficients(MISSING_GUARDINA) are the w_l of section 10.
    */
   private final Map<String, Map<String, Group.ElementModQ>> _lagrange_coefficients = new HashMap<>();
 
@@ -127,7 +128,7 @@ public class DecryptionMediator {
 
     // Only allow a guardian to be compensated for once
     if (this._compensated_decryption_shares.containsKey(missing_guardian_id)) {
-      logger.atInfo().log("guardian {missing_guardian_id} already compensated", missing_guardian_id);
+      logger.atInfo().log("guardian %s already compensated", missing_guardian_id);
       return Optional.of(ImmutableList.copyOf(
               this._compensated_decryption_shares.get(missing_guardian_id).values()));
     }
@@ -138,7 +139,6 @@ public class DecryptionMediator {
     // Loop through each of the available guardians
     // and calculate a partial for the missing one
     for (Guardian available_guardian : this._available_guardians.values()) {
-
       // Compute lagrange coefficients for each of the available guardians
       //  *[guardian.sequence_order for guardian in this._available_guardians.values()
       //     if guardian.object_id != available_guardian.object_id]
@@ -163,9 +163,9 @@ public class DecryptionMediator {
       }
     }
 
-    // Verify generated the correct number of partials
+    // Verify that we generated the correct number of partials
     if (compensated_decryptions.size() != this._available_guardians.size()) {
-      logger.atInfo().log("compensate mismatch partial decryptions for missing guardian  %s", missing_guardian_id);
+      logger.atInfo().log("compensate mismatch partial decryptions for missing guardian %s", missing_guardian_id);
       return Optional.empty();
     } else {
       this._lagrange_coefficients.put(missing_guardian_id, lagrange_coefficients);

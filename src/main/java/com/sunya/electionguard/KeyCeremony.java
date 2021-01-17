@@ -82,12 +82,18 @@ public class KeyCeremony {
   /** Election partial key backup used for key sharing. */
   @AutoValue
   abstract static class ElectionPartialKeyBackup {
-    abstract String owner_id(); // The Id of the guardian that generated this backup
-    abstract String designated_id(); // The Id of the guardian to receive this backup
-    abstract int designated_sequence_order(); // The sequence order of the designated guardian
-    abstract Auxiliary.ByteString encrypted_value(); // The encrypted coordinate corresponding to a secret election polynomial
-    abstract ImmutableList<ElementModP> coefficient_commitments(); // The public keys `K_ij`generated from the election polynomial coefficients
-    abstract ImmutableList<SchnorrProof> coefficient_proofs(); // the proofs of possession of the private keys for the election polynomial secret coefficients
+    /** The Id of the guardian that generated this backup. */
+    abstract String owner_id();
+    /** The Id of the guardian to receive this backup. */
+    abstract String designated_id();
+    /** // The sequence order of the designated guardian. */
+    abstract int designated_sequence_order();
+    /** The encrypted coordinate corresponding to a secret election polynomial. */
+    abstract Auxiliary.ByteString encrypted_value();
+    /** The public keys `K_ij`generated from the election polynomial coefficients. */
+    abstract ImmutableList<ElementModP> coefficient_commitments();
+    /** The proofs of possession of the private keys for the election polynomial secret coefficients. */
+    abstract ImmutableList<SchnorrProof> coefficient_proofs();
 
     public static ElectionPartialKeyBackup create(String owner_id,
                                                   String designated_id,

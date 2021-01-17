@@ -35,7 +35,7 @@ public class TestEndToEndElectionIntegration {
   public void setUp() throws IOException {
     Path tmp = Files.createTempDirectory(null);
     // tmp.toFile().deleteOnExit();
-    outputDir = "/home/snake/tmp/testEndToEnd";
+    outputDir = "/home/snake/tmp/testQuorum";
     // outputDir = tmp.toAbsolutePath().toString();
     System.out.printf("=========== outputDir = %s%n", outputDir);
   }
@@ -240,10 +240,16 @@ public class TestEndToEndElectionIntegration {
     this.decrypter = new DecryptionMediator(this.metadata, this.context, this.ciphertext_tally);
 
     // Announce each guardian as present
+    int count = 0;
     for (Guardian guardian : this.guardians) {
       Optional<DecryptionShare.TallyDecryptionShare> decryption_share = this.decrypter.announce(guardian);
       System.out.printf("Guardian Present: %s%n", guardian.object_id);
       assertThat(decryption_share).isPresent();
+      count++;
+      if (count == QUORUM) {
+        System.out.printf(" Only %d Guardians are available%n", count);
+        break;
+      }
     }
 
     // Get the Plain Text Tally

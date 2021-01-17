@@ -44,8 +44,8 @@ public class VerifyElectionTallyMain {
     BallotAggregationVerifier bav = new BallotAggregationVerifier(electionParameters, consumer);
     boolean bavOk = bav.verify_ballot_aggregation();
 
-    System.out.println("------------ [box 8] Correctness of Partial Decryptions ------------");
-    PartialDecryptionsVerifier dv = new PartialDecryptionsVerifier(electionParameters, consumer);
+    System.out.println("------------ [box 8, 9] Correctness of Decryptions ------------");
+    DecryptionVerifier dv = new DecryptionVerifier(electionParameters, consumer);
     boolean dvOk = dv.verify_cast_ballot_tallies();
 
     System.out.println("------------ [box 11] Validation of Correct Decryption of Tallies ------------");

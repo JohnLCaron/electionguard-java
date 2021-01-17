@@ -184,13 +184,14 @@ public class TestDecryptionMediator extends TestProperties {
     assertThat(result).isPresent();
   }
 
-  /* @Example
+  /*
+  @Example
   public void test_compute_compensated_selection_failure() {
     Tally.CiphertextTallySelection first_selection =
-            this.ciphertext_tally.cast.values().stream().flatMap(contest -> contest.tally_selections.values().stream())
+            this.ciphertext_tally.cast().values().stream().flatMap(contest -> contest.tally_selections().values().stream())
                     .findFirst().orElseThrow(RuntimeException::new);
 
-    // Look mutating
+    // LOOK mutating
     this.guardians.get(0)._guardian_election_partial_key_backups.remove(this.guardians.get(2).object_id);
 
     assertThat(this.guardians.get(0).recovery_public_key_for(this.guardians.get(2).object_id)).isEmpty();
