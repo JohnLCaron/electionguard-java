@@ -16,7 +16,7 @@ public class Encrypt {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
   private static final boolean show = false;
 
-  /** Metadata for encryption device. */
+  /** The device that is doing the encryption. */
   @Immutable
   public static class EncryptionDevice {
     public final String uuid;

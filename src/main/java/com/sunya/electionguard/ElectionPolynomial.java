@@ -14,7 +14,9 @@ import java.util.stream.Collectors;
 import static com.sunya.electionguard.Group.*;
 
 /**
- * A polynomial defined by coefficients.
+ * The election polynomial is the mathematical expression that each Guardian defines to solve for their private key.
+ * A different point associated with the polynomial is shared with each of the other guardians so that the guardians
+ * can come together to derive the polynomial function and solve for the private key.
  * <p>
  * The 0-index coefficient is used for a secret key which can
  * be discovered by a quorum of n guardians corresponding to n coefficients.

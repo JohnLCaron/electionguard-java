@@ -237,7 +237,10 @@ public class Tally {
     }
   } // CiphertextTallyContest
 
-  /** This accumulates the encrypted counts (aka tallies) for an Election. Mutable. */
+  /**
+   * The homomorphically-combined and encrypted representation of all selections made for each option on
+   * every contest in the election. Mutable.
+   */
   public static class CiphertextTally extends ElectionObjectBase {
     private final Election.InternalElectionDescription _metadata;
     private final Election.CiphertextElectionContext _encryption;

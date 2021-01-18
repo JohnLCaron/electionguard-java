@@ -6,7 +6,7 @@ import java.util.Optional;
 
 import static com.sunya.electionguard.Ballot.*;
 
-/** A mutable object to cache election data. */
+/** A collection of ballots that have been either cast or spoiled. */
 public class BallotBox {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 

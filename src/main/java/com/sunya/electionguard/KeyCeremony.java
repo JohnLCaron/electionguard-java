@@ -15,7 +15,13 @@ import java.util.stream.Collectors;
 
 import static com.sunya.electionguard.Group.*;
 
-public class KeyCeremony {
+/**
+ * The process conducted at the beginning of the election to create the joint encryption context for
+ * encrypting ballots during the election.
+ */
+
+
+ public class KeyCeremony {
 
   /** Details of key ceremony. */
   @AutoValue
@@ -28,7 +34,7 @@ public class KeyCeremony {
     }
   }
 
-  /** A tuple of election key pair, proof and polynomial */
+  /** Pair of keys (public & secret) used to encrypt/decrypt election. */
   @AutoValue
   abstract static class ElectionKeyPair {
     abstract ElGamal.KeyPair key_pair();
@@ -79,7 +85,7 @@ public class KeyCeremony {
     }
   }
 
-  /** Election partial key backup used for key sharing. */
+  /** A point on a secret polynomial and commitments to verify this point for a designated guardian. */
   @AutoValue
   abstract static class ElectionPartialKeyBackup {
     /** The Id of the guardian that generated this backup. */

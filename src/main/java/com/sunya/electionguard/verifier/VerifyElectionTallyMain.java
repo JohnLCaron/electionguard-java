@@ -14,6 +14,7 @@ public class VerifyElectionTallyMain {
     Consumer consumer = new Consumer(topdir);
     ElectionParameters electionParameters = new ElectionParameters(consumer);
 
+    System.out.println("============ Ballot Verification =========================");
     System.out.println("------------ [box 1] Parameter Validation ------------");
     ParameterVerifier blv = new ParameterVerifier(electionParameters);
     boolean blvOk = blv.verify_all_params();
@@ -38,8 +39,7 @@ public class VerifyElectionTallyMain {
     BallotChainingVerifier bcv = new BallotChainingVerifier(electionParameters, consumer);
     boolean bcvOk = bcv.verify_all_ballots();
 
-    // tally and spoiled ballot check. LOOK is this a different workflow? after decryption ?
-
+    System.out.println("============ Decryption Verification =========================");
     System.out.println("------------ [box 7] Ballot Aggregation Validation ------------");
     BallotAggregationVerifier bav = new BallotAggregationVerifier(electionParameters, consumer);
     boolean bavOk = bav.verify_ballot_aggregation();

@@ -7,7 +7,7 @@ import java.util.*;
 
 import static com.sunya.electionguard.KeyCeremony.*;
 
-/** KeyCeremonyMediator for assisting communication between guardians. Mutable. */
+/** A mediator to mediate communication (if needed) of information such as keys between the guardians. Mutable. */
 public class KeyCeremonyMediator {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 

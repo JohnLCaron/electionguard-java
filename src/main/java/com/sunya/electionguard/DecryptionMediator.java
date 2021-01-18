@@ -14,8 +14,8 @@ import static com.sunya.electionguard.Election.*;
 import static com.sunya.electionguard.Tally.*;
 
 /**
- * The Decryption Mediator composes partial decryptions from each Guardian
- * to form a decrypted representation of an election tally. Mutable.
+ * A component or actor responsible for composing each guardian's partial decryptions or compensated decryptions
+ * into the plaintext tally. Mutable.
  */
 public class DecryptionMediator {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();

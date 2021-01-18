@@ -17,7 +17,7 @@ public class Ballot {
   private static boolean first = false;
 
   /**
-   * A PlaintextBallot represents a voters selections for a given ballot and ballot style.
+   * The plaintext representation of a voter's selections.
    * The object_id is a unique Ballot ID created by the external system.
    */
   @Immutable
@@ -699,7 +699,7 @@ public class Ballot {
   }
 
   /**
-   * A CiphertextBallot represents a voter's encrypted selections for a given ballot and ballot style.
+   * An encrypted representation of a voter's filled-in ballot.
    * <p>
    * When a ballot is in its complete, encrypted state, the `nonce` is the master nonce
    * from which all other nonces can be derived to encrypt the ballot.  Along with the `nonce`

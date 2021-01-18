@@ -14,8 +14,8 @@ import java.util.stream.Collectors;
 import static com.sunya.electionguard.Group.*;
 
 /**
- * Election metadata.
- * TODO replace [ElectionGuard Spec](https://github.com/microsoft/electionguard/wiki) when available.
+ * Election Manifest.
+ * The election metadata in json format that is parsed into an Election Description.
  */
 public class Election {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
@@ -26,13 +26,13 @@ public class Election {
    */
   public enum ElectionType {
     unknown,
-    general,
-    partisan_primary_closed,
-    partisan_primary_open,
-    primary,
-    runoff,
-    special,
-    other
+    general,  // For an election held typically on the national day for elections.
+    partisan_primary_closed, //	For a primary election that is for a specific party where voter eligibility is based on registration.
+    partisan_primary_open, //	For a primary election that is for a specific party where voter declares desired party or chooses in private.
+    primary,  //	For a primary election without a specified type, such as a nonpartisan primary.
+    runoff,   //	For an election to decide a prior contest that ended with no candidate receiving a majority of the votes.
+    special, //	For an election held out of sequence for special circumstances, for example, to fill a vacated office.
+    other;  //	Used when the election type is not listed in this enumeration. If used, include a specific value of the OtherType element.
   }
 
   /**
@@ -784,14 +784,10 @@ public class Election {
   }
 
   /**
-   * Use this entity for defining the structure of the election and associated
-   * information such as candidates, contests, and vote counts.  This class is
+   * The election metadata that describes the structure and type of the election, including geopolitical units,
+   * contests, candidates, and ballot styles, etc. This class is
    * based on the NIST Election Common Standard Data Specification.  Some deviations
    * from the standard exist.
-   * <p>
-   * This structure is considered an immutable input object and should not be changed
-   * through the course of an election, as it's hash representation is the basis for all
-   * other hash representations within an ElectionGuard election context.
    * <p>
    * See: https://developers.google.com/elections-data/reference/election
    */
@@ -1013,9 +1009,8 @@ public class Election {
   }
 
   /**
-   * `InternalElectionDescription` is a subset of the `ElectionDescription` structure that specifies
-   * the components that ElectionGuard uses for conducting an election.  The key component is the
-   * `contests` collection, which applies placeholder selections to the `ElectionDescription` contests
+   * The subset of the election description required by ElectionGuard to validate ballots are
+   * correctly associated with an election. LOOK This component mutates the state of the Election Description.
    */
   public static class InternalElectionDescription {
     final ElectionDescription description;
@@ -1133,7 +1128,7 @@ public class Election {
   }
 
   /**
-   * `CiphertextElectionContext` is the ElectionGuard representation of a specific election.
+   * The cryptographic context of an election that is configured during the Key Ceremony.
    * <p>
    * Note: The ElectionGuard Data Spec deviates from the NIST model in that
    * this object includes fields that are populated in the course of encrypting an election

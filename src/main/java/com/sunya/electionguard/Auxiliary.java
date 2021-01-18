@@ -9,7 +9,7 @@ import java.util.Optional;
 /** Wrapper around java.security.PrivateKey. */
 public class Auxiliary {
 
-  /** A tuple of a secret key and public key. */
+  /** Pair of keys (public & secret) used to encrypt/decrypt information sent between guardians. */
   @Immutable
   public static class KeyPair {
     public final java.security.PrivateKey secret_key;
