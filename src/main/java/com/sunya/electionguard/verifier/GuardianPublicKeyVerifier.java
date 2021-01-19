@@ -40,9 +40,9 @@ public class GuardianPublicKeyVerifier {
     return !error;
   }
 
-  boolean verify_one_guardian(KeyCeremony.CoefficientValidationSet coeff) {
+  boolean verify_one_guardian(KeyCeremony.CoefficientValidationSet coeffSet) {
     boolean error = false;
-    List<SchnorrProof> coefficient_proofs = coeff.coefficient_proofs();
+    List<SchnorrProof> coefficient_proofs = coeffSet.coefficient_proofs();
 
     // loop through every proof TODO why only quorum, why not all??
     for (int i = 0; i < this.electionParameters.quorum(); i++) {
@@ -56,13 +56,13 @@ public class GuardianPublicKeyVerifier {
       ElementModQ challenge_computed = this.compute_guardian_challenge_threshold_separated(public_key, commitment);
       if (!challenge_computed.equals(challenge)) {
         error = true;
-        System.out.printf("guardian %d challenge number error on equation 2A.%n", i);
+        System.out.printf("Guardian %s coefficient_proof %d: equation 2A challenge validation failed.%n", coeffSet.owner_id(), i);
       }
 
       // check equation 2.B
       if (!this.verify_individual_key_computation(response, commitment, public_key, challenge)) {
         error = true;
-        System.out.printf("guardian %d equation error on equation 2B.%n", i);
+        System.out.printf("Guardian %s coefficient_proof %d: equation 2B validation failed.%n", coeffSet.owner_id(), i);
       }
     }
     return !error;
@@ -76,8 +76,8 @@ public class GuardianPublicKeyVerifier {
    * @return a challenge value of a guardian, separated by quorum
    */
   ElementModQ compute_guardian_challenge_threshold_separated(ElementModP public_key, ElementModP commitment) {
-    // LOOK should be return Hash.hash_elems(this.electionParameters.base_hash(), public_key, commitment);
-    return Hash.hash_elems(public_key, commitment);
+    // LOOK changed to return Hash.hash_elems(this.electionParameters.base_hash(), public_key, commitment);
+    return Hash.hash_elems(this.electionParameters.base_hash(), public_key, commitment);
   }
 
   /**

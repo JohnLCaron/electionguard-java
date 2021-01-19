@@ -42,7 +42,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
     // Setup Guardians
     for (int i = 0; i < NUMBER_OF_GUARDIANS; i++) {
       int sequence = i + 2;
-      this.guardians.add(new Guardian("guardian_" + sequence, sequence, NUMBER_OF_GUARDIANS, QUORUM, null));
+      this.guardians.add(Guardian.createForTesting("guardian_" + sequence, sequence, NUMBER_OF_GUARDIANS, QUORUM, null));
     }
 
     // Attendance (Public Key Share)

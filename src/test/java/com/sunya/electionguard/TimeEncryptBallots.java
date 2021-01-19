@@ -135,7 +135,7 @@ public class TimeEncryptBallots {
   void step_1_key_ceremony() {
     // Setup Guardians
     for (int i = 0; i < NUMBER_OF_GUARDIANS; i++) {
-      this.guardians.add(new Guardian("guardian_" + i, i, NUMBER_OF_GUARDIANS, QUORUM, null));
+      this.guardians.add(Guardian.createForTesting("guardian_" + i, i, NUMBER_OF_GUARDIANS, QUORUM, null));
     }
 
     // Setup Mediator

@@ -42,7 +42,7 @@ public class TestPublish {
             ImmutableList.of(), ImmutableList.of(), ImmutableList.of(), null, null);
     InternalElectionDescription metadata = new InternalElectionDescription(description);
 
-    CiphertextElectionContext context = make_ciphertext_election_context(1, 1, ONE_MOD_P, ONE_MOD_Q);
+    CiphertextElectionContext context = make_ciphertext_election_context(1, 1, ONE_MOD_P, description);
     List<KeyCeremony.CoefficientValidationSet> coefficients = ImmutableList.of(
             KeyCeremony.CoefficientValidationSet.create("", ImmutableList.of(), ImmutableList.of()));
     Tally.PlaintextTally plaintext_tally = Tally.PlaintextTally.create("PlaintextTallyId", ImmutableMap.of(), ImmutableMap.of());
@@ -74,7 +74,7 @@ public class TestPublish {
             Ballot.make_ciphertext_ballot("CipherTextBallotId", "ballot_style", int_to_q_unchecked(BigInteger.ZERO),
                     Optional.of(int_to_q_unchecked(BigInteger.ZERO)), ImmutableList.of(), Optional.empty(),Optional.empty(), Optional.empty()));
 
-    List<Guardian> guardians = ImmutableList.of( new Guardian("GuardianId", 1, 1, 1, null));
+    List<Guardian> guardians = ImmutableList.of(Guardian.createForTesting("GuardianId", 1, 1, 1, null));
 
     Publisher publisher = new Publisher(outputDir, false);
     publisher.publish_private_data(

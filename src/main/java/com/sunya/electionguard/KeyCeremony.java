@@ -119,7 +119,7 @@ import static com.sunya.electionguard.Group.*;
   /** Set of validation pieces for election key coefficients. */
   @AutoValue
   public abstract static class CoefficientValidationSet {
-    public abstract String owner_id();
+    public abstract String owner_id(); // Guardian.object_id
     public abstract ImmutableList<ElementModP> coefficient_commitments();
     public abstract ImmutableList<SchnorrProof> coefficient_proofs();
 
@@ -178,14 +178,14 @@ import static com.sunya.electionguard.Group.*;
    * @param nonce: Optional nonce for testing, do not use in production.
    * LOOK move to Guardian?
    */
-  static ElectionKeyPair generate_election_key_pair(int quorum, @Nullable ElementModQ nonce) {
-    ElectionPolynomial polynomial = ElectionPolynomial.generate_polynomial(quorum, nonce);
+  static ElectionKeyPair generate_election_key_pair(int quorum, @Nullable ElementModQ nonce, ElementModQ crypto_base_hash) {
+    ElectionPolynomial polynomial = ElectionPolynomial.generate_polynomial(quorum, nonce, crypto_base_hash);
     // the 0th coefficient is the secret s for the ith Guardian
     // the 0th commitment is the public key = g^s mod p
     // The key_pair is Ki = election keypair for ith Guardian
     ElGamal.KeyPair key_pair = new ElGamal.KeyPair(
             polynomial.coefficients.get(0), polynomial.coefficient_commitments.get(0));
-    SchnorrProof proof = SchnorrProof.make_schnorr_proof(key_pair, rand_q());
+    SchnorrProof proof = SchnorrProof.make_schnorr_proof(key_pair, rand_q(), crypto_base_hash);
     return ElectionKeyPair.create(key_pair, proof, polynomial);
   }
 

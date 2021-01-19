@@ -545,7 +545,7 @@ public class ElectionTestHelper {
                     1,
                     1,
                     keypair.public_key,
-                    election_description.crypto_hash()));
+                    election_description));
   }
 
   public static class EverythingTuple {

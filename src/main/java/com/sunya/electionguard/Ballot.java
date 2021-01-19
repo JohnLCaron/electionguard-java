@@ -362,7 +362,7 @@ public class Ballot {
      * @param seed_hash:             the hash of the SelectionDescription, or
      *                               whatever `ElementModQ` was used to populate the `description_hash` field.
      * @param elgamelPublicKey:      The election key
-     * @param cryptoExtendedBaseHash crypto_base_hash for the election (Q)
+     * @param cryptoExtendedBaseHash crypto_extended_base_hash for the election (Qbar)
      */
     boolean is_valid_encryption(ElementModQ seed_hash, ElementModP elgamelPublicKey, ElementModQ cryptoExtendedBaseHash) {
       if (!seed_hash.equals(this.description_hash)) {

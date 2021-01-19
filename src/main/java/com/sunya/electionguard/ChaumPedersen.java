@@ -46,9 +46,9 @@ public class ChaumPedersen {
      * <p>
      * @param message: The ciphertext message
      * @param k: The public key of the election
-     * @param q: The extended base hash of the election
+     * @param qbar: The extended base hash of the election
      */
-    boolean is_valid(ElGamal.Ciphertext message, ElementModP k, ElementModQ q) {
+    boolean is_valid(ElGamal.Ciphertext message, ElementModP k, ElementModQ qbar) {
       ElementModP alpha = message.pad;
       ElementModP beta = message.data;
 
@@ -73,7 +73,7 @@ public class ChaumPedersen {
       boolean in_bounds_v0 = v0.is_in_bounds();
       boolean in_bounds_v1 = v1.is_in_bounds();
 
-      boolean consistent_c = add_q(c0, c1).equals(c) && c.equals(Hash.hash_elems(q, alpha, beta, a0, b0, a1, b1));
+      boolean consistent_c = add_q(c0, c1).equals(c) && c.equals(Hash.hash_elems(qbar, alpha, beta, a0, b0, a1, b1));
       boolean consistent_gv0 = g_pow_p(v0).equals(mult_p(a0, pow_p(alpha, c0)));
       boolean consistent_gv1 = g_pow_p(v1).equals(mult_p(a1, pow_p(alpha, c1)));
       boolean consistent_kv0 = pow_p(k, v0).equals(mult_p(b0, pow_p(beta, c0)));

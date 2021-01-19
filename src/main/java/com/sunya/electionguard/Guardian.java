@@ -19,6 +19,7 @@ public class Guardian extends ElectionObjectBase {
 
   private final int sequence_order;
   private final CeremonyDetails ceremony_details;
+  private final ElementModQ crypto_base_hash;
   private final Auxiliary.KeyPair _auxiliary_keys;
   private final ElectionKeyPair _election_keys; // Ki = election keypair for ith Guardian
 
@@ -39,27 +40,56 @@ public class Guardian extends ElectionObjectBase {
   private final Map<String, ElectionPartialKeyVerification> otherGuardianVerifications; // Map(GUARDIAN_ID, ElectionPartialKeyVerification)
 
   /**
-   * Initialize a guardian with the specified arguments.
-   * <p>
+   * Create a guardian for production.
+   * LOOK cant get a Guardian without generating a random key for it. No use case for a Guardian with a given key?
+   *   Who create these? What are the use cases?
+   * @param id: the unique identifier for the guardian
+   * @param sequence_order: a unique number in [0, 256) that identifies this guardian
+   * @param number_of_guardians: the total number of guardians that will participate in the election
+   * @param quorum: the count of guardians necessary to decrypt
+   * @param crypto_base_hash the election crypto hash, Q is the spec. LOOK could use dependency injection, or Singleton?
+   * LOOK cant get a Guardian without generating a random key for it. No use case for a Guardian with a given key?
+   */
+  public static Guardian create(String id,
+                                int sequence_order,
+                                int number_of_guardians,
+                                int quorum,
+                                ElementModQ crypto_base_hash) {
+
+    return new Guardian(id, sequence_order, number_of_guardians, quorum, null, crypto_base_hash);
+  }
+
+  /**
+   * Create a guardian used for testing. The crypto_base_hash is random.
    * @param id: the unique identifier for the guardian
    * @param sequence_order: a unique number in [0, 256) that identifies this guardian
    * @param number_of_guardians: the total number of guardians that will participate in the election
    * @param quorum: the count of guardians necessary to decrypt
    * @param nonce_seed: an optional `ElementModQ` value that can be used to generate the `ElectionKeyPair`,
-   *                    recommended to only use this field for testing.
-   * LOOK cant get a Guardian without generating a random key for it. No use case for a Guardian with a given key?
+   *                    recommended to only use this field for testing. When null, a random nonce is used.
    */
-  public Guardian(String id,
+  public static Guardian createForTesting(String id,
+                                          int sequence_order,
+                                          int number_of_guardians,
+                                          int quorum,
+                                          @Nullable Group.ElementModQ nonce_seed) {
+
+    return new Guardian(id, sequence_order, number_of_guardians, quorum, nonce_seed, Group.rand_q());
+  }
+
+  private Guardian(String id,
            int sequence_order,
            int number_of_guardians,
            int quorum,
-           @Nullable Group.ElementModQ nonce_seed) {
+           @Nullable Group.ElementModQ nonce_seed,
+           ElementModQ crypto_base_hash) {
 
     super(id);
     this.sequence_order = sequence_order;
     this.ceremony_details = CeremonyDetails.create(number_of_guardians, quorum);
+    this.crypto_base_hash = crypto_base_hash;
     this._auxiliary_keys = KeyCeremony.generate_rsa_auxiliary_key_pair();
-    this._election_keys =  KeyCeremony.generate_election_key_pair(this.ceremony_details.quorum(), nonce_seed);
+    this._election_keys =  KeyCeremony.generate_election_key_pair(this.ceremony_details.quorum(), nonce_seed, crypto_base_hash);
 
     this._backups_to_share = new HashMap<>();
     this.otherGuardianAuxiliaryKeys = new HashMap<>();
@@ -77,6 +107,10 @@ public class Guardian extends ElectionObjectBase {
 
   int sequence_order() {
     return sequence_order;
+  }
+
+  ElementModQ crypto_base_hash() {
+    return crypto_base_hash;
   }
 
   /*

@@ -19,9 +19,9 @@ public class TestKeyCeremonyMediator {
   private static final String GUARDIAN_1_ID = "Guardian 1";
   private static final String GUARDIAN_2_ID = "Guardian 2";
   private static final String VERIFIER_ID = "Guardian 3";
-  private static final Guardian GUARDIAN_1 = new Guardian(GUARDIAN_1_ID, 1, NUMBER_OF_GUARDIANS, QUORUM, null);
-  private static final Guardian GUARDIAN_2 = new Guardian(GUARDIAN_2_ID, 2, NUMBER_OF_GUARDIANS, QUORUM, null);
-  private static final Guardian VERIFIER = new Guardian(VERIFIER_ID, 3, NUMBER_OF_GUARDIANS, QUORUM, null);
+  private static final Guardian GUARDIAN_1 = Guardian.createForTesting(GUARDIAN_1_ID, 1, NUMBER_OF_GUARDIANS, QUORUM, null);
+  private static final Guardian GUARDIAN_2 = Guardian.createForTesting(GUARDIAN_2_ID, 2, NUMBER_OF_GUARDIANS, QUORUM, null);
+  private static final Guardian VERIFIER =   Guardian.createForTesting(VERIFIER_ID, 3, NUMBER_OF_GUARDIANS, QUORUM, null);
 
   static Auxiliary.Decryptor identity_auxiliary_decrypt = (m, k) -> Optional.of(new String(m.getBytes()));
   static Auxiliary.Encryptor identity_auxiliary_encrypt = (m, k) -> Optional.of(new Auxiliary.ByteString(m.getBytes()));
@@ -39,7 +39,7 @@ public class TestKeyCeremonyMediator {
     KeyCeremonyMediator mediator = new KeyCeremonyMediator(CEREMONY_DETAILS);
     CeremonyDetails new_ceremony_details = CeremonyDetails.create(3, 3);
 
-    // Look mutating
+    // LOOK mutating
     mediator.reset(new_ceremony_details);
     assertThat(mediator.ceremony_details).isEqualTo(new_ceremony_details);
   } */
@@ -49,15 +49,12 @@ public class TestKeyCeremonyMediator {
     KeyCeremonyMediator mediator = new KeyCeremonyMediator(CEREMONY_DETAILS);
 
     mediator.confirm_presence_of_guardian(GUARDIAN_1.share_public_keys());
-
     assertThat(mediator.all_guardians_in_attendance()).isFalse();
 
     mediator.confirm_presence_of_guardian(GUARDIAN_2.share_public_keys());
-
     assertThat(mediator.all_guardians_in_attendance()).isTrue();
 
     Iterable<String> guardians = mediator.share_guardians_in_attendance();
-
     assertThat(guardians).isNotNull();
     assertThat(Iterables.size(guardians)).isEqualTo(NUMBER_OF_GUARDIANS);
   }
@@ -67,15 +64,15 @@ public class TestKeyCeremonyMediator {
     KeyCeremonyMediator mediator = new KeyCeremonyMediator(CEREMONY_DETAILS);
 
     mediator.receive_auxiliary_public_key(GUARDIAN_1.share_auxiliary_public_key());
-
     assertThat(mediator.all_auxiliary_public_keys_available()).isFalse();
+
     Iterable<Auxiliary.PublicKey> partial_list = mediator.share_auxiliary_public_keys();
     assertThat(partial_list).isNotNull();
     assertThat(Iterables.size(partial_list)).isEqualTo(1);
 
     mediator.receive_auxiliary_public_key(GUARDIAN_2.share_auxiliary_public_key());
-
     assertThat(mediator.all_auxiliary_public_keys_available()).isTrue();
+
     partial_list = mediator.share_auxiliary_public_keys();
     assertThat(partial_list).isNotNull();
     assertThat(Iterables.size(partial_list)).isEqualTo(2);
@@ -86,15 +83,15 @@ public class TestKeyCeremonyMediator {
     KeyCeremonyMediator mediator = new KeyCeremonyMediator(CEREMONY_DETAILS);
 
     mediator.receive_election_public_key(GUARDIAN_1.share_election_public_key());
-
     assertThat(mediator.all_election_public_keys_available()).isFalse();
+
     Iterable<ElectionPublicKey>partial_list = mediator.share_election_public_keys();
     assertThat(partial_list).isNotNull();
     assertThat(Iterables.size(partial_list)).isEqualTo(1);
 
     mediator.receive_election_public_key(GUARDIAN_2.share_election_public_key());
-
     assertThat(mediator.all_election_public_keys_available()).isTrue();
+
     partial_list = mediator.share_election_public_keys();
     assertThat(partial_list).isNotNull();
     assertThat(Iterables.size(partial_list)).isEqualTo(2);
@@ -131,8 +128,8 @@ public class TestKeyCeremonyMediator {
     assertThat(guardian2_backups.get(0)).isEqualTo(backup_from_1_for_2.get());
   }
 
-  /**         Test for the happy path of the verification process where each key is successfully verified and no bad actors. */
-   @Example
+  /** Test for the happy path of the verification process where each key is successfully verified and no bad actors. */
+  @Example
   public void test_partial_key_backup_verification_success() {
      KeyCeremonyMediator mediator = new KeyCeremonyMediator(CEREMONY_DETAILS);
 
@@ -147,7 +144,6 @@ public class TestKeyCeremonyMediator {
      Optional<ElectionPartialKeyVerification> verification2 = GUARDIAN_2.verify_election_partial_key_backup(GUARDIAN_1_ID, identity_auxiliary_decrypt);
 
      mediator.receive_election_partial_key_verification(verification1.get());
-
      assertThat(mediator.all_election_partial_key_verifications_received()).isFalse();
      assertThat(mediator.all_election_partial_key_backups_verified()).isFalse();
      assertThat(mediator.publish_joint_key()).isNotNull();
@@ -161,8 +157,8 @@ public class TestKeyCeremonyMediator {
    }
 
   /**
-   *         In this case, the recipient guardian does not correctly verify the sent key backup.
-   *         This failed verificaton requires the sender create a challenge and a new verifier aka another guardian must verify this challenge.
+   * In this case, the recipient guardian does not correctly verify the sent key backup.
+   * This failed verificaton requires the sender create a challenge and a new verifier aka another guardian must verify this challenge.
    */
   @Example
   public void test_partial_key_backup_verification_failure() {
@@ -215,6 +211,5 @@ public class TestKeyCeremonyMediator {
     assertThat(mediator.all_election_partial_key_backups_verified()).isTrue();
     assertThat(joint_key).isNotNull();
   }
-
 
 }

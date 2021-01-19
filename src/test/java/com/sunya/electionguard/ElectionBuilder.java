@@ -52,7 +52,7 @@ public class ElectionBuilder {
               this.number_of_guardians,
               this.quorum,
               this.elgamal_public_key.get(),
-              this.description.crypto_hash())));
+              this.description)));
   }
 
 }

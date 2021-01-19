@@ -60,6 +60,7 @@ public class Encrypt {
       this._metadata = metadata;
       this._encryption = encryption;
       // LOOK does not follow validation spec 5.1, should be Q = crypto_base_hash
+      //  Ok to use device hash see Issue #272
       this._last_hash = encryption_device.get_hash();
     }
 

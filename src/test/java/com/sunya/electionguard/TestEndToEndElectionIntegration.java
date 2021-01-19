@@ -34,9 +34,9 @@ public class TestEndToEndElectionIntegration {
   @BeforeProperty
   public void setUp() throws IOException {
     Path tmp = Files.createTempDirectory(null);
-    // tmp.toFile().deleteOnExit();
-    outputDir = "/home/snake/tmp/testQuorum";
-    // outputDir = tmp.toAbsolutePath().toString();
+    tmp.toFile().deleteOnExit();
+    // outputDir = "/home/snake/tmp/testQuorum";
+    outputDir = tmp.toAbsolutePath().toString();
     System.out.printf("=========== outputDir = %s%n", outputDir);
   }
 
@@ -123,9 +123,10 @@ public class TestEndToEndElectionIntegration {
    * the public election keys to make a joint election key that is used to encrypt ballots
    */
   void step_1_key_ceremony() {
+    Group.ElementModQ crypto_base_hash = Election.make_crypto_base_hash(NUMBER_OF_GUARDIANS, QUORUM, description);
     // Setup Guardians
     for (int i = 0; i < NUMBER_OF_GUARDIANS; i++) {
-      this.guardians.add(new Guardian("guardian_" + i, i, NUMBER_OF_GUARDIANS, QUORUM, null));
+      this.guardians.add(Guardian.create("guardian_" + i, i, NUMBER_OF_GUARDIANS, QUORUM, crypto_base_hash));
     }
 
     // Setup Mediator

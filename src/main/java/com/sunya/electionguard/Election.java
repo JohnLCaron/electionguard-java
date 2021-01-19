@@ -31,8 +31,8 @@ public class Election {
     partisan_primary_open, //	For a primary election that is for a specific party where voter declares desired party or chooses in private.
     primary,  //	For a primary election without a specified type, such as a nonpartisan primary.
     runoff,   //	For an election to decide a prior contest that ended with no candidate receiving a majority of the votes.
-    special, //	For an election held out of sequence for special circumstances, for example, to fill a vacated office.
-    other;  //	Used when the election type is not listed in this enumeration. If used, include a specific value of the OtherType element.
+    special,  //	For an election held out of sequence for special circumstances, for example, to fill a vacated office.
+    other     //	Used when the election type is not listed in this enumeration. If used, include a specific value of the OtherType element.
   }
 
   /**
@@ -1010,7 +1010,7 @@ public class Election {
 
   /**
    * The subset of the election description required by ElectionGuard to validate ballots are
-   * correctly associated with an election. LOOK This component mutates the state of the Election Description.
+   * correctly associated with an election. LOOK This component mutates the state of the Election Description, true?
    */
   public static class InternalElectionDescription {
     final ElectionDescription description;
@@ -1137,7 +1137,8 @@ public class Election {
    * Refer to the [Electionguard Specification](https://github.com/microsoft/electionguard) for more information.
    * <p>
    * To make an instance of this class, don't construct it directly. Use `make_ciphertext_election_context` instead.
-   * LOOK: put in its own class
+   * LOOK: put in its own class?
+   * LOOK: add serialization version?
    */
   @Immutable
   public static class CiphertextElectionContext {
@@ -1157,7 +1158,7 @@ public class Election {
     public final Group.ElementModQ crypto_extended_base_hash;
 
     CiphertextElectionContext(int number_of_guardians, int quorum, ElementModP elgamal_public_key,
-                                     ElementModQ description_hash, ElementModQ crypto_base_hash, ElementModQ crypto_extended_base_hash) {
+           ElementModQ description_hash, ElementModQ crypto_base_hash, ElementModQ crypto_extended_base_hash) {
       this.number_of_guardians = number_of_guardians;
       this.quorum = quorum;
       this.elgamal_public_key = elgamal_public_key;
@@ -1185,19 +1186,24 @@ public class Election {
     }
   }
 
+
+  public static ElementModQ make_crypto_base_hash(int number_of_guardians, int quorum, ElectionDescription election) {
+    return Hash.hash_elems(P, Q, G, number_of_guardians, quorum, election.crypto_hash());
+  }
+
   /**
    * Makes a CiphertextElectionContext object.
    * <p>
    * @param number_of_guardians: The number of guardians necessary to generate the public key
    * @param quorum: The quorum of guardians necessary to decrypt an election.  Must be less than `number_of_guardians`
    * @param elgamal_public_key: the public key of the election
-   * @param description_hash: the hash of the election metadata
+   * @param description: the election description
    */
   public static CiphertextElectionContext make_ciphertext_election_context(
           int number_of_guardians,
           int quorum,
           ElementModP elgamal_public_key,
-          ElementModQ description_hash) {
+          ElectionDescription description) {
 
     // What's a crypto_base_hash?
     // The metadata of this object are hashed together with the
@@ -1215,14 +1221,14 @@ public class Election {
     //  with the base hash 𝑄 to form an extended base hash 𝑄' that will
     //  form the basis of subsequent hash computations.
 
-    ElementModQ crypto_base_hash = Hash.hash_elems(P, Q, G, number_of_guardians, quorum, description_hash);
+    ElementModQ crypto_base_hash = make_crypto_base_hash(number_of_guardians, quorum, description);
     ElementModQ crypto_extended_base_hash = Hash.hash_elems(crypto_base_hash, elgamal_public_key);
 
     return new CiphertextElectionContext(
             number_of_guardians,
             quorum,
             elgamal_public_key,
-            description_hash,
+            description.crypto_hash(),
             crypto_base_hash,
             crypto_extended_base_hash);
   }
