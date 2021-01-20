@@ -48,7 +48,8 @@ public class Encrypt {
 
   /**
    * An object for caching election and encryption state. It composes Elections and Ballots.
-   * LOOK mutable, since it has to keep track of the last hash for ballot chaining.
+   * Mutable, since it has to keep track of the last hash for ballot chaining.
+   * See discussion on Issue #272 about "ballot chaining".
    */
   public static class EncryptionMediator {
     private final InternalElectionDescription _metadata;
@@ -59,8 +60,8 @@ public class Encrypt {
                               EncryptionDevice encryption_device) {
       this._metadata = metadata;
       this._encryption = encryption;
-      // LOOK does not follow validation spec 5.1, should be Q = crypto_base_hash
-      //  Ok to use device hash see Issue #272
+      // LOOK does not follow validation spec 5.1, which calls for crypto_base_hash.
+      //   Ok to use device hash see Issue #272. Spec should be updated.
       this._last_hash = encryption_device.get_hash();
     }
 
@@ -236,7 +237,6 @@ public class Encrypt {
     ElementModQ contest_description_hash = contest_description.crypto_hash();
     Nonces nonce_sequence = new Nonces(contest_description_hash, nonce_seed);
     ElementModQ contest_nonce = nonce_sequence.get(contest_description.sequence_order);
-    // LOOK correct?   chaum_pedersen_nonce = next(iter(nonce_sequence)) the one following contest_nonce? the first ??
     ElementModQ chaum_pedersen_nonce = nonce_sequence.get(0);
 
     List<CiphertextBallotSelection> encrypted_selections = new ArrayList<>();

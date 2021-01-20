@@ -20,7 +20,7 @@ Im also happy to donate it to another organization for hosting, etc.
  
 ## TODO
 
-  * Finish validation step 7, 8.
+  * Fix issues in validation.
   * Not yet compatible with Python library JSON serialization, due to different ways to serialize Optional.
   * Look at BigInteger performance, consider using GMP through jni or jna.
   * Measure performance.
