@@ -4,7 +4,9 @@ import com.google.common.base.Strings;
 import com.google.common.flogger.FluentLogger;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
+import com.sunya.electionguard.Election;
 
 import javax.annotation.Nullable;
 import java.io.*;
@@ -19,17 +21,20 @@ import static com.sunya.electionguard.Election.*;
 public class ElectionDescriptionToJson {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
-  private final String pathname;
+  public static JsonElement serialize(Election.ElectionDescription src) {
+    Gson gson = GsonTypeAdapters.enhancedGson();
+    ElectionDescriptionToJson converter = new ElectionDescriptionToJson(null);
+    ElectionDescriptionPojo pojo = converter.convert(src);
+    Type typeOfSrc = new TypeToken<ElectionDescriptionPojo>() {}.getType();
+    return gson.toJsonTree(pojo, typeOfSrc);
+  }
 
-  /**
-   * Write ElectionDescription to a json file.
-   *
-   * @param pathname absolute pathname.
-   */
+  private final String pathname;
   public ElectionDescriptionToJson(String pathname) {
     this.pathname = pathname;
   }
 
+  // used for testing
   public void write(ElectionDescription org) throws IOException {
     Gson gson = new GsonBuilder().setPrettyPrinting().create();
     try {
@@ -50,7 +55,6 @@ public class ElectionDescriptionToJson {
   }
 
   ElectionDescriptionPojo convert(ElectionDescription org) {
-
     ElectionDescriptionPojo pojo = new ElectionDescriptionPojo();
     pojo.election_scope_id = org.election_scope_id;
     pojo.type = org.type.name();
@@ -99,10 +103,10 @@ public class ElectionDescriptionToJson {
     }
     ElectionDescriptionPojo.Candidate pojo = new ElectionDescriptionPojo.Candidate();
     pojo.object_id = org.object_id;
-    pojo.ballot_name = convertInternationalizedText(org.ballot_name);
+    pojo.name = convertInternationalizedText(org.name);
     pojo.party_id = org.party_id.orElse(null);
     pojo.image_uri = org.image_uri.orElse(null);
-    pojo.is_write_in = org.is_write_in.orElse(null);
+    pojo.is_write_in = org.is_write_in;
     return pojo;
   }
 
@@ -179,7 +183,7 @@ public class ElectionDescriptionToJson {
     }
     ElectionDescriptionPojo.Party pojo = new ElectionDescriptionPojo.Party();
     pojo.object_id = org.object_id;
-    pojo.ballot_name = convertInternationalizedText(org.ballot_name);
+    pojo.ballot_name = convertInternationalizedText(org.name);
     pojo.abbreviation = org.abbreviation.orElse(null);
     pojo.color = org.color.orElse(null);
     pojo.logo_uri = org.logo_uri.orElse(null);

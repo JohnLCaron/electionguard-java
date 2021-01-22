@@ -29,7 +29,7 @@ public class ElectionDescriptionPojo {
   }
 
   public static class Candidate extends ElectionObjectBase {
-    public InternationalizedText ballot_name;
+    public InternationalizedText name;
     public String party_id;
     public String image_uri;
     public Boolean is_write_in;

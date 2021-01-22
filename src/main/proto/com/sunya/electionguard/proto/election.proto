@@ -1,0 +1,188 @@
+syntax = "proto3";
+
+import "com/sunya/electionguard/proto/common.proto";
+
+option java_package = "com.sunya.electionguard.proto";
+option java_outer_classname = "ElectionProto";
+
+message ElectionDescription {
+
+  enum ElectionType {
+    unknown = 0;
+    general = 1;
+    partisan_primary_closed = 2;
+    partisan_primary_open = 3;
+    primary = 4;
+    runoff = 5;
+    special = 6;
+  }
+
+  string election_scope_id = 1;
+  ElectionType election_type = 2;
+  string start_date = 3; // ISO 8601 formatted date
+  string end_date = 4; // ISO 8601 formatted date
+  repeated GeopoliticalUnit geopolitical_units = 5;
+  repeated Party parties = 6;
+  repeated Candidate candidates = 7;
+  repeated ContestDescription contests = 8;
+  repeated BallotStyle ballot_styles = 9;
+  InternationalizedText name = 10;
+  ContactInformation contact_information = 11;
+}
+
+message AnnotatedString {
+  string annotation = 1;
+  string value = 2;
+}
+
+message BallotStyle {
+  string object_id = 1;
+  repeated string geopolitical_unit_ids = 2;
+  repeated string party_ids = 3;
+  string image_url = 4;
+}
+
+message Candidate {
+  string object_id = 1;
+  InternationalizedText name = 2;
+  string party_id = 3;
+  string image_url = 4;
+  bool is_write_in = 5;
+}
+
+message CandidateContestDescription {
+  ContestDescription contest_description = 1;
+  repeated string primary_party_ids = 2;
+}
+
+message CiphertextElectionContext {
+  uint32 number_of_guardians = 1;
+  uint32 quorum = 2;
+  ElementModP elgamal_public_key = 3;
+  ElementModQ description_hash = 4;
+  ElementModQ crypto_base_hash = 5;
+  ElementModQ crypto_extended_base_hash = 6;
+}
+
+message ContactInformation {
+  string name = 1;
+  repeated string address_line = 2;
+  repeated AnnotatedString email = 3;
+  repeated AnnotatedString phone = 4;
+}
+
+message ContestDescription {
+  enum VoteVariationType {
+    unknown = 0;
+    one_of_m = 1;
+    approval = 2;
+    borda = 3;
+    cumulative = 4;
+    majority = 5;
+    n_of_m = 6;
+    plurality = 7;
+    proportional = 8;
+    range = 9;
+    rcv = 10;
+    super_majority = 11;
+    other = 12;
+  }
+
+  string object_id = 1;
+  string electoral_district_id = 2;
+  uint32 sequence_order = 3;
+  VoteVariationType vote_variation = 4;
+  uint32 number_elected = 5;
+  uint32 votes_allowed = 6;
+  string name = 7;
+  repeated SelectionDescription ballot_selections = 8;
+  InternationalizedText ballot_title = 9;
+  InternationalizedText ballot_subtitle = 10;
+}
+
+message ContestDescriptionWithPlaceholders {
+  ContestDescription contest_description = 1;
+  repeated SelectionDescription placeholder_selections = 2;
+}
+
+message ElectionConstants {
+  ElementModP P = 1;
+  ElementModQ Q = 2;
+  ElementModP R = 3;
+  ElementModP G = 4;
+}
+
+message GeopoliticalUnit {
+
+  enum ReportingUnitType {
+    unknown = 0;
+    ballot_batch = 1;
+    ballot_style_area = 2;
+    borough = 3;
+    city = 4;
+    city_council = 5;
+    combined_precinct = 6;
+    congressional = 7;
+    country = 8;
+    county = 9;
+    county_council = 10;
+    drop_box = 11;
+    judicial = 12;
+    municipality = 13;
+    polling_place = 14;
+    precinct = 15;
+    school = 16;
+    special = 17;
+    split_precinct = 18;
+    state = 19;
+    state_house = 20;
+    state_senate = 21;
+    township = 22;
+    utility = 23;
+    village = 24;
+    vote_center = 25;
+    ward = 26;
+    water = 27;
+    other = 28;
+  }
+
+  string object_id = 1;
+  string name = 2;
+  ReportingUnitType type = 3;
+  ContactInformation contact_information = 4;
+}
+
+message InternalElectionDescription {
+  ElectionDescription description = 1;
+  repeated GeopoliticalUnit geopolitical_units = 2;
+  repeated ContestDescriptionWithPlaceholders contests = 3;
+  repeated BallotStyle ballot_styles = 4;
+  ElementModQ description_hash = 5;
+}
+
+message InternationalizedText {
+  repeated Language text = 1;
+}
+
+message Language {
+  string value = 1;
+  string language = 2;
+}
+
+message Party {
+  string object_id = 1;
+  InternationalizedText name = 2;
+  string abbreviation = 3;
+  string color = 4;
+  string logo_uri = 5;
+}
+
+message ReferendumContestDescription {
+  ContestDescription contest_description = 1;
+}
+
+message SelectionDescription {
+  string object_id = 1;
+  string candidate_id = 2;
+  uint32 sequence_order = 3;
+}

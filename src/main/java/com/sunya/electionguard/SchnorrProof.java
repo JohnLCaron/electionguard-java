@@ -1,5 +1,6 @@
 package com.sunya.electionguard;
 
+import com.google.common.base.Preconditions;
 import com.google.common.flogger.FluentLogger;
 
 import javax.annotation.concurrent.Immutable;
@@ -21,12 +22,12 @@ public class SchnorrProof extends Proof {
   /** u in the spec */
   public final ElementModQ response;
 
-  SchnorrProof(ElementModP public_key, ElementModP commitment, ElementModQ challenge, ElementModQ response) {
+  public SchnorrProof(ElementModP public_key, ElementModP commitment, ElementModQ challenge, ElementModQ response) {
     super("SchnorrProof", SecretValue);
-    this.public_key = public_key;
-    this.commitment = commitment;
-    this.challenge = challenge;
-    this.response = response;
+    this.public_key = Preconditions.checkNotNull(public_key);
+    this.commitment = Preconditions.checkNotNull(commitment);
+    this.challenge = Preconditions.checkNotNull(challenge);
+    this.response = Preconditions.checkNotNull(response);
   }
 
   /**

@@ -95,7 +95,7 @@ public class Encrypt {
    */
   // selection_from( description: SelectionDescription, is_placeholder: bool = False, is_affirmative: bool = False,
   static PlaintextBallotSelection selection_from(SelectionDescription description, boolean is_placeholder, boolean is_affirmative) {
-    return new PlaintextBallotSelection(description.object_id, is_affirmative ? "true" : "false", is_placeholder, Optional.empty());
+    return new PlaintextBallotSelection(description.object_id, is_affirmative ? "true" : "false", is_placeholder, null);
   }
 
   /**

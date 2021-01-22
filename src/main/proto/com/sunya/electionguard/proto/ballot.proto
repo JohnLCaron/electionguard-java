@@ -1,0 +1,75 @@
+syntax = "proto3";
+
+import "com/sunya/electionguard/proto/common.proto";
+
+option java_package = "com.sunya.electionguard.proto";
+option java_outer_classname = "BallotProto";
+
+message CiphertextAcceptedBallot {
+
+  enum BallotBoxState {
+    UNKNOWN = 0;
+    CAST = 1;
+    SPOILED = 2;
+  }
+
+  CiphertextBallot ciphertext_ballot = 1;
+  BallotBoxState state = 2;
+}
+
+message CiphertextBallot {
+  string object_id = 1;
+  string ballot_style_id = 2; // The object_id of the BallotStyle in the Election Manifest
+  ElementModQ description_hash = 3; // Hash of the election description
+  ElementModQ tracking_hash = 4; // Unique ballot tracking hash for this ballot
+  ElementModQ previous_tracking_hash = 5; // optional
+  repeated CiphertextBallotContest contests = 6;
+  int64 timestamp = 7; // Timestamp at which the ballot encryption is generated, in seconds since the epoch UTC.
+  ElementModQ crypto_hash = 8; // The hash of the encrypted ballot representation
+  ElementModQ nonce = 9; // optional
+}
+
+message CiphertextBallotContest {
+  string object_id = 1;
+  ElementModQ description_hash = 2; // Hash of the contest description
+  repeated CiphertextBallotSelection selections = 3;
+  ElementModQ crypto_hash = 4; // The hash of the encrypted values
+  ElementModQ nonce = 5; // optional
+  ConstantChaumPedersenProof proof = 6;
+}
+
+message CiphertextBallotSelection {
+  string object_id = 1;
+  ElementModQ description_hash = 2; // Hash of the selection description
+  ElGamalCiphertext ciphertext = 3;
+  ElementModQ crypto_hash = 4; // The hash of the encrypted values
+  bool is_placeholder_selection = 5;
+  ElementModQ nonce = 6; // optional
+  DisjunctiveChaumPedersenProof proof = 7; // optional
+  ElGamalCiphertext extended_data = 8;   // optional
+}
+
+message ConstantChaumPedersenProof {
+  ElementModP pad = 1;
+  ElementModP data = 2;
+  ElementModQ challenge = 3;
+  ElementModQ response = 4;
+  int32 constant = 5;
+}
+
+message DisjunctiveChaumPedersenProof {
+  ElementModP proof_zero_pad = 1;
+  ElementModP proof_zero_data = 2;
+  ElementModP proof_one_pad = 3;
+  ElementModP proof_one_data = 4;
+  ElementModQ proof_zero_challenge = 5;
+  ElementModQ proof_one_challenge = 6;
+  ElementModQ challenge = 7;
+  ElementModQ proof_zero_response = 8;
+  ElementModQ proof_one_response = 9;
+}
+
+message ElGamalCiphertext {
+  ElementModP pad = 1;
+  ElementModP data = 2;
+}

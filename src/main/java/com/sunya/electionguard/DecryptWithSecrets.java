@@ -45,7 +45,7 @@ public class DecryptWithSecrets {
             selection.object_id,
             Utils.isTrue(plaintext_vote),
             selection.is_placeholder_selection,
-            Optional.empty()));
+            null));
   }
 
   /**
@@ -103,7 +103,7 @@ public class DecryptWithSecrets {
             selection.object_id,
             Utils.isTrue(plaintext_vote),
             selection.is_placeholder_selection,
-            Optional.empty()));
+            null));
   }
 
   /**

@@ -14,8 +14,6 @@ import java.util.Optional;
 import java.util.OptionalInt;
 
 import static com.sunya.electionguard.KeyCeremony.CoefficientValidationSet;
-import static com.sunya.electionguard.DecryptionShare.CiphertextDecryptionSelection;
-
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 
@@ -40,7 +38,7 @@ public class TestJsonRoundtrip {
 
   @Example
   public void testCoefficientRoundtrip() throws IOException {
-    File file = /* new File("/home/snake/tmp/test.json"); */ File.createTempFile("temp", null);
+    File file = File.createTempFile("temp", null);
     file.deleteOnExit();
     String outputFile = file.getAbsolutePath();
 
@@ -54,9 +52,24 @@ public class TestJsonRoundtrip {
   }
 
   @Example
-  public void testEncryptedTallyRoundtrip() throws IOException {
+  public void testPlaintextTallyRoundtrip() throws IOException {
     File file = new File("/home/snake/tmp/test.json"); // */ File.createTempFile("temp", null);
-    // file.deleteOnExit();
+    String outputFile = file.getAbsolutePath();
+
+    // original
+    // String object_id, ElementModQ description_hash, Map<String, CiphertextTallySelection> tally_selections
+    Tally.PlaintextTally org = Tally.PlaintextTally.create("testTally", new HashMap<>(), new HashMap<>());
+    // write json
+    ConvertToJson.write(org, file.toPath());
+    // read it back
+    Tally.PlaintextTally fromFile = ConvertFromJson.readPlaintextTally(outputFile);
+    assertThat(fromFile).isEqualTo(org);
+  }
+
+  @Example
+  public void testEncryptedTallyRoundtrip() throws IOException {
+    File file = File.createTempFile("temp", null);
+    file.deleteOnExit();
     String outputFile = file.getAbsolutePath();
 
     // original
@@ -71,8 +84,8 @@ public class TestJsonRoundtrip {
 
   @Example
   public void testBallotRoundtrip() throws IOException {
-    File file = new File("/home/snake/tmp/test.json"); // */ File.createTempFile("temp", null);
-    // file.deleteOnExit();
+    File file = File.createTempFile("temp", null);
+    file.deleteOnExit();
     String outputFile = file.getAbsolutePath();
 
     Ballot.CiphertextBallotContest contest = new Ballot.CiphertextBallotContest(
@@ -105,7 +118,7 @@ public class TestJsonRoundtrip {
   // https://github.com/hsiafan/gson-java8-datatype
   @Example
   public void testOptional() {
-    Gson gson = ConvertFromJson.enhancedGson();
+    Gson gson = GsonTypeAdapters.enhancedGson();
 
     assertThat(gson.toJson(OptionalInt.of(10))).isEqualTo("10");
     assertThat(gson.fromJson("10", OptionalInt.class)).isEqualTo(OptionalInt.of(10));
@@ -134,71 +147,6 @@ public class TestJsonRoundtrip {
     Optional<Optional<String>> r4 = gson.fromJson("null", new TypeToken<Optional<Optional<String>>>() {
     }.getType());
     assertThat(r4).isEqualTo(Optional.empty());
-  }
-
-  @Example
-  public void testCiphertextDecryptionSelectionEmpty() {
-    CiphertextDecryptionSelection select = CiphertextDecryptionSelection.create(
-            "testCiphertextDecryptionSelectionRoundtrip",
-            "guardian_id",
-            Group.ONE_MOD_Q,
-            Group.ONE_MOD_P,
-            Optional.empty(),
-            Optional.empty());
-
-    Gson gson = ConvertFromJson.enhancedGson();
-
-    String json = gson.toJson(select, CiphertextDecryptionSelection.class);
-    CiphertextDecryptionSelection back = gson.fromJson(json, new TypeToken<CiphertextDecryptionSelection>(){}.getType());
-    assertThat(back).isEqualTo(select);
-  }
-
-  @Example
-  public void testCiphertextDecryptionSelectionHalfEmpty() {
-    // ElementModP pad, ElementModP data, ElementModQ challenge, ElementModQ response
-    ChaumPedersen.ChaumPedersenProof proof = new ChaumPedersen.ChaumPedersenProof(
-            Group.ONE_MOD_P,
-            Group.ONE_MOD_P,
-            Group.ONE_MOD_Q,
-            Group.ONE_MOD_Q
-            );
-
-    CiphertextDecryptionSelection select = CiphertextDecryptionSelection.create(
-            "testCiphertextDecryptionSelectionRoundtrip",
-            "guardian_id",
-            Group.ONE_MOD_Q,
-            Group.ONE_MOD_P,
-            Optional.of(proof),
-            Optional.empty());
-
-    Gson gson = ConvertFromJson.enhancedGson();
-
-    String json = gson.toJson(select, CiphertextDecryptionSelection.class);
-    CiphertextDecryptionSelection back = gson.fromJson(json, new TypeToken<CiphertextDecryptionSelection>(){}.getType());
-    assertThat(back).isEqualTo(select);
-  }
-
-  @Example
-  public void testCiphertextDecryptionSelectionFull() {
-    ChaumPedersen.ChaumPedersenProof proof = new ChaumPedersen.ChaumPedersenProof(
-            Group.ONE_MOD_P,
-            Group.ONE_MOD_P,
-            Group.ONE_MOD_Q,
-            Group.ONE_MOD_Q
-    );
-
-    CiphertextDecryptionSelection select = CiphertextDecryptionSelection.create(
-            "testCiphertextDecryptionSelectionRoundtrip",
-            "guardian_id",
-            Group.ONE_MOD_Q,
-            Group.ONE_MOD_P,
-            Optional.of(proof),
-            Optional.of(new HashMap<>()));
-
-    Gson gson = ConvertFromJson.enhancedGson();
-    String json = gson.toJson(select, CiphertextDecryptionSelection.class);
-    CiphertextDecryptionSelection back = gson.fromJson(json, new TypeToken<CiphertextDecryptionSelection>(){}.getType());
-    assertThat(back).isEqualTo(select);
   }
 
 }

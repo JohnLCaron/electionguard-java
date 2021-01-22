@@ -21,8 +21,8 @@ public class ElGamal {
     final ElementModP public_key;
 
     public KeyPair(ElementModQ secret_key, ElementModP public_key) {
-      this.secret_key = secret_key;
-      this.public_key = public_key;
+      this.secret_key = Preconditions.checkNotNull(secret_key);
+      this.public_key = Preconditions.checkNotNull(public_key);
     }
   }
 
@@ -39,8 +39,11 @@ public class ElGamal {
     public final ElementModP data;
 
     public Ciphertext(ElementModP pad, ElementModP data) {
-      this.pad = pad;
-      this.data = data;
+      if (pad == null || data == null)
+        System.out.printf("HEY");
+
+      this.pad = Preconditions.checkNotNull(pad);
+      this.data = Preconditions.checkNotNull(data);
     }
 
     @Override

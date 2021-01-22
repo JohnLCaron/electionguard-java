@@ -38,13 +38,13 @@ public class TestPublish {
   public void test_publish() throws IOException {
     OffsetDateTime now = OffsetDateTime.now();
     ElectionDescription description = new ElectionDescription(
-            "", ElectionType.unknown, now, now, ImmutableList.of(), ImmutableList.of(),
+            "scope", ElectionType.unknown, now, now, ImmutableList.of(), ImmutableList.of(),
             ImmutableList.of(), ImmutableList.of(), ImmutableList.of(), null, null);
     InternalElectionDescription metadata = new InternalElectionDescription(description);
 
     CiphertextElectionContext context = make_ciphertext_election_context(1, 1, ONE_MOD_P, description);
     List<KeyCeremony.CoefficientValidationSet> coefficients = ImmutableList.of(
-            KeyCeremony.CoefficientValidationSet.create("", ImmutableList.of(), ImmutableList.of()));
+            KeyCeremony.CoefficientValidationSet.create("hiD", ImmutableList.of(), ImmutableList.of()));
     Tally.PlaintextTally plaintext_tally = Tally.PlaintextTally.create("PlaintextTallyId", ImmutableMap.of(), ImmutableMap.of());
 
     Tally.PublishedCiphertextTally ciphertext_tally =

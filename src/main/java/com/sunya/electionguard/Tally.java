@@ -1,6 +1,7 @@
 package com.sunya.electionguard;
 
 import com.google.auto.value.AutoValue;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
@@ -36,7 +37,12 @@ public class Tally {
     public abstract ImmutableList<DecryptionShare.CiphertextDecryptionSelection> shares();
 
     public static PlaintextTallySelection create(String object_id, Integer tally, ElementModP value, ElGamal.Ciphertext message, List<DecryptionShare.CiphertextDecryptionSelection> shares) {
-      return new AutoValue_Tally_PlaintextTallySelection(object_id, tally, value, message, ImmutableList.copyOf(shares));
+      return new AutoValue_Tally_PlaintextTallySelection(
+              Preconditions.checkNotNull(object_id),
+              Preconditions.checkNotNull(tally),
+              Preconditions.checkNotNull(value),
+              Preconditions.checkNotNull(message),
+              ImmutableList.copyOf(shares));
     }
 
     public static TypeAdapter<PlaintextTallySelection> typeAdapter(Gson gson) {
@@ -53,7 +59,9 @@ public class Tally {
     public abstract Map<String, PlaintextTallySelection> selections(); // Map(SELECTION_ID, PlaintextTallySelection)
 
     public static PlaintextTallyContest create(String object_id, Map<String, PlaintextTallySelection> selections) {
-      return new AutoValue_Tally_PlaintextTallyContest(object_id, selections);
+      return new AutoValue_Tally_PlaintextTallyContest(
+              Preconditions.checkNotNull(object_id),
+              Preconditions.checkNotNull(selections));
     }
 
     public static TypeAdapter<PlaintextTallyContest> typeAdapter(Gson gson) {
@@ -72,8 +80,12 @@ public class Tally {
     /** The spoiled ballots. */
     public abstract Map<String, Map<String, PlaintextTallyContest>> spoiled_ballots(); // Map(BALLOT_ID, Map(CONTEST_ID, PlaintextTallyContest))
 
-    public static PlaintextTally create(String object_id, Map<String, PlaintextTallyContest> contests, Map<String, Map<String, PlaintextTallyContest>> spoiled_ballots) {
-      return new AutoValue_Tally_PlaintextTally(object_id, contests, spoiled_ballots);
+    public static PlaintextTally create(String object_id, Map<String, PlaintextTallyContest> contests,
+                                        Map<String, Map<String, PlaintextTallyContest>> spoiled_ballots) {
+      return new AutoValue_Tally_PlaintextTally(
+              Preconditions.checkNotNull(object_id),
+              Preconditions.checkNotNull(contests),
+              Preconditions.checkNotNull(spoiled_ballots));
     }
     public static TypeAdapter<PlaintextTally> typeAdapter(Gson gson) {
       return new AutoValue_Tally_PlaintextTally.GsonTypeAdapter(gson);
@@ -89,7 +101,7 @@ public class Tally {
    * The object_id is the Election.SelectionDescription.object_id.
    * Note this class is mutable, since we need to do the accumulation here.
    */
-  static class CiphertextTallySelection extends Ballot.CiphertextSelection {
+  public static class CiphertextTallySelection extends Ballot.CiphertextSelection {
     // Note mutable
     private ElGamal.Ciphertext ciphertext_accumulate; // default = ElGamalCiphertext(ONE_MOD_P, ONE_MOD_P)
 
@@ -130,11 +142,11 @@ public class Tally {
       this.tally_selections = tally_selections;
     }
 
-    ElementModQ description_hash() {
+    public ElementModQ description_hash() {
       return description_hash;
     }
 
-    ImmutableMap<String, CiphertextTallySelection> tally_selections() {
+    public ImmutableMap<String, CiphertextTallySelection> tally_selections() {
       return ImmutableMap.copyOf(tally_selections);
     }
 

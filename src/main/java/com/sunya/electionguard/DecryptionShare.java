@@ -1,6 +1,7 @@
 package com.sunya.electionguard;
 
 import com.google.auto.value.AutoValue;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.flogger.FluentLogger;
 import com.google.gson.Gson;
@@ -45,8 +46,14 @@ public class DecryptionShare {
             ElementModP share,
             ElementModP recovery_key,
             ChaumPedersen.ChaumPedersenProof proof) {
-      return new AutoValue_DecryptionShare_CiphertextCompensatedDecryptionSelection(object_id, guardian_id, missing_guardian_id,
-              description_hash, share, recovery_key, proof);
+      return new AutoValue_DecryptionShare_CiphertextCompensatedDecryptionSelection(
+              Preconditions.checkNotNull(object_id),
+              Preconditions.checkNotNull(guardian_id),
+              Preconditions.checkNotNull(missing_guardian_id),
+              Preconditions.checkNotNull(description_hash),
+              Preconditions.checkNotNull(share),
+              Preconditions.checkNotNull(recovery_key),
+              Preconditions.checkNotNull(proof));
     }
 
     public static TypeAdapter<CiphertextCompensatedDecryptionSelection> typeAdapter(Gson gson) {
@@ -92,8 +99,13 @@ public class DecryptionShare {
             ElementModP share,
             Optional<ChaumPedersen.ChaumPedersenProof> proof,
             Optional<Map<String, CiphertextCompensatedDecryptionSelection>> recovered_parts) {
-      return new AutoValue_DecryptionShare_CiphertextDecryptionSelection(object_id, guardian_id, description_hash, share,
-              proof, recovered_parts.map(ImmutableMap::copyOf));
+      return new AutoValue_DecryptionShare_CiphertextDecryptionSelection(
+              Preconditions.checkNotNull(object_id),
+              Preconditions.checkNotNull(guardian_id),
+              Preconditions.checkNotNull(description_hash),
+              Preconditions.checkNotNull(share),
+              Preconditions.checkNotNull(proof),
+              recovered_parts.map(ImmutableMap::copyOf));
     }
 
     public static TypeAdapter<CiphertextDecryptionSelection> typeAdapter(Gson gson) {
@@ -206,8 +218,12 @@ public class DecryptionShare {
             String missing_guardian_id,
             ElementModQ description_hash,
             Map<String, CiphertextCompensatedDecryptionSelection> selections) {
-      return new AutoValue_DecryptionShare_CiphertextCompensatedDecryptionContest(object_id, guardian_id, missing_guardian_id,
-              description_hash, ImmutableMap.copyOf(selections));
+      return new AutoValue_DecryptionShare_CiphertextCompensatedDecryptionContest(
+              Preconditions.checkNotNull(object_id),
+              Preconditions.checkNotNull(guardian_id),
+              Preconditions.checkNotNull(missing_guardian_id),
+              Preconditions.checkNotNull(description_hash),
+              ImmutableMap.copyOf(selections));
     }
   } // CiphertextCompensatedDecryptionContest
 
@@ -226,7 +242,10 @@ public class DecryptionShare {
             String guardian_id,
             ElementModP public_key,
             String ballot_id, Map<String, CiphertextDecryptionContest> contests) {
-      return new AutoValue_DecryptionShare_BallotDecryptionShare(guardian_id, public_key, ballot_id,
+      return new AutoValue_DecryptionShare_BallotDecryptionShare(
+              Preconditions.checkNotNull(guardian_id),
+              Preconditions.checkNotNull(public_key),
+              Preconditions.checkNotNull(ballot_id),
               ImmutableMap.copyOf(contests));
     }
   } // BallotDecryptionShare

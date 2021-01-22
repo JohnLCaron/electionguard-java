@@ -3,6 +3,8 @@ package com.sunya.electionguard.publish;
 import com.google.common.base.Strings;
 import com.google.common.flogger.FluentLogger;
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.sunya.electionguard.Election;
 
 import javax.annotation.Nullable;
 import java.io.*;
@@ -17,17 +19,19 @@ import static com.sunya.electionguard.Election.*;
 public class ElectionDescriptionFromJson {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
-  private final String pathname;
+  public static Election.ElectionDescription deserialize(JsonElement jsonElem) {
+    Gson gson = GsonTypeAdapters.enhancedGson();
+    ElectionDescriptionPojo pojo = gson.fromJson(jsonElem, ElectionDescriptionPojo.class);
+    ElectionDescriptionFromJson converter = new ElectionDescriptionFromJson(null);
+    return converter.convert(pojo);
+  }
 
-  /**
-   * Open a json file containing ElectionDescription.
-   *
-   * @param pathname absolute pathname.
-   */
+  private final String pathname;
   public ElectionDescriptionFromJson(String pathname) {
     this.pathname = pathname;
   }
 
+  // used by consumer
   public ElectionDescription build() throws IOException {
     try (InputStream is = new FileInputStream(pathname)) {
       Reader reader = new InputStreamReader(is);
@@ -92,7 +96,7 @@ public class ElectionDescriptionFromJson {
     if (pojo == null) {
       return null;
     }
-    return new Candidate(pojo.object_id, convertInternationalizedText(pojo.ballot_name),
+    return new Candidate(pojo.object_id, convertInternationalizedText(pojo.name),
             pojo.party_id, pojo.image_uri, pojo.is_write_in);
   }
 

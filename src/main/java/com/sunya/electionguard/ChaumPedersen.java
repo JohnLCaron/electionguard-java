@@ -30,15 +30,15 @@ public class ChaumPedersen {
                                          ElementModP proof_one_pad, ElementModP proof_one_data, ElementModQ proof_zero_challenge,
                                          ElementModQ proof_one_challenge, ElementModQ challenge, ElementModQ proof_zero_response, ElementModQ proof_one_response) {
       super("DisjunctiveChaumPedersenProof", Proof.Usage.SelectionValue);
-      this.proof_zero_pad = proof_zero_pad;
-      this.proof_zero_data = proof_zero_data;
-      this.proof_one_pad = proof_one_pad;
-      this.proof_one_data = proof_one_data;
-      this.proof_zero_challenge = proof_zero_challenge;
-      this.proof_one_challenge = proof_one_challenge;
-      this.challenge = challenge;
-      this.proof_zero_response = proof_zero_response;
-      this.proof_one_response = proof_one_response;
+      this.proof_zero_pad = Preconditions.checkNotNull(proof_zero_pad);
+      this.proof_zero_data = Preconditions.checkNotNull(proof_zero_data);
+      this.proof_one_pad = Preconditions.checkNotNull(proof_one_pad);
+      this.proof_one_data = Preconditions.checkNotNull(proof_one_data);
+      this.proof_zero_challenge = Preconditions.checkNotNull(proof_zero_challenge);
+      this.proof_one_challenge = Preconditions.checkNotNull(proof_one_challenge);
+      this.challenge = Preconditions.checkNotNull(challenge);
+      this.proof_zero_response = Preconditions.checkNotNull(proof_zero_response);
+      this.proof_one_response = Preconditions.checkNotNull(proof_one_response);
     }
 
     /**
@@ -121,10 +121,10 @@ public class ChaumPedersen {
 
     public ChaumPedersenProof(ElementModP pad, ElementModP data, ElementModQ challenge, ElementModQ response) {
       super("ChaumPedersenProof", Proof.Usage.SecretValue);
-      this.pad = pad;
-      this.data = data;
-      this.challenge = challenge;
-      this.response = response;
+      this.pad = Preconditions.checkNotNull(pad);
+      this.data = Preconditions.checkNotNull(data);
+      this.challenge = Preconditions.checkNotNull(challenge);
+      this.response = Preconditions.checkNotNull(response);
     }
 
     /**
@@ -203,10 +203,10 @@ public class ChaumPedersen {
 
     public ConstantChaumPedersenProof(ElementModP pad, ElementModP data, ElementModQ challenge, ElementModQ response, int constant) {
       super("ConstantChaumPedersenProof", Proof.Usage.SelectionLimit);
-      this.pad = pad;
-      this.data = data;
-      this.challenge = challenge;
-      this.response = response;
+      this.pad = Preconditions.checkNotNull(pad);
+      this.data = Preconditions.checkNotNull(data);
+      this.challenge = Preconditions.checkNotNull(challenge);
+      this.response = Preconditions.checkNotNull(response);
       this.constant = constant;
     }
 

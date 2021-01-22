@@ -1,6 +1,8 @@
 package com.sunya.electionguard;
 
 import com.google.auto.value.AutoValue;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import com.google.gson.TypeAdapter;
@@ -19,8 +21,6 @@ import static com.sunya.electionguard.Group.*;
  * The process conducted at the beginning of the election to create the joint encryption context for
  * encrypting ballots during the election.
  */
-
-
  public class KeyCeremony {
 
   /** Details of key ceremony. */
@@ -123,9 +123,13 @@ import static com.sunya.electionguard.Group.*;
     public abstract ImmutableList<ElementModP> coefficient_commitments();
     public abstract ImmutableList<SchnorrProof> coefficient_proofs();
 
-    public static CoefficientValidationSet create(String guardian_id, List<ElementModP> coefficient_commitments, List<SchnorrProof> coefficient_proofs) {
-      return new AutoValue_KeyCeremony_CoefficientValidationSet(guardian_id,
-              ImmutableList.copyOf(coefficient_commitments), ImmutableList.copyOf(coefficient_proofs));
+    public static CoefficientValidationSet create(String guardian_id, List<ElementModP> coefficient_commitments,
+                                                  List<SchnorrProof> coefficient_proofs) {
+      Preconditions.checkArgument(!Strings.isNullOrEmpty(guardian_id));
+      return new AutoValue_KeyCeremony_CoefficientValidationSet(
+              Preconditions.checkNotNull(guardian_id),
+              ImmutableList.copyOf(coefficient_commitments),
+              ImmutableList.copyOf(coefficient_proofs));
     }
 
     // LOOK I was hoping not to expose GSON here.

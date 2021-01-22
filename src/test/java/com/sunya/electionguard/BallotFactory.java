@@ -1,12 +1,11 @@
 package com.sunya.electionguard;
 
-import com.sunya.electionguard.publish.PlaintextBallotFromJson;
+import com.sunya.electionguard.publish.PlaintextBallotPojo;
 
 import javax.annotation.Nullable;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertWithMessage;
 import static com.sunya.electionguard.Ballot.*;
@@ -87,8 +86,8 @@ public class BallotFactory {
     ExtendedData extra_data = new ExtendedData("random", 33);
     return new PlaintextBallotSelection("selection-{draw(uuids)}",
                 TestUtils.randomBool() ? "true" : "false",
-                TestUtils.randomBool(),
-                TestUtils.randomBool() ? Optional.of(extra_data) : Optional.empty());
+                false,
+                TestUtils.randomBool() ? extra_data : null);
   }
 
   static PlaintextBallotSelection get_selection_poorly_formed() {
@@ -96,7 +95,7 @@ public class BallotFactory {
     return new PlaintextBallotSelection("selection-{draw(uuids)}",
             TestUtils.randomBool() ? "yeah" : "nope",
             TestUtils.randomBool(),
-            TestUtils.randomBool() ? Optional.of(extra_data) : Optional.empty());
+            TestUtils.randomBool() ? extra_data : null);
   }
 
   //////////////////////////////////////////////////////////////////////////////////////
@@ -107,8 +106,7 @@ public class BallotFactory {
   }
 
   private List<PlaintextBallot> _get_ballots_from_file(String filename) throws IOException {
-    PlaintextBallotFromJson builder = new PlaintextBallotFromJson(filename);
-    return builder.get_ballots_from_file();
+    return PlaintextBallotPojo.get_ballots_from_file(filename);
   }
 
   PlaintextBallot get_simple_ballot_from_file() throws IOException {
@@ -117,8 +115,7 @@ public class BallotFactory {
   }
 
   private PlaintextBallot _get_ballot_from_file(String filename) throws IOException {
-    PlaintextBallotFromJson builder = new PlaintextBallotFromJson(filename);
-    return builder.get_ballot_from_file();
+    return PlaintextBallotPojo.get_ballot_from_file(filename);
   }
 
 }

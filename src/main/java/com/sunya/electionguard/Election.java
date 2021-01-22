@@ -1,5 +1,6 @@
 package com.sunya.electionguard;
 
+import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.flogger.FluentLogger;
@@ -16,6 +17,7 @@ import static com.sunya.electionguard.Group.*;
 /**
  * Election Manifest.
  * The election metadata in json format that is parsed into an Election Description.
+ * see: https://developers.google.com/elections-data/reference
  */
 public class Election {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
@@ -101,8 +103,8 @@ public class Election {
     public final String value;
 
     public AnnotatedString(String annotation, String value) {
-      this.annotation = annotation;
-      this.value = value;
+      this.annotation = Preconditions.checkNotNull(annotation);
+      this.value = Preconditions.checkNotNull(value);
     }
 
     @Override
@@ -115,8 +117,8 @@ public class Election {
       if (this == o) return true;
       if (o == null || getClass() != o.getClass()) return false;
       AnnotatedString that = (AnnotatedString) o;
-      return Objects.equals(annotation, that.annotation) &&
-              Objects.equals(value, that.value);
+      return annotation.equals(that.annotation) &&
+              value.equals(that.value);
     }
 
     @Override
@@ -135,8 +137,8 @@ public class Election {
     public final String language;
 
     public Language(String value, String language) {
-      this.value = value;
-      this.language = language;
+      this.value = Preconditions.checkNotNull(value);
+      this.language = Preconditions.checkNotNull(language);
     }
 
     @Override
@@ -149,8 +151,8 @@ public class Election {
       if (this == o) return true;
       if (o == null || getClass() != o.getClass()) return false;
       Language language1 = (Language) o;
-      return Objects.equals(value, language1.value) &&
-              Objects.equals(language, language1.language);
+      return value.equals(language1.value) &&
+              language.equals(language1.language);
     }
 
     @Override
@@ -168,7 +170,7 @@ public class Election {
     public final ImmutableList<Language> text;
 
     public InternationalizedText(@Nullable List<Language> text) {
-      this.text = toImmutableList(text);
+      this.text = toImmutableListEmpty(text);
     }
 
     @Override
@@ -181,7 +183,7 @@ public class Election {
       if (this == o) return true;
       if (o == null || getClass() != o.getClass()) return false;
       InternationalizedText that = (InternationalizedText) o;
-      return Objects.equals(text, that.text);
+      return text.equals(that.text);
     }
 
     @Override
@@ -221,10 +223,10 @@ public class Election {
       if (this == o) return true;
       if (o == null || getClass() != o.getClass()) return false;
       ContactInformation that = (ContactInformation) o;
-      return Objects.equals(address_line, that.address_line) &&
-              Objects.equals(email, that.email) &&
-              Objects.equals(phone, that.phone) &&
-              Objects.equals(name, that.name);
+      return address_line.equals(that.address_line) &&
+              email.equals(that.email) &&
+              phone.equals(that.phone) &&
+              name.equals(that.name);
     }
 
     @Override
@@ -249,8 +251,8 @@ public class Election {
                             ReportingUnitType type,
                             @Nullable ContactInformation contact_information) {
       super(object_id);
-      this.name = name;
-      this.type = type;
+      this.name = Preconditions.checkNotNull(name);
+      this.type = Preconditions.checkNotNull(type);
       this.contact_information = Optional.ofNullable(contact_information);
     }
 
@@ -265,9 +267,9 @@ public class Election {
       if (o == null || getClass() != o.getClass()) return false;
       if (!super.equals(o)) return false;
       GeopoliticalUnit that = (GeopoliticalUnit) o;
-      return Objects.equals(name, that.name) &&
+      return name.equals(that.name) &&
               type == that.type &&
-              Objects.equals(contact_information, that.contact_information);
+              contact_information.equals(that.contact_information);
     }
 
     @Override
@@ -290,7 +292,7 @@ public class Election {
       super(object_id);
       this.geopolitical_unit_ids = Optional.ofNullable(toImmutableList(geopolitical_unit_ids));
       this.party_ids = Optional.ofNullable(toImmutableList(party_ids));
-      this.image_uri = Optional.ofNullable(image_uri);
+      this.image_uri = Optional.ofNullable(Strings.emptyToNull(image_uri));
     }
 
 
@@ -306,14 +308,19 @@ public class Election {
       if (o == null || getClass() != o.getClass()) return false;
       if (!super.equals(o)) return false;
       BallotStyle that = (BallotStyle) o;
-      return Objects.equals(geopolitical_unit_ids, that.geopolitical_unit_ids) &&
-              Objects.equals(party_ids, that.party_ids) &&
-              Objects.equals(image_uri, that.image_uri);
+      return geopolitical_unit_ids.equals(that.geopolitical_unit_ids) &&
+              party_ids.equals(that.party_ids) &&
+              image_uri.equals(that.image_uri);
     }
 
     @Override
     public int hashCode() {
       return Objects.hash(super.hashCode(), geopolitical_unit_ids, party_ids, image_uri);
+    }
+
+    @Override
+    public String toString() {
+      return object_id;
     }
   }
 
@@ -323,29 +330,29 @@ public class Election {
    */
   @Immutable
   public static class Party extends ElectionObjectBase implements Hash.CryptoHashable {
-    public final InternationalizedText ballot_name;
+    public final InternationalizedText name;
     public final Optional<String> abbreviation;
     public final Optional<String> color;
     public final Optional<String> logo_uri;
 
     public Party(String object_id) {
       super(object_id);
-      this.ballot_name = new InternationalizedText(ImmutableList.of());
+      this.name = new InternationalizedText(ImmutableList.of());
       this.abbreviation = Optional.empty();
       this.color = Optional.empty();
       this.logo_uri = Optional.empty();
     }
 
     public Party(String object_id,
-                 InternationalizedText ballot_name,
+                 InternationalizedText name,
                  @Nullable String abbreviation,
                  @Nullable String color,
                  @Nullable String logo_uri) {
       super(object_id);
-      this.ballot_name = ballot_name;
-      this.abbreviation = Optional.ofNullable(abbreviation);
-      this.color = Optional.ofNullable(color);
-      this.logo_uri = Optional.ofNullable(logo_uri);
+      this.name = name != null ? name : new InternationalizedText(ImmutableList.of());
+      this.abbreviation = Optional.ofNullable(Strings.emptyToNull(abbreviation));
+      this.color = Optional.ofNullable(Strings.emptyToNull(color));
+      this.logo_uri = Optional.ofNullable(Strings.emptyToNull(logo_uri));
     }
 
     String get_party_id() {
@@ -356,7 +363,7 @@ public class Election {
     public Group.ElementModQ crypto_hash() {
       return Hash.hash_elems(
               this.object_id,
-              this.ballot_name,
+              this.name,
               this.abbreviation,
               this.color,
               this.logo_uri);
@@ -368,15 +375,15 @@ public class Election {
       if (o == null || getClass() != o.getClass()) return false;
       if (!super.equals(o)) return false;
       Party party = (Party) o;
-      return Objects.equals(ballot_name, party.ballot_name) &&
-              Objects.equals(abbreviation, party.abbreviation) &&
-              Objects.equals(color, party.color) &&
-              Objects.equals(logo_uri, party.logo_uri);
+      return name.equals(party.name) &&
+              abbreviation.equals(party.abbreviation) &&
+              color.equals(party.color) &&
+              logo_uri.equals(party.logo_uri);
     }
 
     @Override
     public int hashCode() {
-      return Objects.hash(super.hashCode(), ballot_name, abbreviation, color, logo_uri);
+      return Objects.hash(super.hashCode(), name, abbreviation, color, logo_uri);
     }
   }
 
@@ -391,29 +398,29 @@ public class Election {
    */
   @Immutable
   public static class Candidate extends ElectionObjectBase implements Hash.CryptoHashable {
-    public final InternationalizedText ballot_name;
+    public final InternationalizedText name;
     public final Optional<String> party_id;
     public final Optional<String> image_uri;
-    public final Optional<Boolean> is_write_in;
+    public final boolean is_write_in;
 
     public Candidate(String object_id) {
       super(object_id);
-      this.ballot_name = new InternationalizedText(ImmutableList.of());
+      this.name = new InternationalizedText(ImmutableList.of());
       this.party_id = Optional.empty();
       this.image_uri = Optional.empty();
-      this.is_write_in = Optional.empty();
+      this.is_write_in = false;
     }
 
     public Candidate(String object_id,
-                     InternationalizedText ballot_name,
+                     InternationalizedText name,
                      @Nullable String party_id,
                      @Nullable String image_uri,
                      @Nullable Boolean is_write_in) {
       super(object_id);
-      this.ballot_name = ballot_name;
-      this.party_id = Optional.ofNullable(party_id);
-      this.image_uri = Optional.ofNullable(image_uri);
-      this.is_write_in = Optional.ofNullable(is_write_in);
+      this.name = Preconditions.checkNotNull(name);
+      this.party_id = Optional.ofNullable(Strings.emptyToNull(party_id));
+      this.image_uri = Optional.ofNullable(Strings.emptyToNull(image_uri));
+      this.is_write_in = is_write_in != null ? is_write_in :  false;
     }
 
     /** Get the "candidate ID" for this Candidate. */
@@ -424,7 +431,7 @@ public class Election {
     @Override
     public Group.ElementModQ crypto_hash() {
       return Hash.hash_elems(
-              this.object_id, this.ballot_name, this.party_id, this.image_uri);
+              this.object_id, this.name, this.party_id, this.image_uri);
     }
 
     @Override
@@ -433,15 +440,20 @@ public class Election {
       if (o == null || getClass() != o.getClass()) return false;
       if (!super.equals(o)) return false;
       Candidate candidate = (Candidate) o;
-      return Objects.equals(ballot_name, candidate.ballot_name) &&
-              Objects.equals(party_id, candidate.party_id) &&
-              Objects.equals(image_uri, candidate.image_uri) &&
-              Objects.equals(is_write_in, candidate.is_write_in);
+      return is_write_in == candidate.is_write_in &&
+              name.equals(candidate.name) &&
+              party_id.equals(candidate.party_id) &&
+              image_uri.equals(candidate.image_uri);
     }
 
     @Override
     public int hashCode() {
-      return Objects.hash(super.hashCode(), ballot_name, party_id, image_uri, is_write_in);
+      return Objects.hash(super.hashCode(), name, party_id, image_uri, is_write_in);
+    }
+
+    @Override
+    public String toString() {
+      return object_id;
     }
   }
 
@@ -471,6 +483,7 @@ public class Election {
 
     public SelectionDescription(String object_id, String candidate_id, int sequence_order) {
       super(object_id);
+      Preconditions.checkArgument(!Strings.isNullOrEmpty(candidate_id));
       this.candidate_id = candidate_id;
       this.sequence_order = sequence_order;
     }
@@ -487,7 +500,7 @@ public class Election {
       if (!super.equals(o)) return false;
       SelectionDescription that = (SelectionDescription) o;
       return sequence_order == that.sequence_order &&
-              Objects.equals(candidate_id, that.candidate_id);
+              candidate_id.equals(that.candidate_id);
     }
 
     @Override
@@ -560,12 +573,14 @@ public class Election {
                               @Nullable InternationalizedText ballot_title,
                               @Nullable InternationalizedText ballot_subtitle) {
       super(object_id);
+      Preconditions.checkArgument(!Strings.isNullOrEmpty(electoral_district_id));
+
       this.electoral_district_id = electoral_district_id;
       this.sequence_order = sequence_order;
-      this.vote_variation = vote_variation;
+      this.vote_variation = Preconditions.checkNotNull(vote_variation);
       this.number_elected = number_elected;
       this.votes_allowed = Optional.ofNullable(votes_allowed);
-      this.name = name;
+      this.name = Preconditions.checkNotNull(name);
       this.ballot_selections = toImmutableListEmpty(ballot_selections);
       this.ballot_title = Optional.ofNullable(ballot_title);
       this.ballot_subtitle = Optional.ofNullable(ballot_subtitle);
@@ -579,19 +594,18 @@ public class Election {
       ContestDescription that = (ContestDescription) o;
       return sequence_order == that.sequence_order &&
               number_elected == that.number_elected &&
-              Objects.equals(electoral_district_id, that.electoral_district_id) &&
+              electoral_district_id.equals(that.electoral_district_id) &&
               vote_variation == that.vote_variation &&
-              Objects.equals(votes_allowed, that.votes_allowed) &&
-              Objects.equals(name, that.name) &&
-              Objects.equals(ballot_selections, that.ballot_selections) &&
-              Objects.equals(ballot_title, that.ballot_title) &&
-              Objects.equals(ballot_subtitle, that.ballot_subtitle);
+              votes_allowed.equals(that.votes_allowed) &&
+              name.equals(that.name) &&
+              ballot_selections.equals(that.ballot_selections) &&
+              ballot_title.equals(that.ballot_title) &&
+              ballot_subtitle.equals(that.ballot_subtitle);
     }
 
     @Override
     public int hashCode() {
-      return Objects.hash(super.hashCode(), electoral_district_id, sequence_order, vote_variation, number_elected,
-              votes_allowed, name, ballot_selections, ballot_title, ballot_subtitle);
+      return Objects.hash(super.hashCode(), electoral_district_id, sequence_order, vote_variation, number_elected, votes_allowed, name, ballot_selections, ballot_title, ballot_subtitle);
     }
 
     @Override
@@ -686,7 +700,7 @@ public class Election {
       if (o == null || getClass() != o.getClass()) return false;
       if (!super.equals(o)) return false;
       CandidateContestDescription that = (CandidateContestDescription) o;
-      return Objects.equals(primary_party_ids, that.primary_party_ids);
+      return primary_party_ids.equals(that.primary_party_ids);
     }
 
     @Override
@@ -757,7 +771,7 @@ public class Election {
       if (o == null || getClass() != o.getClass()) return false;
       if (!super.equals(o)) return false;
       ContestDescriptionWithPlaceholders that = (ContestDescriptionWithPlaceholders) o;
-      return Objects.equals(placeholder_selections, that.placeholder_selections);
+      return placeholder_selections.equals(that.placeholder_selections);
     }
 
     @Override
@@ -816,10 +830,12 @@ public class Election {
                                List<BallotStyle> ballot_styles,
                                @Nullable InternationalizedText name,
                                @Nullable ContactInformation contact_information) {
+
+      Preconditions.checkArgument(!Strings.isNullOrEmpty(election_scope_id));
       this.election_scope_id = election_scope_id;
-      this.type = type;
-      this.start_date = start_date;
-      this.end_date = end_date;
+      this.type = Preconditions.checkNotNull(type);
+      this.start_date = Preconditions.checkNotNull(start_date);
+      this.end_date = Preconditions.checkNotNull(end_date);
       this.geopolitical_units = toImmutableListEmpty(geopolitical_units);
       this.parties = toImmutableListEmpty(parties);
       this.candidates = toImmutableListEmpty(candidates);
@@ -834,17 +850,17 @@ public class Election {
       if (this == o) return true;
       if (o == null || getClass() != o.getClass()) return false;
       ElectionDescription that = (ElectionDescription) o;
-      return Objects.equals(election_scope_id, that.election_scope_id) &&
+      return election_scope_id.equals(that.election_scope_id) &&
               type == that.type &&
-              Objects.equals(start_date, that.start_date) &&
-              Objects.equals(end_date, that.end_date) &&
-              Objects.equals(geopolitical_units, that.geopolitical_units) &&
-              Objects.equals(parties, that.parties) &&
-              Objects.equals(candidates, that.candidates) &&
-              Objects.equals(contests, that.contests) &&
-              Objects.equals(ballot_styles, that.ballot_styles) &&
-              Objects.equals(name, that.name) &&
-              Objects.equals(contact_information, that.contact_information);
+              start_date.equals(that.start_date) &&
+              end_date.equals(that.end_date) &&
+              geopolitical_units.equals(that.geopolitical_units) &&
+              parties.equals(that.parties) &&
+              candidates.equals(that.candidates) &&
+              contests.equals(that.contests) &&
+              ballot_styles.equals(that.ballot_styles) &&
+              name.equals(that.name) &&
+              contact_information.equals(that.contact_information);
     }
 
     @Override
@@ -1021,7 +1037,7 @@ public class Election {
     final Group.ElementModQ description_hash;
 
     public InternalElectionDescription(ElectionDescription description) {
-      this.description = description;
+      this.description = Preconditions.checkNotNull(description);
       this.geopolitical_units = description.geopolitical_units;
       this.contests = generate_contests_with_placeholders(description);
       this.ballot_styles = description.ballot_styles;
@@ -1069,15 +1085,16 @@ public class Election {
       if (this == o) return true;
       if (o == null || getClass() != o.getClass()) return false;
       InternalElectionDescription that = (InternalElectionDescription) o;
-      return Objects.equals(geopolitical_units, that.geopolitical_units) &&
-              Objects.equals(contests, that.contests) &&
-              Objects.equals(ballot_styles, that.ballot_styles) &&
-              Objects.equals(description_hash, that.description_hash);
+      return description.equals(that.description) &&
+              geopolitical_units.equals(that.geopolitical_units) &&
+              contests.equals(that.contests) &&
+              ballot_styles.equals(that.ballot_styles) &&
+              description_hash.equals(that.description_hash);
     }
 
     @Override
     public int hashCode() {
-      return Objects.hash(geopolitical_units, contests, ballot_styles, description_hash);
+      return Objects.hash(description, geopolitical_units, contests, ballot_styles, description_hash);
     }
   }
 
@@ -1094,10 +1111,10 @@ public class Election {
     }
 
     public ElectionConstants(BigInteger large_prime, BigInteger small_prime, BigInteger cofactor, BigInteger generator) {
-      this.large_prime = large_prime;
-      this.small_prime = small_prime;
-      this.cofactor = cofactor;
-      this.generator = generator;
+      this.large_prime = Preconditions.checkNotNull(large_prime);
+      this.small_prime = Preconditions.checkNotNull(small_prime);
+      this.cofactor = Preconditions.checkNotNull(cofactor);
+      this.generator = Preconditions.checkNotNull(generator);
     }
 
     @Override
@@ -1161,10 +1178,10 @@ public class Election {
            ElementModQ description_hash, ElementModQ crypto_base_hash, ElementModQ crypto_extended_base_hash) {
       this.number_of_guardians = number_of_guardians;
       this.quorum = quorum;
-      this.elgamal_public_key = elgamal_public_key;
-      this.description_hash = description_hash;
-      this.crypto_base_hash = crypto_base_hash;
-      this.crypto_extended_base_hash = crypto_extended_base_hash;
+      this.elgamal_public_key = Preconditions.checkNotNull(elgamal_public_key);
+      this.description_hash = Preconditions.checkNotNull(description_hash);
+      this.crypto_base_hash = Preconditions.checkNotNull(crypto_base_hash);
+      this.crypto_extended_base_hash = Preconditions.checkNotNull(crypto_extended_base_hash);
     }
 
     @Override
@@ -1174,10 +1191,10 @@ public class Election {
       CiphertextElectionContext that = (CiphertextElectionContext) o;
       return number_of_guardians == that.number_of_guardians &&
               quorum == that.quorum &&
-              Objects.equals(elgamal_public_key, that.elgamal_public_key) &&
-              Objects.equals(description_hash, that.description_hash) &&
-              Objects.equals(crypto_base_hash, that.crypto_base_hash) &&
-              Objects.equals(crypto_extended_base_hash, that.crypto_extended_base_hash);
+              elgamal_public_key.equals(that.elgamal_public_key) &&
+              description_hash.equals(that.description_hash) &&
+              crypto_base_hash.equals(that.crypto_base_hash) &&
+              crypto_extended_base_hash.equals(that.crypto_extended_base_hash);
     }
 
     @Override
@@ -1185,7 +1202,6 @@ public class Election {
       return Objects.hash(number_of_guardians, quorum, elgamal_public_key, description_hash, crypto_base_hash, crypto_extended_base_hash);
     }
   }
-
 
   public static ElementModQ make_crypto_base_hash(int number_of_guardians, int quorum, ElectionDescription election) {
     return Hash.hash_elems(P, Q, G, number_of_guardians, quorum, election.crypto_hash());

@@ -1,27 +1,18 @@
 package com.sunya.electionguard.publish;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.flogger.FluentLogger;
-import com.google.common.reflect.TypeParameter;
-import com.google.common.reflect.TypeToken;
 import com.google.gson.*;
 import com.sunya.electionguard.*;
-import net.dongliu.gson.GsonJava8TypeAdapterFactory;
 
 import java.io.*;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.math.BigInteger;
-import java.util.List;
 
 import static com.sunya.electionguard.Election.*;
 import static com.sunya.electionguard.KeyCeremony.CoefficientValidationSet;
-import static com.sunya.electionguard.DecryptionShare.CiphertextDecryptionSelection;
 
 /** Static helper methods for reading serialized classes from json files. */
 public class ConvertFromJson {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
-  private static final Gson enhancedGson = enhancedGson();
+  private static final Gson enhancedGson = GsonTypeAdapters.enhancedGson();
 
   public static CiphertextElectionContext readContext(String pathname) throws IOException {
     try (InputStream is = new FileInputStream(pathname)) {
@@ -29,6 +20,7 @@ public class ConvertFromJson {
       return enhancedGson.fromJson(reader, CiphertextElectionContext.class);
     } catch (Exception ioe) {
       logger.atSevere().log("Failed reading file '%s'", pathname);
+      ioe.printStackTrace();
       throw ioe;
     }
   }
@@ -54,9 +46,13 @@ public class ConvertFromJson {
   }
 
   public static ElectionDescription readElection(String pathname) throws IOException {
-    // Here we are using our own conversion, LOOK investigate using standard Gson
-    ElectionDescriptionFromJson reader = new ElectionDescriptionFromJson(pathname);
-    return reader.build();
+    try (InputStream is = new FileInputStream(pathname)) {
+      Reader reader = new InputStreamReader(is);
+      return enhancedGson.fromJson(reader, ElectionDescription.class);
+    } catch (Exception ioe) {
+      logger.atSevere().log("Failed reading file '%s'", pathname);
+      throw ioe;
+    }
   }
 
   public static Ballot.CiphertextAcceptedBallot readBallot(String pathname) throws IOException {
@@ -98,96 +94,5 @@ public class ConvertFromJson {
       throw ioe;
     }
   }
-
-  public static Gson enhancedGson() {
-    return new GsonBuilder().setPrettyPrinting().serializeNulls()
-            .registerTypeAdapterFactory(AutoValueGsonTypeAdapterFactory.create())
-            .registerTypeAdapterFactory(new GsonJava8TypeAdapterFactory())
-            .registerTypeAdapter(Group.ElementModQ.class, new ModQDeserializer())
-            .registerTypeAdapter(Group.ElementModP.class, new ModPDeserializer())
-            .registerTypeAdapter(Group.ElementModQ.class, new ModQSerializer())
-            .registerTypeAdapter(Group.ElementModP.class, new ModPSerializer())
-            .registerTypeAdapter(CiphertextDecryptionSelection.class, new CiphertextDecryptionSelectionSerializer())
-            .registerTypeAdapter(CiphertextDecryptionSelection.class, new CiphertextDecryptionSelectionDeserializer())
-            .registerTypeAdapter(ImmutableList.class, new ImmutableListDeserializer())
-            // .registerTypeAdapter(ImmutableMap.class, new ImmutableMapDeserializer())
-            .create();
-  }
-
-  private static class ModQDeserializer implements JsonDeserializer<Group.ElementModQ> {
-    public Group.ElementModQ deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
-            throws JsonParseException {
-      String content = json.getAsJsonPrimitive().getAsString();
-      return Group.int_to_q(new BigInteger(content)).orElseThrow(RuntimeException::new);
-    }
-  }
-
-  private static class ModPDeserializer implements JsonDeserializer<Group.ElementModP> {
-    public Group.ElementModP deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
-            throws JsonParseException {
-      String content = json.getAsJsonPrimitive().getAsString();
-      return Group.int_to_p(new BigInteger(content)).orElseThrow(RuntimeException::new);
-    }
-  }
-
-  private static class ModQSerializer implements JsonSerializer<Group.ElementModQ> {
-    @Override
-    public JsonElement serialize(Group.ElementModQ src, Type typeOfSrc, JsonSerializationContext context) {
-      return new JsonPrimitive(src.getBigInt().toString());
-    }
-  }
-
-  private static class ModPSerializer implements JsonSerializer<Group.ElementModP> {
-    @Override
-    public JsonElement serialize(Group.ElementModP src, Type typeOfSrc, JsonSerializationContext context) {
-      return new JsonPrimitive(src.getBigInt().toString());
-    }
-  }
-
-  private static class CiphertextDecryptionSelectionSerializer implements JsonSerializer<CiphertextDecryptionSelection> {
-    @Override
-    public JsonElement serialize(CiphertextDecryptionSelection src, Type typeOfSrc, JsonSerializationContext context) {
-      return CiphertextDecryptionSelectionPojo.serialize(src);
-    }
-  }
-
-  private static class CiphertextDecryptionSelectionDeserializer implements JsonDeserializer<CiphertextDecryptionSelection> {
-    public CiphertextDecryptionSelection deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
-            throws JsonParseException {
-      return CiphertextDecryptionSelectionPojo.deserialize(json);
-    }
-  }
-
-  @SuppressWarnings("UnstableApiUsage")
-  public static final class ImmutableListDeserializer implements JsonDeserializer<ImmutableList<?>> {
-    @Override
-    public ImmutableList<?> deserialize(final JsonElement json, final Type type, final JsonDeserializationContext context) throws JsonParseException {
-      final Type[] typeArguments = ((ParameterizedType) type).getActualTypeArguments();
-      final Type parameterizedType = listOf(typeArguments[0]).getType();
-      final List<?> list = context.deserialize(json, parameterizedType);
-      return ImmutableList.copyOf(list);
-    }
-
-    private <E> TypeToken<List<E>> listOf(final Type arg) {
-      return new TypeToken<List<E>>() {}
-              .where(new TypeParameter<E>() {}, (TypeToken<E>) TypeToken.of(arg));
-    }
-  }
-
-  /*
-  public static final class ImmutableMapDeserializer implements JsonDeserializer<ImmutableMap<?, ?>> {
-    @Override
-    public ImmutableMap<?, ?> deserialize(final JsonElement json, final Type type, final JsonDeserializationContext context) throws JsonParseException {
-      final Type[] typeArguments = ((ParameterizedType) type).getActualTypeArguments();
-      final Type parameterizedType = mapOf(typeArguments[0]).getType();
-      final Map<?, ?> map = context.deserialize(json, parameterizedType);
-      return ImmutableMap.copyOf(map);
-    }
-
-    private <K, V, E> TypeToken<Map<K, V>> mapOf(final Type arg) {
-      return new TypeToken<Map<K, V>>() {}
-              .where(new TypeParameter<E>() {}, (TypeToken<E>) TypeToken.of(arg));
-    }
-  } */
 
 }

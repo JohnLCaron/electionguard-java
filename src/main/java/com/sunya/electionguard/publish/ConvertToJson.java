@@ -13,18 +13,13 @@ import java.nio.file.Path;
 /** Static helper methods for writing serialized classes to json files. */
 @SuppressWarnings("UnstableApiUsage")
 public class ConvertToJson {
-  private static final Gson enhancedGson = ConvertFromJson.enhancedGson();
+  private static final Gson enhancedGson = GsonTypeAdapters.enhancedGson();
 
   public static void write(Election.ElectionDescription object, Path where) throws IOException {
-    // Here we are using our own conversion
-    ElectionDescriptionToJson writer = new ElectionDescriptionToJson(where.toString());
-    writer.write(object);
-
-    /* TODO investigate using standard Gson
     Type type = new TypeToken<Election.ElectionDescription>(){}.getType();
     try (FileWriter writer = new FileWriter(where.toFile())) {
       enhancedGson.toJson(object, type, writer);
-    } */
+    }
   }
 
   public static void write(Election.CiphertextElectionContext object, Path where) throws IOException {
@@ -96,29 +91,5 @@ public class ConvertToJson {
       enhancedGson.toJson(ballot, type, writer);
     }
   }
-
-  /*
-  private static Gson enhancedGson() {
-    return new GsonBuilder().setPrettyPrinting().serializeNulls()
-            .registerTypeAdapterFactory(AutoValueGsonTypeAdapterFactory.create())
-            .registerTypeAdapterFactory(new GsonJava8TypeAdapterFactory())
-            .registerTypeAdapter(Group.ElementModQ.class, new ModQSerializer())
-            .registerTypeAdapter(Group.ElementModP.class, new ModPSerializer())
-            .create();
-  }
-
-  private static class ModQSerializer implements JsonSerializer<Group.ElementModQ> {
-    @Override
-    public JsonElement serialize(Group.ElementModQ src, Type typeOfSrc, JsonSerializationContext context) {
-      return new JsonPrimitive(src.getBigInt().toString());
-    }
-  }
-
-  private static class ModPSerializer implements JsonSerializer<Group.ElementModP> {
-    @Override
-    public JsonElement serialize(Group.ElementModP src, Type typeOfSrc, JsonSerializationContext context) {
-      return new JsonPrimitive(src.getBigInt().toString());
-    }
-  } */
 
 }

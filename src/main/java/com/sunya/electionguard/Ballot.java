@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.flogger.FluentLogger;
 
+import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -185,12 +186,13 @@ public class Ballot {
     final boolean is_placeholder_selection; // default false
     final Optional<ExtendedData> extended_data; // default None
 
-    public PlaintextBallotSelection(String selection_id, String vote, boolean is_placeholder_selection, Optional<ExtendedData> extended_data) {
+    public PlaintextBallotSelection(String selection_id, String vote, boolean is_placeholder_selection, @Nullable ExtendedData extended_data) {
       Preconditions.checkArgument(!Strings.isNullOrEmpty(selection_id));
+      Preconditions.checkArgument(!Strings.isNullOrEmpty(vote));
       this.selection_id = selection_id;
       this.vote = vote;
       this.is_placeholder_selection = is_placeholder_selection;
-      this.extended_data = extended_data;
+      this.extended_data = Optional.ofNullable(extended_data);
     }
 
     boolean is_valid(String expected_selection_id) {
@@ -299,8 +301,8 @@ public class Ballot {
 
     CiphertextSelection(String object_id, ElementModQ description_hash, ElGamal.Ciphertext ciphertext) {
       super(object_id);
-      this.description_hash = description_hash;
-      this.ciphertext = ciphertext;
+      this.description_hash = Preconditions.checkNotNull(description_hash);
+      this.ciphertext = Preconditions.checkNotNull(ciphertext);
     }
 
     public ElGamal.Ciphertext ciphertext() {
@@ -335,15 +337,16 @@ public class Ballot {
     public final Optional<ChaumPedersen.DisjunctiveChaumPedersenProof> proof;
     public final Optional<ElGamal.Ciphertext> extended_data;
 
-    CiphertextBallotSelection(String object_id, ElementModQ description_hash, ElGamal.Ciphertext ciphertext,
+    public CiphertextBallotSelection(String object_id, ElementModQ description_hash, ElGamal.Ciphertext ciphertext,
                               ElementModQ crypto_hash, boolean is_placeholder_selection, Optional<ElementModQ> nonce,
                               Optional<ChaumPedersen.DisjunctiveChaumPedersenProof> proof, Optional<ElGamal.Ciphertext> extended_data) {
       super(object_id, description_hash, ciphertext);
-      this.crypto_hash = crypto_hash;
+
+      this.crypto_hash = Preconditions.checkNotNull(crypto_hash);
       this.is_placeholder_selection = is_placeholder_selection;
-      this.nonce = nonce;
-      this.proof = proof;
-      this.extended_data = extended_data;
+      this.nonce = Preconditions.checkNotNull(nonce);
+      this.proof = Preconditions.checkNotNull(proof);
+      this.extended_data = Preconditions.checkNotNull(extended_data);
     }
 
     /** Remove nonce and return new object without the nonce. */
@@ -503,11 +506,11 @@ public class Ballot {
                                    Optional<ElementModQ> nonce,
                                    Optional<ChaumPedersen.ConstantChaumPedersenProof> proof) {
       super(object_id);
-      this.description_hash = description_hash;
-      this.ballot_selections = ImmutableList.copyOf(ballot_selections);
-      this.crypto_hash = crypto_hash;
-      this.nonce = nonce;
-      this.proof = proof;
+      this.description_hash = Preconditions.checkNotNull(description_hash);
+      this.ballot_selections = ImmutableList.copyOf(Preconditions.checkNotNull(ballot_selections));
+      this.crypto_hash = Preconditions.checkNotNull(crypto_hash);
+      this.nonce = Preconditions.checkNotNull(nonce);
+      this.proof = Preconditions.checkNotNull(proof);
     }
 
     /** Remove nonces from selections and return new contest. LOOK problem? */
@@ -719,19 +722,20 @@ public class Ballot {
     public final ElementModQ crypto_hash;
     public final Optional<ElementModQ> nonce;
 
-    CiphertextBallot(String object_id, String ballot_style, ElementModQ description_hash,
-                            ElementModQ previous_tracking_hash, List<CiphertextBallotContest> contests,
+    public CiphertextBallot(String object_id, String ballot_style, ElementModQ description_hash,
+                            ElementModQ previous_tracking_hash, List<Ballot.CiphertextBallotContest> contests,
                             Optional<ElementModQ> tracking_hash, long timestamp, ElementModQ crypto_hash,
                             Optional<ElementModQ> nonce) {
       super(object_id);
+      Preconditions.checkArgument(!Strings.isNullOrEmpty(ballot_style));
       this.ballot_style = ballot_style;
-      this.description_hash = description_hash;
-      this.previous_tracking_hash = previous_tracking_hash;
-      this.contests = ImmutableList.copyOf(contests);
-      this.tracking_hash = tracking_hash;
+      this.description_hash = Preconditions.checkNotNull(description_hash);
+      this.previous_tracking_hash = Preconditions.checkNotNull(previous_tracking_hash);
+      this.contests = ImmutableList.copyOf(Preconditions.checkNotNull(contests));
+      this.tracking_hash = Preconditions.checkNotNull(tracking_hash);
       this.timestamp = timestamp;
-      this.crypto_hash = crypto_hash;
-      this.nonce = nonce;
+      this.crypto_hash = Preconditions.checkNotNull(crypto_hash);
+      this.nonce = Preconditions.checkNotNull(nonce);
     }
 
     /**
@@ -880,6 +884,13 @@ public class Ballot {
   @Immutable
   public static class CiphertextAcceptedBallot extends CiphertextBallot {
     public final BallotBoxState state;
+
+    public CiphertextAcceptedBallot(CiphertextBallot ballot,
+                                    BallotBoxState state) {
+      super(ballot.object_id, ballot.ballot_style, ballot.description_hash, ballot.previous_tracking_hash, ballot.contests,
+              ballot.tracking_hash, ballot.timestamp, ballot.crypto_hash, ballot.nonce);
+      this.state = Preconditions.checkNotNull(state);
+    }
 
     public CiphertextAcceptedBallot(String object_id,
                                     String ballot_style,

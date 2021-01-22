@@ -51,7 +51,6 @@ public class BallotBox {
     // TODO: ISSUE #56: check if the ballot includes the nonce, and regenerate the proofs
     // TODO: ISSUE #56: check if the ballot includes the proofs, if it does not include the nonce
     CiphertextAcceptedBallot ballot_box_ballot = from_ciphertext_ballot(ballot, state);
-
     _store.put(ballot_box_ballot.object_id, ballot_box_ballot);
     return Optional.of(ballot_box_ballot);
   }

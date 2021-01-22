@@ -1,9 +1,20 @@
+buildscript {
+    repositories {
+        jcenter()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.14'
+    }
+}
+
 plugins {
     id 'java'
+    id "com.google.protobuf" version "0.8.14"
 }
 
 group 'com.sunya.electionguard'
-version '0.5-SNAPSHOT'
+version '0.6-SNAPSHOT'
 
 repositories {
     // Prefer JCenter to Maven Central. See
@@ -70,6 +81,7 @@ dependencies {
     // Annotations: Nullable
     implementation 'com.google.code.findbugs:jsr305:3.0.2'
     implementation 'com.google.guava:guava:28.0-jre'
+    implementation 'com.google.protobuf:protobuf-java:3.14.0'
     implementation 'com.google.code.gson:gson:2.8.6'
     implementation "com.google.auto.value:auto-value-annotations:1.7.4"
     implementation 'com.google.flogger:flogger:0.5.1'
@@ -96,3 +108,13 @@ dependencies {
     // Add any other test library you need...
     // testImplementation "org.assertj:assertj-core:3.12.2"
 }
+
+protobuf {
+    protoc {
+        // The artifact spec for the Protobuf Compiler
+        artifact = 'com.google.protobuf:protoc:3.14.0'
+    }
+}
+
+// Add generated sources to the main sourceSet, which keeps intellij happy.
+sourceSets.main.java.srcDirs += ['build/generated/source/proto/main/java']

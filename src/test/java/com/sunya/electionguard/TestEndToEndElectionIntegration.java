@@ -35,8 +35,8 @@ public class TestEndToEndElectionIntegration {
   public void setUp() throws IOException {
     Path tmp = Files.createTempDirectory(null);
     tmp.toFile().deleteOnExit();
-    // outputDir = "/home/snake/tmp/testQuorum";
-    outputDir = tmp.toAbsolutePath().toString();
+    outputDir = "/home/snake/tmp/testQuorum";
+    // outputDir = tmp.toAbsolutePath().toString();
     System.out.printf("=========== outputDir = %s%n", outputDir);
   }
 

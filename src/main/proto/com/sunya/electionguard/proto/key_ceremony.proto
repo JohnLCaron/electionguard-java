@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+import "com/sunya/electionguard/proto/common.proto";
+
+option java_package = "com.sunya.electionguard.proto";
+option java_outer_classname = "KeyCeremonyProto";
+
+// Set of validation pieces for election key coefficients
+message CoefficientValidationSet {
+  string owner_id = 1; // guardian id
+  repeated ElementModP coefficient_commitments = 2;
+  repeated SchnorrProof coefficient_proofs = 3;
+}
+
+message SchnorrProof {
+  ElementModP public_key = 1; // k in the spec
+  ElementModP commitment = 2; // h in the spec
+  ElementModQ challenge = 3; // c in the spec
+  ElementModQ response = 4; // u in the spec
+}
