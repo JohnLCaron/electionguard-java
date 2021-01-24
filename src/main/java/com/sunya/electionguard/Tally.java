@@ -24,52 +24,6 @@ public class Tally {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   /**
-   * The plaintext representation of the counts of one selection of one contest in the election.
-   * The object_id is the same as the encrypted selection (Ballot.CiphertextSelection) object_id.
-   */
-  @AutoValue
-  public static abstract class PlaintextTallySelection implements ElectionObjectBaseIF {
-    /** The actual count. */
-    public abstract Integer tally();
-    /** g^tally or M in the spec. */
-    public abstract ElementModP value();
-    public abstract ElGamal.Ciphertext message();
-    public abstract ImmutableList<DecryptionShare.CiphertextDecryptionSelection> shares();
-
-    public static PlaintextTallySelection create(String object_id, Integer tally, ElementModP value, ElGamal.Ciphertext message, List<DecryptionShare.CiphertextDecryptionSelection> shares) {
-      return new AutoValue_Tally_PlaintextTallySelection(
-              Preconditions.checkNotNull(object_id),
-              Preconditions.checkNotNull(tally),
-              Preconditions.checkNotNull(value),
-              Preconditions.checkNotNull(message),
-              ImmutableList.copyOf(shares));
-    }
-
-    public static TypeAdapter<PlaintextTallySelection> typeAdapter(Gson gson) {
-      return new AutoValue_Tally_PlaintextTallySelection.GsonTypeAdapter(gson);
-    }
-  } // PlaintextTallySelection
-
-  /**
-   * The plaintext representation of the counts of one contest in the election.
-   * The object_id is the same as the Election.ContestDescription.object_id or PlaintextBallotContest object_id.
-   */
-  @AutoValue
-  public static abstract class PlaintextTallyContest implements ElectionObjectBaseIF {
-    public abstract Map<String, PlaintextTallySelection> selections(); // Map(SELECTION_ID, PlaintextTallySelection)
-
-    public static PlaintextTallyContest create(String object_id, Map<String, PlaintextTallySelection> selections) {
-      return new AutoValue_Tally_PlaintextTallyContest(
-              Preconditions.checkNotNull(object_id),
-              Preconditions.checkNotNull(selections));
-    }
-
-    public static TypeAdapter<PlaintextTallyContest> typeAdapter(Gson gson) {
-      return new AutoValue_Tally_PlaintextTallyContest.GsonTypeAdapter(gson);
-    }
-  } // PlaintextTallyContest
-
-  /**
    * The plaintext representation of the counts of all contests in the election.
    * The object_id is the same as the CiphertextTally object_id.
    */
@@ -92,6 +46,53 @@ public class Tally {
     }
 
   } // PlaintextTally
+
+  /**
+   * The plaintext representation of the counts of one contest in the election.
+   * The object_id is the same as the Election.ContestDescription.object_id or PlaintextBallotContest object_id.
+   */
+  @AutoValue
+  public static abstract class PlaintextTallyContest implements ElectionObjectBaseIF {
+    public abstract Map<String, PlaintextTallySelection> selections(); // Map(SELECTION_ID, PlaintextTallySelection)
+
+    public static PlaintextTallyContest create(String object_id, Map<String, PlaintextTallySelection> selections) {
+      return new AutoValue_Tally_PlaintextTallyContest(
+              Preconditions.checkNotNull(object_id),
+              Preconditions.checkNotNull(selections));
+    }
+
+    public static TypeAdapter<PlaintextTallyContest> typeAdapter(Gson gson) {
+      return new AutoValue_Tally_PlaintextTallyContest.GsonTypeAdapter(gson);
+    }
+  } // PlaintextTallyContest
+
+  /**
+   * The plaintext representation of the counts of one selection of one contest in the election.
+   * The object_id is the same as the encrypted selection (Ballot.CiphertextSelection) object_id.
+   */
+  @AutoValue
+  public static abstract class PlaintextTallySelection implements ElectionObjectBaseIF {
+    /** The actual count. */
+    public abstract Integer tally();
+    /** g^tally or M in the spec. */
+    public abstract ElementModP value();
+    public abstract ElGamal.Ciphertext message();
+    public abstract ImmutableList<DecryptionShare.CiphertextDecryptionSelection> shares();
+
+    public static PlaintextTallySelection create(String object_id, Integer tally, ElementModP value, ElGamal.Ciphertext message,
+                                                 List<DecryptionShare.CiphertextDecryptionSelection> shares) {
+      return new AutoValue_Tally_PlaintextTallySelection(
+              Preconditions.checkNotNull(object_id),
+              Preconditions.checkNotNull(tally),
+              Preconditions.checkNotNull(value),
+              Preconditions.checkNotNull(message),
+              ImmutableList.copyOf(shares));
+    }
+
+    public static TypeAdapter<PlaintextTallySelection> typeAdapter(Gson gson) {
+      return new AutoValue_Tally_PlaintextTallySelection.GsonTypeAdapter(gson);
+    }
+  } // PlaintextTallySelection
 
   //////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -503,9 +504,6 @@ public class Tally {
 
 
   //////////////////////////////////////////////////////////////////////////////
-
-  // static publish_ciphertext_tally use CiphertextTally.publish_ciphertext_tally().
-  // tally_ballot use CiphertextTally.append().
 
   /**
    * Tally all of the ballots in the ballot store.

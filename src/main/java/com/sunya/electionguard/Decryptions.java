@@ -167,7 +167,10 @@ public class Decryptions {
     return Optional.of(contests);
   }
 
-  /** Compute the decryption for all spoiled ballots in the Ciphertext Tally. */
+  /**
+   * Compute the compensated decryption for all spoiled ballots in the Ciphertext Tally.
+   * @return Map(BALLOT_ID, compensated decrypted spoiled ballot)
+   */
   static Optional<Map<String, DecryptionShare.CompensatedBallotDecryptionShare>> compute_compensated_decryption_share_for_spoiled_ballots(
           Guardian guardian,
           String missing_guardian_id,
@@ -192,7 +195,7 @@ public class Decryptions {
     return Optional.of(spoiled_ballots);
   }
 
-  /** Compute the decryption for a single ballot. */
+  /** Compute the compensated decryption for a single ballot. */
   static Optional<CompensatedBallotDecryptionShare> compute_compensated_decryption_share_for_ballot(
           Guardian guardian,
           String missing_guardian_id,
@@ -241,7 +244,10 @@ public class Decryptions {
             contests));
   }
 
-  /** Compute the decryption for all spoiled ballots in the Ciphertext Tally. */
+  /**
+   * Compute the decryption for all spoiled ballots in the Ciphertext Tally.
+   * @return Map(BALLOT_ID, decrypted spoiled ballot)
+   */
   static Optional<Map<String, BallotDecryptionShare>> compute_decryption_share_for_spoiled_ballots(
           Guardian guardian,
           CiphertextTally tally,

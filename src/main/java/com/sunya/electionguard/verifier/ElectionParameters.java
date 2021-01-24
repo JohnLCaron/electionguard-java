@@ -26,7 +26,7 @@ public class ElectionParameters {
     this.constants = consumer.constants();
     this.context = consumer.context();
     this.election = consumer.election();
-    this.coefficients = ImmutableList.copyOf(consumer.coefficients());
+    this.coefficients = ImmutableList.copyOf(consumer.guardianCoefficients());
 
     int num_guardians = context.number_of_guardians;
     if (num_guardians != this.coefficients.size()) {

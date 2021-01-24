@@ -1,8 +1,8 @@
 package com.sunya.electionguard;
 
+import com.google.common.base.Preconditions;
 import com.sunya.electionguard.publish.PlaintextBallotPojo;
 
-import javax.annotation.Nullable;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,13 +22,11 @@ public class BallotFactory {
   /**
    * Get a randomly filled contest for the given description that
    * may be undervoted and may include explicitly false votes.
-   * Since this is only used for testing, the random number generator
-   * (`random`) must be provided to make this function deterministic.
    */
   PlaintextBallotContest get_random_contest_from(
           ContestDescription description,
-          boolean suppress_validity_check, // false, false
-          boolean with_trues) {
+          boolean suppress_validity_check, boolean with_trues) { // default false, false
+
 
     if (!suppress_validity_check) {
       boolean ok = description.is_valid();
@@ -38,19 +36,18 @@ public class BallotFactory {
     }
 
     List<PlaintextBallotSelection> selections = new ArrayList<>();
-
     int voted = 0;
 
     for (SelectionDescription selection_description : description.ballot_selections) {
       PlaintextBallotSelection selection = get_random_selection_from(selection_description);
-          // the caller may force a true value
+      // the caller may force a true value
       voted += selection.to_int();
       if (with_trues && voted <= 1 && selection.to_int() == 1) {
         selections.add(selection);
         continue;
       }
 
-          // Possibly append the true selection, indicating an undervote
+      // Possibly append the true selection, indicating an undervote
       if (voted <= description.number_elected && TestUtils.randomBool()) {
         selections.add(selection);
         // Possibly append the false selections as well, indicating some choices may be explicitly false
@@ -65,19 +62,17 @@ public class BallotFactory {
   /** Get a single Fake Ballot object that is manually constructed with default values . */
   PlaintextBallot get_fake_ballot(
           InternalElectionDescription election,
-          @Nullable String ballot_id,
+          String ballot_id,
           boolean with_trues) { // default true
 
-    if (ballot_id == null) {
-      ballot_id = "some-unique-ballot-id-123";
-    }
-
+    Preconditions.checkNotNull(ballot_id);
+    String ballotStyleId = election.ballot_styles.get(0).object_id;
     List<PlaintextBallotContest> contests = new ArrayList<>();
-    for (ContestDescriptionWithPlaceholders contest : election.get_contests_for(election.ballot_styles.get(0).object_id)) {
-      contests.add(this.get_random_contest_from(contest, false, with_trues));
+    for (ContestDescriptionWithPlaceholders contest : election.get_contests_for(ballotStyleId)) {
+      contests.add(this.get_random_contest_from(contest, true, with_trues));
     }
 
-    return new PlaintextBallot(ballot_id, election.ballot_styles.get(0).object_id, contests);
+    return new PlaintextBallot(ballot_id, ballotStyleId, contests);
   }
 
   ///////////////////////////////////////////////////

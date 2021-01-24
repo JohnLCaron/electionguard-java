@@ -1174,7 +1174,7 @@ public class Election {
     // the `extended base hash code (𝑄')` in the [ElectionGuard Spec](https://github.com/microsoft/electionguard/wiki)
     public final Group.ElementModQ crypto_extended_base_hash;
 
-    CiphertextElectionContext(int number_of_guardians, int quorum, ElementModP elgamal_public_key,
+    public CiphertextElectionContext(int number_of_guardians, int quorum, ElementModP elgamal_public_key,
            ElementModQ description_hash, ElementModQ crypto_base_hash, ElementModQ crypto_extended_base_hash) {
       this.number_of_guardians = number_of_guardians;
       this.quorum = quorum;

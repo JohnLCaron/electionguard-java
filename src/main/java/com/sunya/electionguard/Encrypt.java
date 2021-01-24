@@ -20,11 +20,16 @@ public class Encrypt {
   @Immutable
   public static class EncryptionDevice {
     public final String uuid;
-    final String location;
+    public final String location;
 
     public EncryptionDevice(String location) {
       this.location = location;
       uuid = generate_device_uuid();
+    }
+
+    public EncryptionDevice(String uuid, String location) {
+      this.uuid = uuid;
+      this.location = location;
     }
 
     ElementModQ get_hash() {
@@ -360,7 +365,7 @@ public class Encrypt {
   //  by traversing the collection of ballots encrypted by a specific device
 
   /**
-   * Encrypt a PlaintextBallotin the context of a specific InternalElectionDescription.
+   * Encrypt a PlaintextBallot in the context of a specific InternalElectionDescription.
    * <p>
    * This method accepts a ballot representation that only includes `True` selections.
    * It will fill missing selections for a contest with `False` values, and generate `placeholder`
@@ -373,8 +378,8 @@ public class Encrypt {
    * @param election_metadata:    the `InternalElectionDescription` which defines this ballot's structure
    * @param context:              all the cryptographic context for the election
    * @param seed_hash:            Hash from previous ballot or starting hash from device
-   * @param nonce:                an optional `int` used to seed the `Nonce` generated for this contest
-   *                              if this value is not provided, the secret generating mechanism of the OS provides its own
+   * @param nonce:                an optional nonce used to encrypt this contest
+   *                              if this value is not provided, a random nonce is used.
    * @param should_verify_proofs: specify if the proofs should be verified prior to returning (default True)
    */
   // def encrypt_ballot( ballot: PlaintextBallot, election_metadata: InternalElectionDescription, context:

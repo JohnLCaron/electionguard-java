@@ -51,7 +51,7 @@ public class TestPublish {
             new Tally.CiphertextTally("CiphertextTallyId", metadata, context).publish_ciphertext_tally();
 
     Publisher publisher = new Publisher(outputDir, false);
-    publisher.write(
+    publisher.writeElectionRecordJson(
             description,
             context,
             new ElectionConstants(),

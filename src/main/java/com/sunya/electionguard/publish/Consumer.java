@@ -10,6 +10,11 @@ import java.util.List;
 /** helper class for consumers of published data */
 public class Consumer {
   private final Publisher publisher;
+
+  public Consumer(Publisher publisher) {
+    this.publisher = publisher;
+  }
+
   public Consumer(String topDir) throws IOException {
     publisher = new Publisher(topDir, false);
   }
@@ -28,7 +33,7 @@ public class Consumer {
     return ConvertFromJson.readConstants(publisher.constantsFile().toString());
   }
 
-  public Tally.PlaintextTally plaintextTally() throws IOException {
+  public Tally.PlaintextTally decryptedTally() throws IOException {
     return ConvertFromJson.readPlaintextTally(publisher.tallyFile().toString());
   }
 
@@ -63,7 +68,7 @@ public class Consumer {
     return result;
   }
 
-  public List<KeyCeremony.CoefficientValidationSet> coefficients() throws IOException {
+  public List<KeyCeremony.CoefficientValidationSet> guardianCoefficients() throws IOException {
     List<KeyCeremony.CoefficientValidationSet> result = new ArrayList<>();
     for (File file : publisher.coefficientsFiles()) {
       KeyCeremony.CoefficientValidationSet fromPython = ConvertFromJson.readCoefficient(file.getAbsolutePath());
@@ -71,4 +76,5 @@ public class Consumer {
     }
     return result;
   }
+
 }

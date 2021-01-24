@@ -68,8 +68,3 @@ message DisjunctiveChaumPedersenProof {
   ElementModQ proof_zero_response = 8;
   ElementModQ proof_one_response = 9;
 }
-
-message ElGamalCiphertext {
-  ElementModP pad = 1;
-  ElementModP data = 2;
-}

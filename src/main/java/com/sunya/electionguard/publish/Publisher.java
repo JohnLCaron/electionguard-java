@@ -1,10 +1,11 @@
 package com.sunya.electionguard.publish;
 
 import com.sunya.electionguard.*;
-
-import javax.annotation.Nullable;
+import com.sunya.electionguard.proto.ElectionRecordProto;
+import com.sunya.electionguard.proto.ElectionRecordToProto;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -27,6 +28,8 @@ public class Publisher {
   static final String CONSTANTS_FILE_NAME = "constants" + SUFFIX;
   static final String ENCRYPTED_TALLY_FILE_NAME = "encrypted_tally" + SUFFIX;
   static final String TALLY_FILE_NAME = "tally" + SUFFIX;
+  static final String BALLOT_CHAIN_FILE_NAME = "ballotChain.proto";
+  static final String ELECTION_RECORD_FILE_NAME = "electionRecord.proto";
 
   static final String DEVICE_PREFIX = "device_";
   static final String COEFFICIENT_PREFIX = "coefficient_validation_set_";
@@ -82,6 +85,14 @@ public class Publisher {
     return publishDirectory.resolve(TALLY_FILE_NAME).toAbsolutePath();
   }
 
+  public Path electionRecordProtoFile() {
+    return publishDirectory.resolve(ELECTION_RECORD_FILE_NAME).toAbsolutePath();
+  }
+
+  public Path ballotChainProtoFile() {
+    return publishDirectory.resolve(BALLOT_CHAIN_FILE_NAME).toAbsolutePath();
+  }
+
   public Path encryptedTallyFile() {
     return publishDirectory.resolve(ENCRYPTED_TALLY_FILE_NAME).toAbsolutePath();
   }
@@ -122,7 +133,7 @@ public class Publisher {
   }
 
   /** Publishes the election record as json. */
-  public void write(
+  public void writeElectionRecordJson(
           ElectionDescription description,
           CiphertextElectionContext context,
           ElectionConstants constants,
@@ -130,8 +141,44 @@ public class Publisher {
           Iterable<Ballot.CiphertextAcceptedBallot> ciphertext_ballots,
           Iterable<Ballot.CiphertextAcceptedBallot> spoiled_ballots,
           Tally.PublishedCiphertextTally ciphertext_tally,
-          Tally.PlaintextTally plaintext_tally,
-          @Nullable Iterable<KeyCeremony.CoefficientValidationSet> coefficient_validation_sets) throws IOException {
+          Tally.PlaintextTally decryptedTally,
+          Iterable<KeyCeremony.CoefficientValidationSet> coefficient_validation_sets) throws IOException {
+
+    ConvertToJson.write(description, this.electionFile());
+    ConvertToJson.write(context, this.contextFile());
+    ConvertToJson.write(constants, this.constantsFile());
+
+    for (Encrypt.EncryptionDevice device : devices) {
+      ConvertToJson.write(device, this.deviceFile(device.uuid));
+    }
+
+    if (coefficient_validation_sets != null) {
+      for (KeyCeremony.CoefficientValidationSet coefficient_validation_set : coefficient_validation_sets) {
+        ConvertToJson.write(coefficient_validation_set, this.coefficientsFile(coefficient_validation_set.owner_id()));
+      }
+    }
+
+    // LOOK contains all ballots, why not just cast ones?
+    for (Ballot.CiphertextAcceptedBallot ballot : ciphertext_ballots) {
+      ConvertToJson.write(ballot, this.ballotFile(ballot.object_id));
+    }
+
+    for (Ballot.CiphertextAcceptedBallot ballot : spoiled_ballots) {
+      ConvertToJson.write(ballot, this.spoiledFile(ballot.object_id));
+    }
+
+    ConvertToJson.write(ciphertext_tally, encryptedTallyFile());
+    ConvertToJson.write(decryptedTally, tallyFile());
+  }
+
+  /** Publishes the ballot chain as json. */
+  public void writeBallotChainJson(
+          ElectionDescription description,
+          CiphertextElectionContext context,
+          ElectionConstants constants,
+          Iterable<Encrypt.EncryptionDevice> devices,
+          Iterable<Ballot.CiphertextAcceptedBallot> ciphertext_ballots,
+          Iterable<KeyCeremony.CoefficientValidationSet> coefficient_validation_sets) throws IOException {
 
     ConvertToJson.write(description, this.electionFile());
     ConvertToJson.write(context, this.contextFile());
@@ -150,13 +197,48 @@ public class Publisher {
     for (Ballot.CiphertextAcceptedBallot ballot : ciphertext_ballots) {
       ConvertToJson.write(ballot, this.ballotFile(ballot.object_id));
     }
+  }
 
-    for (Ballot.CiphertextAcceptedBallot ballot : spoiled_ballots) {
-      ConvertToJson.write(ballot, this.spoiledFile(ballot.object_id));
+  /** Publishes the election record as proto. */
+  public void writeElectionRecordProto(
+          ElectionDescription description,
+          CiphertextElectionContext context,
+          ElectionConstants constants,
+          Iterable<Encrypt.EncryptionDevice> devices,
+          Iterable<Ballot.CiphertextAcceptedBallot> ciphertext_ballots,
+          Iterable<Ballot.CiphertextAcceptedBallot> spoiled_ballots,
+          Tally.PublishedCiphertextTally ciphertext_tally,
+          Tally.PlaintextTally decryptedTally,
+          Iterable<KeyCeremony.CoefficientValidationSet> coefficient_validation_sets) throws IOException {
+
+    ElectionRecordProto.ElectionRecord ElectionRecordProto = ElectionRecordToProto.buildElectionRecord(
+            description, context, constants, devices,
+            ciphertext_ballots, spoiled_ballots, ciphertext_tally, decryptedTally,
+            coefficient_validation_sets);
+
+
+    try (FileOutputStream out = new FileOutputStream(electionRecordProtoFile().toFile())) {
+      ElectionRecordProto.writeDelimitedTo(out);
     }
+  }
 
-    ConvertToJson.write(ciphertext_tally, encryptedTallyFile());
-    ConvertToJson.write(plaintext_tally, tallyFile());
+  public void writeBallotChainProto(
+          ElectionDescription description,
+          CiphertextElectionContext context,
+          ElectionConstants constants,
+          Encrypt.EncryptionDevice device,
+          Iterable<Ballot.CiphertextAcceptedBallot> ciphertext_ballots,
+          Iterable<KeyCeremony.CoefficientValidationSet> coefficient_validation_sets) throws IOException {
+
+    ElectionRecordProto.BallotChain ballotChainProto = ElectionRecordToProto.buildBallotChain(description, context, constants, device,
+            ciphertext_ballots, coefficient_validation_sets);
+
+
+    byte[] datab = ballotChainProto.toByteArray();
+    System.out.printf("*** size of proto =  %d%n", datab.length);
+    try (FileOutputStream out = new FileOutputStream(ballotChainProtoFile().toFile())) {
+      ballotChainProto.writeDelimitedTo(out);
+    }
   }
 
   /**

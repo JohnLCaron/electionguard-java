@@ -23,7 +23,7 @@ Im also happy to donate it to another organization for hosting, etc.
   * Fix issues in validation.
   * Review uses of Optional and null.
   * Not yet compatible with Python library JSON serialization, due to different ways to serialize Optional.
-  * Look at Serialization performance, consider using protobuf through jni or jna.
+  * Look at Serialization performance, consider using protobuf.
   * Look at BigInteger performance, consider using GMP through jni or jna.
   * Measure performance.
   * Investigate parallelization strategies.

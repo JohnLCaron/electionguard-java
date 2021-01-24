@@ -33,7 +33,7 @@ public class DecryptionVerifier {
   DecryptionVerifier(ElectionParameters electionParameters, Consumer consumer) throws IOException {
     this.electionParameters = electionParameters;
     this.consumer = consumer;
-    this.tally = consumer.plaintextTally();
+    this.tally = consumer.decryptedTally();
     this.grp = new Grp(electionParameters.large_prime(), electionParameters.small_prime());
   }
 

@@ -10,3 +10,8 @@ message ElementModP {
 message ElementModQ {
   bytes value = 1;
 }
+
+message ElGamalCiphertext {
+  ElementModP pad = 1;
+  ElementModP data = 2;
+}

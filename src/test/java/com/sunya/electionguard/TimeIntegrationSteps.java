@@ -2,6 +2,7 @@ package com.sunya.electionguard;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableList;
+import com.sunya.electionguard.proto.ElectionRecordFromProto;
 import com.sunya.electionguard.publish.ConvertFromJson;
 import com.sunya.electionguard.publish.ElectionDescriptionFromJson;
 import com.sunya.electionguard.publish.Publisher;
@@ -22,15 +23,15 @@ import static com.sunya.electionguard.Election.*;
  * Test a complete simple example of executing an End-to-End encrypted election.
  * In a real world scenario all of these steps would not be completed on the same machine.
  */
-public class TimeEncryptBallots {
+public class TimeIntegrationSteps {
   private static final int NUMBER_OF_GUARDIANS = 6;
-  private static final int QUORUM = 6;
+  private static final int QUORUM = 5;
   private static final Random random = new Random(System.currentTimeMillis());
 
   public static void main(String[] args) throws IOException {
     int nballots = Integer.parseInt(args[0]);
 
-    TimeEncryptBallots timer = new TimeEncryptBallots(nballots);
+    TimeIntegrationSteps timer = new TimeIntegrationSteps(nballots);
     timer.run();
   }
 
@@ -40,7 +41,7 @@ public class TimeEncryptBallots {
   // Step 0 - Configure Election
   ElectionDescription description;
   ElectionBuilder election_builder;
-  InternalElectionDescription metadata;
+  InternalElectionDescription election;
   CiphertextElectionContext context;
   ElectionConstants constants;
 
@@ -61,14 +62,14 @@ public class TimeEncryptBallots {
 
   // Step 4 - Decrypt Tally
   Tally.CiphertextTally ciphertext_tally;
-  Tally.PlaintextTally plaintext_tally;
+  Tally.PlaintextTally decryptedTally;
   DecryptionMediator decrypter;
 
-  public TimeEncryptBallots(int nballots) throws IOException {
+  public TimeIntegrationSteps(int nballots) throws IOException {
     Path tmp = Files.createTempDirectory(null);
     tmp.toFile().deleteOnExit();
-    // outputDir = "/home/snake/tmp/testEndToEnd";
     outputDir = tmp.toAbsolutePath().toString();
+    outputDir = "/home/snake/tmp/TimeIntegrationSteps";
     System.out.printf("=========== outputDir = %s nballots = %d%n", outputDir, nballots);
     this.nballots = nballots;
   }
@@ -102,11 +103,15 @@ public class TimeEncryptBallots {
     timePerBallot = ((float) stopwatch.elapsed(TimeUnit.MILLISECONDS)) / nballots;
     System.out.printf("*** step_5_publish_and_verify elapsed = %s nballots = %d timePerBallot = %f ms%n", stopwatch, nballots, timePerBallot);
 
+    this.step_6_publish_election_record_proto();
+    timePerBallot = ((float) stopwatch.elapsed(TimeUnit.MILLISECONDS)) / nballots;
+    System.out.printf("*** step_6_publish_election_record_proto elapsed = %s nballots = %d timePerBallot = %f ms%n", stopwatch, nballots, timePerBallot);
+
     Scheduler.shutdown();
   }
 
   void step_0_configure_election() throws IOException {
-    // Load a pre-configured Election Description
+    System.out.printf("%n0. Verify that the input election meta-data is well-formed%n");
     // TODO: replace with complex election
     this.description = ElectionFactory.get_simple_election_from_file();
 
@@ -119,7 +124,6 @@ public class TimeEncryptBallots {
     System.out.printf("Ballot Styles: %d%n", this.description.ballot_styles.size());
     System.out.printf("----------------------------------%n");
 
-    System.out.printf("Verify that the input election meta-data is well-formed%n");
     assertThat(this.description.is_valid()).isTrue();
 
     // Create an Election Builder
@@ -133,6 +137,7 @@ public class TimeEncryptBallots {
    * the public election keys to make a joint election key that is used to encrypt ballots
    */
   void step_1_key_ceremony() {
+    System.out.printf("%n1. Key Ceremony%n");
     // Setup Guardians
     for (int i = 0; i < NUMBER_OF_GUARDIANS; i++) {
       this.guardians.add(Guardian.createForTesting("guardian_" + i, i, NUMBER_OF_GUARDIANS, QUORUM, null));
@@ -181,25 +186,25 @@ public class TimeEncryptBallots {
 
     // Build the Election
     this.election_builder.set_public_key(joint_key.get());
-    ElectionBuilder.DescriptionAndContext tuple = this.election_builder.build().get();
-    this.metadata = tuple.description;
+    ElectionBuilder.DescriptionAndContext tuple = this.election_builder.build().orElseThrow();
+    this.election = tuple.description;
     this.context = tuple.context;
     this.constants = new ElectionConstants();
   }
 
   // Move on to encrypting ballots
   // Using the `CiphertextElectionContext` encrypt ballots for the election
-  void step_2_encrypt_votes(int nballots) throws IOException {
+  void step_2_encrypt_votes(int nballots) {
     // Configure the Encryption Device
     this.device = new Encrypt.EncryptionDevice("polling-place-one");
-    this.encrypter = new Encrypt.EncryptionMediator(this.metadata, this.context, this.device);
+    this.encrypter = new Encrypt.EncryptionMediator(this.election, this.context, this.device);
     System.out.printf("%n2. Ready to encrypt at location: %s%n", this.device.location);
 
-    // Encrypt nballots Ballots
+    // Encrypt nballots randomly generated fake Ballots
     BallotFactory ballotFactory = new BallotFactory();
     for (int i = 0; i < nballots; i++) {
       String ballot_id = "ballot-id-" + random.nextInt();
-      PlaintextBallot plaintext_ballot = ballotFactory.get_fake_ballot(this.metadata, ballot_id, true);
+      PlaintextBallot plaintext_ballot = ballotFactory.get_fake_ballot(this.election, ballot_id, true);
       Optional<CiphertextBallot> encrypted_ballot = this.encrypter.encrypt(plaintext_ballot);
       assertThat(encrypted_ballot).isPresent();
       this.ciphertext_ballots.add(encrypted_ballot.get());
@@ -207,13 +212,11 @@ public class TimeEncryptBallots {
     }
   }
 
-  // Next, we cast or spoil the ballots
-  //         Accept each ballot by marking it as either cast or spoiled.
-  //        This example demonstrates one way to accept ballots using the `BallotBox` class
+  // Accept each ballot by marking it as either cast or spoiled.
   void step_3_cast_and_spoil() {
     // Configure the Ballot Box
     this.ballot_store = new DataStore();
-    this.ballot_box = new BallotBox(this.metadata, this.context, this.ballot_store);
+    this.ballot_box = new BallotBox(this.election, this.context, this.ballot_store);
     System.out.printf("%n3. cast_and_spoil%n");
     // Randomly cast or spoil the ballots
     for (CiphertextBallot ballot : this.ciphertext_ballots) {
@@ -230,15 +233,15 @@ public class TimeEncryptBallots {
   /**
    * Homomorphically combine the selections made on all of the cast ballots
    * and use the Available Guardians to decrypt the combined tally.
-   * In this way, no individual voter's cast ballot is ever decrypted drectly.
+   * In this way, no individual voter's cast ballot is ever decrypted directly.
    */
   void step_4_decrypt_tally() {
+    System.out.printf("%n4. Homomorphically Accumulate and decrypt tally%n");
     // Generate a Homomorphically Accumulated Tally of the ballots
-    this.ciphertext_tally =
-            Tally.tally_ballots(this.ballot_store, this.metadata, this.context).get();
+    this.ciphertext_tally = Tally.tally_ballots(this.ballot_store, this.election, this.context).orElseThrow();
 
     // Configure the Decryption
-    this.decrypter = new DecryptionMediator(this.metadata, this.context, this.ciphertext_tally);
+    this.decrypter = new DecryptionMediator(this.election, this.context, this.ciphertext_tally);
 
     // Announce each guardian as present
     for (Guardian guardian : this.guardians) {
@@ -247,45 +250,43 @@ public class TimeEncryptBallots {
       assertThat(decryption_share).isPresent();
     }
 
-    // Get the Plain Text Tally
-    this.plaintext_tally = this.decrypter.get_plaintext_tally(false, null).get();
+    // Here's where the ciphertext Tally is decrypted.
+    this.decryptedTally = this.decrypter.get_plaintext_tally(false, null).orElseThrow();
     System.out.printf("Tally Decrypted%n");
 
     // Now, compare the results
     this.compare_results();
   }
 
-  //         Compare the results to ensure the decryption was done correctly
+  // Compare the results to ensure the decryption was done correctly
   void compare_results() {
-    // Create a representation of each contest's tally
-    List<String> selection_ids = new ArrayList<>();
-    Map<String, Integer> expected_plaintext_tally = new HashMap<>();
-    for (ContestDescriptionWithPlaceholders contest : this.metadata.contests) {
+    System.out.printf("%n4.5 Compare results%n");
+
+    Map<String, Integer> expected_plaintext_tally = new HashMap<>(); // Map of selection_id to votes counted
+    for (ContestDescriptionWithPlaceholders contest : this.election.contests) {
       for (SelectionDescription selection : contest.ballot_selections) {
-        selection_ids.add(selection.object_id);
         expected_plaintext_tally.put(selection.object_id, 0);
       }
     }
 
-    // Tally the expected values from the loaded ballots
+    // Tally the expected values from the plaintext ballots that were cast.
     for (PlaintextBallot ballot : this.plaintext_ballots) {
-      if (this.ballot_store.get(ballot.object_id).get().state == BallotBoxState.CAST) {
+      if (this.ballot_store.get(ballot.object_id).orElseThrow().state == BallotBoxState.CAST) {
         for (PlaintextBallotContest contest : ballot.contests) {
           for (PlaintextBallotSelection selection : contest.ballot_selections) {
             Integer value = expected_plaintext_tally.get(selection.selection_id);
-            expected_plaintext_tally.put(selection.selection_id, value + selection.to_int()); // use merge
+            expected_plaintext_tally.put(selection.selection_id, value + selection.to_int()); // could use merge
           }
         }
       }
     }
 
     // Compare the expected tally to the decrypted tally
-    for (Tally.PlaintextTallyContest tally_contest : this.plaintext_tally.contests().values()) {
+    for (Tally.PlaintextTallyContest tally_contest : this.decryptedTally.contests().values()) {
       for (Tally.PlaintextTallySelection tally_selection : tally_contest.selections().values()) {
         Integer expected = expected_plaintext_tally.get(tally_selection.object_id());
-        assertThat(expected).isEqualTo(tally_selection.tally().intValue());
+        assertThat(expected).isEqualTo(tally_selection.tally());
       }
-      System.out.printf("----------------------------------%n");
     }
 
     // Compare the expected values for each spoiled ballot
@@ -294,14 +295,14 @@ public class TimeEncryptBallots {
       CiphertextAcceptedBallot accepted_ballot = entry.getValue();
       if (accepted_ballot.state == BallotBoxState.SPOILED) {
         for (PlaintextBallot plaintext_ballot : this.plaintext_ballots) {
-          if (ballot_id == plaintext_ballot.object_id) {
+          if (ballot_id.equals(plaintext_ballot.object_id)) {
             for (PlaintextBallotContest contest : plaintext_ballot.contests) {
               for (PlaintextBallotSelection selection : contest.ballot_selections) {
                 int expected = selection.to_int();
                 Tally.PlaintextTallySelection decrypted_selection = (
-                        this.plaintext_tally.spoiled_ballots().get(ballot_id).get(contest.contest_id)
+                        this.decryptedTally.spoiled_ballots().get(ballot_id).get(contest.contest_id)
                                 .selections().get(selection.selection_id));
-                assertThat(expected).isEqualTo(decrypted_selection.tally().intValue());
+                assertThat(expected).isEqualTo(decrypted_selection.tally());
               }
             }
           }
@@ -314,7 +315,7 @@ public class TimeEncryptBallots {
   void step_5_publish_and_verify() throws IOException {
     System.out.printf("%n5. publish%n");
     Publisher publisher = new Publisher(outputDir, true);
-    publisher.write(
+    publisher.writeElectionRecordJson(
             this.description,
             this.context,
             this.constants,
@@ -322,15 +323,15 @@ public class TimeEncryptBallots {
             this.ballot_store,
             this.ciphertext_tally.spoiled_ballots().values(),
             this.ciphertext_tally.publish_ciphertext_tally(),
-            this.plaintext_tally,
+            this.decryptedTally,
             this.coefficient_validation_sets);
 
-    System.out.printf("%n6. verify%n");
-    this.verify_results(publisher);
+    System.out.printf("%n5.5. verify%n");
+    this.verify_results_json(publisher);
   }
 
   // Verify results of election
-  void verify_results(Publisher publisher) throws IOException {
+  void verify_results_json(Publisher publisher) throws IOException {
     ElectionDescriptionFromJson builder = new ElectionDescriptionFromJson(
             publisher.electionFile().toString());
     ElectionDescription description_from_file = builder.build();
@@ -371,9 +372,59 @@ public class TimeEncryptBallots {
             publisher.encryptedTallyFile().toString());
     assertThat(ciphertext_tally_from_file).isEqualTo(this.ciphertext_tally.publish_ciphertext_tally());
 
-    Tally.PlaintextTally plainttext_tally_from_file = ConvertFromJson.readPlaintextTally(
+    Tally.PlaintextTally plaintext_tally_from_file = ConvertFromJson.readPlaintextTally(
             publisher.tallyFile().toString());
-    assertThat(plainttext_tally_from_file).isEqualTo(this.plaintext_tally);
+    assertThat(plaintext_tally_from_file).isEqualTo(this.decryptedTally);
+  }
+
+  // Publish election record as proto
+  void step_6_publish_election_record_proto() throws IOException {
+    System.out.printf("%n6. publish election record as proto%n");
+    Publisher publisher = new Publisher("/home/snake/tmp/TimeIntegrationStepsProto", true);
+    publisher.writeElectionRecordProto(
+            this.description,
+            this.context,
+            this.constants,
+            ImmutableList.of(this.device),
+            this.ballot_store,
+            this.ciphertext_tally.spoiled_ballots().values(),
+            this.ciphertext_tally.publish_ciphertext_tally(),
+            this.decryptedTally,
+            this.coefficient_validation_sets);
+
+    System.out.printf("%n6.5. verify%n");
+    this.verify_results_proto(publisher);
+  }
+
+  // Verify results of election
+  void verify_results_proto(Publisher publisher) throws IOException {
+    ElectionRecordFromProto roundtrip = ElectionRecordFromProto.read(publisher.electionRecordProtoFile().toFile().getAbsolutePath());
+    assertThat(roundtrip.election).isEqualTo(this.description);
+    assertThat(roundtrip.context).isEqualTo(this.context);
+    assertThat(roundtrip.constants).isEqualTo(this.constants);
+    assertThat(roundtrip.devices.get(0)).isEqualTo(this.device);
+
+    // LOOK test complete bijections
+    int count = 0;
+    for (CiphertextAcceptedBallot ballot : this.ballot_store) {
+      assertWithMessage(ballot.object_id).that(roundtrip.castBallots.get(count)).isEqualTo(ballot);
+      count++;
+    }
+
+    count = 0;
+    for (CiphertextAcceptedBallot spoiled_ballot : this.ciphertext_tally.spoiled_ballots().values()) {
+      assertThat(roundtrip.spoiledBallots.get(count)).isEqualTo(spoiled_ballot);
+      count++;
+    }
+
+    count = 0;
+    for (KeyCeremony.CoefficientValidationSet coefficient_validation_set : this.coefficient_validation_sets) {
+      assertThat(roundtrip.guardianCoefficients.get(count)).isEqualTo(coefficient_validation_set);
+      count++;
+    }
+
+    assertThat(roundtrip.ciphertextTally).isEqualTo(this.ciphertext_tally.publish_ciphertext_tally());
+    assertThat(roundtrip.decryptedTally).isEqualTo(this.decryptedTally);
   }
 
 }

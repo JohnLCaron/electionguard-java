@@ -35,7 +35,7 @@ public class TestEndToEndElectionIntegration {
   public void setUp() throws IOException {
     Path tmp = Files.createTempDirectory(null);
     tmp.toFile().deleteOnExit();
-    outputDir = "/home/snake/tmp/testQuorum";
+    outputDir = "/home/snake/tmp/testEndToEnd";
     // outputDir = tmp.toAbsolutePath().toString();
     System.out.printf("=========== outputDir = %s%n", outputDir);
   }
@@ -64,7 +64,7 @@ public class TestEndToEndElectionIntegration {
 
   // Step 4 - Decrypt Tally
   Tally.CiphertextTally ciphertext_tally;
-  Tally.PlaintextTally plaintext_tally;
+  Tally.PlaintextTally decryptedTally;
   DecryptionMediator decrypter;
 
   //         Execute the simplified end-to-end test demonstrating each component of the system.
@@ -96,7 +96,7 @@ public class TestEndToEndElectionIntegration {
   }
 
   void step_0_configure_election() throws IOException {
-    // Load a pre-configured Election Description
+    System.out.printf("%n0. Verify that the input election meta-data is well-formed%n");
     // TODO: replace with complex election
     this.description = ElectionFactory.get_simple_election_from_file();
 
@@ -109,7 +109,6 @@ public class TestEndToEndElectionIntegration {
     System.out.printf("Ballot Styles: %d%n", this.description.ballot_styles.size());
     System.out.printf("----------------------------------%n");
 
-    System.out.printf("Verify that the input election meta-data is well-formed%n");
     assertThat(this.description.is_valid()).isTrue();
 
     // Create an Election Builder
@@ -123,6 +122,7 @@ public class TestEndToEndElectionIntegration {
    * the public election keys to make a joint election key that is used to encrypt ballots
    */
   void step_1_key_ceremony() {
+    System.out.printf("%n1. Key Ceremony%n");
     Group.ElementModQ crypto_base_hash = Election.make_crypto_base_hash(NUMBER_OF_GUARDIANS, QUORUM, description);
     // Setup Guardians
     for (int i = 0; i < NUMBER_OF_GUARDIANS; i++) {
@@ -172,7 +172,7 @@ public class TestEndToEndElectionIntegration {
 
     // Build the Election
     this.election_builder.set_public_key(joint_key.get());
-    ElectionBuilder.DescriptionAndContext tuple = this.election_builder.build().get();
+    ElectionBuilder.DescriptionAndContext tuple = this.election_builder.build().orElseThrow();
     this.metadata = tuple.description;
     this.context = tuple.context;
     this.constants = new ElectionConstants();
@@ -225,12 +225,13 @@ public class TestEndToEndElectionIntegration {
   /**
    * Homomorphically combine the selections made on all of the cast ballots
    * and use the Available Guardians to decrypt the combined tally.
-   * In this way, no individual voter's cast ballot is ever decrypted drectly.
+   * In this way, no individual voter's cast ballot is ever decrypted directly.
    */
   void step_4_decrypt_tally() {
+    System.out.printf("%n4. Homomorphically Accumulate and decrypt tally%n");
     // Generate a Homomorphically Accumulated Tally of the ballots
     this.ciphertext_tally =
-            Tally.tally_ballots(this.ballot_store, this.metadata, this.context).get();
+            Tally.tally_ballots(this.ballot_store, this.metadata, this.context).orElseThrow();
 
     System.out.printf("%n4. cast %d spoiled %d total %d%n",
             this.ciphertext_tally.count(),
@@ -253,30 +254,28 @@ public class TestEndToEndElectionIntegration {
       }
     }
 
-    // Get the Plain Text Tally
-    this.plaintext_tally = this.decrypter.get_plaintext_tally(false, null).get();
+    // Here's where the ciphertext Tally is decrypted.
+    this.decryptedTally = this.decrypter.get_plaintext_tally(false, null).orElseThrow();
     System.out.printf("Tally Decrypted%n");
 
     // Now, compare the results
     this.compare_results();
   }
 
-  //         Compare the results to ensure the decryption was done correctly
+  // Compare the results to ensure the decryption was done correctly
   void compare_results() {
-    System.out.printf("----------------------------------%n");
+    System.out.printf("%n4.5 Compare results%n");
     // Create a representation of each contest's tally
-    List<String> selection_ids = new ArrayList<>();
     Map<String, Integer> expected_plaintext_tally = new HashMap<>();
     for (ContestDescriptionWithPlaceholders contest : this.metadata.contests) {
       for (SelectionDescription selection : contest.ballot_selections) {
-        selection_ids.add(selection.object_id);
         expected_plaintext_tally.put(selection.object_id, 0);
       }
     }
 
     // Tally the expected values from the loaded ballots
     for (PlaintextBallot ballot : this.plaintext_ballots) {
-      if (this.ballot_store.get(ballot.object_id).get().state == BallotBoxState.CAST) {
+      if (this.ballot_store.get(ballot.object_id).orElseThrow().state == BallotBoxState.CAST) {
         for (PlaintextBallotContest contest : ballot.contests) {
           for (PlaintextBallotSelection selection : contest.ballot_selections) {
             Integer value = expected_plaintext_tally.get(selection.selection_id);
@@ -287,13 +286,13 @@ public class TestEndToEndElectionIntegration {
     }
 
     // Compare the expected tally to the decrypted tally
-    for (Tally.PlaintextTallyContest tally_contest : this.plaintext_tally.contests().values()) {
+    for (Tally.PlaintextTallyContest tally_contest : this.decryptedTally.contests().values()) {
       System.out.printf("Contest: %s%n", tally_contest.object_id());
       for (Tally.PlaintextTallySelection tally_selection : tally_contest.selections().values()) {
         Integer expected = expected_plaintext_tally.get(tally_selection.object_id());
         System.out.printf("  - Selection: %s expected: %s, actual: %s%n",
                 tally_selection.object_id(), expected, tally_selection.tally());
-        assertThat(expected).isEqualTo(tally_selection.tally().intValue());
+        assertThat(expected).isEqualTo(tally_selection.tally());
       }
       System.out.printf("----------------------------------%n");
     }
@@ -304,18 +303,18 @@ public class TestEndToEndElectionIntegration {
       Ballot.CiphertextAcceptedBallot accepted_ballot = entry.getValue();
       if (accepted_ballot.state == BallotBoxState.SPOILED) {
         for (PlaintextBallot plaintext_ballot : this.plaintext_ballots) {
-          if (ballot_id == plaintext_ballot.object_id) {
+          if (ballot_id.equals(plaintext_ballot.object_id)) {
             System.out.printf("%nSpoiled Ballot: %s%n", ballot_id);
             for (PlaintextBallotContest contest : plaintext_ballot.contests) {
               System.out.printf("%nContest: %s%n", contest.contest_id);
               for (PlaintextBallotSelection selection : contest.ballot_selections) {
                 int expected = selection.to_int();
                 Tally.PlaintextTallySelection decrypted_selection = (
-                        this.plaintext_tally.spoiled_ballots().get(ballot_id).get(contest.contest_id)
+                        this.decryptedTally.spoiled_ballots().get(ballot_id).get(contest.contest_id)
                                 .selections().get(selection.selection_id));
                 System.out.printf("   - Selection: %s expected: %d, actual: %d%n",
                         selection.selection_id, expected, decrypted_selection.tally());
-                assertThat(expected).isEqualTo(decrypted_selection.tally().intValue());
+                assertThat(expected).isEqualTo(decrypted_selection.tally());
               }
             }
           }
@@ -328,7 +327,7 @@ public class TestEndToEndElectionIntegration {
   void step_5_publish_and_verify() throws IOException {
     System.out.printf("%n5. publish%n");
     Publisher publisher = new Publisher(outputDir, true);
-    publisher.write(
+    publisher.writeElectionRecordJson(
             this.description,
             this.context,
             this.constants,
@@ -336,7 +335,7 @@ public class TestEndToEndElectionIntegration {
             this.ballot_store,
             this.ciphertext_tally.spoiled_ballots().values(),
             this.ciphertext_tally.publish_ciphertext_tally(),
-            this.plaintext_tally,
+            this.decryptedTally,
             this.coefficient_validation_sets);
 
     System.out.printf("%n6. verify%n");
@@ -385,9 +384,9 @@ public class TestEndToEndElectionIntegration {
             publisher.encryptedTallyFile().toString());
     assertThat(ciphertext_tally_from_file).isEqualTo(this.ciphertext_tally.publish_ciphertext_tally());
 
-    Tally.PlaintextTally plainttext_tally_from_file = ConvertFromJson.readPlaintextTally(
+    Tally.PlaintextTally plaintext_tally_from_file = ConvertFromJson.readPlaintextTally(
             publisher.tallyFile().toString());
-    assertThat(plainttext_tally_from_file).isEqualTo(this.plaintext_tally);
+    assertThat(plaintext_tally_from_file).isEqualTo(this.decryptedTally);
   }
 
 }

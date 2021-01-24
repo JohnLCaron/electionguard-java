@@ -12,7 +12,6 @@ import com.sunya.electionguard.publish.Consumer;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.sunya.electionguard.Group.ElementModP;
@@ -32,7 +31,7 @@ public class BallotAggregationVerifier {
   BallotAggregationVerifier(ElectionParameters electionParameters, Consumer consumer) throws IOException {
     this.electionParameters = electionParameters;
     this.consumer = consumer;
-    this.tally = consumer.plaintextTally();
+    this.tally = consumer.decryptedTally();
     this.grp = new Grp(electionParameters.large_prime(), electionParameters.small_prime());
   }
 
@@ -69,7 +68,7 @@ public class BallotAggregationVerifier {
    * 11. An election verifier should confirm the following equations for each (non-placeholder) option in
    * each contest in the ballot coding file.
    * (A) B = (M ⋅ (∏ Mi )) mod p.
-   * (B) M = g t mod p.
+   * (B) M = g^t mod p.
    */
   boolean verify_tally_decryption() throws IOException {
     boolean error = false;

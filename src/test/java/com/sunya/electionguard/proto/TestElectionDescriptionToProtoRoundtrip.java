@@ -11,21 +11,21 @@ import java.io.IOException;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 
-public class TestElectionToProtoRoundtrip {
-  private static final String pythonModified = "src/test/data/python-modified/";
+public class TestElectionDescriptionToProtoRoundtrip {
+  public static final String testElectionRecord = "src/test/data/python-modified/";
   private static Publisher publisher;
 
   @BeforeContainer
   public static void setup() throws IOException {
-    publisher = new Publisher(pythonModified, false);
+    publisher = new Publisher(testElectionRecord, false);
   }
 
   @Example
   public void testElectionRoundtrip() throws IOException {
     Election.ElectionDescription fromPython = ConvertFromJson.readElection(publisher.electionFile().toString());
     assertThat(fromPython).isNotNull();
-    ElectionProto.ElectionDescription proto = ElectionToProto.translate(fromPython);
-    Election.ElectionDescription roundtrip = ElectionFromProto.translate(proto);
+    ElectionProto.ElectionDescription proto = ElectionDescriptionToProto.translateToProto(fromPython);
+    Election.ElectionDescription roundtrip = ElectionDescriptionFromProto.translateFromProto(proto);
 
     assertThat(roundtrip.election_scope_id).isEqualTo(fromPython.election_scope_id);
     assertThat(roundtrip.type).isEqualTo(fromPython.type);

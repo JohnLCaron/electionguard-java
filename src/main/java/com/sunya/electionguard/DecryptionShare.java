@@ -26,7 +26,7 @@ public class DecryptionShare {
     /** The Missing Guardian for whom this share is calculated on behalf of. */
     public abstract String missing_guardian_id();
 
-    /**  The SelectionDescription hash. Not used? */
+    /**  The SelectionDescription hash. LOOK Not used? */
     public abstract ElementModQ description_hash();
 
     /** The Share of the decryption of a selection. M_il in the spec. */

@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+import "com/sunya/electionguard/proto/common.proto";
+
+option java_package = "com.sunya.electionguard.proto";
+option java_outer_classname = "CiphertextProto";
+
+message PublishedCiphertextTally {
+  string object_id = 1;
+
+  // Map(CONTEST_ID, CiphertextTallyContest)
+  map<string, CiphertextTallyContest> cast = 2;
+}
+
+message CiphertextTallyContest {
+  string object_id = 1;
+
+  // The ContestDescription hash.
+  ElementModQ description_hash = 2;
+
+  // Map(SELECTION_ID, CiphertextTallySelection)
+  map<string, CiphertextTallySelection> tally_selections = 3;
+}
+
+message CiphertextTallySelection {
+  string object_id = 1;
+  ElementModQ description_hash = 2;
+  // accumulation over all the cast ballots
+  ElGamalCiphertext ciphertext = 3;
+}

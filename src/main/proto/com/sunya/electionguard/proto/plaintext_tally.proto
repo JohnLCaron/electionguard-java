@@ -1,0 +1,79 @@
+syntax = "proto3";
+
+import "com/sunya/electionguard/proto/common.proto";
+
+option java_package = "com.sunya.electionguard.proto";
+option java_outer_classname = "PlaintextProto";
+
+message PlaintextTally {
+  string object_id = 1;
+  // Map(CONTEST_ID, PlaintextTallyContest)
+  map<string, PlaintextTallyContest> contests = 2;
+  // Map(BALLOT_ID, Map(CONTEST_ID, PlaintextTallyContest))
+  map<string, PlaintextTallyContestMap> spoiled_ballots = 3;
+}
+
+message PlaintextTallyContestMap {
+  map<string, PlaintextTallyContest> contests = 3;
+}
+
+message PlaintextTallyContest {
+  string object_id = 1;
+  map<string, PlaintextTallySelection> selections = 2;
+}
+
+message PlaintextTallySelection {
+  string object_id = 1;
+  uint32 tally = 2;
+  // g^tally or M in the spec.
+  ElementModP value = 3;
+  ElGamalCiphertext message = 4;
+  repeated CiphertextDecryptionSelection shares = 5;
+}
+
+message CiphertextDecryptionSelection {
+  string object_id = 1;
+  // The Available Guardian that this share belongs to
+  string guardian_id = 2;
+
+  // The SelectionDescription hash.
+  ElementModQ description_hash = 3;
+
+  // The Share of the decryption of a selection. `M_i` in the spec.
+  ElementModP share = 4;
+
+  // The Proof that the share was decrypted correctly, if the guardian was available for decryption.
+  ChaumPedersenProof proof = 5; // Optional
+
+  // Map[GUARDIAN_ID, CiphertextCompensatedDecryptionSelection]
+  map<string, CiphertextCompensatedDecryptionSelection> recovered_parts = 6; // Optional
+}
+
+message CiphertextCompensatedDecryptionSelection {
+  string object_id = 1;
+
+  // The Available Guardian that this share belongs to.
+  string guardian_id = 2;
+
+  // The Missing Guardian for whom this share is calculated on behalf of.
+  string missing_guardian_id = 3;
+
+  // The SelectionDescription hash. Not used?
+  ElementModQ description_hash = 4;
+
+  // The Share of the decryption of a selection. M_il in the spec.
+  ElementModP share = 5;
+
+  // he Recovery Public Key for the missing_guardian that corresponds to the available guardian's share of the secret.
+  ElementModP recovery_key = 6;
+
+  // The Proof that the share was decrypted correctly.
+  ChaumPedersenProof proof = 7;
+}
+
+message ChaumPedersenProof {
+  ElementModP pad = 1; // a in the spec
+  ElementModP data = 2; // b in the spec
+  ElementModQ challenge = 3; // c in the spec
+  ElementModQ response = 4; // v in the spec
+}

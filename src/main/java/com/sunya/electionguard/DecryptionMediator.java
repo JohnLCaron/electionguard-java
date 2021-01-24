@@ -175,6 +175,7 @@ public class DecryptionMediator {
   }
 
   /**
+   * Decrypt the ciphertext Tally.
    * Get the plaintext tally for the election by composing each Guardian's
    * decrypted representation of each selection into a decrypted representation.
    * <p>
