@@ -76,8 +76,9 @@ public class GuardianPublicKeyVerifier {
    * @return a challenge value of a guardian, separated by quorum
    */
   ElementModQ compute_guardian_challenge_threshold_separated(ElementModP public_key, ElementModP commitment) {
-    // LOOK changed to return Hash.hash_elems(this.electionParameters.base_hash(), public_key, commitment);
-    return Hash.hash_elems(this.electionParameters.base_hash(), public_key, commitment);
+    // LOOK change to return Hash.hash_elems(this.electionParameters.base_hash(), public_key, commitment);
+    //  return Hash.hash_elems(this.electionParameters.base_hash(), public_key, commitment);
+    return Hash.hash_elems(public_key, commitment);
   }
 
   /**

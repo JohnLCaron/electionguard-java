@@ -43,7 +43,9 @@ public class SchnorrProof extends Proof {
     boolean in_bounds_h = h.is_in_bounds();
     boolean in_bounds_u = u.is_in_bounds();
 
-    boolean valid_2A = this.challenge.equals(Hash.hash_elems(crypto_base_hash, k, h));
+    // LOOK withdraw correct hash until python code to catches up
+    //  boolean valid_2A = this.challenge.equals(Hash.hash_elems(crypto_base_hash, k, h));
+    boolean valid_2A = this.challenge.equals(Hash.hash_elems(k, h));
     boolean valid_2B = g_pow_p(u).equals(Group.mult_p(h, Group.pow_p(k, this.challenge)));
 
     boolean success = valid_public_key && in_bounds_h && in_bounds_u && valid_2A && valid_2B;
@@ -78,8 +80,9 @@ public class SchnorrProof extends Proof {
   static SchnorrProof make_schnorr_proof(ElGamal.KeyPair keypair, ElementModQ nonce, ElementModQ crypto_base_hash) {
     ElementModP k = keypair.public_key;
     ElementModP h = g_pow_p(nonce);
-    // LOOK to follow validation spec 2.A, changed to c = Hash.hash_elems(crypto_base_hash, k, h). see issue #278
-    ElementModQ c = Hash.hash_elems(crypto_base_hash, k, h);
+    // LOOK to follow validation spec 2.A, change to c = Hash.hash_elems(crypto_base_hash, k, h). see issue #278
+    //  ElementModQ c = Hash.hash_elems(crypto_base_hash, k, h);
+    ElementModQ c = Hash.hash_elems(k, h);
     ElementModQ u = a_plus_bc_q(nonce, keypair.secret_key, c);
 
     return new SchnorrProof(k, h, c, u);

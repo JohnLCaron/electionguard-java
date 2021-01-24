@@ -61,7 +61,8 @@ public class TestSchnorrProperties extends TestProperties {
     SchnorrProof proof = make_schnorr_proof(keypair, nonce, crypto_hash);
     assertThat(other).isNotEqualTo(crypto_hash); // otherwise wont fail
     SchnorrProof proof_bad = new SchnorrProof(proof.public_key, proof.commitment, proof.challenge, proof.response);
-    assertThat(proof_bad.is_valid(other)).isFalse();
+    // LOOK withdraw fix until python catches up
+    assertThat(proof_bad.is_valid(other)).isTrue();
   }
 
   @Property
