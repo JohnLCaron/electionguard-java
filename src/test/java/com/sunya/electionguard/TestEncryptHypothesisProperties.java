@@ -4,7 +4,6 @@ import net.jqwik.api.ForAll;
 import net.jqwik.api.Property;
 import net.jqwik.api.ShrinkingMode;
 
-import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -36,7 +35,6 @@ public class TestEncryptHypothesisProperties extends TestProperties {
           @ForAll("elections_and_ballots") ElectionTestHelper.EverythingTuple everything,
           @ForAll("elements_mod_q") Group.ElementModQ nonce) {
 
-    Election.ElectionDescription election_description = everything.election_description;
     Election.InternalElectionDescription metadata = everything.internal_election_description;
     List<Ballot.PlaintextBallot> ballots = everything.ballots;
     Group.ElementModQ secret_key = everything.secret_key;

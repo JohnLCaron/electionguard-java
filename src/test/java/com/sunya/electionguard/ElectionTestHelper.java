@@ -239,8 +239,6 @@ public class ElectionTestHelper {
    * with a chance that there will be no party assigned at all.
    * @param party_listO: A list of `Party` objects. If None, then the resulting `Candidate`
    * will have no party.
-   *
-   * @return
    */
   Candidate candidates(Optional<List<Party>> party_listO) {
     String party_id;
@@ -299,8 +297,6 @@ public class ElectionTestHelper {
    * it's varied by Hypothesis.
    * @param mo: optional integer, specifying a particular value for m in this n-of-m contest, otherwise
    * it's varied by Hypothesis.
-   *
-   * @return
    */
   CandidateTuple candidate_contest_descriptions(
           int sequence_order,
@@ -450,7 +446,7 @@ public class ElectionTestHelper {
 
     BallotStyle styles = ballot_styles(parties, geo_units);
 
-    //maybe later on we'll do something more complicated with dates
+    // maybe later on we'll do something more complicated with dates
     OffsetDateTime start_date = OffsetDateTime.now();
     OffsetDateTime end_date = start_date;
 
@@ -497,7 +493,7 @@ public class ElectionTestHelper {
       assertWithMessage("every contest needs to be valid").that(contest.is_valid()).isTrue();
       // LOOK dont understand "we need exactly this many 1 's, and the rest 0' s"
       int n = contest.number_elected ; // we need exactly this many 1 's, and the rest 0' s
-      ArrayList<SelectionDescription> ballot_selections = new ArrayList(contest.ballot_selections);
+      ArrayList<SelectionDescription> ballot_selections = new ArrayList<>(contest.ballot_selections);
       assertThat(ballot_selections.size() >= n).isTrue();
       // LOOK shuffle leave this out for now.
       // Collections.shuffle(ballot_selections);
@@ -575,8 +571,8 @@ public class ElectionTestHelper {
    * <p>
    *
    * @param num_ballots: The number of ballots to generate (default: 3).
-   * @return: a tuple of: an `InternalElectionDescription`, a list of plaintext ballots, an ElGamal secret key,
-   * and a `CiphertextElectionContext`
+   * @return a tuple of an `InternalElectionDescription`, a list of plaintext ballots, an ElGamal secret key,
+   * and a `CiphertextElectionContext`.
    */
   EverythingTuple elections_and_ballots(int num_ballots) {
     Preconditions.checkArgument(num_ballots >= 0, "You're asking for a negative number of ballots?");

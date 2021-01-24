@@ -11,11 +11,11 @@ import static com.sunya.electionguard.Election.*;
 public class ElectionBuilder {
 
   public static class DescriptionAndContext {
-    final InternalElectionDescription description;
+    final InternalElectionDescription metadata;
     final CiphertextElectionContext context;
 
-    public DescriptionAndContext(InternalElectionDescription description, CiphertextElectionContext context) {
-      this.description = description;
+    public DescriptionAndContext(InternalElectionDescription metadata, CiphertextElectionContext context) {
+      this.metadata = metadata;
       this.context = context;
     }
   }

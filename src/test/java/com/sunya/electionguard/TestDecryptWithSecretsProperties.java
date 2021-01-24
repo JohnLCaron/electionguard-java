@@ -353,9 +353,9 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
     // TODO: Hypothesis test instead
 
     Election.ElectionDescription election = ElectionFactory.get_simple_election_from_file();
-    Optional<ElectionBuilder.DescriptionAndContext> celection = ElectionFactory.get_fake_ciphertext_election(election, keypair.public_key);
-    Election.InternalElectionDescription metadata = celection.get().description;
-    Election.CiphertextElectionContext context = celection.get().context;
+    ElectionBuilder.DescriptionAndContext celection = ElectionFactory.get_fake_ciphertext_election(election, keypair.public_key).orElseThrow();
+    Election.InternalElectionDescription metadata = celection.metadata;
+    Election.CiphertextElectionContext context = celection.context;
 
     Ballot.PlaintextBallot data = new BallotFactory().get_simple_ballot_from_file();
     Encrypt.EncryptionDevice device = new Encrypt.EncryptionDevice("Location");
@@ -451,7 +451,7 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
 
         // Selections may be undervoted for a specific contest
         List<Ballot.PlaintextBallotSelection> data_selection_exist = new ArrayList<>();
-        ;
+
         if (data_contest != null) {
           data_selection_exist = data_contest.ballot_selections.stream()
                   .filter(s -> s.selection_id.equals(selection_description.object_id)).collect(Collectors.toList());
@@ -478,9 +478,9 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
           @ForAll("elgamal_keypairs") ElGamal.KeyPair keypair) throws IOException {
 
     Election.ElectionDescription election = ElectionFactory.get_simple_election_from_file();
-    Optional<ElectionBuilder.DescriptionAndContext> celection = ElectionFactory.get_fake_ciphertext_election(election, keypair.public_key);
-    Election.InternalElectionDescription metadata = celection.get().description;
-    Election.CiphertextElectionContext context = celection.get().context;
+    ElectionBuilder.DescriptionAndContext celection = ElectionFactory.get_fake_ciphertext_election(election, keypair.public_key).orElseThrow();
+    Election.InternalElectionDescription metadata = celection.metadata;
+    Election.CiphertextElectionContext context = celection.context;
 
     Ballot.PlaintextBallot data = new BallotFactory().get_simple_ballot_from_file();
     Encrypt.EncryptionDevice device = new Encrypt.EncryptionDevice("Location");

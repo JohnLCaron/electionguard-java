@@ -105,10 +105,10 @@ public class TestKeyCeremonyMediator {
     Optional<ElectionPartialKeyBackup> backup_from_1_for_2 = GUARDIAN_1.share_election_partial_key_backup(GUARDIAN_2_ID);
     Optional<ElectionPartialKeyBackup> backup_from_2_for_1 = GUARDIAN_2.share_election_partial_key_backup(GUARDIAN_1_ID);
 
-    mediator.receive_election_partial_key_backup(backup_from_1_for_2.get());
+    mediator.receive_election_partial_key_backup(backup_from_1_for_2.orElseThrow());
     assertThat(mediator.all_election_partial_key_backups_available()).isFalse();
 
-    mediator.receive_election_partial_key_backup(backup_from_2_for_1.get());
+    mediator.receive_election_partial_key_backup(backup_from_2_for_1.orElseThrow());
     assertThat(mediator.all_election_partial_key_backups_available()).isTrue();
 
     List<ElectionPartialKeyBackup> guardian1_backups = mediator.share_election_partial_key_backups_to_guardian(GUARDIAN_1_ID);
@@ -135,20 +135,20 @@ public class TestKeyCeremonyMediator {
 
      mediator.confirm_presence_of_guardian(GUARDIAN_1.share_public_keys());
      mediator.confirm_presence_of_guardian(GUARDIAN_2.share_public_keys());
-     mediator.receive_election_partial_key_backup(GUARDIAN_1.share_election_partial_key_backup(GUARDIAN_2_ID).get());
-     mediator.receive_election_partial_key_backup(GUARDIAN_2.share_election_partial_key_backup(GUARDIAN_1_ID).get());
+     mediator.receive_election_partial_key_backup(GUARDIAN_1.share_election_partial_key_backup(GUARDIAN_2_ID).orElseThrow());
+     mediator.receive_election_partial_key_backup(GUARDIAN_2.share_election_partial_key_backup(GUARDIAN_1_ID).orElseThrow());
 
      GUARDIAN_1.save_election_partial_key_backup(mediator.share_election_partial_key_backups_to_guardian(GUARDIAN_1_ID).get(0));
      GUARDIAN_2.save_election_partial_key_backup(mediator.share_election_partial_key_backups_to_guardian(GUARDIAN_2_ID).get(0));
      Optional<ElectionPartialKeyVerification> verification1 = GUARDIAN_1.verify_election_partial_key_backup(GUARDIAN_2_ID, identity_auxiliary_decrypt);
      Optional<ElectionPartialKeyVerification> verification2 = GUARDIAN_2.verify_election_partial_key_backup(GUARDIAN_1_ID, identity_auxiliary_decrypt);
 
-     mediator.receive_election_partial_key_verification(verification1.get());
+     mediator.receive_election_partial_key_verification(verification1.orElseThrow());
      assertThat(mediator.all_election_partial_key_verifications_received()).isFalse();
      assertThat(mediator.all_election_partial_key_backups_verified()).isFalse();
      assertThat(mediator.publish_joint_key()).isNotNull();
 
-     mediator.receive_election_partial_key_verification(verification2.get());
+     mediator.receive_election_partial_key_verification(verification2.orElseThrow());
      Optional<Group.ElementModP> joint_key = mediator.publish_joint_key();
 
      assertThat(mediator.all_election_partial_key_verifications_received()).isTrue();
@@ -165,8 +165,8 @@ public class TestKeyCeremonyMediator {
     KeyCeremonyMediator mediator = new KeyCeremonyMediator(CEREMONY_DETAILS);
     mediator.confirm_presence_of_guardian(GUARDIAN_1.share_public_keys());
     mediator.confirm_presence_of_guardian(GUARDIAN_2.share_public_keys());
-    mediator.receive_election_partial_key_backup(GUARDIAN_1.share_election_partial_key_backup(GUARDIAN_2_ID).get());
-    mediator.receive_election_partial_key_backup(GUARDIAN_2.share_election_partial_key_backup(GUARDIAN_1_ID).get());
+    mediator.receive_election_partial_key_backup(GUARDIAN_1.share_election_partial_key_backup(GUARDIAN_2_ID).orElseThrow());
+    mediator.receive_election_partial_key_backup(GUARDIAN_2.share_election_partial_key_backup(GUARDIAN_1_ID).orElseThrow());
     GUARDIAN_1.save_election_partial_key_backup(mediator.share_election_partial_key_backups_to_guardian(GUARDIAN_1_ID).get(0));
     GUARDIAN_2.save_election_partial_key_backup(mediator.share_election_partial_key_backups_to_guardian(GUARDIAN_2_ID).get(0));
     Optional<ElectionPartialKeyVerification> verification1O = GUARDIAN_1.verify_election_partial_key_backup(GUARDIAN_2_ID, identity_auxiliary_decrypt);
@@ -196,7 +196,7 @@ public class TestKeyCeremonyMediator {
     assertThat(missing_challenges.get(0)).isEqualTo(GuardianPair.create(GUARDIAN_1_ID, GUARDIAN_2_ID));
 
     Optional<ElectionPartialKeyChallenge> challenge = GUARDIAN_1.publish_election_backup_challenge(GUARDIAN_2_ID);
-    mediator.receive_election_partial_key_challenge(challenge.get());
+    mediator.receive_election_partial_key_challenge(challenge.orElseThrow());
     List<GuardianPair> no_missing_challenges = mediator.share_missing_election_partial_key_challenges();
 
     assertThat(mediator.all_election_partial_key_backups_verified()).isFalse();

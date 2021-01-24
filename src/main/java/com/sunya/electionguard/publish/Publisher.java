@@ -12,7 +12,7 @@ import java.nio.file.Path;
 
 import static com.sunya.electionguard.Election.*;
 
-/** Publishes Election metadata to Json files. */
+/** Publishes the Election Record to Json or proto files. */
 public class Publisher {
   static final String DEVICES_DIR = "devices";
   static final String COEFFICIENTS_DIR = "coefficients";

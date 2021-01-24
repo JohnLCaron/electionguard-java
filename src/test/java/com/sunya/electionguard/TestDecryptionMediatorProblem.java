@@ -65,7 +65,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
 
     Optional<ElectionBuilder.DescriptionAndContext> tuple = builder.build();
     assertThat(tuple).isPresent();
-    this.metadata = tuple.get().description;
+    this.metadata = tuple.get().metadata;
     this.context = tuple.get().context;
 
     Encrypt.EncryptionDevice encryption_device = new Encrypt.EncryptionDevice("location");
@@ -103,8 +103,8 @@ public class TestDecryptionMediatorProblem extends TestProperties {
     }
 
     // Encrypt
-    CiphertextBallot temp_encrypted_fake_cast_ballot = ballot_marking_device.encrypt(this.fake_cast_ballot).get();
-    CiphertextBallot temp_encrypted_fake_spoiled_ballot = ballot_marking_device.encrypt(this.fake_spoiled_ballot).get();
+    CiphertextBallot temp_encrypted_fake_cast_ballot = ballot_marking_device.encrypt(this.fake_cast_ballot).orElseThrow();
+    CiphertextBallot temp_encrypted_fake_spoiled_ballot = ballot_marking_device.encrypt(this.fake_spoiled_ballot).orElseThrow();
     assertThat(temp_encrypted_fake_cast_ballot).isNotNull();
     assertThat(temp_encrypted_fake_spoiled_ballot).isNotNull();
     assertThat(temp_encrypted_fake_cast_ballot.is_valid_encryption(
@@ -116,19 +116,19 @@ public class TestDecryptionMediatorProblem extends TestProperties {
     // encrypt some more fake ballots
     List<CiphertextBallot> more_fake_encrypted_ballots = new ArrayList<>();
     for (PlaintextBallot fake_ballot : more_fake_ballots) {
-      more_fake_encrypted_ballots.add(ballot_marking_device.encrypt(fake_ballot).get());
+      more_fake_encrypted_ballots.add(ballot_marking_device.encrypt(fake_ballot).orElseThrow());
     }
     // encrypt some more fake ballots
     List<CiphertextBallot> more_fake_encrypted_spoiled_ballots = new ArrayList<>();
     for (PlaintextBallot fake_ballot : more_fake_spoiled_ballots) {
-      more_fake_encrypted_spoiled_ballots.add(ballot_marking_device.encrypt(fake_ballot).get());
+      more_fake_encrypted_spoiled_ballots.add(ballot_marking_device.encrypt(fake_ballot).orElseThrow());
     }
 
     // configure the ballot box
     DataStore ballot_store = new DataStore();
     BallotBox ballot_box = new BallotBox(this.metadata, this.context, ballot_store);
-    this.encrypted_fake_cast_ballot = ballot_box.cast(temp_encrypted_fake_cast_ballot).get();
-    this.encrypted_fake_spoiled_ballot = ballot_box.spoil(temp_encrypted_fake_spoiled_ballot).get();
+    this.encrypted_fake_cast_ballot = ballot_box.cast(temp_encrypted_fake_cast_ballot).orElseThrow();
+    this.encrypted_fake_spoiled_ballot = ballot_box.spoil(temp_encrypted_fake_spoiled_ballot).orElseThrow();
 
     // Cast some more fake ballots
     for (CiphertextBallot fake_ballot : more_fake_encrypted_ballots) {
@@ -140,7 +140,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
     }
 
     // generate encrypted tally
-    this.ciphertext_tally = Tally.tally_ballots(ballot_store, this.metadata, this.context).get();
+    this.ciphertext_tally = Tally.tally_ballots(ballot_store, this.metadata, this.context).orElseThrow();
   }
 
   @Example
@@ -176,11 +176,11 @@ public class TestDecryptionMediatorProblem extends TestProperties {
 
     List<CiphertextBallot> allECastBallots = new ArrayList<>();
     for (PlaintextBallot ballot : castBallots) {
-      allECastBallots.add(ballot_marking_device.encrypt(ballot).get());
+      allECastBallots.add(ballot_marking_device.encrypt(ballot).orElseThrow());
     }
     List<CiphertextBallot> allESpoiledBallots = new ArrayList<>();
     for (PlaintextBallot ballot : spoiledBallots) {
-      allESpoiledBallots.add(ballot_marking_device.encrypt(ballot).get());
+      allESpoiledBallots.add(ballot_marking_device.encrypt(ballot).orElseThrow());
     }
 
     // configure the ballot box
@@ -197,15 +197,15 @@ public class TestDecryptionMediatorProblem extends TestProperties {
     }
 
     // generate encrypted tally
-    Tally.CiphertextTally ctally = Tally.tally_ballots(ballot_store, this.metadata, this.context).get();
+    Tally.CiphertextTally ctally = Tally.tally_ballots(ballot_store, this.metadata, this.context).orElseThrow();
 
     // now decrypt it
     DecryptionMediator decryptionMediator = new DecryptionMediator(this.metadata, this.context, ctally);
     this.guardians.forEach(decryptionMediator::announce);
-    Optional<Tally.PlaintextTally> decrypted_tallies = decryptionMediator.get_plaintext_tally(false, null);
+    Optional<Tally.PlaintextTally> decrypted_tallies = decryptionMediator.getDecryptedTally(false, null);
     assertThat(decrypted_tallies).isNotNull();
 
-    Map<String, Integer> result = this._convert_to_selections(decrypted_tallies.get());
+    Map<String, Integer> result = this._convert_to_selections(decrypted_tallies.orElseThrow());
     System.out.printf("%n==================%ntestProblem result %s%n", result);
     assertThat(result).isEqualTo(expected_tally);
   }
@@ -233,11 +233,11 @@ public class TestDecryptionMediatorProblem extends TestProperties {
 
     List<CiphertextBallot> allECastBallots = new ArrayList<>();
     for (PlaintextBallot ballot : castBallots) {
-      allECastBallots.add(ballot_marking_device.encrypt(ballot).get());
+      allECastBallots.add(ballot_marking_device.encrypt(ballot).orElseThrow());
     }
     List<CiphertextBallot> allESpoiledBallots = new ArrayList<>();
     for (PlaintextBallot ballot : spoiledBallots) {
-      allESpoiledBallots.add(ballot_marking_device.encrypt(ballot).get());
+      allESpoiledBallots.add(ballot_marking_device.encrypt(ballot).orElseThrow());
     }
 
     // configure the ballot box
@@ -254,15 +254,15 @@ public class TestDecryptionMediatorProblem extends TestProperties {
     }
 
     // generate encrypted tally
-    Tally.CiphertextTally ctally = Tally.tally_ballots(ballot_store, this.metadata, this.context).get();
+    Tally.CiphertextTally ctally = Tally.tally_ballots(ballot_store, this.metadata, this.context).orElseThrow();
 
     // now decrypt it
     DecryptionMediator decryptionMediator = new DecryptionMediator(this.metadata, this.context, ctally);
     this.guardians.forEach(decryptionMediator::announce);
-    Optional<Tally.PlaintextTally> decrypted_tallies = decryptionMediator.get_plaintext_tally(false, null);
+    Optional<Tally.PlaintextTally> decrypted_tallies = decryptionMediator.getDecryptedTally(false, null);
     assertThat(decrypted_tallies).isNotNull();
 
-    Map<String, Integer> result = this._convert_to_selections(decrypted_tallies.get());
+    Map<String, Integer> result = this._convert_to_selections(decrypted_tallies.orElseThrow());
     System.out.printf("%n==================%ntestProblem result %s%n", result);
     assertThat(result).isEqualTo(expected);
   }
@@ -292,7 +292,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
     // encrypt ballots
     List<CiphertextBallot> allEncryptedBallots = new ArrayList<>();
     for (PlaintextBallot ballot : allPlaintextBallots) {
-      allEncryptedBallots.add(ballot_marking_device.encrypt(ballot).get());
+      allEncryptedBallots.add(ballot_marking_device.encrypt(ballot).orElseThrow());
     }
 
     // configure the ballot box
@@ -305,15 +305,15 @@ public class TestDecryptionMediatorProblem extends TestProperties {
     }
 
     // generate encrypted tally
-    Tally.CiphertextTally ctally = Tally.tally_ballots(ballot_store, this.metadata, this.context).get();
+    Tally.CiphertextTally ctally = Tally.tally_ballots(ballot_store, this.metadata, this.context).orElseThrow();
 
     // now decrypt it
     DecryptionMediator decryptionMediator = new DecryptionMediator(this.metadata, this.context, ctally);
     this.guardians.forEach(decryptionMediator::announce);
-    Optional<Tally.PlaintextTally> decrypted_tallies = decryptionMediator.get_plaintext_tally(false, null);
+    Optional<Tally.PlaintextTally> decrypted_tallies = decryptionMediator.getDecryptedTally(false, null);
     assertThat(decrypted_tallies).isNotNull();
 
-    Map<String, Integer> result = this._convert_to_selections(decrypted_tallies.get());
+    Map<String, Integer> result = this._convert_to_selections(decrypted_tallies.orElseThrow());
     System.out.printf("%n==================%ntestProblem result %s%n", result);
     assertThat(result).isEqualTo(expected_tally);
   }
@@ -341,23 +341,24 @@ public class TestDecryptionMediatorProblem extends TestProperties {
 
     Encrypt.EncryptionDevice encryption_device = new Encrypt.EncryptionDevice("location");
     Encrypt.EncryptionMediator ballot_marking_device = new Encrypt.EncryptionMediator(this.metadata, this.context, encryption_device);
-    CiphertextBallot encryptedCastBallot = ballot_marking_device.encrypt(castBallot).get();
+    CiphertextBallot encryptedCastBallot = ballot_marking_device.encrypt(castBallot).orElseThrow();
 
     // configure the ballot box
     DataStore ballot_store = new DataStore();
     BallotBox ballot_box = new BallotBox(this.metadata, this.context, ballot_store);
-    CiphertextAcceptedBallot acceptedCastBallot= ballot_box.cast(encryptedCastBallot).get();
+    CiphertextAcceptedBallot acceptedCastBallot = ballot_box.cast(encryptedCastBallot).orElseThrow();
+    assertThat(acceptedCastBallot).isNotNull();
 
     // generate encrypted tally
-    Tally.CiphertextTally ctally = Tally.tally_ballots(ballot_store, this.metadata, this.context).get();
+    Tally.CiphertextTally ctally = Tally.tally_ballots(ballot_store, this.metadata, this.context).orElseThrow();
 
     // now decrypt it
     DecryptionMediator decryptionMediator = new DecryptionMediator(this.metadata, this.context, ctally);
     this.guardians.forEach(decryptionMediator::announce);
-    Optional<Tally.PlaintextTally> decrypted_tallies = decryptionMediator.get_plaintext_tally(false, null);
+    Optional<Tally.PlaintextTally> decrypted_tallies = decryptionMediator.getDecryptedTally(false, null);
     assertThat(decrypted_tallies).isNotNull();
 
-    Map<String, Integer> result = this._convert_to_selections(decrypted_tallies.get());
+    Map<String, Integer> result = this._convert_to_selections(decrypted_tallies.orElseThrow());
     System.out.printf("%n==================%ntestProblem result %s%n", result);
     assertThat(result).isEqualTo(expected_tally);
   }

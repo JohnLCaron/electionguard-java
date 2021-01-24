@@ -10,7 +10,7 @@ import static com.sunya.electionguard.Group.*;
 import static org.junit.Assert.fail;
 
 public class TestGroupProperties extends TestProperties {
-  private static ElementModQ ONE_Q = Group.int_to_q_unchecked(BigInteger.ONE);
+  private static final ElementModQ ONE_Q = Group.int_to_q_unchecked(BigInteger.ONE);
 
   //// TestEquality
   @Property
@@ -113,7 +113,7 @@ public class TestGroupProperties extends TestProperties {
 
   @Property
   public void test_simple_powers() {
-    ElementModP gp = int_to_p(G).get();
+    ElementModP gp = int_to_p_unchecked(G);
     assertThat(gp).isEqualTo(g_pow_p(ONE_MOD_Q));
     assertThat(ONE_MOD_P).isEqualTo(g_pow_p(ZERO_MOD_Q));
   }

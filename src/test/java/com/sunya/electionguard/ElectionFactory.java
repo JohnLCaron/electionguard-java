@@ -70,7 +70,7 @@ public class ElectionFactory {
             fake_candidate_ballot_selections,
             null, null, null);
 
-    ElectionDescription fake_election = new ElectionDescription(
+    return new ElectionDescription(
             "some-scope-id",
             ElectionType.unknown, OffsetDateTime.now(), OffsetDateTime.now(),
             ImmutableList.of(new GeopoliticalUnit("some-geopoltical-unit-id", "some-gp-unit-name", ReportingUnitType.unknown, null)),
@@ -81,8 +81,6 @@ public class ElectionFactory {
             ImmutableList.of(fake_referendum_contest, fake_candidate_contest),
             ImmutableList.of(fake_ballot_style),
             null, null);
-
-    return fake_election;
   }
 
   public static Optional<ElectionBuilder.DescriptionAndContext> get_fake_ciphertext_election(
@@ -104,14 +102,12 @@ public class ElectionFactory {
       ballot_id = "some-unique-ballot-id-123";
     }
 
-    Ballot.PlaintextBallot fake_ballot = new Ballot.PlaintextBallot(
+    return new Ballot.PlaintextBallot(
             ballot_id,
             election.ballot_styles.get(0).object_id,
             ImmutableList.of(Encrypt.contest_from(election.contests.get(0)),
                     Encrypt.contest_from(election.contests.get(1)))
     );
-
-    return fake_ballot;
   }
 
   private static ElectionDescription _get_election_from_file(String filename) throws IOException {
@@ -123,7 +119,7 @@ public class ElectionFactory {
 
   ///////////////////////////////////////////////////////////////////////////////////////
   // should all be in TestUtils ?
-  private static Random random = new Random(System.currentTimeMillis());
+  private static final Random random = new Random(System.currentTimeMillis());
 
   static class SelectionTuple {
     String id;

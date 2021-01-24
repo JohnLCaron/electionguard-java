@@ -20,7 +20,7 @@ public class TestChaumPedersenProperties extends TestProperties {
           @ForAll("elements_mod_q_no_zero") ElementModQ nonce,
           @ForAll("elements_mod_q") ElementModQ seed) {
 
-    ElGamal.Ciphertext message = ElGamal.elgamal_encrypt(0, nonce, keypair.public_key).get();
+    ElGamal.Ciphertext message = ElGamal.elgamal_encrypt(0, nonce, keypair.public_key).orElseThrow();
     DisjunctiveChaumPedersenProof proof = make_disjunctive_chaum_pedersen_zero(
             message, nonce, keypair.public_key, ONE_MOD_Q, seed);
     DisjunctiveChaumPedersenProof proof_bad = make_disjunctive_chaum_pedersen_one(message, nonce, keypair.public_key, ONE_MOD_Q, seed);
@@ -35,7 +35,7 @@ public class TestChaumPedersenProperties extends TestProperties {
           @ForAll("elements_mod_q_no_zero") ElementModQ nonce,
           @ForAll("elements_mod_q") ElementModQ seed) {
 
-    ElGamal.Ciphertext message = ElGamal.elgamal_encrypt(1, nonce, keypair.public_key).get();
+    ElGamal.Ciphertext message = ElGamal.elgamal_encrypt(1, nonce, keypair.public_key).orElseThrow();
     DisjunctiveChaumPedersenProof proof = make_disjunctive_chaum_pedersen_one(
             message, nonce, keypair.public_key, ONE_MOD_Q, seed);
     DisjunctiveChaumPedersenProof proof_bad = make_disjunctive_chaum_pedersen_zero(message, nonce, keypair.public_key, ONE_MOD_Q, seed);
@@ -51,8 +51,8 @@ public class TestChaumPedersenProperties extends TestProperties {
           @ForAll("elements_mod_q") ElementModQ seed) {
 
     // verify two different ways to generate an invalid C-P proof.
-    ElGamal.Ciphertext message = ElGamal.elgamal_encrypt(0, nonce, keypair.public_key).get();
-    ElGamal.Ciphertext message_bad = ElGamal.elgamal_encrypt(2, nonce, keypair.public_key).get();
+    ElGamal.Ciphertext message = ElGamal.elgamal_encrypt(0, nonce, keypair.public_key).orElseThrow();
+    ElGamal.Ciphertext message_bad = ElGamal.elgamal_encrypt(2, nonce, keypair.public_key).orElseThrow();
 
     DisjunctiveChaumPedersenProof proof = make_disjunctive_chaum_pedersen_zero(message, nonce, keypair.public_key, ONE_MOD_Q, seed);
     DisjunctiveChaumPedersenProof proof_bad = make_disjunctive_chaum_pedersen_zero(message_bad, nonce, keypair.public_key, ONE_MOD_Q, seed);
@@ -76,7 +76,7 @@ public class TestChaumPedersenProperties extends TestProperties {
       bad_constant = constant + 1;
     }
     ElementModP badP = Group.int_to_p_unchecked(BigInteger.valueOf(bad_constant));
-    ElGamal.Ciphertext message = ElGamal.elgamal_encrypt(constant, nonce, keypair.public_key).get();
+    ElGamal.Ciphertext message = ElGamal.elgamal_encrypt(constant, nonce, keypair.public_key).orElseThrow();
     ElementModP decryption = message.partial_decrypt(keypair.secret_key);
     ChaumPedersenProof proof = make_chaum_pedersen(message, keypair.secret_key, decryption, seed, ONE_MOD_Q);
     ChaumPedersenProof bad_proof = make_chaum_pedersen(message, keypair.secret_key, badP, seed, ONE_MOD_Q);
@@ -98,8 +98,8 @@ public class TestChaumPedersenProperties extends TestProperties {
     if (constant == bad_constant) {
       bad_constant = constant + 1;
     }
-    ElGamal.Ciphertext message = ElGamal.elgamal_encrypt(constant, nonce, keypair.public_key).get();
-    ElGamal.Ciphertext message_bad = ElGamal.elgamal_encrypt(bad_constant, nonce, keypair.public_key).get();
+    ElGamal.Ciphertext message = ElGamal.elgamal_encrypt(constant, nonce, keypair.public_key).orElseThrow();
+    ElGamal.Ciphertext message_bad = ElGamal.elgamal_encrypt(bad_constant, nonce, keypair.public_key).orElseThrow();
 
     ConstantChaumPedersenProof proof = make_constant_chaum_pedersen(message, constant, nonce, keypair.public_key, seed, ONE_MOD_Q);
     assertThat(proof.is_valid(message, keypair.public_key, ONE_MOD_Q)).isTrue();

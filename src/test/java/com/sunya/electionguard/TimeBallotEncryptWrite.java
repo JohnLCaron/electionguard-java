@@ -183,7 +183,7 @@ public class TimeBallotEncryptWrite {
     // Build the Election
     this.election_builder.set_public_key(joint_key.get());
     ElectionBuilder.DescriptionAndContext tuple = this.election_builder.build().orElseThrow();
-    this.election = tuple.description;
+    this.election = tuple.metadata;
     this.context = tuple.context;
     this.constants = new ElectionConstants();
   }

@@ -29,14 +29,14 @@ public class TestScheduler {
 
   static class TestCallable implements Callable<Integer> {
     @Override
-    public Integer call() throws Exception {
+    public Integer call() {
       return 42;
     }
   }
 
   static class TestCallableBad implements Callable<Integer> {
     @Override
-    public Integer call() throws Exception {
+    public Integer call() {
       if (random.nextBoolean()) {
         return 42;
       } else {

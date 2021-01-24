@@ -57,25 +57,25 @@ public class Encrypt {
    * See discussion on Issue #272 about "ballot chaining".
    */
   public static class EncryptionMediator {
-    private final InternalElectionDescription _metadata;
-    private final CiphertextElectionContext _encryption;
-    private ElementModQ _last_hash;
+    private final InternalElectionDescription metadata;
+    private final CiphertextElectionContext encryption;
+    private ElementModQ last_hash;
 
     public EncryptionMediator(InternalElectionDescription metadata, CiphertextElectionContext encryption,
                               EncryptionDevice encryption_device) {
-      this._metadata = metadata;
-      this._encryption = encryption;
+      this.metadata = metadata;
+      this.encryption = encryption;
       // LOOK does not follow validation spec 5.1, which calls for crypto_base_hash.
       //   Ok to use device hash see Issue #272. Spec should be updated.
-      this._last_hash = encryption_device.get_hash();
+      this.last_hash = encryption_device.get_hash();
     }
 
     /** Encrypt the specified ballot using the cached election context. */
     Optional<CiphertextBallot> encrypt(PlaintextBallot ballot) {
       Optional<CiphertextBallot> encrypted_ballot =
-              encrypt_ballot(ballot, this._metadata, this._encryption, this._last_hash, Optional.empty(), true);
+              encrypt_ballot(ballot, this.metadata, this.encryption, this.last_hash, Optional.empty(), true);
       if (encrypted_ballot.isPresent() && encrypted_ballot.get().tracking_hash.isPresent()) {
-        this._last_hash = encrypted_ballot.get().tracking_hash.get();
+        this.last_hash = encrypted_ballot.get().tracking_hash.get();
       }
       return encrypted_ballot;
     }

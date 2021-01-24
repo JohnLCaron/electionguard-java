@@ -17,7 +17,7 @@ public class DecryptWithSecrets {
    * Decrypt the specified `CiphertextBallotSelection` within the context of the specified selection.
    * <p>
    * @param selection: the selection to decrypt
-   * @param description: the qualified selection metadata
+   * @param description: the qualified selection description
    * @param public_key: the public key for the election (K)
    * @param secret_key: the known secret key used to generate the public key for this election
    * @param crypto_extended_base_hash: the extended base hash code (𝑄') for the election
@@ -52,7 +52,7 @@ public class DecryptWithSecrets {
    * Decrypt the specified `CiphertextBallotSelection` within the context of the specified selection.
    * <p>
    * @param selection: the contest selection to decrypt
-   * @param description: the qualified selection metadata that may be a placeholder selection
+   * @param description: the qualified selection description that may be a placeholder selection
    * @param public_key: the public key for the election (K)
    * @param crypto_extended_base_hash: the extended base hash code (𝑄') for the election
    * @param nonce_seed: the optional nonce that was seeded to the encryption function.
@@ -110,7 +110,7 @@ public class DecryptWithSecrets {
    * Decrypt the specified `CiphertextBallotContest` within the context of the specified contest.
    * <p>
    * @param contest: the contest to decrypt
-   * @param description: the qualified contest metadata that includes placeholder selections
+   * @param description: the qualified contest description that includes placeholder selections
    * @param public_key: the public key for the election (K)
    * @param secret_key: the known secret key used to generate the public key for this election
    * @param crypto_extended_base_hash: the extended base hash code (𝑄') for the election
@@ -161,7 +161,7 @@ public class DecryptWithSecrets {
    * Decrypt the specified `CiphertextBallotContest` within the context of the specified contest.
    * <p>
    * @param contest: the contest to decrypt
-   * @param description: the qualified contest metadata that includes placeholder selections
+   * @param description: the qualified contest description that includes placeholder selections
    * @param public_key: the public key for the election (K)
    * @param crypto_extended_base_hash: the extended base hash code (𝑄') for the election
    * @param nonce_seed: the optional nonce that was seeded to the encryption function
@@ -238,7 +238,7 @@ public class DecryptWithSecrets {
    * Decrypt the specified `CiphertextBallot` within the context of the specified election.
    * <p>
    * @param ballot: the ballot to decrypt
-   * @param election_metadata: the qualified election metadata that includes placeholder selections
+   * @param metadata: the qualified election description that includes placeholder selections
    * @param crypto_extended_base_hash: the extended base hash code (𝑄') for the election
    * @param public_key: the public key for the election (K)
    * @param secret_key: the known secret key used to generate the public key for this election
@@ -247,7 +247,7 @@ public class DecryptWithSecrets {
    */
   static Optional<PlaintextBallot> decrypt_ballot_with_secret(
           CiphertextBallot ballot,
-          Election.InternalElectionDescription election_metadata,
+          Election.InternalElectionDescription metadata,
           ElementModQ crypto_extended_base_hash,
           ElementModP public_key,
           ElementModQ secret_key,
@@ -256,7 +256,7 @@ public class DecryptWithSecrets {
     ) {
 
     if (!suppress_validity_check && !ballot.is_valid_encryption(
-            election_metadata.description_hash, public_key, crypto_extended_base_hash)) {
+            metadata.description_hash, public_key, crypto_extended_base_hash)) {
       return Optional.empty();
     }
 
@@ -264,7 +264,7 @@ public class DecryptWithSecrets {
 
     for (CiphertextBallotContest contest : ballot.contests) {
       Election.ContestDescriptionWithPlaceholders description =
-              election_metadata.contest_for(contest.object_id).orElseThrow(IllegalStateException::new);
+              metadata.contest_for(contest.object_id).orElseThrow(IllegalStateException::new);
       Optional<PlaintextBallotContest> plaintext_contest = decrypt_contest_with_secret(
               contest,
               description,
@@ -290,7 +290,7 @@ public class DecryptWithSecrets {
    * Decrypt the specified `CiphertextBallot` within the context of the specified election.
    * <p>
    * @param ballot: the ballot to decrypt
-   * @param election_metadata: the qualified election metadata that includes placeholder selections
+   * @param metadata: the qualified election metadata that includes placeholder selections
    * @param crypto_extended_base_hash: the extended base hash code (𝑄') for the election
    * @param public_key: the public key for the election (K)
    * @param nonce: the optional master ballot nonce that was either seeded to, or generated by the encryption function
@@ -299,7 +299,7 @@ public class DecryptWithSecrets {
    */
   static Optional<PlaintextBallot> decrypt_ballot_with_nonce(
           CiphertextBallot ballot,
-          Election.InternalElectionDescription election_metadata,
+          Election.InternalElectionDescription metadata,
           ElementModQ crypto_extended_base_hash,
           ElementModP public_key,
           Optional<ElementModQ> nonce,
@@ -308,13 +308,13 @@ public class DecryptWithSecrets {
     ) {
 
     if (!suppress_validity_check && !ballot.is_valid_encryption(
-            election_metadata.description_hash, public_key, crypto_extended_base_hash)) {
+            metadata.description_hash, public_key, crypto_extended_base_hash)) {
       return Optional.empty();
     }
 
     // Use the hashed representation included in the ballot or override with the provided values
     Optional<ElementModQ> nonce_seed = nonce.isEmpty() ? ballot.hashed_ballot_nonce() :
-            Optional.of(CiphertextBallot.nonce_seed(election_metadata.description_hash, ballot.object_id, nonce.get()));
+            Optional.of(CiphertextBallot.nonce_seed(metadata.description_hash, ballot.object_id, nonce.get()));
 
     if (nonce_seed.isEmpty()) {
       logger.atWarning().log(
@@ -326,7 +326,7 @@ public class DecryptWithSecrets {
 
     for (CiphertextBallotContest contest : ballot.contests) {
       Election.ContestDescriptionWithPlaceholders description =
-              election_metadata.contest_for(contest.object_id).orElseThrow(IllegalStateException::new);
+              metadata.contest_for(contest.object_id).orElseThrow(IllegalStateException::new);
       Optional<PlaintextBallotContest> plaintext_contest = decrypt_contest_with_nonce(
               contest,
               description,

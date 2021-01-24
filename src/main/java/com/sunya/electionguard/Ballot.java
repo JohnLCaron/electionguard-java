@@ -400,7 +400,7 @@ public class Ballot {
      * In most cases the seed_hash should match the `description_hash`
      */
     ElementModQ crypto_hash_with(ElementModQ seedHash) {
-      return _ciphertext_ballot_selection_crypto_hash_with(this.object_id, seedHash, this.ciphertext());
+      return ciphertext_ballot_selection_crypto_hash_with(this.object_id, seedHash, this.ciphertext());
     }
 
     @Override
@@ -422,7 +422,7 @@ public class Ballot {
     }
   }
 
-  private static ElementModQ _ciphertext_ballot_selection_crypto_hash_with(
+  private static ElementModQ ciphertext_ballot_selection_crypto_hash_with(
           String object_id, ElementModQ seed_hash, ElGamal.Ciphertext ciphertext) {
     return Hash.hash_elems(object_id, seed_hash, ciphertext.crypto_hash());
   }
@@ -448,7 +448,7 @@ public class Ballot {
           Optional<ElGamal.Ciphertext> extended_data) {
 
     if (crypto_hash.isEmpty()) {
-      crypto_hash = Optional.of(_ciphertext_ballot_selection_crypto_hash_with(object_id, description_hash, ciphertext));
+      crypto_hash = Optional.of(ciphertext_ballot_selection_crypto_hash_with(object_id, description_hash, ciphertext));
     }
 
     if (proof.isEmpty()) {
@@ -537,7 +537,7 @@ public class Ballot {
      * In most cases, the seed_hash is the description_hash
      */
     public ElementModQ crypto_hash_with(ElementModQ seed_hash) {
-      return _ciphertext_ballot_context_crypto_hash(this.object_id, this.ballot_selections, seed_hash);
+      return ciphertext_ballot_context_crypto_hash(this.object_id, this.ballot_selections, seed_hash);
     }
 
     /**
@@ -545,7 +545,7 @@ public class Ballot {
      * in a Chaum-Pedersen proof.
      */
     ElGamal.Ciphertext elgamal_accumulate() {
-      return _ciphertext_ballot_elgamal_accumulate(this.ballot_selections);
+      return ciphertext_ballot_elgamal_accumulate(this.ballot_selections);
     }
 
     /**
@@ -605,7 +605,7 @@ public class Ballot {
     }
   }
 
-  private static ElGamal.Ciphertext _ciphertext_ballot_elgamal_accumulate(List<CiphertextBallotSelection> ballot_selections) {
+  private static ElGamal.Ciphertext ciphertext_ballot_elgamal_accumulate(List<CiphertextBallotSelection> ballot_selections) {
     // return elgamal_add(*[selection.ciphertext for selection in ballot_selections]);
     List<ElGamal.Ciphertext> texts = ballot_selections.stream()
             .map(CiphertextSelection::ciphertext)
@@ -613,7 +613,7 @@ public class Ballot {
     return ElGamal.elgamal_add(Iterables.toArray(texts, ElGamal.Ciphertext.class));
   }
 
-  private static ElementModQ _ciphertext_ballot_context_crypto_hash(
+  private static ElementModQ ciphertext_ballot_context_crypto_hash(
           String object_id,
           List<CiphertextBallotSelection> ballot_selections,
           ElementModQ seed_hash) {
@@ -629,7 +629,7 @@ public class Ballot {
     return result;
   }
 
-  private static Optional<ElementModQ> _ciphertext_ballot_contest_aggregate_nonce(
+  private static Optional<ElementModQ> ciphertext_ballot_contest_aggregate_nonce(
           String object_id, List<CiphertextBallotSelection> ballot_selections) {
 
     List<ElementModQ> selection_nonces = new ArrayList<>();
@@ -663,14 +663,14 @@ public class Ballot {
           Optional<ElementModQ> nonce) {
 
     if (crypto_hash.isEmpty()) {
-      crypto_hash = Optional.of(_ciphertext_ballot_context_crypto_hash(object_id, ballot_selections, description_hash));
+      crypto_hash = Optional.of(ciphertext_ballot_context_crypto_hash(object_id, ballot_selections, description_hash));
     }
 
-    Optional<ElementModQ> aggregate = _ciphertext_ballot_contest_aggregate_nonce(object_id, ballot_selections);
+    Optional<ElementModQ> aggregate = ciphertext_ballot_contest_aggregate_nonce(object_id, ballot_selections);
     if (proof.isEmpty()) {
       proof = aggregate.map(ag ->
               ChaumPedersen.make_constant_chaum_pedersen(
-                      _ciphertext_ballot_elgamal_accumulate(ballot_selections),
+                      ciphertext_ballot_elgamal_accumulate(ballot_selections),
                       number_elected,
                       ag,
                       elgamal_public_key,
@@ -933,7 +933,7 @@ public class Ballot {
    * <p>
    * @param object_id: the object_id of this specific ballot
    * @param ballot_style: The `object_id` of the `BallotStyle` in the `Election` Manifest
-   * @param description_hash: Hash of the election metadata
+   * @param description_hash: Hash of the election description
    * @param previous_tracking_hashO: Previous tracking hash or seed hash
    * @param contests: List of contests for this ballot
    * @param nonce: optional nonce used as part of the encryption process

@@ -18,11 +18,11 @@ public class TestWords {
     int INDEX_RANDOM_2 = 1000;
     int INDEX_MAX = 4095;
 
-    String word_min = get_word(INDEX_MIN).get();
-    String word_random_1 = get_word(INDEX_RANDOM_1).get();
-    String word_random_2 = get_word(INDEX_RANDOM_2).get();
-    String word_max = get_word(INDEX_MAX).get();
-    int reverse_find_of_index_random_1 = get_index_from_word(word_random_1).get();
+    String word_min = get_word(INDEX_MIN).orElseThrow();
+    String word_random_1 = get_word(INDEX_RANDOM_1).orElseThrow();
+    String word_random_2 = get_word(INDEX_RANDOM_2).orElseThrow();
+    String word_max = get_word(INDEX_MAX).orElseThrow();
+    int reverse_find_of_index_random_1 = get_index_from_word(word_random_1).orElseThrow();
 
     assertThat(word_min).isEqualTo("aardvark");
     assertThat(word_random_1).isEqualTo("alpaca");

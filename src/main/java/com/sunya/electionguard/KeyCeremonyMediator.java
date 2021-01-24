@@ -12,32 +12,32 @@ public class KeyCeremonyMediator {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   private final CeremonyDetails ceremony_details;
-  private final Map<String, Auxiliary.PublicKey> _auxiliary_public_keys; // Map(GUARDIAN_ID, Auxiliary.PublicKey)
-  private final Map<String, ElectionPublicKey> _election_public_keys;  // Map(GUARDIAN_ID, ElectionPublicKey)
-  private final Map<GuardianPair, ElectionPartialKeyBackup> _election_partial_key_backups;
-  private final Map<GuardianPair, ElectionPartialKeyVerification> _election_partial_key_verifications;
-  private final Map<GuardianPair, ElectionPartialKeyChallenge> _election_partial_key_challenges;
-  private final List<Guardian> _guardians;
+  private final Map<String, Auxiliary.PublicKey> auxiliary_public_keys; // Map(GUARDIAN_ID, Auxiliary.PublicKey)
+  private final Map<String, ElectionPublicKey> election_public_keys;  // Map(GUARDIAN_ID, ElectionPublicKey)
+  private final Map<GuardianPair, ElectionPartialKeyBackup> election_partial_key_backups;
+  private final Map<GuardianPair, ElectionPartialKeyVerification> election_partial_key_verifications;
+  private final Map<GuardianPair, ElectionPartialKeyChallenge> election_partial_key_challenges;
+  private final List<Guardian> guardians;
 
   KeyCeremonyMediator(CeremonyDetails ceremony_details) {
     this.ceremony_details = ceremony_details;
-    this._auxiliary_public_keys = new HashMap<>();
-    this._election_public_keys = new HashMap<>();
-    this._election_partial_key_backups = new HashMap<>();
-    this._election_partial_key_verifications = new HashMap<>();
-    this._election_partial_key_challenges = new HashMap<>();
-    this._guardians = new ArrayList<>();
+    this.auxiliary_public_keys = new HashMap<>();
+    this.election_public_keys = new HashMap<>();
+    this.election_partial_key_backups = new HashMap<>();
+    this.election_partial_key_verifications = new HashMap<>();
+    this.election_partial_key_challenges = new HashMap<>();
+    this.guardians = new ArrayList<>();
   }
 
   /** Announce the guardian as present and participating the Key Ceremony. */
   void announce(Guardian guardian) {
     this.confirm_presence_of_guardian(guardian.share_public_keys());
-    this._guardians.add(guardian);
+    this.guardians.add(guardian);
 
     // When all guardians have announced, share the public keys among them
     if (this.all_guardians_in_attendance()) {
-      for (Guardian sender : this._guardians) {
-        for (Guardian recipient : this._guardians) {
+      for (Guardian sender : this.guardians) {
+        for (Guardian recipient : this.guardians) {
           if (!sender.object_id.equals(recipient.object_id)) {
             recipient.save_guardian_public_keys(sender.share_public_keys());
           }
@@ -61,13 +61,13 @@ public class KeyCeremonyMediator {
     }
 
     // Partial Key Backup Generation
-    for (Guardian guardian : this._guardians) {
+    for (Guardian guardian : this.guardians) {
       guardian.generate_election_partial_key_backups(encryptor);
     }
 
     // Share Partial Key Backup
-    for (Guardian sender : this._guardians) {
-      for (Guardian recipient : this._guardians) {
+    for (Guardian sender : this.guardians) {
+      for (Guardian recipient : this.guardians) {
         if (!sender.object_id.equals(recipient.object_id)) {
           Optional<ElectionPartialKeyBackup> backup = sender.share_election_partial_key_backup(recipient.object_id);
 
@@ -83,14 +83,14 @@ public class KeyCeremonyMediator {
 
     // Save the backups
     if (this.all_election_partial_key_backups_available()) {
-      for (Guardian recipient_guardian : this._guardians) {
+      for (Guardian recipient_guardian : this.guardians) {
         List<ElectionPartialKeyBackup> backups = this.share_election_partial_key_backups_to_guardian(recipient_guardian.object_id);
         for (ElectionPartialKeyBackup backup : backups) {
           recipient_guardian.save_election_partial_key_backup(backup);
         }
       }
     }
-    return Optional.of(this._guardians);
+    return Optional.of(this.guardians);
   }
 
   /**
@@ -103,8 +103,8 @@ public class KeyCeremonyMediator {
       decryptor = Rsa::decrypt;
     }
 
-    for (Guardian recipient : this._guardians) {
-      for (Guardian sender : this._guardians) {
+    for (Guardian recipient : this.guardians) {
+      for (Guardian sender : this.guardians) {
         if (!sender.object_id.equals(recipient.object_id)) {
           Optional<ElectionPartialKeyVerification> verification = recipient.verify_election_partial_key_backup(sender.object_id, decryptor);
 
@@ -168,7 +168,7 @@ public class KeyCeremonyMediator {
    * @return list of guardians ids
    */
   Iterable<String> share_guardians_in_attendance() {
-    return this._election_public_keys.keySet();
+    return this.election_public_keys.keySet();
   }
 
   /**
@@ -176,7 +176,7 @@ public class KeyCeremonyMediator {
    * @param public_key: Auxiliary public key
    */
   void receive_auxiliary_public_key(Auxiliary.PublicKey public_key) {
-    this._auxiliary_public_keys.put(public_key.owner_id, public_key);
+    this.auxiliary_public_keys.put(public_key.owner_id, public_key);
   }
 
   /**
@@ -184,7 +184,7 @@ public class KeyCeremonyMediator {
    * @return All auxiliary public backups for all guardians available
    */
   boolean all_auxiliary_public_keys_available() {
-    return this._auxiliary_public_keys.size() == this.ceremony_details.number_of_guardians();
+    return this.auxiliary_public_keys.size() == this.ceremony_details.number_of_guardians();
   }
 
   /**
@@ -192,7 +192,7 @@ public class KeyCeremonyMediator {
    * @return list of auxiliary public keys
    */
   Iterable<Auxiliary.PublicKey> share_auxiliary_public_keys() {
-    return this._auxiliary_public_keys.values();
+    return this.auxiliary_public_keys.values();
   }
 
   /**
@@ -200,12 +200,12 @@ public class KeyCeremonyMediator {
    * @param public_key election public key
    */
   void receive_election_public_key(ElectionPublicKey public_key) {
-    this._election_public_keys.put(public_key.owner_id(), public_key);
+    this.election_public_keys.put(public_key.owner_id(), public_key);
   }
 
   /** True if all election public keys for all guardians available. */
   boolean all_election_public_keys_available() {
-    return (this._election_public_keys.size()) == this.ceremony_details.number_of_guardians();
+    return (this.election_public_keys.size()) == this.ceremony_details.number_of_guardians();
   }
 
   /**
@@ -213,7 +213,7 @@ public class KeyCeremonyMediator {
    * @return list of election public keys
    */
   Iterable<ElectionPublicKey> share_election_public_keys() {
-    return this._election_public_keys.values();
+    return this.election_public_keys.values();
   }
 
   /**
@@ -225,14 +225,14 @@ public class KeyCeremonyMediator {
     if (backup.owner_id().equals(backup.designated_id())) {
       return false;
     }
-    this._election_partial_key_backups.put(GuardianPair.create(backup.owner_id(), backup.designated_id()), backup);
+    this.election_partial_key_backups.put(GuardianPair.create(backup.owner_id(), backup.designated_id()), backup);
     return true;
   }
 
   /** True if all election partial key backups for all guardians available. */
   boolean all_election_partial_key_backups_available() {
     int required_backups_per_guardian = this.ceremony_details.number_of_guardians() - 1;
-    return this._election_partial_key_backups.size() ==
+    return this.election_partial_key_backups.size() ==
             required_backups_per_guardian * this.ceremony_details.number_of_guardians();
   }
 
@@ -245,7 +245,7 @@ public class KeyCeremonyMediator {
     List<ElectionPartialKeyBackup> backups = new ArrayList<>();
     for (String current_guardian_id : this.share_guardians_in_attendance()) {
       if (!guardian_id.equals(current_guardian_id)) {
-        ElectionPartialKeyBackup backup = this._election_partial_key_backups.get(
+        ElectionPartialKeyBackup backup = this.election_partial_key_backups.get(
                 GuardianPair.create(current_guardian_id, guardian_id));
         if (backup != null) {
           backups.add(backup);
@@ -258,7 +258,7 @@ public class KeyCeremonyMediator {
   /** Receive election partial key verification from guardian. */
   void receive_election_partial_key_verification(ElectionPartialKeyVerification verification) {
     if (!verification.owner_id().equals(verification.designated_id())) {
-      this._election_partial_key_verifications.put(
+      this.election_partial_key_verifications.put(
               GuardianPair.create(verification.owner_id(), verification.designated_id()),
               verification);
     }
@@ -267,7 +267,7 @@ public class KeyCeremonyMediator {
   /** True if all election partial key verifications received. */
   boolean all_election_partial_key_verifications_received() {
     int required_verifications_per_guardian = this.ceremony_details.number_of_guardians() - 1;
-    return this._election_partial_key_verifications.size() ==
+    return this.election_partial_key_verifications.size() ==
             required_verifications_per_guardian * this.ceremony_details.number_of_guardians();
   }
 
@@ -276,7 +276,7 @@ public class KeyCeremonyMediator {
     if (!this.all_election_partial_key_verifications_received()) {
       return false;
     }
-    for (ElectionPartialKeyVerification verification : this._election_partial_key_verifications.values()) {
+    for (ElectionPartialKeyVerification verification : this.election_partial_key_verifications.values()) {
       if (!verification.verified()) {
         return false;
       }
@@ -287,7 +287,7 @@ public class KeyCeremonyMediator {
   /** Share list of guardians with failed partial key backup verifications. */
   List<GuardianPair> share_failed_partial_key_verifications() {
     List<GuardianPair> failed_verifications = new ArrayList<>();
-    for (Map.Entry<GuardianPair, ElectionPartialKeyVerification> pair : this._election_partial_key_verifications.entrySet()) {
+    for (Map.Entry<GuardianPair, ElectionPartialKeyVerification> pair : this.election_partial_key_verifications.entrySet()) {
       if (!pair.getValue().verified()) {
         failed_verifications.add(pair.getKey());
       }
@@ -298,7 +298,7 @@ public class KeyCeremonyMediator {
   /** Share list of guardians with missing election partial key challenges. */
   List<GuardianPair> share_missing_election_partial_key_challenges() {
     List<GuardianPair> failed_verifications = new ArrayList<>(this.share_failed_partial_key_verifications());
-    for (GuardianPair pair : this._election_partial_key_challenges.keySet()) {
+    for (GuardianPair pair : this.election_partial_key_challenges.keySet()) {
       failed_verifications.remove(pair);
     }
     return failed_verifications;
@@ -306,13 +306,13 @@ public class KeyCeremonyMediator {
 
   /** Receive an election partial key challenge from a guardian with a failed verification. */
   void receive_election_partial_key_challenge(ElectionPartialKeyChallenge challenge) {
-    this._election_partial_key_challenges.put(
+    this.election_partial_key_challenges.put(
             GuardianPair.create(challenge.owner_id(), challenge.designated_id()), challenge);
   }
 
   /** Share all open election partial key challenges with guardians. */
   List<ElectionPartialKeyChallenge> share_open_election_partial_key_challenges() {
-    return new ArrayList<>(this._election_partial_key_challenges.values());
+    return new ArrayList<>(this.election_partial_key_challenges.values());
   }
 
   /** Publish joint election key from the public keys of all guardians. */
@@ -323,7 +323,7 @@ public class KeyCeremonyMediator {
     if (!this.all_election_partial_key_backups_verified()) {
       return Optional.empty();
     }
-    return Optional.of(KeyCeremony.combine_election_public_keys(this._election_public_keys));
+    return Optional.of(KeyCeremony.combine_election_public_keys(this.election_public_keys));
   }
 
 }

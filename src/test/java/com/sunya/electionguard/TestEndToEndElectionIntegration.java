@@ -173,7 +173,7 @@ public class TestEndToEndElectionIntegration {
     // Build the Election
     this.election_builder.set_public_key(joint_key.get());
     ElectionBuilder.DescriptionAndContext tuple = this.election_builder.build().orElseThrow();
-    this.metadata = tuple.description;
+    this.metadata = tuple.metadata;
     this.context = tuple.context;
     this.constants = new ElectionConstants();
   }
@@ -255,7 +255,7 @@ public class TestEndToEndElectionIntegration {
     }
 
     // Here's where the ciphertext Tally is decrypted.
-    this.decryptedTally = this.decrypter.get_plaintext_tally(false, null).orElseThrow();
+    this.decryptedTally = this.decrypter.getDecryptedTally(false, null).orElseThrow();
     System.out.printf("Tally Decrypted%n");
 
     // Now, compare the results

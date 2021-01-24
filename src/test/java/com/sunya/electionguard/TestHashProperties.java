@@ -4,15 +4,11 @@ import com.google.common.collect.ImmutableList;
 import net.jqwik.api.Example;
 import net.jqwik.api.ForAll;
 import net.jqwik.api.Property;
-import org.junit.Before;
-import org.junit.Test;
 
 import java.math.BigInteger;
 import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.sunya.electionguard.Group.P;
-import static com.sunya.electionguard.Group.Q;
 
 public class TestHashProperties extends TestProperties {
 

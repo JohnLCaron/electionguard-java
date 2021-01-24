@@ -187,7 +187,7 @@ public class TimeIntegrationSteps {
     // Build the Election
     this.election_builder.set_public_key(joint_key.get());
     ElectionBuilder.DescriptionAndContext tuple = this.election_builder.build().orElseThrow();
-    this.election = tuple.description;
+    this.election = tuple.metadata;
     this.context = tuple.context;
     this.constants = new ElectionConstants();
   }
@@ -251,7 +251,7 @@ public class TimeIntegrationSteps {
     }
 
     // Here's where the ciphertext Tally is decrypted.
-    this.decryptedTally = this.decrypter.get_plaintext_tally(false, null).orElseThrow();
+    this.decryptedTally = this.decrypter.getDecryptedTally(false, null).orElseThrow();
     System.out.printf("Tally Decrypted%n");
 
     // Now, compare the results

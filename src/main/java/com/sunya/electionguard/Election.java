@@ -16,7 +16,6 @@ import static com.sunya.electionguard.Group.*;
 
 /**
  * Election Manifest.
- * The election metadata in json format that is parsed into an Election Description.
  * see: https://developers.google.com/elections-data/reference
  */
 public class Election {

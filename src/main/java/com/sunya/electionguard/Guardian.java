@@ -20,11 +20,11 @@ public class Guardian extends ElectionObjectBase {
   private final int sequence_order;
   private final CeremonyDetails ceremony_details;
   private final ElementModQ crypto_base_hash;
-  private final Auxiliary.KeyPair _auxiliary_keys;
-  private final ElectionKeyPair _election_keys; // Ki = election keypair for ith Guardian
+  private final Auxiliary.KeyPair auxiliary_keys;
+  private final ElectionKeyPair election_keys; // Ki = election keypair for ith Guardian
 
   // The collection of this guardian's partial key backups that will be shared to other guardians
-  private final Map<String, ElectionPartialKeyBackup> _backups_to_share; // Map(GUARDIAN_ID, ElectionPartialKeyBackup)
+  private final Map<String, ElectionPartialKeyBackup> backups_to_share; // Map(GUARDIAN_ID, ElectionPartialKeyBackup)
 
   //// From Other Guardians
   // The collection of other guardians' auxiliary public keys that are shared with this guardian
@@ -88,10 +88,10 @@ public class Guardian extends ElectionObjectBase {
     this.sequence_order = sequence_order;
     this.ceremony_details = CeremonyDetails.create(number_of_guardians, quorum);
     this.crypto_base_hash = crypto_base_hash;
-    this._auxiliary_keys = KeyCeremony.generate_rsa_auxiliary_key_pair();
-    this._election_keys =  KeyCeremony.generate_election_key_pair(this.ceremony_details.quorum(), nonce_seed, crypto_base_hash);
+    this.auxiliary_keys = KeyCeremony.generate_rsa_auxiliary_key_pair();
+    this.election_keys =  KeyCeremony.generate_election_key_pair(this.ceremony_details.quorum(), nonce_seed, crypto_base_hash);
 
-    this._backups_to_share = new HashMap<>();
+    this.backups_to_share = new HashMap<>();
     this.otherGuardianAuxiliaryKeys = new HashMap<>();
     this.otherGuardianElectionKeys = new HashMap<>();
     this.otherGuardianPartialKeyBackups = new HashMap<>();
@@ -146,9 +146,9 @@ public class Guardian extends ElectionObjectBase {
     return PublicKeySet.create(
             this.object_id,
             this.sequence_order,
-            this._auxiliary_keys.public_key,
-            this._election_keys.key_pair().public_key,
-            this._election_keys.proof());
+            this.auxiliary_keys.public_key,
+            this.election_keys.key_pair().public_key,
+            this.election_keys.proof());
   }
 
   /**
@@ -208,12 +208,12 @@ public class Guardian extends ElectionObjectBase {
 
   /** Share auxiliary public key with another guardian. */
   Auxiliary.PublicKey share_auxiliary_public_key() {
-    return new Auxiliary.PublicKey(this.object_id, this.sequence_order, this._auxiliary_keys.public_key);
+    return new Auxiliary.PublicKey(this.object_id, this.sequence_order, this.auxiliary_keys.public_key);
   }
 
   /** Share coefficient validation set to be used for validating the coefficients post election. */
   CoefficientValidationSet share_coefficient_validation_set() {
-    return KeyCeremony.get_coefficient_validation_set(this.object_id, this._election_keys.polynomial());
+    return KeyCeremony.get_coefficient_validation_set(this.object_id, this.election_keys.polynomial());
   }
 
   /* Generate election key pair for encrypting/decrypting election.
@@ -229,8 +229,8 @@ public class Guardian extends ElectionObjectBase {
   ElectionPublicKey share_election_public_key() {
     return ElectionPublicKey.create(
             this.object_id,
-            this._election_keys.proof(),
-            this._election_keys.key_pair().public_key);
+            this.election_keys.proof(),
+            this.election_keys.key_pair().public_key);
   }
 
   /** Save a guardians election public key. */
@@ -256,13 +256,13 @@ public class Guardian extends ElectionObjectBase {
 
     for (Auxiliary.PublicKey auxiliary_key : this.otherGuardianAuxiliaryKeys.values()) {
       Optional<ElectionPartialKeyBackup> backup =
-              generate_election_partial_key_backup(this.object_id, this._election_keys.polynomial(), auxiliary_key, encryptor);
+              generate_election_partial_key_backup(this.object_id, this.election_keys.polynomial(), auxiliary_key, encryptor);
       if (backup.isEmpty()) {
         logger.atInfo().log("guardian; %s could not generate election partial key backups: failed to encrypt",
                 this.object_id);
         return false;
       }
-      this._backups_to_share.put(auxiliary_key.owner_id, backup.get());
+      this.backups_to_share.put(auxiliary_key.owner_id, backup.get());
     }
 
     return true;
@@ -274,7 +274,7 @@ public class Guardian extends ElectionObjectBase {
    * @return Election partial key backup or None.
    */
   Optional<ElectionPartialKeyBackup> share_election_partial_key_backup(String designated_id) {
-    return Optional.ofNullable(this._backups_to_share.get(designated_id));
+    return Optional.ofNullable(this.backups_to_share.get(designated_id));
   }
 
   /**
@@ -304,7 +304,7 @@ public class Guardian extends ElectionObjectBase {
     if (backup == null) {
       return Optional.empty();
     }
-    return Optional.of(KeyCeremony.verify_election_partial_key_backup(this.object_id, backup, this._auxiliary_keys, decryptor));
+    return Optional.of(KeyCeremony.verify_election_partial_key_backup(this.object_id, backup, this.auxiliary_keys, decryptor));
   }
 
   /**
@@ -313,11 +313,11 @@ public class Guardian extends ElectionObjectBase {
    * @return Election partial key challenge or None
    */
   Optional<ElectionPartialKeyChallenge> publish_election_backup_challenge(String guardian_id) {
-    ElectionPartialKeyBackup backup_in_question = this._backups_to_share.get(guardian_id);
+    ElectionPartialKeyBackup backup_in_question = this.backups_to_share.get(guardian_id);
     if (backup_in_question == null) {
       return Optional.empty();
     }
-    return Optional.of(KeyCeremony.generate_election_partial_key_challenge(backup_in_question, this._election_keys.polynomial()));
+    return Optional.of(KeyCeremony.generate_election_partial_key_challenge(backup_in_question, this.election_keys.polynomial()));
   }
 
   /**
@@ -390,12 +390,12 @@ public class Guardian extends ElectionObjectBase {
     //TODO: ISSUE #47: Decrypt the election secret key
 
     // 𝑀_i = 𝐴^𝑠𝑖 mod 𝑝
-    ElementModP partial_decryption = elgamal.partial_decrypt(this._election_keys.key_pair().secret_key);
+    ElementModP partial_decryption = elgamal.partial_decrypt(this.election_keys.key_pair().secret_key);
 
     // 𝑀_i = 𝐴^𝑠𝑖 mod 𝑝 and 𝐾𝑖 = 𝑔^𝑠𝑖 mod 𝑝
     ChaumPedersen.ChaumPedersenProof proof = ChaumPedersen.make_chaum_pedersen(
             elgamal,
-            this._election_keys.key_pair().secret_key,
+            this.election_keys.key_pair().secret_key,
             partial_decryption,
             nonce_seed,
             extended_base_hash);
@@ -442,7 +442,7 @@ public class Guardian extends ElectionObjectBase {
       return Optional.empty();
     }
 
-    Optional<String> decrypted_value = decryptor.decrypt(backup.encrypted_value(), this._auxiliary_keys.secret_key);
+    Optional<String> decrypted_value = decryptor.decrypt(backup.encrypted_value(), this.auxiliary_keys.secret_key);
     if (decrypted_value.isEmpty()) {
       logger.atInfo().log("compensate decrypt guardian %s failed decryption for %s",
               this.object_id, missing_guardian_id);

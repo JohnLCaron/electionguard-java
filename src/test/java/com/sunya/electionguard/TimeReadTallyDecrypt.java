@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import static com.sunya.electionguard.Election.CiphertextElectionContext;
@@ -15,14 +14,7 @@ import static com.sunya.electionguard.Election.ElectionConstants;
 import static com.sunya.electionguard.Election.ElectionDescription;
 import static com.sunya.electionguard.Election.InternalElectionDescription;
 
-/**
- * Test a complete simple example of executing an End-to-End encrypted election.
- * In a real world scenario all of these steps would not be completed on the same machine.
- */
 public class TimeReadTallyDecrypt {
-  private static final int NUMBER_OF_GUARDIANS = 6;
-  private static final int QUORUM = 5;
-  private static final Random random = new Random(System.currentTimeMillis());
 
   public static void main(String[] args) throws IOException {
     TimeReadTallyDecrypt timer = new TimeReadTallyDecrypt();

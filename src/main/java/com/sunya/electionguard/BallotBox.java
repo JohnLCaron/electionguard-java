@@ -10,16 +10,16 @@ import static com.sunya.electionguard.Ballot.*;
 public class BallotBox {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
-  private final Election.InternalElectionDescription _metadata;
-  private final Election.CiphertextElectionContext _context;
-  private final DataStore _store;
+  private final Election.InternalElectionDescription metadata;
+  private final Election.CiphertextElectionContext context;
+  private final DataStore store;
 
-  public BallotBox(Election.InternalElectionDescription _metadata,
-                   Election.CiphertextElectionContext _context,
-                   DataStore _store) {
-    this._metadata = _metadata;
-    this._context = _context;
-    this._store = _store;
+  public BallotBox(Election.InternalElectionDescription metadata,
+                   Election.CiphertextElectionContext context,
+                   DataStore store) {
+    this.metadata = metadata;
+    this.context = context;
+    this.store = store;
   }
 
   Optional<CiphertextAcceptedBallot> cast(CiphertextBallot ballot) {
@@ -37,12 +37,12 @@ public class BallotBox {
    * @return a `CiphertextAcceptedBallot` or `None` if there was an error
    */
   Optional<CiphertextAcceptedBallot> accept_ballot(CiphertextBallot ballot, BallotBoxState state) {
-    if (!BallotValidations.ballot_is_valid_for_election(ballot, _metadata, _context)) {
+    if (!BallotValidations.ballot_is_valid_for_election(ballot, metadata, context)) {
       return Optional.empty();
     }
 
-    if (_store.containsKey(ballot.object_id)) {
-      Ballot.CiphertextAcceptedBallot existingBallot = _store.get(ballot.object_id).orElseThrow(IllegalStateException::new);
+    if (store.containsKey(ballot.object_id)) {
+      Ballot.CiphertextAcceptedBallot existingBallot = store.get(ballot.object_id).orElseThrow(IllegalStateException::new);
       logger.atWarning().log("error accepting ballot, %s already exists with state: %s",
           ballot.object_id, existingBallot.state);
       return Optional.empty();
@@ -51,7 +51,7 @@ public class BallotBox {
     // TODO: ISSUE #56: check if the ballot includes the nonce, and regenerate the proofs
     // TODO: ISSUE #56: check if the ballot includes the proofs, if it does not include the nonce
     CiphertextAcceptedBallot ballot_box_ballot = from_ciphertext_ballot(ballot, state);
-    _store.put(ballot_box_ballot.object_id, ballot_box_ballot);
+    store.put(ballot_box_ballot.object_id, ballot_box_ballot);
     return Optional.of(ballot_box_ballot);
   }
 }

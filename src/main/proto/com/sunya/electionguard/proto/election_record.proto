@@ -22,6 +22,7 @@ message ElectionRecord {
   PlaintextTally decryptedTally = 9;
 }
 
+// Experimental may not be needed: info before tallying.
 message BallotChain {
   Device device = 1;
   Constants constants = 2;
@@ -48,15 +49,15 @@ message ElectionContext {
   uint32 number_of_guardians = 1; // The number of guardians necessary to generate the public key
   uint32 quorum = 2; // The quorum of guardians necessary to decrypt an election.  Must be less than `number_of_guardians`
 
-  // the `joint public key (K)` in the [ElectionGuard Spec](https://github.com/microsoft/electionguard/wiki)
+  // The `joint public key (K)` in the [ElectionGuard Spec]
   ElementModP elgamal_public_key = 3;
 
-  // The hash of the election metadata
+  // The hash of the election description
   ElementModQ description_hash = 4;
 
-  // the `base hash code (𝑄)` in the [ElectionGuard Spec](https://github.com/microsoft/electionguard/wiki)
+  // the `base hash code (𝑄)` in the [ElectionGuard Spec]
   ElementModQ crypto_base_hash = 5;
 
-  // the `extended base hash code (𝑄')` in the [ElectionGuard Spec](https://github.com/microsoft/electionguard/wiki)
+  // the `extended base hash code (𝑄')` in the [ElectionGuard Spec]
   ElementModQ crypto_extended_base_hash = 6;
 }
