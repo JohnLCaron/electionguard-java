@@ -53,7 +53,7 @@ public class TestJsonRoundtrip {
 
   @Example
   public void testPlaintextTallyRoundtrip() throws IOException {
-    File file = new File("/home/snake/tmp/test.json"); // */ File.createTempFile("temp", null);
+    File file = File.createTempFile("temp", null);
     String outputFile = file.getAbsolutePath();
 
     // original
@@ -115,7 +115,7 @@ public class TestJsonRoundtrip {
     assertThat(fromFile).isEqualTo(org);
   }
 
-  // https://github.com/hsiafan/gson-java8-datatype
+  /* https://github.com/hsiafan/gson-java8-datatype
   @Example
   public void testOptional() {
     Gson gson = GsonTypeAdapters.enhancedGson();
@@ -147,6 +147,6 @@ public class TestJsonRoundtrip {
     Optional<Optional<String>> r4 = gson.fromJson("null", new TypeToken<Optional<Optional<String>>>() {
     }.getType());
     assertThat(r4).isEqualTo(Optional.empty());
-  }
+  } */
 
 }

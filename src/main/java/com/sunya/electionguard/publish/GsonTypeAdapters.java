@@ -17,7 +17,6 @@ import com.sunya.electionguard.Election;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.KeyCeremony;
 import com.sunya.electionguard.Tally;
-import net.dongliu.gson.GsonJava8TypeAdapterFactory;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -28,8 +27,6 @@ public class GsonTypeAdapters {
 
   public static Gson enhancedGson() {
     return new GsonBuilder().setPrettyPrinting().serializeNulls()
-            // .registerTypeAdapterFactory(AutoValueGsonTypeAdapterFactory.create())
-            .registerTypeAdapterFactory(new GsonJava8TypeAdapterFactory())
             .registerTypeAdapter(Group.ElementModQ.class, new ModQDeserializer())
             .registerTypeAdapter(Group.ElementModQ.class, new ModQSerializer())
             .registerTypeAdapter(Group.ElementModP.class, new ModPDeserializer())
@@ -44,8 +41,6 @@ public class GsonTypeAdapters {
             .registerTypeAdapter(Tally.PlaintextTally.class, new PlaintextTallyDeserializer())
             .registerTypeAdapter(Tally.PublishedCiphertextTally.class, new PublishedCiphertextTallySerializer())
             .registerTypeAdapter(Tally.PublishedCiphertextTally.class, new PublishedCiphertextTallyDeserializer())
-            // .registerTypeAdapter(ImmutableList.class, new ImmutableListDeserializer())
-            // .registerTypeAdapter(ImmutableMap.class, new ImmutableMapDeserializer())
             .create();
   }
 
@@ -168,23 +163,7 @@ public class GsonTypeAdapters {
 
     private <E> TypeToken<List<E>> listOf(final Type arg) {
       return new TypeToken<List<E>>() {}
-              .where(new TypeParameter<E>() {}, (TypeToken<E>) TypeToken.of(arg));
+              .where(new TypeParameter<>() {}, (TypeToken<E>) TypeToken.of(arg));
     }
   }
-
-  /*
-  public static final class ImmutableMapDeserializer implements JsonDeserializer<ImmutableMap<?, ?>> {
-    @Override
-    public ImmutableMap<?, ?> deserialize(final JsonElement json, final Type type, final JsonDeserializationContext context) throws JsonParseException {
-      final Type[] typeArguments = ((ParameterizedType) type).getActualTypeArguments();
-      final Type parameterizedType = mapOf(typeArguments[0]).getType();
-      final Map<?, ?> map = context.deserialize(json, parameterizedType);
-      return ImmutableMap.copyOf(map);
-    }
-
-    private <K, V, E> TypeToken<Map<K, V>> mapOf(final Type arg) {
-      return new TypeToken<Map<K, V>>() {}
-              .where(new TypeParameter<E>() {}, (TypeToken<E>) TypeToken.of(arg));
-    }
-  } */
 }

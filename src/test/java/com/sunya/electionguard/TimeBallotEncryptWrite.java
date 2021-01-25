@@ -240,20 +240,20 @@ public class TimeBallotEncryptWrite {
             this.context,
             this.constants,
             ImmutableList.of(this.device),
-            this.ballot_store,
+            this.ballot_box.getCastBallots(),
             this.coefficient_validation_sets);
   }
 
   // Publish ballot chain as Proto
   void step_5_publish_ballot_chain_proto() throws IOException {
     System.out.printf("%n5. publish ballot chain as proto%n");
-    Publisher publisher = new Publisher("/home/snake/tmp/TimeBallotEncryptWrite", true);
+    Publisher publisher = new Publisher("/home/snake/tmp/testBallotReadingProto", true);
     publisher.writeBallotChainProto(
             this.description,
             this.context,
             this.constants,
             this.device,
-            this.ballot_store,
+            this.ballot_box.getCastBallots(),
             this.coefficient_validation_sets);
   }
 

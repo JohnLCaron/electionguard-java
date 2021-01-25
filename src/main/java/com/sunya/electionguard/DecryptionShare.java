@@ -55,10 +55,6 @@ public class DecryptionShare {
               Preconditions.checkNotNull(recovery_key),
               Preconditions.checkNotNull(proof));
     }
-
-    public static TypeAdapter<CiphertextCompensatedDecryptionSelection> typeAdapter(Gson gson) {
-      return new AutoValue_DecryptionShare_CiphertextCompensatedDecryptionSelection.GsonTypeAdapter(gson);
-    }
   } // CiphertextCompensatedDecryptionSelection
 
   /**
@@ -106,10 +102,6 @@ public class DecryptionShare {
               Preconditions.checkNotNull(share),
               Preconditions.checkNotNull(proof),
               recovered_parts.map(ImmutableMap::copyOf));
-    }
-
-    public static TypeAdapter<CiphertextDecryptionSelection> typeAdapter(Gson gson) {
-      return new AutoValue_DecryptionShare_CiphertextDecryptionSelection.GsonTypeAdapter(gson);
     }
 
     /**

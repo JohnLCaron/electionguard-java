@@ -1,5 +1,6 @@
 package com.sunya.electionguard;
 
+import com.google.common.collect.Iterables;
 import com.google.common.flogger.FluentLogger;
 
 import java.util.Optional;
@@ -53,5 +54,9 @@ public class BallotBox {
     CiphertextAcceptedBallot ballot_box_ballot = from_ciphertext_ballot(ballot, state);
     store.put(ballot_box_ballot.object_id, ballot_box_ballot);
     return Optional.of(ballot_box_ballot);
+  }
+
+  Iterable<CiphertextAcceptedBallot> getCastBallots() {
+    return Iterables.filter(store, b -> b.state == BallotBoxState.CAST);
   }
 }

@@ -2,6 +2,7 @@ package com.sunya.electionguard;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.sunya.electionguard.proto.ElectionRecordFromProto;
 import com.sunya.electionguard.publish.ConvertFromJson;
 import com.sunya.electionguard.publish.ElectionDescriptionFromJson;
@@ -19,10 +20,7 @@ import static com.google.common.truth.Truth8.assertThat;
 import static com.sunya.electionguard.Ballot.*;
 import static com.sunya.electionguard.Election.*;
 
-/**
- * Test a complete simple example of executing an End-to-End encrypted election.
- * In a real world scenario all of these steps would not be completed on the same machine.
- */
+/** Time steps for an End-to-End encrypted election. */
 public class TimeIntegrationSteps {
   private static final int NUMBER_OF_GUARDIANS = 6;
   private static final int QUORUM = 5;
@@ -99,13 +97,21 @@ public class TimeIntegrationSteps {
     System.out.printf("*** step_4_decrypt_tally elapsed = %s nballots = %d timePerBallot = %f ms%n", stopwatch, nballots, timePerBallot);
     stopwatch.reset().start();
 
-    this.step_5_publish_and_verify();
+    Publisher publisherJson = this.step_5_publish_and_verify();
     timePerBallot = ((float) stopwatch.elapsed(TimeUnit.MILLISECONDS)) / nballots;
     System.out.printf("*** step_5_publish_and_verify elapsed = %s nballots = %d timePerBallot = %f ms%n", stopwatch, nballots, timePerBallot);
 
-    this.step_6_publish_election_record_proto();
+    Publisher publisherProto = this.step_6_publish_election_record_proto();
     timePerBallot = ((float) stopwatch.elapsed(TimeUnit.MILLISECONDS)) / nballots;
     System.out.printf("*** step_6_publish_election_record_proto elapsed = %s nballots = %d timePerBallot = %f ms%n", stopwatch, nballots, timePerBallot);
+
+    this.step_7_read_json_ballots(publisherJson);
+    timePerBallot = ((float) stopwatch.elapsed(TimeUnit.MILLISECONDS)) / nballots;
+    System.out.printf("*** step_7_read_json_ballots elapsed = %s nballots = %d timePerBallot = %f ms%n", stopwatch, nballots, timePerBallot);
+
+    this.step_8_read_proto_ballots(publisherProto);
+    timePerBallot = ((float) stopwatch.elapsed(TimeUnit.MILLISECONDS)) / nballots;
+    System.out.printf("*** step_8_read_proto_ballots elapsed = %s nballots = %d timePerBallot = %f ms%n", stopwatch, nballots, timePerBallot);
 
     Scheduler.shutdown();
   }
@@ -312,7 +318,7 @@ public class TimeIntegrationSteps {
   }
 
   // Publish and verify steps of the election
-  void step_5_publish_and_verify() throws IOException {
+  Publisher step_5_publish_and_verify() throws IOException {
     System.out.printf("%n5. publish%n");
     Publisher publisher = new Publisher(outputDir, true);
     publisher.writeElectionRecordJson(
@@ -320,7 +326,7 @@ public class TimeIntegrationSteps {
             this.context,
             this.constants,
             ImmutableList.of(this.device),
-            this.ballot_store,
+            this.ballot_box.getCastBallots(),
             this.ciphertext_tally.spoiled_ballots().values(),
             this.ciphertext_tally.publish_ciphertext_tally(),
             this.decryptedTally,
@@ -328,6 +334,7 @@ public class TimeIntegrationSteps {
 
     System.out.printf("%n5.5. verify%n");
     this.verify_results_json(publisher);
+    return publisher;
   }
 
   // Verify results of election
@@ -349,7 +356,7 @@ public class TimeIntegrationSteps {
             publisher.deviceFile(this.device.uuid).toString());
     assertThat(device_from_file).isEqualTo(this.device);
 
-    for (CiphertextAcceptedBallot ballot : this.ballot_store) {
+    for (CiphertextAcceptedBallot ballot : this.ballot_box.getCastBallots()) {
       CiphertextAcceptedBallot ballot_from_file = ConvertFromJson.readBallot(
               publisher.ballotFile(ballot.object_id).toString());
       assertWithMessage(publisher.ballotFile(ballot.object_id).toString())
@@ -378,7 +385,7 @@ public class TimeIntegrationSteps {
   }
 
   // Publish election record as proto
-  void step_6_publish_election_record_proto() throws IOException {
+  Publisher step_6_publish_election_record_proto() throws IOException {
     System.out.printf("%n6. publish election record as proto%n");
     Publisher publisher = new Publisher("/home/snake/tmp/TimeIntegrationStepsProto", true);
     publisher.writeElectionRecordProto(
@@ -386,7 +393,7 @@ public class TimeIntegrationSteps {
             this.context,
             this.constants,
             ImmutableList.of(this.device),
-            this.ballot_store,
+            this.ballot_box.getCastBallots(),
             this.ciphertext_tally.spoiled_ballots().values(),
             this.ciphertext_tally.publish_ciphertext_tally(),
             this.decryptedTally,
@@ -394,6 +401,7 @@ public class TimeIntegrationSteps {
 
     System.out.printf("%n6.5. verify%n");
     this.verify_results_proto(publisher);
+    return publisher;
   }
 
   // Verify results of election
@@ -404,19 +412,21 @@ public class TimeIntegrationSteps {
     assertThat(roundtrip.constants).isEqualTo(this.constants);
     assertThat(roundtrip.devices.get(0)).isEqualTo(this.device);
 
-    // LOOK test complete bijections
+    assertThat(roundtrip.castBallots.size()).isEqualTo(Iterables.size(this.ballot_box.getCastBallots()));
     int count = 0;
-    for (CiphertextAcceptedBallot ballot : this.ballot_store) {
+    for (CiphertextAcceptedBallot ballot : this.ballot_box.getCastBallots()) {
       assertWithMessage(ballot.object_id).that(roundtrip.castBallots.get(count)).isEqualTo(ballot);
       count++;
     }
 
+    assertThat(roundtrip.spoiledBallots.size()).isEqualTo(this.ciphertext_tally.spoiled_ballots().size());
     count = 0;
     for (CiphertextAcceptedBallot spoiled_ballot : this.ciphertext_tally.spoiled_ballots().values()) {
       assertThat(roundtrip.spoiledBallots.get(count)).isEqualTo(spoiled_ballot);
       count++;
     }
 
+    assertThat(roundtrip.guardianCoefficients.size()).isEqualTo(this.coefficient_validation_sets.size());
     count = 0;
     for (KeyCeremony.CoefficientValidationSet coefficient_validation_set : this.coefficient_validation_sets) {
       assertThat(roundtrip.guardianCoefficients.get(count)).isEqualTo(coefficient_validation_set);
@@ -425,6 +435,37 @@ public class TimeIntegrationSteps {
 
     assertThat(roundtrip.ciphertextTally).isEqualTo(this.ciphertext_tally.publish_ciphertext_tally());
     assertThat(roundtrip.decryptedTally).isEqualTo(this.decryptedTally);
+  }
+
+  void step_7_read_json_ballots(Publisher publisher) throws IOException {
+    for (CiphertextAcceptedBallot ballot : this.ballot_box.getCastBallots()) {
+      CiphertextAcceptedBallot ballot_from_file = ConvertFromJson.readBallot(
+              publisher.ballotFile(ballot.object_id).toString());
+      assertWithMessage(publisher.ballotFile(ballot.object_id).toString())
+              .that(ballot_from_file).isEqualTo(ballot);
+    }
+
+    for (CiphertextAcceptedBallot spoiled_ballot : this.ciphertext_tally.spoiled_ballots().values()) {
+      CiphertextAcceptedBallot ballot_from_file = ConvertFromJson.readBallot(
+              publisher.spoiledFile(spoiled_ballot.object_id).toString());
+      assertThat(ballot_from_file).isEqualTo(spoiled_ballot);
+    }
+  }
+
+  void step_8_read_proto_ballots(Publisher publisher) throws IOException {
+    ElectionRecordFromProto roundtrip = ElectionRecordFromProto.read(publisher.electionRecordProtoFile().toFile().getAbsolutePath());
+
+    int count = 0;
+    for (CiphertextAcceptedBallot ballot : this.ballot_box.getCastBallots()) {
+      assertWithMessage(ballot.object_id).that(roundtrip.castBallots.get(count)).isEqualTo(ballot);
+      count++;
+    }
+
+    int count2 = 0;
+    for (CiphertextAcceptedBallot spoiled_ballot : this.ciphertext_tally.spoiled_ballots().values()) {
+      assertThat(roundtrip.spoiledBallots.get(count2)).isEqualTo(spoiled_ballot);
+      count2++;
+    }
   }
 
 }

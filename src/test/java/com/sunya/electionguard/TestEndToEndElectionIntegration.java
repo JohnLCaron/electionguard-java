@@ -181,7 +181,6 @@ public class TestEndToEndElectionIntegration {
   // Move on to encrypting ballots
   // Using the `CiphertextElectionContext` encrypt ballots for the election
   void step_2_encrypt_votes() throws IOException {
-
     // Configure the Encryption Device
     this.device = new Encrypt.EncryptionDevice("polling-place-one");
     this.encrypter = new Encrypt.EncryptionMediator(this.metadata, this.context, this.device);
@@ -201,14 +200,14 @@ public class TestEndToEndElectionIntegration {
     }
   }
 
-  // Next, we cast or spoil the ballots
-  //         Accept each ballot by marking it as either cast or spoiled.
-  //        This example demonstrates one way to accept ballots using the `BallotBox` class
+  //  Accept each ballot by marking it as either cast or spoiled.
+  //  This example demonstrates one way to accept ballots using the `BallotBox` class
   void step_3_cast_and_spoil() {
-    // Configure the Ballot Box
+    System.out.printf("%n3. cast_and_spoil%n");
+
+    // LOOK why not hide the datastore in the ballot_box ?
     this.ballot_store = new DataStore();
     this.ballot_box = new BallotBox(this.metadata, this.context, this.ballot_store);
-    System.out.printf("%n3. cast_and_spoil%n");
     // Randomly cast or spoil the ballots
     for (CiphertextBallot ballot : this.ciphertext_ballots) {
       Optional<CiphertextAcceptedBallot> accepted_ballot;
@@ -332,7 +331,7 @@ public class TestEndToEndElectionIntegration {
             this.context,
             this.constants,
             ImmutableList.of(this.device),
-            this.ballot_store,
+            this.ballot_box.getCastBallots(),
             this.ciphertext_tally.spoiled_ballots().values(),
             this.ciphertext_tally.publish_ciphertext_tally(),
             this.decryptedTally,
@@ -361,7 +360,7 @@ public class TestEndToEndElectionIntegration {
             publisher.deviceFile(this.device.uuid).toString());
     assertThat(device_from_file).isEqualTo(this.device);
 
-    for (CiphertextAcceptedBallot ballot : this.ballot_store) {
+    for (CiphertextAcceptedBallot ballot : this.ballot_box.getCastBallots()) {
       CiphertextAcceptedBallot ballot_from_file = ConvertFromJson.readBallot(
               publisher.ballotFile(ballot.object_id).toString());
       assertWithMessage(publisher.ballotFile(ballot.object_id).toString())

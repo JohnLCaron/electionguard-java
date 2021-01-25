@@ -4,8 +4,6 @@ import com.google.auto.value.AutoValue;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
-import com.google.gson.Gson;
-import com.google.gson.TypeAdapter;
 
 import javax.annotation.Nullable;
 import java.math.BigInteger;
@@ -130,11 +128,6 @@ import static com.sunya.electionguard.Group.*;
               Preconditions.checkNotNull(guardian_id),
               ImmutableList.copyOf(coefficient_commitments),
               ImmutableList.copyOf(coefficient_proofs));
-    }
-
-    // LOOK I was hoping not to expose GSON here.
-    public static TypeAdapter<CoefficientValidationSet> typeAdapter(Gson gson) {
-      return new AutoValue_KeyCeremony_CoefficientValidationSet.GsonTypeAdapter(gson);
     }
   }
 

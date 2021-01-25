@@ -6,8 +6,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.flogger.FluentLogger;
-import com.google.gson.Gson;
-import com.google.gson.TypeAdapter;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
@@ -41,10 +39,6 @@ public class Tally {
               Preconditions.checkNotNull(contests),
               Preconditions.checkNotNull(spoiled_ballots));
     }
-    public static TypeAdapter<PlaintextTally> typeAdapter(Gson gson) {
-      return new AutoValue_Tally_PlaintextTally.GsonTypeAdapter(gson);
-    }
-
   } // PlaintextTally
 
   /**
@@ -59,10 +53,6 @@ public class Tally {
       return new AutoValue_Tally_PlaintextTallyContest(
               Preconditions.checkNotNull(object_id),
               Preconditions.checkNotNull(selections));
-    }
-
-    public static TypeAdapter<PlaintextTallyContest> typeAdapter(Gson gson) {
-      return new AutoValue_Tally_PlaintextTallyContest.GsonTypeAdapter(gson);
     }
   } // PlaintextTallyContest
 
@@ -87,10 +77,6 @@ public class Tally {
               Preconditions.checkNotNull(value),
               Preconditions.checkNotNull(message),
               ImmutableList.copyOf(shares));
-    }
-
-    public static TypeAdapter<PlaintextTallySelection> typeAdapter(Gson gson) {
-      return new AutoValue_Tally_PlaintextTallySelection.GsonTypeAdapter(gson);
     }
   } // PlaintextTallySelection
 
@@ -495,10 +481,6 @@ public class Tally {
 
     public static PublishedCiphertextTally create(String object_id, Map<String, CiphertextTallyContest> cast) {
       return new AutoValue_Tally_PublishedCiphertextTally(object_id, cast);
-    }
-
-    public static TypeAdapter<PublishedCiphertextTally> typeAdapter(Gson gson) {
-      return new AutoValue_Tally_PublishedCiphertextTally.GsonTypeAdapter(gson);
     }
   } // PublishedCiphertextTally
 
