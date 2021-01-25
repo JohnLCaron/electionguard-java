@@ -5,6 +5,7 @@ import "com/sunya/electionguard/proto/common.proto";
 option java_package = "com.sunya.electionguard.proto";
 option java_outer_classname = "CiphertextProto";
 
+// Encrypted Tally of some collection of ballots.
 message PublishedCiphertextTally {
   string object_id = 1;
 
@@ -22,6 +23,7 @@ message CiphertextTallyContest {
   map<string, CiphertextTallySelection> tally_selections = 3;
 }
 
+// A homomorphic accumulation of CiphertextBallotSelections.
 message CiphertextTallySelection {
   string object_id = 1;
   ElementModQ description_hash = 2;

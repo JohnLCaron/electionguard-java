@@ -3,10 +3,12 @@ syntax = "proto3";
 option java_package = "com.sunya.electionguard.proto";
 option java_outer_classname = "CommonProto";
 
+// A member of the group Z mod P
 message ElementModP {
   bytes value = 1;
 }
 
+// A member of the group Z mod Q
 message ElementModQ {
   bytes value = 1;
 }

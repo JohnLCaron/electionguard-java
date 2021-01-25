@@ -5,6 +5,7 @@ import "com/sunya/electionguard/proto/common.proto";
 option java_package = "com.sunya.electionguard.proto";
 option java_outer_classname = "BallotProto";
 
+// An encrypted ballot that has been cast or spoiled.
 message CiphertextAcceptedBallot {
 
   enum BallotBoxState {
@@ -17,36 +18,41 @@ message CiphertextAcceptedBallot {
   BallotBoxState state = 2;
 }
 
+// An encrypted Ballot
 message CiphertextBallot {
   string object_id = 1;
   string ballot_style_id = 2; // The object_id of the BallotStyle in the Election Manifest
   ElementModQ description_hash = 3; // Hash of the election description
-  ElementModQ tracking_hash = 4; // Unique ballot tracking hash for this ballot
-  ElementModQ previous_tracking_hash = 5; // optional
+  ElementModQ tracking_hash = 4; // Unique ballot tracking hash for this ballot LOOK Optional?
+  ElementModQ previous_tracking_hash = 5; // Previous ballot tracking hash or seed hash
   repeated CiphertextBallotContest contests = 6;
   int64 timestamp = 7; // Timestamp at which the ballot encryption is generated, in seconds since the epoch UTC.
   ElementModQ crypto_hash = 8; // The hash of the encrypted ballot representation
-  ElementModQ nonce = 9; // optional
+  ElementModQ nonce = 9; // The nonce used to encrypt this ballot. LOOK Sensitive & should be treated as a secret LOOK Optional
 }
 
+// Encrypted selections for a specific contest.
 message CiphertextBallotContest {
   string object_id = 1;
   ElementModQ description_hash = 2; // Hash of the contest description
   repeated CiphertextBallotSelection selections = 3;
   ElementModQ crypto_hash = 4; // The hash of the encrypted values
-  ElementModQ nonce = 5; // optional
-  ConstantChaumPedersenProof proof = 6;
+  ElementModQ nonce = 5; // The nonce used to generate the encryption. LOOK Sensitive & should be treated as a secret LOOK optional
+  ConstantChaumPedersenProof proof = 6;  // The proof demonstrates the sum of the selections does not exceed the maximum
+                  // available selections for the contest, and that the proof was generated with the nonce LOOK optional
 }
 
+// Encryption of a specific selection.
 message CiphertextBallotSelection {
   string object_id = 1;
   ElementModQ description_hash = 2; // Hash of the selection description
-  ElGamalCiphertext ciphertext = 3;
+  ElGamalCiphertext ciphertext = 3; // The encrypted representation of the vote field
   ElementModQ crypto_hash = 4; // The hash of the encrypted values
   bool is_placeholder_selection = 5;
-  ElementModQ nonce = 6; // optional
-  DisjunctiveChaumPedersenProof proof = 7; // optional
-  ElGamalCiphertext extended_data = 8;   // optional
+  ElementModQ nonce = 6; // The nonce used to generate the encryption. LOOK Sensitive & should be treated as a secret LOOK optional
+  DisjunctiveChaumPedersenProof proof = 7; // The proof that demonstrates the selection is an encryption of 0 or 1,
+                                           // and was encrypted using the nonce. LOOK optional
+  ElGamalCiphertext extended_data = 8;     // LOOK optional
 }
 
 message ConstantChaumPedersenProof {

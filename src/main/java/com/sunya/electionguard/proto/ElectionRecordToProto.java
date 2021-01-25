@@ -10,7 +10,6 @@ import com.sunya.electionguard.SchnorrProof;
 import com.sunya.electionguard.Tally;
 
 import static com.sunya.electionguard.proto.ElectionRecordProto.ElectionRecord;
-import static com.sunya.electionguard.proto.ElectionRecordProto.BallotChain;
 import static com.sunya.electionguard.proto.CommonConvert.convertElementModP;
 import static com.sunya.electionguard.proto.CommonConvert.convertElementModQ;
 
@@ -53,31 +52,6 @@ public class ElectionRecordToProto {
     return builder.build();
   }
 
-  public static BallotChain buildBallotChain(
-          Election.ElectionDescription description,
-          Election.CiphertextElectionContext context,
-          Election.ElectionConstants constants,
-          Encrypt.EncryptionDevice device,
-          Iterable<Ballot.CiphertextAcceptedBallot> castBallots,
-          Iterable<KeyCeremony.CoefficientValidationSet> guardianCoefficients) {
-
-    BallotChain.Builder builder = BallotChain.newBuilder();
-    builder.setDevice( convertDevice(device));
-    builder.setConstants( convertConstants(constants));
-    builder.setElection( ElectionDescriptionToProto.translateToProto(description));
-    builder.setContext( convertContext(context));
-
-    for (KeyCeremony.CoefficientValidationSet coeff : guardianCoefficients) {
-      builder.addGuardianCoefficients(convertCoefficients(coeff));
-    }
-
-    for (Ballot.CiphertextAcceptedBallot ballot : castBallots) {
-      builder.addCastBallots(BallotToProto.translateToProto(ballot));
-    }
-
-    return builder.build();
-  }
-
   static ElectionRecordProto.Constants convertConstants(Election.ElectionConstants constants) {
     ElectionRecordProto.Constants.Builder builder = ElectionRecordProto.Constants.newBuilder();
     builder.setLargePrime(ByteString.copyFrom(constants.large_prime.toByteArray()));
@@ -98,8 +72,8 @@ public class ElectionRecordToProto {
     return builder.build();
   }
 
-  static ElectionRecordProto.Device convertDevice(Encrypt.EncryptionDevice device) {
-    ElectionRecordProto.Device.Builder builder = ElectionRecordProto.Device.newBuilder();
+  static ElectionRecordProto.EncryptionDevice convertDevice(Encrypt.EncryptionDevice device) {
+    ElectionRecordProto.EncryptionDevice.Builder builder = ElectionRecordProto.EncryptionDevice.newBuilder();
     builder.setUuid(device.uuid);
     builder.setLocation(device.location);
     return builder.build();
