@@ -10,10 +10,11 @@ Im also happy to donate it to another organization for hosting, etc.
 ## Notes
 
  * Most classes are immutable. 
- * Assumes Java 11. No Java 11 features are used (yet), but I dont see any reason to stay compatible with 8.
+ * Assumes Java 11.
  * Uses Java's BigInteger for cryptographic computations.
- * Provisionally using AutoValue for (some) immutable value classes.
- * Uses Gson and related plugins for JSON serialization. 
+ * Uses Gson for JSON serialization. 
+ * Can also serialize to protobuf.
+ * Using AutoValue for (some) immutable value classes.
  * Uses Flogger for logging.
  * Uses JUnit5 / jqwik library for property based testing.
  * Uses gradle for building.
@@ -23,9 +24,8 @@ Im also happy to donate it to another organization for hosting, etc.
   * Fix issues in validation.
   * Review uses of Optional and null.
   * Not yet compatible with Python library JSON serialization, due to different ways to serialize Optional.
-  * Look at Serialization performance, consider using protobuf.
-  * Look at BigInteger performance, consider using GMP through jni or jna.
-  * Measure performance.
+  * Measure computational performance.
+  * Look at BigInteger performance, consider if using GMP is justified.
   * Investigate parallelization strategies.
 
 ## License
