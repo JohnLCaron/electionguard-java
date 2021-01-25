@@ -291,7 +291,7 @@ public class Group {
   }
 
   /** Computes g^e mod p. */
-  static ElementModP g_pow_p(ElementMod e) {
+  public static ElementModP g_pow_p(ElementMod e) {
     return int_to_p_unchecked(pow_p(G, e.elem));
   }
 

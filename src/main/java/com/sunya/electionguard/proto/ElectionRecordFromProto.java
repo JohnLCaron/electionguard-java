@@ -1,9 +1,9 @@
 package com.sunya.electionguard.proto;
 
-import com.google.common.collect.ImmutableList;
 import com.google.protobuf.ByteString;
 import com.sunya.electionguard.Ballot;
 import com.sunya.electionguard.Election;
+import com.sunya.electionguard.verifier.ElectionRecord;
 import com.sunya.electionguard.Encrypt;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.KeyCeremony;
@@ -23,7 +23,7 @@ import static com.sunya.electionguard.proto.CommonConvert.convertElementModQ;
 @Immutable
 public class ElectionRecordFromProto {
 
-  public static ElectionRecordFromProto read(String filename) throws IOException {
+  public static ElectionRecord read(String filename) throws IOException {
     ElectionRecordProto.ElectionRecord proto;
     try (FileInputStream inp = new FileInputStream(filename)) {
       proto = ElectionRecordProto.ElectionRecord.parseDelimitedFrom(inp);
@@ -31,7 +31,7 @@ public class ElectionRecordFromProto {
     return translateFromProto(proto);
   }
 
-  public static ElectionRecordFromProto translateFromProto(ElectionRecordProto.ElectionRecord proto) {
+  public static ElectionRecord translateFromProto(ElectionRecordProto.ElectionRecord proto) {
     Election.ElectionConstants constants = convertConstants(proto.getConstants());
     Election.CiphertextElectionContext context = convertContext(proto.getContext());
     Election.ElectionDescription description = ElectionDescriptionFromProto.translateFromProto(proto.getElection());
@@ -46,38 +46,8 @@ public class ElectionRecordFromProto {
     Tally.PublishedCiphertextTally ciphertextTally = CiphertextTallyFromProto.translateFromProto(proto.getCiphertextTally());
     Tally.PlaintextTally decryptedTally = PlaintextTallyFromProto.translateFromProto(proto.getDecryptedTally());
 
-    return new ElectionRecordFromProto(constants, context, description, devices, castBallots, spoiledBallots,
+    return new ElectionRecord(constants, context, description, devices, castBallots, spoiledBallots,
             guardianCoefficients, ciphertextTally, decryptedTally);
-  }
-
-  public final Election.ElectionConstants constants;
-  public final Election.CiphertextElectionContext context;
-  public final Election.ElectionDescription election;
-  public final ImmutableList<Encrypt.EncryptionDevice> devices;
-  public final ImmutableList<Ballot.CiphertextAcceptedBallot> castBallots;
-  public final ImmutableList<Ballot.CiphertextAcceptedBallot> spoiledBallots;
-  public final ImmutableList<KeyCeremony.CoefficientValidationSet> guardianCoefficients;
-  public final Tally.PublishedCiphertextTally ciphertextTally;
-  public final Tally.PlaintextTally decryptedTally;
-
-  private ElectionRecordFromProto(Election.ElectionConstants constants,
-                                  Election.CiphertextElectionContext context,
-                                  Election.ElectionDescription description,
-                                  Iterable<Encrypt.EncryptionDevice> devices,
-                                  Iterable<Ballot.CiphertextAcceptedBallot> castBallots,
-                                  Iterable<Ballot.CiphertextAcceptedBallot> spoiledBallots,
-                                  Iterable<KeyCeremony.CoefficientValidationSet> guardianCoefficients,
-                                  Tally.PublishedCiphertextTally ciphertextTally,
-                                  Tally.PlaintextTally decryptedTally) {
-    this.constants = constants;
-    this.context = context;
-    this.election = description;
-    this.devices = ImmutableList.copyOf(devices);
-    this.castBallots = ImmutableList.copyOf(castBallots);
-    this.spoiledBallots = ImmutableList.copyOf(spoiledBallots);
-    this.guardianCoefficients = ImmutableList.copyOf(guardianCoefficients);
-    this.ciphertextTally = ciphertextTally;
-    this.decryptedTally = decryptedTally;
   }
 
   static Election.ElectionConstants convertConstants(ElectionRecordProto.Constants constants) {

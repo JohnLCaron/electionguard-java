@@ -1,13 +1,14 @@
 package com.sunya.electionguard.publish;
 
 import com.sunya.electionguard.*;
+import com.sunya.electionguard.verifier.ElectionRecord;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-/** helper class for consumers of published data */
+/** Helper class for consumers of published data */
 public class Consumer {
   private final Publisher publisher;
 
@@ -75,6 +76,19 @@ public class Consumer {
       result.add(fromPython);
     }
     return result;
+  }
+
+  public ElectionRecord getElectionRecord() throws IOException {
+    return new ElectionRecord(
+            this.constants(),
+            this.context(),
+            this.election(),
+            this.devices(),
+            this.ballots(),
+            this.spoiled(),
+            this.guardianCoefficients(),
+            this.ciphertextTally(),
+            this.decryptedTally());
   }
 
 }

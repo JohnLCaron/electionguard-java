@@ -8,9 +8,9 @@ import com.sunya.electionguard.Ballot;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.Tally;
-import com.sunya.electionguard.publish.Consumer;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,16 +23,14 @@ import static com.sunya.electionguard.Group.ElementModP;
 public class BallotAggregationVerifier {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
-  final ElectionParameters electionParameters;
-  final Consumer consumer;
-  final Tally.PlaintextTally tally;
+  final ElectionRecord electionRecord;
+  final Tally.PlaintextTally decryptedTally;
   final Grp grp;
 
-  BallotAggregationVerifier(ElectionParameters electionParameters, Consumer consumer) throws IOException {
-    this.electionParameters = electionParameters;
-    this.consumer = consumer;
-    this.tally = consumer.decryptedTally();
-    this.grp = new Grp(electionParameters.large_prime(), electionParameters.small_prime());
+  BallotAggregationVerifier(ElectionRecord electionRecord) {
+    this.electionRecord = electionRecord;
+    this.decryptedTally = electionRecord.decryptedTally;
+    this.grp = new Grp(electionRecord.large_prime(), electionRecord.small_prime());
   }
 
   /**
@@ -42,16 +40,21 @@ public class BallotAggregationVerifier {
    */
   boolean verify_ballot_aggregation() throws IOException {
     boolean error = false;
-    SelectionAggregator agg = new SelectionAggregator(consumer.ballots());
+    SelectionAggregator agg = new SelectionAggregator(electionRecord.castBallots);
 
-    for (Tally.PlaintextTallyContest contest : tally.contests().values()) {
+    for (Tally.PlaintextTallyContest contest : decryptedTally.contests().values()) {
       for (Tally.PlaintextTallySelection selection : contest.selections().values()) {
         String key = contest.object_id() + "." + selection.object_id();
         List<ElGamal.Ciphertext> encryptions = agg.selectionEncryptions.get(key);
-        ElGamal.Ciphertext product = ElGamal.elgamal_add(Iterables.toArray(encryptions, ElGamal.Ciphertext.class));
-        if (!product.equals(selection.message())) {
-          System.out.printf(" Ballot Aggregation Validation failed for %s.%n", key);
-          error = true;
+        // LOOK its possible no ballots voted one way or another
+        if (!encryptions.isEmpty()) {
+          ElGamal.Ciphertext product = ElGamal.elgamal_add(Iterables.toArray(encryptions, ElGamal.Ciphertext.class));
+          if (!product.equals(selection.message())) {
+            System.out.printf(" 7. Ballot Aggregation Validation failed for %s.%n", key);
+            error = true;
+          }
+        } else {
+          System.out.printf("  No ballots for talley key %s%n", key);
         }
       }
     }
@@ -73,14 +76,21 @@ public class BallotAggregationVerifier {
   boolean verify_tally_decryption() throws IOException {
     boolean error = false;
 
-    for (Tally.PlaintextTallyContest contest : tally.contests().values()) {
+    for (Tally.PlaintextTallyContest contest : decryptedTally.contests().values()) {
       for (Tally.PlaintextTallySelection selection : contest.selections().values()) {
+        String key = contest.object_id() + "." + selection.object_id();
         List<ElementModP> partialDecryptions = selection.shares().stream().map(s -> s.share()).collect(Collectors.toList());
         ElementModP productMi = Group.mult_p(partialDecryptions);
         ElementModP M = selection.value();
         ElementModP B = selection.message().data;
         if (!B.equals(Group.mult_p(M, productMi))) {
-          System.out.printf(" Tally Decryption failed for %s-%s.%n", contest.object_id(), selection.object_id());
+          System.out.printf(" 11.A Tally Decryption failed for %s-%s.%n", key);
+          error = true;
+        }
+
+        ElementModP t = Group.int_to_p_unchecked(BigInteger.valueOf(selection.tally()));
+        if (!M.equals(Group.g_pow_p(t))) {
+          System.out.printf(" 11.B Tally Decryption failed for %s-%s.%n", key);
           error = true;
         }
       }
@@ -96,12 +106,14 @@ public class BallotAggregationVerifier {
 
   private static class SelectionAggregator {
     ListMultimap<String, ElGamal.Ciphertext> selectionEncryptions = ArrayListMultimap.create();
+
     SelectionAggregator(List<Ballot.CiphertextAcceptedBallot> ballots) {
       for (Ballot.CiphertextAcceptedBallot ballot : ballots) {
         if (ballot.state == Ballot.BallotBoxState.CAST) {
           for (Ballot.CiphertextBallotContest contest : ballot.contests) {
             for (Ballot.CiphertextBallotSelection selection : contest.ballot_selections) {
-              selectionEncryptions.put(contest.object_id + "." + selection.object_id, selection.ciphertext());
+              String key = contest.object_id + "." + selection.object_id;
+              selectionEncryptions.put(key, selection.ciphertext());
             }
           }
         }

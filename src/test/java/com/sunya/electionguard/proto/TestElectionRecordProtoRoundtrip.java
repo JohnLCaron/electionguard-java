@@ -1,5 +1,6 @@
 package com.sunya.electionguard.proto;
 
+import com.sunya.electionguard.verifier.ElectionRecord;
 import com.sunya.electionguard.publish.Consumer;
 import com.sunya.electionguard.publish.Publisher;
 import net.jqwik.api.Example;
@@ -30,7 +31,7 @@ public class TestElectionRecordProtoRoundtrip {
             consumer.decryptedTally(),
             consumer.guardianCoefficients());
 
-    ElectionRecordFromProto roundtrip = ElectionRecordFromProto.translateFromProto(protoFromJson);
+    ElectionRecord roundtrip = ElectionRecordFromProto.translateFromProto(protoFromJson);
     assertThat(roundtrip.election).isEqualTo(consumer.election());
     assertThat(roundtrip.context).isEqualTo(consumer.context());
     assertThat(roundtrip.constants).isEqualTo(consumer.constants());
@@ -57,7 +58,7 @@ public class TestElectionRecordProtoRoundtrip {
             consumer.decryptedTally(),
             consumer.guardianCoefficients());
 
-    ElectionRecordFromProto roundtrip = ElectionRecordFromProto.read(publisher.electionRecordProtoFile().toFile().getAbsolutePath());
+    ElectionRecord roundtrip = ElectionRecordFromProto.read(publisher.electionRecordProtoFile().toFile().getAbsolutePath());
     assertThat(roundtrip.election).isEqualTo(consumer.election());
     assertThat(roundtrip.context).isEqualTo(consumer.context());
     assertThat(roundtrip.constants).isEqualTo(consumer.constants());

@@ -15,8 +15,7 @@ import java.util.Set;
 import static com.google.common.truth.Truth.assertThat;
 
 public class TestSelectionEncryptionVerifier {
-  static ElectionParameters electionParameters;
-  static Consumer consumer;
+  static ElectionRecord electionRecord;
   static SelectionEncyrptionVerifier sev;
   static Grp grp;
 
@@ -24,10 +23,10 @@ public class TestSelectionEncryptionVerifier {
   public static void setUp() throws IOException {
     String topdir = TestParameterVerifier.topdir;
 
-    consumer = new Consumer(topdir);
-    electionParameters = new ElectionParameters(consumer);
-    sev = new SelectionEncyrptionVerifier(electionParameters, consumer);
-    grp = new Grp(electionParameters.large_prime(), electionParameters.small_prime());
+    Consumer consumer = new Consumer(topdir);
+    electionRecord = consumer.getElectionRecord();
+    sev = new SelectionEncyrptionVerifier(electionRecord);
+    grp = new Grp(electionRecord.large_prime(), electionRecord.small_prime());
   }
 
   @Example
@@ -38,7 +37,7 @@ public class TestSelectionEncryptionVerifier {
 
   @Example
   public void testVerifyAllContests() throws IOException {
-    for (Ballot.CiphertextAcceptedBallot ballot : consumer.ballots()) {
+    for (Ballot.CiphertextAcceptedBallot ballot : electionRecord.castBallots) {
       for (Ballot.CiphertextBallotContest contest : ballot.contests) {
         verify_a_contest(contest);
       }
@@ -46,7 +45,7 @@ public class TestSelectionEncryptionVerifier {
   }
 
   void verify_a_contest(Ballot.CiphertextBallotContest contest) {
-    Integer vote_limit = electionParameters.getVoteLimitForContest(contest.object_id);
+    Integer vote_limit = electionRecord.getVoteLimitForContest(contest.object_id);
     Preconditions.checkNotNull(vote_limit);
 
     int placeholder_count = 0;
@@ -85,7 +84,7 @@ public class TestSelectionEncryptionVerifier {
     Group.ElementModP b = proof.data;
     Group.ElementModQ this_contest_challenge = proof.challenge;
     Group.ElementModQ challenge_computed =
-            Hash.hash_elems(electionParameters.extended_hash(),
+            Hash.hash_elems(electionRecord.extended_hash(),
                     Group.int_to_p_unchecked(selection_alpha_product),
                     Group.int_to_p_unchecked(selection_beta_product), a, b);
 
@@ -130,7 +129,7 @@ public class TestSelectionEncryptionVerifier {
     }
 
     // point 2: conduct hash computation, c = H(Q-bar, (alpha, beta), (a0, b0), (a1, b1))
-    Group.ElementModQ challenge = Hash.hash_elems(electionParameters.extended_hash(), this_pad, this_data,
+    Group.ElementModQ challenge = Hash.hash_elems(electionRecord.extended_hash(), this_pad, this_data,
             zero_pad, zero_data, one_pad, one_data);
 
     // point 4:  c = c0 + c1 mod q is satisfied
@@ -192,12 +191,12 @@ public class TestSelectionEncryptionVerifier {
   private boolean check_cp_proof_zero_proof(Group.ElementModP pad, Group.ElementModP data, Group.ElementModP zero_pad, Group.ElementModP zero_data,
                                             Group.ElementModQ zero_chal, Group.ElementModQ zero_res) {
     // g ^ v0 = a0 * alpha ^ c0 mod p
-    BigInteger equ1_left = grp.pow_p(electionParameters.generator(), zero_res.getBigInt());
+    BigInteger equ1_left = grp.pow_p(electionRecord.generator(), zero_res.getBigInt());
     BigInteger equ1_right = grp.mult_p(zero_pad.getBigInt(), grp.pow_p(pad.getBigInt(), zero_chal.getBigInt()));
     boolean eq1ok = equ1_left.equals(equ1_right);
 
     // K ^ v0 = b0 * beta ^ c0 mod p
-    BigInteger equ2_left = grp.pow_p(electionParameters.elgamal_key().getBigInt(), zero_res.getBigInt());
+    BigInteger equ2_left = grp.pow_p(electionRecord.elgamal_key().getBigInt(), zero_res.getBigInt());
     BigInteger equ2_right = grp.mult_p(zero_data.getBigInt(), grp.pow_p(data.getBigInt(), zero_chal.getBigInt()));
     boolean eq2ok = equ2_left.equals(equ2_right);
 
@@ -227,13 +226,13 @@ public class TestSelectionEncryptionVerifier {
                                            Group.ElementModQ one_chal, Group.ElementModQ one_res) {
 
     // g ^ v1 = a1 * alpha ^ c1 mod p
-    BigInteger equ1_left = grp.pow_p(electionParameters.generator(), one_res.getBigInt());
+    BigInteger equ1_left = grp.pow_p(electionRecord.generator(), one_res.getBigInt());
     BigInteger equ1_right = grp.mult_p(one_pad.getBigInt(), grp.pow_p(pad.getBigInt(), one_chal.getBigInt()));
     boolean eq1ok = equ1_left.equals(equ1_right);
 
     // g ^ c1 * K ^ v1 = b1 * beta ^ c1 mod p
-    BigInteger equ2_left = grp.mult_p(grp.pow_p(electionParameters.generator(), one_chal.getBigInt()),
-            grp.pow_p(electionParameters.elgamal_key().getBigInt(), one_res.getBigInt()));
+    BigInteger equ2_left = grp.mult_p(grp.pow_p(electionRecord.generator(), one_chal.getBigInt()),
+            grp.pow_p(electionRecord.elgamal_key().getBigInt(), one_res.getBigInt()));
     BigInteger equ2_right = grp.mult_p(one_data.getBigInt(), grp.pow_p(data.getBigInt(), one_chal.getBigInt()));
     boolean eq2ok = equ2_left.equals(equ2_right);
 
@@ -280,7 +279,7 @@ public class TestSelectionEncryptionVerifier {
   }
 
   private boolean match_vote_limit_by_contest(String contest_name, int num_of_placeholders) {
-    int vote_limit = electionParameters.getVoteLimitForContest(contest_name);
+    int vote_limit = electionRecord.getVoteLimitForContest(contest_name);
     boolean res = vote_limit == num_of_placeholders;
     if (!res) {
       System.out.printf("Contest placeholder number error.%n");
@@ -298,7 +297,7 @@ public class TestSelectionEncryptionVerifier {
   private boolean check_cp_proof_alpha(Ballot.CiphertextBallotContest contest, BigInteger alpha_product) {
     ChaumPedersen.ConstantChaumPedersenProof proof = contest.proof.orElseThrow(IllegalStateException::new);
 
-    BigInteger left = grp.pow_p(electionParameters.generator(), proof.response.getBigInt());
+    BigInteger left = grp.pow_p(electionRecord.generator(), proof.response.getBigInt());
     BigInteger right = grp.mult_p(grp.mod_p(proof.pad.getBigInt()),
             grp.pow_p(alpha_product, proof.challenge.getBigInt()));
 
@@ -320,8 +319,8 @@ public class TestSelectionEncryptionVerifier {
   private boolean check_cp_proof_beta(Ballot.CiphertextBallotContest contest, BigInteger beta_product, BigInteger votes_allowed) {
     ChaumPedersen.ConstantChaumPedersenProof proof = contest.proof.orElseThrow(IllegalStateException::new);
 
-    BigInteger leftTerm1 = grp.pow_p(electionParameters.generator(), grp.mult_q(votes_allowed, proof.challenge.getBigInt()));
-    BigInteger leftTerm2 = grp.pow_p(electionParameters.elgamal_key().getBigInt(), proof.response.getBigInt());
+    BigInteger leftTerm1 = grp.pow_p(electionRecord.generator(), grp.mult_q(votes_allowed, proof.challenge.getBigInt()));
+    BigInteger leftTerm2 = grp.pow_p(electionRecord.elgamal_key().getBigInt(), proof.response.getBigInt());
     BigInteger left = grp.mult_p(leftTerm1, leftTerm2);
 
     BigInteger right = grp.mult_p(proof.data.getBigInt(), grp.pow_p(beta_product, proof.challenge.getBigInt()));
@@ -338,7 +337,7 @@ public class TestSelectionEncryptionVerifier {
     Set<Group.ElementModQ> prev_hashes = new HashSet<>();
     Set<Group.ElementModQ> curr_hashes = new HashSet<>();
 
-    for (Ballot.CiphertextAcceptedBallot ballot : consumer.ballots()) {
+    for (Ballot.CiphertextAcceptedBallot ballot : electionRecord.castBallots) {
       verify_tracking_hash(ballot);
       if (ballot.previous_tracking_hash != null) {
         prev_hashes.add(ballot.previous_tracking_hash);
@@ -382,7 +381,7 @@ public class TestSelectionEncryptionVerifier {
      */
 
     // verify the first hash H0 = H(Q-bar)
-    Group.ElementModQ zero_hash = Hash.hash_elems(electionParameters.description_hash());
+    Group.ElementModQ zero_hash = Hash.hash_elems(electionRecord.description_hash());
     if (!zero_hash.equals(first_hash)) {
       error = true;
     }

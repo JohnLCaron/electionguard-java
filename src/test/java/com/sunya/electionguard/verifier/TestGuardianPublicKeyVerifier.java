@@ -12,7 +12,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 // Box 2
 public class TestGuardianPublicKeyVerifier {
-  static ElectionParameters electionParameters;
+  static ElectionRecord electionRecord;
   static GuardianPublicKeyVerifier kgv;
   static Grp grp;
 
@@ -21,9 +21,9 @@ public class TestGuardianPublicKeyVerifier {
     String topdir = TestParameterVerifier.topdir;
 
     Consumer consumer = new Consumer(topdir);
-    electionParameters = new ElectionParameters(consumer);
-    kgv = new GuardianPublicKeyVerifier(electionParameters);
-    grp = new Grp(electionParameters.large_prime(), electionParameters.small_prime());
+    electionRecord = consumer.getElectionRecord();
+    kgv = new GuardianPublicKeyVerifier(electionRecord);
+    grp = new Grp(electionRecord.large_prime(), electionRecord.small_prime());
   }
 
   @Example
@@ -33,7 +33,7 @@ public class TestGuardianPublicKeyVerifier {
 
   @Example
   public void testGuardianPublicKeyValidation() {
-    for (KeyCeremony.CoefficientValidationSet coeff : electionParameters.coefficients()) {
+    for (KeyCeremony.CoefficientValidationSet coeff : electionRecord.guardianCoefficients) {
       boolean kgvOk = kgv.verify_one_guardian(coeff);
       assertThat(kgvOk).isTrue();
     }
@@ -41,7 +41,7 @@ public class TestGuardianPublicKeyVerifier {
 
   @Example
   public void testVerifyOneGuardian() {
-    for (KeyCeremony.CoefficientValidationSet coeff : electionParameters.coefficients()) {
+    for (KeyCeremony.CoefficientValidationSet coeff : electionRecord.guardianCoefficients) {
       verify_equations(coeff);
       verify_challenges(coeff);
     }
@@ -74,7 +74,7 @@ public class TestGuardianPublicKeyVerifier {
 
   /** check the equation = generator ^ response mod p = (commitment * public key ^ challenge) mod p */
   void verify_individual_key_computation(Group.ElementModQ response, Group.ElementModP commitment, Group.ElementModP public_key, Group.ElementModQ challenge) {
-    BigInteger left = grp.pow_p(electionParameters.generator(), response.getBigInt());
+    BigInteger left = grp.pow_p(electionRecord.generator(), response.getBigInt());
     BigInteger right = grp.mult_p(commitment.getBigInt(), grp.pow_p(public_key.getBigInt(), challenge.getBigInt()));
     assertThat(left).isEqualTo(right);
   }

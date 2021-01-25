@@ -14,8 +14,7 @@ public class TestParameterVerifier {
   @Example
   public void testJavaGenerated() throws IOException {
     Consumer consumer = new Consumer(topdir);
-    ElectionParameters electionParameters = new ElectionParameters(consumer);
-    ParameterVerifier blv = new ParameterVerifier(electionParameters);
+    ParameterVerifier blv = new ParameterVerifier(consumer.getElectionRecord());
     boolean blvOk = blv.verify_all_params();
     assertThat(blvOk).isTrue();
   }

@@ -7,6 +7,7 @@ import com.sunya.electionguard.proto.ElectionRecordFromProto;
 import com.sunya.electionguard.publish.ConvertFromJson;
 import com.sunya.electionguard.publish.ElectionDescriptionFromJson;
 import com.sunya.electionguard.publish.Publisher;
+import com.sunya.electionguard.verifier.ElectionRecord;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -406,7 +407,7 @@ public class TimeIntegrationSteps {
 
   // Verify results of election
   void verify_results_proto(Publisher publisher) throws IOException {
-    ElectionRecordFromProto roundtrip = ElectionRecordFromProto.read(publisher.electionRecordProtoFile().toFile().getAbsolutePath());
+    ElectionRecord roundtrip = ElectionRecordFromProto.read(publisher.electionRecordProtoFile().toFile().getAbsolutePath());
     assertThat(roundtrip.election).isEqualTo(this.description);
     assertThat(roundtrip.context).isEqualTo(this.context);
     assertThat(roundtrip.constants).isEqualTo(this.constants);
@@ -453,7 +454,7 @@ public class TimeIntegrationSteps {
   }
 
   void step_8_read_proto_ballots(Publisher publisher) throws IOException {
-    ElectionRecordFromProto roundtrip = ElectionRecordFromProto.read(publisher.electionRecordProtoFile().toFile().getAbsolutePath());
+    ElectionRecord roundtrip = ElectionRecordFromProto.read(publisher.electionRecordProtoFile().toFile().getAbsolutePath());
 
     int count = 0;
     for (CiphertextAcceptedBallot ballot : this.ballot_box.getCastBallots()) {

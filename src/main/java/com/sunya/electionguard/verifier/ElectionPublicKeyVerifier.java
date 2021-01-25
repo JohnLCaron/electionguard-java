@@ -12,16 +12,14 @@ import static com.sunya.electionguard.Group.ElementModQ;
 
 /** This verifies specification section "3. Election Public-Key Validation". */
 public class ElectionPublicKeyVerifier {
-  private final ElectionParameters electionParameters;
-  private final Grp grp;
+  private final ElectionRecord electionRecord;
 
-  ElectionPublicKeyVerifier(ElectionParameters electionParameters) {
-    this.electionParameters = electionParameters;
-    this.grp = new Grp(electionParameters.large_prime(), electionParameters.small_prime());
+  ElectionPublicKeyVerifier(ElectionRecord electionRecord) {
+    this.electionRecord = electionRecord;
   }
 
   boolean verify_public_keys() {
-    ElementModP public_key = this.electionParameters.elgamal_key();
+    ElementModP public_key = this.electionRecord.elgamal_key();
     ElementModP expected_public_key = computePublicKey();
 
     // Equation 3.B
@@ -31,8 +29,8 @@ public class ElectionPublicKeyVerifier {
     }
 
     // Equation 3.A LOOK probably wrong, see issue #279.
-    ElementModQ expectedExtendedHash = Hash.hash_elems(this.electionParameters.base_hash(), public_key);
-    if (!this.electionParameters.extended_hash().equals(expectedExtendedHash)) {
+    ElementModQ expectedExtendedHash = Hash.hash_elems(this.electionRecord.base_hash(), public_key);
+    if (!this.electionRecord.extended_hash().equals(expectedExtendedHash)) {
       System.out.printf(" ***Expected extended hash does not match.%n");
       return false;
     }
@@ -42,7 +40,7 @@ public class ElectionPublicKeyVerifier {
 
   ElementModP computePublicKey() {
     List<ElementModP> Ki = new ArrayList<>();
-    for (KeyCeremony.CoefficientValidationSet coeff : this.electionParameters.coefficients()) {
+    for (KeyCeremony.CoefficientValidationSet coeff : this.electionRecord.guardianCoefficients) {
       // the first commitment is the public key for guardian i.
       Ki.add(coeff.coefficient_commitments().get(0));
     }
