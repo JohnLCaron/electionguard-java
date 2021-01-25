@@ -10,7 +10,6 @@ import static com.google.common.truth.Truth.assertThat;
 
 public class TestContestVoteLimitsVerifier {
 
-  static ElectionParameters electionParameters;
   static Consumer consumer;
   static ContestVoteLimitsVerifier validator;
 
@@ -19,8 +18,7 @@ public class TestContestVoteLimitsVerifier {
     String topdir = TestParameterVerifier.topdir;
 
     consumer = new Consumer(topdir);
-    electionParameters = new ElectionParameters(consumer);
-    validator = new ContestVoteLimitsVerifier(electionParameters, consumer);
+    validator = new ContestVoteLimitsVerifier(consumer.getElectionRecord());
   }
 
   @Example

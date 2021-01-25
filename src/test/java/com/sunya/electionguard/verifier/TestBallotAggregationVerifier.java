@@ -9,9 +9,6 @@ import java.io.IOException;
 import static com.google.common.truth.Truth.assertThat;
 
 public class TestBallotAggregationVerifier {
-
-  static ElectionParameters electionParameters;
-  static Consumer consumer;
   static BallotAggregationVerifier validator;
 
   @BeforeContainer
@@ -19,9 +16,8 @@ public class TestBallotAggregationVerifier {
     String topdir = TestParameterVerifier.topdir;
 
     // set up
-    consumer = new Consumer(topdir);
-    electionParameters = new ElectionParameters(consumer);
-    validator = new BallotAggregationVerifier(electionParameters, consumer);
+    Consumer consumer = new Consumer(topdir);
+    validator = new BallotAggregationVerifier(consumer.getElectionRecord());
   }
 
   @Example

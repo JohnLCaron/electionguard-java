@@ -10,7 +10,6 @@ import static com.google.common.truth.Truth.assertThat;
 
 public class TestElectionPublicKeyVerifier {
 
-  static ElectionParameters electionParameters;
   static Consumer consumer;
   static ElectionPublicKeyVerifier validator;
 
@@ -20,8 +19,7 @@ public class TestElectionPublicKeyVerifier {
 
     // set up
     consumer = new Consumer(topdir);
-    electionParameters = new ElectionParameters(consumer);
-    validator = new ElectionPublicKeyVerifier(electionParameters);
+    validator = new ElectionPublicKeyVerifier(consumer.getElectionRecord());
   }
 
   @Example

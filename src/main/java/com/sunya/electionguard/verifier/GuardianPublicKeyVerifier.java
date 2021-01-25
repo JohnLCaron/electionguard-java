@@ -12,12 +12,12 @@ import static com.sunya.electionguard.Group.ElementModP;
 
 /** This verifies specification section "2. Guardian Public-Key Validation". */
 public class GuardianPublicKeyVerifier {
-  private final ElectionParameters electionParameters;
+  private final ElectionRecord electionRecord;
   private final Grp grp;
 
-  GuardianPublicKeyVerifier(ElectionParameters electionParameters) {
-    this.electionParameters = electionParameters;
-    this.grp = new Grp(electionParameters.large_prime(), electionParameters.small_prime());
+  GuardianPublicKeyVerifier(ElectionRecord electionRecord) {
+    this.electionRecord = electionRecord;
+    this.grp = new Grp(electionRecord.large_prime(), electionRecord.small_prime());
   }
 
   /** verify all guardians" key generation info by examining challenge values and equations. */
@@ -25,7 +25,7 @@ public class GuardianPublicKeyVerifier {
     boolean error = false;
 
     int count = 0;
-    for (KeyCeremony.CoefficientValidationSet coeff : this.electionParameters.coefficients()) {
+    for (KeyCeremony.CoefficientValidationSet coeff : this.electionRecord.guardianCoefficients) {
       boolean res = this.verify_one_guardian(coeff);
       if (!res) {
         error = true;
@@ -45,7 +45,7 @@ public class GuardianPublicKeyVerifier {
     List<SchnorrProof> coefficient_proofs = coeffSet.coefficient_proofs();
 
     // loop through every proof TODO why only quorum, why not all??
-    for (int i = 0; i < this.electionParameters.quorum(); i++) {
+    for (int i = 0; i < this.electionRecord.quorum(); i++) {
       SchnorrProof proof = coefficient_proofs.get(i);
       ElementModP commitment = proof.commitment; // h
       ElementModP public_key = proof.public_key; // k
@@ -76,8 +76,8 @@ public class GuardianPublicKeyVerifier {
    * @return a challenge value of a guardian, separated by quorum
    */
   ElementModQ compute_guardian_challenge_threshold_separated(ElementModP public_key, ElementModP commitment) {
-    // LOOK change to return Hash.hash_elems(this.electionParameters.base_hash(), public_key, commitment);
-    //  return Hash.hash_elems(this.electionParameters.base_hash(), public_key, commitment);
+    // LOOK change to return Hash.hash_elems(this.electionRecord.base_hash(), public_key, commitment);
+    //  return Hash.hash_elems(this.electionRecord.base_hash(), public_key, commitment);
     return Hash.hash_elems(public_key, commitment);
   }
 
@@ -90,7 +90,7 @@ public class GuardianPublicKeyVerifier {
    * @return True if both sides of the equations are equal, False otherwise
    */
   boolean verify_individual_key_computation(ElementModQ response, ElementModP commitment, ElementModP public_key, ElementModQ challenge) {
-    BigInteger left = grp.pow_p(this.electionParameters.generator(), response.getBigInt());
+    BigInteger left = grp.pow_p(this.electionRecord.generator(), response.getBigInt());
     BigInteger right = grp.mult_p(commitment.getBigInt(), grp.pow_p(public_key.getBigInt(), challenge.getBigInt()));
     return left.equals(right);
   }

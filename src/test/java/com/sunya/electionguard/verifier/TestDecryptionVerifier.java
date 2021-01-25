@@ -9,20 +9,15 @@ import java.io.IOException;
 import static com.google.common.truth.Truth.assertThat;
 
 public class TestDecryptionVerifier {
-  static ElectionParameters electionParameters;
   static Consumer consumer;
   static DecryptionVerifier validator;
-  static Grp grp;
 
   @BeforeContainer
   public static void setUp() throws IOException {
-    String topdir = "/home/snake/tmp/testQuorum";
-    // String topdir = TestParameterVerifier.topdir;
+    String topdir = TestParameterVerifier.topdir;
 
     consumer = new Consumer(topdir);
-    electionParameters = new ElectionParameters(consumer);
-    validator = new DecryptionVerifier(electionParameters, consumer);
-    grp = new Grp(electionParameters.large_prime(), electionParameters.small_prime());
+    validator = new DecryptionVerifier(consumer.getElectionRecord());
   }
 
   @Example

@@ -6,7 +6,6 @@ import com.google.common.flogger.FluentLogger;
 import com.sunya.electionguard.ChaumPedersen;
 import com.sunya.electionguard.Hash;
 import com.sunya.electionguard.Tally;
-import com.sunya.electionguard.publish.Consumer;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -25,16 +24,14 @@ import static com.sunya.electionguard.Group.ElementModP;
 public class DecryptionVerifier {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
-  final ElectionParameters electionParameters;
-  final Consumer consumer;
+  final ElectionRecord electionRecord;
   final Tally.PlaintextTally tally;
   final Grp grp;
 
-  DecryptionVerifier(ElectionParameters electionParameters, Consumer consumer) throws IOException {
-    this.electionParameters = electionParameters;
-    this.consumer = consumer;
-    this.tally = consumer.decryptedTally();
-    this.grp = new Grp(electionParameters.large_prime(), electionParameters.small_prime());
+  DecryptionVerifier(ElectionRecord electionRecord) throws IOException {
+    this.electionRecord = electionRecord;
+    this.tally = electionRecord.decryptedTally;
+    this.grp = new Grp(electionRecord.large_prime(), electionRecord.small_prime());
   }
 
   /** Verify all cast ballots in the tally. */
@@ -143,7 +140,7 @@ public class DecryptionVerifier {
       this.shares = shares;
       this.selection_pad = selection_pad;
       this.selection_data = selection_data;
-      this.public_keys = electionParameters.public_keys_of_all_guardians();
+      this.public_keys = electionRecord.public_keys_of_all_guardians();
     }
 
     /** Verify all shares of a tally decryption */
@@ -209,7 +206,7 @@ public class DecryptionVerifier {
         }
 
         // 9.C Check if the given challenge ci = H(Q-bar, (A,B), (ai, bi), Mi)
-        ElementModQ challenge_computed = Hash.hash_elems(electionParameters.extended_hash(),
+        ElementModQ challenge_computed = Hash.hash_elems(electionRecord.extended_hash(),
                 this.selection_pad, this.selection_data, pad, data, partial_decryption);
         if (!challenge_computed.equals(challenge)) {
           System.out.printf("  9.C ci != H(Q-bar, (A,B), (ai, bi), Mi) for missing_guardian %s%n", guardian_id);
@@ -269,7 +266,7 @@ public class DecryptionVerifier {
       }
 
       // 8.C Check if the given challenge ci = H(Q-bar, (A,B), (ai, bi), Mi)
-      ElementModQ challenge_computed = Hash.hash_elems(electionParameters.extended_hash(),
+      ElementModQ challenge_computed = Hash.hash_elems(electionRecord.extended_hash(),
               this.selection_pad, this.selection_data, pad, data, partial_decryption);
       if (!challenge_computed.equals(challenge)) {
         System.out.printf("  8.C ci != H(Q-bar, (A,B), (ai, bi), Mi) for missing_guardian %s%n", guardian_id);
@@ -301,7 +298,7 @@ public class DecryptionVerifier {
      */
     private boolean check_equation1(ElementModQ response, ElementModP pad, ElementModQ challenge, ElementModP public_key) {
       // g ^ vi = ai * (Ki ^ ci) mod p
-      BigInteger left = grp.pow_p(electionParameters.generator(), response.getBigInt());
+      BigInteger left = grp.pow_p(electionRecord.generator(), response.getBigInt());
       BigInteger right = grp.mult_p(pad.getBigInt(), grp.pow_p(public_key.getBigInt(), challenge.getBigInt()));
       return left.equals(right);
     }

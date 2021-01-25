@@ -4,7 +4,6 @@ import com.google.common.base.Preconditions;
 import com.sunya.electionguard.ChaumPedersen;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.Hash;
-import com.sunya.electionguard.publish.Consumer;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -19,20 +18,18 @@ import static com.sunya.electionguard.Group.ElementModQ;
 public class ContestVoteLimitsVerifier {
   private static final boolean show = false;
 
-  private final ElectionParameters electionParameters;
-  private final Consumer consumer;
+  private final ElectionRecord electionRecord;
   private final Grp grp;
 
-  ContestVoteLimitsVerifier(ElectionParameters electionParameters, Consumer consumer) {
-    this.electionParameters = electionParameters;
-    this.consumer = consumer;
-    this.grp = new Grp(electionParameters.large_prime(), electionParameters.small_prime());
+  ContestVoteLimitsVerifier(ElectionRecord electionRecord) {
+    this.electionRecord = electionRecord;
+    this.grp = new Grp(electionRecord.large_prime(), electionRecord.small_prime());
   }
 
   boolean verify_all_contests() throws IOException {
     boolean error = false;
 
-    for (CiphertextAcceptedBallot ballot : consumer.ballots()) {
+    for (CiphertextAcceptedBallot ballot : electionRecord.castBallots) {
       if (show) System.out.printf("Ballot %s.%n", ballot.object_id);
       for (CiphertextBallotContest contest : ballot.contests) {
         if (show) System.out.printf(" Contest %s.%n", contest.object_id);
@@ -115,7 +112,7 @@ public class ContestVoteLimitsVerifier {
       }
 
       // 5.A verify the placeholder numbers match the maximum votes allowed
-      Integer vote_limit = electionParameters.getVoteLimitForContest(this.contest.object_id);
+      Integer vote_limit = electionRecord.getVoteLimitForContest(this.contest.object_id);
       Preconditions.checkNotNull(vote_limit);
       if (vote_limit != placeholder_count) {
         System.out.printf("5.A Contest placeholder %d != %d vote limit for contest %s.%n", placeholder_count,
@@ -140,7 +137,7 @@ public class ContestVoteLimitsVerifier {
       ElementModP a = proof.pad;
       ElementModP b = proof.data;
       ElementModQ challenge_computed =
-              Hash.hash_elems(electionParameters.extended_hash(),
+              Hash.hash_elems(electionRecord.extended_hash(),
                       selection_alpha_product, // LOOK BigInteger or ModP ?
                       selection_beta_product, a, b);
       if (!challenge_computed.equals(this.contest_challenge)) {
@@ -166,7 +163,7 @@ public class ContestVoteLimitsVerifier {
      * @return True if the equation is satisfied, False if not
      */
     private boolean check_cp_proof_alpha(BigInteger alpha_product) {
-      BigInteger left = grp.pow_p(electionParameters.generator(), this.contest_response.getBigInt());
+      BigInteger left = grp.pow_p(electionRecord.generator(), this.contest_response.getBigInt());
       BigInteger right = grp.mult_p(grp.mod_p(this.contest_alpha.getBigInt()),
               grp.pow_p(alpha_product, this.contest_challenge.getBigInt()));
 
@@ -186,8 +183,8 @@ public class ContestVoteLimitsVerifier {
      */
     private boolean check_cp_proof_beta(BigInteger beta_product, Integer votes_allowed) {
       BigInteger votes_big = BigInteger.valueOf(votes_allowed);
-      BigInteger leftTerm1 = grp.pow_p(electionParameters.generator(), grp.mult_q(votes_big, this.contest_challenge.getBigInt()));
-      BigInteger leftTerm2 = grp.pow_p(electionParameters.elgamal_key().getBigInt(), this.contest_response.getBigInt());
+      BigInteger leftTerm1 = grp.pow_p(electionRecord.generator(), grp.mult_q(votes_big, this.contest_challenge.getBigInt()));
+      BigInteger leftTerm2 = grp.pow_p(electionRecord.elgamal_key().getBigInt(), this.contest_response.getBigInt());
       BigInteger left = grp.mult_p(leftTerm1, leftTerm2);
 
       BigInteger right = grp.mult_p(this.contest_beta.getBigInt(), grp.pow_p(beta_product, this.contest_challenge.getBigInt()));

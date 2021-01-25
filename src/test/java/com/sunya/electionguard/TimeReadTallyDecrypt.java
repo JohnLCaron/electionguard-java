@@ -2,6 +2,7 @@ package com.sunya.electionguard;
 
 import com.google.common.base.Stopwatch;
 import com.sunya.electionguard.proto.ElectionRecordFromProto;
+import com.sunya.electionguard.verifier.ElectionRecord;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -70,7 +71,7 @@ public class TimeReadTallyDecrypt {
 
   void step_1_read_ballot_chain() throws IOException {
     System.out.printf("%n1. Read ballot chain%n");
-    ElectionRecordFromProto electionRecord = ElectionRecordFromProto.read("/home/snake/tmp/TimeBallotEncryptWrite/ballotChain.proto");
+    ElectionRecord electionRecord = ElectionRecordFromProto.read("/home/snake/tmp/TimeBallotEncryptWrite/ballotChain.proto");
     this.constants = electionRecord.constants;
     this.context = electionRecord.context;
     this.description = electionRecord.election;

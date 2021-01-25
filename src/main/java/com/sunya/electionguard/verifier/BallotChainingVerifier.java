@@ -3,7 +3,6 @@ package com.sunya.electionguard.verifier;
 import com.google.common.collect.Sets;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.Hash;
-import com.sunya.electionguard.publish.Consumer;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -15,14 +14,12 @@ import static com.sunya.electionguard.Group.ElementModQ;
 
  /** This verifies specification section "6. Ballot Chaining". */
 public class BallotChainingVerifier {
-  private final ElectionParameters electionParameters;
-  private final Consumer consumer;
+  private final ElectionRecord electionRecord;
   private final Grp grp;
 
-  BallotChainingVerifier(ElectionParameters electionParameters, Consumer consumer) {
-    this.electionParameters = electionParameters;
-    this.consumer = consumer;
-    this.grp = new Grp(electionParameters.large_prime(), electionParameters.small_prime());
+  BallotChainingVerifier(ElectionRecord electionRecord) {
+    this.electionRecord = electionRecord;
+    this.grp = new Grp(electionRecord.large_prime(), electionRecord.small_prime());
   }
 
   boolean verify_all_ballots() throws IOException {
@@ -32,7 +29,7 @@ public class BallotChainingVerifier {
     Set<ElementModQ> curr_hashes = new HashSet<>();
 
     // LOOK this assumes that the ballots are in the correct order. Why would they be?
-    for (CiphertextAcceptedBallot ballot : consumer.ballots()) {
+    for (CiphertextAcceptedBallot ballot : electionRecord.castBallots) {
         // 6.B For each ballot Bi , Hi = H(Hi−1, D, T, Bi) is satisfied.
         ElementModQ crypto_hash = ballot.crypto_hash;
         ElementModQ prev_hash = ballot.previous_tracking_hash;
@@ -88,7 +85,7 @@ public class BallotChainingVerifier {
     }
 
     // 6.1 verify the first hash H0 = H(Q-bar)
-    ElementModQ zero_hash = Hash.hash_elems(electionParameters.extended_hash());
+    ElementModQ zero_hash = Hash.hash_elems(electionRecord.extended_hash());
     if (!zero_hash.equals(first_hash)) {
       error = true;
     }

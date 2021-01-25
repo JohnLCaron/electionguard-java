@@ -10,7 +10,6 @@ import static com.google.common.truth.Truth.assertThat;
 
 public class TestBallotChainingVerifier {
 
-  static ElectionParameters electionParameters;
   static Consumer consumer;
   static BallotChainingVerifier validator;
 
@@ -20,8 +19,7 @@ public class TestBallotChainingVerifier {
 
     // set up
     consumer = new Consumer(topdir);
-    electionParameters = new ElectionParameters(consumer);
-    validator = new BallotChainingVerifier(electionParameters, consumer);
+    validator = new BallotChainingVerifier(consumer.getElectionRecord());
   }
 
   @Example

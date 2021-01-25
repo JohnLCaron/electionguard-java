@@ -1,7 +1,6 @@
 package com.sunya.electionguard.verifier;
 
 import com.sunya.electionguard.*;
-import com.sunya.electionguard.publish.Consumer;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -12,20 +11,18 @@ import static com.sunya.electionguard.Group.ElementModP;
 
 /** This verifies specification section "4. Correctness of Selection Encryptions". */
 public class SelectionEncyrptionVerifier {
-  private final ElectionParameters electionParameters;
-  private final Consumer consumer;
+  private final ElectionRecord electionRecord;
   private final Grp grp;
 
-  SelectionEncyrptionVerifier(ElectionParameters electionParameters, Consumer consumer) {
-    this.electionParameters = electionParameters;
-    this.consumer = consumer;
-    this.grp = new Grp(electionParameters.large_prime(), electionParameters.small_prime());
+  SelectionEncyrptionVerifier(ElectionRecord electionRecord) {
+    this.electionRecord = electionRecord;
+    this.grp = new Grp(electionRecord.large_prime(), electionRecord.small_prime());
   }
 
   boolean verify_all_selections() throws IOException {
     boolean error = false;
 
-    for (CiphertextAcceptedBallot ballot : consumer.ballots()) {
+    for (CiphertextAcceptedBallot ballot : electionRecord.castBallots) {
       for (CiphertextBallotContest contest : ballot.contests) {
         for (CiphertextBallotSelection selection : contest.ballot_selections) {
           SelectionVerifier sv = new SelectionVerifier(selection);
@@ -86,7 +83,7 @@ public class SelectionEncyrptionVerifier {
       }
 
       // 4.B: conduct hash computation, c = H(Q-bar, (alpha, beta), (a0, b0), (a1, b1))
-      ElementModQ expected_challenge = Hash.hash_elems(electionParameters.extended_hash(),
+      ElementModQ expected_challenge = Hash.hash_elems(electionRecord.extended_hash(),
               this.alpha, this.beta, a0, b0, a1, b1);
       if (!challenge.equals(expected_challenge)) {
         System.out.printf("4.B selection challenge failed for %s.%n", selection);
@@ -101,7 +98,7 @@ public class SelectionEncyrptionVerifier {
       }
 
       // 4.E check chaum-pedersen zero proof: g ^ v0 = a0 * alpha ^ c0 mod p
-      BigInteger equE_left = grp.pow_p(electionParameters.generator(), v0.getBigInt());
+      BigInteger equE_left = grp.pow_p(electionRecord.generator(), v0.getBigInt());
       BigInteger equE_right = grp.mult_p(a0.getBigInt(), grp.pow_p(alpha.getBigInt(), c0.getBigInt()));
       if (!equE_left.equals(equE_right)) {
         System.out.printf("4.E check chaum-pedersen zero proof failed for %s.%n", selection);
@@ -109,7 +106,7 @@ public class SelectionEncyrptionVerifier {
       }
 
       // 4.F check chaum-pedersen one proof: g ^ v1 = a1 * alpha ^ c1 mod p
-      BigInteger equF_left = grp.pow_p(electionParameters.generator(), v1.getBigInt());
+      BigInteger equF_left = grp.pow_p(electionRecord.generator(), v1.getBigInt());
       BigInteger equF_right = grp.mult_p(a1.getBigInt(), grp.pow_p(alpha.getBigInt(), c1.getBigInt()));
       if (!equF_left.equals(equF_right)) {
         System.out.printf("4.F check chaum-pedersen one proof failed for %s.%n", selection);
@@ -117,7 +114,7 @@ public class SelectionEncyrptionVerifier {
       }
 
       // 4.G (G) K ^ v0 = b0 * beta ^ c0 mod p
-      ElementModP K = electionParameters.elgamal_key();
+      ElementModP K = electionRecord.elgamal_key();
       BigInteger equG_left = grp.pow_p(K.getBigInt(), v0.getBigInt());
       BigInteger equG_right = grp.mult_p(b0.getBigInt(), grp.pow_p(beta.getBigInt(), c0.getBigInt()));
       if (!equG_left.equals(equG_right)) {
@@ -126,8 +123,8 @@ public class SelectionEncyrptionVerifier {
       }
 
       // 4.H (H) g ^ c1 * K ^ v1 = b1 * beta ^ c1 mod p
-      BigInteger equH_left = grp.mult_p(grp.pow_p(electionParameters.generator(), c1.getBigInt()),
-              grp.pow_p(electionParameters.elgamal_key().getBigInt(), v1.getBigInt()));
+      BigInteger equH_left = grp.mult_p(grp.pow_p(electionRecord.generator(), c1.getBigInt()),
+              grp.pow_p(electionRecord.elgamal_key().getBigInt(), v1.getBigInt()));
       BigInteger equH_right = grp.mult_p(b1.getBigInt(), grp.pow_p(beta.getBigInt(), c1.getBigInt()));
       if (!equH_left.equals(equH_right)) {
         System.out.printf("4.H check chaum-pedersen one proof failed for %s.%n", selection);
