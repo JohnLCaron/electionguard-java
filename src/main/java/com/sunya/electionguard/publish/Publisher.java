@@ -222,25 +222,6 @@ public class Publisher {
     }
   }
 
-  public void writeBallotChainProto(
-          ElectionDescription description,
-          CiphertextElectionContext context,
-          ElectionConstants constants,
-          Encrypt.EncryptionDevice device,
-          Iterable<Ballot.CiphertextAcceptedBallot> ciphertext_ballots,
-          Iterable<KeyCeremony.CoefficientValidationSet> coefficient_validation_sets) throws IOException {
-
-    ElectionRecordProto.BallotChain ballotChainProto = ElectionRecordToProto.buildBallotChain(description, context, constants, device,
-            ciphertext_ballots, coefficient_validation_sets);
-
-
-    byte[] datab = ballotChainProto.toByteArray();
-    System.out.printf("*** size of proto =  %d%n", datab.length);
-    try (FileOutputStream out = new FileOutputStream(ballotChainProtoFile().toFile())) {
-      ballotChainProto.writeDelimitedTo(out);
-    }
-  }
-
   /**
    * Publish the private data for an election.
    * Useful for generating sample data sets.

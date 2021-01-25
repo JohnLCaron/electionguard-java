@@ -5,6 +5,7 @@ import "com/sunya/electionguard/proto/common.proto";
 option java_package = "com.sunya.electionguard.proto";
 option java_outer_classname = "PlaintextProto";
 
+// Decrypted Tally of one or more ballots.
 message PlaintextTally {
   string object_id = 1;
   // Map(CONTEST_ID, PlaintextTallyContest)
@@ -43,10 +44,10 @@ message CiphertextDecryptionSelection {
   ElementModP share = 4;
 
   // The Proof that the share was decrypted correctly, if the guardian was available for decryption.
-  ChaumPedersenProof proof = 5; // Optional
+  ChaumPedersenProof proof = 5; // LOOK Optional or oneof ?
 
   // Map[GUARDIAN_ID, CiphertextCompensatedDecryptionSelection]
-  map<string, CiphertextCompensatedDecryptionSelection> recovered_parts = 6; // Optional
+  map<string, CiphertextCompensatedDecryptionSelection> recovered_parts = 6; // LOOK Optional or oneof ?
 }
 
 message CiphertextCompensatedDecryptionSelection {

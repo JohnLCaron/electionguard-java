@@ -79,6 +79,7 @@ public class DecryptionShare {
     /** The Share of the decryption of a selection. `M_i` in the spec. */
     public abstract ElementModP share();
 
+    // LOOK Must have a proof or a recovery
     /** The Proof that the share was decrypted correctly, if the guardian was available for decryption */
     public abstract Optional<ChaumPedersen.ChaumPedersenProof> proof();
 
@@ -95,6 +96,9 @@ public class DecryptionShare {
             ElementModP share,
             Optional<ChaumPedersen.ChaumPedersenProof> proof,
             Optional<Map<String, CiphertextCompensatedDecryptionSelection>> recovered_parts) {
+      Preconditions.checkArgument(proof.isPresent() || recovered_parts.isPresent());
+      Preconditions.checkArgument(!(proof.isPresent() && recovered_parts.isPresent()));
+
       return new AutoValue_DecryptionShare_CiphertextDecryptionSelection(
               Preconditions.checkNotNull(object_id),
               Preconditions.checkNotNull(guardian_id),
@@ -113,19 +117,6 @@ public class DecryptionShare {
      * @param extended_base_hash: The `ElementModQ` election extended base hash.
      */
     boolean is_valid(ElGamal.Ciphertext message, ElementModP election_public_key, ElementModQ extended_base_hash) {
-      // verify we have a proof or recovered parts
-      if (this.proof().isEmpty() && this.recovered_parts().isEmpty()) {
-        logger.atWarning().log("CiphertextDecryptionSelection is_valid failed for guardian: %s selection: %s with missing data",
-                this.guardian_id(), this.object_id());
-        return false;
-      }
-
-      if (this.proof().isPresent() && this.recovered_parts().isPresent()) {
-        logger.atWarning().log("CiphertextDecryptionSelection is_valid failed for guardian: %s selection: %s cannot have proof and recovery",
-                this.guardian_id(), this.object_id());
-        return false;
-      }
-
       if (this.proof().isPresent()) {
         ChaumPedersen.ChaumPedersenProof proof = this.proof().get();
         if (!proof.is_valid(message, election_public_key, this.share(), extended_base_hash)) {
@@ -157,10 +148,6 @@ public class DecryptionShare {
           ElementModP share,
           Optional<ChaumPedersen.ChaumPedersenProof> proof,
           Optional<Map<String, CiphertextCompensatedDecryptionSelection>> recovered_parts) {
-
-    if (proof.isEmpty() && recovered_parts.isEmpty()) {
-      logger.atInfo().log("decryption share cannot assign {proof_or_recovery}");
-    }
 
     return CiphertextDecryptionSelection.create(
             object_id, guardian_id, description_hash, share,

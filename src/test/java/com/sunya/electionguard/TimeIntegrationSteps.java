@@ -221,6 +221,8 @@ public class TimeIntegrationSteps {
 
   // Accept each ballot by marking it as either cast or spoiled.
   void step_3_cast_and_spoil() {
+    int ncast = 0;
+    int nspoil = 0;
     // Configure the Ballot Box
     this.ballot_store = new DataStore();
     this.ballot_box = new BallotBox(this.election, this.context, this.ballot_store);
@@ -230,11 +232,14 @@ public class TimeIntegrationSteps {
       Optional<CiphertextAcceptedBallot> accepted_ballot;
       if (random.nextBoolean()) {
         accepted_ballot = this.ballot_box.cast(ballot);
+        ncast++;
       } else {
         accepted_ballot = this.ballot_box.spoil(ballot);
+        nspoil++;
       }
       assertThat(accepted_ballot).isPresent();
     }
+    System.out.printf(" cast %d spoil %d%n", ncast, nspoil);
   }
 
   /**

@@ -73,7 +73,7 @@ public class ElectionRecordFromProto {
             convertElementModQ(context.getCryptoExtendedBaseHash()));
   }
 
-  static Encrypt.EncryptionDevice convertDevice(ElectionRecordProto.Device device) {
+  static Encrypt.EncryptionDevice convertDevice(ElectionRecordProto.EncryptionDevice device) {
     return new Encrypt.EncryptionDevice(device.getUuid(), device.getLocation());
   }
 
