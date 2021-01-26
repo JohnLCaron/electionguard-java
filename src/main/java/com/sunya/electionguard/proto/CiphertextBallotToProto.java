@@ -7,12 +7,12 @@ import static com.sunya.electionguard.proto.CommonConvert.convertCiphertext;
 import static com.sunya.electionguard.proto.CommonConvert.convertElementModQ;
 import static com.sunya.electionguard.proto.CommonConvert.convertElementModP;
 
-import static com.sunya.electionguard.proto.BallotProto.*;
+import static com.sunya.electionguard.proto.CiphertextBallotProto.*;
 
-public class BallotToProto {
+public class CiphertextBallotToProto {
 
   public static CiphertextAcceptedBallot translateToProto(Ballot.CiphertextAcceptedBallot ballot) {
-    CiphertextAcceptedBallot.Builder builder = BallotProto.CiphertextAcceptedBallot.newBuilder();
+    CiphertextAcceptedBallot.Builder builder = CiphertextAcceptedBallot.newBuilder();
     builder.setCiphertextBallot(convertCiphertextBallot(ballot));
     builder.setState(convertBallotBoxState(ballot.state));
     return builder.build();

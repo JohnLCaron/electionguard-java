@@ -7,7 +7,7 @@ import com.google.common.flogger.FluentLogger;
 import com.sunya.electionguard.Ballot;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.Group;
-import com.sunya.electionguard.Tally;
+import com.sunya.electionguard.PlaintextTally;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -24,7 +24,7 @@ public class BallotAggregationVerifier {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   final ElectionRecord electionRecord;
-  final Tally.PlaintextTally decryptedTally;
+  final PlaintextTally decryptedTally;
   final Grp grp;
 
   BallotAggregationVerifier(ElectionRecord electionRecord) {
@@ -42,8 +42,8 @@ public class BallotAggregationVerifier {
     boolean error = false;
     SelectionAggregator agg = new SelectionAggregator(electionRecord.castBallots);
 
-    for (Tally.PlaintextTallyContest contest : decryptedTally.contests().values()) {
-      for (Tally.PlaintextTallySelection selection : contest.selections().values()) {
+    for (PlaintextTally.PlaintextTallyContest contest : decryptedTally.contests.values()) {
+      for (PlaintextTally.PlaintextTallySelection selection : contest.selections().values()) {
         String key = contest.object_id() + "." + selection.object_id();
         List<ElGamal.Ciphertext> encryptions = agg.selectionEncryptions.get(key);
         // LOOK its possible no ballots voted one way or another
@@ -76,8 +76,8 @@ public class BallotAggregationVerifier {
   boolean verify_tally_decryption() throws IOException {
     boolean error = false;
 
-    for (Tally.PlaintextTallyContest contest : decryptedTally.contests().values()) {
-      for (Tally.PlaintextTallySelection selection : contest.selections().values()) {
+    for (PlaintextTally.PlaintextTallyContest contest : decryptedTally.contests.values()) {
+      for (PlaintextTally.PlaintextTallySelection selection : contest.selections().values()) {
         String key = contest.object_id() + "." + selection.object_id();
         List<ElementModP> partialDecryptions = selection.shares().stream().map(s -> s.share()).collect(Collectors.toList());
         ElementModP productMi = Group.mult_p(partialDecryptions);

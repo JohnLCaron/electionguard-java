@@ -34,11 +34,11 @@ public class Consumer {
     return ConvertFromJson.readConstants(publisher.constantsFile().toString());
   }
 
-  public Tally.PlaintextTally decryptedTally() throws IOException {
+  public PlaintextTally decryptedTally() throws IOException {
     return ConvertFromJson.readPlaintextTally(publisher.tallyFile().toString());
   }
 
-  public Tally.PublishedCiphertextTally ciphertextTally() throws IOException {
+  public PublishedCiphertextTally ciphertextTally() throws IOException {
     return ConvertFromJson.readCiphertextTally(publisher.encryptedTallyFile().toString());
   }
 
@@ -54,20 +54,20 @@ public class Consumer {
   public List<Ballot.CiphertextAcceptedBallot> ballots() throws IOException {
     List<Ballot.CiphertextAcceptedBallot> result = new ArrayList<>();
     for (File file : publisher.ballotFiles()) {
-      Ballot.CiphertextAcceptedBallot fromPython = ConvertFromJson.readBallot(file.getAbsolutePath());
+      Ballot.CiphertextAcceptedBallot fromPython = ConvertFromJson.readCiphertextBallot(file.getAbsolutePath());
       result.add(fromPython);
     }
     return result;
   }
 
-  public List<Ballot.CiphertextAcceptedBallot> spoiled() throws IOException {
-    List<Ballot.CiphertextAcceptedBallot> result = new ArrayList<>();
+  /* public List<Ballot.PlaintextBallot> spoiled() throws IOException {
+    List<Ballot.PlaintextBallot> result = new ArrayList<>();
     for (File file : publisher.spoiledFiles()) {
-      Ballot.CiphertextAcceptedBallot fromPython = ConvertFromJson.readBallot(file.getAbsolutePath());
+      Ballot.PlaintextBallot fromPython = ConvertFromJson.readPlaintextBallot(file.getAbsolutePath());
       result.add(fromPython);
     }
     return result;
-  }
+  } */
 
   public List<KeyCeremony.CoefficientValidationSet> guardianCoefficients() throws IOException {
     List<KeyCeremony.CoefficientValidationSet> result = new ArrayList<>();
@@ -85,7 +85,7 @@ public class Consumer {
             this.election(),
             this.devices(),
             this.ballots(),
-            this.spoiled(),
+            // this.spoiled(),
             this.guardianCoefficients(),
             this.ciphertextTally(),
             this.decryptedTally());

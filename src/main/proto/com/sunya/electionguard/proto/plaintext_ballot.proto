@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+option java_package = "com.sunya.electionguard.proto";
+option java_outer_classname = "PlaintextBallotProto";
+
+// A decrypted ballot.
+message PlaintextBallot {
+  string object_id = 1;
+  string ballot_style = 2; // matches the BallotStyle.object_id
+  repeated PlaintextBallotContest contests = 3;
+}
+
+message PlaintextBallotContest {
+  string contest_id = 1; // matches the ContestDescription.object_id
+  repeated PlaintextBallotSelection ballot_selections = 3;
+}
+
+message PlaintextBallotSelection {
+  string selection_id = 1; // matches the SelectionDescription.object_id
+  string vote = 2; // LOOK why String?
+  bool is_placeholder_selection = 3;
+  ExtendedData extended_data = 4; // LOOK Optional
+}
+
+message ExtendedData {
+  string value = 1;
+  uint32 length = 2; // LOOK why length ?
+}

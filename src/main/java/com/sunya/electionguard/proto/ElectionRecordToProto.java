@@ -6,8 +6,9 @@ import com.sunya.electionguard.Election;
 import com.sunya.electionguard.Encrypt;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.KeyCeremony;
+import com.sunya.electionguard.PublishedCiphertextTally;
+import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.SchnorrProof;
-import com.sunya.electionguard.Tally;
 
 import static com.sunya.electionguard.proto.ElectionRecordProto.ElectionRecord;
 import static com.sunya.electionguard.proto.CommonConvert.convertElementModP;
@@ -21,9 +22,9 @@ public class ElectionRecordToProto {
           Election.ElectionConstants constants,
           Iterable<Encrypt.EncryptionDevice> devices,
           Iterable<Ballot.CiphertextAcceptedBallot> castBallots,
-          Iterable<Ballot.CiphertextAcceptedBallot> spoiled_ballots,
-          Tally.PublishedCiphertextTally ciphertext_tally,
-          Tally.PlaintextTally decryptedTally,
+          // Iterable<Ballot.PlaintextBallot> spoiled_ballots,
+          PublishedCiphertextTally ciphertext_tally,
+          PlaintextTally decryptedTally,
           Iterable<KeyCeremony.CoefficientValidationSet> guardianCoefficients) {
 
     ElectionRecord.Builder builder = ElectionRecord.newBuilder();
@@ -40,12 +41,12 @@ public class ElectionRecordToProto {
     }
 
     for (Ballot.CiphertextAcceptedBallot ballot : castBallots) {
-      builder.addCastBallots(BallotToProto.translateToProto(ballot));
+      builder.addCastBallots(CiphertextBallotToProto.translateToProto(ballot));
     }
 
-    for (Ballot.CiphertextAcceptedBallot ballot : spoiled_ballots) {
-      builder.addSpoiledBallots(BallotToProto.translateToProto(ballot));
-    }
+    /* for (Ballot.PlaintextBallot ballot : spoiled_ballots) {
+      builder.addSpoiledBallots(PlaintextBallotToProto.translateToProto(ballot));
+    } */
 
     builder.setCiphertextTally( CiphertextTallyToProto.translateToProto(ciphertext_tally));
     builder.setDecryptedTally( PlaintextTallyToProto.translateToProto(decryptedTally));

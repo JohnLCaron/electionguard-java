@@ -12,7 +12,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 
 public class TestElectionDescriptionToProtoRoundtrip {
-  public static final String testElectionRecord = "src/test/data/python-modified/";
+  public static final String testElectionRecord = "src/test/data/testEndToEnd/";
   private static Publisher publisher;
 
   @BeforeContainer

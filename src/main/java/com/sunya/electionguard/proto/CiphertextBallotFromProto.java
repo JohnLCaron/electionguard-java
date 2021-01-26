@@ -6,18 +6,18 @@ import com.sunya.electionguard.ChaumPedersen;
 import javax.annotation.Nullable;
 import java.util.Optional;
 
-import static com.sunya.electionguard.proto.BallotProto.CiphertextAcceptedBallot;
-import static com.sunya.electionguard.proto.BallotProto.CiphertextBallot;
-import static com.sunya.electionguard.proto.BallotProto.CiphertextBallotContest;
-import static com.sunya.electionguard.proto.BallotProto.CiphertextBallotSelection;
-import static com.sunya.electionguard.proto.BallotProto.ConstantChaumPedersenProof;
-import static com.sunya.electionguard.proto.BallotProto.DisjunctiveChaumPedersenProof;
+import static com.sunya.electionguard.proto.CiphertextBallotProto.CiphertextAcceptedBallot;
+import static com.sunya.electionguard.proto.CiphertextBallotProto.CiphertextBallot;
+import static com.sunya.electionguard.proto.CiphertextBallotProto.CiphertextBallotContest;
+import static com.sunya.electionguard.proto.CiphertextBallotProto.CiphertextBallotSelection;
+import static com.sunya.electionguard.proto.CiphertextBallotProto.ConstantChaumPedersenProof;
+import static com.sunya.electionguard.proto.CiphertextBallotProto.DisjunctiveChaumPedersenProof;
 import static com.sunya.electionguard.proto.CommonConvert.convertCiphertext;
 import static com.sunya.electionguard.proto.CommonConvert.convertElementModQ;
 import static com.sunya.electionguard.proto.CommonConvert.convertElementModP;
 import static com.sunya.electionguard.proto.CommonConvert.convertList;
 
-public class BallotFromProto {
+public class CiphertextBallotFromProto {
 
   public static Ballot.CiphertextAcceptedBallot translateFromProto(CiphertextAcceptedBallot ballot) {
     return new Ballot.CiphertextAcceptedBallot(
@@ -39,7 +39,7 @@ public class BallotFromProto {
             ballot.getBallotStyleId(),
             convertElementModQ(ballot.getDescriptionHash()),
             convertElementModQ(ballot.getPreviousTrackingHash()),
-            convertList(ballot.getContestsList(), BallotFromProto::convertContest),
+            convertList(ballot.getContestsList(), CiphertextBallotFromProto::convertContest),
             Optional.ofNullable(convertElementModQ(ballot.getTrackingHash())),
             ballot.getTimestamp(),
             convertElementModQ(ballot.getCryptoHash()),
@@ -50,7 +50,7 @@ public class BallotFromProto {
     return new Ballot.CiphertextBallotContest(
             contest.getObjectId(),
             convertElementModQ(contest.getDescriptionHash()),
-            convertList(contest.getSelectionsList(), BallotFromProto::convertSelection),
+            convertList(contest.getSelectionsList(), CiphertextBallotFromProto::convertSelection),
             convertElementModQ(contest.getCryptoHash()),
             Optional.ofNullable(convertElementModQ(contest.getNonce())),
             Optional.ofNullable(convertConstantProof(contest.getProof())));

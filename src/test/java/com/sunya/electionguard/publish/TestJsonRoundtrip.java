@@ -1,8 +1,6 @@
 package com.sunya.electionguard.publish;
 
 import com.google.common.collect.ImmutableList;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.sunya.electionguard.*;
 import net.jqwik.api.Example;
 
@@ -11,11 +9,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Optional;
-import java.util.OptionalInt;
 
 import static com.sunya.electionguard.KeyCeremony.CoefficientValidationSet;
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
 
 public class TestJsonRoundtrip {
 
@@ -58,11 +54,11 @@ public class TestJsonRoundtrip {
 
     // original
     // String object_id, ElementModQ description_hash, Map<String, CiphertextTallySelection> tally_selections
-    Tally.PlaintextTally org = Tally.PlaintextTally.create("testTally", new HashMap<>(), new HashMap<>());
+    PlaintextTally org = new PlaintextTally("testTally", new HashMap<>(), new HashMap<>());
     // write json
     ConvertToJson.write(org, file.toPath());
     // read it back
-    Tally.PlaintextTally fromFile = ConvertFromJson.readPlaintextTally(outputFile);
+    PlaintextTally fromFile = ConvertFromJson.readPlaintextTally(outputFile);
     assertThat(fromFile).isEqualTo(org);
   }
 
@@ -74,11 +70,11 @@ public class TestJsonRoundtrip {
 
     // original
     // String object_id, ElementModQ description_hash, Map<String, CiphertextTallySelection> tally_selections
-    Tally.PublishedCiphertextTally org = Tally.PublishedCiphertextTally.create("testTally", new HashMap<>());
+    PublishedCiphertextTally org = new PublishedCiphertextTally("testTally", new HashMap<>());
     // write json
     ConvertToJson.write(org, file.toPath());
     // read it back
-    Tally.PublishedCiphertextTally fromFile = ConvertFromJson.readCiphertextTally(outputFile);
+    PublishedCiphertextTally fromFile = ConvertFromJson.readCiphertextTally(outputFile);
     assertThat(fromFile).isEqualTo(org);
   }
 
@@ -111,7 +107,7 @@ public class TestJsonRoundtrip {
     // write json
     ConvertToJson.write(org, file.toPath());
     // read it back
-    Ballot.CiphertextAcceptedBallot fromFile = ConvertFromJson.readBallot(outputFile);
+    Ballot.CiphertextAcceptedBallot fromFile = ConvertFromJson.readCiphertextBallot(outputFile);
     assertThat(fromFile).isEqualTo(org);
   }
 

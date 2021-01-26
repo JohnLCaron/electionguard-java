@@ -23,8 +23,8 @@ public class Ballot {
    */
   @Immutable
   public static class PlaintextBallot extends ElectionObjectBase {
-    final String ballot_style; // The `object_id` of the Election.BallotStyle
-    final ImmutableList<PlaintextBallotContest> contests; // The list of contests for this ballot
+    public final String ballot_style; // The `object_id` of the Election.BallotStyle
+    public final ImmutableList<PlaintextBallotContest> contests; // The list of contests for this ballot
 
     public PlaintextBallot(String object_id, String ballot_style, List<PlaintextBallotContest> contests) {
       super(object_id);
@@ -85,8 +85,8 @@ public class Ballot {
    */
   @Immutable
   public static class PlaintextBallotContest {
-    final String contest_id; // matches the ContestDescription.object_id
-    final ImmutableList<PlaintextBallotSelection> ballot_selections; // Collection of ballot selections
+    public final String contest_id; // matches the ContestDescription.object_id
+    public final ImmutableList<PlaintextBallotSelection> ballot_selections; // Collection of ballot selections
 
     public PlaintextBallotContest(String contest_id, List<PlaintextBallotSelection> ballot_selections) {
       Preconditions.checkArgument(!Strings.isNullOrEmpty(contest_id));
@@ -181,12 +181,13 @@ public class Ballot {
    */
   @Immutable
   public static class PlaintextBallotSelection {
-    final String selection_id; // matches the SelectionDescription.object_id
-    final String vote;
-    final boolean is_placeholder_selection; // default false
-    final Optional<ExtendedData> extended_data; // default None
+    public final String selection_id; // matches the SelectionDescription.object_id
+    public final String vote;
+    public final boolean is_placeholder_selection; // default false
+    public final Optional<ExtendedData> extended_data; // default None
 
-    public PlaintextBallotSelection(String selection_id, String vote, boolean is_placeholder_selection, @Nullable ExtendedData extended_data) {
+    public PlaintextBallotSelection(String selection_id, String vote, boolean is_placeholder_selection,
+                                    @Nullable ExtendedData extended_data) {
       Preconditions.checkArgument(!Strings.isNullOrEmpty(selection_id));
       Preconditions.checkArgument(!Strings.isNullOrEmpty(vote));
       this.selection_id = selection_id;
@@ -261,8 +262,8 @@ public class Ballot {
    */
   @Immutable
   public static class ExtendedData {
-    final String value;
-    final int length;
+    public final String value;
+    public final int length;
 
     public ExtendedData(String value, int length) {
       this.value = value;
@@ -295,8 +296,7 @@ public class Ballot {
   /** Encrypted selection. */
   @Immutable
   public static class CiphertextSelection extends ElectionObjectBase {
-    /** SelectionDescription.crypto_hash(). */
-    public final ElementModQ description_hash;
+    public final ElementModQ description_hash; // Election.SelectionDescription.crypto_hash().
     private final ElGamal.Ciphertext ciphertext; // only accessed through ciphertext(), so subclass can override
 
     CiphertextSelection(String object_id, ElementModQ description_hash, ElGamal.Ciphertext ciphertext) {

@@ -8,7 +8,8 @@ import com.sunya.electionguard.Election;
 import com.sunya.electionguard.Encrypt;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.KeyCeremony;
-import com.sunya.electionguard.Tally;
+import com.sunya.electionguard.PublishedCiphertextTally;
+import com.sunya.electionguard.PlaintextTally;
 
 import javax.annotation.concurrent.Immutable;
 import java.math.BigInteger;
@@ -22,10 +23,10 @@ public class ElectionRecord {
   public final Election.ElectionDescription election;
   public final ImmutableList<Encrypt.EncryptionDevice> devices;
   public final ImmutableList<Ballot.CiphertextAcceptedBallot> castBallots;
-  public final ImmutableList<Ballot.CiphertextAcceptedBallot> spoiledBallots;
+  // public final ImmutableList<Ballot.PlaintextBallot> spoiledBallots;
   public final ImmutableList<KeyCeremony.CoefficientValidationSet> guardianCoefficients;
-  public final Tally.PublishedCiphertextTally ciphertextTally;
-  public final Tally.PlaintextTally decryptedTally;
+  public final PublishedCiphertextTally ciphertextTally;
+  public final PlaintextTally decryptedTally;
   private final ImmutableMap<String, Integer> contest_vote_limits;
 
   public ElectionRecord(Election.ElectionConstants constants,
@@ -33,16 +34,16 @@ public class ElectionRecord {
                         Election.ElectionDescription election,
                         List<Encrypt.EncryptionDevice> devices,
                         List<Ballot.CiphertextAcceptedBallot> castBallots,
-                        List<Ballot.CiphertextAcceptedBallot> spoiledBallots,
+                        // List<Ballot.PlaintextBallot> spoiledBallots,
                         List<KeyCeremony.CoefficientValidationSet> guardianCoefficients,
-                        Tally.PublishedCiphertextTally ciphertextTally,
-                        Tally.PlaintextTally decryptedTally) {
+                        PublishedCiphertextTally ciphertextTally,
+                        PlaintextTally decryptedTally) {
     this.constants = constants;
     this.context = context;
     this.election = election;
     this.devices = ImmutableList.copyOf(devices);
     this.castBallots = ImmutableList.copyOf(castBallots);
-    this.spoiledBallots = ImmutableList.copyOf(spoiledBallots);
+    // this.spoiledBallots = ImmutableList.copyOf(spoiledBallots);
     this.guardianCoefficients = ImmutableList.copyOf(guardianCoefficients);
     this.ciphertextTally = ciphertextTally;
     this.decryptedTally = decryptedTally;
@@ -130,7 +131,7 @@ public class ElectionRecord {
             election.equals(that.election) &&
             devices.equals(that.devices) &&
             castBallots.equals(that.castBallots) &&
-            spoiledBallots.equals(that.spoiledBallots) &&
+            // spoiledBallots.equals(that.spoiledBallots) &&
             guardianCoefficients.equals(that.guardianCoefficients) &&
             ciphertextTally.equals(that.ciphertextTally) &&
             decryptedTally.equals(that.decryptedTally);
@@ -138,7 +139,7 @@ public class ElectionRecord {
 
   @Override
   public int hashCode() {
-    return Objects.hash(constants, context, election, devices, castBallots, spoiledBallots,
+    return Objects.hash(constants, context, election, devices, castBallots,
             guardianCoefficients, ciphertextTally, decryptedTally);
   }
 }

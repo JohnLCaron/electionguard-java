@@ -1,6 +1,7 @@
 package com.sunya.electionguard.publish;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 import com.sunya.electionguard.Ballot;
 
@@ -30,6 +31,7 @@ public class PlaintextBallotPojo {
   public static class PlaintextBallotSelection {
     public String object_id;
     public String vote;
+    public boolean is_placeholder_selection;
     public String extra_data; // optional
   }
 
@@ -60,6 +62,14 @@ public class PlaintextBallotPojo {
     return from == null ? null : from.stream().map(converter).collect(Collectors.toList());
   }
 
+  ///////////////////////////////////////////////////////////////////////////////////////
+
+  public static Ballot.PlaintextBallot deserialize(JsonElement jsonElem) {
+    Gson gson = GsonTypeAdapters.enhancedGson();
+    PlaintextBallotPojo pojo = gson.fromJson(jsonElem, PlaintextBallotPojo.class);
+    return convertPlaintextBallot(pojo);
+  }
+
   private static Ballot.PlaintextBallot convertPlaintextBallot(PlaintextBallotPojo pojo) {
     return new Ballot.PlaintextBallot(
             pojo.object_id,
@@ -80,7 +90,41 @@ public class PlaintextBallotPojo {
     return new Ballot.PlaintextBallotSelection(
             pojo.object_id,
             pojo.vote,
-            false,
+            pojo.is_placeholder_selection,
             extra);
   }
+
+  ////////////////////////////////////////////////////////////////////////////////////////
+
+  public static JsonElement serialize(Ballot.PlaintextBallot src) {
+    Gson gson = GsonTypeAdapters.enhancedGson();
+    PlaintextBallotPojo pojo = convertPlaintextBallot(src);
+    Type typeOfSrc = new TypeToken<PlaintextBallotPojo>() {}.getType();
+    return gson.toJsonTree(pojo, typeOfSrc);
+  }
+
+  private static PlaintextBallotPojo convertPlaintextBallot(Ballot.PlaintextBallot src) {
+     PlaintextBallotPojo pojo = new PlaintextBallotPojo();
+    pojo.object_id = src.object_id;
+    pojo.ballot_style = src.ballot_style;
+    pojo.contests = convertList(src.contests, PlaintextBallotPojo::convertPlaintextBallotContest);
+    return pojo;
+  }
+
+  private static PlaintextBallotPojo.PlaintextBallotContest convertPlaintextBallotContest(Ballot.PlaintextBallotContest src) {
+    PlaintextBallotPojo.PlaintextBallotContest pojo = new PlaintextBallotPojo.PlaintextBallotContest ();
+    pojo.object_id = src.contest_id;
+    pojo.ballot_selections = convertList(src.ballot_selections, PlaintextBallotPojo::convertPlaintextBallotSelection);
+    return pojo;
+  }
+
+  private static PlaintextBallotPojo.PlaintextBallotSelection convertPlaintextBallotSelection(Ballot.PlaintextBallotSelection src) {
+    PlaintextBallotPojo.PlaintextBallotSelection pojo = new PlaintextBallotPojo.PlaintextBallotSelection ();
+    pojo.object_id = src.selection_id;
+    pojo.vote = src.vote;
+    pojo.is_placeholder_selection = src.is_placeholder_selection;
+    src.extended_data.ifPresent( data -> pojo.extra_data = data.value);
+    return pojo;
+  }
+
 }

@@ -26,7 +26,7 @@ public class TestElectionRecordProtoRoundtrip {
             consumer.constants(),
             consumer.devices(),
             consumer.ballots(),
-            consumer.spoiled(),
+            // consumer.spoiled(),
             consumer.ciphertextTally(),
             consumer.decryptedTally(),
             consumer.guardianCoefficients());
@@ -37,7 +37,7 @@ public class TestElectionRecordProtoRoundtrip {
     assertThat(roundtrip.constants).isEqualTo(consumer.constants());
     assertThat(roundtrip.devices).isEqualTo(consumer.devices());
     assertThat(roundtrip.castBallots).isEqualTo(consumer.ballots());
-    assertThat(roundtrip.spoiledBallots).isEqualTo(consumer.spoiled());
+    // assertThat(roundtrip.spoiledBallots).isEqualTo(consumer.spoiled());
     assertThat(roundtrip.ciphertextTally).isEqualTo(consumer.ciphertextTally());
     assertThat(roundtrip.decryptedTally).isEqualTo(consumer.decryptedTally());
     assertThat(roundtrip.guardianCoefficients).isEqualTo(consumer.guardianCoefficients());
@@ -53,7 +53,7 @@ public class TestElectionRecordProtoRoundtrip {
             consumer.constants(),
             consumer.devices(),
             consumer.ballots(),
-            consumer.spoiled(),
+            // consumer.spoiled(),
             consumer.ciphertextTally(),
             consumer.decryptedTally(),
             consumer.guardianCoefficients());
@@ -64,7 +64,7 @@ public class TestElectionRecordProtoRoundtrip {
     assertThat(roundtrip.constants).isEqualTo(consumer.constants());
     assertThat(roundtrip.devices).isEqualTo(consumer.devices());
     assertThat(roundtrip.castBallots).isEqualTo(consumer.ballots());
-    assertThat(roundtrip.spoiledBallots).isEqualTo(consumer.spoiled());
+    // assertThat(roundtrip.spoiledBallots).isEqualTo(consumer.spoiled());
     assertThat(roundtrip.ciphertextTally).isEqualTo(consumer.ciphertextTally());
     assertThat(roundtrip.decryptedTally).isEqualTo(consumer.decryptedTally());
     assertThat(roundtrip.guardianCoefficients).isEqualTo(consumer.guardianCoefficients());

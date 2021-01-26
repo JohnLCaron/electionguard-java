@@ -3,12 +3,13 @@ package com.sunya.electionguard.proto;
 import com.google.protobuf.ByteString;
 import com.sunya.electionguard.Ballot;
 import com.sunya.electionguard.Election;
+import com.sunya.electionguard.PublishedCiphertextTally;
+import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.verifier.ElectionRecord;
 import com.sunya.electionguard.Encrypt;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.KeyCeremony;
 import com.sunya.electionguard.SchnorrProof;
-import com.sunya.electionguard.Tally;
 
 import javax.annotation.concurrent.Immutable;
 import java.io.FileInputStream;
@@ -38,15 +39,15 @@ public class ElectionRecordFromProto {
     List<Encrypt.EncryptionDevice> devices =
             proto.getDeviceList().stream().map(ElectionRecordFromProto::convertDevice).collect(Collectors.toList());
     List<Ballot.CiphertextAcceptedBallot> castBallots =
-            proto.getCastBallotsList().stream().map(BallotFromProto::translateFromProto).collect(Collectors.toList());
-    List<Ballot.CiphertextAcceptedBallot> spoiledBallots =
-            proto.getSpoiledBallotsList().stream().map(BallotFromProto::translateFromProto).collect(Collectors.toList());
+            proto.getCastBallotsList().stream().map(CiphertextBallotFromProto::translateFromProto).collect(Collectors.toList());
+    // List<Ballot.PlaintextBallot> spoiledBallots =
+    //        proto.getSpoiledBallotsList().stream().map(PlaintextBallotFromProto::translateFromProto).collect(Collectors.toList());
     List<KeyCeremony.CoefficientValidationSet> guardianCoefficients =
             proto.getGuardianCoefficientsList().stream().map(ElectionRecordFromProto::convertCoefficients).collect(Collectors.toList());
-    Tally.PublishedCiphertextTally ciphertextTally = CiphertextTallyFromProto.translateFromProto(proto.getCiphertextTally());
-    Tally.PlaintextTally decryptedTally = PlaintextTallyFromProto.translateFromProto(proto.getDecryptedTally());
+    PublishedCiphertextTally ciphertextTally = CiphertextTallyFromProto.translateFromProto(proto.getCiphertextTally());
+    PlaintextTally decryptedTally = PlaintextTallyFromProto.translateFromProto(proto.getDecryptedTally());
 
-    return new ElectionRecord(constants, context, description, devices, castBallots, spoiledBallots,
+    return new ElectionRecord(constants, context, description, devices, castBallots,
             guardianCoefficients, ciphertextTally, decryptedTally);
   }
 

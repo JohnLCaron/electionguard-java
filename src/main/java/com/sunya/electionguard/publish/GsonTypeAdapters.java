@@ -16,7 +16,8 @@ import com.sunya.electionguard.Ballot;
 import com.sunya.electionguard.Election;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.KeyCeremony;
-import com.sunya.electionguard.Tally;
+import com.sunya.electionguard.PublishedCiphertextTally;
+import com.sunya.electionguard.PlaintextTally;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -37,10 +38,12 @@ public class GsonTypeAdapters {
             .registerTypeAdapter(KeyCeremony.CoefficientValidationSet.class, new CoefficientsDeserializer())
             .registerTypeAdapter(Ballot.CiphertextAcceptedBallot.class, new CiphertextBallotSerializer())
             .registerTypeAdapter(Ballot.CiphertextAcceptedBallot.class, new CiphertextBallotDeserializer())
-            .registerTypeAdapter(Tally.PlaintextTally.class, new PlaintextTallySerializer())
-            .registerTypeAdapter(Tally.PlaintextTally.class, new PlaintextTallyDeserializer())
-            .registerTypeAdapter(Tally.PublishedCiphertextTally.class, new PublishedCiphertextTallySerializer())
-            .registerTypeAdapter(Tally.PublishedCiphertextTally.class, new PublishedCiphertextTallyDeserializer())
+            .registerTypeAdapter(Ballot.PlaintextBallot.class, new PlaintextBallotSerializer())
+            .registerTypeAdapter(Ballot.PlaintextBallot.class, new PlaintextBallotDeserializer())
+            .registerTypeAdapter(PlaintextTally.class, new PlaintextTallySerializer())
+            .registerTypeAdapter(PlaintextTally.class, new PlaintextTallyDeserializer())
+            .registerTypeAdapter(PublishedCiphertextTally.class, new PublishedCiphertextTallySerializer())
+            .registerTypeAdapter(PublishedCiphertextTally.class, new PublishedCiphertextTallyDeserializer())
             .create();
   }
 
@@ -121,31 +124,46 @@ public class GsonTypeAdapters {
     }
   }
 
-  private static class PlaintextTallySerializer implements JsonSerializer<Tally.PlaintextTally> {
+  private static class PlaintextBallotSerializer implements JsonSerializer<Ballot.PlaintextBallot> {
     @Override
-    public JsonElement serialize(Tally.PlaintextTally src, Type typeOfSrc, JsonSerializationContext context) {
+    public JsonElement serialize(Ballot.PlaintextBallot src, Type typeOfSrc, JsonSerializationContext context) {
+      return PlaintextBallotPojo.serialize(src);
+    }
+  }
+
+  private static class PlaintextBallotDeserializer implements JsonDeserializer<Ballot.PlaintextBallot> {
+    @Override
+    public Ballot.PlaintextBallot deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+            throws JsonParseException {
+      return PlaintextBallotPojo.deserialize(json);
+    }
+  }
+
+  private static class PlaintextTallySerializer implements JsonSerializer<PlaintextTally> {
+    @Override
+    public JsonElement serialize(PlaintextTally src, Type typeOfSrc, JsonSerializationContext context) {
       return PlaintextTallyPojo.serialize(src);
     }
   }
 
-  private static class PlaintextTallyDeserializer implements JsonDeserializer<Tally.PlaintextTally> {
+  private static class PlaintextTallyDeserializer implements JsonDeserializer<PlaintextTally> {
     @Override
-    public Tally.PlaintextTally deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+    public PlaintextTally deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
             throws JsonParseException {
       return PlaintextTallyPojo.deserialize(json);
     }
   }
 
-  private static class PublishedCiphertextTallySerializer implements JsonSerializer<Tally.PublishedCiphertextTally> {
+  private static class PublishedCiphertextTallySerializer implements JsonSerializer<PublishedCiphertextTally> {
     @Override
-    public JsonElement serialize(Tally.PublishedCiphertextTally src, Type typeOfSrc, JsonSerializationContext context) {
+    public JsonElement serialize(PublishedCiphertextTally src, Type typeOfSrc, JsonSerializationContext context) {
       return PublishedCiphertextTallyPojo.serialize(src);
     }
   }
 
-  private static class PublishedCiphertextTallyDeserializer implements JsonDeserializer<Tally.PublishedCiphertextTally> {
+  private static class PublishedCiphertextTallyDeserializer implements JsonDeserializer<PublishedCiphertextTally> {
     @Override
-    public Tally.PublishedCiphertextTally deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+    public PublishedCiphertextTally deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
             throws JsonParseException {
       return PublishedCiphertextTallyPojo.deserialize(json);
     }

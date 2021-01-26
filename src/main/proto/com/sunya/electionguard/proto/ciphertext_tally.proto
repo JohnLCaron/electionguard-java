@@ -3,7 +3,7 @@ syntax = "proto3";
 import "com/sunya/electionguard/proto/common.proto";
 
 option java_package = "com.sunya.electionguard.proto";
-option java_outer_classname = "CiphertextProto";
+option java_outer_classname = "CiphertextTallyProto";
 
 // Encrypted Tally of some collection of ballots.
 message PublishedCiphertextTally {
