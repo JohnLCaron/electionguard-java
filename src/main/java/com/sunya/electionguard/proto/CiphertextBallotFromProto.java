@@ -40,7 +40,7 @@ public class CiphertextBallotFromProto {
             convertElementModQ(ballot.getDescriptionHash()),
             convertElementModQ(ballot.getPreviousTrackingHash()),
             convertList(ballot.getContestsList(), CiphertextBallotFromProto::convertContest),
-            Optional.ofNullable(convertElementModQ(ballot.getTrackingHash())),
+            convertElementModQ(ballot.getTrackingHash()),
             ballot.getTimestamp(),
             convertElementModQ(ballot.getCryptoHash()),
             Optional.ofNullable(convertElementModQ(ballot.getNonce())));

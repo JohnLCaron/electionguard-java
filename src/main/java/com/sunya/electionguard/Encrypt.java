@@ -74,8 +74,8 @@ public class Encrypt {
     Optional<CiphertextBallot> encrypt(PlaintextBallot ballot) {
       Optional<CiphertextBallot> encrypted_ballot =
               encrypt_ballot(ballot, this.metadata, this.encryption, this.last_hash, Optional.empty(), true);
-      if (encrypted_ballot.isPresent() && encrypted_ballot.get().tracking_hash.isPresent()) {
-        this.last_hash = encrypted_ballot.get().tracking_hash.get();
+      if (encrypted_ballot.isPresent()) {
+        this.last_hash = encrypted_ballot.get().tracking_hash;
       }
       return encrypted_ballot;
     }
@@ -447,10 +447,6 @@ public class Encrypt {
           Optional.of(seed_hash),
           encrypted_contests,
           Optional.of(random_master_nonce), Optional.empty(), Optional.empty());
-
-    if (encrypted_ballot.tracking_hash.isEmpty()) {
-        return Optional.empty();
-      }
 
     if (!should_verify_proofs) {
       return Optional.of(encrypted_ballot);

@@ -98,7 +98,7 @@ public class TestJsonRoundtrip {
             Group.ONE_MOD_Q,
             Group.ONE_MOD_Q,
             ImmutableList.of(contest),
-            Optional.of(Group.ONE_MOD_Q),
+            Group.ONE_MOD_Q,
             1234L,
             Group.ONE_MOD_Q,
             Optional.of(Group.ONE_MOD_Q),

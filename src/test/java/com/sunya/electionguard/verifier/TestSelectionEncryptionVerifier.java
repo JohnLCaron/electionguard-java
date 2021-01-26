@@ -342,7 +342,7 @@ public class TestSelectionEncryptionVerifier {
       if (ballot.previous_tracking_hash != null) {
         prev_hashes.add(ballot.previous_tracking_hash);
       }
-      ballot.tracking_hash.ifPresent(curr_hashes::add);
+      curr_hashes.add(ballot.tracking_hash);
     }
 
     // withdraw this test for now
@@ -353,7 +353,7 @@ public class TestSelectionEncryptionVerifier {
   void verify_tracking_hash(Ballot.CiphertextAcceptedBallot ballot) {
     Group.ElementModQ crypto_hash = ballot.crypto_hash;
     Group.ElementModQ prev_hash = ballot.previous_tracking_hash;
-    Group.ElementModQ curr_hash = ballot.tracking_hash.orElseThrow(IllegalStateException::new);
+    Group.ElementModQ curr_hash = ballot.tracking_hash;
     Group.ElementModQ curr_hash_computed = Hash.hash_elems(prev_hash, ballot.timestamp, crypto_hash);
     assertThat(curr_hash).isEqualTo(curr_hash_computed);
   }
