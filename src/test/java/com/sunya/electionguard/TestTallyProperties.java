@@ -31,7 +31,7 @@ public class TestTallyProperties extends TestProperties {
               ballot, everything.internal_election_description, everything.context, seed_hash, Optional.empty(), true);
       assertThat(encrypted_ballotO).isPresent();
       CiphertextBallot encrypted_ballot = encrypted_ballotO.get();
-      seed_hash = encrypted_ballot.tracking_hash.orElseThrow();
+      seed_hash = encrypted_ballot.tracking_hash;
       // add to the ballot store
       store.put(encrypted_ballot.object_id, from_ciphertext_ballot(encrypted_ballot, BallotBoxState.CAST));
     }
@@ -60,7 +60,7 @@ public class TestTallyProperties extends TestProperties {
               ballot, everything.internal_election_description, everything.context, seed_hash, Optional.empty(), true);
       assertThat(encrypted_ballotO).isPresent();
       CiphertextBallot encrypted_ballot = encrypted_ballotO.get();
-      seed_hash = encrypted_ballot.tracking_hash.orElseThrow();
+      seed_hash = encrypted_ballot.tracking_hash;
       // add to the ballot store
       store.put(encrypted_ballot.object_id, from_ciphertext_ballot(encrypted_ballot, BallotBoxState.SPOILED));
     }
@@ -95,7 +95,7 @@ public class TestTallyProperties extends TestProperties {
               ballot, everything.internal_election_description, everything.context, seed_hash, Optional.empty(), true);
       assertThat(encrypted_ballotO).isPresent();
       CiphertextBallot encrypted_ballot = encrypted_ballotO.get();
-      seed_hash = encrypted_ballot.tracking_hash.orElseThrow();
+      seed_hash = encrypted_ballot.tracking_hash;
       // vary the state
       BallotBoxState state = (count % 3 == 0) ? BallotBoxState.UNKNOWN : (count % 3 == 1) ? BallotBoxState.CAST : BallotBoxState.SPOILED;
       CiphertextAcceptedBallot acceptedBallot = from_ciphertext_ballot(encrypted_ballot, state);

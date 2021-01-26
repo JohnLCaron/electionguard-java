@@ -1,8 +1,6 @@
 package com.sunya.electionguard.publish;
 
 import com.google.common.collect.ImmutableList;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.sunya.electionguard.*;
 import net.jqwik.api.Example;
 
@@ -11,11 +9,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Optional;
-import java.util.OptionalInt;
 
 import static com.sunya.electionguard.KeyCeremony.CoefficientValidationSet;
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
 
 public class TestJsonRoundtrip {
 
@@ -102,7 +98,7 @@ public class TestJsonRoundtrip {
             Group.ONE_MOD_Q,
             Group.ONE_MOD_Q,
             ImmutableList.of(contest),
-            Optional.of(Group.ONE_MOD_Q),
+            Group.ONE_MOD_Q,
             1234L,
             Group.ONE_MOD_Q,
             Optional.of(Group.ONE_MOD_Q),

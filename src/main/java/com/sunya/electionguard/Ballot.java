@@ -679,7 +679,7 @@ public class Ballot {
               )
       );
     }
-    if (first) {
+    if (first) { // LOOK debugging remove
       List<ElGamal.Ciphertext> texts = ballot_selections.stream()
               .map(CiphertextSelection::ciphertext)
               .collect(Collectors.toList());
@@ -717,14 +717,14 @@ public class Ballot {
     public final ElementModQ description_hash;
     public final ElementModQ previous_tracking_hash;
     public final ImmutableList<CiphertextBallotContest> contests;
-    public final Optional<ElementModQ> tracking_hash;
+    public final ElementModQ tracking_hash; // LOOK changed, not optional
     public final long timestamp; // LOOK something better?
     public final ElementModQ crypto_hash;
     public final Optional<ElementModQ> nonce;
 
     public CiphertextBallot(String object_id, String ballot_style, ElementModQ description_hash,
                             ElementModQ previous_tracking_hash, List<Ballot.CiphertextBallotContest> contests,
-                            Optional<ElementModQ> tracking_hash, long timestamp, ElementModQ crypto_hash,
+                            ElementModQ tracking_hash, long timestamp, ElementModQ crypto_hash,
                             Optional<ElementModQ> nonce) {
       super(object_id);
       Preconditions.checkArgument(!Strings.isNullOrEmpty(ballot_style));
@@ -764,10 +764,7 @@ public class Ballot {
      * @return Tracker in words or None.
      */
     Optional<String> get_tracker_code() {
-      if (this.tracking_hash.isEmpty()) {
-        return Optional.empty();
-      }
-      return Tracker.tracker_hash_to_words(this.tracking_hash.get(), null);
+      return Tracker.tracker_hash_to_words(this.tracking_hash, null);
     }
 
     /**
@@ -897,7 +894,7 @@ public class Ballot {
                                     ElementModQ description_hash,
                                     ElementModQ previous_tracking_hash,
                                     List<CiphertextBallotContest> contests,
-                                    Optional<ElementModQ> tracking_hash,
+                                    ElementModQ tracking_hash,
                                     long timestamp,
                                     ElementModQ crypto_hash,
                                     Optional<ElementModQ> nonce,
@@ -947,7 +944,7 @@ public class Ballot {
           List<CiphertextBallotContest> contests,
           Optional<ElementModQ> nonce,
           Optional<Long> timestamp,
-          Optional<ElementModQ> tracking_hash) {
+          Optional<ElementModQ> tracking_hashO) {
 
     if (contests.isEmpty()) {
       logger.atInfo().log("ciphertext ballot with no contests: %s", object_id);
@@ -958,9 +955,7 @@ public class Ballot {
 
     long time = timestamp.orElse(System.currentTimeMillis());
     ElementModQ previous_tracking_hash = previous_tracking_hashO.orElse(description_hash);
-    if (tracking_hash.isEmpty()) {
-      tracking_hash = Optional.of(Tracker.get_rotating_tracker_hash(previous_tracking_hash, time, contest_hash));
-    }
+    ElementModQ tracking_hash = tracking_hashO.orElse(Tracker.get_rotating_tracker_hash(previous_tracking_hash, time, contest_hash));
 
     return new CiphertextBallot(
             object_id,
@@ -982,6 +977,7 @@ public class Ballot {
    * @param description_hash: Hash of the election metadata
    * @param previous_tracking_hashO: Previous tracking hash or seed hash
    * @param contests: List of contests for this ballot
+   * @param tracking_hash: This ballot's tracking hash
    * @param timestampO: Timestamp at which the ballot encryption is generated in tick
    * @param state: ballot box state
    */
@@ -991,7 +987,7 @@ public class Ballot {
           ElementModQ description_hash,
           Optional<ElementModQ> previous_tracking_hashO,
           List<CiphertextBallotContest> contests,
-          Optional<ElementModQ> tracking_hash,
+          ElementModQ tracking_hash,
           Optional<Long> timestampO,
           BallotBoxState state) { // default BallotBoxState.UNKNOWN,
 
@@ -1003,10 +999,7 @@ public class Ballot {
     ElementModQ contest_hash = Hash.hash_elems(object_id, description_hash, contest_hashes);
 
     long timestamp = timestampO.orElse(System.currentTimeMillis());
-    ElementModQ previous_tracking_hash = previous_tracking_hashO.orElse(description_hash);
-    if (tracking_hash.isEmpty()) {
-      tracking_hash = Optional.of(Tracker.get_rotating_tracker_hash(previous_tracking_hash, timestamp, contest_hash));
-    }
+    ElementModQ previous_tracking_hash = previous_tracking_hashO.orElse(description_hash); // LOOK true?
 
     // copy the contests and selections, removing all nonces
     List<CiphertextBallotContest> new_contests = contests.stream().map(CiphertextBallotContest::removeNonces).collect(Collectors.toList());

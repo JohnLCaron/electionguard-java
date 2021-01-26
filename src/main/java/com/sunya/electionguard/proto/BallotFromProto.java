@@ -40,7 +40,7 @@ public class BallotFromProto {
             convertElementModQ(ballot.getDescriptionHash()),
             convertElementModQ(ballot.getPreviousTrackingHash()),
             convertList(ballot.getContestsList(), BallotFromProto::convertContest),
-            Optional.ofNullable(convertElementModQ(ballot.getTrackingHash())),
+            convertElementModQ(ballot.getTrackingHash()),
             ballot.getTimestamp(),
             convertElementModQ(ballot.getCryptoHash()),
             Optional.ofNullable(convertElementModQ(ballot.getNonce())));
