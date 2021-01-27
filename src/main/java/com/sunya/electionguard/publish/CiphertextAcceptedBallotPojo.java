@@ -36,6 +36,7 @@ public class CiphertextAcceptedBallotPojo {
     public ElementModQ description_hash;
     public List<CiphertextBallotSelectionPojo> ballot_selections;
     public ElementModQ crypto_hash;
+    public ElGamalCiphertextPojo encrypted_total;
     public ElementModQ nonce;
     public ConstantChaumPedersenProofPojo proof;
   }
@@ -114,6 +115,7 @@ public class CiphertextAcceptedBallotPojo {
             contest.description_hash,
             convertList(contest.ballot_selections, CiphertextAcceptedBallotPojo::translateSelection),
             contest.crypto_hash,
+            translateCiphertext(contest.encrypted_total),
             Optional.ofNullable(contest.nonce),
             Optional.ofNullable(translateConstantProof(contest.proof)));
   }
@@ -201,6 +203,7 @@ public class CiphertextAcceptedBallotPojo {
     pojo.description_hash = contest.description_hash;
     pojo.ballot_selections = convertList(contest.ballot_selections, CiphertextAcceptedBallotPojo::convertSelection);
     pojo.crypto_hash = contest.crypto_hash;
+    pojo.encrypted_total = convertCiphertext(contest.encrypted_total);
     pojo.nonce = contest.nonce.orElse(null);
     contest.proof.ifPresent(proof -> pojo.proof = convertConstantProof(proof));
     return pojo;

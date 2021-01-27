@@ -280,7 +280,9 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
     // tamper with the nonce
     Ballot.CiphertextBallotContest bad_subject = new Ballot.CiphertextBallotContest(
             subject.object_id, subject.description_hash,
-            subject.ballot_selections, subject.crypto_hash, Optional.of(int_to_q_unchecked(BigInteger.ONE)), subject.proof);
+            subject.ballot_selections, subject.crypto_hash,
+            new ElGamal.Ciphertext(TWO_MOD_P, TWO_MOD_P),
+            Optional.of(int_to_q_unchecked(BigInteger.ONE)), subject.proof);
 
     Optional<Ballot.PlaintextBallotContest> result_from_nonce = DecryptWithSecrets.decrypt_contest_with_nonce(
             bad_subject,
@@ -312,7 +314,8 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
 
     Ballot.CiphertextBallotContest bad_contest = new Ballot.CiphertextBallotContest(
             subject.object_id, subject.description_hash,
-            bad_selections, subject.crypto_hash, Optional.of(int_to_q_unchecked(BigInteger.ONE)), subject.proof);
+            bad_selections, subject.crypto_hash, new ElGamal.Ciphertext(TWO_MOD_P, TWO_MOD_P),
+            Optional.of(int_to_q_unchecked(BigInteger.ONE)), subject.proof);
 
     Optional<Ballot.PlaintextBallotContest> result_from_key_tampered = decrypt_contest_with_secret(
             bad_contest,

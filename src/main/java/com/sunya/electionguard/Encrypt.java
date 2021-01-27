@@ -338,8 +338,6 @@ public class Encrypt {
         crypto_extended_base_hash,
         chaum_pedersen_nonce,
         contest_description.number_elected,
-        Optional.empty(),
-        Optional.empty(),
         Optional.of(contest_nonce));
 
     if (encrypted_contest.proof.isEmpty()){

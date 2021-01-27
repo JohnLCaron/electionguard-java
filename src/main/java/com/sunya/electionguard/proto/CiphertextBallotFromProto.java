@@ -52,6 +52,7 @@ public class CiphertextBallotFromProto {
             convertElementModQ(contest.getDescriptionHash()),
             convertList(contest.getSelectionsList(), CiphertextBallotFromProto::convertSelection),
             convertElementModQ(contest.getCryptoHash()),
+            convertCiphertext(contest.getEncryptedTotal()),
             Optional.ofNullable(convertElementModQ(contest.getNonce())),
             Optional.ofNullable(convertConstantProof(contest.getProof())));
   }

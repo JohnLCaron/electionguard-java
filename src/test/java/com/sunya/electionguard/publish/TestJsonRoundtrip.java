@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Optional;
 
+import static com.sunya.electionguard.Group.TWO_MOD_P;
 import static com.sunya.electionguard.KeyCeremony.CoefficientValidationSet;
 import static com.google.common.truth.Truth.assertThat;
 
@@ -89,6 +90,7 @@ public class TestJsonRoundtrip {
             Group.ONE_MOD_Q,
             ImmutableList.of(),
             Group.ONE_MOD_Q,
+            new ElGamal.Ciphertext(Group.TWO_MOD_P, Group.TWO_MOD_P),
             Optional.of(Group.ONE_MOD_Q),
             Optional.empty());
 

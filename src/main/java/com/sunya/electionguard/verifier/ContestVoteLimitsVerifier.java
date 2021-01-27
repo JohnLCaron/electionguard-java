@@ -5,7 +5,6 @@ import com.sunya.electionguard.ChaumPedersen;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.Hash;
 
-import java.io.IOException;
 import java.math.BigInteger;
 
 import static com.sunya.electionguard.Ballot.CiphertextAcceptedBallot;
@@ -26,7 +25,7 @@ public class ContestVoteLimitsVerifier {
     this.grp = new Grp(electionRecord.large_prime(), electionRecord.small_prime());
   }
 
-  boolean verify_all_contests() throws IOException {
+  boolean verify_all_contests() {
     boolean error = false;
 
     for (CiphertextAcceptedBallot ballot : electionRecord.castBallots) {
@@ -60,8 +59,8 @@ public class ContestVoteLimitsVerifier {
     ContestVerifier(CiphertextBallotContest contest) {
       this.contest = contest;
       this.proof = contest.proof.orElseThrow();
-      this.contest_alpha = proof.pad; // LOOK why do I think this is true? validator code ??
-      this.contest_beta = proof.data; // LOOK why do I think this is true?
+      this.contest_alpha = contest.encrypted_total.pad; // LOOK changed see Issue #280
+      this.contest_beta = contest.encrypted_total.data; // LOOK changed see Issue #280
       this.contest_response = proof.response;
       this.contest_challenge = proof.challenge;
       this.contest_id = contest.object_id;
@@ -120,16 +119,15 @@ public class ContestVoteLimitsVerifier {
         limit_error = true;
       }
 
-      // Possibly wrong spec
       // 5.B The contest total (A, B) satisfies A = ∏ αi mod p and B = ∏ βi mod p where the (αi, βi)
       // represent all possible selections (including placeholder selections) for the contest.
       if (!this.contest_alpha.equals(selection_alpha_product)) {
         System.out.printf("5.B Contest total A fails verification for contest %s.%n", contest.object_id);
-        //limit_error = true;
+        limit_error = true;
       }
       if (!this.contest_beta.equals(selection_beta_product)) {
         System.out.printf("5.B Contest total B fails verification for contest %s.%n", contest.object_id);
-        //limit_error = true;
+        limit_error = true;
       }
 
       // 5.E calculate c = H(Q-bar, (A,B), (a,b))
@@ -164,7 +162,7 @@ public class ContestVoteLimitsVerifier {
      */
     private boolean check_cp_proof_alpha(BigInteger alpha_product) {
       BigInteger left = grp.pow_p(electionRecord.generator(), this.contest_response.getBigInt());
-      BigInteger right = grp.mult_p(grp.mod_p(this.contest_alpha.getBigInt()),
+      BigInteger right = grp.mult_p(grp.mod_p(this.proof.pad.getBigInt()),
               grp.pow_p(alpha_product, this.contest_challenge.getBigInt()));
 
       if (!left.equals(right)) {
@@ -187,7 +185,7 @@ public class ContestVoteLimitsVerifier {
       BigInteger leftTerm2 = grp.pow_p(electionRecord.elgamal_key().getBigInt(), this.contest_response.getBigInt());
       BigInteger left = grp.mult_p(leftTerm1, leftTerm2);
 
-      BigInteger right = grp.mult_p(this.contest_beta.getBigInt(), grp.pow_p(beta_product, this.contest_challenge.getBigInt()));
+      BigInteger right = grp.mult_p(this.proof.data.getBigInt(), grp.pow_p(beta_product, this.contest_challenge.getBigInt()));
 
       if (!left.equals(right)) {
         System.out.printf("5.G fails.%n");

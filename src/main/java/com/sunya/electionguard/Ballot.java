@@ -494,6 +494,7 @@ public class Ballot {
     public final ElementModQ description_hash; // Hash from contestDescription
     public final ImmutableList<CiphertextBallotSelection> ballot_selections; // Collection of ballot selections
     public final ElementModQ crypto_hash; // Hash of the encrypted values
+    public final ElGamal.Ciphertext encrypted_total; // The contest total (A, B)
     public final Optional<ElementModQ> nonce; // The nonce used to generate the encryption. Sensitive & should be treated as a secret.
 
     // The proof demonstrates the sum of the selections does not exceed the maximum
@@ -503,12 +504,14 @@ public class Ballot {
     public CiphertextBallotContest(String object_id, ElementModQ description_hash,
                                    List<CiphertextBallotSelection> ballot_selections,
                                    ElementModQ crypto_hash,
+                                   ElGamal.Ciphertext encrypted_total,
                                    Optional<ElementModQ> nonce,
                                    Optional<ChaumPedersen.ConstantChaumPedersenProof> proof) {
       super(object_id);
       this.description_hash = Preconditions.checkNotNull(description_hash);
       this.ballot_selections = ImmutableList.copyOf(Preconditions.checkNotNull(ballot_selections));
       this.crypto_hash = Preconditions.checkNotNull(crypto_hash);
+      this.encrypted_total = Preconditions.checkNotNull(encrypted_total);
       this.nonce = Preconditions.checkNotNull(nonce);
       this.proof = Preconditions.checkNotNull(proof);
     }
@@ -521,7 +524,7 @@ public class Ballot {
 
       // new_contest = replace(contest, nonce=None, ballot_selections=new_selections)
       return new CiphertextBallotContest(this.object_id, this.description_hash, new_selections, this.crypto_hash,
-              Optional.empty(), this.proof);
+              this.encrypted_total, Optional.empty(), this.proof);
     }
 
     // not used aggregate_nonce()
@@ -645,10 +648,9 @@ public class Ballot {
   }
 
   /**
-   * Constructs a `CipherTextBallotContest` object. Most of the parameters here match up to fields
-   * in the class, but this helper function will optionally compute a Chaum-Pedersen proof if the
-   * ballot selections include their encryption nonces. Likewise, if a crypto_hash is not provided,
-   * it will be derived from the other fields.
+   * Constructs a `CipherTextBallotContest` object. Computes a Chaum-Pedersen proof if the
+   * ballot selections include their encryption nonces. LOOK changed for Issue #280: A crypto_hash and a
+   * contest_total are computed and saved in the CiphertextBallotContest.
    */
   static CiphertextBallotContest make_ciphertext_ballot_contest(
           String object_id,
@@ -658,27 +660,23 @@ public class Ballot {
           ElementModQ crypto_extended_base_hash,
           ElementModQ proof_seed,
           int number_elected,
-          Optional<ElementModQ> crypto_hash,
-          Optional<ChaumPedersen.ConstantChaumPedersenProof> proof,
           Optional<ElementModQ> nonce) {
 
-    if (crypto_hash.isEmpty()) {
-      crypto_hash = Optional.of(ciphertext_ballot_context_crypto_hash(object_id, ballot_selections, description_hash));
-    }
-
+    ElementModQ crypto_hash = ciphertext_ballot_context_crypto_hash(object_id, ballot_selections, description_hash);
+    ElGamal.Ciphertext contest_total = ciphertext_ballot_elgamal_accumulate(ballot_selections);
     Optional<ElementModQ> aggregate = ciphertext_ballot_contest_aggregate_nonce(object_id, ballot_selections);
-    if (proof.isEmpty()) {
-      proof = aggregate.map(ag ->
-              ChaumPedersen.make_constant_chaum_pedersen(
-                      ciphertext_ballot_elgamal_accumulate(ballot_selections),
-                      number_elected,
-                      ag,
-                      elgamal_public_key,
-                      proof_seed,
-                      crypto_extended_base_hash
-              )
-      );
-    }
+
+    Optional<ChaumPedersen.ConstantChaumPedersenProof> proof = aggregate.map(ag ->
+            ChaumPedersen.make_constant_chaum_pedersen(
+                    contest_total,
+                    number_elected,
+                    ag,
+                    elgamal_public_key,
+                    proof_seed,
+                    crypto_extended_base_hash
+            )
+    );
+
     if (first) { // LOOK debugging remove
       List<ElGamal.Ciphertext> texts = ballot_selections.stream()
               .map(CiphertextSelection::ciphertext)
@@ -696,7 +694,8 @@ public class Ballot {
             object_id,
             description_hash,
             ballot_selections,
-            crypto_hash.get(),
+            crypto_hash,
+            contest_total,
             nonce,
             proof);
   }
