@@ -44,10 +44,10 @@ message CiphertextDecryptionSelection {
   ElementModP share = 4;
 
   // The Proof that the share was decrypted correctly, if the guardian was available for decryption.
-  ChaumPedersenProof proof = 5; // LOOK Optional or oneof ?
+  ChaumPedersenProof proof = 5;
 
   // Map[GUARDIAN_ID, CiphertextCompensatedDecryptionSelection]
-  map<string, CiphertextCompensatedDecryptionSelection> recovered_parts = 6; // LOOK Optional or oneof ?
+  map<string, CiphertextCompensatedDecryptionSelection> recovered_parts = 6;
 }
 
 message CiphertextCompensatedDecryptionSelection {

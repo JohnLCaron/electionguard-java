@@ -101,7 +101,7 @@ public class CiphertextAcceptedBallotPojo {
             pojo.description_hash,
             pojo.previous_tracking_hash,
             convertList(pojo.contests, CiphertextAcceptedBallotPojo::translateContest),
-            Optional.ofNullable(pojo.tracking_hash),
+            pojo.tracking_hash,
             pojo.timestamp,
             pojo.crypto_hash,
             Optional.ofNullable(pojo.nonce),
@@ -187,7 +187,7 @@ public class CiphertextAcceptedBallotPojo {
     pojo.description_hash = org.description_hash;
     pojo.previous_tracking_hash = org.previous_tracking_hash;
     pojo.contests = convertList(org.contests, CiphertextAcceptedBallotPojo::convertContest);
-    pojo.tracking_hash = org.tracking_hash.orElse(null);
+    pojo.tracking_hash = org.tracking_hash;
     pojo.timestamp = org.timestamp;
     pojo.crypto_hash = org.crypto_hash;
     pojo.nonce = org.nonce.orElse(null);
