@@ -12,7 +12,7 @@ public class TestSchnorrProperties extends TestProperties {
 
   @Property
   public void test_schnorr_proofs_simple() {
-    //doesn 't get any simpler than this
+    // doesn't get any simpler than this
     ElGamal.KeyPair keypair = ElGamal.elgamal_keypair_from_secret(TWO_MOD_Q).orElseThrow();
     SchnorrProof proof = make_schnorr_proof(keypair, ONE_MOD_Q, crypto_hash);
     assertThat(proof.is_valid(crypto_hash)).isTrue();
@@ -27,7 +27,8 @@ public class TestSchnorrProperties extends TestProperties {
     assertThat(proof.is_valid(crypto_hash)).isTrue();
   }
 
-  //Now, we introduce errors in the proofs and make sure that they fail to verify
+  //// Introduce errors in the proofs and make sure that they fail to verify
+
   @Property
   public void test_schnorr_proofs_invalid_u(
           @ForAll("elgamal_keypairs") ElGamal.KeyPair keypair,
@@ -35,7 +36,7 @@ public class TestSchnorrProperties extends TestProperties {
           @ForAll("elements_mod_q") Group.ElementModQ other) {
 
     SchnorrProof proof = make_schnorr_proof(keypair, nonce, crypto_hash);
-    // assume(other != proof.response);
+    assertThat(other).isNotEqualTo(proof.response); // otherwise wont fail
     SchnorrProof proof2 = new SchnorrProof(proof.public_key, proof.commitment, proof.challenge, other);
     assertThat(proof2.is_valid(crypto_hash)).isFalse();
   }
@@ -61,8 +62,7 @@ public class TestSchnorrProperties extends TestProperties {
     SchnorrProof proof = make_schnorr_proof(keypair, nonce, crypto_hash);
     assertThat(other).isNotEqualTo(crypto_hash); // otherwise wont fail
     SchnorrProof proof_bad = new SchnorrProof(proof.public_key, proof.commitment, proof.challenge, proof.response);
-    // LOOK withdraw fix until python catches up
-    assertThat(proof_bad.is_valid(other)).isTrue();
+    assertThat(proof_bad.is_valid(other)).isFalse();
   }
 
   @Property
@@ -72,7 +72,7 @@ public class TestSchnorrProperties extends TestProperties {
           @ForAll("elements_mod_p_no_zero") Group.ElementModP other) {
 
     SchnorrProof proof = make_schnorr_proof(keypair, nonce, crypto_hash);
-    // assume(other != proof.public_key);
+    assertThat(other).isNotEqualTo(proof.public_key); // otherwise wont fail
     SchnorrProof proof2 = new SchnorrProof(other, proof.commitment, proof.challenge, proof.response);
     assertThat(proof2.is_valid(crypto_hash)).isFalse();
   }

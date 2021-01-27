@@ -65,9 +65,8 @@ public class TestGuardianPublicKeyVerifier {
       Group.ElementModP public_key = proof.public_key; // k
       Group.ElementModQ challenge = proof.challenge;   // c
 
-      // LOOK withdraw correct hash until python code to catches up
-      //   Group.ElementModQ challenge_computed = Hash.hash_elems(electionParameters.base_hash(), public_key, commitment);
-      Group.ElementModQ challenge_computed = Hash.hash_elems(public_key, commitment);
+      // LOOK changed to follow validation spec 2.A. see issue #278
+      Group.ElementModQ challenge_computed = Hash.hash_elems(electionRecord.base_hash(), public_key, commitment);
       assertThat(challenge_computed).isEqualTo(challenge);
     }
   }

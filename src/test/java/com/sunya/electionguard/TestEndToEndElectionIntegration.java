@@ -35,8 +35,8 @@ public class TestEndToEndElectionIntegration {
   public void setUp() throws IOException {
     Path tmp = Files.createTempDirectory(null);
     tmp.toFile().deleteOnExit();
-    outputDir = "/home/snake/tmp/testEndToEnd";
-    // outputDir = tmp.toAbsolutePath().toString();
+    // outputDir = "/home/snake/tmp/testEndToEnd";
+    outputDir = tmp.toAbsolutePath().toString();
     System.out.printf("=========== outputDir = %s%n", outputDir);
   }
 
@@ -67,7 +67,7 @@ public class TestEndToEndElectionIntegration {
   PlaintextTally decryptedTally;
   DecryptionMediator decrypter;
 
-  //         Execute the simplified end-to-end test demonstrating each component of the system.
+  // Execute the simplified end-to-end test demonstrating each component of the system.
   @Example
   public void test_end_to_end_election() throws IOException {
     Stopwatch stopwatch = Stopwatch.createStarted();
