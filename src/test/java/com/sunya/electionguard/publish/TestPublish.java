@@ -3,9 +3,11 @@ package com.sunya.electionguard.publish;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.sunya.electionguard.Ballot;
+import com.sunya.electionguard.CiphertextTallyBuilder;
 import com.sunya.electionguard.Guardian;
 import com.sunya.electionguard.KeyCeremony;
-import com.sunya.electionguard.Tally;
+import com.sunya.electionguard.PublishedCiphertextTally;
+import com.sunya.electionguard.PlaintextTally;
 import net.jqwik.api.Example;
 import net.jqwik.api.lifecycle.BeforeProperty;
 
@@ -45,10 +47,10 @@ public class TestPublish {
     CiphertextElectionContext context = make_ciphertext_election_context(1, 1, ONE_MOD_P, description);
     List<KeyCeremony.CoefficientValidationSet> coefficients = ImmutableList.of(
             KeyCeremony.CoefficientValidationSet.create("hiD", ImmutableList.of(), ImmutableList.of()));
-    Tally.PlaintextTally plaintext_tally = Tally.PlaintextTally.create("PlaintextTallyId", ImmutableMap.of(), ImmutableMap.of());
+    PlaintextTally plaintext_tally = new PlaintextTally("PlaintextTallyId", ImmutableMap.of(), ImmutableMap.of());
 
-    Tally.PublishedCiphertextTally ciphertext_tally =
-            new Tally.CiphertextTally("CiphertextTallyId", metadata, context).publish_ciphertext_tally();
+    PublishedCiphertextTally ciphertext_tally =
+            new CiphertextTallyBuilder("CiphertextTallyId", metadata, context).build();
 
     Publisher publisher = new Publisher(outputDir, false);
     publisher.writeElectionRecordJson(
@@ -57,7 +59,7 @@ public class TestPublish {
             new ElectionConstants(),
             ImmutableList.of(),
             ImmutableList.of(),
-            ImmutableList.of(),
+            // ImmutableList.of(),
             ciphertext_tally,
             plaintext_tally,
             coefficients);

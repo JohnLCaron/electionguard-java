@@ -12,7 +12,7 @@ import java.io.IOException;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 
-public class TestBallotToProtoRoundtrip {
+public class TestCiphertextBallotToProtoRoundtrip {
   private static Publisher publisher;
 
   @BeforeContainer
@@ -23,22 +23,12 @@ public class TestBallotToProtoRoundtrip {
   @Example
   public void testBallotsRoundtrip() throws IOException {
     for (File file : publisher.ballotFiles()) {
-      Ballot.CiphertextAcceptedBallot fromPython = ConvertFromJson.readBallot(file.getAbsolutePath());
+      Ballot.CiphertextAcceptedBallot fromPython = ConvertFromJson.readCiphertextBallot(file.getAbsolutePath());
       assertThat(fromPython).isNotNull();
-      BallotProto.CiphertextAcceptedBallot proto = BallotToProto.translateToProto(fromPython);
-      Ballot.CiphertextAcceptedBallot roundtrip = BallotFromProto.translateFromProto(proto);
+      CiphertextBallotProto.CiphertextAcceptedBallot proto = CiphertextBallotToProto.translateToProto(fromPython);
+      Ballot.CiphertextAcceptedBallot roundtrip = CiphertextBallotFromProto.translateFromProto(proto);
       assertThat(roundtrip).isEqualTo(fromPython);
     }
   }
 
-  @Example
-  public void testSpoiledBallotsRoundtrip() throws IOException {
-    for (File file : publisher.spoiledFiles()) {
-      Ballot.CiphertextAcceptedBallot fromPython = ConvertFromJson.readBallot(file.getAbsolutePath());
-      assertThat(fromPython).isNotNull();
-      BallotProto.CiphertextAcceptedBallot proto = BallotToProto.translateToProto(fromPython);
-      Ballot.CiphertextAcceptedBallot roundtrip = BallotFromProto.translateFromProto(proto);
-      assertThat(roundtrip).isEqualTo(fromPython);
-    }
-  }
 }

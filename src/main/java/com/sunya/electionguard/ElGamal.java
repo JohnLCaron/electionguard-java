@@ -39,9 +39,6 @@ public class ElGamal {
     public final ElementModP data;
 
     public Ciphertext(ElementModP pad, ElementModP data) {
-      if (pad == null || data == null)
-        System.out.printf("HEY");
-
       this.pad = Preconditions.checkNotNull(pad);
       this.data = Preconditions.checkNotNull(data);
     }

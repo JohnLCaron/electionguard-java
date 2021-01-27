@@ -55,7 +55,7 @@ public class ConvertFromJson {
     }
   }
 
-  public static Ballot.CiphertextAcceptedBallot readBallot(String pathname) throws IOException {
+  public static Ballot.CiphertextAcceptedBallot readCiphertextBallot(String pathname) throws IOException {
     try (InputStream is = new FileInputStream(pathname)) {
       Reader reader = new InputStreamReader(is);
       return enhancedGson.fromJson(reader, Ballot.CiphertextAcceptedBallot.class);
@@ -65,20 +65,30 @@ public class ConvertFromJson {
     }
   }
 
-  public static Tally.PublishedCiphertextTally readCiphertextTally(String pathname) throws IOException {
+  public static Ballot.PlaintextBallot readPlaintextBallot(String pathname) throws IOException {
     try (InputStream is = new FileInputStream(pathname)) {
       Reader reader = new InputStreamReader(is);
-      return enhancedGson.fromJson(reader, Tally.PublishedCiphertextTally.class);
+      return enhancedGson.fromJson(reader, Ballot.PlaintextBallot.class);
     } catch (Exception ioe) {
       logger.atSevere().log("Failed reading file '%s'", pathname);
       throw ioe;
     }
   }
 
-  public static Tally.PlaintextTally readPlaintextTally(String pathname) throws IOException {
+  public static PublishedCiphertextTally readCiphertextTally(String pathname) throws IOException {
     try (InputStream is = new FileInputStream(pathname)) {
       Reader reader = new InputStreamReader(is);
-      return enhancedGson.fromJson(reader, Tally.PlaintextTally.class);
+      return enhancedGson.fromJson(reader, PublishedCiphertextTally.class);
+    } catch (Exception ioe) {
+      logger.atSevere().log("Failed reading file '%s'", pathname);
+      throw ioe;
+    }
+  }
+
+  public static PlaintextTally readPlaintextTally(String pathname) throws IOException {
+    try (InputStream is = new FileInputStream(pathname)) {
+      Reader reader = new InputStreamReader(is);
+      return enhancedGson.fromJson(reader, PlaintextTally.class);
     } catch (Exception ioe) {
       logger.atSevere().log("Failed reading file '%s'", pathname);
       throw ioe;

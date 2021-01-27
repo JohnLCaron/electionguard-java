@@ -36,10 +36,10 @@ public class TestTallyProperties extends TestProperties {
       store.put(encrypted_ballot.object_id, from_ciphertext_ballot(encrypted_ballot, BallotBoxState.CAST));
     }
 
-    Optional<Tally.CiphertextTally> result = Tally.tally_ballots(store, everything.internal_election_description, everything.context);
-    assertThat(result).isPresent();
+    CiphertextTallyBuilder result = new CiphertextTallyBuilder("whatever", everything.internal_election_description, everything.context);
+    result.tally_ballots(store);
 
-    Map<String, Integer> decrypted_tallies = this._decrypt_with_secret(result.get(), everything.secret_key);
+    Map<String, Integer> decrypted_tallies = this._decrypt_with_secret(result, everything.secret_key);
     System.out.printf("%n test_tally_cast_ballots_accumulates_valid_tally actual %s%n", decrypted_tallies);
     assertThat(plaintext_tallies).isEqualTo(decrypted_tallies);
   }
@@ -65,10 +65,11 @@ public class TestTallyProperties extends TestProperties {
       store.put(encrypted_ballot.object_id, from_ciphertext_ballot(encrypted_ballot, BallotBoxState.SPOILED));
     }
 
-    Optional<Tally.CiphertextTally> result = Tally.tally_ballots(store, everything.internal_election_description, everything.context);
-    assertThat(result).isPresent();
 
-    Map<String, Integer> decrypted_tallies = this._decrypt_with_secret(result.get(), everything.secret_key);
+    CiphertextTallyBuilder result = new CiphertextTallyBuilder("whatever", everything.internal_election_description, everything.context);
+    result.tally_ballots(store);
+
+    Map<String, Integer> decrypted_tallies = this._decrypt_with_secret(result, everything.secret_key);
     System.out.printf("%n test_tally_spoiled_ballots_accumulates_valid_tally decrypted_tallies %s%n%n", decrypted_tallies);
 
      // self.assertCountEqual(plaintext_tallies, decrypted_tallies)
@@ -77,7 +78,7 @@ public class TestTallyProperties extends TestProperties {
     for (Integer value : decrypted_tallies.values()) {
       assertThat(value).isEqualTo(0);
     }
-    assertThat(result.get().spoiled_ballots().size()).isEqualTo(everything.ballots.size());
+    assertThat(result.spoiled_ballots.size()).isEqualTo(everything.ballots.size());
   }
 
   // LOOK this assumes mutability, must be rewritten
@@ -103,7 +104,8 @@ public class TestTallyProperties extends TestProperties {
       acceptedBallots[count % 3] = acceptedBallot;
       count++;
     }
-    Tally.CiphertextTally tally = new Tally.CiphertextTally("my-tally", everything.internal_election_description, everything.context);
+
+    CiphertextTallyBuilder tally = new CiphertextTallyBuilder("my-tally", everything.internal_election_description, everything.context);
 
     CiphertextAcceptedBallot first_ballot = acceptedBallots[0];
     assertThat(first_ballot.state).isEqualTo(BallotBoxState.UNKNOWN);
@@ -138,10 +140,10 @@ public class TestTallyProperties extends TestProperties {
 
 
   /** Demonstrates how to decrypt a tally with a known secret key. */
-  private Map<String, Integer> _decrypt_with_secret(Tally.CiphertextTally tally, Group.ElementModQ secret_key) {
+  private Map<String, Integer> _decrypt_with_secret(CiphertextTallyBuilder tally, Group.ElementModQ secret_key) {
     Map<String, Integer> plaintext_selections = new HashMap<>();
-    for (Tally.CiphertextTallyContest contest : tally.cast().values()) {
-      for (Map.Entry<String, Tally.CiphertextTallySelection> entry : contest.tally_selections().entrySet()) {
+    for (CiphertextTallyBuilder.CiphertextTallyContestBuilder contest : tally.cast.values()) {
+      for (Map.Entry<String, CiphertextTallyBuilder.CiphertextTallySelectionBuilder> entry : contest.tally_selections.entrySet()) {
         Integer plaintext_tally = entry.getValue().ciphertext().decrypt(secret_key);
         plaintext_selections.put(entry.getKey(), plaintext_tally);
       }

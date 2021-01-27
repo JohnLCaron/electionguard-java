@@ -5,7 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.flogger.FluentLogger;
 import com.sunya.electionguard.ChaumPedersen;
 import com.sunya.electionguard.Hash;
-import com.sunya.electionguard.Tally;
+import com.sunya.electionguard.PlaintextTally;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -25,7 +25,7 @@ public class DecryptionVerifier {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   final ElectionRecord electionRecord;
-  final Tally.PlaintextTally tally;
+  final PlaintextTally tally;
   final Grp grp;
 
   DecryptionVerifier(ElectionRecord electionRecord) throws IOException {
@@ -36,7 +36,7 @@ public class DecryptionVerifier {
 
   /** Verify all cast ballots in the tally. */
   boolean verify_cast_ballot_tallies() {
-    boolean error = !this.make_all_contest_verification(this.tally.object_id(), this.tally.contests());
+    boolean error = !this.make_all_contest_verification(this.tally.object_id, this.tally.contests);
     if (error) {
       System.out.printf(" ***Decryptions of cast ballots failure. %n");
     } else {
@@ -53,7 +53,7 @@ public class DecryptionVerifier {
   boolean verify_spoiled_ballots() {
     boolean error = false;
 
-    for (Map.Entry<String, Map<String, Tally.PlaintextTallyContest>> entry : this.tally.spoiled_ballots().entrySet()) {
+    for (Map.Entry<String, Map<String, PlaintextTally.PlaintextTallyContest>> entry : this.tally.spoiled_ballots.entrySet()) {
       if (!this.make_all_contest_verification(entry.getKey(), entry.getValue())) {
         error = true;
       }
@@ -67,9 +67,9 @@ public class DecryptionVerifier {
     return !error;
   }
 
-  private boolean make_all_contest_verification(String name, Map<String, Tally.PlaintextTallyContest> contests) {
+  private boolean make_all_contest_verification(String name, Map<String, PlaintextTally.PlaintextTallyContest> contests) {
     boolean error = false;
-    for (Tally.PlaintextTallyContest contest : contests.values()) {
+    for (PlaintextTally.PlaintextTallyContest contest : contests.values()) {
       DecryptionContestVerifier tcv = new DecryptionContestVerifier(contest);
       if (!tcv.verify_a_contest()) {
         System.out.printf(" Contest %s decryption failure for %s. %n", contest.object_id(), name);
@@ -80,15 +80,15 @@ public class DecryptionVerifier {
   }
 
   class DecryptionContestVerifier {
-    Tally.PlaintextTallyContest contest;
+    PlaintextTally.PlaintextTallyContest contest;
 
-    DecryptionContestVerifier(Tally.PlaintextTallyContest contest) {
+    DecryptionContestVerifier(PlaintextTally.PlaintextTallyContest contest) {
       this.contest = contest;
     }
 
     boolean verify_a_contest() {
       boolean error = false;
-      for (Tally.PlaintextTallySelection selection : this.contest.selections().values()) {
+      for (PlaintextTally.PlaintextTallySelection selection : this.contest.selections().values()) {
         String id = contest.object_id() + "-" + selection.object_id();
         DecryptionSelectionVerifier tsv = new DecryptionSelectionVerifier(id, selection);
         if (!tsv.verify_a_selection()) {
@@ -102,12 +102,12 @@ public class DecryptionVerifier {
 
   class DecryptionSelectionVerifier {
     final String id;
-    final Tally.PlaintextTallySelection selection;
+    final PlaintextTally.PlaintextTallySelection selection;
     final String selection_id;
     final ElementModP pad;
     final ElementModP data;
 
-    DecryptionSelectionVerifier(String id, Tally.PlaintextTallySelection selection) {
+    DecryptionSelectionVerifier(String id, PlaintextTally.PlaintextTallySelection selection) {
       this.id = id;
       this.selection = selection;
       this.selection_id = selection.object_id();

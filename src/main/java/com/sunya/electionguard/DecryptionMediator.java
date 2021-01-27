@@ -11,18 +11,17 @@ import java.util.stream.Collectors;
 
 import static com.sunya.electionguard.DecryptionShare.*;
 import static com.sunya.electionguard.Election.*;
-import static com.sunya.electionguard.Tally.*;
 
 /**
- * A component or actor responsible for composing each guardian's partial decryptions or compensated decryptions
- * into the plaintext tally. Mutable.
+ * Create a plaintext tally by composing each guardian's partial decryptions or compensated decryptions.
+ * Mutable.
  */
 public class DecryptionMediator {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   private final InternalElectionDescription metadata;
   private final CiphertextElectionContext context;
-  private final CiphertextTally encryptedTally;
+  private final CiphertextTallyBuilder encryptedTally;
   private final Optional<PlaintextTally> decryptedTally = Optional.empty();
 
   private final Map<String, Guardian> available_guardians = new HashMap<>(); // Map(AVAILABLE_GUARDIAN_ID, Guardian)
@@ -44,7 +43,7 @@ public class DecryptionMediator {
    */
   private final Map<String, Map<String, CompensatedTallyDecryptionShare>> compensated_decryption_shares = new HashMap<>();
 
-  public DecryptionMediator(InternalElectionDescription metadata, CiphertextElectionContext context, CiphertextTally encryptedTally) {
+  public DecryptionMediator(InternalElectionDescription metadata, CiphertextElectionContext context, CiphertextTallyBuilder encryptedTally) {
     this.metadata = metadata;
     this.context = context;
     this.encryptedTally = encryptedTally;

@@ -42,14 +42,14 @@ public class TestReadPythonJson {
 
   @Example
   public void testEncryptedTallyPythonJson() throws IOException {
-    Tally.PublishedCiphertextTally fromPython = ConvertFromJson.readCiphertextTally(publisher.encryptedTallyFile().toString());
+    PublishedCiphertextTally fromPython = ConvertFromJson.readCiphertextTally(publisher.encryptedTallyFile().toString());
     assertThat(fromPython).isNotNull();
     System.out.printf("%s%n", fromPython);
   }
 
   @Example
   public void testPlaintextTallyPythonJson() throws IOException {
-    Tally.PlaintextTally fromPython = ConvertFromJson.readPlaintextTally(publisher.tallyFile().toString());
+    PlaintextTally fromPython = ConvertFromJson.readPlaintextTally(publisher.tallyFile().toString());
     assertThat(fromPython).isNotNull();
     System.out.printf("%s%n", fromPython);
   }
@@ -77,27 +77,26 @@ public class TestReadPythonJson {
   @Example
   public void testBallotsPythonJson() throws IOException {
     for (File file : publisher.ballotFiles()) {
-      Ballot.CiphertextAcceptedBallot fromPython = ConvertFromJson.readBallot(file.getAbsolutePath());
+      Ballot.CiphertextAcceptedBallot fromPython = ConvertFromJson.readCiphertextBallot(file.getAbsolutePath());
       assertThat(fromPython).isNotNull();
       System.out.printf("%s%n", fromPython);
     }
   }
 
-  @Example
+  /* LOOK @Example
   public void testSpoiledPythonJson() throws IOException {
     for (File file : publisher.spoiledFiles()) {
-      Ballot.CiphertextAcceptedBallot fromPython = ConvertFromJson.readBallot(file.getAbsolutePath());
+      Ballot.PlaintextBallot fromPython = ConvertFromJson.readPlaintextBallot(file.getAbsolutePath());
       assertThat(fromPython).isNotNull();
       System.out.printf("%s%n", fromPython);
     }
-  }
+  } */
 
   // LOOK @Example
   public void testProblemPythonJson() throws IOException {
     // this is failing because Optional is encoded as "None".
     String filename = pythonPublish + "/encrypted_ballots/ballot_03a29d15-667c-4ac8-afd7-549f19b8e4eb.json";
-    System.out.printf(" testCoefficientsPythonJson %s%n", filename);
-    Ballot.CiphertextAcceptedBallot fromPython = ConvertFromJson.readBallot(filename);
+    Ballot.CiphertextAcceptedBallot fromPython = ConvertFromJson.readCiphertextBallot(filename);
     assertThat(fromPython).isNotNull();
     System.out.printf("%s%n", fromPython);
   }

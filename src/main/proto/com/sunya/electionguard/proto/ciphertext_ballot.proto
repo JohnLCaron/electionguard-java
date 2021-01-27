@@ -3,7 +3,7 @@ syntax = "proto3";
 import "com/sunya/electionguard/proto/common.proto";
 
 option java_package = "com.sunya.electionguard.proto";
-option java_outer_classname = "BallotProto";
+option java_outer_classname = "CiphertextBallotProto";
 
 // An encrypted ballot that has been cast or spoiled.
 message CiphertextAcceptedBallot {

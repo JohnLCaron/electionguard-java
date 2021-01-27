@@ -142,18 +142,27 @@
   ],
   "parties": [
     {
+      "ballot_name": {
+        "text": []
+      },
       "abbreviation": "WHI",
       "color": "AAAAAA",
       "logo_uri": "http://some/path/to/whig.svg",
       "object_id": "whig"
     },
     {
+      "ballot_name": {
+        "text": []
+      },
       "abbreviation": "FED",
       "color": "CCCCCC",
       "logo_uri": "http://some/path/to/federalist.svg",
       "object_id": "federalist"
     },
     {
+      "ballot_name": {
+        "text": []
+      },
       "abbreviation": "DEMREP",
       "color": "EEEEEE",
       "logo_uri": "http://some/path/to/democratic-repulbican.svg",
@@ -162,7 +171,7 @@
   ],
   "candidates": [
     {
-      "ballot_name": {
+      "name": {
         "text": [
           {
             "value": "Benjamin Franklin",
@@ -171,10 +180,12 @@
         ]
       },
       "party_id": "whig",
+      "image_uri": null,
+      "is_write_in": false,
       "object_id": "benjamin-franklin"
     },
     {
-      "ballot_name": {
+      "name": {
         "text": [
           {
             "value": "John Adams",
@@ -183,10 +194,12 @@
         ]
       },
       "party_id": "federalist",
+      "image_uri": null,
+      "is_write_in": false,
       "object_id": "john-adams"
     },
     {
-      "ballot_name": {
+      "name": {
         "text": [
           {
             "value": "John Hancock",
@@ -195,10 +208,12 @@
         ]
       },
       "party_id": "democratic-republican",
+      "image_uri": null,
+      "is_write_in": false,
       "object_id": "john-hancock"
     },
     {
-      "ballot_name": {
+      "name": {
         "text": [
           {
             "value": "Write In Candidate",
@@ -210,11 +225,13 @@
           }
         ]
       },
+      "party_id": null,
+      "image_uri": null,
       "is_write_in": true,
       "object_id": "write-in"
     },
     {
-      "ballot_name": {
+      "name": {
         "text": [
           {
             "value": "Pineapple should be banned on pizza",
@@ -222,10 +239,13 @@
           }
         ]
       },
+      "party_id": null,
+      "image_uri": null,
+      "is_write_in": false,
       "object_id": "referendum-pineapple-affirmative"
     },
     {
-      "ballot_name": {
+      "name": {
         "text": [
           {
             "value": "Pineapple should not be banned on pizza",
@@ -233,6 +253,9 @@
           }
         ]
       },
+      "party_id": null,
+      "image_uri": null,
+      "is_write_in": false,
       "object_id": "referendum-pineapple-negative"
     }
   ],
@@ -343,6 +366,8 @@
       "geopolitical_unit_ids": [
         "jefferson-county"
       ],
+      "party_ids": null,
+      "image_uri": null,
       "object_id": "jefferson-county-ballot-style"
     },
     {
@@ -350,6 +375,8 @@
         "jefferson-county",
         "harrison-township"
       ],
+      "party_ids": null,
+      "image_uri": null,
       "object_id": "harrison-township-ballot-style"
     },
     {
@@ -359,6 +386,8 @@
         "harrison-township-precinct-east",
         "rutledge-elementary"
       ],
+      "party_ids": null,
+      "image_uri": null,
       "object_id": "harrison-township-precinct-east-ballot-style"
     },
     {
@@ -367,6 +396,8 @@
         "harrison-township",
         "rutledge-elementary"
       ],
+      "party_ids": null,
+      "image_uri": null,
       "object_id": "rutledge-elementary-ballot-style"
     }
   ]

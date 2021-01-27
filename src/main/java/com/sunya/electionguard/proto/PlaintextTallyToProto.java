@@ -2,10 +2,8 @@ package com.sunya.electionguard.proto;
 
 import com.sunya.electionguard.ChaumPedersen;
 import com.sunya.electionguard.DecryptionShare;
-import com.sunya.electionguard.Tally;
-import com.sunya.electionguard.publish.PlaintextTallyPojo;
+import com.sunya.electionguard.PlaintextTally;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -13,51 +11,47 @@ import java.util.stream.Collectors;
 import static com.sunya.electionguard.proto.CommonConvert.convertElementModP;
 import static com.sunya.electionguard.proto.CommonConvert.convertElementModQ;
 import static com.sunya.electionguard.proto.CommonConvert.convertCiphertext;
-import static com.sunya.electionguard.proto.PlaintextProto.PlaintextTally;
-import static com.sunya.electionguard.proto.PlaintextProto.PlaintextTallyContest;
-import static com.sunya.electionguard.proto.PlaintextProto.PlaintextTallyContestMap;
-import static com.sunya.electionguard.proto.PlaintextProto.PlaintextTallySelection;
-import static com.sunya.electionguard.proto.PlaintextProto.CiphertextDecryptionSelection;
-import static com.sunya.electionguard.proto.PlaintextProto.CiphertextCompensatedDecryptionSelection;
-import static com.sunya.electionguard.proto.PlaintextProto.ChaumPedersenProof;
+import static com.sunya.electionguard.proto.PlaintextTallyProto.CiphertextDecryptionSelection;
+import static com.sunya.electionguard.proto.PlaintextTallyProto.CiphertextCompensatedDecryptionSelection;
+import static com.sunya.electionguard.proto.PlaintextTallyProto.ChaumPedersenProof;
 
 public class PlaintextTallyToProto {
 
-  public static PlaintextTally translateToProto(Tally.PlaintextTally tally) {
-    PlaintextTally.Builder builder = PlaintextTally.newBuilder();
-    builder.setObjectId(tally.object_id());
-    for (Map.Entry<String, Tally.PlaintextTallyContest> contest : tally.contests().entrySet()) {
-      builder.putContests(contest.getKey(), convertContest(contest.getValue()));
+  public static PlaintextTallyProto.PlaintextTally translateToProto(PlaintextTally tally) {
+    PlaintextTallyProto.PlaintextTally.Builder builder = PlaintextTallyProto.PlaintextTally.newBuilder();
+    builder.setObjectId(tally.object_id);
+    for (Map.Entry<String, PlaintextTally.PlaintextTallyContest> entry : tally.contests.entrySet()) {
+      builder.putContests(entry.getKey(), convertContest(entry.getValue()));
     }
-    for (Map.Entry<String, Map<String, Tally.PlaintextTallyContest>> spoiled : tally.spoiled_ballots().entrySet()) {
+    for (Map.Entry<String, Map<String, PlaintextTally.PlaintextTallyContest>> spoiled : tally.spoiled_ballots.entrySet()) {
       builder.putSpoiledBallots(spoiled.getKey(), convertSpoiled(spoiled.getValue()));
     }
     return builder.build();
   }
 
-  static PlaintextTallyContestMap convertSpoiled(Map<String, Tally.PlaintextTallyContest> spoiledMap) {
-    PlaintextTallyContestMap.Builder builder = PlaintextTallyContestMap.newBuilder();
-    for (Map.Entry<String, Tally.PlaintextTallyContest> selection : spoiledMap.entrySet()) {
+  static PlaintextTallyProto.PlaintextTallyContestMap convertSpoiled(Map<String, PlaintextTally.PlaintextTallyContest> spoiledMap) {
+    PlaintextTallyProto.PlaintextTallyContestMap.Builder builder = PlaintextTallyProto.PlaintextTallyContestMap.newBuilder();
+    for (Map.Entry<String, PlaintextTally.PlaintextTallyContest> selection : spoiledMap.entrySet()) {
       builder.putContests(selection.getKey(), convertContest(selection.getValue()));
     }
     return builder.build();
   }
 
-  static PlaintextTallyContest convertContest(Tally.PlaintextTallyContest contest) {
-    PlaintextTallyContest.Builder builder = PlaintextTallyContest.newBuilder();
+  static PlaintextTallyProto.PlaintextTallyContest convertContest(PlaintextTally.PlaintextTallyContest contest) {
+    PlaintextTallyProto.PlaintextTallyContest.Builder builder = PlaintextTallyProto.PlaintextTallyContest.newBuilder();
     builder.setObjectId(contest.object_id());
-    for (Map.Entry<String, Tally.PlaintextTallySelection> selection : contest.selections().entrySet()) {
+    for (Map.Entry<String, PlaintextTally.PlaintextTallySelection> selection : contest.selections().entrySet()) {
       builder.putSelections(selection.getKey(), convertSelection(selection.getValue()));
     }
     return builder.build();
   }
 
-  static PlaintextTallySelection convertSelection(Tally.PlaintextTallySelection selection) {
+  static PlaintextTallyProto.PlaintextTallySelection convertSelection(PlaintextTally.PlaintextTallySelection selection) {
 
-    List<PlaintextProto.CiphertextDecryptionSelection> shares =
+    List<CiphertextDecryptionSelection> shares =
             selection.shares().stream().map(PlaintextTallyToProto::convertShare).collect(Collectors.toList());
 
-    PlaintextTallySelection.Builder builder = PlaintextTallySelection.newBuilder();
+    PlaintextTallyProto.PlaintextTallySelection.Builder builder = PlaintextTallyProto.PlaintextTallySelection.newBuilder();
     builder.setObjectId(selection.object_id());
     builder.setTally(selection.tally());
     builder.setValue(convertElementModP(selection.value()));

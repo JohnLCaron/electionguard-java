@@ -15,10 +15,7 @@ import java.util.stream.Collectors;
 
 import static com.sunya.electionguard.Group.*;
 
-/**
- * The process conducted at the beginning of the election to create the joint encryption context for
- * encrypting ballots during the election.
- */
+/** The process to create the joint encryption context for encrypting ballots. */
  public class KeyCeremony {
 
   /** Details of key ceremony. */
@@ -296,8 +293,8 @@ import static com.sunya.electionguard.Group.*;
    * @return Joint key for election
    */
   static ElementModP combine_election_public_keys(Map<String, ElectionPublicKey> election_public_keys) {
-    // public_keys = map(lambda public_key:public_key.key, election_public_keys.values())
-    List<ElementModP> public_keys = election_public_keys.values().stream().map(pk -> pk.key()).collect(Collectors.toList());
+    List<ElementModP> public_keys = election_public_keys.values().stream()
+            .map(pk -> pk.key()).collect(Collectors.toList());
 
     return ElGamal.elgamal_combine_public_keys(public_keys);
   }

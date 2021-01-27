@@ -56,6 +56,10 @@ public class BallotBox {
     return Optional.of(ballot_box_ballot);
   }
 
+  Iterable<CiphertextAcceptedBallot> getAllBallots() {
+    return store;
+  }
+
   Iterable<CiphertextAcceptedBallot> getCastBallots() {
     return Iterables.filter(store, b -> b.state == BallotBoxState.CAST);
   }

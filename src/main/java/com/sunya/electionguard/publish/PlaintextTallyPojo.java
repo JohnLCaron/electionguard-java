@@ -7,7 +7,7 @@ import com.sunya.electionguard.ChaumPedersen;
 import com.sunya.electionguard.DecryptionShare;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.Group;
-import com.sunya.electionguard.Tally;
+import com.sunya.electionguard.PlaintextTally;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Type;
@@ -72,45 +72,45 @@ public class PlaintextTallyPojo {
   ////////////////////////////////////////////////////////////////////////////
   // deserialize
 
-  public static Tally.PlaintextTally deserialize(JsonElement jsonElem) {
+  public static PlaintextTally deserialize(JsonElement jsonElem) {
     Gson gson = GsonTypeAdapters.enhancedGson();
     PlaintextTallyPojo pojo = gson.fromJson(jsonElem, PlaintextTallyPojo.class);
     return translateTally(pojo);
   }
 
-  private static Tally.PlaintextTally translateTally(PlaintextTallyPojo pojo) {
-    Map<String, Tally.PlaintextTallyContest> contests = new HashMap<>();
+  private static PlaintextTally translateTally(PlaintextTallyPojo pojo) {
+    Map<String, PlaintextTally.PlaintextTallyContest> contests = new HashMap<>();
     for (Map.Entry<String, PlaintextTallyContestPojo> entry : pojo.contests.entrySet()) {
       contests.put(entry.getKey(), translateContest(entry.getValue()));
     }
 
-    Map<String, Map<String, Tally.PlaintextTallyContest>> spoiled_ballots = new HashMap<>();
+    Map<String, Map<String, PlaintextTally.PlaintextTallyContest>> spoiled_ballots = new HashMap<>();
     for (Map.Entry<String, Map<String, PlaintextTallyContestPojo>> entry1 : pojo.spoiled_ballots.entrySet()) {
-      Map<String, Tally.PlaintextTallyContest> byContest = new HashMap<>();
+      Map<String, PlaintextTally.PlaintextTallyContest> byContest = new HashMap<>();
       for (Map.Entry<String, PlaintextTallyContestPojo> entry2 : entry1.getValue().entrySet()) {
         byContest.put(entry2.getKey(), translateContest(entry2.getValue()));
       }
       spoiled_ballots.put(entry1.getKey(), byContest);
     }
 
-    return Tally.PlaintextTally.create(
+    return new PlaintextTally(
             pojo.object_id,
             contests,
             spoiled_ballots);
   }
 
-  private static Tally.PlaintextTallyContest translateContest(PlaintextTallyContestPojo pojo) {
-    Map<String, Tally.PlaintextTallySelection> selections = new HashMap<>();
+  private static PlaintextTally.PlaintextTallyContest translateContest(PlaintextTallyContestPojo pojo) {
+    Map<String, PlaintextTally.PlaintextTallySelection> selections = new HashMap<>();
     for (Map.Entry<String, PlaintextTallySelectionPojo> entry : pojo.selections.entrySet()) {
       selections.put(entry.getKey(), translateSelection(entry.getValue()));
     }
-    return Tally.PlaintextTallyContest.create(
+    return PlaintextTally.PlaintextTallyContest.create(
             pojo.object_id,
             selections);
   }
 
-  private static Tally.PlaintextTallySelection translateSelection(PlaintextTallySelectionPojo pojo) {
-    return Tally.PlaintextTallySelection.create(
+  private static PlaintextTally.PlaintextTallySelection translateSelection(PlaintextTallySelectionPojo pojo) {
+    return PlaintextTally.PlaintextTallySelection.create(
             pojo.object_id,
             pojo.tally,
             pojo.value,
@@ -164,38 +164,38 @@ public class PlaintextTallyPojo {
   ////////////////////////////////////////////////////////////////////////////
   // serialize
 
-  public static JsonElement serialize(Tally.PlaintextTally src) {
+  public static JsonElement serialize(PlaintextTally src) {
     Gson gson = GsonTypeAdapters.enhancedGson();
     PlaintextTallyPojo pojo = convertTally(src);
     Type typeOfSrc = new TypeToken<PlaintextTallyPojo>() {}.getType();
     return gson.toJsonTree(pojo, typeOfSrc);
   }
 
-  private static PlaintextTallyPojo convertTally(Tally.PlaintextTally org) {
+  private static PlaintextTallyPojo convertTally(PlaintextTally org) {
     Map<String, PlaintextTallyContestPojo> contests = new HashMap<>();
-    for (Map.Entry<String, Tally.PlaintextTallyContest> entry : org.contests().entrySet()) {
+    for (Map.Entry<String, PlaintextTally.PlaintextTallyContest> entry : org.contests.entrySet()) {
       contests.put(entry.getKey(), convertContest(entry.getValue()));
     }
 
     Map<String, Map<String, PlaintextTallyContestPojo>> spoiled_ballots = new HashMap<>();
-    for (Map.Entry<String, Map<String, Tally.PlaintextTallyContest>> entry1 : org.spoiled_ballots().entrySet()) {
+    for (Map.Entry<String, Map<String, PlaintextTally.PlaintextTallyContest>> entry1 : org.spoiled_ballots.entrySet()) {
       Map<String, PlaintextTallyContestPojo> byContest = new HashMap<>();
-      for (Map.Entry<String, Tally.PlaintextTallyContest> entry2 : entry1.getValue().entrySet()) {
+      for (Map.Entry<String, PlaintextTally.PlaintextTallyContest> entry2 : entry1.getValue().entrySet()) {
         byContest.put(entry2.getKey(), convertContest(entry2.getValue()));
       }
       spoiled_ballots.put(entry1.getKey(), byContest);
     }
 
     PlaintextTallyPojo pojo = new PlaintextTallyPojo();
-    pojo.object_id = org.object_id();
+    pojo.object_id = org.object_id;
     pojo.contests = contests;
     pojo.spoiled_ballots = spoiled_ballots;
     return pojo;
   }
 
-  private static PlaintextTallyContestPojo convertContest(Tally.PlaintextTallyContest org) {
+  private static PlaintextTallyContestPojo convertContest(PlaintextTally.PlaintextTallyContest org) {
     Map<String, PlaintextTallySelectionPojo> selections = new HashMap<>();
-    for (Map.Entry<String, Tally.PlaintextTallySelection> entry : org.selections().entrySet()) {
+    for (Map.Entry<String, PlaintextTally.PlaintextTallySelection> entry : org.selections().entrySet()) {
       selections.put(entry.getKey(), convertSelection(entry.getValue()));
     }
     PlaintextTallyContestPojo pojo = new PlaintextTallyContestPojo();
@@ -204,7 +204,7 @@ public class PlaintextTallyPojo {
     return pojo;
   }
 
-  private static PlaintextTallySelectionPojo convertSelection(Tally.PlaintextTallySelection org) {
+  private static PlaintextTallySelectionPojo convertSelection(PlaintextTally.PlaintextTallySelection org) {
     PlaintextTallySelectionPojo pojo = new PlaintextTallySelectionPojo();
     pojo.object_id = org.object_id();
     pojo.tally = org.tally();

@@ -124,13 +124,13 @@ public class Publisher {
     return ballotsDirPath.toFile().listFiles();
   }
 
-  public Path spoiledFile(String id) {
+  /* public Path spoiledFile(String id) {
     String fileName = BALLOT_PREFIX + id + SUFFIX;
     return spoiledDirPath.resolve(fileName);
   }
   public File[] spoiledFiles() {
     return spoiledDirPath.toFile().listFiles();
-  }
+  } */
 
   /** Publishes the election record as json. */
   public void writeElectionRecordJson(
@@ -139,9 +139,9 @@ public class Publisher {
           ElectionConstants constants,
           Iterable<Encrypt.EncryptionDevice> devices,
           Iterable<Ballot.CiphertextAcceptedBallot> ciphertext_ballots,
-          Iterable<Ballot.CiphertextAcceptedBallot> spoiled_ballots,
-          Tally.PublishedCiphertextTally ciphertext_tally,
-          Tally.PlaintextTally decryptedTally,
+          // Iterable<Ballot.PlaintextBallot> spoiled_ballots,
+          PublishedCiphertextTally ciphertext_tally,
+          PlaintextTally decryptedTally,
           Iterable<KeyCeremony.CoefficientValidationSet> coefficient_validation_sets) throws IOException {
 
     ConvertToJson.write(description, this.electionFile());
@@ -163,40 +163,12 @@ public class Publisher {
       ConvertToJson.write(ballot, this.ballotFile(ballot.object_id));
     }
 
-    for (Ballot.CiphertextAcceptedBallot ballot : spoiled_ballots) {
+    /* for (Ballot.PlaintextBallot ballot : spoiled_ballots) {
       ConvertToJson.write(ballot, this.spoiledFile(ballot.object_id));
-    }
+    } */
 
     ConvertToJson.write(ciphertext_tally, encryptedTallyFile());
     ConvertToJson.write(decryptedTally, tallyFile());
-  }
-
-  /** Publishes the ballot chain as json. */
-  public void writeBallotChainJson(
-          ElectionDescription description,
-          CiphertextElectionContext context,
-          ElectionConstants constants,
-          Iterable<Encrypt.EncryptionDevice> devices,
-          Iterable<Ballot.CiphertextAcceptedBallot> ciphertext_ballots,
-          Iterable<KeyCeremony.CoefficientValidationSet> coefficient_validation_sets) throws IOException {
-
-    ConvertToJson.write(description, this.electionFile());
-    ConvertToJson.write(context, this.contextFile());
-    ConvertToJson.write(constants, this.constantsFile());
-
-    for (Encrypt.EncryptionDevice device : devices) {
-      ConvertToJson.write(device, this.deviceFile(device.uuid));
-    }
-
-    if (coefficient_validation_sets != null) {
-      for (KeyCeremony.CoefficientValidationSet coefficient_validation_set : coefficient_validation_sets) {
-        ConvertToJson.write(coefficient_validation_set, this.coefficientsFile(coefficient_validation_set.owner_id()));
-      }
-    }
-
-    for (Ballot.CiphertextAcceptedBallot ballot : ciphertext_ballots) {
-      ConvertToJson.write(ballot, this.ballotFile(ballot.object_id));
-    }
   }
 
   /** Publishes the election record as proto. */
@@ -206,14 +178,14 @@ public class Publisher {
           ElectionConstants constants,
           Iterable<Encrypt.EncryptionDevice> devices,
           Iterable<Ballot.CiphertextAcceptedBallot> ciphertext_ballots,
-          Iterable<Ballot.CiphertextAcceptedBallot> spoiled_ballots,
-          Tally.PublishedCiphertextTally ciphertext_tally,
-          Tally.PlaintextTally decryptedTally,
+          // Iterable<Ballot.PlaintextBallot> spoiled_ballots,
+          PublishedCiphertextTally ciphertext_tally,
+          PlaintextTally decryptedTally,
           Iterable<KeyCeremony.CoefficientValidationSet> coefficient_validation_sets) throws IOException {
 
     ElectionRecordProto.ElectionRecord ElectionRecordProto = ElectionRecordToProto.buildElectionRecord(
             description, context, constants, devices,
-            ciphertext_ballots, spoiled_ballots, ciphertext_tally, decryptedTally,
+            ciphertext_ballots, ciphertext_tally, decryptedTally,
             coefficient_validation_sets);
 
 

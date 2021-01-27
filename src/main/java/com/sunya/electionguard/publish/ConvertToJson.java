@@ -57,15 +57,15 @@ public class ConvertToJson {
     }
   }
 
-  public static void write(Tally.PublishedCiphertextTally  object, Path where) throws IOException {
-    Type type = new TypeToken<Tally.PublishedCiphertextTally >(){}.getType();
+  public static void write(PublishedCiphertextTally object, Path where) throws IOException {
+    Type type = new TypeToken<PublishedCiphertextTally>(){}.getType();
     try (FileWriter writer = new FileWriter(where.toFile())) {
       enhancedGson.toJson(object, type, writer);
     }
   }
 
-  public static void write(Tally.PlaintextTally object, Path where) throws IOException {
-    Type type = new TypeToken<Tally.PlaintextTally>(){}.getType();
+  public static void write(PlaintextTally object, Path where) throws IOException {
+    Type type = new TypeToken<PlaintextTally>(){}.getType();
     try (FileWriter writer = new FileWriter(where.toFile())) {
       enhancedGson.toJson(object, type, writer);
     }
