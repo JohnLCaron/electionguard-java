@@ -68,7 +68,7 @@ public class TimeIntegrationSteps {
     Path tmp = Files.createTempDirectory(null);
     tmp.toFile().deleteOnExit();
     outputDir = tmp.toAbsolutePath().toString();
-    outputDir = "/home/snake/tmp/TimeIntegrationSteps";
+    // outputDir = "/home/snake/tmp/TimeIntegrationSteps";
     System.out.printf("=========== outputDir = %s nballots = %d%n", outputDir, nballots);
     this.nballots = nballots;
   }

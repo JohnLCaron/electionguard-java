@@ -59,7 +59,7 @@ public class DecryptionMediator {
   Optional<TallyDecryptionShare> announce(Guardian guardian) {
     // Only allow a guardian to announce once
     if (available_guardians.containsKey(guardian.object_id)) {
-      logger.atInfo().log("guardian %s already announced", guardian.object_id, Optional.empty());
+      logger.atInfo().log("guardian %s already announced", guardian.object_id);
       return Optional.ofNullable(this.decryption_shares.get(guardian.object_id));
     }
 

@@ -53,7 +53,9 @@ public class GuardianPublicKeyVerifier {
       ElementModQ response = proof.response;     // u
 
       // compute challenge 2.A
-      ElementModQ challenge_computed = this.compute_guardian_challenge_threshold_separated(public_key, commitment);
+      // LOOK changed to follow validation spec 2.A. see issue #278
+      //  return Hash.hash_elems(this.electionRecord.base_hash(), public_key, commitment);
+      ElementModQ challenge_computed =  Hash.hash_elems(this.electionRecord.base_hash(), public_key, commitment);
       if (!challenge_computed.equals(challenge)) {
         error = true;
         System.out.printf("Guardian %s coefficient_proof %d: equation 2A challenge validation failed.%n", coeffSet.owner_id(), i);
@@ -66,19 +68,6 @@ public class GuardianPublicKeyVerifier {
       }
     }
     return !error;
-  }
-
-  /**
-   * computes challenge (c_ij) with hash, H(cij) = H(base hash, public key, commitment) % q.
-   * Each guardian has quorum number of these challenges.
-   * @param public_key: public key, under each guardian, previously listed as k
-   * @param commitment: commitment, under each guardian, previously listed as h
-   * @return a challenge value of a guardian, separated by quorum
-   */
-  ElementModQ compute_guardian_challenge_threshold_separated(ElementModP public_key, ElementModP commitment) {
-    // LOOK change to return Hash.hash_elems(this.electionRecord.base_hash(), public_key, commitment);
-    //  return Hash.hash_elems(this.electionRecord.base_hash(), public_key, commitment);
-    return Hash.hash_elems(public_key, commitment);
   }
 
   /**
