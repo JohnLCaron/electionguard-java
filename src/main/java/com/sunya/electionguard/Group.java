@@ -21,13 +21,13 @@ public class Group {
   static final BigInteger R = P_MINUS_ONE.multiply(Q.modInverse(P)).mod(P);
 
   // Common constants
-  static final ElementModQ ZERO_MOD_Q = new ElementModQ(BigInteger.ZERO);
+  public static final ElementModQ ZERO_MOD_Q = new ElementModQ(BigInteger.ZERO);
   public static final ElementModQ ONE_MOD_Q = new ElementModQ(BigInteger.ONE);
-  static final ElementModQ TWO_MOD_Q = new ElementModQ(BigInteger.TWO);
+  public static final ElementModQ TWO_MOD_Q = new ElementModQ(BigInteger.TWO);
 
-  static final ElementModP ZERO_MOD_P = new ElementModP(BigInteger.ZERO);
+  public static final ElementModP ZERO_MOD_P = new ElementModP(BigInteger.ZERO);
   public static final ElementModP ONE_MOD_P = new ElementModP(BigInteger.ONE);
-  static final ElementModP TWO_MOD_P = new ElementModP(BigInteger.TWO);
+  public static final ElementModP TWO_MOD_P = new ElementModP(BigInteger.TWO);
 
   @Immutable
   static class ElementMod {

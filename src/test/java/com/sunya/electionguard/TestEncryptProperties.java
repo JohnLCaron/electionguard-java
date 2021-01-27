@@ -212,13 +212,18 @@ public class TestEncryptProperties extends TestProperties {
 
     CiphertextBallotContest malformed_proof = new CiphertextBallotContest(
             result.object_id, result.description_hash,
-            result.ballot_selections, result.crypto_hash, result.nonce, Optional.of(malformed_disjunctive));
+            result.ballot_selections, result.crypto_hash,
+            new ElGamal.Ciphertext(TWO_MOD_P, TWO_MOD_P),
+            result.nonce,
+            Optional.of(malformed_disjunctive));
     assertThat(malformed_proof.is_valid_encryption(description.crypto_hash(), keypair.public_key, ONE_MOD_Q)).isFalse();
 
     // remove the proof
     CiphertextBallotContest missing_proof = new CiphertextBallotContest(
             result.object_id, result.description_hash,
-            result.ballot_selections, result.crypto_hash, result.nonce, Optional.empty());
+            result.ballot_selections, result.crypto_hash,
+            new ElGamal.Ciphertext(TWO_MOD_P, TWO_MOD_P),
+            result.nonce, Optional.empty());
     assertThat(missing_proof.is_valid_encryption(description.crypto_hash(), keypair.public_key, ONE_MOD_Q)).isFalse();
   }
 

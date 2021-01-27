@@ -37,9 +37,10 @@ message CiphertextBallotContest {
   ElementModQ description_hash = 2; // Hash of the contest description
   repeated CiphertextBallotSelection selections = 3;
   ElementModQ crypto_hash = 4; // The hash of the encrypted values
-  ElementModQ nonce = 5; // The nonce used to generate the encryption. LOOK Sensitive & should be treated as a secret LOOK optional
-  ConstantChaumPedersenProof proof = 6;  // The proof demonstrates the sum of the selections does not exceed the maximum
-                  // available selections for the contest, and that the proof was generated with the nonce LOOK optional
+  ElGamalCiphertext encrypted_total = 5;  // The contest total (A, B)
+  ElementModQ nonce = 6; // The nonce used to generate the encryption. LOOK Sensitive & should be treated as a secret LOOK optional
+  ConstantChaumPedersenProof proof = 7;  // The proof that the sum of the selections does not exceed the maximum
+               // available selections for the contest, and that the proof was generated with the nonce LOOK optional
 }
 
 // Encryption of a specific selection.
