@@ -8,8 +8,8 @@ import java.io.IOException;
 import static com.google.common.truth.Truth.assertThat;
 
 public class TestParameterVerifier {
-  public static final String topdir = "src/test/data/testEndToEnd/";
-  // public static final String topdir = "src/test/data/python-modified";
+  // public static final String topdir = "src/test/data/testEndToEnd/";
+  public static final String topdir ="/home/snake/tmp/testEndToEnd";
 
   @Example
   public void testJavaGenerated() throws IOException {

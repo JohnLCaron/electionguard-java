@@ -2,7 +2,6 @@ package com.sunya.electionguard;
 
 import com.google.common.flogger.FluentLogger;
 
-import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
@@ -27,12 +26,14 @@ public class Decryptions {
           CiphertextTallyBuilder tally,
           CiphertextElectionContext context) {
 
+    // Map(CONTEST_ID, CiphertextDecryptionContest)
     Optional<Map<String, CiphertextDecryptionContest>> contests =
             compute_decryption_share_for_cast_contests(guardian, tally, context);
     if (contests.isEmpty()) {
       return Optional.empty();
     }
 
+    // Map(BALLOT_ID, BallotDecryptionShare)
     Optional<Map<String, BallotDecryptionShare>> spoiled_ballots =
             compute_decryption_share_for_spoiled_ballots(guardian, tally, context);
 
@@ -85,7 +86,10 @@ public class Decryptions {
             spoiled_ballots.get()));
   }
 
-  /** Compute the decryption for all of the cast contests in the Ciphertext Tally. */
+  /**
+   * Compute the decryption for all of the cast contests in the Ciphertext Tally.
+   * @return Map(CONTEST_ID, CiphertextDecryptionContest)
+   */
   static Optional<Map<String, CiphertextDecryptionContest>> compute_decryption_share_for_cast_contests(
           Guardian guardian,
           CiphertextTallyBuilder tally,
@@ -273,6 +277,7 @@ public class Decryptions {
           Ballot.CiphertextAcceptedBallot ballot,
           CiphertextElectionContext context) {
 
+    // Map(CONTEST_ID, CiphertextDecryptionContest)
     Map<String, CiphertextDecryptionContest> contests = new HashMap<>();
     for (Ballot.CiphertextBallotContest contest : ballot.contests) {
       Map<String, CiphertextDecryptionSelection> selections = new HashMap<>();
@@ -424,6 +429,7 @@ public class Decryptions {
             recovery_public_key.get(),
             tuple.decryption,
             context.crypto_extended_base_hash)) {
+
       CiphertextCompensatedDecryptionSelection share = CiphertextCompensatedDecryptionSelection.create(
               selection.object_id,
               available_guardian.object_id,
@@ -444,13 +450,11 @@ public class Decryptions {
   private static Group.ElementModQ compute_lagrange_coefficients_for_guardian(
           List<KeyCeremony.PublicKeySet> all_available_guardian_keys, KeyCeremony.PublicKeySet guardian_keys) {
 
-    List<BigInteger> other_guardian_orders = all_available_guardian_keys.stream()
+    List<Integer> other_guardian_orders = all_available_guardian_keys.stream()
             .filter(g -> !g.owner_id().equals(guardian_keys.owner_id()))
-            .map(g -> BigInteger.valueOf(g.sequence_order())).collect(Collectors.toList());
+            .map(g -> g.sequence_order()).collect(Collectors.toList());
 
-    return ElectionPolynomial.compute_lagrange_coefficient(
-            BigInteger.valueOf(guardian_keys.sequence_order()),
-            other_guardian_orders);
+    return ElectionPolynomial.compute_lagrange_coefficient(guardian_keys.sequence_order(), other_guardian_orders);
   }
 
   /** Produce all Lagrange coefficients for a collection of available Guardians, used when reconstructing a missing share. */
@@ -483,13 +487,13 @@ public class Decryptions {
         return Optional.empty();
       }
 
-      // make sure there are computed lagrange coefficients:
+      // make sure there are already computed lagrange coefficients:
       Map<String, Group.ElementModQ> lagrange_coefficients_for_missing = lagrange_coefficients.get(missing_guardian_id);
       if (lagrange_coefficients_for_missing == null) {
         lagrange_coefficients_for_missing = new HashMap<>();
       }
 
-      //         if not any(lagrange_coefficients):
+      // if not any(lagrange_coefficients):
       boolean haveAny = lagrange_coefficients.values().stream().anyMatch(Objects::nonNull);
       if (!haveAny) {
         logger.atInfo().log("Could not reconstruct tally for %s with no lagrange coefficients", missing_guardian_id);

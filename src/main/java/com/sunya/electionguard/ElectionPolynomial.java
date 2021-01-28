@@ -2,7 +2,6 @@ package com.sunya.electionguard;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
@@ -11,7 +10,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.sunya.electionguard.Group.*;
+import static com.sunya.electionguard.Group.ElementModQ;
+import static com.sunya.electionguard.Group.ElementModP;
+import static com.sunya.electionguard.Group.Q;
+import static com.sunya.electionguard.Group.ZERO_MOD_Q;
+import static com.sunya.electionguard.Group.add_q;
+import static com.sunya.electionguard.Group.g_pow_p;
+import static com.sunya.electionguard.Group.mult_pi;
+import static com.sunya.electionguard.Group.mult_q;
+import static com.sunya.electionguard.Group.pow_p;
+import static com.sunya.electionguard.Group.pow_q;
+import static com.sunya.electionguard.Group.rand_q;
 
 /**
  * The election polynomial is the mathematical expression that each Guardian defines to solve for their private key.
@@ -44,7 +53,7 @@ public class ElectionPolynomial {
    * Generates a polynomial for sharing election keys.
    *
    * @param number_of_coefficients: Number of coefficients of polynomial
-   * @param nonce:                  an optional nonce parameter that may be provided (useful for testing)
+   * @param nonce:                  an optional nonce parameter that may be provided (only for testing)
    * @return Polynomial used to share election keys
    */
   static ElectionPolynomial generate_polynomial(int number_of_coefficients, @Nullable Group.ElementModQ nonce, ElementModQ crypto_base_hash) {
@@ -77,7 +86,7 @@ public class ElectionPolynomial {
    * @return Polynomial used to share election keys
    */
   static ElementModQ compute_polynomial_coordinate(BigInteger exponent_modifier, ElectionPolynomial polynomial) {
-    Preconditions.checkArgument(between(BigInteger.ZERO, exponent_modifier, Q), "exponent_modifier is out of range");
+    Preconditions.checkArgument(Group.between(BigInteger.ZERO, exponent_modifier, Q), "exponent_modifier is out of range");
 
     ElementModQ computed_value = ZERO_MOD_Q;
     int count = 0;
@@ -95,14 +104,16 @@ public class ElectionPolynomial {
    *
    * @param coordinate: the coordinate to plot, usually a Guardian's Sequence Order
    * @param degrees:    the degrees across which to plot, usually the collection of
-   *                    available Guardians' Sequence Orders
+   *                    other Guardians' Sequence Orders
    */
-  static ElementModQ compute_lagrange_coefficient(BigInteger coordinate, List<BigInteger> degrees) {
-    ElementModQ numerator = mult_q(Iterables.toArray(degrees, BigInteger.class));
+  public static ElementModQ compute_lagrange_coefficient(Integer coordinate, List<Integer> degrees) {
+    int product = degrees.stream().reduce(1, (a, b)  -> a * b);
+    ElementModQ numerator = Group.int_to_q_unchecked(BigInteger.valueOf(product).mod(Q));
     // denominator = mult_q(*[(degree - coordinate) for degree in degrees])
-    List<BigInteger> diff = degrees.stream().map(degree -> degree.subtract(coordinate)).collect(Collectors.toList());
-    ElementModQ denominator = mult_q(Iterables.toArray(diff, BigInteger.class));
-    return div_q(numerator, denominator);
+    List<Integer> diff = degrees.stream().map(degree -> degree - coordinate).collect(Collectors.toList());
+    int productDiff = diff.stream().reduce(1, (a, b)  -> a * b);
+    ElementModQ denominator = Group.int_to_q_unchecked(BigInteger.valueOf(productDiff).mod(Q));
+    return Group.div_q(numerator, denominator);
   }
 
   /**

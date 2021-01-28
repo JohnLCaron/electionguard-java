@@ -41,23 +41,24 @@ import static com.sunya.electionguard.Group.*;
     }
   }
 
-  /** A tuple of election public key and owner information. */
+  /** Guardian's public key and owner information. */
   @AutoValue
   abstract static class ElectionPublicKey {
-    abstract String owner_id();
+    abstract String owner_id(); // guardian object_id
+    abstract int sequence_order();
     abstract SchnorrProof proof();
     abstract ElementModP key();
 
-    public static ElectionPublicKey create(String owner_id, SchnorrProof proof, ElementModP key) {
-      return new AutoValue_KeyCeremony_ElectionPublicKey(owner_id, proof, key);
+    public static ElectionPublicKey create(String owner_id, int sequence_order, SchnorrProof proof, ElementModP key) {
+      return new AutoValue_KeyCeremony_ElectionPublicKey(owner_id, sequence_order, proof, key);
     }
   }
 
   /** Public key set of auxiliary and election keys and owner information. */
   @AutoValue
   abstract static class PublicKeySet {
-    abstract String owner_id();
-    abstract int sequence_order();
+    abstract String owner_id(); // guardian object_id
+    abstract int sequence_order(); // guardian sequence_order
     abstract java.security.PublicKey auxiliary_public_key(); // LOOK can we hide java.security.PublicKey?
     abstract ElementModP election_public_key();
     abstract SchnorrProof election_public_key_proof();

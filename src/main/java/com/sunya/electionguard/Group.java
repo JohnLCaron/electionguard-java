@@ -227,6 +227,11 @@ public class Group {
   // reduction on the exponent.
 
   /** Computes b^e mod p. */
+  static ElementModP pow_p(ElementModP b, ElementModP e) {
+    return int_to_p_unchecked(pow_p(b.elem.mod(P), e.elem));
+  }
+
+  /** Computes b^e mod p. */
   static ElementModP pow_p(ElementMod b, ElementMod e) {
     return int_to_p_unchecked(pow_p(b.elem.mod(P), e.elem));
   }
@@ -274,7 +279,7 @@ public class Group {
    * Computes the product, mod q, of all elements.
    * @param elems Zero or more elements in [0,Q).
    */
-  static ElementModQ mult_q(ElementMod... elems) {
+  public static ElementModQ mult_q(ElementModQ... elems) {
     BigInteger product = BigInteger.ONE;
     for (ElementMod x : elems) {
       product = product.multiply(x.elem).mod(Q);
@@ -282,7 +287,7 @@ public class Group {
     return int_to_q_unchecked(product);
   }
 
-  static ElementModQ mult_q(BigInteger... elems) {
+  static ElementModQ mult_qi(BigInteger... elems) {
     BigInteger product = BigInteger.ONE;
     for (BigInteger x : elems) {
       product = product.multiply(x).mod(Q);

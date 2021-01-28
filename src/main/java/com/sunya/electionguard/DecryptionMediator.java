@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.flogger.FluentLogger;
 
 import javax.annotation.Nullable;
-import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -19,22 +18,24 @@ import static com.sunya.electionguard.Election.*;
 public class DecryptionMediator {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
-  private final InternalElectionDescription metadata;
+  private final InternalElectionDescription metadata; // LOOK unused
   private final CiphertextElectionContext context;
   private final CiphertextTallyBuilder encryptedTally;
   private final Optional<PlaintextTally> decryptedTally = Optional.empty();
 
-  private final Map<String, Guardian> available_guardians = new HashMap<>(); // Map(AVAILABLE_GUARDIAN_ID, Guardian)
-  private final Map<String, KeyCeremony.ElectionPublicKey> missing_guardians = new HashMap<>(); // Map(MISSING_GUARDIAN_ID, Guardian)
-
-  /** A collection of Decryption Shares for each Available Guardian. */
-  private final Map<String, TallyDecryptionShare> decryption_shares = new HashMap<>(); // Map(AVAILABLE_GUARDIAN_ID, TallyDecryptionShare)
+  // Map(AVAILABLE_GUARDIAN_ID, Guardian)
+  private final Map<String, Guardian> available_guardians = new HashMap<>();
+  // Map(MISSING_GUARDIAN_ID, ElectionPublicKey)
+  private final Map<String, KeyCeremony.ElectionPublicKey> missing_guardians = new HashMap<>();
+  // Map(AVAILABLE_GUARDIAN_ID, TallyDecryptionShare)
+  private final Map<String, TallyDecryptionShare> decryption_shares = new HashMap<>();
 
   /**
    * A collection of lagrange coefficients w_ij computed by available guardians for each missing guardian.
-   * Map(MISSING_GUARDIAN_ID, Map(AVAILABLE_GUARDIAN_ID, ElementModQ))
-   * So _lagrange_coefficients(MISSING_GUARDINA) are the w_l of section 10.
+   * So lagrange_coefficients(MISSING_GUARDIAN_ID) are the w_l of section 10.
+   * Pass these to the decrypted tally for verification of section 10.
    */
+  // Map(MISSING_GUARDIAN_ID, Map(AVAILABLE_GUARDIAN_ID, ElementModQ))
   private final Map<String, Map<String, Group.ElementModQ>> lagrange_coefficients = new HashMap<>();
 
   /**
@@ -43,7 +44,9 @@ public class DecryptionMediator {
    */
   private final Map<String, Map<String, CompensatedTallyDecryptionShare>> compensated_decryption_shares = new HashMap<>();
 
-  public DecryptionMediator(InternalElectionDescription metadata, CiphertextElectionContext context, CiphertextTallyBuilder encryptedTally) {
+  public DecryptionMediator(InternalElectionDescription metadata,
+                            CiphertextElectionContext context,
+                            CiphertextTallyBuilder encryptedTally) {
     this.metadata = metadata;
     this.context = context;
     this.encryptedTally = encryptedTally;
@@ -89,11 +92,11 @@ public class DecryptionMediator {
                     .filter(e -> !this.available_guardians.containsKey(e.getKey()))
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-    // Check that the public keys match for any missing guardians already reported
-    // note this check naively assumes that the first guardian to announce is telling the truth
-    // but for this implementation it is simply a sanity check on the input data.
-    // a consuming application should implement better validation of the guardian state
-    // before announcing a guardian is available for decryption.
+    // LOOK Check that the public keys match for any missing guardians already reported
+    //  note this check naively assumes that the first guardian to announce is telling the truth
+    //  but for this implementation it is simply a sanity check on the input data.
+    //  a consuming application should implement better validation of the guardian state
+    //  before announcing a guardian is available for decryption.
     for (Map.Entry<String, KeyCeremony.ElectionPublicKey> entry : missing_guardians.entrySet()) {
       String guardian_id = entry.getKey();
       KeyCeremony.ElectionPublicKey public_key = entry.getValue();
@@ -138,11 +141,13 @@ public class DecryptionMediator {
       // Compute lagrange coefficients for each of the available guardians
       //  *[guardian.sequence_order for guardian in this._available_guardians.values()
       //     if guardian.object_id != available_guardian.object_id]
-      List<BigInteger> seq_orders = this.available_guardians.values().stream().filter(g -> !g.object_id.equals(available_guardian.object_id))
-              .map(g -> BigInteger.valueOf(g.sequence_order())).collect(Collectors.toList());
+      List<Integer> seq_orders = this.available_guardians.values().stream()
+              .filter(g -> !g.object_id.equals(available_guardian.object_id))
+              .map(g -> g.sequence_order()).collect(Collectors.toList());
+
       lagrange_coefficients.put(
               available_guardian.object_id,
-              ElectionPolynomial.compute_lagrange_coefficient(BigInteger.valueOf(available_guardian.sequence_order()), seq_orders));
+              ElectionPolynomial.compute_lagrange_coefficient(available_guardian.sequence_order(), seq_orders));
 
       // Compute the decryption shares
       Optional<CompensatedTallyDecryptionShare> share = Decryptions.compute_compensated_decryption_share(
@@ -187,6 +192,12 @@ public class DecryptionMediator {
       return this.decryptedTally;
     }
 
+    List<PlaintextTally.GuardianState> guardianStates = new ArrayList<>();
+    this.available_guardians.values().forEach(g -> guardianStates.add(PlaintextTally.GuardianState.create(
+            g.object_id, g.sequence_order(), false)));
+    this.missing_guardians.values().forEach(k -> guardianStates.add(PlaintextTally.GuardianState.create(
+            k.owner_id(), k.sequence_order(), true)));
+
     // Make sure a Quorum of Guardians have announced
     if (this.available_guardians.size() < this.context.quorum) {
       logger.atInfo().log("cannot get plaintext tally with less than quorum available guardians");
@@ -195,7 +206,9 @@ public class DecryptionMediator {
 
     // If all Guardians are present decrypt the tally
     if (this.available_guardians.size() == this.context.number_of_guardians) {
-      return DecryptWithShares.decrypt_tally(this.encryptedTally, this.decryption_shares, this.context);
+      // LOOK technically we dont need lagrange_coefficients and guardianStates when all Guardians are present.
+      return DecryptWithShares.decrypt_tally(this.encryptedTally, this.decryption_shares, this.context,
+              this.lagrange_coefficients, guardianStates);
     }
 
     // If missing guardians compensate for the missing guardians
@@ -235,7 +248,8 @@ public class DecryptionMediator {
       return Optional.empty();
     }
 
-    return DecryptWithShares.decrypt_tally(this.encryptedTally, merged_decryption_shares, this.context);
+    return DecryptWithShares.decrypt_tally(this.encryptedTally, merged_decryption_shares, this.context,
+            this.lagrange_coefficients, guardianStates);
   }
 
   /** Submit the decryption share to be used in the decryption. */

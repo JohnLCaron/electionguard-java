@@ -2,6 +2,7 @@ package com.sunya.electionguard.proto;
 
 import com.sunya.electionguard.ChaumPedersen;
 import com.sunya.electionguard.DecryptionShare;
+import com.sunya.electionguard.Group;
 import com.sunya.electionguard.PlaintextTally;
 
 import java.util.HashMap;
@@ -11,6 +12,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.sunya.electionguard.proto.CommonConvert.convertElementModP;
+import static com.sunya.electionguard.proto.CommonConvert.convertList;
 import static com.sunya.electionguard.proto.PlaintextTallyProto.CiphertextDecryptionSelection;
 import static com.sunya.electionguard.proto.PlaintextTallyProto.CiphertextCompensatedDecryptionSelection;
 import static com.sunya.electionguard.proto.PlaintextTallyProto.ChaumPedersenProof;
@@ -21,16 +23,23 @@ public class PlaintextTallyFromProto {
 
   public static PlaintextTally translateFromProto(PlaintextTallyProto.PlaintextTally tally) {
     Map<String, PlaintextTally.PlaintextTallyContest> contests = tally.getContestsMap().entrySet().stream()
-            .collect(Collectors.toMap(e -> e.getKey(), e -> convertContest(e.getValue())));
+            .collect(Collectors.toMap(Map.Entry::getKey, e -> convertContest(e.getValue())));
 
     Map<String, Map<String, PlaintextTally.PlaintextTallyContest>> spoiled = tally.getSpoiledBallotsMap().entrySet().stream()
             .collect(Collectors.toMap(Map.Entry::getKey,
                     e -> convertSpoiled(e.getValue())));
 
+    Map<String, Map<String, Group.ElementModQ>> lagrange_coefficients = tally.getLagrangeCoefficientsMap().entrySet().stream()
+            .collect(Collectors.toMap(Map.Entry::getKey,
+                    e -> e.getValue().getCoeffMap().entrySet().stream()
+                            .collect(Collectors.toMap(Map.Entry::getKey, e2 -> convertElementModQ(e2.getValue())))));
+
     return new PlaintextTally(
             tally.getObjectId(),
             contests,
-            spoiled);
+            spoiled,
+            lagrange_coefficients,
+            convertList(tally.getGuardianStatesList(), PlaintextTallyFromProto::convertState));
   }
 
   static Map<String, PlaintextTally.PlaintextTallyContest> convertSpoiled(PlaintextTallyProto.PlaintextTallyContestMap spoiledMap) {
@@ -98,6 +107,13 @@ public class PlaintextTallyFromProto {
             convertElementModP(proof.getData()),
             convertElementModQ(proof.getChallenge()),
             convertElementModQ(proof.getResponse()));
+  }
+
+  private static PlaintextTally.GuardianState convertState(PlaintextTallyProto.GuardianState proto) {
+    return PlaintextTally.GuardianState.create(
+            proto.getGuardianId(),
+            proto.getSequence(),
+            proto.getMissing());
   }
 
 }

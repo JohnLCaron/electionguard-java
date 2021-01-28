@@ -220,11 +220,11 @@ public class TestDecryptionMediator extends TestProperties {
 
     // Compute lagrange coefficients for the guardians that are present
     Group.ElementModQ lagrange_0 = ElectionPolynomial.compute_lagrange_coefficient(
-            BigInteger.valueOf(this.guardians.get(0).sequence_order()),
-            ImmutableList.of(BigInteger.valueOf(this.guardians.get(1).sequence_order())));
+            this.guardians.get(0).sequence_order(),
+            ImmutableList.of(this.guardians.get(1).sequence_order()));
     Group.ElementModQ lagrange_1 = ElectionPolynomial.compute_lagrange_coefficient(
-            BigInteger.valueOf(this.guardians.get(1).sequence_order()),
-            ImmutableList.of(BigInteger.valueOf(this.guardians.get(0).sequence_order())));
+            this.guardians.get(1).sequence_order(),
+            ImmutableList.of(this.guardians.get(0).sequence_order()));
 
     System.out.printf("lagrange: sequence_orders: (%s, %s, %s)%n",
             this.guardians.get(0).sequence_order(), this.guardians.get(1).sequence_order(), this.guardians.get(2).sequence_order());
@@ -384,7 +384,6 @@ public class TestDecryptionMediator extends TestProperties {
 
   @Example
   public void test_decrypt_ballot_compensate_missing_guardians() {
-
     // precompute decryption shares for the guardians
     PlaintextBallot plaintext_ballot = this.fake_cast_ballot;
     CiphertextAcceptedBallot encrypted_ballot = this.encrypted_fake_cast_ballot;

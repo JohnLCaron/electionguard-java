@@ -146,7 +146,7 @@ public class TestEndToEndElectionIntegration {
     System.out.printf("Executes the key exchange between guardians%n");
     assertThat(orchestrated).isPresent();
 
-    System.out.printf("Confirm sall guardians have shared their partial key backups%n");
+    System.out.printf("Confirm all guardians have shared their partial key backups%n");
     assertThat(this.mediator.all_election_partial_key_backups_available()).isTrue();
 
     // Verification

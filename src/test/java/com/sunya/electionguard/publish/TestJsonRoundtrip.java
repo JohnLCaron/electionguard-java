@@ -55,7 +55,7 @@ public class TestJsonRoundtrip {
 
     // original
     // String object_id, ElementModQ description_hash, Map<String, CiphertextTallySelection> tally_selections
-    PlaintextTally org = new PlaintextTally("testTally", new HashMap<>(), new HashMap<>());
+    PlaintextTally org = new PlaintextTally("testTally", new HashMap<>(), new HashMap<>(), new HashMap<>(), new ArrayList<>());
     // write json
     ConvertToJson.write(org, file.toPath());
     // read it back
