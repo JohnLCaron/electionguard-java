@@ -9,8 +9,9 @@ Im also happy to donate it to another organization for hosting, etc.
 
 ## Notes
 
- * Most classes are immutable. 
+ * Full validation spec is implemented.
  * Assumes Java 11.
+ * Most classes are immutable, anticipating need for multithreading. 
  * Uses Java's BigInteger for cryptographic computations.
  * Uses Gson for JSON serialization. 
  * Can also serialize to protobuf.
@@ -21,8 +22,6 @@ Im also happy to donate it to another organization for hosting, etc.
  
 ## TODO
 
-  * Fix issues in validation.
-  * Review uses of Optional and null.
   * Not yet compatible with Python library JSON serialization, due to different ways to serialize Optional.
   * Measure computational performance.
   * Look at BigInteger performance, consider if using GMP is justified.
