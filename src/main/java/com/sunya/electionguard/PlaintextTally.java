@@ -24,8 +24,7 @@ public class PlaintextTally {
   public final ImmutableMap<String, ImmutableMap<String, PlaintextTallyContest>> spoiled_ballots;
 
   /** The lagrange coefficients w_ij for verification of section 10. */
-  // Map(MISSING_GUARDIAN_ID, Map(AVAILABLE_GUARDIAN_ID, ElementModQ))
-  public final ImmutableMap<String, ImmutableMap<String, Group.ElementModQ>> lagrange_coefficients;
+  public final ImmutableMap<String, Group.ElementModQ> lagrange_coefficients;
 
   /** The state of the Guardian when decrypting: missing or available. */
   public final ImmutableList<GuardianState> guardianStates;
@@ -33,7 +32,7 @@ public class PlaintextTally {
   public PlaintextTally(String object_id,
                         Map<String, PlaintextTallyContest> contests,
                         Map<String, Map<String, PlaintextTallyContest>> spoiled_ballots,
-                        Map<String, Map<String, Group.ElementModQ>> lagrange_coefficients,
+                        Map<String, Group.ElementModQ> lagrange_coefficients,
                         List<GuardianState> guardianState) {
     this.object_id = Preconditions.checkNotNull(object_id);
     this.contests =  ImmutableMap.copyOf(Preconditions.checkNotNull(contests));
@@ -55,23 +54,7 @@ public class PlaintextTally {
                     Map.Entry::getKey,
                     Map.Entry::getValue)))); */
 
-    ImmutableMap.Builder<String, ImmutableMap<String, Group.ElementModQ>> builder3 = ImmutableMap.builder();
-    for (Map.Entry<String, Map<String, Group.ElementModQ>> entry : lagrange_coefficients.entrySet()) {
-      ImmutableMap.Builder<String, Group.ElementModQ> builder2 = ImmutableMap.builder();
-      for (Map.Entry<String, Group.ElementModQ> entry2 : entry.getValue().entrySet()) {
-        builder2.put(entry2.getKey(), entry2.getValue());
-      }
-      builder3.put(entry.getKey(), builder2.build());
-    }
-    this.lagrange_coefficients = builder3.build();
-
-    /* this.lagrange_coefficients =
-            lagrange_coefficients.entrySet().stream().collect(ImmutableMap.toImmutableMap(
-                    Map.Entry::getKey,
-                    e -> e.getValue().entrySet().stream().collect(ImmutableMap.toImmutableMap(
-                            Map.Entry::getKey,
-                            Map.Entry::getValue)))); */
-
+    this.lagrange_coefficients = ImmutableMap.copyOf(lagrange_coefficients);
     this.guardianStates = ImmutableList.copyOf(guardianState);
   }
 

@@ -29,10 +29,8 @@ public class PlaintextTallyFromProto {
             .collect(Collectors.toMap(Map.Entry::getKey,
                     e -> convertSpoiled(e.getValue())));
 
-    Map<String, Map<String, Group.ElementModQ>> lagrange_coefficients = tally.getLagrangeCoefficientsMap().entrySet().stream()
-            .collect(Collectors.toMap(Map.Entry::getKey,
-                    e -> e.getValue().getCoeffMap().entrySet().stream()
-                            .collect(Collectors.toMap(Map.Entry::getKey, e2 -> convertElementModQ(e2.getValue())))));
+    Map<String, Group.ElementModQ> lagrange_coefficients = tally.getLagrangeCoefficientsMap().entrySet().stream()
+            .collect(Collectors.toMap(Map.Entry::getKey, e -> convertElementModQ(e.getValue())));
 
     return new PlaintextTally(
             tally.getObjectId(),

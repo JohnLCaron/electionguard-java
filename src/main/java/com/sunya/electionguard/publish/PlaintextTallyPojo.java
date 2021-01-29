@@ -23,7 +23,7 @@ public class PlaintextTallyPojo {
   public String object_id;
   public Map<String, PlaintextTallyContestPojo> contests;
   public Map<String, Map<String, PlaintextTallyContestPojo>> spoiled_ballots;
-  public Map<String, Map<String, Group.ElementModQ>> lagrange_coefficients;
+  public Map<String, Group.ElementModQ> lagrange_coefficients;
   public List<GuardianStatePojo> guardian_states;
 
   public static class PlaintextTallyContestPojo {
@@ -200,13 +200,7 @@ public class PlaintextTallyPojo {
                             Map.Entry::getKey,
                             e2 -> convertContest(e2.getValue())))));
 
-    pojo.lagrange_coefficients =
-            org.lagrange_coefficients.entrySet().stream().collect(Collectors.toMap(
-                    Map.Entry::getKey,
-                    e -> e.getValue().entrySet().stream().collect(Collectors.toMap(
-                            Map.Entry::getKey,
-                            Map.Entry::getValue))));
-
+    pojo.lagrange_coefficients = org.lagrange_coefficients;
     pojo.guardian_states = convertList(org.guardianStates, PlaintextTallyPojo::convertGuardianState);
 
     return pojo;

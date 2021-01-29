@@ -112,7 +112,7 @@ class DecryptWithShares {
           CiphertextTallyBuilder tally,
           Map<String, TallyDecryptionShare> shares, // Map(AVAILABLE_GUARDIAN_ID, TallyDecryptionShare)
           Election.CiphertextElectionContext context,
-          Map<String, Map<String, Group.ElementModQ>> lagrange_coefficients,
+          Map<String, Group.ElementModQ> lagrange_coefficients,
           List<PlaintextTally.GuardianState> guardianStates) {
 
     Optional<Map<String, PlaintextTally.PlaintextTallyContest>> contests = decrypt_tally_contests_with_decryption_shares(

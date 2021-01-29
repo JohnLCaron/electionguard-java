@@ -473,7 +473,7 @@ public class Decryptions {
           CiphertextTallyBuilder ciphertext_tally,
           Map<String, KeyCeremony.ElectionPublicKey> missing_guardians,
           Map<String, Map<String, CompensatedTallyDecryptionShare>> compensated_shares,
-          Map<String, Map<String, Group.ElementModQ>> lagrange_coefficients) {
+          Map<String, Group.ElementModQ> lagrange_coefficients) {
 
     Map<String, TallyDecryptionShare> reconstructed_shares = new HashMap<>();
     for (Map.Entry<String, Map<String, CompensatedTallyDecryptionShare>> entry : compensated_shares.entrySet()) {
@@ -487,25 +487,12 @@ public class Decryptions {
         return Optional.empty();
       }
 
-      // make sure there are already computed lagrange coefficients:
-      Map<String, Group.ElementModQ> lagrange_coefficients_for_missing = lagrange_coefficients.get(missing_guardian_id);
-      if (lagrange_coefficients_for_missing == null) {
-        lagrange_coefficients_for_missing = new HashMap<>();
-      }
-
-      // if not any(lagrange_coefficients):
-      boolean haveAny = lagrange_coefficients.values().stream().anyMatch(Objects::nonNull);
-      if (!haveAny) {
-        logger.atInfo().log("Could not reconstruct tally for %s with no lagrange coefficients", missing_guardian_id);
-        return Optional.empty();
-      }
-
       // iterate through the tallies and accumulate all of the shares for this guardian
       Map<String, CiphertextDecryptionContest> contests = reconstruct_decryption_contests(
               missing_guardian_id,
               ciphertext_tally.cast,
               shares,
-              lagrange_coefficients_for_missing);
+              lagrange_coefficients);
 
       // iterate through the spoiled ballots and accumulate all of the shares for this guardian
       Map<String, BallotDecryptionShare> spoiled_ballots = reconstruct_decryption_ballots(
@@ -513,7 +500,7 @@ public class Decryptions {
               public_key,
               ciphertext_tally.spoiled_ballots,
               shares,
-              lagrange_coefficients_for_missing);
+              lagrange_coefficients);
 
       reconstructed_shares.put(
               missing_guardian_id,

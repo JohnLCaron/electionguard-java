@@ -29,12 +29,8 @@ public class PlaintextTallyToProto {
     for (Map.Entry<String, ImmutableMap<String, PlaintextTally.PlaintextTallyContest>> spoiled : tally.spoiled_ballots.entrySet()) {
       builder.putSpoiledBallots(spoiled.getKey(), convertSpoiled(spoiled.getValue()));
     }
-    for (Map.Entry<String, ImmutableMap<String, Group.ElementModQ>> coeffs : tally.lagrange_coefficients.entrySet()) {
-      PlaintextTallyProto.ElementModQMap.Builder innerBuilder = PlaintextTallyProto.ElementModQMap.newBuilder();
-      for (Map.Entry<String, Group.ElementModQ> coeff : coeffs.getValue().entrySet()) {
-        innerBuilder.putCoeff(coeff.getKey(), convertElementModQ(coeff.getValue()));
-      }
-      builder.putLagrangeCoefficients(coeffs.getKey(), innerBuilder.build());
+    for (Map.Entry<String, Group.ElementModQ> coeff : tally.lagrange_coefficients.entrySet()) {
+      builder.putLagrangeCoefficients(coeff.getKey(), convertElementModQ(coeff.getValue()));
     }
     builder.addAllGuardianStates(convertList(tally.guardianStates, PlaintextTallyToProto::convertState));
     return builder.build();

@@ -31,15 +31,6 @@ public class DecryptionMediator {
   private final Map<String, TallyDecryptionShare> decryption_shares = new HashMap<>();
 
   /**
-   * A collection of lagrange coefficients w_ij computed by available guardians for each missing guardian.
-   * So lagrange_coefficients(MISSING_GUARDIAN_ID) are the w_l of section 10.
-   * Pass these to the decrypted tally for verification of section 10.
-   * LOOK I think these are always identical, eg doesnt depend on which missing guardian it is.
-   */
-  // Map(MISSING_GUARDIAN_ID, Map(AVAILABLE_GUARDIAN_ID, ElementModQ))
-  private final Map<String, Map<String, Group.ElementModQ>> lagrange_coefficients = new HashMap<>();
-
-  /**
    * A collection of Compensated Decryption Shares for each Available Guardian.
    * Map( MISSING_GUARDIAN_ID, Map(AVAILABLE_GUARDIAN_ID, CompensatedTallyDecryptionShare))
    */
@@ -136,21 +127,8 @@ public class DecryptionMediator {
     List<CompensatedTallyDecryptionShare> compensated_decryptions = new ArrayList<>();
     Map<String, Group.ElementModQ> lagrange_coefficients = new HashMap<>();
 
-    // Loop through each of the available guardians
-    // and calculate a partial for the missing one
+    // Loop through each of the available guardians and calculate a decryption shares for the missing one
     for (Guardian available_guardian : this.available_guardians.values()) {
-      // Compute lagrange coefficients for each of the available guardians
-      //  *[guardian.sequence_order for guardian in this._available_guardians.values()
-      //     if guardian.object_id != available_guardian.object_id]
-      List<Integer> seq_orders = this.available_guardians.values().stream()
-              .filter(g -> !g.object_id.equals(available_guardian.object_id))
-              .map(g -> g.sequence_order()).collect(Collectors.toList());
-
-      lagrange_coefficients.put(
-              available_guardian.object_id,
-              ElectionPolynomial.compute_lagrange_coefficient(available_guardian.sequence_order(), seq_orders));
-
-      // Compute the decryption shares
       Optional<CompensatedTallyDecryptionShare> share = Decryptions.compute_compensated_decryption_share(
               available_guardian,
               missing_guardian_id,
@@ -170,7 +148,6 @@ public class DecryptionMediator {
       logger.atInfo().log("compensate mismatch partial decryptions for missing guardian %s", missing_guardian_id);
       return Optional.empty();
     } else {
-      this.lagrange_coefficients.put(missing_guardian_id, lagrange_coefficients);
       this.submit_compensated_decryption_shares(compensated_decryptions);
       return Optional.of(compensated_decryptions);
     }
@@ -193,6 +170,19 @@ public class DecryptionMediator {
       return this.decryptedTally;
     }
 
+    // Compute lagrange coefficients for each of the available guardians
+    //  *[guardian.sequence_order for guardian in this._available_guardians.values()
+    //     if guardian.object_id != available_guardian.object_id]
+    Map<String, Group.ElementModQ> lagrange_coefficients = new HashMap<>();
+    for (Guardian available_guardian : this.available_guardians.values()) {
+      List<Integer> seq_orders = this.available_guardians.values().stream()
+              .filter(g -> !g.object_id.equals(available_guardian.object_id))
+              .map(g -> g.sequence_order()).collect(Collectors.toList());
+      lagrange_coefficients.put(
+              available_guardian.object_id,
+              ElectionPolynomial.compute_lagrange_coefficient(available_guardian.sequence_order(), seq_orders));
+    }
+
     List<PlaintextTally.GuardianState> guardianStates = new ArrayList<>();
     this.available_guardians.values().forEach(g -> guardianStates.add(PlaintextTally.GuardianState.create(
             g.object_id, g.sequence_order(), false)));
@@ -209,7 +199,7 @@ public class DecryptionMediator {
     if (this.available_guardians.size() == this.context.number_of_guardians) {
       // LOOK technically we dont need lagrange_coefficients and guardianStates when all Guardians are present.
       return DecryptWithShares.decrypt_tally(this.encryptedTally, this.decryption_shares, this.context,
-              this.lagrange_coefficients, guardianStates);
+              lagrange_coefficients, guardianStates);
     }
 
     // If missing guardians compensate for the missing guardians
@@ -227,7 +217,7 @@ public class DecryptionMediator {
                     this.encryptedTally,
                     this.missing_guardians,
                     this.compensated_decryption_shares,
-                    this.lagrange_coefficients);
+                    lagrange_coefficients);
     if (missing_decryption_shares.isEmpty() ||
             missing_decryption_shares.get().size() != this.missing_guardians.size()) {
       logger.atInfo().log("get plaintext tally failed with missing decryption shares");
@@ -250,7 +240,7 @@ public class DecryptionMediator {
     }
 
     return DecryptWithShares.decrypt_tally(this.encryptedTally, merged_decryption_shares, this.context,
-            this.lagrange_coefficients, guardianStates);
+            lagrange_coefficients, guardianStates);
   }
 
   /** Submit the decryption share to be used in the decryption. */

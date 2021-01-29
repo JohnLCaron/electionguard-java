@@ -29,7 +29,6 @@ public class PartialDecryptionVerifier {
   final PlaintextTally tally;
   final Grp grp;
   final Map<String, PlaintextTally.GuardianState> guardianStateMap;
-  final ImmutableMap<String, Group.ElementModQ> all_lagrange;
 
   PartialDecryptionVerifier(ElectionRecord electionRecord) {
     this.electionRecord = electionRecord;
@@ -37,9 +36,6 @@ public class PartialDecryptionVerifier {
     this.grp = new Grp(electionRecord.large_prime(), electionRecord.small_prime());
     this.guardianStateMap = new HashMap<>();
     tally.guardianStates.forEach(gs -> guardianStateMap.put(gs.guardian_id(), gs));
-
-    // LOOK it think identical across missing_coefficients? so being stored redundantly??
-    all_lagrange = tally.lagrange_coefficients.values().stream().findAny().orElse(null);
   }
 
   /** Verify 10.A for available guardians, if there are missing guardians. */
@@ -62,26 +58,18 @@ public class PartialDecryptionVerifier {
   boolean verify_lagrange_coefficients() {
     boolean error = false;
 
-    for (Map.Entry<String, ImmutableMap<String, Group.ElementModQ>> entry : tally.lagrange_coefficients.entrySet()) {
-      PlaintextTally.GuardianState missing_state = guardianStateMap.get(entry.getKey());
-      if (missing_state == null || !missing_state.is_missing()) {
+    for (Map.Entry<String, Group.ElementModQ> entry : tally.lagrange_coefficients.entrySet()) {
+      PlaintextTally.GuardianState available_state = guardianStateMap.get(entry.getKey());
+      if (available_state == null || available_state.is_missing()) {
         System.out.printf(" ***Inconsistent Guardian missing state. %n");
         return false;
       }
 
-      for (Map.Entry<String, Group.ElementModQ> entry2 : entry.getValue().entrySet()) {
-        PlaintextTally.GuardianState available_state = guardianStateMap.get(entry2.getKey());
-        if (available_state == null || available_state.is_missing()) {
-          System.out.printf(" ***Inconsistent Guardian available state. %n");
-          return false;
-        }
+      List<Integer> seq_others = tally.guardianStates.stream()
+              .filter(gs -> !gs.is_missing() && !gs.guardian_id().equals(available_state.guardian_id()))
+              .map(gs -> gs.sequence()).collect(Collectors.toList());
 
-        List<Integer> seq_others = tally.guardianStates.stream()
-                .filter(gs -> !gs.is_missing() && !gs.guardian_id().equals(available_state.guardian_id()))
-                .map(gs -> gs.sequence()).collect(Collectors.toList());
-
-        error |= !this.verify_lagrange_coefficient(available_state.sequence(), seq_others, entry2.getValue());
-      }
+      error |= !this.verify_lagrange_coefficient(available_state.sequence(), seq_others, entry.getValue());
     }
 
     if (error) {
@@ -202,7 +190,7 @@ public class PartialDecryptionVerifier {
       List<ElementModP> partial = new ArrayList<>();
       for (CiphertextCompensatedDecryptionSelection compShare : share.recovered_parts().get().values()) {
         ElementModP M_il = compShare.share(); // M_i,l in the spec
-        ElementModQ lagrange = all_lagrange.get(compShare.guardian_id());
+        ElementModQ lagrange = tally.lagrange_coefficients.get(compShare.guardian_id());
         partial.add(Group.int_to_p_unchecked(Group.pow_pi(M_il.getBigInt(), lagrange.getBigInt())));
       }
       ElementModP product = Group.mult_p(partial);

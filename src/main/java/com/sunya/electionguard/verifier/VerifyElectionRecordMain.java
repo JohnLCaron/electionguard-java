@@ -20,7 +20,7 @@ public class VerifyElectionRecordMain {
       electionRecord = consumer.getElectionRecord();
     }
 
-  verifyElectionRecord(electionRecord);
+    verifyElectionRecord(electionRecord);
   }
 
   static void verifyElectionRecord(ElectionRecord electionRecord) throws IOException {
