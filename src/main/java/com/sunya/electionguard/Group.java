@@ -228,16 +228,16 @@ public class Group {
 
   /** Computes b^e mod p. */
   static ElementModP pow_p(ElementModP b, ElementModP e) {
-    return int_to_p_unchecked(pow_p(b.elem.mod(P), e.elem));
+    return int_to_p_unchecked(pow_pi(b.elem.mod(P), e.elem));
   }
 
   /** Computes b^e mod p. */
   static ElementModP pow_p(ElementMod b, ElementMod e) {
-    return int_to_p_unchecked(pow_p(b.elem.mod(P), e.elem));
+    return int_to_p_unchecked(pow_pi(b.elem.mod(P), e.elem));
   }
 
   /** Computes b^e mod p. */
-  static public BigInteger pow_p(BigInteger b, BigInteger e) {
+  static public BigInteger pow_pi(BigInteger b, BigInteger e) {
     return b.modPow(e, P);
   }
 
@@ -297,7 +297,7 @@ public class Group {
 
   /** Computes g^e mod p. */
   public static ElementModP g_pow_p(ElementMod e) {
-    return int_to_p_unchecked(pow_p(G, e.elem));
+    return int_to_p_unchecked(pow_pi(G, e.elem));
   }
 
   /**

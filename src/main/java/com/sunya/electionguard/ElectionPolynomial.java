@@ -52,8 +52,9 @@ public class ElectionPolynomial {
   /**
    * Generates a polynomial for sharing election keys.
    *
-   * @param number_of_coefficients: Number of coefficients of polynomial
+   * @param number_of_coefficients: Number of coefficients of polynomial: the quorum, k.
    * @param nonce:                  an optional nonce parameter that may be provided (only for testing)
+   * @param crypto_base_hash:       needed for the Schnorr proof.
    * @return Polynomial used to share election keys
    */
   static ElectionPolynomial generate_polynomial(int number_of_coefficients, @Nullable Group.ElementModQ nonce, ElementModQ crypto_base_hash) {
@@ -62,7 +63,7 @@ public class ElectionPolynomial {
     ArrayList<SchnorrProof> proofs = new ArrayList<>();
 
     for (int i = 0; i < number_of_coefficients; i++) {
-      // Note the nonce value is not safe.it is designed for testing only.
+      // Note the nonce value is not safe. it is designed for testing only.
       // this method should be called without the nonce in production.
       ElementModQ coeff_value = Group.int_to_q_unchecked(BigInteger.valueOf(i));
       Group.ElementModQ coefficient = (nonce == null) ? rand_q() : add_q(nonce, coeff_value);
@@ -127,8 +128,8 @@ public class ElectionPolynomial {
     BigInteger commitment_output = BigInteger.ONE;
     int count = 0;
     for (ElementModP commitment : coefficient_commitments) {
-      BigInteger exponent = pow_p(exponent_modifier, BigInteger.valueOf(count));
-      BigInteger factor = pow_p(commitment.getBigInt(), exponent);
+      BigInteger exponent = Group.pow_pi(exponent_modifier, BigInteger.valueOf(count));
+      BigInteger factor = Group.pow_pi(commitment.getBigInt(), exponent);
       commitment_output = mult_pi(commitment_output, factor);
       count++;
     }

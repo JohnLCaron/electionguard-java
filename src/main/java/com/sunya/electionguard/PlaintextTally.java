@@ -38,19 +38,39 @@ public class PlaintextTally {
     this.object_id = Preconditions.checkNotNull(object_id);
     this.contests =  ImmutableMap.copyOf(Preconditions.checkNotNull(contests));
 
-    this.spoiled_ballots =
+    ImmutableMap.Builder<String, ImmutableMap<String, PlaintextTallyContest>> builder = ImmutableMap.builder();
+    for (Map.Entry<String, Map<String, PlaintextTallyContest>> entry : spoiled_ballots.entrySet()) {
+      ImmutableMap.Builder<String, PlaintextTallyContest> builder2 = ImmutableMap.builder();
+      for (Map.Entry<String, PlaintextTallyContest> entry2 : entry.getValue().entrySet()) {
+        builder2.put(entry2.getKey(), entry2.getValue());
+      }
+      builder.put(entry.getKey(), builder2.build());
+    }
+    this.spoiled_ballots = builder.build();
+
+    /* this.spoiled_ballots =
             spoiled_ballots.entrySet().stream().collect(ImmutableMap.toImmutableMap(
               Map.Entry::getKey,
               e -> e.getValue().entrySet().stream().collect(ImmutableMap.toImmutableMap(
                     Map.Entry::getKey,
-                    Map.Entry::getValue))));
+                    Map.Entry::getValue)))); */
 
-    this.lagrange_coefficients =
+    ImmutableMap.Builder<String, ImmutableMap<String, Group.ElementModQ>> builder3 = ImmutableMap.builder();
+    for (Map.Entry<String, Map<String, Group.ElementModQ>> entry : lagrange_coefficients.entrySet()) {
+      ImmutableMap.Builder<String, Group.ElementModQ> builder2 = ImmutableMap.builder();
+      for (Map.Entry<String, Group.ElementModQ> entry2 : entry.getValue().entrySet()) {
+        builder2.put(entry2.getKey(), entry2.getValue());
+      }
+      builder3.put(entry.getKey(), builder2.build());
+    }
+    this.lagrange_coefficients = builder3.build();
+
+    /* this.lagrange_coefficients =
             lagrange_coefficients.entrySet().stream().collect(ImmutableMap.toImmutableMap(
                     Map.Entry::getKey,
                     e -> e.getValue().entrySet().stream().collect(ImmutableMap.toImmutableMap(
                             Map.Entry::getKey,
-                            Map.Entry::getValue))));
+                            Map.Entry::getValue)))); */
 
     this.guardianStates = ImmutableList.copyOf(guardianState);
   }

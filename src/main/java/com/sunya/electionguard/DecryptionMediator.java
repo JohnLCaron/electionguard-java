@@ -34,6 +34,7 @@ public class DecryptionMediator {
    * A collection of lagrange coefficients w_ij computed by available guardians for each missing guardian.
    * So lagrange_coefficients(MISSING_GUARDIAN_ID) are the w_l of section 10.
    * Pass these to the decrypted tally for verification of section 10.
+   * LOOK I think these are always identical, eg doesnt depend on which missing guardian it is.
    */
   // Map(MISSING_GUARDIAN_ID, Map(AVAILABLE_GUARDIAN_ID, ElementModQ))
   private final Map<String, Map<String, Group.ElementModQ>> lagrange_coefficients = new HashMap<>();

@@ -571,6 +571,7 @@ public class Decryptions {
           share_pow_p.add(Group.pow_p(share.share(), lagrange_coefficients.get(available_guardian_id)));
         }
 
+        // product M_il^w_l
         Group.ElementModP reconstructed_share = Group.mult_p(share_pow_p);
 
         selections.put(selection_id, create_ciphertext_decryption_selection(

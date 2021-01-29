@@ -3,12 +3,11 @@ package com.sunya.electionguard.verifier;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.flogger.FluentLogger;
-import com.sunya.electionguard.ChaumPedersen;
 import com.sunya.electionguard.Group;
-import com.sunya.electionguard.Hash;
 import com.sunya.electionguard.PlaintextTally;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +29,7 @@ public class PartialDecryptionVerifier {
   final PlaintextTally tally;
   final Grp grp;
   final Map<String, PlaintextTally.GuardianState> guardianStateMap;
+  final ImmutableMap<String, Group.ElementModQ> all_lagrange;
 
   PartialDecryptionVerifier(ElectionRecord electionRecord) {
     this.electionRecord = electionRecord;
@@ -37,6 +37,9 @@ public class PartialDecryptionVerifier {
     this.grp = new Grp(electionRecord.large_prime(), electionRecord.small_prime());
     this.guardianStateMap = new HashMap<>();
     tally.guardianStates.forEach(gs -> guardianStateMap.put(gs.guardian_id(), gs));
+
+    // LOOK it think identical across missing_coefficients? so being stored redundantly??
+    all_lagrange = tally.lagrange_coefficients.values().stream().findAny().orElse(null);
   }
 
   /** Verify 10.A for available guardians, if there are missing guardians. */
@@ -181,32 +184,29 @@ public class PartialDecryptionVerifier {
         if (share.recovered_parts().isPresent()) {
           if (!this.verify_share_replacement_lagrange(share)) {
             error = true;
-            System.out.printf("10. ShareVerifier verify replacement lagrangian Guardian %s failed for %s.%n",
+            System.out.printf(" 10. ShareVerifier verify replacement lagrangian Guardian %s failed for %s.%n",
                     share.guardian_id(), id);
           }
-        } else {
-          error = true;
-          System.out.printf("ShareVerifier Guardian %s has no proof or recovery for %s.%n", share.guardian_id(), id);
         }
       }
       return !error;
     }
 
-    private boolean verify_share_replacement_lagrange(CiphertextDecryptionSelection share) {
-      Preconditions.checkArgument(share.recovered_parts().isPresent());
-      ElementModP partial_decryption = share.share(); // M_i in the spec
-
-      List<ElementModP> M_il = share.recovered_parts().get().values().stream().map(comp -> comp.share()).collect(Collectors.toList());
-      // LOOK dunno what lagrange is, is it constant across missing guardians? so being stored redunantly??
-      return verify_missing_tally_share(partial_decryption, M_il, Group.ONE_MOD_Q);
-    }
-
     // 10.B Confirm the correct missing tally share for each (non-placeholder) option
     // in each contest in the ballot coding file for each missing trustee T_i as
     //    M_i = ∏ l∈U (M_i,l)^w_l mod p
-    boolean verify_missing_tally_share(ElementModP M_i, List<ElementModP> M_il, ElementModQ lagrange) {
-      ElementModP product = Group.mult_p(M_il);
-      return M_i.equals(Group.int_to_p_unchecked(Group.pow_p(product.getBigInt(), lagrange.getBigInt())));
+    private boolean verify_share_replacement_lagrange(CiphertextDecryptionSelection share) {
+      Preconditions.checkArgument(share.recovered_parts().isPresent());
+      ElementModP M_i = share.share(); // M_i in the spec, i is missing
+
+      List<ElementModP> partial = new ArrayList<>();
+      for (CiphertextCompensatedDecryptionSelection compShare : share.recovered_parts().get().values()) {
+        ElementModP M_il = compShare.share(); // M_i,l in the spec
+        ElementModQ lagrange = all_lagrange.get(compShare.guardian_id());
+        partial.add(Group.int_to_p_unchecked(Group.pow_pi(M_il.getBigInt(), lagrange.getBigInt())));
+      }
+      ElementModP product = Group.mult_p(partial);
+      return M_i.equals(product);
     }
   }
 }

@@ -4,8 +4,6 @@ import com.google.auto.value.AutoValue;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.flogger.FluentLogger;
-import com.google.gson.Gson;
-import com.google.gson.TypeAdapter;
 
 import javax.annotation.concurrent.Immutable;
 import java.util.HashMap;

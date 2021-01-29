@@ -21,6 +21,7 @@ import static com.sunya.electionguard.Election.*;
 import static com.sunya.electionguard.Group.*;
 import static com.sunya.electionguard.KeyCeremony.*;
 
+// LOOK why is this so slow?
 public class TestDecryptionMediator extends TestProperties {
   private static final int NUMBER_OF_GUARDIANS = 3;
   private static final int QUORUM = 2;
