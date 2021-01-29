@@ -51,7 +51,7 @@ public class ElectionDescriptionToJson {
 
   @Nullable
   <T, U> List<U> convertList(@Nullable List<T> from, Function<T, U> converter) {
-    return from == null ? null : from.stream().map(converter).collect(Collectors.toList());
+    return from == null || from.isEmpty() ? null : from.stream().map(converter).collect(Collectors.toList());
   }
 
   ElectionDescriptionPojo convert(ElectionDescription org) {
@@ -90,8 +90,8 @@ public class ElectionDescriptionToJson {
     ElectionDescriptionPojo.BallotStyle pojo = new ElectionDescriptionPojo.BallotStyle();
 
     pojo.object_id = org.object_id;
-    pojo.geopolitical_unit_ids = convertList(org.geopolitical_unit_ids.orElse(null), Strings::nullToEmpty);
-    pojo.party_ids = convertList(org.party_ids.orElse(null), Strings::nullToEmpty);
+    pojo.geopolitical_unit_ids = convertList(org.geopolitical_unit_ids, Strings::nullToEmpty);
+    pojo.party_ids = convertList(org.party_ids, Strings::nullToEmpty);
     pojo.image_uri = org.image_uri.orElse(null);
     return pojo;
   }
@@ -116,9 +116,9 @@ public class ElectionDescriptionToJson {
       return null;
     }
     ElectionDescriptionPojo.ContactInformation pojo = new ElectionDescriptionPojo.ContactInformation();
-    pojo.address_line = convertList(org.address_line.orElse(null), Strings::nullToEmpty);
-    pojo.email = convertList(org.email.orElse(null), this::convertAnnotatedString);
-    pojo.phone = convertList(org.phone.orElse(null), this::convertAnnotatedString);
+    pojo.address_line = convertList(org.address_line, Strings::nullToEmpty);
+    pojo.email = convertList(org.email, this::convertAnnotatedString);
+    pojo.phone = convertList(org.phone, this::convertAnnotatedString);
     pojo.name = org.name.orElse(null);
     return pojo;
   }

@@ -38,8 +38,8 @@ public class ElectionDescriptionToProto {
   static BallotStyle convertBallotStyle(Election.BallotStyle style) {
     BallotStyle.Builder builder = BallotStyle.newBuilder();
     builder.setObjectId(style.object_id);
-    style.geopolitical_unit_ids.ifPresent(builder::addAllGeopoliticalUnitIds);
-    style.party_ids.ifPresent(builder::addAllPartyIds);
+    builder.addAllGeopoliticalUnitIds(style.geopolitical_unit_ids);
+    builder.addAllPartyIds(style.party_ids);
     style.image_uri.ifPresent(builder::setImageUrl);
     return builder.build();
   }
@@ -57,14 +57,14 @@ public class ElectionDescriptionToProto {
   static ContactInformation convertContactInformation(Election.ContactInformation contact) {
     ContactInformation.Builder builder = ContactInformation.newBuilder();
     contact.name.ifPresent(builder::setName);
-    contact.address_line.ifPresent(builder::addAllAddressLine);
-    contact.email.ifPresent(email -> email.forEach(value -> builder.addEmail(convertAnnotatedString(value))));
-    contact.phone.ifPresent(phone -> phone.forEach(value -> builder.addPhone(convertAnnotatedString(value))));
+    builder.addAllAddressLine(contact.address_line);
+    contact.email.forEach(value -> builder.addEmail(convertAnnotatedString(value)));
+    contact.phone.forEach(value -> builder.addPhone(convertAnnotatedString(value)));
     return builder.build();
   }
 
   static ContestDescription convertContestDescription(Election.ContestDescription contest) {
-    // LOOK check for subtypes of ContestDescription. Argues for just having optional fields
+    // LOOK check for subtypes of ContestDescription. Argues for just adding subtype's fields
     ContestDescription.Builder builder = ContestDescription.newBuilder();
     builder.setObjectId(contest.object_id);
     builder.setElectoralDistrictId(contest.electoral_district_id);

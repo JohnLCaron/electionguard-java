@@ -40,7 +40,7 @@ public class ElectionDescriptionPojo {
     public int sequence_order;
     public String vote_variation;
     public int number_elected;
-    public Integer votes_allowed;
+    public int votes_allowed;
     public String name;
     public List<SelectionDescription> ballot_selections;
     public InternationalizedText ballot_title;

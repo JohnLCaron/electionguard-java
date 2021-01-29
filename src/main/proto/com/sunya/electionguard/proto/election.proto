@@ -27,8 +27,8 @@ message ElectionDescription {
   repeated Candidate candidates = 7;
   repeated ContestDescription contests = 8;
   repeated BallotStyle ballot_styles = 9;
-  InternationalizedText name = 10; // LOOK Optional
-  ContactInformation contact_information = 11; // LOOK Optional
+  InternationalizedText name = 10;
+  ContactInformation contact_information = 11;
 }
 
 message AnnotatedString {
@@ -38,16 +38,16 @@ message AnnotatedString {
 
 message BallotStyle {
   string object_id = 1;
-  repeated string geopolitical_unit_ids = 2; // LOOK Optional
-  repeated string party_ids = 3; // LOOK Optional
-  string image_url = 4; // LOOK Optional
+  repeated string geopolitical_unit_ids = 2;
+  repeated string party_ids = 3;
+  string image_url = 4;
 }
 
 message Candidate {
   string object_id = 1;
   InternationalizedText name = 2;
-  string party_id = 3; // LOOK Optional
-  string image_url = 4; // LOOK Optional
+  string party_id = 3;
+  string image_url = 4;
   bool is_write_in = 5; // default false
 }
 
@@ -66,10 +66,10 @@ message CiphertextElectionContext {
 }
 
 message ContactInformation {
-  string name = 1;                    // LOOK Optional?
-  repeated string address_line = 2;   // LOOK Optional
-  repeated AnnotatedString email = 3; // LOOK Optional
-  repeated AnnotatedString phone = 4; // LOOK Optional
+  string name = 1;
+  repeated string address_line = 2;
+  repeated AnnotatedString email = 3;
+  repeated AnnotatedString phone = 4;
 }
 
 message ContestDescription {
@@ -94,11 +94,11 @@ message ContestDescription {
   uint32 sequence_order = 3;
   VoteVariationType vote_variation = 4;
   uint32 number_elected = 5;
-  uint32 votes_allowed = 6;  // LOOK Optional?
+  uint32 votes_allowed = 6;  // TODO why Optional?
   string name = 7;
   repeated SelectionDescription ballot_selections = 8;
-  InternationalizedText ballot_title = 9; // LOOK Optional
-  InternationalizedText ballot_subtitle = 10; // LOOK Optional
+  InternationalizedText ballot_title = 9;
+  InternationalizedText ballot_subtitle = 10;
 }
 
 message ContestDescriptionWithPlaceholders {
@@ -150,7 +150,7 @@ message GeopoliticalUnit {
   string object_id = 1;
   string name = 2;
   ReportingUnitType type = 3;
-  ContactInformation contact_information = 4; // LOOK Optional
+  ContactInformation contact_information = 4;
 }
 
 message InternalElectionDescription {
@@ -173,9 +173,9 @@ message Language {
 message Party {
   string object_id = 1;
   InternationalizedText name = 2;
-  string abbreviation = 3; // LOOK Optional
-  string color = 4; // LOOK Optional
-  string logo_uri = 5; // LOOK Optional
+  string abbreviation = 3;
+  string color = 4;
+  string logo_uri = 5;
 }
 
 message ReferendumContestDescription {
