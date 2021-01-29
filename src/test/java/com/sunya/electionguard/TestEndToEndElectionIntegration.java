@@ -25,8 +25,8 @@ import static com.google.common.truth.Truth8.assertThat;
  * In a real world scenario all of these steps would not be completed on the same machine.
  */
 public class TestEndToEndElectionIntegration {
-  private static final int NUMBER_OF_GUARDIANS = 5;
-  private static final int QUORUM = 3;
+  private static final int NUMBER_OF_GUARDIANS = 7;
+  private static final int QUORUM = 5;
   private static final Random random = new Random(System.currentTimeMillis());
 
   String outputDir;
@@ -125,7 +125,7 @@ public class TestEndToEndElectionIntegration {
     System.out.printf("%n1. Key Ceremony%n");
     Group.ElementModQ crypto_base_hash = Election.make_crypto_base_hash(NUMBER_OF_GUARDIANS, QUORUM, description);
     // Setup Guardians
-    for (int i = 0; i < NUMBER_OF_GUARDIANS; i++) {
+    for (int i = 1; i <= NUMBER_OF_GUARDIANS; i++) {
       this.guardians.add(Guardian.create("guardian_" + i, i, NUMBER_OF_GUARDIANS, QUORUM, crypto_base_hash));
     }
 
@@ -146,7 +146,7 @@ public class TestEndToEndElectionIntegration {
     System.out.printf("Executes the key exchange between guardians%n");
     assertThat(orchestrated).isPresent();
 
-    System.out.printf("Confirm sall guardians have shared their partial key backups%n");
+    System.out.printf("Confirm all guardians have shared their partial key backups%n");
     assertThat(this.mediator.all_election_partial_key_backups_available()).isTrue();
 
     // Verification

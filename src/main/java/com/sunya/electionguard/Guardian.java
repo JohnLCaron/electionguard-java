@@ -1,5 +1,6 @@
 package com.sunya.electionguard;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.flogger.FluentLogger;
 
@@ -42,13 +43,12 @@ public class Guardian extends ElectionObjectBase {
   /**
    * Create a guardian for production.
    * LOOK cant get a Guardian without generating a random key for it. No use case for a Guardian with a given key?
-   *   Who create these? What are the use cases?
+   *   Who creates these? What are the use cases?
    * @param id: the unique identifier for the guardian
-   * @param sequence_order: a unique number in [0, 256) that identifies this guardian
+   * @param sequence_order: a unique number in (0, 256) that identifies this guardian
    * @param number_of_guardians: the total number of guardians that will participate in the election
    * @param quorum: the count of guardians necessary to decrypt
-   * @param crypto_base_hash the election crypto hash, Q is the spec. LOOK could use dependency injection, or Singleton?
-   * LOOK cant get a Guardian without generating a random key for it. No use case for a Guardian with a given key?
+   * @param crypto_base_hash the election crypto hash, Q is the spec.
    */
   public static Guardian create(String id,
                                 int sequence_order,
@@ -62,7 +62,7 @@ public class Guardian extends ElectionObjectBase {
   /**
    * Create a guardian used for testing. The crypto_base_hash is random.
    * @param id: the unique identifier for the guardian
-   * @param sequence_order: a unique number in [0, 256) that identifies this guardian
+   * @param sequence_order: a unique number in (0, 256) that identifies this guardian
    * @param number_of_guardians: the total number of guardians that will participate in the election
    * @param quorum: the count of guardians necessary to decrypt
    * @param nonce_seed: an optional `ElementModQ` value that can be used to generate the `ElectionKeyPair`,
@@ -85,6 +85,7 @@ public class Guardian extends ElectionObjectBase {
            ElementModQ crypto_base_hash) {
 
     super(id);
+    Preconditions.checkArgument(sequence_order > 0 && sequence_order < 256);
     this.sequence_order = sequence_order;
     this.ceremony_details = CeremonyDetails.create(number_of_guardians, quorum);
     this.crypto_base_hash = crypto_base_hash;
@@ -166,6 +167,7 @@ public class Guardian extends ElectionObjectBase {
     this.save_election_public_key(
             ElectionPublicKey.create(
                     public_key_set.owner_id(),
+                    public_key_set.sequence_order(),
                     public_key_set.election_public_key_proof(),
                     public_key_set.election_public_key()));
   }
@@ -229,6 +231,7 @@ public class Guardian extends ElectionObjectBase {
   ElectionPublicKey share_election_public_key() {
     return ElectionPublicKey.create(
             this.object_id,
+            this.sequence_order,
             this.election_keys.proof(),
             this.election_keys.key_pair().public_key);
   }
@@ -442,6 +445,7 @@ public class Guardian extends ElectionObjectBase {
       return Optional.empty();
     }
 
+    // LOOK why string?
     Optional<String> decrypted_value = decryptor.decrypt(backup.encrypted_value(), this.auxiliary_keys.secret_key);
     if (decrypted_value.isEmpty()) {
       logger.atInfo().log("compensate decrypt guardian %s failed decryption for %s",

@@ -12,6 +12,7 @@ import static com.sunya.electionguard.KeyCeremony.*;
 
 public class TestKeyCeremony {
   private static final String SENDER_GUARDIAN_ID = "Test Guardian 1";
+  private static final int SENDER_SEQUENCE_ORDER = 1;
   private static final String RECIPIENT_GUARDIAN_ID = "Test Guardian 2";
   private static final String ALTERNATE_VERIFIER_GUARDIAN_ID = "Test Guardian 3";
   private static final int RECIPIENT_SEQUENCE_ORDER = 2;
@@ -164,12 +165,14 @@ public class TestKeyCeremony {
             RECIPIENT_GUARDIAN_ID,
             ElectionPublicKey.create(
                     RECIPIENT_GUARDIAN_ID,
+                    RECIPIENT_SEQUENCE_ORDER,
                     random_keypair.proof(),
                     random_keypair.key_pair().public_key));
     public_keys.put(
             SENDER_GUARDIAN_ID,
             ElectionPublicKey.create(
                     SENDER_GUARDIAN_ID,
+                    SENDER_SEQUENCE_ORDER,
                     random_keypair_two.proof(),
                     random_keypair_two.key_pair().public_key));
 

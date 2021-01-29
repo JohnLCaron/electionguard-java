@@ -16,16 +16,46 @@ import static com.sunya.electionguard.Group.ElementModP;
 @Immutable
 public class PlaintextTally {
   public final String object_id; // matches the CiphertextTally object_id
-  public final ImmutableMap<String, PlaintextTallyContest> contests; // Map(CONTEST_ID, PlaintextTallyContest)
-  // LOOK what is the point of storing this? We want to store the decrypted ballot in the election record. Why store the same
-  //  information in the PlaintextTally? Perhaps this is the object we want to store in the
-  public final ImmutableMap<String, Map<String, PlaintextTallyContest>> spoiled_ballots; // Map(BALLOT_ID, Map(CONTEST_ID, PlaintextTallyContest))
 
-  public PlaintextTally(String object_id, Map<String, PlaintextTallyContest> contests,
-                                      Map<String, Map<String, PlaintextTallyContest>> spoiled_ballots) {
+  // Map(CONTEST_ID, PlaintextTallyContest)
+  public final ImmutableMap<String, PlaintextTallyContest> contests;
+
+  // Map(BALLOT_ID, Map(CONTEST_ID, PlaintextTallyContest))
+  public final ImmutableMap<String, ImmutableMap<String, PlaintextTallyContest>> spoiled_ballots;
+
+  /** The lagrange coefficients w_ij for verification of section 10. */
+  public final ImmutableMap<String, Group.ElementModQ> lagrange_coefficients;
+
+  /** The state of the Guardian when decrypting: missing or available. */
+  public final ImmutableList<GuardianState> guardianStates;
+
+  public PlaintextTally(String object_id,
+                        Map<String, PlaintextTallyContest> contests,
+                        Map<String, Map<String, PlaintextTallyContest>> spoiled_ballots,
+                        Map<String, Group.ElementModQ> lagrange_coefficients,
+                        List<GuardianState> guardianState) {
     this.object_id = Preconditions.checkNotNull(object_id);
     this.contests =  ImmutableMap.copyOf(Preconditions.checkNotNull(contests));
-    this.spoiled_ballots =  ImmutableMap.copyOf(Preconditions.checkNotNull(spoiled_ballots));
+
+    ImmutableMap.Builder<String, ImmutableMap<String, PlaintextTallyContest>> builder = ImmutableMap.builder();
+    for (Map.Entry<String, Map<String, PlaintextTallyContest>> entry : spoiled_ballots.entrySet()) {
+      ImmutableMap.Builder<String, PlaintextTallyContest> builder2 = ImmutableMap.builder();
+      for (Map.Entry<String, PlaintextTallyContest> entry2 : entry.getValue().entrySet()) {
+        builder2.put(entry2.getKey(), entry2.getValue());
+      }
+      builder.put(entry.getKey(), builder2.build());
+    }
+    this.spoiled_ballots = builder.build();
+
+    /* this.spoiled_ballots =
+            spoiled_ballots.entrySet().stream().collect(ImmutableMap.toImmutableMap(
+              Map.Entry::getKey,
+              e -> e.getValue().entrySet().stream().collect(ImmutableMap.toImmutableMap(
+                    Map.Entry::getKey,
+                    Map.Entry::getValue)))); */
+
+    this.lagrange_coefficients = ImmutableMap.copyOf(lagrange_coefficients);
+    this.guardianStates = ImmutableList.copyOf(guardianState);
   }
 
   @Override
@@ -81,5 +111,20 @@ public class PlaintextTally {
               ImmutableList.copyOf(shares));
     }
   } // PlaintextTallySelection
+
+  /** The state of the Guardian when decrypting: missing or available. */
+  @AutoValue
+  public static abstract class GuardianState {
+    public abstract String guardian_id();
+    public abstract int sequence();
+    public abstract boolean is_missing();
+
+    public static GuardianState create(String guardianId, int sequence, boolean isMissing) {
+      return new AutoValue_PlaintextTally_GuardianState(
+              Preconditions.checkNotNull(guardianId),
+              sequence,
+              isMissing);
+    }
+  }
 
 }

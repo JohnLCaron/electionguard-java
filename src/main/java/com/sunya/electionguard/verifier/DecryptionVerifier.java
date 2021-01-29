@@ -7,7 +7,6 @@ import com.sunya.electionguard.ChaumPedersen;
 import com.sunya.electionguard.Hash;
 import com.sunya.electionguard.PlaintextTally;
 
-import java.io.IOException;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
@@ -28,13 +27,13 @@ public class DecryptionVerifier {
   final PlaintextTally tally;
   final Grp grp;
 
-  DecryptionVerifier(ElectionRecord electionRecord) throws IOException {
+  DecryptionVerifier(ElectionRecord electionRecord) {
     this.electionRecord = electionRecord;
     this.tally = electionRecord.decryptedTally;
     this.grp = new Grp(electionRecord.large_prime(), electionRecord.small_prime());
   }
 
-  /** Verify all cast ballots in the tally. */
+  /** Verify 8,9 for all cast ballots in the tally. */
   boolean verify_cast_ballot_tallies() {
     boolean error = !this.make_all_contest_verification(this.tally.object_id, this.tally.contests);
     if (error) {
@@ -53,7 +52,7 @@ public class DecryptionVerifier {
   boolean verify_spoiled_ballots() {
     boolean error = false;
 
-    for (Map.Entry<String, Map<String, PlaintextTally.PlaintextTallyContest>> entry : this.tally.spoiled_ballots.entrySet()) {
+    for (Map.Entry<String, ImmutableMap<String, PlaintextTally.PlaintextTallyContest>> entry : this.tally.spoiled_ballots.entrySet()) {
       if (!this.make_all_contest_verification(entry.getKey(), entry.getValue())) {
         error = true;
       }
@@ -108,7 +107,7 @@ public class DecryptionVerifier {
     final ElementModP data;
 
     DecryptionSelectionVerifier(String id, PlaintextTally.PlaintextTallySelection selection) {
-      this.id = id;
+      this.id = id; // contest/selection
       this.selection = selection;
       this.selection_id = selection.object_id();
       this.pad = selection.message().pad;
@@ -129,7 +128,7 @@ public class DecryptionVerifier {
 
   // verify section 8 and 9
   private class ShareVerifier {
-    final String id;
+    final String id; // contest/selection
     List<CiphertextDecryptionSelection> shares;
     ElementModP selection_pad;
     ElementModP selection_data;
@@ -151,12 +150,12 @@ public class DecryptionVerifier {
         if (share.proof().isPresent()) {
           if (!this.verify_share_guardian_present(share, curr_public_key)) {
             error = true;
-            System.out.printf("ShareVerifier verify present Guardian %s failed for %s.%n", share.guardian_id(), id);
+            System.out.printf("8. ShareVerifier verify present Guardian %s failed for %s.%n", share.guardian_id(), id);
           }
         } else if (share.recovered_parts().isPresent()) {
           if (!this.verify_share_guardian_missing(share)) {
             error = true;
-            System.out.printf("ShareVerifier verify missing Guardian %s failed for %s.%n", share.guardian_id(), id);
+            System.out.printf("9. ShareVerifier verify missing Guardian %s failed for %s.%n", share.guardian_id(), id);
           }
         } else {
           error = true;
@@ -205,11 +204,11 @@ public class DecryptionVerifier {
           error = true;
         }
 
-        // 9.C Check if the given challenge ci = H(Q-bar, (A,B), (ai, bi), Mi)
+        // 9.C Check if the given challenge ci = H(Q-bar, (A,B), (ai, bi), M_i,l)
         ElementModQ challenge_computed = Hash.hash_elems(electionRecord.extended_hash(),
                 this.selection_pad, this.selection_data, pad, data, partial_decryption);
         if (!challenge_computed.equals(challenge)) {
-          System.out.printf("  9.C ci != H(Q-bar, (A,B), (ai, bi), Mi) for missing_guardian %s%n", guardian_id);
+          System.out.printf("  9.C ci != H(Q-bar, (A,B), (ai, bi), M_i,l) for missing_guardian %s%n", guardian_id);
           error = true;
         }
 
@@ -219,9 +218,9 @@ public class DecryptionVerifier {
           error = true;
         }
 
-        // 9.E A^vi mod p = bi * Mi ^ ci mod p
+        // 9.E A^vi mod p = bi * M_i,l ^ ci mod p
         if (!this.check_equation2(response, data, challenge, partial_decryption)) {
-          System.out.printf("  9.E A^vi mod p = bi * Mi ^ ci mod p for missing_guardian %s%n", guardian_id);
+          System.out.printf("  9.E A^vi mod p = bi * M_i,l ^ ci mod p for missing_guardian %s%n", guardian_id);
           error = true;
         }
       }
@@ -247,7 +246,7 @@ public class DecryptionVerifier {
       ElementModP data = proof.data;
       ElementModQ response = proof.response;
       ElementModQ challenge = proof.challenge;
-      ElementModP partial_decryption = share.share();
+      ElementModP partial_decryption = share.share(); // M_i in the spec
 
       // 8.A check if the response vi is in the set Zq
       if (!grp.is_within_set_zq(response.getBigInt())) {
@@ -309,10 +308,10 @@ public class DecryptionVerifier {
      * @param response: response of a share, vi
      * @param data: data of a share, bi
      * @param challenge: challenge of a share, ci
-     * @param partial_decrypt: partial decryption of a guardian, Mi
+     * @param partial_decrypt: partial decryption of a guardian, M_i,l
      */
     boolean check_equation2(ElementModQ response, ElementModP data, ElementModQ challenge, ElementModP partial_decrypt) {
-      // A ^ vi = bi * (Mi^ ci) mod p
+      // A ^ vi = (bi * (M_i,l)^ ci) mod p
       BigInteger left = grp.pow_p(this.selection_pad.getBigInt(), response.getBigInt());
       BigInteger right = grp.mult_p(data.getBigInt(), grp.pow_p(partial_decrypt.getBigInt(), challenge.getBigInt()));
       return left.equals(right);

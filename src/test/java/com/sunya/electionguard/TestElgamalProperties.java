@@ -34,10 +34,10 @@ public class TestElgamalProperties extends TestProperties {
 
     Ciphertext ciphertext = elgamal_encrypt(0, nonce, keypair.public_key).orElseThrow();
     assertThat(G).isEqualTo(ciphertext.pad.getBigInt());
-    assertThat(pow_p(ciphertext.pad.getBigInt(), secret_key.getBigInt()))
-            .isEqualTo(pow_p(public_key.getBigInt(), nonce.getBigInt()));
+    assertThat(pow_pi(ciphertext.pad.getBigInt(), secret_key.getBigInt()))
+            .isEqualTo(pow_pi(public_key.getBigInt(), nonce.getBigInt()));
     assertThat(ciphertext.data.getBigInt())
-            .isEqualTo(pow_p(public_key.getBigInt(), nonce.getBigInt()));
+            .isEqualTo(pow_pi(public_key.getBigInt(), nonce.getBigInt()));
 
     Integer plaintext = ciphertext.decrypt(keypair.secret_key);
     assertThat(plaintext).isEqualTo(0);

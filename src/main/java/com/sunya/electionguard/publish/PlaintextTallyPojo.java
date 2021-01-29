@@ -23,6 +23,8 @@ public class PlaintextTallyPojo {
   public String object_id;
   public Map<String, PlaintextTallyContestPojo> contests;
   public Map<String, Map<String, PlaintextTallyContestPojo>> spoiled_ballots;
+  public Map<String, Group.ElementModQ> lagrange_coefficients;
+  public List<GuardianStatePojo> guardian_states;
 
   public static class PlaintextTallyContestPojo {
     public String object_id;
@@ -64,6 +66,12 @@ public class PlaintextTallyPojo {
     public int constant;
   }
 
+  public static class GuardianStatePojo {
+    public String guardian_id;
+    public int sequence;
+    public boolean is_missing;
+  }
+
   @Nullable
   private static <T, U> List<U> convertList(@Nullable List<T> from, Function<T, U> converter) {
     return from == null ? null : from.stream().map(converter).collect(Collectors.toList());
@@ -79,31 +87,30 @@ public class PlaintextTallyPojo {
   }
 
   private static PlaintextTally translateTally(PlaintextTallyPojo pojo) {
-    Map<String, PlaintextTally.PlaintextTallyContest> contests = new HashMap<>();
-    for (Map.Entry<String, PlaintextTallyContestPojo> entry : pojo.contests.entrySet()) {
-      contests.put(entry.getKey(), translateContest(entry.getValue()));
-    }
+    Map<String, PlaintextTally.PlaintextTallyContest> contests = pojo.contests.entrySet().stream().collect(Collectors.toMap(
+            Map.Entry::getKey,
+            e2 -> translateContest(e2.getValue())));
 
-    Map<String, Map<String, PlaintextTally.PlaintextTallyContest>> spoiled_ballots = new HashMap<>();
-    for (Map.Entry<String, Map<String, PlaintextTallyContestPojo>> entry1 : pojo.spoiled_ballots.entrySet()) {
-      Map<String, PlaintextTally.PlaintextTallyContest> byContest = new HashMap<>();
-      for (Map.Entry<String, PlaintextTallyContestPojo> entry2 : entry1.getValue().entrySet()) {
-        byContest.put(entry2.getKey(), translateContest(entry2.getValue()));
-      }
-      spoiled_ballots.put(entry1.getKey(), byContest);
-    }
+    Map<String, Map<String, PlaintextTally.PlaintextTallyContest>> spoiled_ballots =
+            pojo.spoiled_ballots.entrySet().stream().collect(Collectors.toMap(
+                    Map.Entry::getKey,
+                    e -> e.getValue().entrySet().stream().collect(Collectors.toMap(
+                            Map.Entry::getKey,
+                            e2 -> translateContest(e2.getValue())))));
 
     return new PlaintextTally(
             pojo.object_id,
             contests,
-            spoiled_ballots);
+            spoiled_ballots,
+            pojo.lagrange_coefficients,
+            convertList(pojo.guardian_states, PlaintextTallyPojo::translateGuardianState));
   }
 
   private static PlaintextTally.PlaintextTallyContest translateContest(PlaintextTallyContestPojo pojo) {
-    Map<String, PlaintextTally.PlaintextTallySelection> selections = new HashMap<>();
-    for (Map.Entry<String, PlaintextTallySelectionPojo> entry : pojo.selections.entrySet()) {
-      selections.put(entry.getKey(), translateSelection(entry.getValue()));
-    }
+    Map<String, PlaintextTally.PlaintextTallySelection> selections = pojo.selections.entrySet().stream().collect(Collectors.toMap(
+            Map.Entry::getKey,
+            e2 -> translateSelection(e2.getValue())));
+
     return PlaintextTally.PlaintextTallyContest.create(
             pojo.object_id,
             selections);
@@ -161,6 +168,13 @@ public class PlaintextTallyPojo {
       proof.response);
   }
 
+  private static PlaintextTally.GuardianState translateGuardianState(GuardianStatePojo pojo) {
+    return PlaintextTally.GuardianState.create(
+            pojo.guardian_id,
+            pojo.sequence,
+            pojo.is_missing);
+  }
+
   ////////////////////////////////////////////////////////////////////////////
   // serialize
 
@@ -172,35 +186,32 @@ public class PlaintextTallyPojo {
   }
 
   private static PlaintextTallyPojo convertTally(PlaintextTally org) {
-    Map<String, PlaintextTallyContestPojo> contests = new HashMap<>();
-    for (Map.Entry<String, PlaintextTally.PlaintextTallyContest> entry : org.contests.entrySet()) {
-      contests.put(entry.getKey(), convertContest(entry.getValue()));
-    }
-
-    Map<String, Map<String, PlaintextTallyContestPojo>> spoiled_ballots = new HashMap<>();
-    for (Map.Entry<String, Map<String, PlaintextTally.PlaintextTallyContest>> entry1 : org.spoiled_ballots.entrySet()) {
-      Map<String, PlaintextTallyContestPojo> byContest = new HashMap<>();
-      for (Map.Entry<String, PlaintextTally.PlaintextTallyContest> entry2 : entry1.getValue().entrySet()) {
-        byContest.put(entry2.getKey(), convertContest(entry2.getValue()));
-      }
-      spoiled_ballots.put(entry1.getKey(), byContest);
-    }
-
     PlaintextTallyPojo pojo = new PlaintextTallyPojo();
     pojo.object_id = org.object_id;
-    pojo.contests = contests;
-    pojo.spoiled_ballots = spoiled_ballots;
+
+    pojo.contests = org.contests.entrySet().stream().collect(Collectors.toMap(
+            Map.Entry::getKey,
+            e2 -> convertContest(e2.getValue())));
+
+    pojo.spoiled_ballots =
+            org.spoiled_ballots.entrySet().stream().collect(Collectors.toMap(
+                    Map.Entry::getKey,
+                    e -> e.getValue().entrySet().stream().collect(Collectors.toMap(
+                            Map.Entry::getKey,
+                            e2 -> convertContest(e2.getValue())))));
+
+    pojo.lagrange_coefficients = org.lagrange_coefficients;
+    pojo.guardian_states = convertList(org.guardianStates, PlaintextTallyPojo::convertGuardianState);
+
     return pojo;
   }
 
   private static PlaintextTallyContestPojo convertContest(PlaintextTally.PlaintextTallyContest org) {
-    Map<String, PlaintextTallySelectionPojo> selections = new HashMap<>();
-    for (Map.Entry<String, PlaintextTally.PlaintextTallySelection> entry : org.selections().entrySet()) {
-      selections.put(entry.getKey(), convertSelection(entry.getValue()));
-    }
     PlaintextTallyContestPojo pojo = new PlaintextTallyContestPojo();
     pojo.object_id = org.object_id();
-    pojo.selections = selections;
+    pojo.selections = org.selections().entrySet().stream().collect(Collectors.toMap(
+            Map.Entry::getKey,
+            e2 -> convertSelection(e2.getValue())));
     return pojo;
   }
 
@@ -252,6 +263,14 @@ public class PlaintextTallyPojo {
     pojo.data = proof.data;
     pojo.challenge = proof.challenge;
     pojo.response = proof.response;
+    return pojo;
+  }
+
+  private static GuardianStatePojo convertGuardianState(PlaintextTally.GuardianState state) {
+    GuardianStatePojo pojo = new GuardianStatePojo();
+    pojo.guardian_id = state.guardian_id();
+    pojo.sequence = state.sequence();
+    pojo.is_missing = state.is_missing();
     return pojo;
   }
 

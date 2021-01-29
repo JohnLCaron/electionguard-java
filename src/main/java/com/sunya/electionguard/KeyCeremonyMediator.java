@@ -151,6 +151,7 @@ public class KeyCeremonyMediator {
     this.receive_election_public_key(
             ElectionPublicKey.create(
                     public_key_set.owner_id(),
+                    public_key_set.sequence_order(),
                     public_key_set.election_public_key_proof(),
                     public_key_set.election_public_key()));
   }

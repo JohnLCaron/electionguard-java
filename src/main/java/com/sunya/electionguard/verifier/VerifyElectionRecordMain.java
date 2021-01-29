@@ -20,7 +20,7 @@ public class VerifyElectionRecordMain {
       electionRecord = consumer.getElectionRecord();
     }
 
-  verifyElectionRecord(electionRecord);
+    verifyElectionRecord(electionRecord);
   }
 
   static void verifyElectionRecord(ElectionRecord electionRecord) throws IOException {
@@ -58,13 +58,17 @@ public class VerifyElectionRecordMain {
     DecryptionVerifier dv = new DecryptionVerifier(electionRecord);
     boolean dvOk = dv.verify_cast_ballot_tallies();
 
-    System.out.println("------------ [box 11] Validation of Correct Decryption of Tallies ------------");
+    System.out.println("------------ [box 10] Correctness of Replacement Partial Decryptions ------------");
+    PartialDecryptionVerifier pdv = new PartialDecryptionVerifier(electionRecord);
+    boolean pdvOk = pdv.verify_replacement_partial_decryptions();
+
+    System.out.println("------------ [box 11] Correctness of Decryption of Tallies ------------");
     boolean bavt = bav.verify_tally_decryption();
 
     System.out.println("------------ [box 12] Correct Decryption of Spoiled Ballots ------------");
     boolean dvsOk = dv.verify_spoiled_ballots();
 
-    if (blvOk && gpkvOk && epkvOk && sevOk && cvlvOk && bcvOk && bavOk && dvOk && bavt && dvsOk) {
+    if (blvOk && gpkvOk && epkvOk && sevOk && cvlvOk && bcvOk && bavOk && dvOk && pdvOk && bavt && dvsOk) {
       System.out.printf("%n===== ALL OK! ===== %n");
     } else {
       System.out.printf("%n!!!!!! NOT OK !!!!!! %n");

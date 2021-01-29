@@ -5,17 +5,27 @@ import "com/sunya/electionguard/proto/common.proto";
 option java_package = "com.sunya.electionguard.proto";
 option java_outer_classname = "PlaintextTallyProto";
 
-// Decrypted Tally of one or more ballots.
+// Decrypted Tally of some collection of ballots.
 message PlaintextTally {
   string object_id = 1;
   // Map(CONTEST_ID, PlaintextTallyContest)
   map<string, PlaintextTallyContest> contests = 2;
   // Map(BALLOT_ID, Map(CONTEST_ID, PlaintextTallyContest))
   map<string, PlaintextTallyContestMap> spoiled_ballots = 3;
+  //  Map(AVAILABLE_GUARDIAN_ID, ElementModQ)
+  map<string, ElementModQ> lagrange_coefficients = 4;
+  // track guardians sequence numbers
+  repeated GuardianState guardian_states = 5;
+}
+
+message GuardianState {
+  string guardian_id = 1;
+  uint32 sequence = 2;
+  bool missing = 3;
 }
 
 message PlaintextTallyContestMap {
-  map<string, PlaintextTallyContest> contests = 3;
+  map<string, PlaintextTallyContest> contests = 1;
 }
 
 message PlaintextTallyContest {

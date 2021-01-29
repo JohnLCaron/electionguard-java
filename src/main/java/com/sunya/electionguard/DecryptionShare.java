@@ -4,8 +4,6 @@ import com.google.auto.value.AutoValue;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.flogger.FluentLogger;
-import com.google.gson.Gson;
-import com.google.gson.TypeAdapter;
 
 import javax.annotation.concurrent.Immutable;
 import java.util.HashMap;
@@ -215,12 +213,14 @@ public class DecryptionShare {
 
     abstract String ballot_id(); // The Ballot Id that this Decryption Share belongs to
 
+    // Map(CONTEST_ID, CiphertextDecryptionContest)
     abstract ImmutableMap<String, CiphertextDecryptionContest> contests(); //  The collection of all contests in the ballot
 
     public static BallotDecryptionShare create(
             String guardian_id,
             ElementModP public_key,
-            String ballot_id, Map<String, CiphertextDecryptionContest> contests) {
+            String ballot_id,
+            Map<String, CiphertextDecryptionContest> contests) {
       return new AutoValue_DecryptionShare_BallotDecryptionShare(
               Preconditions.checkNotNull(guardian_id),
               Preconditions.checkNotNull(public_key),
@@ -295,16 +295,16 @@ public class DecryptionShare {
   @AutoValue
   static abstract class TallyDecryptionShare {
     /** The Available Guardian that this share belongs to. */
-    abstract String guardian_id();
+    abstract String guardian_id(); // guardian.object_id
 
     /** The election public key for the guardian. */
     abstract ElementModP public_key();
 
     /** The collection of decryption shares for all contests in the election . */
-    abstract ImmutableMap<String, CiphertextDecryptionContest> contests();
+    abstract ImmutableMap<String, CiphertextDecryptionContest> contests(); // Map(CONTEST_ID, CiphertextDecryptionContest)
 
     /** // The collection of decryption shares for all spoiled ballots in the election. */
-    abstract ImmutableMap<String, BallotDecryptionShare> spoiled_ballots();
+    abstract ImmutableMap<String, BallotDecryptionShare> spoiled_ballots(); // Map(BALLOT_ID, BallotDecryptionShare)
 
     public static TallyDecryptionShare create(
             String guardian_id,
@@ -316,8 +316,14 @@ public class DecryptionShare {
     }
   } // TallyDecryptionShare
 
-  /** Get all of the cast shares for a specific selection */
-  static Map<String, KeyAndSelection> get_tally_shares_for_selection(String selection_id, Map<String, TallyDecryptionShare> shares) {
+  /**
+   * Get all of the cast shares for a specific selection
+   * @return Map(AVAILABLE_GUARDIAN_ID, KeyAndSelection)
+   */
+  static Map<String, KeyAndSelection> get_tally_shares_for_selection(
+          String selection_id,
+          Map<String, TallyDecryptionShare> shares) { // Map(AVAILABLE_GUARDIAN_ID, TallyDecryptionShare)
+
     HashMap<String, KeyAndSelection> cast_shares = new HashMap<>();
     for (TallyDecryptionShare share : shares.values()) {
       for (CiphertextDecryptionContest contest : share.contests().values()) {

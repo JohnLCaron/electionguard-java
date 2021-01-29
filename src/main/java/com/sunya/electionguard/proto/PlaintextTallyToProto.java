@@ -1,7 +1,9 @@
 package com.sunya.electionguard.proto;
 
+import com.google.common.collect.ImmutableMap;
 import com.sunya.electionguard.ChaumPedersen;
 import com.sunya.electionguard.DecryptionShare;
+import com.sunya.electionguard.Group;
 import com.sunya.electionguard.PlaintextTally;
 
 import java.util.List;
@@ -11,6 +13,7 @@ import java.util.stream.Collectors;
 import static com.sunya.electionguard.proto.CommonConvert.convertElementModP;
 import static com.sunya.electionguard.proto.CommonConvert.convertElementModQ;
 import static com.sunya.electionguard.proto.CommonConvert.convertCiphertext;
+import static com.sunya.electionguard.proto.CommonConvert.convertList;
 import static com.sunya.electionguard.proto.PlaintextTallyProto.CiphertextDecryptionSelection;
 import static com.sunya.electionguard.proto.PlaintextTallyProto.CiphertextCompensatedDecryptionSelection;
 import static com.sunya.electionguard.proto.PlaintextTallyProto.ChaumPedersenProof;
@@ -23,9 +26,13 @@ public class PlaintextTallyToProto {
     for (Map.Entry<String, PlaintextTally.PlaintextTallyContest> entry : tally.contests.entrySet()) {
       builder.putContests(entry.getKey(), convertContest(entry.getValue()));
     }
-    for (Map.Entry<String, Map<String, PlaintextTally.PlaintextTallyContest>> spoiled : tally.spoiled_ballots.entrySet()) {
+    for (Map.Entry<String, ImmutableMap<String, PlaintextTally.PlaintextTallyContest>> spoiled : tally.spoiled_ballots.entrySet()) {
       builder.putSpoiledBallots(spoiled.getKey(), convertSpoiled(spoiled.getValue()));
     }
+    for (Map.Entry<String, Group.ElementModQ> coeff : tally.lagrange_coefficients.entrySet()) {
+      builder.putLagrangeCoefficients(coeff.getKey(), convertElementModQ(coeff.getValue()));
+    }
+    builder.addAllGuardianStates(convertList(tally.guardianStates, PlaintextTallyToProto::convertState));
     return builder.build();
   }
 
@@ -98,6 +105,14 @@ public class PlaintextTallyToProto {
     builder.setData(convertElementModP(proof.data));
     builder.setChallenge(convertElementModQ(proof.challenge));
     builder.setResponse(convertElementModQ(proof.response));
+    return builder.build();
+  }
+
+  private static PlaintextTallyProto.GuardianState convertState(PlaintextTally.GuardianState state) {
+    PlaintextTallyProto.GuardianState.Builder builder = PlaintextTallyProto.GuardianState.newBuilder();
+    builder.setGuardianId(state.guardian_id());
+    builder.setSequence(state.sequence());
+    builder.setMissing(state.is_missing());
     return builder.build();
   }
 }
