@@ -164,7 +164,7 @@ public class Encrypt {
       return Optional.empty();
     }
 
-    // TODO: ISSUE #35: encrypt/decrypt: encrypt the extended_data field
+    // TODO: ISSUE #47: encrypt/decrypt: encrypt the extended_data field
 
     // Create the return object
     CiphertextBallotSelection encrypted_selection = make_ciphertext_ballot_selection(

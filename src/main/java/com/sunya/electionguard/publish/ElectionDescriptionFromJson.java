@@ -46,7 +46,7 @@ public class ElectionDescriptionFromJson {
 
   @Nullable
   <T, U> List<U> convertList(@Nullable List<T> from, Function<T, U> converter) {
-    return from == null ? null : from.stream().map(converter).collect(Collectors.toList());
+    return from == null || from.isEmpty() ? null : from.stream().map(converter).collect(Collectors.toList());
   }
 
   ElectionDescription convert(ElectionDescriptionPojo pojo) {

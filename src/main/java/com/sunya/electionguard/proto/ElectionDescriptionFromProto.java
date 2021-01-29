@@ -23,6 +23,8 @@ public class ElectionDescriptionFromProto {
   public static Election.ElectionDescription translateFromProto(ElectionProto.ElectionDescription election) {
     OffsetDateTime start_date = OffsetDateTime.parse(election.getStartDate());
     OffsetDateTime end_date = OffsetDateTime.parse(election.getEndDate());
+    Election.InternationalizedText name = election.hasName() ?
+            convertInternationalizedText(election.getName()) : null;
     Election.ContactInformation contact = election.hasContactInformation() ?
             convertContactInformation(election.getContactInformation()) : null;
 
@@ -47,7 +49,7 @@ public class ElectionDescriptionFromProto {
             convertList(election.getCandidatesList(), ElectionDescriptionFromProto::convertCandidate),
             convertList(election.getContestsList(), ElectionDescriptionFromProto::convertContestDescription),
             convertList(election.getBallotStylesList(), ElectionDescriptionFromProto::convertBallotStyle),
-            convertInternationalizedText(election.getName()),
+            name,
             contact);
   }
 
@@ -94,8 +96,8 @@ public class ElectionDescriptionFromProto {
             contest.getVotesAllowed(),
             contest.getName(),
             convertList(contest.getBallotSelectionsList(), ElectionDescriptionFromProto::convertSelectionDescription),
-            convertInternationalizedText(contest.getBallotTitle()),
-            convertInternationalizedText(contest.getBallotSubtitle()));
+            contest.hasBallotTitle() ? convertInternationalizedText(contest.getBallotTitle()) : null,
+            contest.hasBallotSubtitle() ? convertInternationalizedText(contest.getBallotSubtitle()) : null);
   }
 
   static Election.VoteVariationType convertVoteVariationType(ContestDescription.VoteVariationType type) {
@@ -111,14 +113,11 @@ public class ElectionDescriptionFromProto {
   }
 
   static Election.GeopoliticalUnit convertGeopoliticalUnit(GeopoliticalUnit geoUnit) {
-    Election.ContactInformation contact = geoUnit.hasContactInformation() ?
-            convertContactInformation(geoUnit.getContactInformation()) : null;
-
     return new Election.GeopoliticalUnit(
             geoUnit.getObjectId(),
             geoUnit.getName(),
             convertReportingUnitType(geoUnit.getType()),
-            contact);
+            geoUnit.hasContactInformation() ? convertContactInformation(geoUnit.getContactInformation()) : null);
   }
 
   static Election.InternationalizedText convertInternationalizedText(InternationalizedText text) {

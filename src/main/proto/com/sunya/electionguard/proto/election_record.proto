@@ -21,7 +21,7 @@ message ElectionRecord {
   repeated CiphertextAcceptedBallot cast_ballots = 6;
   repeated PlaintextBallot spoiled_ballots = 7;
   PublishedCiphertextTally ciphertext_tally = 8;
-  PlaintextTally decryptedTally = 9;
+  PlaintextTally decrypted_tally = 9;
 }
 
 // The device that does the encryption.

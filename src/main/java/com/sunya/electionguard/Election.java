@@ -197,18 +197,18 @@ public class Election {
    */
   @Immutable
   public static class ContactInformation implements Hash.CryptoHashable {
-    public final Optional<ImmutableList<String>> address_line;
-    public final Optional<ImmutableList<AnnotatedString>> email;
-    public final Optional<ImmutableList<AnnotatedString>> phone;
+    public final ImmutableList<String> address_line; // may be empty
+    public final ImmutableList<AnnotatedString> email; // may be empty
+    public final ImmutableList<AnnotatedString> phone; // may be empty
     public final Optional<String> name;
 
     public ContactInformation(@Nullable List<String> address_line,
                               @Nullable List<AnnotatedString> email,
                               @Nullable List<AnnotatedString> phone,
                               @Nullable String name) {
-      this.address_line = Optional.ofNullable(toImmutableList(address_line));
-      this.email = Optional.ofNullable(toImmutableList(email));
-      this.phone = Optional.ofNullable(toImmutableList(phone));
+      this.address_line = toImmutableListEmpty(address_line);
+      this.email = toImmutableListEmpty(email);
+      this.phone = toImmutableListEmpty(phone);
       this.name = Optional.ofNullable(Strings.emptyToNull(name));
     }
 
@@ -280,8 +280,8 @@ public class Election {
   /** A BallotStyle works as a key to uniquely specify a set of contests. */
   @Immutable
   public static class BallotStyle extends ElectionObjectBase implements Hash.CryptoHashable {
-    public final Optional<ImmutableList<String>> geopolitical_unit_ids;
-    public final Optional<ImmutableList<String>> party_ids;
+    public final ImmutableList<String> geopolitical_unit_ids; // may be empty
+    public final ImmutableList<String> party_ids; // may be empty
     public final Optional<String> image_uri;
 
     public BallotStyle(String object_id,
@@ -289,8 +289,8 @@ public class Election {
                        @Nullable List<String> party_ids,
                        @Nullable String image_uri) {
       super(object_id);
-      this.geopolitical_unit_ids = Optional.ofNullable(toImmutableList(geopolitical_unit_ids));
-      this.party_ids = Optional.ofNullable(toImmutableList(party_ids));
+      this.geopolitical_unit_ids = toImmutableListEmpty(geopolitical_unit_ids);
+      this.party_ids = toImmutableListEmpty(party_ids);
       this.image_uri = Optional.ofNullable(Strings.emptyToNull(image_uri));
     }
 
@@ -547,7 +547,7 @@ public class Election {
 
     /** Maximum number of votes/write-ins per voter in this contest. Used in cumulative voting
         to indicate how many total votes a voter can spread around. In n-of-m elections, this will be None. */
-    public final Optional<Integer> votes_allowed;
+    public final Optional<Integer> votes_allowed; // LOOK why optional ?
 
     /** Name of the contest, not necessarily as it appears on the ballot. */
     public final String name;
@@ -566,7 +566,7 @@ public class Election {
                               int sequence_order,
                               VoteVariationType vote_variation,
                               int number_elected,
-                              @Nullable Integer votes_allowed, // LOOK why optional ?
+                              int votes_allowed,
                               String name,
                               List<SelectionDescription> ballot_selections,
                               @Nullable InternationalizedText ballot_title,
@@ -578,7 +578,7 @@ public class Election {
       this.sequence_order = sequence_order;
       this.vote_variation = Preconditions.checkNotNull(vote_variation);
       this.number_elected = number_elected;
-      this.votes_allowed = Optional.ofNullable(votes_allowed);
+      this.votes_allowed = votes_allowed == 0 ? Optional.empty() : Optional.of(votes_allowed);
       this.name = Preconditions.checkNotNull(name);
       this.ballot_selections = toImmutableListEmpty(ballot_selections);
       this.ballot_title = Optional.ofNullable(ballot_title);
@@ -682,7 +682,7 @@ public class Election {
                                        int sequence_order,
                                        VoteVariationType vote_variation,
                                        int number_elected,
-                                       @Nullable Integer votes_allowed,
+                                       int votes_allowed,
                                        String name,
                                        List<SelectionDescription> ballot_selections,
                                        @Nullable InternationalizedText ballot_title,
@@ -722,7 +722,7 @@ public class Election {
                                         int sequence_order,
                                         VoteVariationType vote_variation,
                                         int number_elected,
-                                        @Nullable Integer votes_allowed,
+                                        int votes_allowed,
                                         String name, List<SelectionDescription> ballot_selections,
                                         @Nullable InternationalizedText ballot_title,
                                         @Nullable InternationalizedText ballot_subtitle) {
@@ -747,7 +747,7 @@ public class Election {
                                               int sequence_order,
                                               VoteVariationType vote_variation,
                                               int number_elected,
-                                              @Nullable Integer votes_allowed,
+                                              int votes_allowed,
                                               String name,
                                               List<SelectionDescription> ballot_selections,
                                               @Nullable InternationalizedText ballot_title,
@@ -798,9 +798,9 @@ public class Election {
 
   /**
    * The election metadata that describes the structure and type of the election, including geopolitical units,
-   * contests, candidates, and ballot styles, etc. This class is
-   * based on the NIST Election Common Standard Data Specification.  Some deviations
-   * from the standard exist.
+   * contests, candidates, and ballot styles, etc.
+   * This class is based on the NIST Election Common Standard Data Specification.
+   * Some deviations from the standard exist.
    * <p>
    * See: https://developers.google.com/elections-data/reference/election
    */
@@ -928,7 +928,7 @@ public class Election {
           break;
         }
         // validate associated gp unit ids
-        for (String gp_unit_id : style.geopolitical_unit_ids.get()) {
+        for (String gp_unit_id : style.geopolitical_unit_ids) {
           ballot_styles_have_valid_gp_unit_ids &= gp_unit_ids.contains(gp_unit_id);
         }
       }
@@ -1059,7 +1059,7 @@ public class Election {
         return new ArrayList<>();
       }
       // gp_unit_ids = [gp_unit_id for gp_unit_id in style.geopolitical_unit_ids]
-      List<String> gp_unit_ids = new ArrayList<>(style.get().geopolitical_unit_ids.get());
+      List<String> gp_unit_ids = new ArrayList<>(style.get().geopolitical_unit_ids);
       // contests = list(filter(lambda i: i.electoral_district_id in gp_unit_ids, this.contests)
       return this.contests.stream().filter(c -> gp_unit_ids.contains(c.electoral_district_id)).collect(Collectors.toList());
     }
@@ -1263,7 +1263,7 @@ public class Election {
             description.sequence_order,
             description.vote_variation,
             description.number_elected,
-            description.votes_allowed.orElse(null),
+            description.votes_allowed.orElse(0),
             description.name,
             description.ballot_selections,
             description.ballot_title.orElse(null),

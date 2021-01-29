@@ -15,7 +15,6 @@ import static com.sunya.electionguard.Group.*;
 
 public class Ballot {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
-  private static boolean first = false;
 
   /**
    * The plaintext representation of a voter's selections.
@@ -677,19 +676,6 @@ public class Ballot {
             )
     );
 
-    if (first) { // LOOK debugging remove
-      List<ElGamal.Ciphertext> texts = ballot_selections.stream()
-              .map(CiphertextSelection::ciphertext)
-              .collect(Collectors.toList());
-      for (ElGamal.Ciphertext text : texts) {
-        System.out.printf("     alpha %s%n", text.pad);
-        System.out.printf("     beta %s%n%n", text.data);
-      }
-      ElGamal.elgamal_add_show(Iterables.toArray(texts, ElGamal.Ciphertext.class));
-      System.out.printf("  make_ciphertext_ballot_contest pad=%s data=%s%n", proof.get().pad, proof.get().data);
-      first = false;
-    }
-
     return new CiphertextBallotContest(
             object_id,
             description_hash,
@@ -716,7 +702,7 @@ public class Ballot {
     public final ElementModQ description_hash;
     public final ElementModQ previous_tracking_hash;
     public final ImmutableList<CiphertextBallotContest> contests;
-    public final ElementModQ tracking_hash; // LOOK changed, not optional
+    public final ElementModQ tracking_hash; // not optional
     public final long timestamp; // LOOK something better?
     public final ElementModQ crypto_hash;
     public final Optional<ElementModQ> nonce;
