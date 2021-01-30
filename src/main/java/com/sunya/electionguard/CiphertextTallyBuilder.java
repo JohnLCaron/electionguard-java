@@ -348,8 +348,6 @@ public class CiphertextTallyBuilder {
       }
     }
 
-    // LOOK do we need equals?
-
     @Override
     public boolean equals(Object o) {
       if (this == o) return true;

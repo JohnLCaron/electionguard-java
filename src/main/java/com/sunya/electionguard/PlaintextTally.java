@@ -47,13 +47,6 @@ public class PlaintextTally {
     }
     this.spoiled_ballots = builder.build();
 
-    /* this.spoiled_ballots =
-            spoiled_ballots.entrySet().stream().collect(ImmutableMap.toImmutableMap(
-              Map.Entry::getKey,
-              e -> e.getValue().entrySet().stream().collect(ImmutableMap.toImmutableMap(
-                    Map.Entry::getKey,
-                    Map.Entry::getValue)))); */
-
     this.lagrange_coefficients = ImmutableMap.copyOf(lagrange_coefficients);
     this.guardianStates = ImmutableList.copyOf(guardianState);
   }

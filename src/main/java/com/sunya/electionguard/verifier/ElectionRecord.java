@@ -68,6 +68,10 @@ public class ElectionRecord {
     return this.constants.generator;
   }
 
+  public Group.ElementModP generatorP() {
+    return Group.int_to_p_unchecked(this.constants.generator);
+  }
+
   public BigInteger large_prime() {
     return this.constants.large_prime;
   }

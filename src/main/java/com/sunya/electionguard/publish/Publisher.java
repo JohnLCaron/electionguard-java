@@ -158,7 +158,6 @@ public class Publisher {
       }
     }
 
-    // LOOK contains all ballots, why not just cast ones?
     for (Ballot.CiphertextAcceptedBallot ballot : ciphertext_ballots) {
       ConvertToJson.write(ballot, this.ballotFile(ballot.object_id));
     }

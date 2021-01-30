@@ -18,11 +18,9 @@ public class ContestVoteLimitsVerifier {
   private static final boolean show = false;
 
   private final ElectionRecord electionRecord;
-  private final Grp grp;
 
   ContestVoteLimitsVerifier(ElectionRecord electionRecord) {
     this.electionRecord = electionRecord;
-    this.grp = new Grp(electionRecord.large_prime(), electionRecord.small_prime());
   }
 
   boolean verify_all_contests() {
@@ -52,7 +50,7 @@ public class ContestVoteLimitsVerifier {
     ChaumPedersen.ConstantChaumPedersenProof proof;
     ElementModP contest_alpha;
     ElementModP contest_beta;
-    ElementModQ contest_response; // V
+    ElementModQ contest_response;
     ElementModQ contest_challenge;
     String contest_id;
 
@@ -70,7 +68,7 @@ public class ContestVoteLimitsVerifier {
       boolean limit_error = false;
 
       // 5.C The given value V is in Z q
-      if (!grp.is_within_set_zq(proof.response.getBigInt())) {
+      if (!proof.response.is_in_bounds()) {
         System.out.printf("5.C V not in Zq for contest %s.%n", contest);
         limit_error = true;
       }
@@ -95,11 +93,11 @@ public class ContestVoteLimitsVerifier {
         }
 
         // 5.D The given values a and b are each in Zr_p.
-        if (!grp.is_within_set_zrp(alpha.getBigInt())) {
+        if (!alpha.is_valid_residue()) {
           System.out.printf("5.D alpha not in Zr_p for selection %s.%n", selection.object_id);
           limit_error = true;
         }
-        if (!grp.is_within_set_zrp(beta.getBigInt())) {
+        if (!beta.is_valid_residue()) {
           System.out.printf("5.D beta not in Zr_p for selection %s.%n", selection.object_id);
           limit_error = true;
         }
@@ -144,8 +142,8 @@ public class ContestVoteLimitsVerifier {
       }
 
       // check equations
-      boolean equ1_check = this.check_cp_proof_alpha(selection_alpha_product.getBigInt());
-      boolean equ2_check = this.check_cp_proof_beta(selection_beta_product.getBigInt(), vote_limit);
+      boolean equ1_check = this.check_cp_proof_alpha(selection_alpha_product);
+      boolean equ2_check = this.check_cp_proof_beta(selection_beta_product, vote_limit);
 
       if (!equ1_check || !equ2_check) {
         limit_error = true;
@@ -160,10 +158,9 @@ public class ContestVoteLimitsVerifier {
      * @param alpha_product: the accumulative product of all the alpha/pad values on all selections within a contest
      * @return True if the equation is satisfied, False if not
      */
-    private boolean check_cp_proof_alpha(BigInteger alpha_product) {
-      BigInteger left = grp.pow_p(electionRecord.generator(), this.contest_response.getBigInt());
-      BigInteger right = grp.mult_p(grp.mod_p(this.proof.pad.getBigInt()),
-              grp.pow_p(alpha_product, this.contest_challenge.getBigInt()));
+    private boolean check_cp_proof_alpha(ElementModP alpha_product) {
+      ElementModP left = Group.pow_p(electionRecord.generatorP(), this.contest_response);
+      ElementModP right = Group.mult_p(this.proof.pad, Group.pow_p(alpha_product, this.contest_challenge));
 
       if (!left.equals(right)) {
         System.out.printf("5.F fails.%n");
@@ -179,13 +176,13 @@ public class ContestVoteLimitsVerifier {
      * @param votes_allowed: the maximum votes allowed for this contest
      * @return True if the equation is satisfied, False if not
      */
-    private boolean check_cp_proof_beta(BigInteger beta_product, Integer votes_allowed) {
-      BigInteger votes_big = BigInteger.valueOf(votes_allowed);
-      BigInteger leftTerm1 = grp.pow_p(electionRecord.generator(), grp.mult_q(votes_big, this.contest_challenge.getBigInt()));
-      BigInteger leftTerm2 = grp.pow_p(electionRecord.elgamal_key().getBigInt(), this.contest_response.getBigInt());
-      BigInteger left = grp.mult_p(leftTerm1, leftTerm2);
+    private boolean check_cp_proof_beta(ElementModP beta_product, Integer votes_allowed) {
+      ElementModQ votes_big = Group.int_to_q_unchecked(BigInteger.valueOf(votes_allowed));
+      ElementModP leftTerm1 = Group.pow_p(electionRecord.generatorP(), Group.mult_q(votes_big, this.contest_challenge));
+      ElementModP leftTerm2 = Group.pow_p(electionRecord.elgamal_key(), this.contest_response);
+      ElementModP left = Group.mult_p(leftTerm1, leftTerm2);
 
-      BigInteger right = grp.mult_p(this.proof.data.getBigInt(), grp.pow_p(beta_product, this.contest_challenge.getBigInt()));
+      ElementModP right = Group.mult_p(this.proof.data, Group.pow_p(beta_product, this.contest_challenge));
 
       if (!left.equals(right)) {
         System.out.printf("5.G fails.%n");

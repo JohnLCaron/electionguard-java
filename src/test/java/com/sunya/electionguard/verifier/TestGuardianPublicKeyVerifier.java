@@ -6,7 +6,6 @@ import net.jqwik.api.Example;
 import net.jqwik.api.lifecycle.BeforeContainer;
 
 import java.io.IOException;
-import java.math.BigInteger;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -14,7 +13,6 @@ import static com.google.common.truth.Truth.assertThat;
 public class TestGuardianPublicKeyVerifier {
   static ElectionRecord electionRecord;
   static GuardianPublicKeyVerifier kgv;
-  static Grp grp;
 
   @BeforeContainer
   public static void setUp() throws IOException {
@@ -23,7 +21,6 @@ public class TestGuardianPublicKeyVerifier {
     Consumer consumer = new Consumer(topdir);
     electionRecord = consumer.getElectionRecord();
     kgv = new GuardianPublicKeyVerifier(electionRecord);
-    grp = new Grp(electionRecord.large_prime(), electionRecord.small_prime());
   }
 
   @Example
@@ -73,8 +70,8 @@ public class TestGuardianPublicKeyVerifier {
 
   /** check the equation = generator ^ response mod p = (commitment * public key ^ challenge) mod p */
   void verify_individual_key_computation(Group.ElementModQ response, Group.ElementModP commitment, Group.ElementModP public_key, Group.ElementModQ challenge) {
-    BigInteger left = grp.pow_p(electionRecord.generator(), response.getBigInt());
-    BigInteger right = grp.mult_p(commitment.getBigInt(), grp.pow_p(public_key.getBigInt(), challenge.getBigInt()));
+    Group.ElementModP left = Group.pow_p(electionRecord.generatorP(), response);
+    Group.ElementModP right = Group.mult_p(commitment, Group.pow_p(public_key, challenge));
     assertThat(left).isEqualTo(right);
   }
 }

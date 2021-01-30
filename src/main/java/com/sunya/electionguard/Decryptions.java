@@ -389,7 +389,7 @@ public class Decryptions {
 
   /**
    * Compute a compensated decryption share for a specific selection using the
-   * available guardian's share of the missing guardian's private key polynomial.
+   * available guardians' share of the missing guardian's private key polynomial.
    * <p>
    * @param available_guardian: The available guardian that will partially decrypt the selection
    * @param missing_guardian_id: The id of the guardian that is missing

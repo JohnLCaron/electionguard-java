@@ -1,7 +1,6 @@
 package com.sunya.electionguard.verifier;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Sets;
 import com.sunya.electionguard.*;
 import com.sunya.electionguard.publish.Consumer;
 import net.jqwik.api.Example;
@@ -9,15 +8,15 @@ import net.jqwik.api.lifecycle.BeforeContainer;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.HashSet;
-import java.util.Set;
 
 import static com.google.common.truth.Truth.assertThat;
+
+import static com.sunya.electionguard.Group.ElementModP;
+import static com.sunya.electionguard.Group.ElementModQ;
 
 public class TestSelectionEncryptionVerifier {
   static ElectionRecord electionRecord;
   static SelectionEncyrptionVerifier sev;
-  static Grp grp;
 
   @BeforeContainer
   public static void setUp() throws IOException {
@@ -26,17 +25,16 @@ public class TestSelectionEncryptionVerifier {
     Consumer consumer = new Consumer(topdir);
     electionRecord = consumer.getElectionRecord();
     sev = new SelectionEncyrptionVerifier(electionRecord);
-    grp = new Grp(electionRecord.large_prime(), electionRecord.small_prime());
   }
 
   @Example
-  public void testSelectionEncryptionValidation() throws IOException {
+  public void testSelectionEncryptionValidation() {
     boolean sevOk = sev.verify_all_selections();
     assertThat(sevOk).isTrue();
   }
 
   @Example
-  public void testVerifyAllContests() throws IOException {
+  public void testVerifyAllContests() {
     for (Ballot.CiphertextAcceptedBallot ballot : electionRecord.castBallots) {
       for (Ballot.CiphertextBallotContest contest : ballot.contests) {
         verify_a_contest(contest);
@@ -49,16 +47,16 @@ public class TestSelectionEncryptionVerifier {
     Preconditions.checkNotNull(vote_limit);
 
     int placeholder_count = 0;
-    BigInteger selection_alpha_product = BigInteger.ONE;
-    BigInteger selection_beta_product = BigInteger.ONE;
+    ElementModP selection_alpha_product = Group.ONE_MOD_P;
+    ElementModP selection_beta_product = Group.ONE_MOD_P;
 
     for (Ballot.CiphertextBallotSelection selection : contest.ballot_selections) {
-      Group.ElementModP this_pad = selection.ciphertext().pad;
-      Group.ElementModP this_data = selection.ciphertext().data;
+      ElementModP this_pad = selection.ciphertext().pad;
+      ElementModP this_data = selection.ciphertext().data;
 
       // get alpha, beta products
-      selection_alpha_product = grp.mult_p(selection_alpha_product, this_pad.getBigInt());
-      selection_beta_product = grp.mult_p(selection_beta_product, this_data.getBigInt());
+      selection_alpha_product = Group.mult_p(selection_alpha_product, this_pad);
+      selection_beta_product = Group.mult_p(selection_beta_product, this_data);
 
       // check validity of a selection
       boolean is_correct = verify_selection_validity(selection);
@@ -80,28 +78,29 @@ public class TestSelectionEncryptionVerifier {
 
     // calculate c = H(Q-bar, (A,B), (a,b))
     ChaumPedersen.ConstantChaumPedersenProof proof = contest.proof.orElseThrow(IllegalStateException::new);
-    Group.ElementModP a = proof.pad;
-    Group.ElementModP b = proof.data;
-    Group.ElementModQ this_contest_challenge = proof.challenge;
-    Group.ElementModQ challenge_computed =
+    ElementModP a = proof.pad;
+    ElementModP b = proof.data;
+    ElementModQ this_contest_challenge = proof.challenge;
+    ElementModQ challenge_computed =
             Hash.hash_elems(electionRecord.extended_hash(),
-                    Group.int_to_p_unchecked(selection_alpha_product),
-                    Group.int_to_p_unchecked(selection_beta_product), a, b);
+                    selection_alpha_product,
+                    selection_beta_product, a, b);
 
     // check if given contest challenge matches the computation
     assertThat(challenge_computed).isEqualTo(this_contest_challenge);
 
     // check equations
     boolean equ1_check = this.check_cp_proof_alpha(contest, selection_alpha_product);
-    boolean equ2_check = this.check_cp_proof_beta(contest, selection_beta_product, BigInteger.valueOf(vote_limit));
+    boolean equ2_check = this.check_cp_proof_beta(contest, selection_beta_product,
+            Group.int_to_q_unchecked(BigInteger.valueOf(vote_limit)));
     assertThat(equ1_check).isTrue();
     assertThat(equ2_check).isTrue();
   }
 
   boolean verify_selection_validity(Ballot.CiphertextBallotSelection selection) {
     boolean error = false;
-    Group.ElementModP this_pad = selection.ciphertext().pad;
-    Group.ElementModP this_data = selection.ciphertext().data;
+    ElementModP this_pad = selection.ciphertext().pad;
+    ElementModP this_data = selection.ciphertext().data;
 
     // get dictionaries
     ChaumPedersen.DisjunctiveChaumPedersenProof proof = selection.proof.orElseThrow();
@@ -109,14 +108,14 @@ public class TestSelectionEncryptionVerifier {
 
     // get values
     String selection_id = selection.object_id;
-    Group.ElementModP zero_pad = proof.proof_zero_pad; // a0
-    Group.ElementModP one_pad = proof.proof_one_pad; // a1
-    Group.ElementModP zero_data = proof.proof_zero_data; // b0
-    Group.ElementModP one_data = proof.proof_one_data; // b1
-    Group.ElementModQ zero_challenge = proof.proof_zero_challenge; // c0
-    Group.ElementModQ one_challenge = proof.proof_one_challenge; // c1
-    Group.ElementModQ zero_response = proof.proof_zero_response; // v0
-    Group.ElementModQ one_response = proof.proof_one_response; // v1
+    ElementModP zero_pad = proof.proof_zero_pad; // a0
+    ElementModP one_pad = proof.proof_one_pad; // a1
+    ElementModP zero_data = proof.proof_zero_data; // b0
+    ElementModP one_data = proof.proof_one_data; // b1
+    ElementModQ zero_challenge = proof.proof_zero_challenge; // c0
+    ElementModQ one_challenge = proof.proof_one_challenge; // c1
+    ElementModQ zero_response = proof.proof_zero_response; // v0
+    ElementModQ one_response = proof.proof_one_response; // v1
 
     // point 1: check alpha, beta, a0, b0, a1, b1 are all in set Zrp
     if (!(this.check_params_within_zrp(cipher.pad, cipher.data, zero_pad, one_pad, zero_data, one_data))) {
@@ -129,11 +128,11 @@ public class TestSelectionEncryptionVerifier {
     }
 
     // point 2: conduct hash computation, c = H(Q-bar, (alpha, beta), (a0, b0), (a1, b1))
-    Group.ElementModQ challenge = Hash.hash_elems(electionRecord.extended_hash(), this_pad, this_data,
+    ElementModQ challenge = Hash.hash_elems(electionRecord.extended_hash(), this_pad, this_data,
             zero_pad, zero_data, one_pad, one_data);
 
     // point 4:  c = c0 + c1 mod q is satisfied
-    if (!this.check_hash_comp(challenge.getBigInt(), zero_challenge.getBigInt(), one_challenge.getBigInt())) {
+    if (!this.check_hash_comp(challenge, zero_challenge, one_challenge)) {
       error = true;
     }
 
@@ -151,10 +150,10 @@ public class TestSelectionEncryptionVerifier {
   }
 
   /** check if the given values are all in set Zrp */
-  private boolean check_params_within_zrp(Group.ElementModP... params) {
+  private boolean check_params_within_zrp(ElementModP... params) {
     boolean error = false;
-    for (Group.ElementModP param : params) {
-      if (!grp.is_within_set_zrp(param.getBigInt())) {
+    for (ElementModP param : params) {
+      if (!param.is_valid_residue()) {
         error = true;
       }
     }
@@ -162,10 +161,10 @@ public class TestSelectionEncryptionVerifier {
   }
 
   /** check if the given values are each in the set zq */
-  private boolean check_params_within_zq(Group.ElementModQ... params) {
+  private boolean check_params_within_zq(ElementModQ... params) {
     boolean error = false;
-    for (Group.ElementModQ param : params) {
-      if (!grp.is_within_set_zq(param.getBigInt())) {
+    for (ElementModQ param : params) {
+      if (!param.is_in_bounds()) {
         error = true;
       }
     }
@@ -188,16 +187,16 @@ public class TestSelectionEncryptionVerifier {
    * @param zero_res: zero_response of a selection
    * @return True if both equations of the zero proof are satisfied, False if either is not satisfied
    */
-  private boolean check_cp_proof_zero_proof(Group.ElementModP pad, Group.ElementModP data, Group.ElementModP zero_pad, Group.ElementModP zero_data,
-                                            Group.ElementModQ zero_chal, Group.ElementModQ zero_res) {
+  private boolean check_cp_proof_zero_proof(ElementModP pad, ElementModP data, ElementModP zero_pad, ElementModP zero_data,
+                                            ElementModQ zero_chal, ElementModQ zero_res) {
     // g ^ v0 = a0 * alpha ^ c0 mod p
-    BigInteger equ1_left = grp.pow_p(electionRecord.generator(), zero_res.getBigInt());
-    BigInteger equ1_right = grp.mult_p(zero_pad.getBigInt(), grp.pow_p(pad.getBigInt(), zero_chal.getBigInt()));
+    ElementModP equ1_left = Group.pow_p(electionRecord.generatorP(), zero_res);
+    ElementModP equ1_right = Group.mult_p(zero_pad, Group.pow_p(pad, zero_chal));
     boolean eq1ok = equ1_left.equals(equ1_right);
 
     // K ^ v0 = b0 * beta ^ c0 mod p
-    BigInteger equ2_left = grp.pow_p(electionRecord.elgamal_key().getBigInt(), zero_res.getBigInt());
-    BigInteger equ2_right = grp.mult_p(zero_data.getBigInt(), grp.pow_p(data.getBigInt(), zero_chal.getBigInt()));
+    ElementModP equ2_left = Group.pow_p(electionRecord.elgamal_key(), zero_res);
+    ElementModP equ2_right = Group.mult_p(zero_data, Group.pow_p(data, zero_chal));
     boolean eq2ok = equ2_left.equals(equ2_right);
 
     if (!eq1ok || !eq2ok) {
@@ -222,18 +221,18 @@ public class TestSelectionEncryptionVerifier {
    * @param one_res: one_response of a selection
    * @return True if both equations of the one proof are satisfied, False if either is not satisfied
    */
-  private boolean check_cp_proof_one_proof(Group.ElementModP pad, Group.ElementModP data, Group.ElementModP one_pad, Group.ElementModP one_data,
-                                           Group.ElementModQ one_chal, Group.ElementModQ one_res) {
+  private boolean check_cp_proof_one_proof(ElementModP pad, ElementModP data, ElementModP one_pad, ElementModP one_data,
+                                           ElementModQ one_chal, ElementModQ one_res) {
 
     // g ^ v1 = a1 * alpha ^ c1 mod p
-    BigInteger equ1_left = grp.pow_p(electionRecord.generator(), one_res.getBigInt());
-    BigInteger equ1_right = grp.mult_p(one_pad.getBigInt(), grp.pow_p(pad.getBigInt(), one_chal.getBigInt()));
+    ElementModP equ1_left = Group.pow_p(electionRecord.generatorP(), one_res);
+    ElementModP equ1_right = Group.mult_p(one_pad, Group.pow_p(pad, one_chal));
     boolean eq1ok = equ1_left.equals(equ1_right);
 
     // g ^ c1 * K ^ v1 = b1 * beta ^ c1 mod p
-    BigInteger equ2_left = grp.mult_p(grp.pow_p(electionRecord.generator(), one_chal.getBigInt()),
-            grp.pow_p(electionRecord.elgamal_key().getBigInt(), one_res.getBigInt()));
-    BigInteger equ2_right = grp.mult_p(one_data.getBigInt(), grp.pow_p(data.getBigInt(), one_chal.getBigInt()));
+    ElementModP equ2_left = Group.mult_p(Group.pow_p(electionRecord.generatorP(), one_chal),
+            Group.pow_p(electionRecord.elgamal_key(), one_res));
+    ElementModP equ2_right = Group.mult_p(one_data, Group.pow_p(data, one_chal));
     boolean eq2ok = equ2_left.equals(equ2_right);
 
     if (!eq1ok || !eq2ok) {
@@ -248,10 +247,10 @@ public class TestSelectionEncryptionVerifier {
    * @param zero_chal: zero_challenge of a selection
    * @param one_chal: one_challenge of a selection
    */
-  private boolean check_hash_comp(BigInteger chal, BigInteger zero_chal, BigInteger one_chal) {
+  private boolean check_hash_comp(ElementModQ chal, ElementModQ zero_chal, ElementModQ one_chal) {
     // calculated expected challenge value: c0 + c1 mod q
-    BigInteger expected = grp.mod_q(zero_chal.add(one_chal));
-    boolean res = grp.mod_q(chal).equals(expected);
+    ElementModQ expected = Group.add_q(zero_chal, one_chal);
+    boolean res = chal.equals(expected);
     if (!res) {
       System.out.printf("challenge value error.%n");
     }
@@ -259,14 +258,14 @@ public class TestSelectionEncryptionVerifier {
   }
 
   /**
-   * check if a selection's a and b are in set Zrp - box 4, limit check
+   * check if a selection's a and b are in set Z_r^p
    */
   boolean verify_selection_limit(Ballot.CiphertextBallotSelection selection) {
-    Group.ElementModP this_pad = selection.ciphertext().pad;
-    Group.ElementModP this_data = selection.ciphertext().data;
+    ElementModP this_pad = selection.ciphertext().pad;
+    ElementModP this_data = selection.ciphertext().data;
 
-    boolean a_res = grp.is_within_set_zrp(this_pad.getBigInt());
-    boolean b_res = grp.is_within_set_zrp(this_data.getBigInt());
+    boolean a_res = this_pad.is_valid_residue();
+    boolean b_res = this_data.is_valid_residue();
 
     if (!a_res) {
       System.out.printf("selection pad/a value error.%n");
@@ -294,12 +293,11 @@ public class TestSelectionEncryptionVerifier {
    * @param alpha_product: the accumulative product of all the alpha/pad values on all selections within a contest
    * @return True if the equation is satisfied, False if not
    */
-  private boolean check_cp_proof_alpha(Ballot.CiphertextBallotContest contest, BigInteger alpha_product) {
+  private boolean check_cp_proof_alpha(Ballot.CiphertextBallotContest contest, ElementModP alpha_product) {
     ChaumPedersen.ConstantChaumPedersenProof proof = contest.proof.orElseThrow(IllegalStateException::new);
 
-    BigInteger left = grp.pow_p(electionRecord.generator(), proof.response.getBigInt());
-    BigInteger right = grp.mult_p(grp.mod_p(proof.pad.getBigInt()),
-            grp.pow_p(alpha_product, proof.challenge.getBigInt()));
+    ElementModP left = Group.pow_p(electionRecord.generatorP(), proof.response);
+    ElementModP right = Group.mult_p(proof.pad, Group.pow_p(alpha_product, proof.challenge));
 
     boolean res = left.equals(right);
     if (!res) {
@@ -316,14 +314,14 @@ public class TestSelectionEncryptionVerifier {
    * @param votes_allowed: the maximum votes allowed for this contest
    * @return True if the equation is satisfied, False if not
    */
-  private boolean check_cp_proof_beta(Ballot.CiphertextBallotContest contest, BigInteger beta_product, BigInteger votes_allowed) {
+  private boolean check_cp_proof_beta(Ballot.CiphertextBallotContest contest, ElementModP beta_product, ElementModQ votes_allowed) {
     ChaumPedersen.ConstantChaumPedersenProof proof = contest.proof.orElseThrow(IllegalStateException::new);
 
-    BigInteger leftTerm1 = grp.pow_p(electionRecord.generator(), grp.mult_q(votes_allowed, proof.challenge.getBigInt()));
-    BigInteger leftTerm2 = grp.pow_p(electionRecord.elgamal_key().getBigInt(), proof.response.getBigInt());
-    BigInteger left = grp.mult_p(leftTerm1, leftTerm2);
+    ElementModP leftTerm1 = Group.pow_p(electionRecord.generatorP(), Group.mult_q(votes_allowed, proof.challenge));
+    ElementModP leftTerm2 = Group.pow_p(electionRecord.elgamal_key(), proof.response);
+    ElementModP left = Group.mult_p(leftTerm1, leftTerm2);
 
-    BigInteger right = grp.mult_p(proof.data.getBigInt(), grp.pow_p(beta_product, proof.challenge.getBigInt()));
+    ElementModP right = Group.mult_p(proof.data, Group.pow_p(beta_product, proof.challenge));
 
     boolean res = left.equals(right);
     if (!res) {
@@ -333,68 +331,14 @@ public class TestSelectionEncryptionVerifier {
   }
 
   @Example
-  public void testTrackingHashes() throws IOException {
-    Set<Group.ElementModQ> prev_hashes = new HashSet<>();
-    Set<Group.ElementModQ> curr_hashes = new HashSet<>();
-
+  public void testTrackingHashes() {
     for (Ballot.CiphertextAcceptedBallot ballot : electionRecord.castBallots) {
-      verify_tracking_hash(ballot);
-      if (ballot.previous_tracking_hash != null) {
-        prev_hashes.add(ballot.previous_tracking_hash);
-      }
-      curr_hashes.add(ballot.tracking_hash);
+      ElementModQ crypto_hash = ballot.crypto_hash;
+      ElementModQ prev_hash = ballot.previous_tracking_hash;
+      ElementModQ curr_hash = ballot.tracking_hash;
+      ElementModQ curr_hash_computed = Hash.hash_elems(prev_hash, ballot.timestamp, crypto_hash);
+      assertThat(curr_hash).isEqualTo(curr_hash_computed);
     }
-
-    // withdraw this test for now
-    boolean trackOk = verify_tracking_hashes(prev_hashes, curr_hashes);
-    // assertThat(trackOk).isTrue();
-  }
-
-  void verify_tracking_hash(Ballot.CiphertextAcceptedBallot ballot) {
-    Group.ElementModQ crypto_hash = ballot.crypto_hash;
-    Group.ElementModQ prev_hash = ballot.previous_tracking_hash;
-    Group.ElementModQ curr_hash = ballot.tracking_hash;
-    Group.ElementModQ curr_hash_computed = Hash.hash_elems(prev_hash, ballot.timestamp, crypto_hash);
-    assertThat(curr_hash).isEqualTo(curr_hash_computed);
-  }
-
-  private boolean verify_tracking_hashes(Set<Group.ElementModQ> prev_hashes, Set<Group.ElementModQ> curr_hashes) {
-    boolean error = false;
-
-    // find the set that only contains first and last hash
-    Set<Group.ElementModQ> differenceSet = Sets.symmetricDifference(prev_hashes, curr_hashes);
-
-    // find the first and last hash
-    Group.ElementModQ first_hash = Group.int_to_q_unchecked(BigInteger.ZERO);
-    Group.ElementModQ last_hash = Group.int_to_q_unchecked(BigInteger.ZERO);
-    for (Group.ElementModQ h : differenceSet) {
-      if (prev_hashes.contains(h)){
-        first_hash = h;
-      } else if (curr_hashes.contains(h)){
-        last_hash = h;
-      }
-    }
-
-    /*
-    LOOK: The zero_hash is given to the EncryptionMediator. For TestEndtoEndElectionIntegration, this is the device hash.
-    I dont think this is captured in the ElectionCntext, so cant be tested.
-     */
-
-    // verify the first hash H0 = H(Q-bar)
-    Group.ElementModQ zero_hash = Hash.hash_elems(electionRecord.description_hash());
-    if (!zero_hash.equals(first_hash)) {
-      error = true;
-    }
-
-    /* LOOK "CLOSE" is not used in library; anyway, its impossible for last_hash = Hash.hash_elems(last_hash, "CLOSE") */
-
-    // verify the closing hash, H-bar = H(Hl, 'CLOSE')
-    Group.ElementModQ closing_hash_computed = Hash.hash_elems(last_hash, "CLOSE");
-    if (!closing_hash_computed.equals(last_hash)) {
-      error = true;
-    }
-
-    return !error;
   }
 
 }

@@ -16,9 +16,7 @@ import static com.sunya.electionguard.Group.Q;
 import static com.sunya.electionguard.Group.ZERO_MOD_Q;
 import static com.sunya.electionguard.Group.add_q;
 import static com.sunya.electionguard.Group.g_pow_p;
-import static com.sunya.electionguard.Group.mult_pi;
 import static com.sunya.electionguard.Group.mult_q;
-import static com.sunya.electionguard.Group.pow_p;
 import static com.sunya.electionguard.Group.pow_q;
 import static com.sunya.electionguard.Group.rand_q;
 
@@ -125,17 +123,17 @@ public class ElectionPolynomial {
    * @param coefficient_commitments Commitments for coefficients of polynomial
    */
   static boolean verify_polynomial_coordinate(ElementModQ coordinate, BigInteger exponent_modifier, List<ElementModP> coefficient_commitments) {
-    BigInteger commitment_output = BigInteger.ONE;
+    ElementModP commitment_output = Group.ONE_MOD_P;
     int count = 0;
     for (ElementModP commitment : coefficient_commitments) {
-      BigInteger exponent = Group.pow_pi(exponent_modifier, BigInteger.valueOf(count));
-      BigInteger factor = Group.pow_pi(commitment.getBigInt(), exponent);
-      commitment_output = mult_pi(commitment_output, factor);
+      ElementModP exponent = Group.int_to_p_unchecked(Group.pow_pi(exponent_modifier, BigInteger.valueOf(count)));
+      ElementModP factor = Group.pow_p(commitment, exponent);
+      commitment_output = Group.mult_p(commitment_output, factor);
       count++;
     }
 
     ElementModP value_output = g_pow_p(coordinate);
-    return value_output.elem.equals(commitment_output);
+    return value_output.equals(commitment_output);
   }
 
 }

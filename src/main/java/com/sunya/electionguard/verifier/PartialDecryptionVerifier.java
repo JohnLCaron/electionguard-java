@@ -27,13 +27,11 @@ public class PartialDecryptionVerifier {
 
   final ElectionRecord electionRecord;
   final PlaintextTally tally;
-  final Grp grp;
   final Map<String, PlaintextTally.GuardianState> guardianStateMap;
 
   PartialDecryptionVerifier(ElectionRecord electionRecord) {
     this.electionRecord = electionRecord;
     this.tally = electionRecord.decryptedTally;
-    this.grp = new Grp(electionRecord.large_prime(), electionRecord.small_prime());
     this.guardianStateMap = new HashMap<>();
     tally.guardianStates.forEach(gs -> guardianStateMap.put(gs.guardian_id(), gs));
   }

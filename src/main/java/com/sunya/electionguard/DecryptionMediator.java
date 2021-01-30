@@ -84,7 +84,7 @@ public class DecryptionMediator {
                     .filter(e -> !this.available_guardians.containsKey(e.getKey()))
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-    // LOOK Check that the public keys match for any missing guardians already reported
+    // TODO Check that the public keys match for any missing guardians already reported
     //  note this check naively assumes that the first guardian to announce is telling the truth
     //  but for this implementation it is simply a sanity check on the input data.
     //  a consuming application should implement better validation of the guardian state

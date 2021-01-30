@@ -4,10 +4,10 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.flogger.FluentLogger;
 import com.sunya.electionguard.ChaumPedersen;
+import com.sunya.electionguard.Group;
 import com.sunya.electionguard.Hash;
 import com.sunya.electionguard.PlaintextTally;
 
-import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 
@@ -25,12 +25,10 @@ public class DecryptionVerifier {
 
   final ElectionRecord electionRecord;
   final PlaintextTally tally;
-  final Grp grp;
 
   DecryptionVerifier(ElectionRecord electionRecord) {
     this.electionRecord = electionRecord;
     this.tally = electionRecord.decryptedTally;
-    this.grp = new Grp(electionRecord.large_prime(), electionRecord.small_prime());
   }
 
   /** Verify 8,9 for all cast ballots in the tally. */
@@ -179,7 +177,7 @@ public class DecryptionVerifier {
       // get values
       Preconditions.checkArgument(share.recovered_parts().isPresent());
       for (CiphertextCompensatedDecryptionSelection compSelection : share.recovered_parts().get().values()) {
-        String guardian_id = compSelection.missing_guardian_id();
+        String missing_guardian_id = compSelection.missing_guardian_id();
         ChaumPedersen.ChaumPedersenProof proof = compSelection.proof();
         ElementModP pad = proof.pad;
         ElementModP data = proof.data;
@@ -189,18 +187,18 @@ public class DecryptionVerifier {
         ElementModP recovery_key = compSelection.recovery_key();
 
         // 9.A check if the response vi is in the set Zq
-        if (!grp.is_within_set_zq(response.getBigInt())) {
-          System.out.printf("  9.A response not in Zq for missing_guardian %s%n", guardian_id);
+        if (!response.is_in_bounds()) {
+          System.out.printf("  9.A response not in Zq for missing_guardian %s%n", missing_guardian_id);
           error = true;
         }
 
         // 9.B check if the given ai, bi are both in set Zr_p
-        if (!grp.is_within_set_zrp(pad.getBigInt())) {
-          System.out.printf("  9.B ai not in Zr_p for missing_guardian %s%n", guardian_id);
+        if (!pad.is_valid_residue()) {
+          System.out.printf("  9.B ai not in Zr_p for missing_guardian %s%n", missing_guardian_id);
           error = true;
         }
-        if (!grp.is_within_set_zrp(data.getBigInt())) {
-          System.out.printf("  9.B bi not in Zr_p for missing_guardian %s%n", guardian_id);
+        if (!data.is_valid_residue()) {
+          System.out.printf("  9.B bi not in Zr_p for missing_guardian %s%n", missing_guardian_id);
           error = true;
         }
 
@@ -208,19 +206,19 @@ public class DecryptionVerifier {
         ElementModQ challenge_computed = Hash.hash_elems(electionRecord.extended_hash(),
                 this.selection_pad, this.selection_data, pad, data, partial_decryption);
         if (!challenge_computed.equals(challenge)) {
-          System.out.printf("  9.C ci != H(Q-bar, (A,B), (ai, bi), M_i,l) for missing_guardian %s%n", guardian_id);
+          System.out.printf("  9.C ci != H(Q-bar, (A,B), (ai, bi), M_i,l) for missing_guardian %s%n", missing_guardian_id);
           error = true;
         }
 
         // 9.D g^vi mod p = ai * Ki^ci mod p
         if (!this.check_equation1(response, pad, challenge, recovery_key)) {
-          System.out.printf("  9.D g^vi mod p != ai * Ki^ci mod p for missing_guardian %s%n", guardian_id);
+          System.out.printf("  9.D g^vi mod p != ai * Ki^ci mod p for missing_guardian %s%n", missing_guardian_id);
           error = true;
         }
 
         // 9.E A^vi mod p = bi * M_i,l ^ ci mod p
         if (!this.check_equation2(response, data, challenge, partial_decryption)) {
-          System.out.printf("  9.E A^vi mod p = bi * M_i,l ^ ci mod p for missing_guardian %s%n", guardian_id);
+          System.out.printf("  9.E A^vi mod p = bi * M_i,l ^ ci mod p for missing_guardian %s%n", missing_guardian_id);
           error = true;
         }
       }
@@ -249,17 +247,17 @@ public class DecryptionVerifier {
       ElementModP partial_decryption = share.share(); // M_i in the spec
 
       // 8.A check if the response vi is in the set Zq
-      if (!grp.is_within_set_zq(response.getBigInt())) {
+      if (!response.is_in_bounds()) {
         System.out.printf("  8.A response not in Zq for missing_guardian %s%n", guardian_id);
         error = true;
       }
 
       // 8.B check if the given ai, bi are both in set Zr_p
-      if (!grp.is_within_set_zrp(pad.getBigInt())) {
+      if (!pad.is_valid_residue()) {
         System.out.printf("  8.B ai not in Zr_p for missing_guardian %s%n", guardian_id);
         error = true;
       }
-      if (!grp.is_within_set_zrp(data.getBigInt())) {
+      if (!data.is_valid_residue()) {
         System.out.printf("  8.B bi not in Zr_p for missing_guardian %s%n", guardian_id);
         error = true;
       }
@@ -297,8 +295,8 @@ public class DecryptionVerifier {
      */
     private boolean check_equation1(ElementModQ response, ElementModP pad, ElementModQ challenge, ElementModP public_key) {
       // g ^ vi = ai * (Ki ^ ci) mod p
-      BigInteger left = grp.pow_p(electionRecord.generator(), response.getBigInt());
-      BigInteger right = grp.mult_p(pad.getBigInt(), grp.pow_p(public_key.getBigInt(), challenge.getBigInt()));
+      ElementModP left = Group.pow_p(electionRecord.generatorP(), response);
+      ElementModP right = Group.mult_p(pad, Group.pow_p(public_key, challenge));
       return left.equals(right);
     }
 
@@ -312,8 +310,8 @@ public class DecryptionVerifier {
      */
     boolean check_equation2(ElementModQ response, ElementModP data, ElementModQ challenge, ElementModP partial_decrypt) {
       // A ^ vi = (bi * (M_i,l)^ ci) mod p
-      BigInteger left = grp.pow_p(this.selection_pad.getBigInt(), response.getBigInt());
-      BigInteger right = grp.mult_p(data.getBigInt(), grp.pow_p(partial_decrypt.getBigInt(), challenge.getBigInt()));
+      ElementModP left = Group.pow_p(this.selection_pad, response);
+      ElementModP right = Group.mult_p(data, Group.pow_p(partial_decrypt, challenge));
       return left.equals(right);
     }
   }
