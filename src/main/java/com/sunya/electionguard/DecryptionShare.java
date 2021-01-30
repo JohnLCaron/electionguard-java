@@ -24,8 +24,8 @@ public class DecryptionShare {
     /** The Missing Guardian for whom this share is calculated on behalf of. */
     public abstract String missing_guardian_id();
 
-    /**  The SelectionDescription hash. LOOK Not used? */
-    public abstract ElementModQ description_hash();
+    /**  The Ballot.CiphertextSelection description_hash. */
+    public abstract ElementModQ description_hash(); // LOOK Not used
 
     /** The Share of the decryption of a selection. M_il in the spec. */
     public abstract ElementModP share();
@@ -72,12 +72,11 @@ public class DecryptionShare {
     public abstract String guardian_id();
 
     /** The SelectionDescription hash. */
-    public abstract ElementModQ description_hash();
+    public abstract ElementModQ description_hash(); // LOOK not used
 
     /** The Share of the decryption of a selection. `M_i` in the spec. */
     public abstract ElementModP share();
 
-    // LOOK Must have a proof or a recovery
     /** The Proof that the share was decrypted correctly, if the guardian was available for decryption */
     public abstract Optional<ChaumPedersen.ChaumPedersenProof> proof();
 

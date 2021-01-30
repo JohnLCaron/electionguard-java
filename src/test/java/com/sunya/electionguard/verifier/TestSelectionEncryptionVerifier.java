@@ -36,7 +36,7 @@ public class TestSelectionEncryptionVerifier {
   }
 
   @Example
-  public void testVerifyAllContests() throws IOException {
+  public void testVerifyAllContests() {
     for (Ballot.CiphertextAcceptedBallot ballot : electionRecord.castBallots) {
       for (Ballot.CiphertextBallotContest contest : ballot.contests) {
         verify_a_contest(contest);
@@ -333,7 +333,7 @@ public class TestSelectionEncryptionVerifier {
   }
 
   @Example
-  public void testTrackingHashes() throws IOException {
+  public void testTrackingHashes() {
     Set<Group.ElementModQ> prev_hashes = new HashSet<>();
     Set<Group.ElementModQ> curr_hashes = new HashSet<>();
 

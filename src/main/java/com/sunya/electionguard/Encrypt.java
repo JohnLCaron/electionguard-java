@@ -65,7 +65,7 @@ public class Encrypt {
                               EncryptionDevice encryption_device) {
       this.metadata = metadata;
       this.encryption = encryption;
-      // LOOK does not follow validation spec 5.1, which calls for crypto_base_hash.
+      // LOOK does not follow validation spec 6.A, which calls for crypto_base_hash.
       //   Ok to use device hash see Issue #272. Spec should be updated.
       this.last_hash = encryption_device.get_hash();
     }

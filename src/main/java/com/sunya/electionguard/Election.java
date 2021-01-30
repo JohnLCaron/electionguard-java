@@ -1025,7 +1025,7 @@ public class Election {
 
   /**
    * The subset of the election description required by ElectionGuard to validate ballots are
-   * correctly associated with an election. LOOK This component mutates the state of the Election Description, true?
+   * correctly associated with an election.
    */
   public static class InternalElectionDescription {
     final ElectionDescription description;
@@ -1153,7 +1153,6 @@ public class Election {
    * Refer to the [Electionguard Specification](https://github.com/microsoft/electionguard) for more information.
    * <p>
    * To make an instance of this class, don't construct it directly. Use `make_ciphertext_election_context` instead.
-   * LOOK: put in its own class?
    * LOOK: add serialization version?
    */
   @Immutable
@@ -1319,13 +1318,6 @@ public class Election {
       selections.add(sd.orElseThrow(IllegalStateException::new));
     }
     return selections;
-  }
-
-  private static <T> ImmutableList<T> toImmutableList(List<T> from) {
-    if (from == null || from.isEmpty()) {
-      return null;
-    }
-    return ImmutableList.copyOf(from);
   }
 
   private static <T> ImmutableList<T> toImmutableListEmpty(List<T> from) {

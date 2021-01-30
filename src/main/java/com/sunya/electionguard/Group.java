@@ -114,8 +114,7 @@ public class Group {
      */
     boolean is_valid_residue() {
       boolean residue = elem.modPow(Q, P).equals(BigInteger.ONE);
-      // LOOK should be between 1 and P?
-      return this.is_in_bounds() && residue;
+      return between(BigInteger.ONE, elem, P) && residue;
     }
 
     @Override
@@ -176,13 +175,12 @@ public class Group {
     return new ElementModQ(biggy);
   }
 
-  // If it is known that a, b ∈ Z n , then one can choose to avoid the division normally inherent in
-  // the modular reduction and just use (a + b) mod n = a + b (if a + b < n) or a + b − n (if a + b ≥ n).
+  // https://www.electionguard.vote/spec/0.95.0/9_Verifier_construction/#modular-addition
   /** Adds together one or more elements in Q, returns the sum mod Q */
   static ElementModQ add_q(ElementModQ... elems) {
     BigInteger t = BigInteger.ZERO;
     for (ElementModQ e : elems) {
-      t = t.add(e.elem).mod(Q); // LOOK can we forgo the mod(Q) and just do it at the end?
+      t = t.add(e.elem).mod(Q);
     }
     return int_to_q_unchecked(t);
   }
@@ -223,9 +221,7 @@ public class Group {
     return int_to_p_unchecked(elem.elem.modInverse(P));
   }
 
-  // To compute a^b mod n, one can compute (a mod n)^b mod n, but one should not perform a modular
-  // reduction on the exponent.
-
+  // https://www.electionguard.vote/spec/0.95.0/9_Verifier_construction/#modular-exponentiation
   /** Computes b^e mod p. */
   static ElementModP pow_p(ElementModP b, ElementModP e) {
     return int_to_p_unchecked(pow_pi(b.elem.mod(P), e.elem));
@@ -246,6 +242,7 @@ public class Group {
     return int_to_q_unchecked(b.modPow(e, Q));
   }
 
+  // https://www.electionguard.vote/spec/0.95.0/9_Verifier_construction/#modular-multiplication
   /**
    * Computes the product, mod p, of all elements.
    * @param elems: Zero or more elements in [0,P).

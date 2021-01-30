@@ -158,10 +158,7 @@ import static com.sunya.electionguard.Group.*;
     }
   }
 
-  /**
-   * Generate auxiliary key pair using RSA .
-   * LOOK move to Guardian?
-   */
+  /** Generate auxiliary key pair using RSA . */
   static Auxiliary.KeyPair generate_rsa_auxiliary_key_pair() {
     KeyPair rsa_key_pair = Rsa.rsa_keypair();
     return new Auxiliary.KeyPair(rsa_key_pair.getPrivate(), rsa_key_pair.getPublic());
@@ -171,7 +168,6 @@ import static com.sunya.electionguard.Group.*;
    * Generate election key pair, proof, and polynomial.
    * @param quorum: Quorum of guardians needed to decrypt
    * @param nonce: Optional nonce for testing, do not use in production.
-   * LOOK move to Guardian?
    */
   static ElectionKeyPair generate_election_key_pair(int quorum, @Nullable ElementModQ nonce, ElementModQ crypto_base_hash) {
     ElectionPolynomial polynomial = ElectionPolynomial.generate_polynomial(quorum, nonce, crypto_base_hash);

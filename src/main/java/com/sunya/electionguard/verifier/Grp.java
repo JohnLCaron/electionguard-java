@@ -5,7 +5,7 @@ import com.sunya.electionguard.Group;
 import java.math.BigInteger;
 
 /**
- * Eventual replacement for Group that allows the primes to be set.
+ * Alternative for Group that allows the primes to be set.
  * LOOK seems likely that we are using Q and P in validation.
  */
 public class Grp {

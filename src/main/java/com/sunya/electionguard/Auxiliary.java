@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 
 import javax.annotation.concurrent.Immutable;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Optional;
 
 /** Wrapper around java.security.PrivateKey. */
@@ -16,13 +17,12 @@ public class Auxiliary {
     public final java.security.PublicKey public_key;
 
     public KeyPair(java.security.PrivateKey secret_key, java.security.PublicKey public_key) {
-      this.secret_key = secret_key;
-      this.public_key = public_key;
+      this.secret_key = Preconditions.checkNotNull(secret_key);
+      this.public_key = Preconditions.checkNotNull(public_key);
     }
   }
 
   /** A tuple of auxiliary public key and owner information. */
-  // LOOK does this need hash/equals ?
   @Immutable
   public static class PublicKey {
     /** The unique identifier of the guardian. */
@@ -35,9 +35,24 @@ public class Auxiliary {
     public final java.security.PublicKey key;
 
     public PublicKey(String owner_id, int sequence_order, java.security.PublicKey key) {
-      this.owner_id = owner_id;
+      this.owner_id = Preconditions.checkNotNull(owner_id);
       this.sequence_order = sequence_order;
-      this.key = key;
+      this.key = Preconditions.checkNotNull(key);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      PublicKey publicKey = (PublicKey) o;
+      return sequence_order == publicKey.sequence_order &&
+              owner_id.equals(publicKey.owner_id) &&
+              key.equals(publicKey.key);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(owner_id, sequence_order, key);
     }
   }
 

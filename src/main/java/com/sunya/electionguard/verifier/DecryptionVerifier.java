@@ -179,7 +179,7 @@ public class DecryptionVerifier {
       // get values
       Preconditions.checkArgument(share.recovered_parts().isPresent());
       for (CiphertextCompensatedDecryptionSelection compSelection : share.recovered_parts().get().values()) {
-        String guardian_id = compSelection.missing_guardian_id();
+        String missing_guardian_id = compSelection.missing_guardian_id();
         ChaumPedersen.ChaumPedersenProof proof = compSelection.proof();
         ElementModP pad = proof.pad;
         ElementModP data = proof.data;
@@ -190,17 +190,17 @@ public class DecryptionVerifier {
 
         // 9.A check if the response vi is in the set Zq
         if (!grp.is_within_set_zq(response.getBigInt())) {
-          System.out.printf("  9.A response not in Zq for missing_guardian %s%n", guardian_id);
+          System.out.printf("  9.A response not in Zq for missing_guardian %s%n", missing_guardian_id);
           error = true;
         }
 
         // 9.B check if the given ai, bi are both in set Zr_p
         if (!grp.is_within_set_zrp(pad.getBigInt())) {
-          System.out.printf("  9.B ai not in Zr_p for missing_guardian %s%n", guardian_id);
+          System.out.printf("  9.B ai not in Zr_p for missing_guardian %s%n", missing_guardian_id);
           error = true;
         }
         if (!grp.is_within_set_zrp(data.getBigInt())) {
-          System.out.printf("  9.B bi not in Zr_p for missing_guardian %s%n", guardian_id);
+          System.out.printf("  9.B bi not in Zr_p for missing_guardian %s%n", missing_guardian_id);
           error = true;
         }
 
@@ -208,19 +208,19 @@ public class DecryptionVerifier {
         ElementModQ challenge_computed = Hash.hash_elems(electionRecord.extended_hash(),
                 this.selection_pad, this.selection_data, pad, data, partial_decryption);
         if (!challenge_computed.equals(challenge)) {
-          System.out.printf("  9.C ci != H(Q-bar, (A,B), (ai, bi), M_i,l) for missing_guardian %s%n", guardian_id);
+          System.out.printf("  9.C ci != H(Q-bar, (A,B), (ai, bi), M_i,l) for missing_guardian %s%n", missing_guardian_id);
           error = true;
         }
 
         // 9.D g^vi mod p = ai * Ki^ci mod p
         if (!this.check_equation1(response, pad, challenge, recovery_key)) {
-          System.out.printf("  9.D g^vi mod p != ai * Ki^ci mod p for missing_guardian %s%n", guardian_id);
+          System.out.printf("  9.D g^vi mod p != ai * Ki^ci mod p for missing_guardian %s%n", missing_guardian_id);
           error = true;
         }
 
         // 9.E A^vi mod p = bi * M_i,l ^ ci mod p
         if (!this.check_equation2(response, data, challenge, partial_decryption)) {
-          System.out.printf("  9.E A^vi mod p = bi * M_i,l ^ ci mod p for missing_guardian %s%n", guardian_id);
+          System.out.printf("  9.E A^vi mod p = bi * M_i,l ^ ci mod p for missing_guardian %s%n", missing_guardian_id);
           error = true;
         }
       }

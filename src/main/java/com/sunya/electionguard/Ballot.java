@@ -515,7 +515,7 @@ public class Ballot {
       this.proof = Preconditions.checkNotNull(proof);
     }
 
-    /** Remove nonces from selections and return new contest. LOOK problem? */
+    /** Remove nonces from selections and return new contest. */
     CiphertextBallotContest removeNonces() {
       // new_selections = [replace(selection, nonce = None) for selection in contest.ballot_selections]
       List<CiphertextBallotSelection> new_selections =
@@ -648,8 +648,9 @@ public class Ballot {
 
   /**
    * Constructs a `CipherTextBallotContest` object. Computes a Chaum-Pedersen proof if the
-   * ballot selections include their encryption nonces. LOOK changed for Issue #280: A crypto_hash and a
-   * contest_total are computed and saved in the CiphertextBallotContest.
+   * ballot selections include their encryption nonces.
+   * LOOK changed for Issue #280: A crypto_hash and a contest_total are always computed and saved
+   *  in the CiphertextBallotContest.
    */
   static CiphertextBallotContest make_ciphertext_ballot_contest(
           String object_id,
@@ -682,8 +683,8 @@ public class Ballot {
             ballot_selections,
             crypto_hash,
             contest_total,
-            nonce,
-            proof);
+            nonce,  // Optional
+            proof); // Optional
   }
 
   /**
@@ -703,7 +704,7 @@ public class Ballot {
     public final ElementModQ previous_tracking_hash;
     public final ImmutableList<CiphertextBallotContest> contests;
     public final ElementModQ tracking_hash; // not optional
-    public final long timestamp; // LOOK something better?
+    public final long timestamp; // LOOK Timestamp at which the ballot encryption is generated, in seconds since the epoch UTC.
     public final ElementModQ crypto_hash;
     public final Optional<ElementModQ> nonce;
 
@@ -867,8 +868,7 @@ public class Ballot {
   public static class CiphertextAcceptedBallot extends CiphertextBallot {
     public final BallotBoxState state;
 
-    public CiphertextAcceptedBallot(CiphertextBallot ballot,
-                                    BallotBoxState state) {
+    public CiphertextAcceptedBallot(CiphertextBallot ballot, BallotBoxState state) {
       super(ballot.object_id, ballot.ballot_style, ballot.description_hash, ballot.previous_tracking_hash, ballot.contests,
               ballot.tracking_hash, ballot.timestamp, ballot.crypto_hash, ballot.nonce);
       this.state = Preconditions.checkNotNull(state);
@@ -984,11 +984,21 @@ public class Ballot {
     ElementModQ contest_hash = Hash.hash_elems(object_id, description_hash, contest_hashes);
 
     long timestamp = timestampO.orElse(System.currentTimeMillis());
-    ElementModQ previous_tracking_hash = previous_tracking_hashO.orElse(description_hash); // LOOK true?
+    ElementModQ previous_tracking_hash = previous_tracking_hashO.orElse(description_hash); // LOOK spec #6.A says H0 = H(Qbar)
 
     // copy the contests and selections, removing all nonces
     List<CiphertextBallotContest> new_contests = contests.stream().map(CiphertextBallotContest::removeNonces).collect(Collectors.toList());
 
+    // String object_id,
+    //                                    String ballot_style,
+    //                                    ElementModQ description_hash,
+    //                                    ElementModQ previous_tracking_hash,
+    //                                    List<CiphertextBallotContest> contests,
+    //                                    ElementModQ tracking_hash,
+    //                                    long timestamp,
+    //                                    ElementModQ crypto_hash,
+    //                                    Optional<ElementModQ> nonce,
+    //                                    BallotBoxState state
     return new CiphertextAcceptedBallot(
             object_id,
             ballot_style,
