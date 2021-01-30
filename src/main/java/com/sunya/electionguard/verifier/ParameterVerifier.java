@@ -29,7 +29,7 @@ public class ParameterVerifier {
   public boolean verify_all_params() {
     boolean error = false;
 
-    // check if p and q are the expected values
+    // check if p, q, g are the expected values
     if (!electionRecord.large_prime().equals(Group.P)) {
       System.out.printf(" Large prime value not equal to P. %n");
       error = true;
@@ -37,6 +37,14 @@ public class ParameterVerifier {
     if (!electionRecord.small_prime().equals(Group.Q)) {
       error = true;
       System.out.printf(" Small prime value not equal to Q. %n");
+    }
+    if (!electionRecord.generator().equals(Group.G)) {
+      error = true;
+      System.out.printf(" Generator value not equal to G. %n");
+    }
+    if (!electionRecord.cofactor().equals(Group.R)) {
+      error = true;
+      System.out.printf(" Generator value not equal to G. %n");
     }
 
     // check equation p - 1 = q * r
