@@ -87,7 +87,7 @@ public class Group {
     }
 
     /** Validates that the element is actually within the bounds of [0,Q). */
-    boolean is_in_bounds() {
+    public boolean is_in_bounds() {
       return between(BigInteger.ZERO, elem, Q);
     }
 
@@ -104,7 +104,7 @@ public class Group {
     }
 
     /** Validates that the element is actually within the bounds of [0,P). */
-    boolean is_in_bounds() {
+    public boolean is_in_bounds() {
       return between(BigInteger.ZERO, elem, P);
     }
 
@@ -112,7 +112,7 @@ public class Group {
      * Validates that this element is in Z^r_p.
      * y ∈ Z^r_p if and only if y^q mod p = 1
      */
-    boolean is_valid_residue() {
+    public boolean is_valid_residue() {
       boolean residue = elem.modPow(Q, P).equals(BigInteger.ONE);
       return between(BigInteger.ONE, elem, P) && residue;
     }
@@ -177,7 +177,7 @@ public class Group {
 
   // https://www.electionguard.vote/spec/0.95.0/9_Verifier_construction/#modular-addition
   /** Adds together one or more elements in Q, returns the sum mod Q */
-  static ElementModQ add_q(ElementModQ... elems) {
+  public static ElementModQ add_q(ElementModQ... elems) {
     BigInteger t = BigInteger.ZERO;
     for (ElementModQ e : elems) {
       t = t.add(e.elem).mod(Q);
@@ -228,7 +228,7 @@ public class Group {
   }
 
   /** Computes b^e mod p. */
-  static ElementModP pow_p(ElementMod b, ElementMod e) {
+  public static ElementModP pow_p(ElementMod b, ElementMod e) {
     return int_to_p_unchecked(pow_pi(b.elem.mod(P), e.elem));
   }
 
@@ -284,14 +284,6 @@ public class Group {
     return int_to_q_unchecked(product);
   }
 
-  static ElementModQ mult_qi(BigInteger... elems) {
-    BigInteger product = BigInteger.ONE;
-    for (BigInteger x : elems) {
-      product = product.multiply(x).mod(Q);
-    }
-    return int_to_q_unchecked(product);
-  }
-
   /** Computes g^e mod p. */
   public static ElementModP g_pow_p(ElementMod e) {
     return int_to_p_unchecked(pow_pi(G, e.elem));
@@ -339,11 +331,9 @@ public class Group {
     return x.compareTo(b) < 0;
   }
 
-  static BigInteger sum(Iterable<BigInteger> elems) {
-    BigInteger sum = BigInteger.ZERO;
-    for (BigInteger e : elems) {
-      sum = sum.add(e);
-    }
-    return sum;
+  /** check if a is a divisor of b. */
+  public static boolean is_divisor(BigInteger a, BigInteger b) {
+    return a.mod(b).equals(BigInteger.ZERO);
   }
+
 }

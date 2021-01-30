@@ -77,14 +77,7 @@ public class Hash {
       digest.update(hash_me.getBytes(StandardCharsets.UTF_8));
     }
 
-    // return int_to_q_unchecked(int.from_bytes(h.digest(), byteorder = "big") % Q_MINUS_ONE);
+    // must be positive
     return Group.int_to_q_unchecked(new BigInteger(1, digest.digest()).mod(Group.Q_MINUS_ONE));
-    /* byte[] bb = digest.digest();
-    System.out.printf("bb = %s%n", UnsignedBytes.join("-", bb));
-    BigInteger ibb = new BigInteger(1, bb);
-    System.out.printf("ibb = %s%n", ibb.toString(16));
-    BigInteger ibbq = ibb.mod(Group.Q_MINUS_ONE);
-    Group.ElementModQ ibbqu = new Group.ElementModQ(ibbq);
-    return ibbqu; */
   }
 }

@@ -1,10 +1,10 @@
 package com.sunya.electionguard.verifier;
 
+import com.sunya.electionguard.Group;
 import com.sunya.electionguard.Hash;
 import com.sunya.electionguard.KeyCeremony;
 import com.sunya.electionguard.SchnorrProof;
 
-import java.math.BigInteger;
 import java.util.List;
 
 import static com.sunya.electionguard.Group.ElementModQ;
@@ -13,11 +13,9 @@ import static com.sunya.electionguard.Group.ElementModP;
 /** This verifies specification section "2. Guardian Public-Key Validation". */
 public class GuardianPublicKeyVerifier {
   private final ElectionRecord electionRecord;
-  private final Grp grp;
 
   GuardianPublicKeyVerifier(ElectionRecord electionRecord) {
     this.electionRecord = electionRecord;
-    this.grp = new Grp(electionRecord.large_prime(), electionRecord.small_prime());
   }
 
   /** verify all guardians" key generation info by examining challenge values and equations. */
@@ -79,8 +77,8 @@ public class GuardianPublicKeyVerifier {
    * @return True if both sides of the equations are equal, False otherwise
    */
   boolean verify_individual_key_computation(ElementModQ response, ElementModP commitment, ElementModP public_key, ElementModQ challenge) {
-    BigInteger left = grp.pow_p(this.electionRecord.generator(), response.getBigInt());
-    BigInteger right = grp.mult_p(commitment.getBigInt(), grp.pow_p(public_key.getBigInt(), challenge.getBigInt()));
+    ElementModP left = Group.pow_p(Group.int_to_p_unchecked(this.electionRecord.generator()), response);
+    ElementModP right = Group.mult_p(commitment, Group.pow_p(public_key, challenge));
     return left.equals(right);
   }
 

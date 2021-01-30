@@ -2,9 +2,6 @@ package com.sunya.electionguard.verifier;
 
 import com.sunya.electionguard.*;
 
-import java.io.IOException;
-import java.math.BigInteger;
-
 import static com.sunya.electionguard.Ballot.*;
 import static com.sunya.electionguard.Group.ElementModQ;
 import static com.sunya.electionguard.Group.ElementModP;
@@ -12,14 +9,12 @@ import static com.sunya.electionguard.Group.ElementModP;
 /** This verifies specification section "4. Correctness of Selection Encryptions". */
 public class SelectionEncyrptionVerifier {
   private final ElectionRecord electionRecord;
-  private final Grp grp;
 
   SelectionEncyrptionVerifier(ElectionRecord electionRecord) {
     this.electionRecord = electionRecord;
-    this.grp = new Grp(electionRecord.large_prime(), electionRecord.small_prime());
   }
 
-  boolean verify_all_selections() throws IOException {
+  boolean verify_all_selections() {
     boolean error = false;
 
     for (CiphertextAcceptedBallot ballot : electionRecord.castBallots) {
@@ -90,24 +85,24 @@ public class SelectionEncyrptionVerifier {
         error = true;
       }
 
-      // 4.D:  c = c0 + c1 mod q
-      BigInteger expected = grp.mod_q(c0.getBigInt().add(c1.getBigInt()));
-      if (!challenge.getBigInt().equals(expected)) {
-        System.out.printf("4.D c = c0 + c1 mod q failed for %s.%n", selection);
+      // 4.D:  c = (c0 + c1) mod q
+      ElementModQ expected = Group.add_q(c0, c1);
+      if (!challenge.equals(expected)) {
+        System.out.printf("4.D c = (c0 + c1) mod q failed for %s.%n", selection);
         error = true;
       }
 
       // 4.E check chaum-pedersen zero proof: g ^ v0 = a0 * alpha ^ c0 mod p
-      BigInteger equE_left = grp.pow_p(electionRecord.generator(), v0.getBigInt());
-      BigInteger equE_right = grp.mult_p(a0.getBigInt(), grp.pow_p(alpha.getBigInt(), c0.getBigInt()));
+      ElementModP equE_left = Group.pow_p(electionRecord.generatorP(), v0);
+      ElementModP equE_right = Group.mult_p(a0, Group.pow_p(alpha, c0));
       if (!equE_left.equals(equE_right)) {
         System.out.printf("4.E check chaum-pedersen zero proof failed for %s.%n", selection);
         error = true;
       }
 
       // 4.F check chaum-pedersen one proof: g ^ v1 = a1 * alpha ^ c1 mod p
-      BigInteger equF_left = grp.pow_p(electionRecord.generator(), v1.getBigInt());
-      BigInteger equF_right = grp.mult_p(a1.getBigInt(), grp.pow_p(alpha.getBigInt(), c1.getBigInt()));
+      ElementModP equF_left = Group.pow_p(electionRecord.generatorP(), v1);
+      ElementModP equF_right = Group.mult_p(a1, Group.pow_p(alpha, c1));
       if (!equF_left.equals(equF_right)) {
         System.out.printf("4.F check chaum-pedersen one proof failed for %s.%n", selection);
         error = true;
@@ -115,17 +110,17 @@ public class SelectionEncyrptionVerifier {
 
       // 4.G (G) K ^ v0 = b0 * beta ^ c0 mod p
       ElementModP K = electionRecord.elgamal_key();
-      BigInteger equG_left = grp.pow_p(K.getBigInt(), v0.getBigInt());
-      BigInteger equG_right = grp.mult_p(b0.getBigInt(), grp.pow_p(beta.getBigInt(), c0.getBigInt()));
+      ElementModP equG_left = Group.pow_p(K, v0);
+      ElementModP equG_right = Group.mult_p(b0, Group.pow_p(beta, c0));
       if (!equG_left.equals(equG_right)) {
         System.out.printf("4.G check chaum-pedersen zero proof failed for %s.%n", selection);
         error = true;
       }
 
       // 4.H (H) g ^ c1 * K ^ v1 = b1 * beta ^ c1 mod p
-      BigInteger equH_left = grp.mult_p(grp.pow_p(electionRecord.generator(), c1.getBigInt()),
-              grp.pow_p(electionRecord.elgamal_key().getBigInt(), v1.getBigInt()));
-      BigInteger equH_right = grp.mult_p(b1.getBigInt(), grp.pow_p(beta.getBigInt(), c1.getBigInt()));
+      ElementModP equH_left = Group.mult_p(Group.pow_p(electionRecord.generatorP(), c1),
+              Group.pow_p(electionRecord.elgamal_key(), v1));
+      ElementModP equH_right = Group.mult_p(b1, Group.pow_p(beta, c1));
       if (!equH_left.equals(equH_right)) {
         System.out.printf("4.H check chaum-pedersen one proof failed for %s.%n", selection);
         error = true;
@@ -141,7 +136,7 @@ public class SelectionEncyrptionVerifier {
     private boolean check_params_within_zrp(ElementModP... params) {
       boolean error = false;
       for (ElementModP param : params) {
-        if (!grp.is_within_set_zrp(param.getBigInt())) {
+        if (!param.is_valid_residue()) {
           error = true;
         }
       }
@@ -152,7 +147,7 @@ public class SelectionEncyrptionVerifier {
     private boolean check_params_within_zq(ElementModQ... params) {
       boolean error = false;
       for (ElementModQ param : params) {
-        if (!grp.is_within_set_zq(param.getBigInt())) {
+        if (!param.is_in_bounds()) {
           error = true;
         }
       }

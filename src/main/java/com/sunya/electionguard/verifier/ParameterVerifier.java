@@ -19,33 +19,24 @@ import java.math.BigInteger;
  * </ol>
  */
 public class ParameterVerifier {
-  private static final int NUMBER_OF_ITERATIONS = 5;
-
   private final ElectionRecord electionRecord;
-  private final Grp grp;
 
   ParameterVerifier(ElectionRecord electionRecord) {
     this.electionRecord = electionRecord;
-    this.grp = new Grp(electionRecord.large_prime(), electionRecord.small_prime());
   }
 
   /** verify all parameters including p, q, r, g */
   public boolean verify_all_params() {
     boolean error = false;
 
-    // check if p and q are the expected values, or prime
+    // check if p and q are the expected values
     if (!electionRecord.large_prime().equals(Group.P)) {
-      // if not, use Miller-Rabin algorithm to check the primality of p and q, 5 iterations by default
-      if (!Grp.is_prime(electionRecord.large_prime(), NUMBER_OF_ITERATIONS)) {
-        error = true;
-        System.out.printf(" Large prime value error. %n");
-      }
+      System.out.printf(" Large prime value not equal to P. %n");
+      error = true;
     }
     if (!electionRecord.small_prime().equals(Group.Q)) {
-      if (!Grp.is_prime(electionRecord.small_prime(), NUMBER_OF_ITERATIONS)) {
-        error = true;
-        System.out.printf(" Small prime value error. %n");
-      }
+      error = true;
+      System.out.printf(" Small prime value not equal to Q. %n");
     }
 
     // check equation p - 1 = q * r
@@ -56,23 +47,16 @@ public class ParameterVerifier {
     }
 
     // check q is not a divisor of r
-    if (Grp.is_divisor(electionRecord.small_prime(), cofactor)) {
+    if (Group.is_divisor(electionRecord.small_prime(), cofactor)) {
       error = true;
       System.out.printf(" q is a divisor of r.%n");
     }
 
-    // check 1 < g < p
-    BigInteger generator = electionRecord.generator();
-    if (!grp.is_within_set_zstarp(generator)) {
+    // check g is in Z^r_p
+    Group.ElementModP generator = electionRecord.generatorP();
+    if (!generator.is_valid_residue()) {
       error = true;
       System.out.printf(" g is not in the range of 1 to p. %n");
-    }
-
-    // check g^q mod p = 1
-    BigInteger product = generator.modPow(electionRecord.small_prime(), electionRecord.large_prime());
-    if (!product.equals(BigInteger.ONE)) {
-      error = true;
-      System.out.printf(" g^q mod p does not equal to 1. %n");
     }
 
     if (error) {

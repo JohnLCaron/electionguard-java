@@ -11,11 +11,9 @@ import static com.sunya.electionguard.Group.ElementModQ;
  /** This verifies specification section "6. Ballot Chaining". */
 public class BallotChainingVerifier {
   private final ElectionRecord electionRecord;
-  private final Grp grp;
 
   BallotChainingVerifier(ElectionRecord electionRecord) {
     this.electionRecord = electionRecord;
-    this.grp = new Grp(electionRecord.large_prime(), electionRecord.small_prime());
   }
 
   boolean verify_all_ballots() {

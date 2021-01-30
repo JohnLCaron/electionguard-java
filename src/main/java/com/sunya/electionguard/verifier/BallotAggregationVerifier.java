@@ -9,7 +9,6 @@ import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.PlaintextTally;
 
-import java.io.IOException;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,12 +24,10 @@ public class BallotAggregationVerifier {
 
   final ElectionRecord electionRecord;
   final PlaintextTally decryptedTally;
-  final Grp grp;
 
   BallotAggregationVerifier(ElectionRecord electionRecord) {
     this.electionRecord = electionRecord;
     this.decryptedTally = electionRecord.decryptedTally;
-    this.grp = new Grp(electionRecord.large_prime(), electionRecord.small_prime());
   }
 
   /**
@@ -38,7 +35,7 @@ public class BallotAggregationVerifier {
    * (𝐴, 𝐵) satisfies 𝐴 = ∏ 𝛼 and 𝐵 = ∏ 𝛽 where the (𝛼 , 𝛽) are the corresponding encryptions on all cast ballots
    * in the election record.
    */
-  boolean verify_ballot_aggregation() throws IOException {
+  boolean verify_ballot_aggregation() {
     boolean error = false;
     SelectionAggregator agg = new SelectionAggregator(electionRecord.castBallots);
 
@@ -73,7 +70,7 @@ public class BallotAggregationVerifier {
    * (A) B = (M ⋅ (∏ Mi )) mod p.
    * (B) M = g^t mod p.
    */
-  boolean verify_tally_decryption() throws IOException {
+  boolean verify_tally_decryption() {
     boolean error = false;
 
     for (PlaintextTally.PlaintextTallyContest contest : decryptedTally.contests.values()) {
@@ -84,13 +81,13 @@ public class BallotAggregationVerifier {
         ElementModP M = selection.value();
         ElementModP B = selection.message().data;
         if (!B.equals(Group.mult_p(M, productMi))) {
-          System.out.printf(" 11.A Tally Decryption failed for %s-%s.%n", key);
+          System.out.printf(" 11.A Tally Decryption failed for %s.%n", key);
           error = true;
         }
 
         ElementModP t = Group.int_to_p_unchecked(BigInteger.valueOf(selection.tally()));
         if (!M.equals(Group.g_pow_p(t))) {
-          System.out.printf(" 11.B Tally Decryption failed for %s-%s.%n", key);
+          System.out.printf(" 11.B Tally Decryption failed for %s.%n", key);
           error = true;
         }
       }
