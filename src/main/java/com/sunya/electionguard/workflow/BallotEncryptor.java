@@ -37,15 +37,12 @@ public class BallotEncryptor {
     String encryptDir;
 
     @Parameter(names = {"-guardians"},
-            description = "GuardianProvider classname", required = true)
-    String guardianProviderClass;
+            description = "CoefficientsProvider classname", required = true)
+    String coefficientsProviderClass;
 
     @Parameter(names = {"-ballots"},
             description = "BallotProvider classname")
     String ballotProviderClass;
-
-    @Parameter(names = {"-nballots"}, description = "Number of ballots to generate")
-    int nballots = 11;
 
     @Parameter(names = {"--proto"}, description = "Input election record is in proto format")
     boolean isProto = false;
@@ -92,9 +89,9 @@ public class BallotEncryptor {
       election = consumer.election();
     }
 
-    GuardianProvider guardianProvider = null;
+    CoefficientsProvider coefficientsProvider = null;
     try {
-      guardianProvider = makeGuardianProvider(cmdLine.guardianProviderClass);
+      coefficientsProvider = makeCoefficientsProvider(cmdLine.coefficientsProviderClass);
     } catch (Throwable t) {
       t.printStackTrace();
       System.exit(2);
@@ -108,9 +105,9 @@ public class BallotEncryptor {
       System.exit(3);
     }
 
-    System.out.printf(" Read from %s%n Ballots from %s%n Guardians from %s%n Write to %s%n",
-            cmdLine.inputDir, cmdLine.ballotProviderClass, cmdLine.guardianProviderClass, cmdLine.encryptDir);
-    encryptor = new BallotEncryptor(election, guardianProvider);
+    System.out.printf(" BallotEncryptor read from %s%n Ballots from %s%n Guardians from %s%n Write to %s%n",
+            cmdLine.inputDir, cmdLine.ballotProviderClass, cmdLine.coefficientsProviderClass, cmdLine.encryptDir);
+    encryptor = new BallotEncryptor(election, coefficientsProvider);
 
     try {
       for (Ballot.PlaintextBallot ballot : ballotProvider.ballots()) {
@@ -132,6 +129,8 @@ public class BallotEncryptor {
     try {
       // publish
       encryptor.publish(cmdLine.encryptDir);
+      System.exit(0);
+
     } catch (Throwable t) {
       t.printStackTrace();
       System.exit(5);
@@ -148,27 +147,27 @@ public class BallotEncryptor {
     return constructor.newInstance(election);
   }
 
-  public static GuardianProvider makeGuardianProvider(String className) throws Throwable {
+  public static CoefficientsProvider makeCoefficientsProvider(String className) throws Throwable {
     Class<?> c = Class.forName(className);
-    if (!(GuardianProvider.class.isAssignableFrom(c))) {
-      throw new IllegalArgumentException(String.format("%s must implement %s", c.getName(), GuardianProvider.class));
+    if (!(CoefficientsProvider.class.isAssignableFrom(c))) {
+      throw new IllegalArgumentException(String.format("%s must implement %s", c.getName(), CoefficientsProvider.class));
     }
-    java.lang.reflect.Constructor<GuardianProvider> constructor = (Constructor<GuardianProvider>) c.getConstructor();
+    java.lang.reflect.Constructor<CoefficientsProvider> constructor = (Constructor<CoefficientsProvider>) c.getConstructor();
     return constructor.newInstance();
   }
 
   ///////////////////////////////////////////////////////////////////////////
   private static final Random random = new Random(System.currentTimeMillis());
 
+  final Election.ElectionDescription election;
   final int numberOfGuardians;
   final int quorum;
-  final Election.ElectionDescription election;
 
   Group.ElementModP jointKey;
   Election.CiphertextElectionContext context;
   Election.InternalElectionDescription metadata;
 
-  Iterable<Guardian> guardians;
+  List<Guardian> guardians;
   List<KeyCeremony.CoefficientValidationSet> coefficientValidationSets = new ArrayList<>();
   List<Ballot.PlaintextBallot> originalBallots = new ArrayList<>();
 
@@ -177,11 +176,16 @@ public class BallotEncryptor {
   DataStore ballotStore;
   BallotBox ballotBox;
 
-  public BallotEncryptor(Election.ElectionDescription election, GuardianProvider guardianProvider) {
+  public BallotEncryptor(Election.ElectionDescription election, CoefficientsProvider coefficientsProvider) {
     this.election = election;
-    this.quorum = guardianProvider.quorum(); // LOOK where else can we get this? KeyCeremony.CeremonyDetails
-    this.guardians = guardianProvider.guardians();
-    this.numberOfGuardians = Iterables.size(this.guardians);
+    this.quorum = coefficientsProvider.quorum();
+    this.numberOfGuardians = Iterables.size(coefficientsProvider.guardianCoefficients());
+    Group.ElementModQ crypto_base_hash = Election.make_crypto_base_hash(this.numberOfGuardians, this.quorum, election);
+
+    this.guardians = new ArrayList<>();
+    for (KeyCeremony.CoefficientSet coeffSet : coefficientsProvider.guardianCoefficients()) {
+      this.guardians.add(Guardian.create(coeffSet, numberOfGuardians, quorum, crypto_base_hash));
+    }
 
     System.out.printf("%nKey Ceremony%n");
     if (!keyCeremony()) {

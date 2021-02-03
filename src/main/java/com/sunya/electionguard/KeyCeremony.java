@@ -123,9 +123,33 @@ import static com.sunya.electionguard.Group.*;
                                                   List<SchnorrProof> coefficient_proofs) {
       Preconditions.checkArgument(!Strings.isNullOrEmpty(guardian_id));
       return new AutoValue_KeyCeremony_CoefficientValidationSet(
-              Preconditions.checkNotNull(guardian_id),
+              guardian_id,
               ImmutableList.copyOf(coefficient_commitments),
               ImmutableList.copyOf(coefficient_proofs));
+    }
+  }
+
+  /** These are the secret coefficients Kij for the ith Guardian. */
+  @AutoValue
+  public abstract static class CoefficientSet {
+    public abstract String guardianId(); // Guardian.object_id
+    public abstract int guardianSequence(); // Guardian.sequence
+    public abstract ImmutableList<ElementModQ> coefficients(); // Kij, j=0..quorum-1
+
+    public static CoefficientSet create(String id, int guardian, List<ElementModQ> coefficients) {
+      Preconditions.checkArgument(!Strings.isNullOrEmpty(id));
+      Preconditions.checkArgument(guardian > 0);
+      Preconditions.checkNotNull(coefficients);
+      return new AutoValue_KeyCeremony_CoefficientSet(id, guardian, ImmutableList.copyOf(coefficients));
+    }
+
+    // This is what the Guardian needs.
+    ElectionKeyPair generate_election_key_pair(ElementModQ crypto_base_hash) {
+      ElectionPolynomial polynomial = ElectionPolynomial.generate_polynomial(coefficients(), crypto_base_hash);
+      ElGamal.KeyPair key_pair = new ElGamal.KeyPair(
+              polynomial.coefficients.get(0), polynomial.coefficient_commitments.get(0));
+      SchnorrProof proof = SchnorrProof.make_schnorr_proof(key_pair, rand_q(), crypto_base_hash);
+      return ElectionKeyPair.create(key_pair, proof, polynomial);
     }
   }
 

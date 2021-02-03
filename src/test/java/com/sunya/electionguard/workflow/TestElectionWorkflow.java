@@ -1,4 +1,4 @@
-package com.sunya.electionguard;
+package com.sunya.electionguard.workflow;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
@@ -20,7 +20,7 @@ public class TestElectionWorkflow {
     boolean isProto = false;
 
     @Parameter(names = {"-guardians"},
-            description = "GuardianProvider classname", required = true)
+            description = "CoefficientsProvider classname", required = true)
     String guardianProviderClass;
 
     @Parameter(names = {"-encryptDir"},
@@ -31,8 +31,9 @@ public class TestElectionWorkflow {
             description = "Directory where complete election record is published", required = true)
     String outputDir;
 
-    @Parameter(names = {"-nballots"}, description = "Number of ballots to generate")
-    int nballots = 11;
+    @Parameter(names = {"-ballots"},
+            description = "BallotProvider classname")
+    String ballotProviderClass;
 
     @Parameter(names = {"-h", "--help"}, description = "Display this help and exit", help = true)
     boolean help = false;
@@ -75,26 +76,45 @@ public class TestElectionWorkflow {
             "com.sunya.electionguard.workflow.BallotEncryptor",
             "-in", cmdLine.inputDir,
             "-guardians", cmdLine.guardianProviderClass,
-            "-out", cmdLine.encryptDir,
-            "-nballots", Integer.toString(cmdLine.nballots)
+            "-ballots", cmdLine.ballotProviderClass,
+            "-encryptDir", cmdLine.encryptDir
             );
     System.out.printf("%s", out);
+    if (command.statusReturn != 0) {
+      System.exit(command.statusReturn);
+    }
     System.out.printf("%n==============================================================%n");
 
-    /* BallotDecryptor
+    // BallotDecryptor
     RunCommand command2 = new RunCommand();
     Formatter out2 = new Formatter();
     command2.run(out2, "java", "-classpath", "build/libs/electionguard-java-0.7-SNAPSHOT-all.jar",
-            "com.sunya.electionguard.decryptor.BallotDecryptor",
-            "-in", cmdLine.encryptDir,
+            "com.sunya.electionguard.workflow.BallotDecryptor",
+            "-encryptDir", cmdLine.encryptDir,
+            "-guardians", cmdLine.guardianProviderClass,
             "-out", cmdLine.outputDir
     );
     System.out.printf("%s", out2);
-    System.out.printf("%n==============================================================%n"); */
+    if (command2.statusReturn != 0) {
+      System.exit(command2.statusReturn);
+    }
+    System.out.printf("%n==============================================================%n");
+
+    // BallotDecryptor
+    RunCommand command3 = new RunCommand();
+    Formatter out3 = new Formatter();
+    command3.run(out3, "java", "-classpath", "build/libs/electionguard-java-0.7-SNAPSHOT-all.jar",
+            "com.sunya.electionguard.verifier.VerifyElectionRecord",
+            "-in", cmdLine.outputDir,
+            "--proto"
+    );
+    System.out.printf("%s", out3);
+    System.exit(command3.statusReturn);
   }
 
   /** Run a command, output of which is added to out. */
   public static class RunCommand {
+    int statusReturn;
 
     public void run(Formatter out, String... args) {
       System.out.printf("> %s%n", String.join(" ", args));
@@ -119,8 +139,7 @@ public class TestElectionWorkflow {
       }
 
       try {
-        // this should return immediately since the process has closed stdout
-        int status = process.waitFor();
+        this.statusReturn = process.waitFor();
 
         try (BufferedReader stdout = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
           out.format("---StdErr---%n");
@@ -132,7 +151,7 @@ public class TestElectionWorkflow {
           out.format("%s%n", e.getMessage());
         }
 
-        out.format("---Done status = %s%n", status);
+        out.format("---Done status = %s%n", this.statusReturn);
       } catch (Exception e) {
         e.printStackTrace();
         out.format("%s", e.getMessage());

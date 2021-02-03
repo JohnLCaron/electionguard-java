@@ -35,7 +35,7 @@ public class TestEndToEndElectionIntegration {
   public void setUp() throws IOException {
     Path tmp = Files.createTempDirectory(null);
     tmp.toFile().deleteOnExit();
-    outputDir = "/home/snake/tmp/testEndToEnd";
+    outputDir = "/home/snake/tmp/publishEndToEnd";
     // outputDir = tmp.toAbsolutePath().toString();
     System.out.printf("=========== outputDir = %s%n", outputDir);
   }
@@ -126,7 +126,7 @@ public class TestEndToEndElectionIntegration {
     Group.ElementModQ crypto_base_hash = Election.make_crypto_base_hash(NUMBER_OF_GUARDIANS, QUORUM, description);
     // Setup Guardians
     for (int i = 1; i <= NUMBER_OF_GUARDIANS; i++) {
-      this.guardians.add(Guardian.create("guardian_" + i, i, NUMBER_OF_GUARDIANS, QUORUM, crypto_base_hash));
+      this.guardians.add(Guardian.createForTesting("guardian_" + i, i, NUMBER_OF_GUARDIANS, QUORUM, crypto_base_hash));
     }
 
     // Setup Mediator

@@ -106,14 +106,6 @@ message ContestDescriptionWithPlaceholders {
   repeated SelectionDescription placeholder_selections = 2;
 }
 
-// LOOK shouldnt be here
-message ElectionConstants {
-  ElementModP P = 1;
-  ElementModQ Q = 2;
-  ElementModP R = 3;
-  ElementModP G = 4;
-}
-
 message GeopoliticalUnit {
 
   enum ReportingUnitType {

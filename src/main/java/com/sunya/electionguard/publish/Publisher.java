@@ -28,7 +28,6 @@ public class Publisher {
   static final String CONSTANTS_FILE_NAME = "constants" + SUFFIX;
   static final String ENCRYPTED_TALLY_FILE_NAME = "encrypted_tally" + SUFFIX;
   static final String TALLY_FILE_NAME = "tally" + SUFFIX;
-  static final String BALLOT_CHAIN_FILE_NAME = "ballotChain.proto";
   static final String ELECTION_RECORD_FILE_NAME = "electionRecord.proto";
 
   static final String DEVICE_PREFIX = "device_";
@@ -69,8 +68,9 @@ public class Publisher {
 
   /** Delete everything in the output directory, but leave that directory. */
   private void removeAllFiles() throws IOException {
-    if (!publishDirectory.startsWith("publish")) {
-      throw new RuntimeException("Publish directory should start with 'publish'");
+    String filename = publishDirectory.getFileName().toString();
+    if (!filename.startsWith("publish")) {
+      throw new RuntimeException(String.format("Publish directory '%s' should start with 'publish'", filename));
     }
     Files.walk(publishDirectory)
             .filter(p -> !p.equals(publishDirectory))
@@ -97,10 +97,6 @@ public class Publisher {
 
   public Path electionRecordProtoFile() {
     return publishDirectory.resolve(ELECTION_RECORD_FILE_NAME).toAbsolutePath();
-  }
-
-  public Path ballotChainProtoFile() {
-    return publishDirectory.resolve(BALLOT_CHAIN_FILE_NAME).toAbsolutePath();
   }
 
   public Path encryptedTallyFile() {
@@ -216,7 +212,6 @@ public class Publisher {
             ciphertext_ballots,
             coefficient_validation_sets,
             null, null);
-
 
     try (FileOutputStream out = new FileOutputStream(electionRecordProtoFile().toFile())) {
       ElectionRecordProto.writeDelimitedTo(out);

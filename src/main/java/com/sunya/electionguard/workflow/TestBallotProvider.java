@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+// Create nballots randomly generated fake Ballots
 public class TestBallotProvider implements BallotProvider {
   private static final Random random = new Random(System.currentTimeMillis());
   private static final int nballots = 11;
@@ -18,7 +19,6 @@ public class TestBallotProvider implements BallotProvider {
     this.election = election;
   }
 
-  // Create nballots randomly generated fake Ballots
   @Override
   public Iterable<Ballot.PlaintextBallot> ballots() {
     // LOOK get rid of InternalElectionDescription

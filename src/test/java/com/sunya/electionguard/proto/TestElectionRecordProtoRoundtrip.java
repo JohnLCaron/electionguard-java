@@ -43,7 +43,7 @@ public class TestElectionRecordProtoRoundtrip {
 
   @Example
   public void testElectionRecordPublishRoundtrip() throws IOException {
-    String dest = "/home/snake/tmp/TestElectionRecordProtoRoundtrip/";
+    String dest = "/home/snake/tmp/electionguard/publishElectionRecordProtoRoundtrip/";
     Publisher publisher = new Publisher(dest, true, false);
     publisher.writeElectionRecordProto(
             consumer.election(),

@@ -1026,6 +1026,7 @@ public class Election {
   /**
    * The subset of the election description required by ElectionGuard to validate ballots are
    * correctly associated with an election.
+   * LOOK this could go away I think, or at least not be in this class
    */
   public static class InternalElectionDescription {
     final ElectionDescription description;
@@ -1095,7 +1096,7 @@ public class Election {
     }
   }
 
-  /** The constants for mathematical functions used for this election. */
+  /** The constants for mathematical functions used for this election. LOOK maybe another class? */
   @Immutable
   public static class ElectionConstants {
     public final BigInteger large_prime; // large prime or p
@@ -1210,6 +1211,7 @@ public class Election {
    * @param quorum: The quorum of guardians necessary to decrypt an election.  Must be less than `number_of_guardians`
    * @param elgamal_public_key: the public key of the election
    * @param description: the election description
+   * LOOK doesnt belong in this class
    */
   public static CiphertextElectionContext make_ciphertext_election_context(
           int number_of_guardians,
