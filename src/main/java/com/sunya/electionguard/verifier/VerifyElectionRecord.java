@@ -1,25 +1,66 @@
 package com.sunya.electionguard.verifier;
 
+import com.beust.jcommander.JCommander;
+import com.beust.jcommander.Parameter;
+import com.beust.jcommander.ParameterException;
 import com.sunya.electionguard.proto.ElectionRecordFromProto;
 import com.sunya.electionguard.publish.Consumer;
+import com.sunya.electionguard.workflow.BallotEncryptor;
 
 import java.io.IOException;
 
 /** Verify all sections of the spec, on a completed election record. */
-public class VerifyElectionRecordMain {
+public class VerifyElectionRecord {
+
+  private static class CommandLine {
+    @Parameter(names = {"-in"},
+            description = "Directory containing input election record", required = true)
+    String inputDir;
+
+    @Parameter(names = {"--proto"}, description = "Input election record is in proto format")
+    boolean isProto = false;
+
+    @Parameter(names = {"-h", "--help"}, description = "Display this help and exit", help = true)
+    boolean help = false;
+
+    private final JCommander jc;
+
+    public CommandLine(String progName, String[] args) throws ParameterException {
+      this.jc = new JCommander(this);
+      this.jc.parse(args);
+      jc.setProgramName(progName); // Displayed in the usage information.
+    }
+
+    public void printUsage() {
+      jc.usage();
+    }
+  }
 
   public static void main(String[] args) throws IOException {
-    String topdir = args[0];
-    boolean isProtoElectionRecord = args.length > 1 && args[1].contains("proto");
+    String progName = BallotEncryptor.class.getName();
+    CommandLine cmdLine = null;
+
+    try {
+      cmdLine = new CommandLine(progName, args);
+      if (cmdLine.help) {
+        cmdLine.printUsage();
+        return;
+      }
+    } catch (ParameterException e) {
+      System.err.println(e.getMessage());
+      System.err.printf("Try '%s --help' for more information.%n", progName);
+      System.exit(1);
+    }
 
     ElectionRecord electionRecord;
-    if (isProtoElectionRecord) {
-      electionRecord = ElectionRecordFromProto.read(topdir);
+    Consumer consumer = new Consumer(cmdLine.inputDir);
+    if (cmdLine.isProto) {
+      electionRecord = ElectionRecordFromProto.read(consumer.electionRecordProtoFile().toString());
     } else {
-      Consumer consumer = new Consumer(topdir);
       electionRecord = consumer.getElectionRecord();
     }
 
+    System.out.printf(" VerifyElectionRecord read from %s isProto = %s%n", cmdLine.inputDir, cmdLine.isProto);
     verifyElectionRecord(electionRecord);
   }
 

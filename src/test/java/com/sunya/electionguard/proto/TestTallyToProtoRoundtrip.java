@@ -16,7 +16,7 @@ public class TestTallyToProtoRoundtrip {
 
   @BeforeContainer
   public static void setup() throws IOException {
-    publisher = new Publisher(TestElectionDescriptionToProtoRoundtrip.testElectionRecord, false);
+    publisher = new Publisher(TestElectionDescriptionToProtoRoundtrip.testElectionRecord, false, false);
   }
 
   @Example

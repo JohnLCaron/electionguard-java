@@ -27,6 +27,7 @@ import static com.sunya.electionguard.Group.rand_q;
  * <p>
  * The 0-index coefficient is used for a secret key which can
  * be discovered by a quorum of n guardians corresponding to n coefficients.
+ * // LOOK this is what is needed to create the same Guardian.
  */
 @Immutable
 public class ElectionPolynomial {
@@ -40,11 +41,34 @@ public class ElectionPolynomial {
   /** A proof of possession of the private key for each secret coefficient. */
   final ImmutableList<SchnorrProof> coefficient_proofs;
 
+  // LOOK test all sizes == quorum
   ElectionPolynomial(List<Group.ElementModQ> coefficients, List<Group.ElementModP> coefficient_commitments,
                      List<SchnorrProof> coefficient_proofs) {
     this.coefficients = ImmutableList.copyOf(coefficients);
     this.coefficient_commitments = ImmutableList.copyOf(coefficient_commitments);
     this.coefficient_proofs = ImmutableList.copyOf(coefficient_proofs);
+  }
+
+  /**
+   * Generates a polynomial when the coefficients are already chosen
+   *
+   * @param coefficients:           the k coefficients of the polynomial
+   * @param crypto_base_hash:       needed for the Schnorr proof.
+   * @return Polynomial used to share election keys
+   */
+  static ElectionPolynomial generate_polynomial(List<Group.ElementModQ> coefficients, ElementModQ crypto_base_hash) {
+    ArrayList<Group.ElementModP> commitments = new ArrayList<>();
+    ArrayList<SchnorrProof> proofs = new ArrayList<>();
+
+    for (Group.ElementModQ coefficient : coefficients) {
+      Group.ElementModP commitment = g_pow_p(coefficient);
+      // TODO Alternate schnorr proof method that doesn't need KeyPair
+      SchnorrProof proof = SchnorrProof.make_schnorr_proof(new ElGamal.KeyPair(coefficient, commitment), rand_q(), crypto_base_hash);
+      commitments.add(commitment);
+      proofs.add(proof);
+    }
+
+    return new ElectionPolynomial(coefficients, commitments, proofs);
   }
 
   /**

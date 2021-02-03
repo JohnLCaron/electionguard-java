@@ -28,7 +28,6 @@ public class Publisher {
   static final String CONSTANTS_FILE_NAME = "constants" + SUFFIX;
   static final String ENCRYPTED_TALLY_FILE_NAME = "encrypted_tally" + SUFFIX;
   static final String TALLY_FILE_NAME = "tally" + SUFFIX;
-  static final String BALLOT_CHAIN_FILE_NAME = "ballotChain.proto";
   static final String ELECTION_RECORD_FILE_NAME = "electionRecord.proto";
 
   static final String DEVICE_PREFIX = "device_";
@@ -45,7 +44,7 @@ public class Publisher {
   private final Path ballotsDirPath;
   private final Path spoiledDirPath;
 
-  public Publisher(String where, boolean removeAllFiles) throws IOException {
+  public Publisher(String where, boolean removeAllFiles, boolean createDirs) throws IOException {
     this.publishDirectory = Path.of(where);
     this.devicesDirPath = publishDirectory.resolve(DEVICES_DIR);
     this.coefficientsDirPath = publishDirectory.resolve(COEFFICIENTS_DIR);
@@ -55,18 +54,29 @@ public class Publisher {
     if (removeAllFiles) {
       removeAllFiles();
     }
+    if (createDirs) {
+      createDirs();
+    }
+  }
+
+  private void createDirs() throws IOException {
     Files.createDirectories(spoiledDirPath);
     Files.createDirectories(ballotsDirPath);
     Files.createDirectories(coefficientsDirPath);
     Files.createDirectories(devicesDirPath);
   }
 
-  /** Delete everything in the output directory. */
-  public void removeAllFiles() throws IOException {
+  /** Delete everything in the output directory, but leave that directory. */
+  private void removeAllFiles() throws IOException {
+    String filename = publishDirectory.getFileName().toString();
+    if (!filename.startsWith("publish")) {
+      throw new RuntimeException(String.format("Publish directory '%s' should start with 'publish'", filename));
+    }
     Files.walk(publishDirectory)
+            .filter(p -> !p.equals(publishDirectory))
             .map(Path::toFile)
             .sorted((o1, o2) -> -o1.compareTo(o2))
-            .forEach(File::delete);
+            .forEach( f-> f.delete());
   }
 
   public Path electionFile() {
@@ -87,10 +97,6 @@ public class Publisher {
 
   public Path electionRecordProtoFile() {
     return publishDirectory.resolve(ELECTION_RECORD_FILE_NAME).toAbsolutePath();
-  }
-
-  public Path ballotChainProtoFile() {
-    return publishDirectory.resolve(BALLOT_CHAIN_FILE_NAME).toAbsolutePath();
   }
 
   public Path encryptedTallyFile() {
@@ -177,16 +183,35 @@ public class Publisher {
           ElectionConstants constants,
           Iterable<Encrypt.EncryptionDevice> devices,
           Iterable<Ballot.CiphertextAcceptedBallot> ciphertext_ballots,
-          // Iterable<Ballot.PlaintextBallot> spoiled_ballots,
+          Iterable<KeyCeremony.CoefficientValidationSet> coefficient_validation_sets,
           PublishedCiphertextTally ciphertext_tally,
-          PlaintextTally decryptedTally,
+          PlaintextTally decryptedTally) throws IOException {
+
+    ElectionRecordProto.ElectionRecord ElectionRecordProto = ElectionRecordToProto.buildElectionRecord(
+            description, context, constants, devices,
+            ciphertext_ballots, coefficient_validation_sets,
+            ciphertext_tally, decryptedTally);
+
+
+    try (FileOutputStream out = new FileOutputStream(electionRecordProtoFile().toFile())) {
+      ElectionRecordProto.writeDelimitedTo(out);
+    }
+  }
+
+  /** Publishes the election record as proto. */
+  public void writeEncryptionRecordProto(
+          ElectionDescription description,
+          CiphertextElectionContext context,
+          ElectionConstants constants,
+          Iterable<Encrypt.EncryptionDevice> devices,
+          Iterable<Ballot.CiphertextAcceptedBallot> ciphertext_ballots,
           Iterable<KeyCeremony.CoefficientValidationSet> coefficient_validation_sets) throws IOException {
 
     ElectionRecordProto.ElectionRecord ElectionRecordProto = ElectionRecordToProto.buildElectionRecord(
             description, context, constants, devices,
-            ciphertext_ballots, ciphertext_tally, decryptedTally,
-            coefficient_validation_sets);
-
+            ciphertext_ballots,
+            coefficient_validation_sets,
+            null, null);
 
     try (FileOutputStream out = new FileOutputStream(electionRecordProtoFile().toFile())) {
       ElectionRecordProto.writeDelimitedTo(out);

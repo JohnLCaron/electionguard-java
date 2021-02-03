@@ -1,5 +1,6 @@
 package com.sunya.electionguard.proto;
 
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.ByteString;
 import com.sunya.electionguard.Ballot;
 import com.sunya.electionguard.Election;
@@ -40,12 +41,13 @@ public class ElectionRecordFromProto {
             proto.getDeviceList().stream().map(ElectionRecordFromProto::convertDevice).collect(Collectors.toList());
     List<Ballot.CiphertextAcceptedBallot> castBallots =
             proto.getCastBallotsList().stream().map(CiphertextBallotFromProto::translateFromProto).collect(Collectors.toList());
-    // List<Ballot.PlaintextBallot> spoiledBallots =
-    //        proto.getSpoiledBallotsList().stream().map(PlaintextBallotFromProto::translateFromProto).collect(Collectors.toList());
     List<KeyCeremony.CoefficientValidationSet> guardianCoefficients =
-            proto.getGuardianCoefficientsList().stream().map(ElectionRecordFromProto::convertCoefficients).collect(Collectors.toList());
-    PublishedCiphertextTally ciphertextTally = CiphertextTallyFromProto.translateFromProto(proto.getCiphertextTally());
-    PlaintextTally decryptedTally = PlaintextTallyFromProto.translateFromProto(proto.getDecryptedTally());
+            proto.getGuardianCoefficientsList().stream().map(ElectionRecordFromProto::convertValidationCoefficients).collect(Collectors.toList());
+
+    PublishedCiphertextTally ciphertextTally = proto.hasCiphertextTally() ?
+            CiphertextTallyFromProto.translateFromProto(proto.getCiphertextTally()) : null;
+    PlaintextTally decryptedTally = proto.hasDecryptedTally() ?
+            PlaintextTallyFromProto.translateFromProto(proto.getDecryptedTally()) : null;
 
     return new ElectionRecord(constants, context, description, devices, castBallots,
             guardianCoefficients, ciphertextTally, decryptedTally);
@@ -78,7 +80,7 @@ public class ElectionRecordFromProto {
     return new Encrypt.EncryptionDevice(device.getUuid(), device.getLocation());
   }
 
-  static KeyCeremony.CoefficientValidationSet convertCoefficients(KeyCeremonyProto.CoefficientValidationSet coeff) {
+  static KeyCeremony.CoefficientValidationSet convertValidationCoefficients(KeyCeremonyProto.CoefficientValidationSet coeff) {
    List<Group.ElementModP> coefficient_commitments = coeff.getCoefficientCommitmentsList().stream()
             .map(CommonConvert::convertElementModP)
             .collect(Collectors.toList());
@@ -100,5 +102,32 @@ public class ElectionRecordFromProto {
             convertElementModP(proof.getCommitment()),
             convertElementModQ(proof.getChallenge()),
             convertElementModQ(proof.getResponse()));
+  }
+
+  public static ImmutableList<KeyCeremony.CoefficientSet> readCoefficientSet(String filename) throws IOException {
+    KeyCeremonyProto.CoefficientSets proto;
+    try (FileInputStream inp = new FileInputStream(filename)) {
+      proto = KeyCeremonyProto.CoefficientSets.parseDelimitedFrom(inp);
+    }
+    return convertCoefficientSet(proto);
+  }
+
+  private static ImmutableList<KeyCeremony.CoefficientSet>  convertCoefficientSet(KeyCeremonyProto.CoefficientSets coeffSets) {
+    ImmutableList.Builder<KeyCeremony.CoefficientSet> builder = ImmutableList.builder();
+    for (KeyCeremonyProto.CoefficientSets.CoefficientSet coeffSet : coeffSets.getGuardianSetsList()) {
+      builder.add(convertCoefficients(coeffSet));
+    }
+    return builder.build();
+  }
+
+  private static KeyCeremony.CoefficientSet convertCoefficients(KeyCeremonyProto.CoefficientSets.CoefficientSet coeff) {
+    List<Group.ElementModQ> coefficients = coeff.getCoefficientsList().stream()
+            .map(CommonConvert::convertElementModQ)
+            .collect(Collectors.toList());
+
+    return KeyCeremony.CoefficientSet.create(
+            coeff.getGuardianId(),
+            coeff.getGuardianSequence(),
+            coefficients);
   }
 }

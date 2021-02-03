@@ -106,13 +106,6 @@ message ContestDescriptionWithPlaceholders {
   repeated SelectionDescription placeholder_selections = 2;
 }
 
-message ElectionConstants {
-  ElementModP P = 1;
-  ElementModQ Q = 2;
-  ElementModP R = 3;
-  ElementModP G = 4;
-}
-
 message GeopoliticalUnit {
 
   enum ReportingUnitType {
@@ -153,6 +146,7 @@ message GeopoliticalUnit {
   ContactInformation contact_information = 4;
 }
 
+// LOOK shouldnt be here
 message InternalElectionDescription {
   ElectionDescription description = 1;
   repeated GeopoliticalUnit geopolitical_units = 2;

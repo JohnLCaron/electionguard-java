@@ -292,7 +292,7 @@ public class DecryptionShare {
 
   /** A Guardian's Partial Decryption Share of an election tally. */
   @AutoValue
-  static abstract class TallyDecryptionShare {
+  public static abstract class TallyDecryptionShare {
     /** The Available Guardian that this share belongs to. */
     abstract String guardian_id(); // guardian.object_id
 

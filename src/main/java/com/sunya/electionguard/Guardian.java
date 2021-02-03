@@ -24,6 +24,7 @@ public class Guardian extends ElectionObjectBase {
   private final Auxiliary.KeyPair auxiliary_keys;
   private final ElectionKeyPair election_keys; // Ki = election keypair for ith Guardian
 
+  // LOOK maybe all of this should not be here - more like a helper class? set in DecryptionMediator
   // The collection of this guardian's partial key backups that will be shared to other guardians
   private final Map<String, ElectionPartialKeyBackup> backups_to_share; // Map(GUARDIAN_ID, ElectionPartialKeyBackup)
 
@@ -42,21 +43,17 @@ public class Guardian extends ElectionObjectBase {
 
   /**
    * Create a guardian for production.
-   * LOOK cant get a Guardian without generating a random key for it. No use case for a Guardian with a given key?
-   *   Who creates these? What are the use cases?
-   * @param id: the unique identifier for the guardian
-   * @param sequence_order: a unique number in (0, 256) that identifies this guardian
+   * @param coeff the secret polynomial coefficients
    * @param number_of_guardians: the total number of guardians that will participate in the election
    * @param quorum: the count of guardians necessary to decrypt
    * @param crypto_base_hash the election crypto hash, Q is the spec.
    */
-  public static Guardian create(String id,
-                                int sequence_order,
+  public static Guardian create(KeyCeremony.CoefficientSet coeff,
                                 int number_of_guardians,
                                 int quorum,
                                 ElementModQ crypto_base_hash) {
 
-    return new Guardian(id, sequence_order, number_of_guardians, quorum, null, crypto_base_hash);
+    return new Guardian(coeff, number_of_guardians, quorum, crypto_base_hash);
   }
 
   /**
@@ -90,7 +87,7 @@ public class Guardian extends ElectionObjectBase {
     this.ceremony_details = CeremonyDetails.create(number_of_guardians, quorum);
     this.crypto_base_hash = crypto_base_hash;
     this.auxiliary_keys = KeyCeremony.generate_rsa_auxiliary_key_pair();
-    this.election_keys =  KeyCeremony.generate_election_key_pair(this.ceremony_details.quorum(), nonce_seed, crypto_base_hash);
+    this.election_keys =  KeyCeremony.generate_election_key_pair(quorum, nonce_seed, crypto_base_hash);
 
     this.backups_to_share = new HashMap<>();
     this.otherGuardianAuxiliaryKeys = new HashMap<>();
@@ -102,7 +99,30 @@ public class Guardian extends ElectionObjectBase {
     this.save_election_public_key(this.share_election_public_key());
   }
 
-  CeremonyDetails ceremony_details() {
+  private Guardian(KeyCeremony.CoefficientSet coeff,
+                   int number_of_guardians,
+                   int quorum,
+                   ElementModQ crypto_base_hash) {
+
+    super(coeff.guardianId());
+    Preconditions.checkArgument(coeff.guardianSequence() > 0 && coeff.guardianSequence() < 256);
+    this.sequence_order = coeff.guardianSequence();
+    this.ceremony_details = CeremonyDetails.create(number_of_guardians, quorum);
+    this.crypto_base_hash = crypto_base_hash;
+    this.auxiliary_keys = KeyCeremony.generate_rsa_auxiliary_key_pair();
+    this.election_keys =  coeff.generate_election_key_pair(crypto_base_hash);
+
+    this.backups_to_share = new HashMap<>();
+    this.otherGuardianAuxiliaryKeys = new HashMap<>();
+    this.otherGuardianElectionKeys = new HashMap<>();
+    this.otherGuardianPartialKeyBackups = new HashMap<>();
+    this.otherGuardianVerifications = new HashMap<>();
+
+    this.save_auxiliary_public_key(this.share_auxiliary_public_key());
+    this.save_election_public_key(this.share_election_public_key());
+  }
+
+  public CeremonyDetails ceremony_details() {
     return ceremony_details;
   }
 
@@ -113,31 +133,6 @@ public class Guardian extends ElectionObjectBase {
   ElementModQ crypto_base_hash() {
     return crypto_base_hash;
   }
-
-  /*
-   * Reset guardian to initial state.
-   * @param number_of_guardians: Number of guardians in election
-   * @param quorum: Quorum of guardians required to decrypt
-   *
-  void reset(int number_of_guardians, int quorum) {
-    this._backups_to_share.clear();
-    this._guardian_auxiliary_public_keys.clear();
-    this._guardian_election_public_keys.clear();
-    this._guardian_election_partial_key_backups.clear();
-    this._guardian_election_partial_key_verifications.clear();
-    this.set_ceremony_details(number_of_guardians, quorum);
-    this.generate_auxiliary_key_pair();
-    this.generate_election_key_pair(null);
-  }
-
-  /*
-   * Set ceremony details for election.
-   * @param number_of_guardians: Number of guardians in election
-   * @param quorum: Quorum of guardians required to decrypt
-   *
-  private void set_ceremony_details(int number_of_guardians, int quorum) {
-    this.ceremony_details = CeremonyDetails.create(number_of_guardians, quorum);
-  } */
 
   /**
    * Share public election and auxiliary keys for guardian.
@@ -214,7 +209,7 @@ public class Guardian extends ElectionObjectBase {
   }
 
   /** Share coefficient validation set to be used for validating the coefficients post election. */
-  CoefficientValidationSet share_coefficient_validation_set() {
+  public CoefficientValidationSet share_coefficient_validation_set() {
     return KeyCeremony.get_coefficient_validation_set(this.object_id, this.election_keys.polynomial());
   }
 

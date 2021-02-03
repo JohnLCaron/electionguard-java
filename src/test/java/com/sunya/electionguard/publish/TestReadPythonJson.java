@@ -16,7 +16,7 @@ public class TestReadPythonJson {
 
   @BeforeContainer
   public static void setup() throws IOException {
-    publisher = new Publisher(pythonModified, false);
+    publisher = new Publisher(pythonModified, false, false);
   }
 
   @Example

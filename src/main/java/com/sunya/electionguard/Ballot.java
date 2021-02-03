@@ -214,7 +214,7 @@ public class Ballot {
      * See: https://docs.python.org/3/distutils/apiref.html#distutils.util.strtobool
      * @return an integer 0 or 1 for valid data, or 0 if the data is malformed
      */
-    int to_int() {
+    public int to_int() {
       boolean asBool;
       try {
         asBool = Utils.strtobool(vote);

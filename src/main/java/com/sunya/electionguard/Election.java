@@ -1026,13 +1026,14 @@ public class Election {
   /**
    * The subset of the election description required by ElectionGuard to validate ballots are
    * correctly associated with an election.
+   * LOOK this could go away I think, or at least not be in this class
    */
   public static class InternalElectionDescription {
     final ElectionDescription description;
 
     final ImmutableList<GeopoliticalUnit> geopolitical_units;
     final ImmutableList<ContestDescriptionWithPlaceholders> contests;
-    final ImmutableList<BallotStyle> ballot_styles;
+    public final ImmutableList<BallotStyle> ballot_styles;
     final Group.ElementModQ description_hash;
 
     public InternalElectionDescription(ElectionDescription description) {
@@ -1053,14 +1054,12 @@ public class Election {
     }
 
     /** Get contests that have the given ballot style. */
-    List<ContestDescriptionWithPlaceholders> get_contests_for(String ballot_style_id) {
+    public List<ContestDescriptionWithPlaceholders> get_contests_for(String ballot_style_id) {
       Optional<BallotStyle> style = this.get_ballot_style(ballot_style_id);
       if (style.isEmpty() || style.get().geopolitical_unit_ids.isEmpty()) {
         return new ArrayList<>();
       }
-      // gp_unit_ids = [gp_unit_id for gp_unit_id in style.geopolitical_unit_ids]
       List<String> gp_unit_ids = new ArrayList<>(style.get().geopolitical_unit_ids);
-      // contests = list(filter(lambda i: i.electoral_district_id in gp_unit_ids, this.contests)
       return this.contests.stream().filter(c -> gp_unit_ids.contains(c.electoral_district_id)).collect(Collectors.toList());
     }
 
@@ -1097,7 +1096,7 @@ public class Election {
     }
   }
 
-  /** The constants for mathematical functions used for this election. */
+  /** The constants for mathematical functions used for this election. LOOK maybe another class? */
   @Immutable
   public static class ElectionConstants {
     public final BigInteger large_prime; // large prime or p
@@ -1212,6 +1211,7 @@ public class Election {
    * @param quorum: The quorum of guardians necessary to decrypt an election.  Must be less than `number_of_guardians`
    * @param elgamal_public_key: the public key of the election
    * @param description: the election description
+   * LOOK doesnt belong in this class
    */
   public static CiphertextElectionContext make_ciphertext_election_context(
           int number_of_guardians,

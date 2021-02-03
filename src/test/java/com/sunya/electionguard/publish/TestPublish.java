@@ -53,14 +53,13 @@ public class TestPublish {
     PublishedCiphertextTally ciphertext_tally =
             new CiphertextTallyBuilder("CiphertextTallyId", metadata, context).build();
 
-    Publisher publisher = new Publisher(outputDir, false);
+    Publisher publisher = new Publisher(outputDir, false, true);
     publisher.writeElectionRecordJson(
             description,
             context,
             new ElectionConstants(),
             ImmutableList.of(),
             ImmutableList.of(),
-            // ImmutableList.of(),
             ciphertext_tally,
             plaintext_tally,
             coefficients);
@@ -79,7 +78,7 @@ public class TestPublish {
 
     List<Guardian> guardians = ImmutableList.of(Guardian.createForTesting("GuardianId", 1, 1, 1, null));
 
-    Publisher publisher = new Publisher(outputDir, false);
+    Publisher publisher = new Publisher(outputDir, false, false);
     publisher.publish_private_data(
             plaintext_ballots,
             encrypted_ballots,

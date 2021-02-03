@@ -71,7 +71,7 @@ public class Encrypt {
     }
 
     /** Encrypt the specified ballot using the cached election context. */
-    Optional<CiphertextBallot> encrypt(PlaintextBallot ballot) {
+    public Optional<CiphertextBallot> encrypt(PlaintextBallot ballot) {
       Optional<CiphertextBallot> encrypted_ballot =
               encrypt_ballot(ballot, this.metadata, this.encryption, this.last_hash, Optional.empty(), true);
       if (encrypted_ballot.isPresent()) {
@@ -280,6 +280,7 @@ public class Encrypt {
           }
         }
 
+        // LOOK what is this?
         if (!has_selection) {
           // No selection was made for this possible value
           // so we explicitly set it to false

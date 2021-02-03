@@ -5,6 +5,7 @@ import com.sunya.electionguard.verifier.ElectionRecord;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,7 +18,7 @@ public class Consumer {
   }
 
   public Consumer(String topDir) throws IOException {
-    publisher = new Publisher(topDir, false);
+    publisher = new Publisher(topDir, false, false);
   }
 
   public Election.ElectionDescription election() throws IOException {
@@ -60,15 +61,6 @@ public class Consumer {
     return result;
   }
 
-  /* public List<Ballot.PlaintextBallot> spoiled() throws IOException {
-    List<Ballot.PlaintextBallot> result = new ArrayList<>();
-    for (File file : publisher.spoiledFiles()) {
-      Ballot.PlaintextBallot fromPython = ConvertFromJson.readPlaintextBallot(file.getAbsolutePath());
-      result.add(fromPython);
-    }
-    return result;
-  } */
-
   public List<KeyCeremony.CoefficientValidationSet> guardianCoefficients() throws IOException {
     List<KeyCeremony.CoefficientValidationSet> result = new ArrayList<>();
     for (File file : publisher.coefficientsFiles()) {
@@ -78,6 +70,10 @@ public class Consumer {
     return result;
   }
 
+  public Path electionRecordProtoFile() {
+    return publisher.electionRecordProtoFile();
+  }
+
   public ElectionRecord getElectionRecord() throws IOException {
     return new ElectionRecord(
             this.constants(),
@@ -85,7 +81,6 @@ public class Consumer {
             this.election(),
             this.devices(),
             this.ballots(),
-            // this.spoiled(),
             this.guardianCoefficients(),
             this.ciphertextTally(),
             this.decryptedTally());

@@ -10,6 +10,10 @@ import com.sunya.electionguard.PublishedCiphertextTally;
 import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.SchnorrProof;
 
+import javax.annotation.Nullable;
+
+import java.util.List;
+
 import static com.sunya.electionguard.proto.ElectionRecordProto.ElectionRecord;
 import static com.sunya.electionguard.proto.CommonConvert.convertElementModP;
 import static com.sunya.electionguard.proto.CommonConvert.convertElementModQ;
@@ -22,10 +26,9 @@ public class ElectionRecordToProto {
           Election.ElectionConstants constants,
           Iterable<Encrypt.EncryptionDevice> devices,
           Iterable<Ballot.CiphertextAcceptedBallot> castBallots,
-          // Iterable<Ballot.PlaintextBallot> spoiled_ballots,
-          PublishedCiphertextTally ciphertext_tally,
-          PlaintextTally decryptedTally,
-          Iterable<KeyCeremony.CoefficientValidationSet> guardianCoefficients) {
+          Iterable<KeyCeremony.CoefficientValidationSet> guardianCoefficients,
+          @Nullable PublishedCiphertextTally ciphertext_tally,
+          @Nullable PlaintextTally decryptedTally) {
 
     ElectionRecord.Builder builder = ElectionRecord.newBuilder();
     builder.setConstants( convertConstants(constants));
@@ -37,19 +40,19 @@ public class ElectionRecordToProto {
     }
 
     for (KeyCeremony.CoefficientValidationSet coeff : guardianCoefficients) {
-      builder.addGuardianCoefficients(convertCoefficients(coeff));
+      builder.addGuardianCoefficients(convertValidationCoefficients(coeff));
     }
 
     for (Ballot.CiphertextAcceptedBallot ballot : castBallots) {
       builder.addCastBallots(CiphertextBallotToProto.translateToProto(ballot));
     }
 
-    /* for (Ballot.PlaintextBallot ballot : spoiled_ballots) {
-      builder.addSpoiledBallots(PlaintextBallotToProto.translateToProto(ballot));
-    } */
-
-    builder.setCiphertextTally( CiphertextTallyToProto.translateToProto(ciphertext_tally));
-    builder.setDecryptedTally( PlaintextTallyToProto.translateToProto(decryptedTally));
+    if (ciphertext_tally != null) {
+      builder.setCiphertextTally(CiphertextTallyToProto.translateToProto(ciphertext_tally));
+    }
+    if (decryptedTally != null) {
+      builder.setDecryptedTally(PlaintextTallyToProto.translateToProto(decryptedTally));
+    }
     return builder.build();
   }
 
@@ -80,13 +83,13 @@ public class ElectionRecordToProto {
     return builder.build();
   }
 
-  static KeyCeremonyProto.CoefficientValidationSet convertCoefficients(KeyCeremony.CoefficientValidationSet guardianCoefficientSet) {
+  static KeyCeremonyProto.CoefficientValidationSet convertValidationCoefficients(KeyCeremony.CoefficientValidationSet validationSet) {
     KeyCeremonyProto.CoefficientValidationSet.Builder builder = KeyCeremonyProto.CoefficientValidationSet.newBuilder();
-    builder.setOwnerId(guardianCoefficientSet.owner_id());
-    for (Group.ElementModP commitment : guardianCoefficientSet.coefficient_commitments()) {
+    builder.setOwnerId(validationSet.owner_id());
+    for (Group.ElementModP commitment : validationSet.coefficient_commitments()) {
       builder.addCoefficientCommitments(convertElementModP(commitment));
     }
-    for (SchnorrProof proof : guardianCoefficientSet.coefficient_proofs()) {
+    for (SchnorrProof proof : validationSet.coefficient_proofs()) {
       builder.addCoefficientProofs(convertSchnorrProof(proof));
     }
     return builder.build();
@@ -98,6 +101,24 @@ public class ElectionRecordToProto {
     builder.setCommitment(convertElementModP(proof.commitment));
     builder.setChallenge(convertElementModQ(proof.challenge));
     builder.setResponse(convertElementModQ(proof.response));
+    return builder.build();
+  }
+
+  public static KeyCeremonyProto.CoefficientSets convertCoefficientSet(List<KeyCeremony.CoefficientSet> coeffSets) {
+    KeyCeremonyProto.CoefficientSets.Builder builder = KeyCeremonyProto.CoefficientSets.newBuilder();
+    for (KeyCeremony.CoefficientSet coeffSet : coeffSets) {
+      builder.addGuardianSets(convertCoefficients(coeffSet));
+    }
+    return builder.build();
+  }
+
+  private static KeyCeremonyProto.CoefficientSets.CoefficientSet convertCoefficients(KeyCeremony.CoefficientSet coeffSet) {
+    KeyCeremonyProto.CoefficientSets.CoefficientSet.Builder builder = KeyCeremonyProto.CoefficientSets.CoefficientSet.newBuilder();
+    builder.setGuardianId(coeffSet.guardianId());
+    builder.setGuardianSequence(coeffSet.guardianSequence());
+    for (Group.ElementModQ coeff : coeffSet.coefficients()) {
+      builder.addCoefficients(convertElementModQ(coeff));
+    }
     return builder.build();
   }
 }

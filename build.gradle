@@ -79,6 +79,7 @@ test {
 
 dependencies {
     // Annotations: Nullable
+    implementation 'com.beust:jcommander:1.80'
     implementation 'com.google.code.findbugs:jsr305:3.0.2'
     implementation 'com.google.guava:guava:28.0-jre'
     implementation 'com.google.protobuf:protobuf-java:3.14.0'
@@ -108,3 +109,15 @@ protobuf {
 
 // Add generated sources to the main sourceSet, which keeps intellij happy.
 sourceSets.main.java.srcDirs += ['build/generated/source/proto/main/java']
+
+task fatJar(type: Jar) {
+    manifest {
+        attributes 'Main-Class': 'com.yourpackage.Main'
+    }
+    archiveClassifier = "all"
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    with jar
+}

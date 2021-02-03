@@ -5,7 +5,17 @@ import "com/sunya/electionguard/proto/common.proto";
 option java_package = "com.sunya.electionguard.proto";
 option java_outer_classname = "KeyCeremonyProto";
 
-// Set of validation pieces for election key coefficients
+// Set of polynomial coefficients, one for each guardian
+message CoefficientSets {
+  message CoefficientSet {
+    string guardian_id = 1;
+    uint32 guardian_sequence = 2; // i=1,number of guardians
+    repeated ElementModQ coefficients = 3; // Kij, k=0...quorum-1
+  }
+  repeated CoefficientSet guardianSets = 1; // size = number of guardians
+}
+
+// Set of coefficient validation pieces, one for each available guardian
 message CoefficientValidationSet {
   string owner_id = 1; // guardian id
   repeated ElementModP coefficient_commitments = 2;

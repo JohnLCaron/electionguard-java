@@ -62,7 +62,7 @@ public class TimeIntegrationSteps {
   // Step 4 - Decrypt Tally
   CiphertextTallyBuilder ciphertext_tally;
   PlaintextTally decryptedTally;
-  DecryptionMediator decrypter;
+  DecryptionMediator decryptionMediator;
 
   public TimeIntegrationSteps(int nballots) throws IOException {
     Path tmp = Files.createTempDirectory(null);
@@ -147,7 +147,8 @@ public class TimeIntegrationSteps {
     System.out.printf("%n1. Key Ceremony%n");
     // Setup Guardians
     for (int i = 0; i < NUMBER_OF_GUARDIANS; i++) {
-      this.guardians.add(Guardian.createForTesting("guardian_" + i, i, NUMBER_OF_GUARDIANS, QUORUM, null));
+      int sequence = i + 1;
+      this.guardians.add(Guardian.createForTesting("guardian_" + sequence, sequence, NUMBER_OF_GUARDIANS, QUORUM, null));
     }
 
     // Setup Mediator
@@ -254,17 +255,17 @@ public class TimeIntegrationSteps {
     this.ciphertext_tally.tally_ballots(this.ballot_store);
 
     // Configure the Decryption
-    this.decrypter = new DecryptionMediator(this.election, this.context, this.ciphertext_tally);
+    this.decryptionMediator = new DecryptionMediator(this.election, this.context, this.ciphertext_tally);
 
     // Announce each guardian as present
     for (Guardian guardian : this.guardians) {
-      Optional<DecryptionShare.TallyDecryptionShare> decryption_share = this.decrypter.announce(guardian);
+      Optional<DecryptionShare.TallyDecryptionShare> decryption_share = this.decryptionMediator.announce(guardian);
       System.out.printf("Guardian Present: %s%n", guardian.object_id);
       assertThat(decryption_share).isPresent();
     }
 
     // Here's where the ciphertext Tally is decrypted.
-    this.decryptedTally = this.decrypter.getDecryptedTally(false, null).orElseThrow();
+    this.decryptedTally = this.decryptionMediator.getDecryptedTally(false, null).orElseThrow();
     System.out.printf("Tally Decrypted%n");
 
     // Now, compare the results
@@ -327,7 +328,7 @@ public class TimeIntegrationSteps {
   // Publish and verify steps of the election
   Publisher step_5_publish_and_verify() throws IOException {
     System.out.printf("%n5. publish%n");
-    Publisher publisher = new Publisher(outputDir, true);
+    Publisher publisher = new Publisher(outputDir, true, true);
     publisher.writeElectionRecordJson(
             this.description,
             this.context,
@@ -395,17 +396,16 @@ public class TimeIntegrationSteps {
   // Publish election record as proto
   Publisher step_6_publish_election_record_proto() throws IOException {
     System.out.printf("%n6. publish election record as proto%n");
-    Publisher publisher = new Publisher("/home/snake/tmp/TimeIntegrationStepsProto", true);
+    Publisher publisher = new Publisher("/home/snake/tmp/TimeIntegrationStepsProto", true, false);
     publisher.writeElectionRecordProto(
             this.description,
             this.context,
             this.constants,
             ImmutableList.of(this.device),
             this.ballot_box.getAllBallots(),
-            // this.decryptedTally.spoiled_ballots.values(),
+            this.coefficient_validation_sets,
             this.ciphertext_tally.build(),
-            this.decryptedTally,
-            this.coefficient_validation_sets);
+            this.decryptedTally);
 
     System.out.printf("%n6.5. verify%n");
     this.verify_results_proto(publisher);

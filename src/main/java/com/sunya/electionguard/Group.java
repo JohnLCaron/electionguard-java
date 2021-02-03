@@ -292,7 +292,7 @@ public class Group {
   /**
    * Generate random number between 0 and Q
    */
-  static ElementModQ rand_q() {
+  public static ElementModQ rand_q() {
     BigInteger random = Utils.randbelow(Q);
     return int_to_q_unchecked(random);
   }

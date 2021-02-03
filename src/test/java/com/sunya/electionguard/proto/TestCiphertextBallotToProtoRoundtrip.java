@@ -10,14 +10,13 @@ import java.io.File;
 import java.io.IOException;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
 
 public class TestCiphertextBallotToProtoRoundtrip {
   private static Publisher publisher;
 
   @BeforeContainer
   public static void setup() throws IOException {
-    publisher = new Publisher(TestElectionDescriptionToProtoRoundtrip.testElectionRecord, false);
+    publisher = new Publisher(TestElectionDescriptionToProtoRoundtrip.testElectionRecord, false, false);
   }
 
   @Example
