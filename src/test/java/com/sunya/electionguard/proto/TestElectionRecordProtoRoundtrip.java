@@ -26,10 +26,9 @@ public class TestElectionRecordProtoRoundtrip {
             consumer.constants(),
             consumer.devices(),
             consumer.ballots(),
-            // consumer.spoiled(),
+            consumer.guardianCoefficients(),
             consumer.ciphertextTally(),
-            consumer.decryptedTally(),
-            consumer.guardianCoefficients());
+            consumer.decryptedTally());
 
     ElectionRecord roundtrip = ElectionRecordFromProto.translateFromProto(protoFromJson);
     assertThat(roundtrip.election).isEqualTo(consumer.election());
@@ -37,7 +36,6 @@ public class TestElectionRecordProtoRoundtrip {
     assertThat(roundtrip.constants).isEqualTo(consumer.constants());
     assertThat(roundtrip.devices).isEqualTo(consumer.devices());
     assertThat(roundtrip.castBallots).isEqualTo(consumer.ballots());
-    // assertThat(roundtrip.spoiledBallots).isEqualTo(consumer.spoiled());
     assertThat(roundtrip.ciphertextTally).isEqualTo(consumer.ciphertextTally());
     assertThat(roundtrip.decryptedTally).isEqualTo(consumer.decryptedTally());
     assertThat(roundtrip.guardianCoefficients).isEqualTo(consumer.guardianCoefficients());
@@ -46,17 +44,16 @@ public class TestElectionRecordProtoRoundtrip {
   @Example
   public void testElectionRecordPublishRoundtrip() throws IOException {
     String dest = "/home/snake/tmp/TestElectionRecordProtoRoundtrip/";
-    Publisher publisher = new Publisher(dest, true);
+    Publisher publisher = new Publisher(dest, true, false);
     publisher.writeElectionRecordProto(
             consumer.election(),
             consumer.context(),
             consumer.constants(),
             consumer.devices(),
             consumer.ballots(),
-            // consumer.spoiled(),
+            consumer.guardianCoefficients(),
             consumer.ciphertextTally(),
-            consumer.decryptedTally(),
-            consumer.guardianCoefficients());
+            consumer.decryptedTally());
 
     ElectionRecord roundtrip = ElectionRecordFromProto.read(publisher.electionRecordProtoFile().toFile().getAbsolutePath());
     assertThat(roundtrip.election).isEqualTo(consumer.election());
@@ -64,7 +61,6 @@ public class TestElectionRecordProtoRoundtrip {
     assertThat(roundtrip.constants).isEqualTo(consumer.constants());
     assertThat(roundtrip.devices).isEqualTo(consumer.devices());
     assertThat(roundtrip.castBallots).isEqualTo(consumer.ballots());
-    // assertThat(roundtrip.spoiledBallots).isEqualTo(consumer.spoiled());
     assertThat(roundtrip.ciphertextTally).isEqualTo(consumer.ciphertextTally());
     assertThat(roundtrip.decryptedTally).isEqualTo(consumer.decryptedTally());
     assertThat(roundtrip.guardianCoefficients).isEqualTo(consumer.guardianCoefficients());

@@ -17,7 +17,7 @@ public class TestElectionDescriptionToProtoRoundtrip {
 
   @BeforeContainer
   public static void setup() throws IOException {
-    publisher = new Publisher(testElectionRecord, false);
+    publisher = new Publisher(testElectionRecord, false, false);
   }
 
   @Example

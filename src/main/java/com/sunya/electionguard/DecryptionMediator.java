@@ -50,8 +50,9 @@ public class DecryptionMediator {
    * <p>
    * @param guardian: The guardian who will participate in the decryption.
    * @return a `TallyDecryptionShare` for this `Guardian` or `None` if there is an error.
+   * LOOK return value never used, except to mean "success".
    */
-  Optional<TallyDecryptionShare> announce(Guardian guardian) {
+  public Optional<TallyDecryptionShare> announce(Guardian guardian) {
     // Only allow a guardian to announce once
     if (available_guardians.containsKey(guardian.object_id)) {
       logger.atInfo().log("guardian %s already announced", guardian.object_id);
@@ -77,8 +78,7 @@ public class DecryptionMediator {
     // This guardian removes itself from the missing list since it generated a valid share
     this.missing_guardians.remove(guardian.object_id);
 
-    // Check this guardian's collection of public keys
-    // for other guardians that have not announced
+    // Check this guardian's collection of public keys for other guardians that have not announced
     Map<String, KeyCeremony.ElectionPublicKey> missing_guardians =
             guardian.otherGuardianElectionKeys().entrySet().stream()
                     .filter(e -> !this.available_guardians.containsKey(e.getKey()))
@@ -161,7 +161,7 @@ public class DecryptionMediator {
    * @param recompute: Specify if the function should recompute the result, even if one already exists. default false
    * @return a `PlaintextTally` or `None`
    */
-  Optional<PlaintextTally> getDecryptedTally(boolean recompute, @Nullable Auxiliary.Decryptor decryptor) {
+  public Optional<PlaintextTally> getDecryptedTally(boolean recompute, @Nullable Auxiliary.Decryptor decryptor) {
     if (decryptor == null) {
       decryptor = Rsa::decrypt;
     }
@@ -202,7 +202,7 @@ public class DecryptionMediator {
               lagrange_coefficients, guardianStates);
     }
 
-    // If missing guardians compensate for the missing guardians
+    // If missing guardians, compensate for them
     for (String missing : this.missing_guardians.keySet()) {
       Optional<List<CompensatedTallyDecryptionShare>> compensated_decryptions = this.compensate(missing, decryptor);
       if (compensated_decryptions.isEmpty()) {

@@ -10,6 +10,8 @@ import com.sunya.electionguard.PublishedCiphertextTally;
 import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.SchnorrProof;
 
+import javax.annotation.Nullable;
+
 import static com.sunya.electionguard.proto.ElectionRecordProto.ElectionRecord;
 import static com.sunya.electionguard.proto.CommonConvert.convertElementModP;
 import static com.sunya.electionguard.proto.CommonConvert.convertElementModQ;
@@ -22,10 +24,9 @@ public class ElectionRecordToProto {
           Election.ElectionConstants constants,
           Iterable<Encrypt.EncryptionDevice> devices,
           Iterable<Ballot.CiphertextAcceptedBallot> castBallots,
-          // Iterable<Ballot.PlaintextBallot> spoiled_ballots,
-          PublishedCiphertextTally ciphertext_tally,
-          PlaintextTally decryptedTally,
-          Iterable<KeyCeremony.CoefficientValidationSet> guardianCoefficients) {
+          Iterable<KeyCeremony.CoefficientValidationSet> guardianCoefficients,
+          @Nullable PublishedCiphertextTally ciphertext_tally,
+          @Nullable PlaintextTally decryptedTally) {
 
     ElectionRecord.Builder builder = ElectionRecord.newBuilder();
     builder.setConstants( convertConstants(constants));
@@ -44,12 +45,12 @@ public class ElectionRecordToProto {
       builder.addCastBallots(CiphertextBallotToProto.translateToProto(ballot));
     }
 
-    /* for (Ballot.PlaintextBallot ballot : spoiled_ballots) {
-      builder.addSpoiledBallots(PlaintextBallotToProto.translateToProto(ballot));
-    } */
-
-    builder.setCiphertextTally( CiphertextTallyToProto.translateToProto(ciphertext_tally));
-    builder.setDecryptedTally( PlaintextTallyToProto.translateToProto(decryptedTally));
+    if (ciphertext_tally != null) {
+      builder.setCiphertextTally(CiphertextTallyToProto.translateToProto(ciphertext_tally));
+    }
+    if (decryptedTally != null) {
+      builder.setDecryptedTally(PlaintextTallyToProto.translateToProto(decryptedTally));
+    }
     return builder.build();
   }
 

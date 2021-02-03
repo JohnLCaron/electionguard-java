@@ -5,6 +5,12 @@ import "com/sunya/electionguard/proto/common.proto";
 option java_package = "com.sunya.electionguard.proto";
 option java_outer_classname = "KeyCeremonyProto";
 
+// this is whats needed to create the Guardian
+message CoefficientSet {
+  string id = 1;
+  repeated ElementModQ coefficient = 2;
+}
+
 // Set of validation pieces for election key coefficients
 message CoefficientValidationSet {
   string owner_id = 1; // guardian id

@@ -20,7 +20,7 @@ import static com.sunya.electionguard.Group.*;
 
   /** Details of key ceremony. */
   @AutoValue
-  abstract static class CeremonyDetails {
+  public abstract static class CeremonyDetails {
     abstract int number_of_guardians();
     abstract int quorum();
 
@@ -32,8 +32,8 @@ import static com.sunya.electionguard.Group.*;
   /** Pair of keys (public & secret) used to encrypt/decrypt election. */
   @AutoValue
   abstract static class ElectionKeyPair {
-    abstract ElGamal.KeyPair key_pair();
-    abstract SchnorrProof proof();
+    abstract ElGamal.KeyPair key_pair(); // Ki = (si, g^si)
+    abstract SchnorrProof proof(); // proof of knowledge of possession of the associated private key
     abstract ElectionPolynomial polynomial();
 
     public static ElectionKeyPair create(ElGamal.KeyPair key_pair, SchnorrProof proof, ElectionPolynomial polynomial) {

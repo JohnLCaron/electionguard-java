@@ -27,6 +27,7 @@ import static com.sunya.electionguard.Group.rand_q;
  * <p>
  * The 0-index coefficient is used for a secret key which can
  * be discovered by a quorum of n guardians corresponding to n coefficients.
+ * // LOOK this is what is needed to create the same Guardian.
  */
 @Immutable
 public class ElectionPolynomial {
@@ -40,6 +41,7 @@ public class ElectionPolynomial {
   /** A proof of possession of the private key for each secret coefficient. */
   final ImmutableList<SchnorrProof> coefficient_proofs;
 
+  // LOOK test all sizes == quorum
   ElectionPolynomial(List<Group.ElementModQ> coefficients, List<Group.ElementModP> coefficient_commitments,
                      List<SchnorrProof> coefficient_proofs) {
     this.coefficients = ImmutableList.copyOf(coefficients);

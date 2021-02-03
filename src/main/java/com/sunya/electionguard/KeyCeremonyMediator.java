@@ -19,7 +19,7 @@ public class KeyCeremonyMediator {
   private final Map<GuardianPair, ElectionPartialKeyChallenge> election_partial_key_challenges;
   private final List<Guardian> guardians;
 
-  KeyCeremonyMediator(CeremonyDetails ceremony_details) {
+  public KeyCeremonyMediator(CeremonyDetails ceremony_details) {
     this.ceremony_details = ceremony_details;
     this.auxiliary_public_keys = new HashMap<>();
     this.election_public_keys = new HashMap<>();
@@ -30,7 +30,7 @@ public class KeyCeremonyMediator {
   }
 
   /** Announce the guardian as present and participating the Key Ceremony. */
-  void announce(Guardian guardian) {
+  public void announce(Guardian guardian) {
     this.confirm_presence_of_guardian(guardian.share_public_keys());
     this.guardians.add(guardian);
 
@@ -52,7 +52,7 @@ public class KeyCeremonyMediator {
    * @param encryptor: Auxiliary encrypt function, or null for default.
    * @return a collection of guardians, or None if there is an error
    */
-  Optional<List<Guardian>> orchestrate(@Nullable Auxiliary.Encryptor encryptor) {
+  public Optional<List<Guardian>> orchestrate(@Nullable Auxiliary.Encryptor encryptor) {
     if (!this.all_guardians_in_attendance()) {
       return Optional.empty();
     }
@@ -98,7 +98,7 @@ public class KeyCeremonyMediator {
    * @param decryptor: Auxiliary decrypt function
    * @return True if verification succeeds, else False
    */
-  boolean verify(@Nullable Auxiliary.Decryptor decryptor) {
+  public boolean verify(@Nullable Auxiliary.Decryptor decryptor) {
     if (decryptor == null) {
       decryptor = Rsa::decrypt;
     }
@@ -160,7 +160,7 @@ public class KeyCeremonyMediator {
    * Check the attendance of all the guardians expected.
    * @return True if all guardians in attendance
    */
-  boolean all_guardians_in_attendance() {
+  public boolean all_guardians_in_attendance() {
     return this.all_auxiliary_public_keys_available() && this.all_election_public_keys_available();
   }
 
@@ -231,7 +231,7 @@ public class KeyCeremonyMediator {
   }
 
   /** True if all election partial key backups for all guardians available. */
-  boolean all_election_partial_key_backups_available() {
+  public boolean all_election_partial_key_backups_available() {
     int required_backups_per_guardian = this.ceremony_details.number_of_guardians() - 1;
     return this.election_partial_key_backups.size() ==
             required_backups_per_guardian * this.ceremony_details.number_of_guardians();
@@ -266,14 +266,14 @@ public class KeyCeremonyMediator {
   }
 
   /** True if all election partial key verifications received. */
-  boolean all_election_partial_key_verifications_received() {
+  public boolean all_election_partial_key_verifications_received() {
     int required_verifications_per_guardian = this.ceremony_details.number_of_guardians() - 1;
     return this.election_partial_key_verifications.size() ==
             required_verifications_per_guardian * this.ceremony_details.number_of_guardians();
   }
 
   /** True if all election partial key backups verified . */
-  boolean all_election_partial_key_backups_verified() {
+  public boolean all_election_partial_key_backups_verified() {
     if (!this.all_election_partial_key_verifications_received()) {
       return false;
     }
@@ -317,7 +317,7 @@ public class KeyCeremonyMediator {
   }
 
   /** Publish joint election key from the public keys of all guardians. */
-  Optional<Group.ElementModP> publish_joint_key() {
+  public Optional<Group.ElementModP> publish_joint_key() {
     if (!this.all_election_public_keys_available()) {
       return Optional.empty();
     }

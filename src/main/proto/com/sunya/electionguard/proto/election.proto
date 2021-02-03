@@ -106,6 +106,7 @@ message ContestDescriptionWithPlaceholders {
   repeated SelectionDescription placeholder_selections = 2;
 }
 
+// LOOK shouldnt be here
 message ElectionConstants {
   ElementModP P = 1;
   ElementModQ Q = 2;
@@ -153,6 +154,7 @@ message GeopoliticalUnit {
   ContactInformation contact_information = 4;
 }
 
+// LOOK shouldnt be here
 message InternalElectionDescription {
   ElectionDescription description = 1;
   repeated GeopoliticalUnit geopolitical_units = 2;

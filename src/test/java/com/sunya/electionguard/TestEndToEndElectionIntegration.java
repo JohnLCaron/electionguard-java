@@ -325,7 +325,7 @@ public class TestEndToEndElectionIntegration {
   // Publish and verify steps of the election
   void step_5_publish_and_verify() throws IOException {
     System.out.printf("%n5. publish%n");
-    Publisher publisher = new Publisher(outputDir, true);
+    Publisher publisher = new Publisher(outputDir, true, true);
     publisher.writeElectionRecordJson(
             this.description,
             this.context,

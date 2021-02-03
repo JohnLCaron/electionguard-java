@@ -40,12 +40,13 @@ public class ElectionRecordFromProto {
             proto.getDeviceList().stream().map(ElectionRecordFromProto::convertDevice).collect(Collectors.toList());
     List<Ballot.CiphertextAcceptedBallot> castBallots =
             proto.getCastBallotsList().stream().map(CiphertextBallotFromProto::translateFromProto).collect(Collectors.toList());
-    // List<Ballot.PlaintextBallot> spoiledBallots =
-    //        proto.getSpoiledBallotsList().stream().map(PlaintextBallotFromProto::translateFromProto).collect(Collectors.toList());
     List<KeyCeremony.CoefficientValidationSet> guardianCoefficients =
             proto.getGuardianCoefficientsList().stream().map(ElectionRecordFromProto::convertCoefficients).collect(Collectors.toList());
-    PublishedCiphertextTally ciphertextTally = CiphertextTallyFromProto.translateFromProto(proto.getCiphertextTally());
-    PlaintextTally decryptedTally = PlaintextTallyFromProto.translateFromProto(proto.getDecryptedTally());
+
+    PublishedCiphertextTally ciphertextTally = proto.hasCiphertextTally() ?
+            CiphertextTallyFromProto.translateFromProto(proto.getCiphertextTally()) : null;
+    PlaintextTally decryptedTally = proto.hasDecryptedTally() ?
+            PlaintextTallyFromProto.translateFromProto(proto.getDecryptedTally()) : null;
 
     return new ElectionRecord(constants, context, description, devices, castBallots,
             guardianCoefficients, ciphertextTally, decryptedTally);

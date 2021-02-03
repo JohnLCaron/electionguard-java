@@ -23,12 +23,12 @@ public class BallotBox {
     this.store = store;
   }
 
-  Optional<CiphertextAcceptedBallot> cast(CiphertextBallot ballot) {
+  public Optional<CiphertextAcceptedBallot> cast(CiphertextBallot ballot) {
     return accept_ballot(ballot, BallotBoxState.CAST);
   }
 
   /** Spoil a specific encrypted `CiphertextBallot` . */
-  Optional<CiphertextAcceptedBallot> spoil(CiphertextBallot ballot) {
+  public Optional<CiphertextAcceptedBallot> spoil(CiphertextBallot ballot) {
     return accept_ballot(ballot, BallotBoxState.SPOILED);
   }
 
@@ -56,11 +56,15 @@ public class BallotBox {
     return Optional.of(ballot_box_ballot);
   }
 
-  Iterable<CiphertextAcceptedBallot> getAllBallots() {
+  public Iterable<CiphertextAcceptedBallot> getAllBallots() {
     return store;
   }
 
-  Iterable<CiphertextAcceptedBallot> getCastBallots() {
+  public Iterable<CiphertextAcceptedBallot> getCastBallots() {
     return Iterables.filter(store, b -> b.state == BallotBoxState.CAST);
+  }
+
+  public Iterable<CiphertextAcceptedBallot> getSpoiledBallots() {
+    return Iterables.filter(store, b -> b.state == BallotBoxState.SPOILED);
   }
 }

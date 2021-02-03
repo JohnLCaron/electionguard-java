@@ -24,6 +24,7 @@ public class Guardian extends ElectionObjectBase {
   private final Auxiliary.KeyPair auxiliary_keys;
   private final ElectionKeyPair election_keys; // Ki = election keypair for ith Guardian
 
+  // LOOK maybe all of this should not be here - more like a helper class? set in DecryptionMediator
   // The collection of this guardian's partial key backups that will be shared to other guardians
   private final Map<String, ElectionPartialKeyBackup> backups_to_share; // Map(GUARDIAN_ID, ElectionPartialKeyBackup)
 
@@ -102,7 +103,7 @@ public class Guardian extends ElectionObjectBase {
     this.save_election_public_key(this.share_election_public_key());
   }
 
-  CeremonyDetails ceremony_details() {
+  public CeremonyDetails ceremony_details() {
     return ceremony_details;
   }
 
@@ -214,7 +215,7 @@ public class Guardian extends ElectionObjectBase {
   }
 
   /** Share coefficient validation set to be used for validating the coefficients post election. */
-  CoefficientValidationSet share_coefficient_validation_set() {
+  public CoefficientValidationSet share_coefficient_validation_set() {
     return KeyCeremony.get_coefficient_validation_set(this.object_id, this.election_keys.polynomial());
   }
 
