@@ -40,18 +40,15 @@ public class TestDecryptionMediatorProblem extends TestProperties {
     this.key_ceremony = new KeyCeremonyMediator(CEREMONY_DETAILS);
 
     // Setup Guardians
+    List<GuardianBuilder> guardianBuilders = new ArrayList<>();
     for (int i = 0; i < NUMBER_OF_GUARDIANS; i++) {
       int sequence = i + 2;
-      this.guardians.add(Guardian.createForTesting("guardian_" + sequence, sequence, NUMBER_OF_GUARDIANS, QUORUM, null));
+      guardianBuilders.add(GuardianBuilder.createForTesting("guardian_" + sequence, sequence, NUMBER_OF_GUARDIANS, QUORUM, null));
     }
-
-    // Attendance (Public Key Share)
-    for (Guardian guardian : this.guardians) {
-      this.key_ceremony.announce(guardian);
-    }
-
+    guardianBuilders.forEach(gb -> this.key_ceremony.announce(gb));
     this.key_ceremony.orchestrate(identity_auxiliary_encrypt);
     this.key_ceremony.verify(identity_auxiliary_decrypt);
+    guardianBuilders.forEach(gb -> this.guardians.add(gb.build()));
 
     Optional<ElementModP> joinKeyO = this.key_ceremony.publish_joint_key();
     assertThat(joinKeyO).isPresent();

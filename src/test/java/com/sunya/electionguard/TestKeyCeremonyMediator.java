@@ -19,9 +19,9 @@ public class TestKeyCeremonyMediator {
   private static final String GUARDIAN_1_ID = "Guardian 1";
   private static final String GUARDIAN_2_ID = "Guardian 2";
   private static final String VERIFIER_ID = "Guardian 3";
-  private static final Guardian GUARDIAN_1 = Guardian.createForTesting(GUARDIAN_1_ID, 1, NUMBER_OF_GUARDIANS, QUORUM, null);
-  private static final Guardian GUARDIAN_2 = Guardian.createForTesting(GUARDIAN_2_ID, 2, NUMBER_OF_GUARDIANS, QUORUM, null);
-  private static final Guardian VERIFIER =   Guardian.createForTesting(VERIFIER_ID, 3, NUMBER_OF_GUARDIANS, QUORUM, null);
+  private static final GuardianBuilder GUARDIAN_1 = GuardianBuilder.createForTesting(GUARDIAN_1_ID, 1, NUMBER_OF_GUARDIANS, QUORUM, null);
+  private static final GuardianBuilder GUARDIAN_2 = GuardianBuilder.createForTesting(GUARDIAN_2_ID, 2, NUMBER_OF_GUARDIANS, QUORUM, null);
+  private static final GuardianBuilder VERIFIER =   GuardianBuilder.createForTesting(VERIFIER_ID, 3, NUMBER_OF_GUARDIANS, QUORUM, null);
 
   static Auxiliary.Decryptor identity_auxiliary_decrypt = (m, k) -> Optional.of(new String(m.getBytes()));
   static Auxiliary.Encryptor identity_auxiliary_encrypt = (m, k) -> Optional.of(new Auxiliary.ByteString(m.getBytes()));

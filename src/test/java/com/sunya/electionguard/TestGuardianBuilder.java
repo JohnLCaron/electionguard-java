@@ -7,10 +7,10 @@ import java.util.Optional;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 
-public class TestGuardian {
-  private static final String SENDER_GUARDIAN_ID = "Test Guardian 1";
-  private static final String RECIPIENT_GUARDIAN_ID = "Test Guardian 2";
-  private static final String ALTERNATE_VERIFIER_GUARDIAN_ID = "Test Guardian 3";
+public class TestGuardianBuilder {
+  private static final String SENDER_GUARDIAN_ID = "Test GuardianBuilder 1";
+  private static final String RECIPIENT_GUARDIAN_ID = "Test GuardianBuilder 2";
+  private static final String ALTERNATE_VERIFIER_GUARDIAN_ID = "Test GuardianBuilder 3";
   private static final int SENDER_SEQUENCE_ORDER = 1;
   private static final int RECIPIENT_SEQUENCE_ORDER = 2;
   private static final int ALTERNATE_VERIFIER_SEQUENCE_ORDER = 3;
@@ -20,35 +20,9 @@ public class TestGuardian {
   static Auxiliary.Decryptor identity_auxiliary_decryptor = (m, k) -> Optional.of(new String(m.getBytes()));
   static Auxiliary.Encryptor identity_auxiliary_encryptor = (m, k) -> Optional.of(new Auxiliary.ByteString(m.getBytes()));
 
-  /* @Example
-  public void test_reset() {
-    Guardian guardian = Guardian.create(SENDER_GUARDIAN_ID, SENDER_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
-    int expected_number_of_guardians = 10;
-    int expected_quorum = 4;
-
-    // LOOK mutating
-    guardian.reset(expected_number_of_guardians, expected_quorum);
-
-    assertThat(expected_number_of_guardians).isEqualTo(guardian.ceremony_details().number_of_guardians());
-    assertThat(expected_quorum).isEqualTo(guardian.ceremony_details().quorum());
-  } */
-
-  /* @Example
-  public void test_set_ceremony_details() {
-    Guardian guardian = Guardian.create(SENDER_GUARDIAN_ID, SENDER_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
-    int expected_number_of_guardians = 10;
-    int expected_quorum = 4;
-
-    // LOOK mutating
-    guardian.set_ceremony_details(expected_number_of_guardians, expected_quorum);
-
-    assertThat(expected_number_of_guardians).isEqualTo(guardian.ceremony_details().number_of_guardians());
-    assertThat(expected_quorum).isEqualTo(guardian.ceremony_details().quorum());
-  } */
-
   @Example
   public void test_share_public_keys() {
-    Guardian guardian = Guardian.createForTesting(SENDER_GUARDIAN_ID, SENDER_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
+    GuardianBuilder guardian = GuardianBuilder.createForTesting(SENDER_GUARDIAN_ID, SENDER_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
 
     KeyCeremony.PublicKeySet public_keys = guardian.share_public_keys();
 
@@ -62,8 +36,8 @@ public class TestGuardian {
 
   @Example
   public void test_save_guardian_public_keys() {
-    Guardian guardian = Guardian.createForTesting(SENDER_GUARDIAN_ID, SENDER_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
-    Guardian other_guardian = Guardian.createForTesting(RECIPIENT_GUARDIAN_ID, RECIPIENT_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
+    GuardianBuilder guardian = GuardianBuilder.createForTesting(SENDER_GUARDIAN_ID, SENDER_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
+    GuardianBuilder other_guardian = GuardianBuilder.createForTesting(RECIPIENT_GUARDIAN_ID, RECIPIENT_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
 
     KeyCeremony.PublicKeySet public_keys = other_guardian.share_public_keys();
     guardian.save_guardian_public_keys(public_keys);
@@ -74,8 +48,8 @@ public class TestGuardian {
 
   @Example
   public void test_all_public_keys_received() {
-    Guardian guardian = Guardian.createForTesting(SENDER_GUARDIAN_ID, SENDER_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
-    Guardian other_guardian = Guardian.createForTesting(RECIPIENT_GUARDIAN_ID, RECIPIENT_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
+    GuardianBuilder guardian = GuardianBuilder.createForTesting(SENDER_GUARDIAN_ID, SENDER_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
+    GuardianBuilder other_guardian = GuardianBuilder.createForTesting(RECIPIENT_GUARDIAN_ID, RECIPIENT_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
 
     KeyCeremony.PublicKeySet public_keys = other_guardian.share_public_keys();
 
@@ -85,23 +59,9 @@ public class TestGuardian {
     assertThat(guardian.all_public_keys_received()).isTrue();
   }
 
-  /* @Example
-  public void test_generate_auxiliary_key_pair() {
-    Guardian guardian = Guardian.create(SENDER_GUARDIAN_ID, SENDER_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
-    Auxiliary.PublicKey first_public_key = guardian.share_auxiliary_public_key();
-
-    // LOOK mutating
-    guardian.generate_auxiliary_key_pair();
-    Auxiliary.PublicKey second_public_key = guardian.share_auxiliary_public_key();
-
-    assertThat(second_public_key).isNotNull();
-    assertThat(second_public_key.key).isNotNull();
-    assertThat(first_public_key.key).isNotEqualTo(second_public_key.key);
-  } */
-
   @Example
   public void test_share_auxiliary_public_key() {
-    Guardian guardian = Guardian.createForTesting(SENDER_GUARDIAN_ID, SENDER_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
+    GuardianBuilder guardian = GuardianBuilder.createForTesting(SENDER_GUARDIAN_ID, SENDER_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
 
     Auxiliary.PublicKey public_key = guardian.share_auxiliary_public_key();
 
@@ -113,8 +73,8 @@ public class TestGuardian {
 
   @Example
   public void test_save_auxiliary_public_key() {
-    Guardian guardian = Guardian.createForTesting(SENDER_GUARDIAN_ID, SENDER_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
-    Guardian other_guardian = Guardian.createForTesting(RECIPIENT_GUARDIAN_ID, RECIPIENT_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
+    GuardianBuilder guardian = GuardianBuilder.createForTesting(SENDER_GUARDIAN_ID, SENDER_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
+    GuardianBuilder other_guardian = GuardianBuilder.createForTesting(RECIPIENT_GUARDIAN_ID, RECIPIENT_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
     Auxiliary.PublicKey public_key = other_guardian.share_auxiliary_public_key();
 
     guardian.save_auxiliary_public_key(public_key);
@@ -124,8 +84,8 @@ public class TestGuardian {
 
   @Example
   public void test_all_auxiliary_public_keys_received() {
-    Guardian guardian = Guardian.createForTesting(SENDER_GUARDIAN_ID, SENDER_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
-    Guardian other_guardian = Guardian.createForTesting(RECIPIENT_GUARDIAN_ID, RECIPIENT_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
+    GuardianBuilder guardian = GuardianBuilder.createForTesting(SENDER_GUARDIAN_ID, SENDER_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
+    GuardianBuilder other_guardian = GuardianBuilder.createForTesting(RECIPIENT_GUARDIAN_ID, RECIPIENT_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
     Auxiliary.PublicKey public_key = other_guardian.share_auxiliary_public_key();
 
     assertThat(guardian.all_auxiliary_public_keys_received()).isFalse();
@@ -136,7 +96,7 @@ public class TestGuardian {
 
   /* @Example
   public void test_generate_election_key_pair() {
-    Guardian guardian = Guardian.create(SENDER_GUARDIAN_ID, SENDER_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
+    GuardianBuilder guardian = GuardianBuilder.create(SENDER_GUARDIAN_ID, SENDER_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
     KeyCeremony.ElectionPublicKey first_public_key = guardian.share_election_public_key();
 
     // LOOK mutating
@@ -150,7 +110,7 @@ public class TestGuardian {
 
   @Example
   public void test_share_election_public_key() {
-    Guardian guardian = Guardian.createForTesting(SENDER_GUARDIAN_ID, SENDER_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
+    GuardianBuilder guardian = GuardianBuilder.createForTesting(SENDER_GUARDIAN_ID, SENDER_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
     KeyCeremony.ElectionPublicKey public_key = guardian.share_election_public_key();
 
     assertThat(public_key).isNotNull();
@@ -161,8 +121,8 @@ public class TestGuardian {
 
   @Example
   public void test_save_election_public_key() {
-    Guardian guardian = Guardian.createForTesting(SENDER_GUARDIAN_ID, SENDER_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
-    Guardian other_guardian = Guardian.createForTesting(RECIPIENT_GUARDIAN_ID, RECIPIENT_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
+    GuardianBuilder guardian = GuardianBuilder.createForTesting(SENDER_GUARDIAN_ID, SENDER_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
+    GuardianBuilder other_guardian = GuardianBuilder.createForTesting(RECIPIENT_GUARDIAN_ID, RECIPIENT_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
     KeyCeremony.ElectionPublicKey public_key = other_guardian.share_election_public_key();
 
     guardian.save_election_public_key(public_key);
@@ -172,8 +132,8 @@ public class TestGuardian {
 
   @Example
   public void test_all_election_public_keys_received() {
-    Guardian guardian = Guardian.createForTesting(SENDER_GUARDIAN_ID, SENDER_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
-    Guardian other_guardian = Guardian.createForTesting(RECIPIENT_GUARDIAN_ID, RECIPIENT_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
+    GuardianBuilder guardian = GuardianBuilder.createForTesting(SENDER_GUARDIAN_ID, SENDER_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
+    GuardianBuilder other_guardian = GuardianBuilder.createForTesting(RECIPIENT_GUARDIAN_ID, RECIPIENT_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
     KeyCeremony.ElectionPublicKey public_key = other_guardian.share_election_public_key();
 
     assertThat(guardian.all_election_public_keys_received()).isFalse();
@@ -184,8 +144,8 @@ public class TestGuardian {
 
   @Example
   public void test_generate_election_partial_key_backups() {
-    Guardian guardian = Guardian.createForTesting(SENDER_GUARDIAN_ID, SENDER_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
-    Guardian other_guardian = Guardian.createForTesting(RECIPIENT_GUARDIAN_ID, RECIPIENT_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
+    GuardianBuilder guardian = GuardianBuilder.createForTesting(SENDER_GUARDIAN_ID, SENDER_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
+    GuardianBuilder other_guardian = GuardianBuilder.createForTesting(RECIPIENT_GUARDIAN_ID, RECIPIENT_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
     Optional<KeyCeremony.ElectionPartialKeyBackup> empty_key_backup = other_guardian.share_election_partial_key_backup(RECIPIENT_GUARDIAN_ID);
 
     assertThat(empty_key_backup).isEmpty();
@@ -208,8 +168,8 @@ public class TestGuardian {
 
   @Example
   public void test_share_election_partial_key_backup() {
-    Guardian guardian = Guardian.createForTesting(SENDER_GUARDIAN_ID, SENDER_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
-    Guardian other_guardian = Guardian.createForTesting(RECIPIENT_GUARDIAN_ID, RECIPIENT_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
+    GuardianBuilder guardian = GuardianBuilder.createForTesting(SENDER_GUARDIAN_ID, SENDER_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
+    GuardianBuilder other_guardian = GuardianBuilder.createForTesting(RECIPIENT_GUARDIAN_ID, RECIPIENT_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
 
     guardian.save_auxiliary_public_key(other_guardian.share_auxiliary_public_key());
     guardian.generate_election_partial_key_backups(identity_auxiliary_encryptor);
@@ -230,8 +190,8 @@ public class TestGuardian {
 
   @Example
   public void test_save_election_partial_key_backup() {
-    Guardian guardian = Guardian.createForTesting(SENDER_GUARDIAN_ID, SENDER_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
-    Guardian other_guardian = Guardian.createForTesting(RECIPIENT_GUARDIAN_ID, RECIPIENT_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
+    GuardianBuilder guardian = GuardianBuilder.createForTesting(SENDER_GUARDIAN_ID, SENDER_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
+    GuardianBuilder other_guardian = GuardianBuilder.createForTesting(RECIPIENT_GUARDIAN_ID, RECIPIENT_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
 
     guardian.save_auxiliary_public_key(other_guardian.share_auxiliary_public_key());
     guardian.generate_election_partial_key_backups(identity_auxiliary_encryptor);
@@ -246,8 +206,8 @@ public class TestGuardian {
 
   @Example
   public void test_all_election_partial_key_backups_received() {
-    Guardian guardian = Guardian.createForTesting(SENDER_GUARDIAN_ID, SENDER_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
-    Guardian other_guardian = Guardian.createForTesting(RECIPIENT_GUARDIAN_ID, RECIPIENT_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
+    GuardianBuilder guardian = GuardianBuilder.createForTesting(SENDER_GUARDIAN_ID, SENDER_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
+    GuardianBuilder other_guardian = GuardianBuilder.createForTesting(RECIPIENT_GUARDIAN_ID, RECIPIENT_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
 
     guardian.save_auxiliary_public_key(other_guardian.share_auxiliary_public_key());
     guardian.generate_election_partial_key_backups(identity_auxiliary_encryptor);
@@ -263,8 +223,8 @@ public class TestGuardian {
 
   @Example
   public void test_verify_election_partial_key_backup() {
-    Guardian guardian = Guardian.createForTesting(SENDER_GUARDIAN_ID, SENDER_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
-    Guardian other_guardian = Guardian.createForTesting(RECIPIENT_GUARDIAN_ID, RECIPIENT_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
+    GuardianBuilder guardian = GuardianBuilder.createForTesting(SENDER_GUARDIAN_ID, SENDER_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
+    GuardianBuilder other_guardian = GuardianBuilder.createForTesting(RECIPIENT_GUARDIAN_ID, RECIPIENT_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
 
     guardian.save_auxiliary_public_key(other_guardian.share_auxiliary_public_key());
     guardian.generate_election_partial_key_backups(identity_auxiliary_encryptor);
@@ -288,9 +248,9 @@ public class TestGuardian {
 
   @Example
   public void test_verify_election_partial_key_challenge() {
-    Guardian guardian = Guardian.createForTesting(SENDER_GUARDIAN_ID, SENDER_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
-    Guardian recipient_guardian = Guardian.createForTesting(RECIPIENT_GUARDIAN_ID, RECIPIENT_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
-    Guardian alternate_guardian = Guardian.createForTesting(ALTERNATE_VERIFIER_GUARDIAN_ID, ALTERNATE_VERIFIER_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
+    GuardianBuilder guardian = GuardianBuilder.createForTesting(SENDER_GUARDIAN_ID, SENDER_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
+    GuardianBuilder recipient_guardian = GuardianBuilder.createForTesting(RECIPIENT_GUARDIAN_ID, RECIPIENT_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
+    GuardianBuilder alternate_guardian = GuardianBuilder.createForTesting(ALTERNATE_VERIFIER_GUARDIAN_ID, ALTERNATE_VERIFIER_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
 
     guardian.save_auxiliary_public_key(recipient_guardian.share_auxiliary_public_key());
     guardian.generate_election_partial_key_backups(identity_auxiliary_encryptor);
@@ -309,8 +269,8 @@ public class TestGuardian {
 
   @Example
   public void test_publish_election_backup_challenge() {
-    Guardian guardian = Guardian.createForTesting(SENDER_GUARDIAN_ID, SENDER_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
-    Guardian recipient_guardian = Guardian.createForTesting(RECIPIENT_GUARDIAN_ID, RECIPIENT_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
+    GuardianBuilder guardian = GuardianBuilder.createForTesting(SENDER_GUARDIAN_ID, SENDER_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
+    GuardianBuilder recipient_guardian = GuardianBuilder.createForTesting(RECIPIENT_GUARDIAN_ID, RECIPIENT_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
 
     guardian.save_auxiliary_public_key(recipient_guardian.share_auxiliary_public_key());
     guardian.generate_election_partial_key_backups(identity_auxiliary_encryptor);
@@ -331,8 +291,8 @@ public class TestGuardian {
 
   @Example
   public void test_save_election_partial_key_verification() {
-    Guardian guardian = Guardian.createForTesting(SENDER_GUARDIAN_ID, SENDER_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
-    Guardian other_guardian = Guardian.createForTesting(RECIPIENT_GUARDIAN_ID, RECIPIENT_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
+    GuardianBuilder guardian = GuardianBuilder.createForTesting(SENDER_GUARDIAN_ID, SENDER_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
+    GuardianBuilder other_guardian = GuardianBuilder.createForTesting(RECIPIENT_GUARDIAN_ID, RECIPIENT_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
 
     guardian.save_auxiliary_public_key(other_guardian.share_auxiliary_public_key());
     guardian.generate_election_partial_key_backups(identity_auxiliary_encryptor);
@@ -350,8 +310,8 @@ public class TestGuardian {
 
   @Example
   public void test_all_election_partial_key_backups_verified() {
-    Guardian guardian = Guardian.createForTesting(SENDER_GUARDIAN_ID, SENDER_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
-    Guardian other_guardian = Guardian.createForTesting(RECIPIENT_GUARDIAN_ID, RECIPIENT_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
+    GuardianBuilder guardian = GuardianBuilder.createForTesting(SENDER_GUARDIAN_ID, SENDER_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
+    GuardianBuilder other_guardian = GuardianBuilder.createForTesting(RECIPIENT_GUARDIAN_ID, RECIPIENT_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
 
     guardian.save_auxiliary_public_key(other_guardian.share_auxiliary_public_key());
     guardian.generate_election_partial_key_backups(identity_auxiliary_encryptor);
@@ -369,8 +329,8 @@ public class TestGuardian {
 
   @Example
   public void test_publish_joint_key() {
-    Guardian guardian = Guardian.createForTesting(SENDER_GUARDIAN_ID, SENDER_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
-    Guardian other_guardian = Guardian.createForTesting(RECIPIENT_GUARDIAN_ID, RECIPIENT_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
+    GuardianBuilder guardian = GuardianBuilder.createForTesting(SENDER_GUARDIAN_ID, SENDER_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
+    GuardianBuilder other_guardian = GuardianBuilder.createForTesting(RECIPIENT_GUARDIAN_ID, RECIPIENT_SEQUENCE_ORDER, NUMBER_OF_GUARDIANS, QUORUM, null);
 
     guardian.save_auxiliary_public_key(other_guardian.share_auxiliary_public_key());
     guardian.generate_election_partial_key_backups(identity_auxiliary_encryptor);

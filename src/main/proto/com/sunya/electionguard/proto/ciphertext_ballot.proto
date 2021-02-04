@@ -7,7 +7,6 @@ option java_outer_classname = "CiphertextBallotProto";
 
 // An encrypted ballot that has been cast or spoiled.
 message CiphertextAcceptedBallot {
-
   enum BallotBoxState {
     UNKNOWN = 0;
     CAST = 1;
