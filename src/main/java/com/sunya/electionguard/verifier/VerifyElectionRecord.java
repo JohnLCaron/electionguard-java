@@ -5,7 +5,7 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.sunya.electionguard.proto.ElectionRecordFromProto;
 import com.sunya.electionguard.publish.Consumer;
-import com.sunya.electionguard.workflow.BallotEncryptor;
+import com.sunya.electionguard.workflow.EncryptBallots;
 
 import java.io.IOException;
 
@@ -37,7 +37,7 @@ public class VerifyElectionRecord {
   }
 
   public static void main(String[] args) throws IOException {
-    String progName = BallotEncryptor.class.getName();
+    String progName = EncryptBallots.class.getName();
     CommandLine cmdLine = null;
 
     try {

@@ -17,7 +17,7 @@ public class KeyCeremonyMediator {
   private final Map<GuardianPair, ElectionPartialKeyBackup> election_partial_key_backups;
   private final Map<GuardianPair, ElectionPartialKeyVerification> election_partial_key_verifications;
   private final Map<GuardianPair, ElectionPartialKeyChallenge> election_partial_key_challenges;
-  private final List<Guardian> guardians;
+  private final List<GuardianBuilder> guardians;
 
   public KeyCeremonyMediator(CeremonyDetails ceremony_details) {
     this.ceremony_details = ceremony_details;
@@ -30,14 +30,14 @@ public class KeyCeremonyMediator {
   }
 
   /** Announce the guardian as present and participating the Key Ceremony. */
-  public void announce(Guardian guardian) {
+  public void announce(GuardianBuilder guardian) {
     this.confirm_presence_of_guardian(guardian.share_public_keys());
     this.guardians.add(guardian);
 
     // When all guardians have announced, share the public keys among them
     if (this.all_guardians_in_attendance()) {
-      for (Guardian sender : this.guardians) {
-        for (Guardian recipient : this.guardians) {
+      for (GuardianBuilder sender : this.guardians) {
+        for (GuardianBuilder recipient : this.guardians) {
           if (!sender.object_id.equals(recipient.object_id)) {
             recipient.save_guardian_public_keys(sender.share_public_keys());
           }
@@ -52,7 +52,7 @@ public class KeyCeremonyMediator {
    * @param encryptor: Auxiliary encrypt function, or null for default.
    * @return a collection of guardians, or None if there is an error
    */
-  public Optional<List<Guardian>> orchestrate(@Nullable Auxiliary.Encryptor encryptor) {
+  public Optional<List<GuardianBuilder>> orchestrate(@Nullable Auxiliary.Encryptor encryptor) {
     if (!this.all_guardians_in_attendance()) {
       return Optional.empty();
     }
@@ -61,13 +61,13 @@ public class KeyCeremonyMediator {
     }
 
     // Partial Key Backup Generation
-    for (Guardian guardian : this.guardians) {
+    for (GuardianBuilder guardian : this.guardians) {
       guardian.generate_election_partial_key_backups(encryptor);
     }
 
     // Share Partial Key Backup
-    for (Guardian sender : this.guardians) {
-      for (Guardian recipient : this.guardians) {
+    for (GuardianBuilder sender : this.guardians) {
+      for (GuardianBuilder recipient : this.guardians) {
         if (!sender.object_id.equals(recipient.object_id)) {
           Optional<ElectionPartialKeyBackup> backup = sender.share_election_partial_key_backup(recipient.object_id);
 
@@ -83,7 +83,7 @@ public class KeyCeremonyMediator {
 
     // Save the backups
     if (this.all_election_partial_key_backups_available()) {
-      for (Guardian recipient_guardian : this.guardians) {
+      for (GuardianBuilder recipient_guardian : this.guardians) {
         List<ElectionPartialKeyBackup> backups = this.share_election_partial_key_backups_to_guardian(recipient_guardian.object_id);
         for (ElectionPartialKeyBackup backup : backups) {
           recipient_guardian.save_election_partial_key_backup(backup);
@@ -103,8 +103,8 @@ public class KeyCeremonyMediator {
       decryptor = Rsa::decrypt;
     }
 
-    for (Guardian recipient : this.guardians) {
-      for (Guardian sender : this.guardians) {
+    for (GuardianBuilder recipient : this.guardians) {
+      for (GuardianBuilder sender : this.guardians) {
         if (!sender.object_id.equals(recipient.object_id)) {
           Optional<ElectionPartialKeyVerification> verification = recipient.verify_election_partial_key_backup(sender.object_id, decryptor);
 
@@ -122,20 +122,6 @@ public class KeyCeremonyMediator {
     return this.all_election_partial_key_verifications_received() &&
             this.all_election_partial_key_backups_verified();
   }
-
-  /*
-   * Reset mediator to initial state.
-   * @param ceremony_details: Ceremony details of election
-   *
-  void reset(CeremonyDetails ceremony_details) {
-    this.ceremony_details = ceremony_details;
-    this._auxiliary_public_keys.clear();
-    this._election_public_keys.clear();
-    this._election_partial_key_backups.clear();
-    this._election_partial_key_challenges.clear();
-    this._election_partial_key_verifications.clear();
-    this._guardians.clear();
-  } */
 
   /**
    * Confirm presence of guardian by passing their public key set.

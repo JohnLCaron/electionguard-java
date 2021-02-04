@@ -3,6 +3,7 @@ package com.sunya.electionguard.proto;
 import com.google.protobuf.ByteString;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.Group;
+import com.sunya.electionguard.SchnorrProof;
 
 import javax.annotation.Nullable;
 import java.math.BigInteger;
@@ -16,6 +17,9 @@ public class CommonConvert {
   static <T, U> List<U> convertList(@Nullable List<T> from, Function<T, U> converter) {
     return from == null ? null : from.stream().map(converter).collect(Collectors.toList());
   }
+
+  /////////////////////////////////////////////////////////////////////////////////////////
+  // from proto
   
   @Nullable
   static Group.ElementModQ convertElementModQ(@Nullable CommonProto.ElementModQ modQ) {
@@ -46,6 +50,17 @@ public class CommonConvert {
     );
   }
 
+  static SchnorrProof convertSchnorrProof(CommonProto.SchnorrProof proof) {
+    return new SchnorrProof(
+            convertElementModP(proof.getPublicKey()),
+            convertElementModP(proof.getCommitment()),
+            convertElementModQ(proof.getChallenge()),
+            convertElementModQ(proof.getResponse()));
+  }
+
+  /////////////////////////////////////////////////////////////////////////////////////////
+  // to proto
+
   static CommonProto.ElementModQ convertElementModQ(Group.ElementModQ modQ) {
     CommonProto.ElementModQ.Builder builder = CommonProto.ElementModQ.newBuilder();
     builder.setValue(ByteString.copyFrom(modQ.getBigInt().toByteArray()));
@@ -62,6 +77,15 @@ public class CommonConvert {
     CommonProto.ElGamalCiphertext.Builder builder = CommonProto.ElGamalCiphertext.newBuilder();
     builder.setPad(convertElementModP(ciphertext.pad));
     builder.setData(convertElementModP(ciphertext.data));
+    return builder.build();
+  }
+
+  static CommonProto.SchnorrProof convertSchnorrProof(SchnorrProof proof) {
+    CommonProto.SchnorrProof.Builder builder = CommonProto.SchnorrProof.newBuilder();
+    builder.setPublicKey(convertElementModP(proof.public_key));
+    builder.setCommitment(convertElementModP(proof.commitment));
+    builder.setChallenge(convertElementModQ(proof.challenge));
+    builder.setResponse(convertElementModQ(proof.response));
     return builder.build();
   }
   

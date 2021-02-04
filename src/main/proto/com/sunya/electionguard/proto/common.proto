@@ -17,3 +17,10 @@ message ElGamalCiphertext {
   ElementModP pad = 1;
   ElementModP data = 2;
 }
+
+message SchnorrProof {
+  ElementModP public_key = 1; // k in the spec
+  ElementModP commitment = 2; // h in the spec
+  ElementModQ challenge = 3; // c in the spec
+  ElementModQ response = 4; // u in the spec
+}

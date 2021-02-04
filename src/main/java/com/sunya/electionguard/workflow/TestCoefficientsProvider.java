@@ -4,7 +4,9 @@ import com.google.common.collect.ImmutableList;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.proto.ElectionRecordFromProto;
 import com.sunya.electionguard.proto.ElectionRecordToProto;
+import com.sunya.electionguard.proto.KeyCeremonyFromProto;
 import com.sunya.electionguard.proto.KeyCeremonyProto;
+import com.sunya.electionguard.proto.KeyCeremonyToProto;
 
 import static com.sunya.electionguard.KeyCeremony.CoefficientSet;
 
@@ -34,7 +36,7 @@ public class TestCoefficientsProvider implements CoefficientsProvider {
 
   static ImmutableList<CoefficientSet> read() {
     try {
-      return ElectionRecordFromProto.readCoefficientSet(WHERE);
+      return KeyCeremonyFromProto.readCoefficientSet(WHERE);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -52,7 +54,7 @@ public class TestCoefficientsProvider implements CoefficientsProvider {
       }
       coeffSets.add(CoefficientSet.create("guardian_" + sequence, sequence, coefficients));
     }
-    KeyCeremonyProto.CoefficientSets proto = ElectionRecordToProto.convertCoefficientSet(coeffSets);
+    KeyCeremonyProto.CoefficientSets proto = KeyCeremonyToProto.convertCoefficientSet(coeffSets);
 
     try (FileOutputStream out = new FileOutputStream(WHERE)) {
       proto.writeDelimitedTo(out);

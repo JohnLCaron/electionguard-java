@@ -4,15 +4,11 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Iterables;
 import com.sunya.electionguard.CiphertextTallyBuilder;
 import com.sunya.electionguard.DecryptionMediator;
 import com.sunya.electionguard.DecryptionShare;
 import com.sunya.electionguard.Election;
-import com.sunya.electionguard.Group;
 import com.sunya.electionguard.Guardian;
-import com.sunya.electionguard.KeyCeremony;
-import com.sunya.electionguard.KeyCeremonyMediator;
 import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.PublishedCiphertextTally;
 import com.sunya.electionguard.Scheduler;
@@ -23,21 +19,19 @@ import com.sunya.electionguard.verifier.ElectionRecord;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
-/** Encrypt a collection of ballots. */
-public class BallotDecryptor {
+/** Decrypt a collection of ballots. */
+public class DecryptBallots {
 
   private static class CommandLine {
-    @Parameter(names = {"-encryptDir"},
-            description = "Directory containing ballot encryption", required = true)
+    @Parameter(names = {"-in"},
+            description = "Directory containing input election record and ballot encryptions", required = true)
     String encryptDir;
 
     @Parameter(names = {"-guardians"},
-            description = "CoefficientsProvider classname", required = true)
-    String coefficientsProviderClass;
+            description = "GuardianProvider classname", required = true)
+    String guardiansProviderClass;
 
     @Parameter(names = {"-out"},
             description = "Directory where augmented election record is published", required = true)
@@ -60,8 +54,8 @@ public class BallotDecryptor {
   }
 
   public static void main(String[] args) {
-    String progName = BallotDecryptor.class.getName();
-    BallotDecryptor decryptor;
+    String progName = DecryptBallots.class.getName();
+    DecryptBallots decryptor;
     CommandLine cmdLine = null;
 
     try {
@@ -76,9 +70,9 @@ public class BallotDecryptor {
       System.exit(1);
     }
 
-    CoefficientsProvider coefficientsProvider = null;
+    GuardiansProvider guardiansProvider = null;
     try {
-      coefficientsProvider = makeCoefficientsProvider(cmdLine.coefficientsProviderClass);
+      guardiansProvider = makeGuardiansProvider(cmdLine.guardiansProviderClass);
     } catch (Throwable t) {
       t.printStackTrace();
       System.exit(2);
@@ -89,7 +83,7 @@ public class BallotDecryptor {
       ElectionRecord electionRecord = ElectionRecordFromProto.read(consumer.electionRecordProtoFile().toString());
 
       System.out.printf(" BallotDecryptor read from %s%n Write to %s%n", cmdLine.encryptDir, cmdLine.outputDir);
-      decryptor = new BallotDecryptor(electionRecord, coefficientsProvider);
+      decryptor = new DecryptBallots(electionRecord, guardiansProvider);
       decryptor.accumulateTally();
       decryptor.decryptTally();
       decryptor.publish(cmdLine.outputDir);
@@ -104,12 +98,12 @@ public class BallotDecryptor {
     }
   }
 
-  public static CoefficientsProvider makeCoefficientsProvider(String className) throws Throwable {
+  public static GuardiansProvider makeGuardiansProvider(String className) throws Throwable {
     Class<?> c = Class.forName(className);
-    if (!(CoefficientsProvider.class.isAssignableFrom(c))) {
-      throw new IllegalArgumentException(String.format("%s must implement %s", c.getName(), CoefficientsProvider.class));
+    if (!(GuardiansProvider.class.isAssignableFrom(c))) {
+      throw new IllegalArgumentException(String.format("%s must implement %s", c.getName(), GuardiansProvider.class));
     }
-    java.lang.reflect.Constructor<CoefficientsProvider> constructor = (Constructor<CoefficientsProvider>) c.getConstructor();
+    java.lang.reflect.Constructor<GuardiansProvider> constructor = (Constructor<GuardiansProvider>) c.getConstructor();
     return constructor.newInstance();
   }
 
@@ -117,91 +111,25 @@ public class BallotDecryptor {
   final ElectionRecord electionRecord;
   final Election.InternalElectionDescription metadata; // dont see much point to this.
 
-  List<Guardian> guardians;
+  Iterable<Guardian> guardians;
   CiphertextTallyBuilder ciphertextTally;
   PublishedCiphertextTally publishedTally;
   PlaintextTally decryptedTally;
   int quorum;
   int numberOfGuardians;
 
-  public BallotDecryptor(ElectionRecord electionRecord, CoefficientsProvider provider) {
+  public DecryptBallots(ElectionRecord electionRecord, GuardiansProvider provider) {
     this.electionRecord = electionRecord;
     this.metadata = new Election.InternalElectionDescription(electionRecord.election);
-    this.quorum = provider.quorum();
-    this.numberOfGuardians = Iterables.size(provider.guardianCoefficients());
-    Group.ElementModQ crypto_base_hash = Election.make_crypto_base_hash(this.numberOfGuardians, this.quorum, electionRecord.election);
+    this.quorum = electionRecord.context.quorum;
+    this.numberOfGuardians = electionRecord.context.number_of_guardians;
 
-    this.guardians = new ArrayList<>();
-    for (KeyCeremony.CoefficientSet coeffSet : provider.guardianCoefficients()) {
-      this.guardians.add(Guardian.create(coeffSet, numberOfGuardians, quorum, crypto_base_hash));
+    this.guardians = provider.guardians();
+    for (Guardian guardian : provider.guardians()) {
       // LOOK test Guardians against whats in the electionRecord.
     }
 
     System.out.printf("%nReady to decrypt%n");
-
-    // Run the key ceremony in order to fill in the guardian fields, if quorum < nguardians
-    if ((this.quorum < this.numberOfGuardians) && !keyCeremony()) {
-      throw new RuntimeException("keyCeremony failed");
-    }
-  }
-
-  boolean keyCeremony() {
-    // Setup Mediator
-    KeyCeremony.CeremonyDetails details = KeyCeremony.CeremonyDetails.create(this.numberOfGuardians,  this.quorum);
-    KeyCeremonyMediator keyCeremony = new KeyCeremonyMediator(details);
-
-    // Attendance (Public Key Share)
-    int count = 0;
-    for (Guardian guardian : this.guardians) {
-      keyCeremony.announce(guardian);
-      count++;
-      if (count == this.quorum) {
-        break;
-      }
-    }
-    System.out.printf(" %d Guardians in attendance (%d/%d) %n", count, this.quorum, this.numberOfGuardians);
-
-    /* System.out.printf(" Confirm all guardians have shared their public keys%n");
-    if (!keyCeremony.all_guardians_in_attendance()) {
-      System.out.printf(" *** FAILED%n");
-      return false;
-    }
-
-    // Run the Key Ceremony process, which shares the keys among the guardians
-    Optional<List<Guardian>> orchestrated = keyCeremony.orchestrate(null);
-    System.out.printf(" Execute the key exchange between guardians%n");
-    if (orchestrated.isEmpty()) {
-      System.out.printf(" *** FAILED%n");
-      return false;
-    }
-
-    System.out.printf(" Confirm all guardians have shared their partial key backups%n");
-    if (!keyCeremony.all_election_partial_key_backups_available()) {
-      System.out.printf(" *** FAILED%n");
-      return false;
-    }
-
-    // Verification
-    boolean verified = keyCeremony.verify(null);
-    System.out.printf(" Confirm all guardians truthfully executed the ceremony%n");
-    if (!verified) {
-      System.out.printf(" *** FAILED%n");
-      return false;
-    }
-
-    System.out.printf(" Confirm all guardians have submitted a verification of the backups of all other guardians%n");
-    if (!keyCeremony.all_election_partial_key_verifications_received()) {
-      System.out.printf(" *** FAILED%n");
-      return false;
-    }
-
-    System.out.printf(" Confirm all guardians have verified the backups of all other guardians%n");
-    if (!keyCeremony.all_election_partial_key_backups_verified()) {
-      System.out.printf(" *** FAILED%n");
-      return false;
-    } */
-
-    return true;
   }
 
   void accumulateTally() {
@@ -245,7 +173,7 @@ public class BallotDecryptor {
             this.electionRecord.context,
             this.electionRecord.constants,
             this.electionRecord.devices,
-            this.electionRecord.castBallots,
+            this.electionRecord.castBallots, // LOOK
             this.electionRecord.guardianCoefficients,
             this.publishedTally,
             this.decryptedTally);

@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 import static com.sunya.electionguard.Group.*;
 
 /** The process to create the joint encryption context for encrypting ballots. */
- public class KeyCeremony {
+public class KeyCeremony {
 
   /** Details of key ceremony. */
   @AutoValue
@@ -43,11 +43,11 @@ import static com.sunya.electionguard.Group.*;
 
   /** Guardian's public key and owner information. */
   @AutoValue
-  abstract static class ElectionPublicKey {
-    abstract String owner_id(); // guardian object_id
-    abstract int sequence_order();
-    abstract SchnorrProof proof();
-    abstract ElementModP key();
+  public abstract static class ElectionPublicKey {
+    public abstract String owner_id(); // guardian object_id
+    public abstract int sequence_order();
+    public abstract SchnorrProof proof();
+    public abstract ElementModP key();
 
     public static ElectionPublicKey create(String owner_id, int sequence_order, SchnorrProof proof, ElementModP key) {
       return new AutoValue_KeyCeremony_ElectionPublicKey(owner_id, sequence_order, proof, key);
@@ -59,7 +59,7 @@ import static com.sunya.electionguard.Group.*;
   abstract static class PublicKeySet {
     abstract String owner_id(); // guardian object_id
     abstract int sequence_order(); // guardian sequence_order
-    abstract java.security.PublicKey auxiliary_public_key(); // LOOK can we hide java.security.PublicKey?
+    abstract java.security.PublicKey auxiliary_public_key();
     abstract ElementModP election_public_key();
     abstract SchnorrProof election_public_key_proof();
 
@@ -83,19 +83,19 @@ import static com.sunya.electionguard.Group.*;
 
   /** A point on a secret polynomial and commitments to verify this point for a designated guardian. */
   @AutoValue
-  abstract static class ElectionPartialKeyBackup {
+  public abstract static class ElectionPartialKeyBackup {
     /** The Id of the guardian that generated this backup. */
-    abstract String owner_id();
+    public abstract String owner_id();
     /** The Id of the guardian to receive this backup. */
-    abstract String designated_id();
+    public abstract String designated_id();
     /** // The sequence order of the designated guardian. */
-    abstract int designated_sequence_order();
+    public abstract int designated_sequence_order();
     /** The encrypted coordinate corresponding to a secret election polynomial. */
-    abstract Auxiliary.ByteString encrypted_value();
+    public abstract Auxiliary.ByteString encrypted_value();
     /** The public keys `K_ij`generated from the election polynomial coefficients. */
-    abstract ImmutableList<ElementModP> coefficient_commitments();
+    public abstract ImmutableList<ElementModP> coefficient_commitments();
     /** The proofs of possession of the private keys for the election polynomial secret coefficients. */
-    abstract ImmutableList<SchnorrProof> coefficient_proofs();
+    public abstract ImmutableList<SchnorrProof> coefficient_proofs();
 
     public static ElectionPartialKeyBackup create(String owner_id,
                                                   String designated_id,
@@ -133,7 +133,7 @@ import static com.sunya.electionguard.Group.*;
   @AutoValue
   public abstract static class CoefficientSet {
     public abstract String guardianId(); // Guardian.object_id
-    public abstract int guardianSequence(); // Guardian.sequence
+    public abstract int guardianSequence(); // a unique number in [1, 256) that is the polynomial x value for this guardian
     public abstract ImmutableList<ElementModQ> coefficients(); // Kij, j=0..quorum-1
 
     public static CoefficientSet create(String id, int guardian, List<ElementModQ> coefficients) {
@@ -155,11 +155,11 @@ import static com.sunya.electionguard.Group.*;
 
   /** Verification of election partial key used in key sharing. */
   @AutoValue
-  abstract static class ElectionPartialKeyVerification {
-    abstract String owner_id();
-    abstract String designated_id();
-    abstract String verifier_id();
-    abstract boolean verified();
+  public abstract static class ElectionPartialKeyVerification {
+    public abstract String owner_id();
+    public abstract String designated_id();
+    public abstract String verifier_id();
+    public abstract boolean verified();
 
     public static ElectionPartialKeyVerification create(String owner_id, String designated_id, String verifier_id, boolean verified) {
       return new AutoValue_KeyCeremony_ElectionPartialKeyVerification(owner_id, designated_id, verifier_id, verified);

@@ -20,7 +20,7 @@ public class TestElectionWorkflow {
     boolean isProto = false;
 
     @Parameter(names = {"-guardians"},
-            description = "CoefficientsProvider classname", required = true)
+            description = "GuardianProvider classname", required = true)
     String guardianProviderClass;
 
     @Parameter(names = {"-encryptDir"},
@@ -68,47 +68,65 @@ public class TestElectionWorkflow {
       return;
     }
 
-    // BallotEncryptor
-    RunCommand command = new RunCommand();
+    // PerformKeyCeremony
+    RunCommand command0 = new RunCommand();
     Formatter out = new Formatter();
-    command.run(out, "java",
+    command0.run(out, "java",
             "-classpath", "build/libs/electionguard-java-0.7-SNAPSHOT-all.jar",
-            "com.sunya.electionguard.workflow.BallotEncryptor",
+            "com.sunya.electionguard.workflow.PerformKeyCeremony",
             "-in", cmdLine.inputDir,
-            "-guardians", cmdLine.guardianProviderClass,
-            "-ballots", cmdLine.ballotProviderClass,
-            "-encryptDir", cmdLine.encryptDir
-            );
+            "-out", cmdLine.encryptDir,
+            "-nguardians", "6",
+            "-quorum", "5"
+    );
     System.out.printf("%s", out);
-    if (command.statusReturn != 0) {
-      System.exit(command.statusReturn);
+    if (command0.statusReturn != 0) {
+      System.exit(command0.statusReturn);
     }
     System.out.printf("%n==============================================================%n");
 
-    // BallotDecryptor
+    // EncryptBallots
+    RunCommand command1 = new RunCommand();
+    out = new Formatter();
+    command1.run(out, "java",
+            "-classpath", "build/libs/electionguard-java-0.7-SNAPSHOT-all.jar",
+            "com.sunya.electionguard.workflow.EncryptBallots",
+            "-in", cmdLine.encryptDir,
+            "--proto",
+            "-ballots", cmdLine.ballotProviderClass,
+            "-out", cmdLine.encryptDir,
+            "-device", "deviceName"
+            );
+    System.out.printf("%s", out);
+    if (command1.statusReturn != 0) {
+      System.exit(command1.statusReturn);
+    }
+    System.out.printf("%n==============================================================%n");
+
+    // DecryptBallots
     RunCommand command2 = new RunCommand();
-    Formatter out2 = new Formatter();
-    command2.run(out2, "java", "-classpath", "build/libs/electionguard-java-0.7-SNAPSHOT-all.jar",
-            "com.sunya.electionguard.workflow.BallotDecryptor",
-            "-encryptDir", cmdLine.encryptDir,
+    out = new Formatter();
+    command2.run(out, "java", "-classpath", "build/libs/electionguard-java-0.7-SNAPSHOT-all.jar",
+            "com.sunya.electionguard.workflow.DecryptBallots",
+            "-in", cmdLine.encryptDir,
             "-guardians", cmdLine.guardianProviderClass,
             "-out", cmdLine.outputDir
     );
-    System.out.printf("%s", out2);
+    System.out.printf("%s", out);
     if (command2.statusReturn != 0) {
       System.exit(command2.statusReturn);
     }
     System.out.printf("%n==============================================================%n");
 
-    // BallotDecryptor
+    // VerifyElectionRecord
     RunCommand command3 = new RunCommand();
-    Formatter out3 = new Formatter();
-    command3.run(out3, "java", "-classpath", "build/libs/electionguard-java-0.7-SNAPSHOT-all.jar",
+    out = new Formatter();
+    command3.run(out, "java", "-classpath", "build/libs/electionguard-java-0.7-SNAPSHOT-all.jar",
             "com.sunya.electionguard.verifier.VerifyElectionRecord",
             "-in", cmdLine.outputDir,
             "--proto"
     );
-    System.out.printf("%s", out3);
+    System.out.printf("%s", out);
     System.exit(command3.statusReturn);
   }
 

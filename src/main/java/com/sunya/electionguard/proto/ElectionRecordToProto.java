@@ -12,8 +12,6 @@ import com.sunya.electionguard.SchnorrProof;
 
 import javax.annotation.Nullable;
 
-import java.util.List;
-
 import static com.sunya.electionguard.proto.ElectionRecordProto.ElectionRecord;
 import static com.sunya.electionguard.proto.CommonConvert.convertElementModP;
 import static com.sunya.electionguard.proto.CommonConvert.convertElementModQ;
@@ -24,8 +22,8 @@ public class ElectionRecordToProto {
           Election.ElectionDescription description,
           Election.CiphertextElectionContext context,
           Election.ElectionConstants constants,
-          Iterable<Encrypt.EncryptionDevice> devices,
-          Iterable<Ballot.CiphertextAcceptedBallot> castBallots,
+          @Nullable  Iterable<Encrypt.EncryptionDevice> devices,
+          @Nullable  Iterable<Ballot.CiphertextAcceptedBallot> castBallots,
           Iterable<KeyCeremony.CoefficientValidationSet> guardianCoefficients,
           @Nullable PublishedCiphertextTally ciphertext_tally,
           @Nullable PlaintextTally decryptedTally) {
@@ -35,18 +33,20 @@ public class ElectionRecordToProto {
     builder.setElection( ElectionDescriptionToProto.translateToProto(description));
     builder.setContext( convertContext(context));
 
-    for (Encrypt.EncryptionDevice device : devices) {
-      builder.addDevice(convertDevice(device));
-    }
-
     for (KeyCeremony.CoefficientValidationSet coeff : guardianCoefficients) {
       builder.addGuardianCoefficients(convertValidationCoefficients(coeff));
     }
 
-    for (Ballot.CiphertextAcceptedBallot ballot : castBallots) {
-      builder.addCastBallots(CiphertextBallotToProto.translateToProto(ballot));
+    if (devices != null) {
+      for (Encrypt.EncryptionDevice device : devices) {
+        builder.addDevice(convertDevice(device));
+      }
     }
-
+    if (castBallots != null) {
+      for (Ballot.CiphertextAcceptedBallot ballot : castBallots) {
+        builder.addCastBallots(CiphertextBallotToProto.translateToProto(ballot));
+      }
+    }
     if (ciphertext_tally != null) {
       builder.setCiphertextTally(CiphertextTallyToProto.translateToProto(ciphertext_tally));
     }
@@ -90,35 +90,9 @@ public class ElectionRecordToProto {
       builder.addCoefficientCommitments(convertElementModP(commitment));
     }
     for (SchnorrProof proof : validationSet.coefficient_proofs()) {
-      builder.addCoefficientProofs(convertSchnorrProof(proof));
+      builder.addCoefficientProofs(CommonConvert.convertSchnorrProof(proof));
     }
     return builder.build();
   }
 
-  static KeyCeremonyProto.SchnorrProof convertSchnorrProof(SchnorrProof proof) {
-    KeyCeremonyProto.SchnorrProof.Builder builder = KeyCeremonyProto.SchnorrProof.newBuilder();
-    builder.setPublicKey(convertElementModP(proof.public_key));
-    builder.setCommitment(convertElementModP(proof.commitment));
-    builder.setChallenge(convertElementModQ(proof.challenge));
-    builder.setResponse(convertElementModQ(proof.response));
-    return builder.build();
-  }
-
-  public static KeyCeremonyProto.CoefficientSets convertCoefficientSet(List<KeyCeremony.CoefficientSet> coeffSets) {
-    KeyCeremonyProto.CoefficientSets.Builder builder = KeyCeremonyProto.CoefficientSets.newBuilder();
-    for (KeyCeremony.CoefficientSet coeffSet : coeffSets) {
-      builder.addGuardianSets(convertCoefficients(coeffSet));
-    }
-    return builder.build();
-  }
-
-  private static KeyCeremonyProto.CoefficientSets.CoefficientSet convertCoefficients(KeyCeremony.CoefficientSet coeffSet) {
-    KeyCeremonyProto.CoefficientSets.CoefficientSet.Builder builder = KeyCeremonyProto.CoefficientSets.CoefficientSet.newBuilder();
-    builder.setGuardianId(coeffSet.guardianId());
-    builder.setGuardianSequence(coeffSet.guardianSequence());
-    for (Group.ElementModQ coeff : coeffSet.coefficients()) {
-      builder.addCoefficients(convertElementModQ(coeff));
-    }
-    return builder.build();
-  }
 }

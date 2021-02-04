@@ -3,6 +3,7 @@ package com.sunya.electionguard.publish;
 import com.sunya.electionguard.*;
 import com.sunya.electionguard.proto.ElectionRecordProto;
 import com.sunya.electionguard.proto.ElectionRecordToProto;
+import com.sunya.electionguard.proto.KeyCeremonyProto;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -35,6 +36,7 @@ public class Publisher {
   static final String BALLOT_PREFIX = "ballot_";
   static final String PLAINTEXT_BALLOT_PREFIX = "plaintext_ballot_";
   static final String GUARDIAN_PREFIX = "guardian_";
+  static final String GUARDIAN_FILE = "guardians.proto";
 
   // TODO #148 Revert PlaintextTally to PublishedPlaintextTally after moving spoiled info
 
@@ -43,6 +45,7 @@ public class Publisher {
   private final Path coefficientsDirPath;
   private final Path ballotsDirPath;
   private final Path spoiledDirPath;
+  private final Path privateDirPath;
 
   public Publisher(String where, boolean removeAllFiles, boolean createDirs) throws IOException {
     this.publishDirectory = Path.of(where);
@@ -50,6 +53,7 @@ public class Publisher {
     this.coefficientsDirPath = publishDirectory.resolve(COEFFICIENTS_DIR);
     this.ballotsDirPath = publishDirectory.resolve(BALLOTS_DIR);
     this.spoiledDirPath = publishDirectory.resolve(SPOILED_DIR);
+    this.privateDirPath = publishDirectory.resolve(PRIVATE_DIR);
 
     if (removeAllFiles) {
       removeAllFiles();
@@ -108,6 +112,10 @@ public class Publisher {
     return devicesDirPath.resolve(fileName);
   }
 
+  public Path guardiansFile() {
+    return privateDirPath.resolve(GUARDIAN_FILE);
+  }
+
   public File[] deviceFiles() {
     return devicesDirPath.toFile().listFiles();
   }
@@ -129,14 +137,6 @@ public class Publisher {
   public File[] ballotFiles() {
     return ballotsDirPath.toFile().listFiles();
   }
-
-  /* public Path spoiledFile(String id) {
-    String fileName = BALLOT_PREFIX + id + SUFFIX;
-    return spoiledDirPath.resolve(fileName);
-  }
-  public File[] spoiledFiles() {
-    return spoiledDirPath.toFile().listFiles();
-  } */
 
   /** Publishes the election record as json. */
   public void writeElectionRecordJson(
@@ -167,10 +167,6 @@ public class Publisher {
     for (Ballot.CiphertextAcceptedBallot ballot : ciphertext_ballots) {
       ConvertToJson.write(ballot, this.ballotFile(ballot.object_id));
     }
-
-    /* for (Ballot.PlaintextBallot ballot : spoiled_ballots) {
-      ConvertToJson.write(ballot, this.spoiledFile(ballot.object_id));
-    } */
 
     ConvertToJson.write(ciphertext_tally, encryptedTallyFile());
     ConvertToJson.write(decryptedTally, tallyFile());
@@ -218,6 +214,24 @@ public class Publisher {
     }
   }
 
+  /** Publishes the KeyCeremony part of the election record as proto. */
+  public void writeKeyCeremonyProto(
+          ElectionDescription description,
+          CiphertextElectionContext context,
+          ElectionConstants constants,
+          Iterable<KeyCeremony.CoefficientValidationSet> coefficient_validation_sets) throws IOException {
+
+    ElectionRecordProto.ElectionRecord ElectionRecordProto = ElectionRecordToProto.buildElectionRecord(
+            description, context, constants, null,
+            null,
+            coefficient_validation_sets,
+            null, null);
+
+    try (FileOutputStream out = new FileOutputStream(electionRecordProtoFile().toFile())) {
+      ElectionRecordProto.writeDelimitedTo(out);
+    }
+  }
+
   /**
    * Publish the private data for an election.
    * Useful for generating sample data sets.
@@ -248,6 +262,15 @@ public class Publisher {
     for (Ballot.CiphertextBallot ciphertext_ballot : ciphertext_ballots) {
       String ballot_name = BALLOT_PREFIX + ciphertext_ballot.object_id + SUFFIX;
       ConvertToJson.write(ciphertext_ballot, encryptedDirPath.resolve(ballot_name));
+    }
+  }
+
+  public void publishGuardiansProto(KeyCeremonyProto.Guardians guardiansProto) throws IOException {
+    Path privateDirPath = publishDirectory.resolve(PRIVATE_DIR);
+    Files.createDirectories(privateDirPath);
+
+    try (FileOutputStream out = new FileOutputStream(guardiansFile().toFile())) {
+      guardiansProto.writeDelimitedTo(out);
     }
   }
 }

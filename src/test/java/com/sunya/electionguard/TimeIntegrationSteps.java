@@ -46,6 +46,7 @@ public class TimeIntegrationSteps {
 
   // Step 1 - Key Ceremony;
   KeyCeremonyMediator mediator;
+  List<GuardianBuilder> guardianBuilders = new ArrayList<>();
   List<Guardian> guardians = new ArrayList<>();
   List<KeyCeremony.CoefficientValidationSet> coefficient_validation_sets = new ArrayList<>();
 
@@ -148,15 +149,15 @@ public class TimeIntegrationSteps {
     // Setup Guardians
     for (int i = 0; i < NUMBER_OF_GUARDIANS; i++) {
       int sequence = i + 1;
-      this.guardians.add(Guardian.createForTesting("guardian_" + sequence, sequence, NUMBER_OF_GUARDIANS, QUORUM, null));
+      this.guardianBuilders.add(GuardianBuilder.createForTesting("guardian_" + sequence, sequence, NUMBER_OF_GUARDIANS, QUORUM, null));
     }
 
     // Setup Mediator
-    this.mediator = new KeyCeremonyMediator(this.guardians.get(0).ceremony_details());
+    this.mediator = new KeyCeremonyMediator(this.guardianBuilders.get(0).ceremony_details());
 
     // Attendance (Public Key Share)
-    for (Guardian guardian : this.guardians) {
-      this.mediator.announce(guardian);
+    for (GuardianBuilder guardianBuilder : this.guardianBuilders) {
+      this.mediator.announce(guardianBuilder);
     }
 
     System.out.printf("Confirms all guardians have shared their public keys%n");
@@ -164,7 +165,7 @@ public class TimeIntegrationSteps {
 
     // Run the Key Ceremony process,
     // Which shares the keys among the guardians
-    Optional<List<Guardian>> orchestrated = this.mediator.orchestrate(null);
+    Optional<List<GuardianBuilder>> orchestrated = this.mediator.orchestrate(null);
     System.out.printf("Executes the key exchange between guardians%n");
     assertThat(orchestrated).isPresent();
 
@@ -188,7 +189,9 @@ public class TimeIntegrationSteps {
     assertThat(joint_key).isPresent();
 
     // Save Validation Keys
-    for (Guardian guardian : this.guardians) {
+    for (GuardianBuilder guardianBuilder : this.guardianBuilders) {
+      Guardian guardian = guardianBuilder.build();
+      this.guardians.add(guardian);
       this.coefficient_validation_sets.add(guardian.share_coefficient_validation_set());
     }
 

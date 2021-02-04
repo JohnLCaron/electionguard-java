@@ -86,7 +86,7 @@ public class ElectionRecordFromProto {
             .collect(Collectors.toList());
 
     List<SchnorrProof> coefficient_proofs = coeff.getCoefficientProofsList().stream()
-            .map(ElectionRecordFromProto::convertSchnorrProof)
+            .map(CommonConvert::convertSchnorrProof)
             .collect(Collectors.toList());
 
     return KeyCeremony.CoefficientValidationSet.create(
@@ -96,38 +96,4 @@ public class ElectionRecordFromProto {
     );
   }
 
-  static SchnorrProof convertSchnorrProof(KeyCeremonyProto.SchnorrProof proof) {
-    return new SchnorrProof(
-            convertElementModP(proof.getPublicKey()),
-            convertElementModP(proof.getCommitment()),
-            convertElementModQ(proof.getChallenge()),
-            convertElementModQ(proof.getResponse()));
-  }
-
-  public static ImmutableList<KeyCeremony.CoefficientSet> readCoefficientSet(String filename) throws IOException {
-    KeyCeremonyProto.CoefficientSets proto;
-    try (FileInputStream inp = new FileInputStream(filename)) {
-      proto = KeyCeremonyProto.CoefficientSets.parseDelimitedFrom(inp);
-    }
-    return convertCoefficientSet(proto);
-  }
-
-  private static ImmutableList<KeyCeremony.CoefficientSet>  convertCoefficientSet(KeyCeremonyProto.CoefficientSets coeffSets) {
-    ImmutableList.Builder<KeyCeremony.CoefficientSet> builder = ImmutableList.builder();
-    for (KeyCeremonyProto.CoefficientSets.CoefficientSet coeffSet : coeffSets.getGuardianSetsList()) {
-      builder.add(convertCoefficients(coeffSet));
-    }
-    return builder.build();
-  }
-
-  private static KeyCeremony.CoefficientSet convertCoefficients(KeyCeremonyProto.CoefficientSets.CoefficientSet coeff) {
-    List<Group.ElementModQ> coefficients = coeff.getCoefficientsList().stream()
-            .map(CommonConvert::convertElementModQ)
-            .collect(Collectors.toList());
-
-    return KeyCeremony.CoefficientSet.create(
-            coeff.getGuardianId(),
-            coeff.getGuardianSequence(),
-            coefficients);
-  }
 }
