@@ -6,11 +6,8 @@ import com.sunya.electionguard.Group;
 import com.sunya.electionguard.Guardian;
 import com.sunya.electionguard.KeyCeremony;
 
-import java.security.KeyFactory;
-import java.security.PrivateKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
-import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.List;
 
 import static com.sunya.electionguard.proto.CommonConvert.convertElementModP;
@@ -35,7 +32,6 @@ public class KeyCeremonyToProto {
     guardian.auxiliary_public_keys().forEach(k -> builder.addOtherGuardianAuxiliaryKeys(convertAuxiliaryPublicKey(k)));
     guardian.election_public_keys().forEach(k -> builder.addOtherGuardianElectionKeys(convertElectionPublicKey(k)));
     guardian.election_partial_key_backups().forEach(k -> builder.addOtherGuardianBackups(convertElectionPartialKeyBackup(k)));
-    // guardian.election_partial_key_verification().forEach(k -> convertElectionPartialKeyVerification(k));
 
     return builder.build();
   }
@@ -72,15 +68,6 @@ public class KeyCeremonyToProto {
     builder.setEncryptedValue(ByteString.copyFrom(org.encrypted_value().getBytes()));
     org.coefficient_commitments().forEach(c -> builder.addCoefficientCommitments(convertElementModP(c)));
     org.coefficient_proofs().forEach(p -> builder.addCoefficientProofs(convertSchnorrProof(p)));
-    return builder.build();
-  }
-
-  private static KeyCeremonyProto.ElectionPartialKeyVerification convertElectionPartialKeyVerification(KeyCeremony.ElectionPartialKeyVerification org) {
-    KeyCeremonyProto.ElectionPartialKeyVerification.Builder builder = KeyCeremonyProto.ElectionPartialKeyVerification.newBuilder();
-    builder.setOwnerId(org.owner_id());
-    builder.setDesignatedId(org.designated_id());
-    builder.setVerifierId(org.verifier_id());
-    builder.setVerified(org.verified());
     return builder.build();
   }
 

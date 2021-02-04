@@ -20,12 +20,8 @@ public class Guardian extends ElectionObjectBase {
 
   private final int sequence_order;
   private final KeyCeremony.CeremonyDetails ceremony_details;
-  private final ElementModQ crypto_base_hash;
   private final Auxiliary.KeyPair auxiliary_keys;
   private final KeyCeremony.ElectionKeyPair election_keys; // Ki = election keypair for this Guardian
-
-  // The collection of this guardian's partial key backups that will be shared to other guardians
-  private final ImmutableMap<String, KeyCeremony.ElectionPartialKeyBackup> backups_to_share; // Map(GUARDIAN_ID, ElectionPartialKeyBackup)
 
   //// From Other Guardians
   // The collection of other guardians' auxiliary public keys that are shared with this guardian
@@ -39,20 +35,16 @@ public class Guardian extends ElectionObjectBase {
 
   public Guardian(String object_id, int sequence_order,
                   KeyCeremony.CeremonyDetails ceremony_details,
-                  ElementModQ crypto_base_hash,
                   Auxiliary.KeyPair auxiliary_keys,
                   KeyCeremony.ElectionKeyPair election_keys,
-                  Map<String, KeyCeremony.ElectionPartialKeyBackup> backups_to_share,
                   Map<String, Auxiliary.PublicKey> otherGuardianAuxiliaryKeys,
                   Map<String, KeyCeremony.ElectionPublicKey> otherGuardianElectionKeys,
                   Map<String, KeyCeremony.ElectionPartialKeyBackup> otherGuardianPartialKeyBackups) {
     super(object_id);
     this.sequence_order = sequence_order;
     this.ceremony_details = Preconditions.checkNotNull(ceremony_details);
-    this.crypto_base_hash = Preconditions.checkNotNull(crypto_base_hash);
     this.auxiliary_keys = Preconditions.checkNotNull(auxiliary_keys);
     this.election_keys = Preconditions.checkNotNull(election_keys);
-    this.backups_to_share = ImmutableMap.copyOf(backups_to_share);
     this.otherGuardianAuxiliaryKeys = ImmutableMap.copyOf(otherGuardianAuxiliaryKeys);
     this.otherGuardianElectionKeys = ImmutableMap.copyOf(otherGuardianElectionKeys);
     this.otherGuardianPartialKeyBackups = ImmutableMap.copyOf(otherGuardianPartialKeyBackups);
@@ -71,27 +63,29 @@ public class Guardian extends ElectionObjectBase {
                                                  int sequence_order,
                                                  int number_of_guardians,
                                                  int quorum,
-                                                 @Nullable ElementModQ nonce_seed) {
+                                                 @Nullable ElementModQ nonce_seed,
+                                                 @Nullable ElementModQ crypto_base_hash) {
 
-    return new Guardian(id, sequence_order, number_of_guardians, quorum, nonce_seed, Group.rand_q());
+    return new Guardian(id, sequence_order, number_of_guardians, quorum, nonce_seed, crypto_base_hash);
   }
 
   private Guardian(String id,
-                          int sequence_order,
-                          int number_of_guardians,
-                          int quorum,
-                          @Nullable ElementModQ nonce_seed,
-                          ElementModQ crypto_base_hash) {
+                    int sequence_order,
+                    int number_of_guardians,
+                    int quorum,
+                    @Nullable ElementModQ nonce_seed,
+                    @Nullable ElementModQ crypto_base_hash) {
 
     super(id);
     Preconditions.checkArgument(sequence_order > 0 && sequence_order < 256);
     this.sequence_order = sequence_order;
     this.ceremony_details = KeyCeremony.CeremonyDetails.create(number_of_guardians, quorum);
-    this.crypto_base_hash = crypto_base_hash;
     this.auxiliary_keys = KeyCeremony.generate_rsa_auxiliary_key_pair();
+    if (crypto_base_hash == null) {
+      crypto_base_hash = Group.rand_q();
+    }
     this.election_keys =  KeyCeremony.generate_election_key_pair(quorum, nonce_seed, crypto_base_hash);
 
-    this.backups_to_share = ImmutableMap.of();
     this.otherGuardianAuxiliaryKeys = ImmutableMap.of(this.object_id, this.share_auxiliary_public_key());
     this.otherGuardianElectionKeys = ImmutableMap.of(this.object_id, this.share_election_public_key());
     this.otherGuardianPartialKeyBackups = ImmutableMap.of();

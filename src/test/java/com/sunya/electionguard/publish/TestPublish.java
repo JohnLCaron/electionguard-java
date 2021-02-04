@@ -76,7 +76,7 @@ public class TestPublish {
             Ballot.make_ciphertext_ballot("CipherTextBallotId", "ballot_style", int_to_q_unchecked(BigInteger.ZERO),
                     Optional.of(int_to_q_unchecked(BigInteger.ZERO)), ImmutableList.of(), Optional.empty(),Optional.empty(), Optional.empty()));
 
-    List<Guardian> guardians = ImmutableList.of(Guardian.createForTesting("GuardianId", 1, 1, 1, null));
+    List<Guardian> guardians = ImmutableList.of(Guardian.createForTesting("GuardianId", 1, 1, 1, null, null));
 
     Publisher publisher = new Publisher(outputDir, false, false);
     publisher.publish_private_data(

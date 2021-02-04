@@ -52,8 +52,6 @@ public class KeyCeremonyFromProto {
             .forEach(k -> builder.save_election_public_key(convertElectionPublicKey(k)));
     proto.getOtherGuardianBackupsList()
             .forEach(b -> builder.save_election_partial_key_backup(convertElectionPartialKeyBackup(b)));
-    proto.getOtherGuardianVerificationsList()
-            .forEach(v -> builder.save_election_partial_key_verification(convertElectionPartialKeyVerification(v)));
 
     // Generate partial key backups based on existing public keys
     builder.generate_election_partial_key_backups(null);
@@ -89,14 +87,6 @@ public class KeyCeremonyFromProto {
             new Auxiliary.ByteString(proto.getEncryptedValue().toByteArray()),
             CommonConvert.convertList(proto.getCoefficientCommitmentsList(), CommonConvert::convertElementModP),
             CommonConvert.convertList(proto.getCoefficientProofsList(), CommonConvert::convertSchnorrProof));
-  }
-
-  private static KeyCeremony.ElectionPartialKeyVerification convertElectionPartialKeyVerification(KeyCeremonyProto.ElectionPartialKeyVerification proto) {
-    return KeyCeremony.ElectionPartialKeyVerification.create(
-            proto.getOwnerId(),
-            proto.getDesignatedId(),
-            proto.getVerifierId(),
-            proto.getVerified());
   }
 
   // LOOK there may be something better to do when serializing. Find out before use in production.

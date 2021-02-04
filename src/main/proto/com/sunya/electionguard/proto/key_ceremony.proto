@@ -13,7 +13,8 @@ message Guardians {
 
 message Guardian {
   CoefficientSet coefficients = 1;
-  AuxiliaryKeyPair auxiliary_keys = 2; // LOOK
+  AuxiliaryKeyPair auxiliary_keys = 2;
+  // dont need to store the election_keys because they are generated from the coefficients
 
   // The collection of other guardians' auxiliary public keys that are shared with this guardian
   repeated AuxiliaryPublicKey other_guardian_auxiliary_keys = 3;
@@ -23,12 +24,8 @@ message Guardian {
 
   // Other guardians' partial key backups that are shared with this guardian
   repeated ElectionPartialKeyBackup other_guardian_backups = 5;
-
-  // Other guardians' verifications that they shared their backups correctly LOOK not needed?
-  repeated ElectionPartialKeyVerification other_guardian_verifications = 6;
 }
 
-// not obvious how to serialize
 message AuxiliaryKeyPair {
   // java.security.PrivateKey
   RSAPrivateKey secret_key = 1;
@@ -62,12 +59,6 @@ message CoefficientValidationSet {
   repeated SchnorrProof coefficient_proofs = 3;
 }
 
-message ElectionKeyPair {
-  ElGamalKeyPair key_pair = 1; // Ki = (si, g^si)
-  SchnorrProof proof = 2; // proof of knowledge of possession of the associated private key
-  // ElectionPolynomial polynomial = 3;
-}
-
 message ElectionPublicKey {
   string owner_id = 1; // guardian object_id
   uint32 sequence_order = 2;
@@ -88,13 +79,6 @@ message ElectionPartialKeyBackup {
   repeated ElementModP coefficient_commitments = 5;
   /** The proofs of possession of the private keys for the election polynomial secret coefficients. */
   repeated SchnorrProof coefficient_proofs = 6;
-}
-
-message ElectionPartialKeyVerification {
-  string owner_id = 1;
-  string designated_id = 2;
-  string verifier_id = 3;
-  bool verified = 4;
 }
 
 message ElectionPartialKeyChallenge {

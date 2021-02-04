@@ -1,7 +1,6 @@
 package com.sunya.electionguard;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.flogger.FluentLogger;
 
 import javax.annotation.Nullable;
@@ -37,8 +36,8 @@ public class GuardianBuilder extends ElectionObjectBase {
   private final Map<String, KeyCeremony.ElectionPartialKeyBackup> otherGuardianPartialKeyBackups; // Map(GUARDIAN_ID, ElectionPartialKeyBackup)
 
   // The collection of other guardians' verifications that they shared their backups correctly
-  //    * LOOK not needed, functionality in KeyCeremonyMediator
-  private final Map<String, KeyCeremony.ElectionPartialKeyVerification> otherGuardianVerifications; // Map(GUARDIAN_ID, ElectionPartialKeyVerification)
+  // LOOK not needed, functionality in KeyCeremonyMediator
+  private final Map<String, KeyCeremony.ElectionPartialKeyVerification> otherGuardianVerifications;
 
   /**
    * Create a guardian for production, passing in coefficients
@@ -195,19 +194,6 @@ public class GuardianBuilder extends ElectionObjectBase {
   /** True if all auxiliary public keys have been received. */
   boolean all_auxiliary_public_keys_received() {
     return this.otherGuardianAuxiliaryKeys.size() == this.ceremony_details.number_of_guardians();
-  }
-
-  // guardian_auxiliary_public_keys() not used
-  // guardian_auxiliary_public_keys() not used
-
-  /** Get a read-only view of the Guardian Election Public Keys shared with this Guardian. */
-  ImmutableMap<String, KeyCeremony.ElectionPublicKey> otherGuardianElectionKeys() {
-    return ImmutableMap.copyOf(otherGuardianElectionKeys);
-  }
-
-  /** From the Guardian Election Public Keys shared with this Guardian, find the ElectionPublicKey by guardian_id. */
-  @Nullable KeyCeremony.ElectionPublicKey otherGuardianElectionKey(String guardian_id) {
-    return otherGuardianElectionKeys.get(guardian_id);
   }
 
   /** Share auxiliary public key with another guardian. */
@@ -382,10 +368,8 @@ public class GuardianBuilder extends ElectionObjectBase {
   public Guardian build() {
     return new Guardian(object_id, sequence_order,
       ceremony_details,
-      crypto_base_hash,
       auxiliary_keypair,
       election_keys,
-      backups_to_share,
       otherGuardianAuxiliaryKeys,
       otherGuardianElectionKeys,
       otherGuardianPartialKeyBackups);
