@@ -22,9 +22,9 @@ public class ElectionRecordToProto {
           Election.ElectionDescription description,
           Election.CiphertextElectionContext context,
           Election.ElectionConstants constants,
-          @Nullable  Iterable<Encrypt.EncryptionDevice> devices,
-          @Nullable  Iterable<Ballot.CiphertextAcceptedBallot> castBallots,
           Iterable<KeyCeremony.CoefficientValidationSet> guardianCoefficients,
+          @Nullable Iterable<Encrypt.EncryptionDevice> devices,
+          @Nullable Iterable<Ballot.CiphertextAcceptedBallot> castBallots,
           @Nullable PublishedCiphertextTally ciphertext_tally,
           @Nullable PlaintextTally decryptedTally) {
 

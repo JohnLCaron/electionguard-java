@@ -2,8 +2,6 @@ package com.sunya.electionguard.workflow;
 
 import com.google.common.collect.ImmutableList;
 import com.sunya.electionguard.Group;
-import com.sunya.electionguard.proto.ElectionRecordFromProto;
-import com.sunya.electionguard.proto.ElectionRecordToProto;
 import com.sunya.electionguard.proto.KeyCeremonyFromProto;
 import com.sunya.electionguard.proto.KeyCeremonyProto;
 import com.sunya.electionguard.proto.KeyCeremonyToProto;

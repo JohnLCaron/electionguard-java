@@ -138,7 +138,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
 
     // generate encrypted tally
     this.ciphertext_tally = new CiphertextTallyBuilder("whatever", metadata, context);
-    this.ciphertext_tally.tally_ballots(ballot_store);
+    this.ciphertext_tally.tally_ballots(ballot_box.accepted());
   }
 
   @Example
@@ -196,7 +196,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
 
     // generate encrypted tally
     CiphertextTallyBuilder ctally  = new CiphertextTallyBuilder("whatever", this.metadata, this.context);
-    ctally.tally_ballots(ballot_store);
+    ctally.tally_ballots(ballot_box.accepted());
 
     // now decrypt it
     DecryptionMediator decryptionMediator = new DecryptionMediator(this.metadata, this.context, ctally);
@@ -254,7 +254,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
 
     // generate encrypted tally
     CiphertextTallyBuilder ctally  = new CiphertextTallyBuilder("whatever", this.metadata, this.context);
-    ctally.tally_ballots(ballot_store);
+    ctally.tally_ballots(ballot_box.accepted());
 
     // now decrypt it
     DecryptionMediator decryptionMediator = new DecryptionMediator(this.metadata, this.context, ctally);
@@ -306,7 +306,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
 
     // generate encrypted tally
     CiphertextTallyBuilder ctally  = new CiphertextTallyBuilder("whatever", this.metadata, this.context);
-    ctally.tally_ballots(ballot_store);
+    ctally.tally_ballots(ballot_box.accepted());
 
     // now decrypt it
     DecryptionMediator decryptionMediator = new DecryptionMediator(this.metadata, this.context, ctally);
@@ -352,7 +352,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
 
     // generate encrypted tally
     CiphertextTallyBuilder ctally  = new CiphertextTallyBuilder("whatever", this.metadata, this.context);
-    ctally.tally_ballots(ballot_store);
+    ctally.tally_ballots(ballot_box.accepted());
 
     // now decrypt it
     DecryptionMediator decryptionMediator = new DecryptionMediator(this.metadata, this.context, ctally);

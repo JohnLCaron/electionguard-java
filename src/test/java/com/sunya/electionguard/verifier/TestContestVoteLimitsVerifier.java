@@ -18,7 +18,7 @@ public class TestContestVoteLimitsVerifier {
     String topdir = TestParameterVerifier.topdir;
 
     consumer = new Consumer(topdir);
-    validator = new ContestVoteLimitsVerifier(consumer.getElectionRecord());
+    validator = new ContestVoteLimitsVerifier(consumer.readElectionRecordJson());
   }
 
   @Example

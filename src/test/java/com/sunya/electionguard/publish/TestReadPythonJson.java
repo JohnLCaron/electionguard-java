@@ -21,35 +21,35 @@ public class TestReadPythonJson {
 
   @Example
   public void testConstantsPythonJson() throws IOException {
-    Election.ElectionConstants fromPython = ConvertFromJson.readConstants(publisher.constantsFile().toString());
+    Election.ElectionConstants fromPython = ConvertFromJson.readConstants(publisher.constantsPath().toString());
     assertThat(fromPython).isNotNull();
     System.out.printf("%s%n", fromPython);
   }
 
   @Example
   public void testContextPythonJson() throws IOException {
-    Election.CiphertextElectionContext fromPython = ConvertFromJson.readContext(publisher.contextFile().toString());
+    Election.CiphertextElectionContext fromPython = ConvertFromJson.readContext(publisher.contextPath().toString());
     assertThat(fromPython).isNotNull();
     System.out.printf("%s%n", fromPython);
   }
 
   @Example
   public void testElectionPythonJson() throws IOException {
-    Election.ElectionDescription fromPython = ConvertFromJson.readElection(publisher.electionFile().toString());
+    Election.ElectionDescription fromPython = ConvertFromJson.readElection(publisher.electionPath().toString());
     assertThat(fromPython).isNotNull();
     System.out.printf("%s%n", fromPython);
   }
 
   @Example
   public void testEncryptedTallyPythonJson() throws IOException {
-    PublishedCiphertextTally fromPython = ConvertFromJson.readCiphertextTally(publisher.encryptedTallyFile().toString());
+    PublishedCiphertextTally fromPython = ConvertFromJson.readCiphertextTally(publisher.encryptedTallyPath().toString());
     assertThat(fromPython).isNotNull();
     System.out.printf("%s%n", fromPython);
   }
 
   @Example
   public void testPlaintextTallyPythonJson() throws IOException {
-    PlaintextTally fromPython = ConvertFromJson.readPlaintextTally(publisher.tallyFile().toString());
+    PlaintextTally fromPython = ConvertFromJson.readPlaintextTally(publisher.tallyPath().toString());
     assertThat(fromPython).isNotNull();
     System.out.printf("%s%n", fromPython);
   }

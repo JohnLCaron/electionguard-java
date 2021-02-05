@@ -104,7 +104,7 @@ public class BallotAggregationVerifier {
   private static class SelectionAggregator {
     ListMultimap<String, ElGamal.Ciphertext> selectionEncryptions = ArrayListMultimap.create();
 
-    SelectionAggregator(List<Ballot.CiphertextAcceptedBallot> ballots) {
+    SelectionAggregator(Iterable<Ballot.CiphertextAcceptedBallot> ballots) {
       for (Ballot.CiphertextAcceptedBallot ballot : ballots) {
         if (ballot.state == Ballot.BallotBoxState.CAST) {
           for (Ballot.CiphertextBallotContest contest : ballot.contests) {

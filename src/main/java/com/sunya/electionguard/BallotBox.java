@@ -2,6 +2,8 @@ package com.sunya.electionguard;
 
 import com.google.common.collect.Iterables;
 import com.google.common.flogger.FluentLogger;
+import com.sunya.electionguard.publish.CloseableIterable;
+import com.sunya.electionguard.publish.CloseableIterableAdapter;
 
 import java.util.Optional;
 
@@ -67,4 +69,14 @@ public class BallotBox {
   public Iterable<CiphertextAcceptedBallot> getSpoiledBallots() {
     return Iterables.filter(store, b -> b.state == BallotBoxState.SPOILED);
   }
+
+  /** Return the value for the given key, or empty. */
+  Optional<Ballot.CiphertextAcceptedBallot> get(String key) {
+    return store.get(key);
+  }
+
+  public CloseableIterable<CiphertextAcceptedBallot> accepted() {
+    return CloseableIterableAdapter.wrap(store);
+  }
+
 }

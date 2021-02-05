@@ -12,7 +12,6 @@ import com.sunya.electionguard.Guardian;
 import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.PublishedCiphertextTally;
 import com.sunya.electionguard.Scheduler;
-import com.sunya.electionguard.proto.ElectionRecordFromProto;
 import com.sunya.electionguard.publish.Consumer;
 import com.sunya.electionguard.publish.Publisher;
 import com.sunya.electionguard.verifier.ElectionRecord;
@@ -80,13 +79,13 @@ public class DecryptBallots {
 
     try {
       Consumer consumer = new Consumer(cmdLine.encryptDir);
-      ElectionRecord electionRecord = ElectionRecordFromProto.read(consumer.electionRecordProtoFile().toString());
+      ElectionRecord electionRecord = consumer.readElectionRecordProto();
 
       System.out.printf(" BallotDecryptor read from %s%n Write to %s%n", cmdLine.encryptDir, cmdLine.outputDir);
       decryptor = new DecryptBallots(electionRecord, guardiansProvider);
       decryptor.accumulateTally();
       decryptor.decryptTally();
-      decryptor.publish(cmdLine.outputDir);
+      decryptor.publish(cmdLine.encryptDir, cmdLine.outputDir);
       System.exit(0);
 
     } catch (Throwable t) {
@@ -135,9 +134,9 @@ public class DecryptBallots {
   void accumulateTally() {
     System.out.printf("%nAccumulate tally%n");
     this.ciphertextTally = new CiphertextTallyBuilder("BallotDecryptor", this.metadata, electionRecord.context);
-    this.ciphertextTally.tally_ballots(electionRecord.castBallots);
+    int nballots = this.ciphertextTally.tally_ballots(electionRecord.castBallots);
     this.publishedTally = this.ciphertextTally.build();
-    System.out.printf(" done accumulating tally%n");
+    System.out.printf(" done accumulating %d ballots in the tally%n", nballots);
   }
 
   void decryptTally() {
@@ -151,7 +150,7 @@ public class DecryptBallots {
       // LOOK not using TallyDecryptionShare?
       // LOOK test Guardians against whats in the electionRecord.
       Optional<DecryptionShare.TallyDecryptionShare> decryption_share = mediator.announce(guardian);
-      System.out.printf("Guardian Present: %s%n", guardian.object_id);
+      System.out.printf(" Guardian Present: %s%n", guardian.object_id);
       Preconditions.checkArgument(decryption_share.isPresent());
       count++;
       if (count == this.quorum) {
@@ -163,10 +162,10 @@ public class DecryptBallots {
     // Here's where the ciphertext Tally is decrypted.
     Optional<PlaintextTally> decryptedTallyO = mediator.getDecryptedTally(false, null);
     this.decryptedTally = decryptedTallyO.orElseThrow();
-    System.out.printf(" done decrypting tally%n");
+    System.out.printf("Done decrypting tally%n%n%s%n", this.decryptedTally);
   }
 
-  void publish(String publishDir) throws IOException {
+  void publish(String inputDir, String publishDir) throws IOException {
     Publisher publisher = new Publisher(publishDir, true, false);
     publisher.writeElectionRecordProto(
             this.electionRecord.election,
@@ -177,5 +176,7 @@ public class DecryptBallots {
             this.electionRecord.guardianCoefficients,
             this.publishedTally,
             this.decryptedTally);
+
+    publisher.copyAcceptedBallots(inputDir);
   }
 }

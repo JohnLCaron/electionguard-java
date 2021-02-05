@@ -24,9 +24,9 @@ public class TestElectionRecordProtoRoundtrip {
             consumer.election(),
             consumer.context(),
             consumer.constants(),
+            consumer.guardianCoefficients(),
             consumer.devices(),
             consumer.ballots(),
-            consumer.guardianCoefficients(),
             consumer.ciphertextTally(),
             consumer.decryptedTally());
 
@@ -55,7 +55,7 @@ public class TestElectionRecordProtoRoundtrip {
             consumer.ciphertextTally(),
             consumer.decryptedTally());
 
-    ElectionRecord roundtrip = ElectionRecordFromProto.read(publisher.electionRecordProtoFile().toFile().getAbsolutePath());
+    ElectionRecord roundtrip = ElectionRecordFromProto.read(publisher.electionRecordProtoPath().toFile().getAbsolutePath());
     assertThat(roundtrip.election).isEqualTo(consumer.election());
     assertThat(roundtrip.context).isEqualTo(consumer.context());
     assertThat(roundtrip.constants).isEqualTo(consumer.constants());

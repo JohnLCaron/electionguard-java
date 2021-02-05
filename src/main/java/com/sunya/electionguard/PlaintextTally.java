@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
 import javax.annotation.concurrent.Immutable;
+import java.util.Formatter;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -66,6 +67,13 @@ public class PlaintextTally {
     return Objects.hash(object_id, contests, spoiled_ballots);
   }
 
+  @Override
+  public String toString() {
+    Formatter out = new Formatter();
+    contests.values().forEach(contest -> out.format("%s%n", contest.toString()));
+    return out.toString();
+  }
+
   /**
    * The plaintext representation of the counts of one contest in the election.
    * The object_id is the same as the Election.ContestDescription.object_id or PlaintextBallotContest object_id.
@@ -78,6 +86,16 @@ public class PlaintextTally {
       return new AutoValue_PlaintextTally_PlaintextTallyContest(
               Preconditions.checkNotNull(object_id),
               ImmutableMap.copyOf(Preconditions.checkNotNull(selections)));
+    }
+
+    @Override
+    public String toString() {
+      Formatter out = new Formatter();
+      out.format("Contest %s%n", object_id());
+      int sum = selections().values().stream().mapToInt(s -> s.tally()).sum();
+      selections().values().forEach(selection -> out.format("%s%n", selection.toString()));
+      out.format("   %-40s = %d%n", "Total votes", sum);
+      return out.toString();
     }
   } // PlaintextTallyContest
 
@@ -102,6 +120,11 @@ public class PlaintextTally {
               Preconditions.checkNotNull(value),
               Preconditions.checkNotNull(message),
               ImmutableList.copyOf(shares));
+    }
+
+    @Override
+    public String toString() {
+      return String.format("   %-40s = %d", object_id(), tally());
     }
   } // PlaintextTallySelection
 

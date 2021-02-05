@@ -255,7 +255,7 @@ public class TimeIntegrationSteps {
     System.out.printf("%n4. Homomorphically Accumulate and decrypt tally%n");
     // Generate a Homomorphically Accumulated Tally of the ballots
     this.ciphertext_tally = new CiphertextTallyBuilder("whatever", this.election, this.context);
-    this.ciphertext_tally.tally_ballots(this.ballot_store);
+    this.ciphertext_tally.tally_ballots(this.ballot_box.accepted());
 
     // Configure the Decryption
     this.decryptionMediator = new DecryptionMediator(this.election, this.context, this.ciphertext_tally);
@@ -351,26 +351,26 @@ public class TimeIntegrationSteps {
   // Verify results of election
   void verify_results_json(Publisher publisher) throws IOException {
     ElectionDescriptionFromJson builder = new ElectionDescriptionFromJson(
-            publisher.electionFile().toString());
+            publisher.electionPath().toString());
     ElectionDescription description_from_file = builder.build();
     assertThat(description_from_file).isEqualTo(this.description);
 
     CiphertextElectionContext context_from_file = ConvertFromJson.readContext(
-            publisher.contextFile().toString());
+            publisher.contextPath().toString());
     assertThat(context_from_file).isEqualTo(this.context);
 
     ElectionConstants constants_from_file = ConvertFromJson.readConstants(
-            publisher.constantsFile().toString());
+            publisher.constantsPath().toString());
     assertThat(constants_from_file).isEqualTo(this.constants);
 
     Encrypt.EncryptionDevice device_from_file = ConvertFromJson.readDevice(
-            publisher.deviceFile(this.device.uuid).toString());
+            publisher.devicePath(this.device.uuid).toString());
     assertThat(device_from_file).isEqualTo(this.device);
 
     for (CiphertextAcceptedBallot ballot : this.ballot_box.getAllBallots()) {
       CiphertextAcceptedBallot ballot_from_file = ConvertFromJson.readCiphertextBallot(
-              publisher.ballotFile(ballot.object_id).toString());
-      assertWithMessage(publisher.ballotFile(ballot.object_id).toString())
+              publisher.ballotPath(ballot.object_id).toString());
+      assertWithMessage(publisher.ballotPath(ballot.object_id).toString())
               .that(ballot_from_file).isEqualTo(ballot);
     }
 
@@ -383,16 +383,16 @@ public class TimeIntegrationSteps {
 
     for (KeyCeremony.CoefficientValidationSet coefficient_validation_set : this.coefficient_validation_sets) {
       KeyCeremony.CoefficientValidationSet coefficient_validation_set_from_file = ConvertFromJson.readCoefficient(
-              publisher.coefficientsFile(coefficient_validation_set.owner_id()).toString());
+              publisher.coefficientsPath(coefficient_validation_set.owner_id()).toString());
       assertThat(coefficient_validation_set_from_file).isEqualTo(coefficient_validation_set);
     }
 
     PublishedCiphertextTally ciphertext_tally_from_file = ConvertFromJson.readCiphertextTally(
-            publisher.encryptedTallyFile().toString());
+            publisher.encryptedTallyPath().toString());
     assertThat(ciphertext_tally_from_file).isEqualTo(this.ciphertext_tally.build());
 
     PlaintextTally plaintext_tally_from_file = ConvertFromJson.readPlaintextTally(
-            publisher.tallyFile().toString());
+            publisher.tallyPath().toString());
     assertThat(plaintext_tally_from_file).isEqualTo(this.decryptedTally);
   }
 
@@ -417,18 +417,20 @@ public class TimeIntegrationSteps {
 
   // Verify results of election
   void verify_results_proto(Publisher publisher) throws IOException {
-    ElectionRecord roundtrip = ElectionRecordFromProto.read(publisher.electionRecordProtoFile().toFile().getAbsolutePath());
+    ElectionRecord roundtrip = ElectionRecordFromProto.read(publisher.electionRecordProtoPath().toFile().getAbsolutePath());
     assertThat(roundtrip.election).isEqualTo(this.description);
     assertThat(roundtrip.context).isEqualTo(this.context);
     assertThat(roundtrip.constants).isEqualTo(this.constants);
     assertThat(roundtrip.devices.get(0)).isEqualTo(this.device);
 
-    assertThat(roundtrip.castBallots.size()).isEqualTo(Iterables.size(this.ballot_box.getAllBallots()));
     int count = 0;
-    for (CiphertextAcceptedBallot ballot : this.ballot_box.getAllBallots()) {
-      assertWithMessage(ballot.object_id).that(roundtrip.castBallots.get(count)).isEqualTo(ballot);
+    for (CiphertextAcceptedBallot ballot : roundtrip.castBallots) {
+      Optional<CiphertextAcceptedBallot> have = this.ballot_box.get(ballot.object_id);
+      assertThat(have).isPresent();
+      assertWithMessage(ballot.object_id).that(have.get()).isEqualTo(ballot);
       count++;
     }
+    assertThat(count).isEqualTo(Iterables.size(this.ballot_box.getAllBallots()));
 
     /* LOOK spoiled_ballot fix
     assertThat(roundtrip.spoiledBallots.size()).isEqualTo(this.ciphertext_tally.spoiled_ballots.size());
@@ -452,8 +454,8 @@ public class TimeIntegrationSteps {
   void step_7_read_json_ballots(Publisher publisher) throws IOException {
     for (CiphertextAcceptedBallot ballot : this.ballot_box.getAllBallots()) {
       CiphertextAcceptedBallot ballot_from_file = ConvertFromJson.readCiphertextBallot(
-              publisher.ballotFile(ballot.object_id).toString());
-      assertWithMessage(publisher.ballotFile(ballot.object_id).toString())
+              publisher.ballotPath(ballot.object_id).toString());
+      assertWithMessage(publisher.ballotPath(ballot.object_id).toString())
               .that(ballot_from_file).isEqualTo(ballot);
     }
 
@@ -466,13 +468,17 @@ public class TimeIntegrationSteps {
   }
 
   void step_8_read_proto_ballots(Publisher publisher) throws IOException {
-    ElectionRecord roundtrip = ElectionRecordFromProto.read(publisher.electionRecordProtoFile().toFile().getAbsolutePath());
+    ElectionRecord roundtrip = ElectionRecordFromProto.read(publisher.electionRecordProtoPath().toFile().getAbsolutePath());
 
     int count = 0;
-    for (CiphertextAcceptedBallot ballot : this.ballot_box.getAllBallots()) {
-      assertWithMessage(ballot.object_id).that(roundtrip.castBallots.get(count)).isEqualTo(ballot);
+    for (CiphertextAcceptedBallot ballot : roundtrip.castBallots) {
+      Optional<CiphertextAcceptedBallot> have = this.ballot_box.get(ballot.object_id);
+      assertThat(have).isPresent();
+      assertWithMessage(ballot.object_id).that(have.get()).isEqualTo(ballot);
       count++;
     }
+    assertThat(count).isEqualTo(Iterables.size(this.ballot_box.getAllBallots()));
+
 
     /* LOOK spoiled_ballot fix
     int count2 = 0;

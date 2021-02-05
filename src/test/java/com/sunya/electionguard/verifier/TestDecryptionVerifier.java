@@ -17,7 +17,7 @@ public class TestDecryptionVerifier {
     String topdir = TestParameterVerifier.topdir;
 
     consumer = new Consumer(topdir);
-    validator = new DecryptionVerifier(consumer.getElectionRecord());
+    validator = new DecryptionVerifier(consumer.readElectionRecordJson());
   }
 
   @Example

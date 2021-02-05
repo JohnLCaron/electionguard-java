@@ -4,9 +4,12 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.flogger.FluentLogger;
+import com.sunya.electionguard.publish.CloseableIterable;
+import com.sunya.electionguard.publish.CloseableIterator;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -22,7 +25,7 @@ import static com.sunya.electionguard.Ballot.CiphertextAcceptedBallot;
 import static com.sunya.electionguard.Group.ElementModQ;
 import static com.sunya.electionguard.Group.ONE_MOD_P;
 
-/** A mutable builder of CiphertextTally */
+/** A mutable builder of PublishedCiphertextTally */
 public class CiphertextTallyBuilder {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
@@ -82,30 +85,38 @@ public class CiphertextTallyBuilder {
   }
 
   /** Append a collection of Ballots to the tally. */
-  public boolean tally_ballots(Iterable<CiphertextAcceptedBallot> ballots) {
+  public int tally_ballots(CloseableIterable<CiphertextAcceptedBallot> ballots) {
     // Map(SELECTION_ID, Map(BALLOT_ID, Ciphertext)
     Map<String, Map<String, ElGamal.Ciphertext>> cast_ballot_selections = new HashMap<>();
 
     // Find all the ballots for each selection.
-    for (CiphertextAcceptedBallot ballot : ballots) {
-      if (!this.contains(ballot) &&
-              BallotValidations.ballot_is_valid_for_election(ballot, this.metadata, this.encryption)) {
+    int count = 0;
+    try (CloseableIterator<CiphertextAcceptedBallot> ballotsIter = ballots.iterator()) {
+      while (ballotsIter.hasNext()) {
+        CiphertextAcceptedBallot ballot = ballotsIter.next();
+        if (!this.contains(ballot) &&
+                BallotValidations.ballot_is_valid_for_election(ballot, this.metadata, this.encryption)) {
 
-        if (ballot.state == BallotBoxState.CAST) {
-          // collect the selections so they can can be accumulated in parallel
-          for (Ballot.CiphertextBallotContest contest : ballot.contests) {
-            for (Ballot.CiphertextBallotSelection selection : contest.ballot_selections) {
-              Map<String, ElGamal.Ciphertext> map2 = cast_ballot_selections.computeIfAbsent(selection.object_id, map1 -> new HashMap<>());
-              map2.put(ballot.object_id, selection.ciphertext());
+          if (ballot.state == BallotBoxState.CAST) {
+            // collect the selections so they can can be accumulated in parallel
+            for (Ballot.CiphertextBallotContest contest : ballot.contests) {
+              for (Ballot.CiphertextBallotSelection selection : contest.ballot_selections) {
+                Map<String, ElGamal.Ciphertext> map2 = cast_ballot_selections.computeIfAbsent(selection.object_id, map1 -> new HashMap<>());
+                map2.put(ballot.object_id, selection.ciphertext());
+              }
             }
+          } else if (ballot.state == BallotBoxState.SPOILED) {
+            // just append the spoiled ballots
+            this.add_spoiled(ballot);
           }
-        } else if (ballot.state == BallotBoxState.SPOILED) {
-          // just append the spoiled ballots
-          this.add_spoiled(ballot);
         }
+        count++;
       }
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
 
+    // LOOK can we not read it twice ?
     // cache the cast ballot id's so they are not double counted
     if (this.execute_accumulate(cast_ballot_selections)) {
       for (CiphertextAcceptedBallot ballot : ballots) {
@@ -113,10 +124,10 @@ public class CiphertextTallyBuilder {
           this.cast_ballot_ids.add(ballot.object_id);
         }
       }
-      return true;
+      return count;
     }
 
-    return false;
+    return 0;
   }
 
   /** Append a ballot to the tally. */

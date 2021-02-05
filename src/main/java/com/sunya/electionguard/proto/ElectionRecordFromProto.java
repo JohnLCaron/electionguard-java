@@ -1,6 +1,5 @@
 package com.sunya.electionguard.proto;
 
-import com.google.common.collect.ImmutableList;
 import com.google.protobuf.ByteString;
 import com.sunya.electionguard.Ballot;
 import com.sunya.electionguard.Election;
@@ -39,8 +38,6 @@ public class ElectionRecordFromProto {
     Election.ElectionDescription description = ElectionDescriptionFromProto.translateFromProto(proto.getElection());
     List<Encrypt.EncryptionDevice> devices =
             proto.getDeviceList().stream().map(ElectionRecordFromProto::convertDevice).collect(Collectors.toList());
-    List<Ballot.CiphertextAcceptedBallot> castBallots =
-            proto.getCastBallotsList().stream().map(CiphertextBallotFromProto::translateFromProto).collect(Collectors.toList());
     List<KeyCeremony.CoefficientValidationSet> guardianCoefficients =
             proto.getGuardianCoefficientsList().stream().map(ElectionRecordFromProto::convertValidationCoefficients).collect(Collectors.toList());
 
@@ -49,8 +46,8 @@ public class ElectionRecordFromProto {
     PlaintextTally decryptedTally = proto.hasDecryptedTally() ?
             PlaintextTallyFromProto.translateFromProto(proto.getDecryptedTally()) : null;
 
-    return new ElectionRecord(constants, context, description, devices, castBallots,
-            guardianCoefficients, ciphertextTally, decryptedTally);
+    return new ElectionRecord(constants, context, description, guardianCoefficients,
+            devices, null, ciphertextTally, decryptedTally);
   }
 
   static Election.ElectionConstants convertConstants(ElectionRecordProto.Constants constants) {
@@ -64,7 +61,6 @@ public class ElectionRecordFromProto {
   static BigInteger convertBigInteger(ByteString bs) {
     return new BigInteger(bs.toByteArray());
   }
-
 
   static Election.CiphertextElectionContext convertContext(ElectionRecordProto.ElectionContext context) {
     return new Election.CiphertextElectionContext(

@@ -546,18 +546,18 @@ public class ElectionTestHelper {
 
   public static class EverythingTuple {
     ElectionDescription election_description;
-    InternalElectionDescription internal_election_description;
+    InternalElectionDescription metadata;
     List<Ballot.PlaintextBallot> ballots;
     ElementModQ secret_key;
     CiphertextElectionContext context;
 
     public EverythingTuple(ElectionDescription election_description,
-                 InternalElectionDescription internal_election_description,
+                 InternalElectionDescription metadata,
                  List<Ballot.PlaintextBallot> ballots,
                  ElementModQ secret_key,
                  CiphertextElectionContext context) {
       this.election_description = election_description;
-      this.internal_election_description = internal_election_description;
+      this.metadata = metadata;
       this.ballots = ballots;
       this.secret_key = secret_key;
       this.context = context;

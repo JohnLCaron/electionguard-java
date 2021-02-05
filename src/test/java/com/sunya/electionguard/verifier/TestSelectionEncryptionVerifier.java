@@ -23,7 +23,7 @@ public class TestSelectionEncryptionVerifier {
     String topdir = TestParameterVerifier.topdir;
 
     Consumer consumer = new Consumer(topdir);
-    electionRecord = consumer.getElectionRecord();
+    electionRecord = consumer.readElectionRecordJson();
     sev = new SelectionEncyrptionVerifier(electionRecord);
   }
 

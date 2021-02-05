@@ -144,7 +144,7 @@ public class TestDecryptionMediator extends TestProperties {
 
     // generate encrypted tally
     this.ciphertext_tally = new CiphertextTallyBuilder("some-id", this.metadata, this.context);
-    this.ciphertext_tally.tally_ballots(ballot_store);
+    this.ciphertext_tally.tally_ballots(ballot_box.accepted());
   }
 
   /*
@@ -550,19 +550,16 @@ public class TestDecryptionMediator extends TestProperties {
           List<PlaintextBallot> ballots) {
 
     // encrypt each ballot
-    DataStore store = new DataStore();
+    BallotBox ballot_box = new BallotBox(metadata, context, new DataStore());
     for (PlaintextBallot ballot : ballots) {
       Optional<CiphertextBallot> encrypted_ballot = Encrypt.encrypt_ballot(
               ballot, metadata, context, int_to_q_unchecked(BigInteger.ONE), Optional.empty(), true);
       assertThat(encrypted_ballot).isPresent();
-      // add to the ballot store
-      store.put(
-              encrypted_ballot.get().object_id,
-              from_ciphertext_ballot(encrypted_ballot.get(), BallotBoxState.CAST));
+      ballot_box.accept_ballot(encrypted_ballot.get(), BallotBoxState.CAST);
     }
 
     CiphertextTallyBuilder result = new CiphertextTallyBuilder("whatever", metadata, context);
-    result.tally_ballots(store);
+    result.tally_ballots(ballot_box.accepted());
     return result;
   }
 

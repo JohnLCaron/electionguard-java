@@ -55,9 +55,9 @@ public class VerifyElectionRecord {
     ElectionRecord electionRecord;
     Consumer consumer = new Consumer(cmdLine.inputDir);
     if (cmdLine.isProto) {
-      electionRecord = ElectionRecordFromProto.read(consumer.electionRecordProtoFile().toString());
+      electionRecord = consumer.readElectionRecordProto();
     } else {
-      electionRecord = consumer.getElectionRecord();
+      electionRecord = consumer.readElectionRecordJson();
     }
 
     System.out.printf(" VerifyElectionRecord read from %s isProto = %s%n", cmdLine.inputDir, cmdLine.isProto);

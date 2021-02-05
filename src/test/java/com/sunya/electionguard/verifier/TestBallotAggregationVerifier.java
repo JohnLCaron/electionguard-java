@@ -17,7 +17,7 @@ public class TestBallotAggregationVerifier {
 
     // set up
     Consumer consumer = new Consumer(topdir);
-    validator = new BallotAggregationVerifier(consumer.getElectionRecord());
+    validator = new BallotAggregationVerifier(consumer.readElectionRecordJson());
   }
 
   @Example

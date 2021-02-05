@@ -76,9 +76,9 @@ public class EncryptBallots {
     Consumer consumer = new Consumer(cmdLine.inputDir);
     ElectionRecord electionRecord;
     if (cmdLine.isProto) {
-      electionRecord = ElectionRecordFromProto.read(consumer.electionRecordProtoFile().toString());
+      electionRecord = consumer.readElectionRecordProto();
     } else {
-      electionRecord = consumer.getElectionRecord();
+      electionRecord = consumer.readElectionRecordJson();
     }
 
     BallotProvider ballotProvider = null;
@@ -181,12 +181,13 @@ public class EncryptBallots {
             ncast, nspoiled, failed, originalBallotsCount);
 
     Publisher publisher = new Publisher(publishDir, false, false);
-    publisher.writeEncryptionRecordProto(
+    publisher.writeEncryptionResultsProto(
             electionRecord.election,
             electionRecord.context,
             electionRecord.constants,
-            ImmutableList.of(this.device),
-            this.ballotBox.getAllBallots(), // add the encrypted ballots
-            electionRecord.guardianCoefficients);
+            electionRecord.guardianCoefficients,
+            ImmutableList.of(this.device), // add the device
+            this.ballotBox.getAllBallots() // add the encrypted ballots
+            );
   }
 }
