@@ -37,7 +37,7 @@ public class BallotAggregationVerifier {
    */
   boolean verify_ballot_aggregation() {
     boolean error = false;
-    SelectionAggregator agg = new SelectionAggregator(electionRecord.castBallots);
+    SelectionAggregator agg = new SelectionAggregator(electionRecord.acceptedBallots);
 
     for (PlaintextTally.PlaintextTallyContest contest : decryptedTally.contests.values()) {
       for (PlaintextTally.PlaintextTallySelection selection : contest.selections().values()) {

@@ -134,7 +134,7 @@ public class DecryptBallots {
   void accumulateTally() {
     System.out.printf("%nAccumulate tally%n");
     this.ciphertextTally = new CiphertextTallyBuilder("BallotDecryptor", this.metadata, electionRecord.context);
-    int nballots = this.ciphertextTally.tally_ballots(electionRecord.castBallots);
+    int nballots = this.ciphertextTally.tally_ballots(electionRecord.acceptedBallots);
     this.publishedTally = this.ciphertextTally.build();
     System.out.printf(" done accumulating %d ballots in the tally%n", nballots);
   }
@@ -172,7 +172,6 @@ public class DecryptBallots {
             this.electionRecord.context,
             this.electionRecord.constants,
             this.electionRecord.devices,
-            this.electionRecord.castBallots, // LOOK
             this.electionRecord.guardianCoefficients,
             this.publishedTally,
             this.decryptedTally);

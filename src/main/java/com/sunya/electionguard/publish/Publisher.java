@@ -242,7 +242,7 @@ public class Publisher {
 
     ElectionRecordProto.ElectionRecord ElectionRecordProto = ElectionRecordToProto.buildElectionRecord(
             description, context, constants, coefficient_validation_sets,
-            null, null, null, null);
+            null, null, null);
     try (FileOutputStream out = new FileOutputStream(electionRecordProtoPath().toFile())) {
       ElectionRecordProto.writeDelimitedTo(out);
     }
@@ -268,8 +268,7 @@ public class Publisher {
 
     ElectionRecordProto.ElectionRecord electionRecordProto = ElectionRecordToProto.buildElectionRecord(
             description, context, constants, coefficient_validation_sets,
-            devices,
-            null, null, null);
+            devices, null, null);
 
     try (FileOutputStream out = new FileOutputStream(electionRecordProtoPath().toFile())) {
       electionRecordProto.writeDelimitedTo(out);
@@ -282,7 +281,6 @@ public class Publisher {
           CiphertextElectionContext context,
           ElectionConstants constants,
           Iterable<Encrypt.EncryptionDevice> devices,
-          Iterable<Ballot.CiphertextAcceptedBallot> ciphertext_ballots,
           Iterable<KeyCeremony.CoefficientValidationSet> coefficient_validation_sets,
           PublishedCiphertextTally ciphertext_tally,
           PlaintextTally decryptedTally) throws IOException {
@@ -290,7 +288,6 @@ public class Publisher {
     ElectionRecordProto.ElectionRecord ElectionRecordProto = ElectionRecordToProto.buildElectionRecord(
             description, context, constants, coefficient_validation_sets,
             devices,
-            ciphertext_ballots,
             ciphertext_tally,
             decryptedTally);
 

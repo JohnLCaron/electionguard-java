@@ -25,7 +25,7 @@ public class ElectionRecord {
   public final Election.ElectionDescription election;
   public final ImmutableList<KeyCeremony.CoefficientValidationSet> guardianCoefficients;
   public final ImmutableList<Encrypt.EncryptionDevice> devices;
-  public final CloseableIterable<Ballot.CiphertextAcceptedBallot> castBallots; // LOOK all ballots?
+  public final CloseableIterable<Ballot.CiphertextAcceptedBallot> acceptedBallots; // LOOK all ballots, not just cast!
   @Nullable public final PublishedCiphertextTally ciphertextTally;
   @Nullable  public final PlaintextTally decryptedTally;
   private final ImmutableMap<String, Integer> contest_vote_limits;
@@ -43,7 +43,7 @@ public class ElectionRecord {
     this.election = election;
     this.guardianCoefficients = ImmutableList.copyOf(guardianCoefficients);
     this.devices = devices == null ? ImmutableList.of() : ImmutableList.copyOf(devices);
-    this.castBallots = castBallots;
+    this.acceptedBallots = castBallots;
     this.ciphertextTally = ciphertextTally;
     this.decryptedTally = decryptedTally;
 
@@ -138,7 +138,7 @@ public class ElectionRecord {
             context.equals(that.context) &&
             election.equals(that.election) &&
             devices.equals(that.devices) &&
-            castBallots.equals(that.castBallots) &&
+            acceptedBallots.equals(that.acceptedBallots) &&
             guardianCoefficients.equals(that.guardianCoefficients) &&
             Objects.equals(ciphertextTally, that.ciphertextTally) &&
             Objects.equals(decryptedTally, that.decryptedTally) &&
@@ -147,7 +147,7 @@ public class ElectionRecord {
 
   @Override
   public int hashCode() {
-    return Objects.hash(constants, context, election, devices, castBallots, guardianCoefficients, ciphertextTally,
+    return Objects.hash(constants, context, election, devices, acceptedBallots, guardianCoefficients, ciphertextTally,
             decryptedTally, contest_vote_limits);
   }
 }

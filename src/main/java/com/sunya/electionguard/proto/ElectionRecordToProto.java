@@ -1,7 +1,6 @@
 package com.sunya.electionguard.proto;
 
 import com.google.protobuf.ByteString;
-import com.sunya.electionguard.Ballot;
 import com.sunya.electionguard.Election;
 import com.sunya.electionguard.Encrypt;
 import com.sunya.electionguard.Group;
@@ -24,7 +23,6 @@ public class ElectionRecordToProto {
           Election.ElectionConstants constants,
           Iterable<KeyCeremony.CoefficientValidationSet> guardianCoefficients,
           @Nullable Iterable<Encrypt.EncryptionDevice> devices,
-          @Nullable Iterable<Ballot.CiphertextAcceptedBallot> castBallots,
           @Nullable PublishedCiphertextTally ciphertext_tally,
           @Nullable PlaintextTally decryptedTally) {
 
@@ -40,11 +38,6 @@ public class ElectionRecordToProto {
     if (devices != null) {
       for (Encrypt.EncryptionDevice device : devices) {
         builder.addDevice(convertDevice(device));
-      }
-    }
-    if (castBallots != null) {
-      for (Ballot.CiphertextAcceptedBallot ballot : castBallots) {
-        builder.addCastBallots(CiphertextBallotToProto.translateToProto(ballot));
       }
     }
     if (ciphertext_tally != null) {

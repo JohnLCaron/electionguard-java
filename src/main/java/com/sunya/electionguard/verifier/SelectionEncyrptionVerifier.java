@@ -17,7 +17,7 @@ public class SelectionEncyrptionVerifier {
   boolean verify_all_selections() {
     boolean error = false;
 
-    for (CiphertextAcceptedBallot ballot : electionRecord.castBallots) {
+    for (CiphertextAcceptedBallot ballot : electionRecord.acceptedBallots) {
       for (CiphertextBallotContest contest : ballot.contests) {
         for (CiphertextBallotSelection selection : contest.ballot_selections) {
           SelectionVerifier sv = new SelectionVerifier(selection);

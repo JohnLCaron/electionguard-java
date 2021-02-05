@@ -35,7 +35,7 @@ public class TestSelectionEncryptionVerifier {
 
   @Example
   public void testVerifyAllContests() {
-    for (Ballot.CiphertextAcceptedBallot ballot : electionRecord.castBallots) {
+    for (Ballot.CiphertextAcceptedBallot ballot : electionRecord.acceptedBallots) {
       for (Ballot.CiphertextBallotContest contest : ballot.contests) {
         verify_a_contest(contest);
       }
@@ -332,7 +332,7 @@ public class TestSelectionEncryptionVerifier {
 
   @Example
   public void testTrackingHashes() {
-    for (Ballot.CiphertextAcceptedBallot ballot : electionRecord.castBallots) {
+    for (Ballot.CiphertextAcceptedBallot ballot : electionRecord.acceptedBallots) {
       ElementModQ crypto_hash = ballot.crypto_hash;
       ElementModQ prev_hash = ballot.previous_tracking_hash;
       ElementModQ curr_hash = ballot.tracking_hash;

@@ -26,7 +26,7 @@ public class ContestVoteLimitsVerifier {
   boolean verify_all_contests() {
     boolean error = false;
 
-    for (CiphertextAcceptedBallot ballot : electionRecord.castBallots) {
+    for (CiphertextAcceptedBallot ballot : electionRecord.acceptedBallots) {
       if (show) System.out.printf("Ballot %s.%n", ballot.object_id);
       for (CiphertextBallotContest contest : ballot.contests) {
         if (show) System.out.printf(" Contest %s.%n", contest.object_id);

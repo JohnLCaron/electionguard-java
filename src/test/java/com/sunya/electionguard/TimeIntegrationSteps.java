@@ -405,7 +405,6 @@ public class TimeIntegrationSteps {
             this.context,
             this.constants,
             ImmutableList.of(this.device),
-            this.ballot_box.getAllBallots(),
             this.coefficient_validation_sets,
             this.ciphertext_tally.build(),
             this.decryptedTally);
@@ -424,7 +423,7 @@ public class TimeIntegrationSteps {
     assertThat(roundtrip.devices.get(0)).isEqualTo(this.device);
 
     int count = 0;
-    for (CiphertextAcceptedBallot ballot : roundtrip.castBallots) {
+    for (CiphertextAcceptedBallot ballot : roundtrip.acceptedBallots) {
       Optional<CiphertextAcceptedBallot> have = this.ballot_box.get(ballot.object_id);
       assertThat(have).isPresent();
       assertWithMessage(ballot.object_id).that(have.get()).isEqualTo(ballot);
@@ -471,7 +470,7 @@ public class TimeIntegrationSteps {
     ElectionRecord roundtrip = ElectionRecordFromProto.read(publisher.electionRecordProtoPath().toFile().getAbsolutePath());
 
     int count = 0;
-    for (CiphertextAcceptedBallot ballot : roundtrip.castBallots) {
+    for (CiphertextAcceptedBallot ballot : roundtrip.acceptedBallots) {
       Optional<CiphertextAcceptedBallot> have = this.ballot_box.get(ballot.object_id);
       assertThat(have).isPresent();
       assertWithMessage(ballot.object_id).that(have.get()).isEqualTo(ballot);

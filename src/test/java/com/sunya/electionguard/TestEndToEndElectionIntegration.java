@@ -35,7 +35,7 @@ public class TestEndToEndElectionIntegration {
   public void setUp() throws IOException {
     Path tmp = Files.createTempDirectory(null);
     tmp.toFile().deleteOnExit();
-    outputDir = "/home/snake/tmp/publishEndToEnd";
+    outputDir = "/home/snake/tmp/electionguard/publishEndToEnd";
     // outputDir = tmp.toAbsolutePath().toString();
     System.out.printf("=========== outputDir = %s%n", outputDir);
   }
@@ -169,7 +169,7 @@ public class TestEndToEndElectionIntegration {
     // Save Validation Keys
     for (GuardianBuilder guardianBuilder : this.guardianBuilders) {
       Guardian guardian = guardianBuilder.build();
-      this.guardianBuilders.add(guardianBuilder);
+      this.guardians.add(guardian);
       this.coefficient_validation_sets.add(guardian.share_coefficient_validation_set());
     }
 
@@ -335,7 +335,6 @@ public class TestEndToEndElectionIntegration {
             this.constants,
             ImmutableList.of(this.device),
             this.ballot_box.getAllBallots(),
-            // this.ciphertext_tally.spoiled_ballots.values(),
             this.ciphertext_tally.build(),
             this.decryptedTally,
             this.coefficient_validation_sets);

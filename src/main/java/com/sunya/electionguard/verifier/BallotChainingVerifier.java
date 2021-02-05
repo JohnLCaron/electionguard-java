@@ -23,7 +23,7 @@ public class BallotChainingVerifier {
     Set<ElementModQ> curr_hashes = new HashSet<>();
 
     // LOOK this assumes that the ballots are in the correct order. Why would they be?
-    for (CiphertextAcceptedBallot ballot : electionRecord.castBallots) {
+    for (CiphertextAcceptedBallot ballot : electionRecord.acceptedBallots) {
         // 6.B For each ballot Bi , Hi = H(Hi−1, D, T, Bi) is satisfied. // LOOK what is D? is B_i == crypto_hash?
         ElementModQ crypto_hash = ballot.crypto_hash;
         ElementModQ prev_hash = ballot.previous_tracking_hash;

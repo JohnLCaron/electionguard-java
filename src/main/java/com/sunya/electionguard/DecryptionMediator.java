@@ -191,7 +191,9 @@ public class DecryptionMediator {
 
     // Make sure a Quorum of Guardians have announced
     if (this.available_guardians.size() < this.context.quorum) {
-      logger.atInfo().log("cannot get plaintext tally with less than quorum available guardians");
+      logger.atInfo().log(
+              String.format("cannot get plaintext tally with less than quorum (%d) available guardians (%d)",
+                      this.context.quorum, this.available_guardians.size()));
       return Optional.empty();
     }
 
