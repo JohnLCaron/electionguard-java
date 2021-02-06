@@ -144,7 +144,7 @@ public class TestDecryptionMediator extends TestProperties {
 
     // generate encrypted tally
     this.ciphertext_tally = new CiphertextTallyBuilder("some-id", this.metadata, this.context);
-    this.ciphertext_tally.tally_ballots(ballot_box.accepted());
+    this.ciphertext_tally.batch_append(ballot_box.accepted());
   }
 
   /*
@@ -169,7 +169,7 @@ public class TestDecryptionMediator extends TestProperties {
     assertThat(subject.submit_decryption_share(share)).isFalse();
 
     // Cannot get plaintext tally without a quorum
-    assertThat(subject.getDecryptedTally(true, null)).isEmpty();
+    assertThat(subject.decrypt_tally(true, null)).isEmpty();
   }
 
   @Example
@@ -481,7 +481,7 @@ public class TestDecryptionMediator extends TestProperties {
       assertThat(subject.announce(guardian)).isPresent();
     }
 
-    Optional<PlaintextTally> decrypted_tallies = subject.getDecryptedTally(false, null);
+    Optional<PlaintextTally> decrypted_tallies = subject.decrypt_tally(false, null);
     assertThat(decrypted_tallies).isPresent();
     Map<String, Integer> result = this.convert_to_selections(decrypted_tallies.get());
 
@@ -489,7 +489,7 @@ public class TestDecryptionMediator extends TestProperties {
     assertThat(result).isEqualTo(this.expected_plaintext_tally);
 
     // Verify we get the same tally back if we call again
-    Optional<PlaintextTally> another_decrypted_tally = subject.getDecryptedTally(false, null);
+    Optional<PlaintextTally> another_decrypted_tally = subject.decrypt_tally(false, null);
     assertThat(another_decrypted_tally).isPresent();
 
     assertThat(decrypted_tallies.get()).isEqualTo(another_decrypted_tally.get());
@@ -505,7 +505,7 @@ public class TestDecryptionMediator extends TestProperties {
     // explicitly compensate to demonstrate that this is possible, but not required
     assertThat(subject.compensate(this.guardians.get(2).object_id, identity_auxiliary_decrypt)).isPresent();
 
-    Optional<PlaintextTally> decrypted_tallies = subject.getDecryptedTally(false, null);
+    Optional<PlaintextTally> decrypted_tallies = subject.decrypt_tally(false, null);
     assertThat(decrypted_tallies).isPresent();
     Map<String, Integer> result = this.convert_to_selections(decrypted_tallies.get());
 
@@ -535,7 +535,7 @@ public class TestDecryptionMediator extends TestProperties {
       assertThat(subject.announce(guardian)).isPresent();
     }
 
-    Optional<PlaintextTally> decrypted_tallies = subject.getDecryptedTally(false, null);
+    Optional<PlaintextTally> decrypted_tallies = subject.decrypt_tally(false, null);
     assertThat(decrypted_tallies).isPresent();
     Map<String, Integer> result = this.convert_to_selections(decrypted_tallies.get());
 
@@ -559,7 +559,7 @@ public class TestDecryptionMediator extends TestProperties {
     }
 
     CiphertextTallyBuilder result = new CiphertextTallyBuilder("whatever", metadata, context);
-    result.tally_ballots(ballot_box.accepted());
+    result.batch_append(ballot_box.accepted());
     return result;
   }
 

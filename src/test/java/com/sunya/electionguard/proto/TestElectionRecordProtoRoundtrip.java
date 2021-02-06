@@ -50,7 +50,8 @@ public class TestElectionRecordProtoRoundtrip {
             consumer.devices(),
             consumer.guardianCoefficients(),
             consumer.ciphertextTally(),
-            consumer.decryptedTally());
+            consumer.decryptedTally(),
+            null);
 
     ElectionRecord roundtrip = ElectionRecordFromProto.read(publisher.electionRecordProtoPath().toFile().getAbsolutePath());
     assertThat(roundtrip.election).isEqualTo(consumer.election());

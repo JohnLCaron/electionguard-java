@@ -6,7 +6,10 @@ import com.sunya.electionguard.proto.CiphertextBallotToProto;
 import com.sunya.electionguard.proto.ElectionRecordProto;
 import com.sunya.electionguard.proto.ElectionRecordToProto;
 import com.sunya.electionguard.proto.KeyCeremonyProto;
+import com.sunya.electionguard.proto.PlaintextBallotProto;
+import com.sunya.electionguard.proto.PlaintextBallotToProto;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -21,14 +24,13 @@ public class Publisher {
   static final String PRIVATE_DIR = "private";
 
   // json
+  static final String SUFFIX = ".json";
+
   static final String DEVICES_DIR = "devices";
   static final String COEFFICIENTS_DIR = "coefficients";
   static final String BALLOTS_DIR = "encrypted_ballots";
   static final String SPOILED_DIR = "spoiled_ballots";
-  static final String PLAINTEXT_BALLOTS_DIR = "plaintext";
-  static final String ENCRYPTED_BALLOTS_DIR = "encrypted";
 
-  static final String SUFFIX = ".json";
   static final String DESCRIPTION_FILE_NAME = "description" + SUFFIX;
   static final String CONTEXT_FILE_NAME = "context" + SUFFIX;
   static final String CONSTANTS_FILE_NAME = "constants" + SUFFIX;
@@ -38,6 +40,10 @@ public class Publisher {
   static final String DEVICE_PREFIX = "device_";
   static final String COEFFICIENT_PREFIX = "coefficient_validation_set_";
   static final String BALLOT_PREFIX = "ballot_";
+
+  // json private
+  static final String PRIVATE_PLAINTEXT_BALLOTS_DIR = "plaintext";
+  static final String PRIVATE_ENCRYPTED_BALLOTS_DIR = "encrypted";
   static final String PLAINTEXT_BALLOT_PREFIX = "plaintext_ballot_";
   static final String GUARDIAN_PREFIX = "guardian_";
 
@@ -45,6 +51,7 @@ public class Publisher {
   static final String ELECTION_RECORD_FILE_NAME = "electionRecord.proto";
   static final String GUARDIANS_FILE = "guardians.proto";
   static final String CIPHERTEXT_BALLOT_FILE = "ciphertextAcceptedBallot.proto";
+  static final String SPOILED_BALLOT_FILE = "spoiledPlaintextBallot.proto";
 
   // TODO #148 Revert PlaintextTally to PublishedPlaintextTally after moving spoiled info
 
@@ -142,6 +149,15 @@ public class Publisher {
     return ballotsDirPath.toFile().listFiles();
   }
 
+  public Path spoiledBallotPath(String id) {
+    String fileName = SPOILED_DIR + id + SUFFIX;
+    return spoiledDirPath.resolve(fileName);
+  }
+
+  public File[] spoiledBallotFiles() {
+    return spoiledDirPath.toFile().listFiles();
+  }
+
   ///
 
   public Path electionRecordProtoPath() {
@@ -150,6 +166,10 @@ public class Publisher {
 
   public Path ciphertextBallotProtoPath() {
     return publishDirectory.resolve(CIPHERTEXT_BALLOT_FILE).toAbsolutePath();
+  }
+
+  public Path spoiledBallotProtoPath() {
+    return publishDirectory.resolve(SPOILED_BALLOT_FILE).toAbsolutePath();
   }
 
   //////////////////////////////////////////////////////////////////
@@ -164,7 +184,8 @@ public class Publisher {
           Iterable<Ballot.CiphertextAcceptedBallot> ciphertext_ballots,
           PublishedCiphertextTally ciphertext_tally,
           PlaintextTally decryptedTally,
-          Iterable<KeyCeremony.CoefficientValidationSet> coefficient_validation_sets) throws IOException {
+          @Nullable Iterable<KeyCeremony.CoefficientValidationSet> coefficient_validation_sets,
+          @Nullable Iterable<Ballot.PlaintextBallot> spoiledBallots) throws IOException {
 
     ConvertToJson.write(description, this.electionPath());
     ConvertToJson.write(context, this.contextPath());
@@ -206,14 +227,14 @@ public class Publisher {
       ConvertToJson.write(guardian, privateDirPath.resolve(guardian_name));
     }
 
-    Path ballotsDirPath = privateDirPath.resolve(PLAINTEXT_BALLOTS_DIR);
+    Path ballotsDirPath = privateDirPath.resolve(PRIVATE_PLAINTEXT_BALLOTS_DIR);
     Files.createDirectories(ballotsDirPath);
     for (Ballot.PlaintextBallot plaintext_ballot : plaintext_ballots) {
       String ballot_name = PLAINTEXT_BALLOT_PREFIX + plaintext_ballot.object_id + SUFFIX;
       ConvertToJson.write(plaintext_ballot, ballotsDirPath.resolve(ballot_name));
     }
 
-    Path encryptedDirPath = privateDirPath.resolve(ENCRYPTED_BALLOTS_DIR);
+    Path encryptedDirPath = privateDirPath.resolve(PRIVATE_ENCRYPTED_BALLOTS_DIR);
     Files.createDirectories(encryptedDirPath);
     for (Ballot.CiphertextBallot ciphertext_ballot : ciphertext_ballots) {
       String ballot_name = BALLOT_PREFIX + ciphertext_ballot.object_id + SUFFIX;
@@ -283,7 +304,18 @@ public class Publisher {
           Iterable<Encrypt.EncryptionDevice> devices,
           Iterable<KeyCeremony.CoefficientValidationSet> coefficient_validation_sets,
           PublishedCiphertextTally ciphertext_tally,
-          PlaintextTally decryptedTally) throws IOException {
+          PlaintextTally decryptedTally,
+          @Nullable Iterable<Ballot.PlaintextBallot> spoiledBallots) throws IOException {
+
+    if (spoiledBallots != null) {
+      // the spoiledBallots are written into their own file
+      try (FileOutputStream out = new FileOutputStream(spoiledBallotProtoPath().toFile())) {
+        for (Ballot.PlaintextBallot ballot : spoiledBallots) {
+          PlaintextBallotProto.PlaintextBallot ballotProto = PlaintextBallotToProto.translateToProto(ballot);
+          ballotProto.writeDelimitedTo(out);
+        }
+      }
+    }
 
     ElectionRecordProto.ElectionRecord ElectionRecordProto = ElectionRecordToProto.buildElectionRecord(
             description, context, constants, coefficient_validation_sets,

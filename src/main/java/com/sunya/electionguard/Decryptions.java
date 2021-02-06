@@ -14,7 +14,7 @@ public class Decryptions {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   /**
-   * Compute a decryptions share for a guardian.
+   * Compute a decryptions share for a guardian. Parallizable over each of the tally's contests.
    * <p>
    * @param guardian: The guardian who will partially decrypt the tally
    * @param tally: The election tally to decrypt
@@ -27,6 +27,7 @@ public class Decryptions {
           CiphertextElectionContext context) {
 
     // Map(CONTEST_ID, CiphertextDecryptionContest)
+    // Parallizable over each of the tally's contests.
     Optional<Map<String, CiphertextDecryptionContest>> contests =
             compute_decryption_share_for_cast_contests(guardian, tally, context);
     if (contests.isEmpty()) {
@@ -34,6 +35,7 @@ public class Decryptions {
     }
 
     // Map(BALLOT_ID, BallotDecryptionShare)
+    // Parallizable over each of the tally's contests.
     Optional<Map<String, BallotDecryptionShare>> spoiled_ballots =
             compute_decryption_share_for_spoiled_ballots(guardian, tally, context);
 
@@ -49,7 +51,7 @@ public class Decryptions {
   }
 
   /**
-   * Compute a compensated decryptions share for a guardian.
+   * Compute a compensated decryptions share for a guardian. Parallizable over each of the tally's contests.
    * <p>
    * @param guardian: The guardian who will partially decrypt the tally
    * @param missing_guardian_id: the missing guardian id to compensate
@@ -64,6 +66,7 @@ public class Decryptions {
           CiphertextElectionContext context,
           Auxiliary.Decryptor decryptor) {
 
+    // Parallizable over each of the tally's contests.
     Optional<Map<String, CiphertextCompensatedDecryptionContest>> contests =
             compute_compensated_decryption_share_for_cast_contests(
                     guardian, missing_guardian_id, tally, context, decryptor);
@@ -71,6 +74,7 @@ public class Decryptions {
       return Optional.empty();
     }
 
+    // Parallizable over each of the tally's contests.
     Optional<Map<String, DecryptionShare.CompensatedBallotDecryptionShare>> spoiled_ballots =
             compute_compensated_decryption_share_for_spoiled_ballots(
                     guardian, missing_guardian_id, tally.spoiled_ballots, context, decryptor);
@@ -87,7 +91,8 @@ public class Decryptions {
   }
 
   /**
-   * Compute the decryption for all of the cast contests in the Ciphertext Tally.
+   * Compute the decryption for all of the contests in the Ciphertext Tally for a specific guardian.
+   * Parallizable over each of the tally's contests.
    * @return Map(CONTEST_ID, CiphertextDecryptionContest)
    */
   static Optional<Map<String, CiphertextDecryptionContest>> compute_decryption_share_for_cast_contests(
@@ -125,7 +130,10 @@ public class Decryptions {
     return Optional.of(contests);
   }
 
-  /** Compute the compensated decryption for all of the cast contests in the Ciphertext Tally. */
+  /**
+   * Compute the compensated decryption for all of the cast contests in the Ciphertext Tally.
+   * Parallizable over each of the tally's contests.
+   */
   static Optional<Map<String, CiphertextCompensatedDecryptionContest>> compute_compensated_decryption_share_for_cast_contests(
           Guardian guardian,
           String missing_guardian_id,
@@ -150,7 +158,6 @@ public class Decryptions {
       List<Optional<CiphertextCompensatedDecryptionSelection>>
               selection_decryptions = scheduler.schedule(tasks, true);
 
-
       // verify the decryptions are received and add them to the collection
       for (Optional<CiphertextCompensatedDecryptionSelection> decryption : selection_decryptions) {
         if (decryption.isEmpty()) {
@@ -171,7 +178,8 @@ public class Decryptions {
   }
 
   /**
-   * Compute the compensated decryption for all spoiled ballots in the Ciphertext Tally.
+   * Compute the compensated decryption for all spoiled ballots in the Ciphertext Tally, for a specific guardian.
+   * Parallizable over each of the ballot's selections.
    * @return Map(BALLOT_ID, compensated decrypted spoiled ballot)
    */
   static Optional<Map<String, DecryptionShare.CompensatedBallotDecryptionShare>> compute_compensated_decryption_share_for_spoiled_ballots(
@@ -198,7 +206,10 @@ public class Decryptions {
     return Optional.of(decrypted_ballots);
   }
 
-  /** Compute the compensated decryption for a single ballot. */
+  /**
+   * Compute the compensated decryption for a single ballot.
+   * Parallizable over each of the ballot's selections.
+   */
   static Optional<CompensatedBallotDecryptionShare> compute_compensated_decryption_share_for_ballot(
           Guardian guardian,
           String missing_guardian_id,
@@ -249,6 +260,7 @@ public class Decryptions {
 
   /**
    * Compute the decryption for all spoiled ballots in the Ciphertext Tally.
+   * Parallizable over each of the tally's contests.
    * @return Map(BALLOT_ID, decrypted spoiled ballot)
    */
   static Optional<Map<String, BallotDecryptionShare>> compute_decryption_share_for_spoiled_ballots(
@@ -271,7 +283,10 @@ public class Decryptions {
     return Optional.of(spoiled_ballots);
   }
 
-  /** Compute the decryption for a single ballot. */
+  /**
+   * Compute the decryption for a single ballot for a guardian.
+   * Parallizable over each of the ballot's selections.
+   */
   static Optional<BallotDecryptionShare> compute_decryption_share_for_ballot(
           Guardian guardian,
           Ballot.CiphertextAcceptedBallot ballot,
@@ -331,7 +346,7 @@ public class Decryptions {
   }
 
   /**
-   * Compute a partial decryption for a specific selection.
+   * Compute a partial decryption for a specific selection and guardian.
    * @param guardian: The guardian who will partially decrypt the selection
    * @param selection: The specific selection to decrypt
    * @param context: The public election encryption context

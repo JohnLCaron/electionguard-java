@@ -64,9 +64,10 @@ public class TestEndToEndElectionIntegration {
   BallotBox ballot_box;
 
   // Step 4 - Decrypt Tally
+  DecryptionMediator decrypter;
   CiphertextTallyBuilder ciphertext_tally;
   PlaintextTally decryptedTally;
-  DecryptionMediator decrypter;
+  Map<String, Ballot.PlaintextBallot> spoiledBallots;
 
   // Execute the simplified end-to-end test demonstrating each component of the system.
   @Example
@@ -233,7 +234,7 @@ public class TestEndToEndElectionIntegration {
     System.out.printf("%n4. Homomorphically Accumulate and decrypt tally%n");
     // Generate a Homomorphically Accumulated Tally of the ballots
     this.ciphertext_tally = new CiphertextTallyBuilder("tally_object_id", this.metadata, this.context);
-    this.ciphertext_tally.tally_ballots(this.ballot_box.accepted());
+    this.ciphertext_tally.batch_append(this.ballot_box.accepted());
 
     System.out.printf("%n4. cast %d spoiled %d total %d%n",
             this.ciphertext_tally.count(),
@@ -257,7 +258,8 @@ public class TestEndToEndElectionIntegration {
     }
 
     // Here's where the ciphertext Tally is decrypted.
-    this.decryptedTally = this.decrypter.getDecryptedTally(false, null).orElseThrow();
+    this.decryptedTally = this.decrypter.decrypt_tally(false, null).orElseThrow();
+    this.spoiledBallots = this.decrypter.spoiled_ballots().orElseThrow();
     System.out.printf("Tally Decrypted%n");
 
     // Now, compare the results
@@ -312,7 +314,7 @@ public class TestEndToEndElectionIntegration {
               for (PlaintextBallotSelection selection : contest.ballot_selections) {
                 int expected = selection.to_int();
                 PlaintextTally.PlaintextTallySelection decrypted_selection = (
-                        this.decryptedTally.spoiled_ballots.get(ballot_id).get(contest.contest_id)
+                        this.decryptedTally.spoiledBallotTally.get(ballot_id).get(contest.contest_id)
                                 .selections().get(selection.selection_id));
                 System.out.printf("   - Selection: %s expected: %d, actual: %d%n",
                         selection.selection_id, expected, decrypted_selection.tally());
@@ -337,7 +339,8 @@ public class TestEndToEndElectionIntegration {
             this.ballot_box.getAllBallots(),
             this.ciphertext_tally.build(),
             this.decryptedTally,
-            this.coefficient_validation_sets);
+            this.coefficient_validation_sets,
+            this.spoiledBallots.values());
 
     System.out.printf("%n6. verify%n");
     this.verify_results(publisher);

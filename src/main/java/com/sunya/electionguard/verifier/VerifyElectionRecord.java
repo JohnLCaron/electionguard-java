@@ -108,8 +108,10 @@ public class VerifyElectionRecord {
 
     System.out.println("------------ [box 12] Correct Decryption of Spoiled Ballots ------------");
     boolean dvsOk = dv.verify_spoiled_ballots();
+    PlaintextBallotVerifier pbv = new PlaintextBallotVerifier(electionRecord);
+    boolean pbvOk = pbv.verify_plaintext_ballot();
 
-    if (blvOk && gpkvOk && epkvOk && sevOk && cvlvOk && bcvOk && bavOk && dvOk && pdvOk && bavt && dvsOk) {
+    if (blvOk && gpkvOk && epkvOk && sevOk && cvlvOk && bcvOk && bavOk && dvOk && pdvOk && bavt && dvsOk && pbvOk) {
       System.out.printf("%n===== ALL OK! ===== %n");
     } else {
       System.out.printf("%n!!!!!! NOT OK !!!!!! %n");

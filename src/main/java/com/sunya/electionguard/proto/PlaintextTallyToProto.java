@@ -26,7 +26,7 @@ public class PlaintextTallyToProto {
     for (Map.Entry<String, PlaintextTally.PlaintextTallyContest> entry : tally.contests.entrySet()) {
       builder.putContests(entry.getKey(), convertContest(entry.getValue()));
     }
-    for (Map.Entry<String, ImmutableMap<String, PlaintextTally.PlaintextTallyContest>> spoiled : tally.spoiled_ballots.entrySet()) {
+    for (Map.Entry<String, ImmutableMap<String, PlaintextTally.PlaintextTallyContest>> spoiled : tally.spoiledBallotTally.entrySet()) {
       builder.putSpoiledBallots(spoiled.getKey(), convertSpoiled(spoiled.getValue()));
     }
     for (Map.Entry<String, Group.ElementModQ> coeff : tally.lagrange_coefficients.entrySet()) {

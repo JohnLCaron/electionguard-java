@@ -11,6 +11,7 @@ import com.sunya.electionguard.KeyCeremony;
 import com.sunya.electionguard.PublishedCiphertextTally;
 import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.publish.CloseableIterable;
+import com.sunya.electionguard.publish.CloseableIterableAdapter;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
@@ -26,6 +27,7 @@ public class ElectionRecord {
   public final ImmutableList<KeyCeremony.CoefficientValidationSet> guardianCoefficients;
   public final ImmutableList<Encrypt.EncryptionDevice> devices;
   public final CloseableIterable<Ballot.CiphertextAcceptedBallot> acceptedBallots; // LOOK all ballots, not just cast!
+  public final CloseableIterable<Ballot.PlaintextBallot> spoiledBallots;
   @Nullable public final PublishedCiphertextTally ciphertextTally;
   @Nullable  public final PlaintextTally decryptedTally;
   private final ImmutableMap<String, Integer> contest_vote_limits;
@@ -36,6 +38,7 @@ public class ElectionRecord {
                         List<KeyCeremony.CoefficientValidationSet> guardianCoefficients,
                         @Nullable List<Encrypt.EncryptionDevice> devices,
                         @Nullable CloseableIterable<Ballot.CiphertextAcceptedBallot> castBallots,
+                        @Nullable CloseableIterable<Ballot.PlaintextBallot> spoiledBallots,
                         @Nullable PublishedCiphertextTally ciphertextTally,
                         @Nullable PlaintextTally decryptedTally) {
     this.constants = constants;
@@ -43,7 +46,8 @@ public class ElectionRecord {
     this.election = election;
     this.guardianCoefficients = ImmutableList.copyOf(guardianCoefficients);
     this.devices = devices == null ? ImmutableList.of() : ImmutableList.copyOf(devices);
-    this.acceptedBallots = castBallots;
+    this.acceptedBallots = castBallots == null ? CloseableIterableAdapter.empty() : castBallots;
+    this.spoiledBallots = spoiledBallots == null ? CloseableIterableAdapter.empty() : spoiledBallots;
     this.ciphertextTally = ciphertextTally;
     this.decryptedTally = decryptedTally;
 
@@ -63,13 +67,15 @@ public class ElectionRecord {
     contest_vote_limits = builder.build();
   }
 
-  public ElectionRecord setBallots(CloseableIterable<Ballot.CiphertextAcceptedBallot> acceptedBallots) {
+  public ElectionRecord setBallots(CloseableIterable<Ballot.CiphertextAcceptedBallot> acceptedBallots,
+                                   CloseableIterable<Ballot.PlaintextBallot> spoiledBallots) {
     return new ElectionRecord(this.constants,
             this.context,
             this.election,
             this.guardianCoefficients,
             this.devices,
             acceptedBallots,
+            spoiledBallots,
             this.ciphertextTally,
             this.decryptedTally);
   }

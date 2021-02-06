@@ -4,6 +4,7 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.google.common.base.Preconditions;
+import com.sunya.electionguard.Ballot;
 import com.sunya.electionguard.CiphertextTallyBuilder;
 import com.sunya.electionguard.DecryptionMediator;
 import com.sunya.electionguard.DecryptionShare;
@@ -18,6 +19,7 @@ import com.sunya.electionguard.verifier.ElectionRecord;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.util.Map;
 import java.util.Optional;
 
 /** Decrypt a collection of ballots. */
@@ -114,6 +116,7 @@ public class DecryptBallots {
   CiphertextTallyBuilder ciphertextTally;
   PublishedCiphertextTally publishedTally;
   PlaintextTally decryptedTally;
+  Map<String, Ballot.PlaintextBallot> spoiledBallots;
   int quorum;
   int numberOfGuardians;
 
@@ -127,14 +130,13 @@ public class DecryptBallots {
     for (Guardian guardian : provider.guardians()) {
       // LOOK test Guardians against whats in the electionRecord.
     }
-
     System.out.printf("%nReady to decrypt%n");
   }
 
   void accumulateTally() {
     System.out.printf("%nAccumulate tally%n");
-    this.ciphertextTally = new CiphertextTallyBuilder("BallotDecryptor", this.metadata, electionRecord.context);
-    int nballots = this.ciphertextTally.tally_ballots(electionRecord.acceptedBallots);
+    this.ciphertextTally = new CiphertextTallyBuilder("DecryptBallots", this.metadata, electionRecord.context);
+    int nballots = this.ciphertextTally.batch_append(electionRecord.acceptedBallots);
     this.publishedTally = this.ciphertextTally.build();
     System.out.printf(" done accumulating %d ballots in the tally%n", nballots);
   }
@@ -160,8 +162,9 @@ public class DecryptBallots {
     }
 
     // Here's where the ciphertext Tally is decrypted.
-    Optional<PlaintextTally> decryptedTallyO = mediator.getDecryptedTally(false, null);
+    Optional<PlaintextTally> decryptedTallyO = mediator.decrypt_tally(false, null);
     this.decryptedTally = decryptedTallyO.orElseThrow();
+    this.spoiledBallots = mediator.spoiled_ballots().orElseThrow();
     System.out.printf("Done decrypting tally%n%n%s%n", this.decryptedTally);
   }
 
@@ -174,7 +177,8 @@ public class DecryptBallots {
             this.electionRecord.devices,
             this.electionRecord.guardianCoefficients,
             this.publishedTally,
-            this.decryptedTally);
+            this.decryptedTally,
+            this.spoiledBallots.values());
 
     publisher.copyAcceptedBallots(inputDir);
   }

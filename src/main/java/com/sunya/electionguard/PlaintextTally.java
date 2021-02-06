@@ -9,7 +9,6 @@ import javax.annotation.concurrent.Immutable;
 import java.util.Formatter;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import static com.sunya.electionguard.Group.ElementModP;
 
@@ -21,8 +20,8 @@ public class PlaintextTally {
   // Map(CONTEST_ID, PlaintextTallyContest)
   public final ImmutableMap<String, PlaintextTallyContest> contests;
 
-  // Map(BALLOT_ID, Map(CONTEST_ID, PlaintextTallyContest))
-  public final ImmutableMap<String, ImmutableMap<String, PlaintextTallyContest>> spoiled_ballots;
+  // Tally of spoiled ballots: Map(BALLOT_ID, Map(CONTEST_ID, PlaintextTallyContest))
+  public final ImmutableMap<String, ImmutableMap<String, PlaintextTallyContest>> spoiledBallotTally;
 
   /** The lagrange coefficients w_ij for verification of section 10. */
   public final ImmutableMap<String, Group.ElementModQ> lagrange_coefficients;
@@ -32,39 +31,24 @@ public class PlaintextTally {
 
   public PlaintextTally(String object_id,
                         Map<String, PlaintextTallyContest> contests,
-                        Map<String, Map<String, PlaintextTallyContest>> spoiled_ballots,
+                        Map<String, Map<String, PlaintextTallyContest>> spoiledTally,
                         Map<String, Group.ElementModQ> lagrange_coefficients,
                         List<GuardianState> guardianState) {
     this.object_id = Preconditions.checkNotNull(object_id);
     this.contests =  ImmutableMap.copyOf(Preconditions.checkNotNull(contests));
 
     ImmutableMap.Builder<String, ImmutableMap<String, PlaintextTallyContest>> builder = ImmutableMap.builder();
-    for (Map.Entry<String, Map<String, PlaintextTallyContest>> entry : spoiled_ballots.entrySet()) {
+    for (Map.Entry<String, Map<String, PlaintextTallyContest>> entry : spoiledTally.entrySet()) {
       ImmutableMap.Builder<String, PlaintextTallyContest> builder2 = ImmutableMap.builder();
       for (Map.Entry<String, PlaintextTallyContest> entry2 : entry.getValue().entrySet()) {
         builder2.put(entry2.getKey(), entry2.getValue());
       }
       builder.put(entry.getKey(), builder2.build());
     }
-    this.spoiled_ballots = builder.build();
+    this.spoiledBallotTally = builder.build();
 
     this.lagrange_coefficients = ImmutableMap.copyOf(lagrange_coefficients);
     this.guardianStates = ImmutableList.copyOf(guardianState);
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-    PlaintextTally that = (PlaintextTally) o;
-    return object_id.equals(that.object_id) &&
-            contests.equals(that.contests) &&
-            spoiled_ballots.equals(that.spoiled_ballots);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(object_id, contests, spoiled_ballots);
   }
 
   @Override

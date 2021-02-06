@@ -24,16 +24,16 @@ public class DecryptionVerifier {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   final ElectionRecord electionRecord;
-  final PlaintextTally tally;
+  final PlaintextTally decryptedTally;
 
   DecryptionVerifier(ElectionRecord electionRecord) {
     this.electionRecord = electionRecord;
-    this.tally = electionRecord.decryptedTally;
+    this.decryptedTally = Preconditions.checkNotNull(electionRecord.decryptedTally);
   }
 
   /** Verify 8,9 for all cast ballots in the tally. */
   boolean verify_cast_ballot_tallies() {
-    boolean error = !this.make_all_contest_verification(this.tally.object_id, this.tally.contests);
+    boolean error = !this.make_all_contest_verification(this.decryptedTally.object_id, this.decryptedTally.contests);
     if (error) {
       System.out.printf(" ***Decryptions of cast ballots failure. %n");
     } else {
@@ -50,16 +50,16 @@ public class DecryptionVerifier {
   boolean verify_spoiled_ballots() {
     boolean error = false;
 
-    for (Map.Entry<String, ImmutableMap<String, PlaintextTally.PlaintextTallyContest>> entry : this.tally.spoiled_ballots.entrySet()) {
+    for (Map.Entry<String, ImmutableMap<String, PlaintextTally.PlaintextTallyContest>> entry : this.decryptedTally.spoiledBallotTally.entrySet()) {
       if (!this.make_all_contest_verification(entry.getKey(), entry.getValue())) {
         error = true;
       }
     }
 
     if (error) {
-      System.out.printf(" ***Spoiled ballot decryption failure. %n");
+      System.out.printf(" *** 12.A Spoiled ballot decryption failure. %n");
     } else {
-      System.out.printf(" Spoiled ballot decryption success. %n");
+      System.out.printf(" 12.A Spoiled ballot decryption success. %n");
     }
     return !error;
   }

@@ -194,7 +194,7 @@ public class PlaintextTallyPojo {
             e2 -> convertContest(e2.getValue())));
 
     pojo.spoiled_ballots =
-            org.spoiled_ballots.entrySet().stream().collect(Collectors.toMap(
+            org.spoiledBallotTally.entrySet().stream().collect(Collectors.toMap(
                     Map.Entry::getKey,
                     e -> e.getValue().entrySet().stream().collect(Collectors.toMap(
                             Map.Entry::getKey,

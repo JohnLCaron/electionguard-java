@@ -1,8 +1,12 @@
 package com.sunya.electionguard.publish;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 
 public class CloseableIterableAdapter<T> implements Iterable<T>, CloseableIterable<T> {
+  public static <T> CloseableIterable<T> empty() {
+    return wrap(new ArrayList<T>());
+  }
 
   public static <T> CloseableIterable <T> wrap(Iterable<T> delegate) {
     return new CloseableIterableAdapter<>(delegate);

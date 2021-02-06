@@ -62,7 +62,8 @@ public class TestPublish {
             ImmutableList.of(),
             ciphertext_tally,
             plaintext_tally,
-            coefficients);
+            coefficients,
+            null);
 
     File testFile = new File(outputDir, Publisher.DEVICES_DIR);
     assertThat(testFile.exists()).isTrue();

@@ -61,9 +61,10 @@ public class TimeIntegrationSteps {
   BallotBox ballot_box;
 
   // Step 4 - Decrypt Tally
+  DecryptionMediator decryptionMediator;
   CiphertextTallyBuilder ciphertext_tally;
   PlaintextTally decryptedTally;
-  DecryptionMediator decryptionMediator;
+  Map<String, Ballot.PlaintextBallot> spoiledBallots;
 
   public TimeIntegrationSteps(int nballots) throws IOException {
     Path tmp = Files.createTempDirectory(null);
@@ -255,7 +256,7 @@ public class TimeIntegrationSteps {
     System.out.printf("%n4. Homomorphically Accumulate and decrypt tally%n");
     // Generate a Homomorphically Accumulated Tally of the ballots
     this.ciphertext_tally = new CiphertextTallyBuilder("whatever", this.election, this.context);
-    this.ciphertext_tally.tally_ballots(this.ballot_box.accepted());
+    this.ciphertext_tally.batch_append(this.ballot_box.accepted());
 
     // Configure the Decryption
     this.decryptionMediator = new DecryptionMediator(this.election, this.context, this.ciphertext_tally);
@@ -268,7 +269,8 @@ public class TimeIntegrationSteps {
     }
 
     // Here's where the ciphertext Tally is decrypted.
-    this.decryptedTally = this.decryptionMediator.getDecryptedTally(false, null).orElseThrow();
+    this.decryptedTally = this.decryptionMediator.decrypt_tally(false, null).orElseThrow();
+    this.spoiledBallots = this.decryptionMediator.spoiled_ballots().orElseThrow();
     System.out.printf("Tally Decrypted%n");
 
     // Now, compare the results
@@ -317,7 +319,7 @@ public class TimeIntegrationSteps {
               for (PlaintextBallotSelection selection : contest.ballot_selections) {
                 int expected = selection.to_int();
                 PlaintextTally.PlaintextTallySelection decrypted_selection = (
-                        this.decryptedTally.spoiled_ballots.get(ballot_id).get(contest.contest_id)
+                        this.decryptedTally.spoiledBallotTally.get(ballot_id).get(contest.contest_id)
                                 .selections().get(selection.selection_id));
                 assertThat(expected).isEqualTo(decrypted_selection.tally());
               }
@@ -338,10 +340,10 @@ public class TimeIntegrationSteps {
             this.constants,
             ImmutableList.of(this.device),
             this.ballot_box.getAllBallots(),
-            // this.ciphertext_tally.spoiled_ballots.values(),
             this.ciphertext_tally.build(),
             this.decryptedTally,
-            this.coefficient_validation_sets);
+            this.coefficient_validation_sets,
+            this.spoiledBallots.values());
 
     System.out.printf("%n5.5. verify%n");
     this.verify_results_json(publisher);
@@ -407,7 +409,8 @@ public class TimeIntegrationSteps {
             ImmutableList.of(this.device),
             this.coefficient_validation_sets,
             this.ciphertext_tally.build(),
-            this.decryptedTally);
+            this.decryptedTally,
+            this.spoiledBallots.values());
 
     System.out.printf("%n6.5. verify%n");
     this.verify_results_proto(publisher);

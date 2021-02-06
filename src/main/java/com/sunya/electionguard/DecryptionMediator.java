@@ -2,6 +2,7 @@ package com.sunya.electionguard;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.flogger.FluentLogger;
 
 import javax.annotation.Nullable;
@@ -21,7 +22,12 @@ public class DecryptionMediator {
   private final InternalElectionDescription metadata; // LOOK unused
   private final CiphertextElectionContext context;
   private final CiphertextTallyBuilder encryptedTally;
-  private final Optional<PlaintextTally> decryptedTally = Optional.empty();
+
+  private Optional<PlaintextTally> decryptedTally = Optional.empty();
+  // Map(BALLOT_ID, PlaintextTally)
+  private Optional<Map<String, PlaintextTally>> spoiled_tallies; // not yet
+  // Map(BALLOT_ID, PlaintextBallot)
+  private Optional<ImmutableMap<String, Ballot.PlaintextBallot>> spoiled_ballots;
 
   // Map(AVAILABLE_GUARDIAN_ID, Guardian)
   private final Map<String, Guardian> available_guardians = new HashMap<>();
@@ -29,11 +35,7 @@ public class DecryptionMediator {
   private final Map<String, KeyCeremony.ElectionPublicKey> missing_guardians = new HashMap<>();
   // Map(AVAILABLE_GUARDIAN_ID, TallyDecryptionShare)
   private final Map<String, TallyDecryptionShare> decryption_shares = new HashMap<>();
-
-  /**
-   * A collection of Compensated Decryption Shares for each Available Guardian.
-   * Map( MISSING_GUARDIAN_ID, Map(AVAILABLE_GUARDIAN_ID, CompensatedTallyDecryptionShare))
-   */
+  // Map( MISSING_GUARDIAN_ID, Map(AVAILABLE_GUARDIAN_ID, CompensatedTallyDecryptionShare))
   private final Map<String, Map<String, CompensatedTallyDecryptionShare>> compensated_decryption_shares = new HashMap<>();
 
   public DecryptionMediator(InternalElectionDescription metadata,
@@ -42,6 +44,10 @@ public class DecryptionMediator {
     this.metadata = metadata;
     this.context = context;
     this.encryptedTally = encryptedTally;
+  }
+
+  public Optional<ImmutableMap<String, Ballot.PlaintextBallot>> spoiled_ballots() {
+    return spoiled_ballots;
   }
 
   /**
@@ -59,7 +65,7 @@ public class DecryptionMediator {
       return Optional.ofNullable(this.decryption_shares.get(guardian.object_id));
     }
 
-    // Compute the Decryption Share for the guardian
+    // Compute the Decryption Share for the guardian. Parallizable over each of the tally's contests.
     Optional<TallyDecryptionShare> share =
             Decryptions.compute_decryption_share(guardian, this.encryptedTally, this.context);
     if (share.isEmpty()) {
@@ -108,6 +114,7 @@ public class DecryptionMediator {
 
   /**
    * Compensate for a missing guardian by reconstructing the share using the available guardians.
+   * Parallizable over each of the tally's contests.
    * <p>
    * @param missing_guardian_id: the guardian that failed to `announce`.
    * @return a collection of `CompensatedTallyDecryptionShare` generated from all available guardians
@@ -125,9 +132,7 @@ public class DecryptionMediator {
     }
 
     List<CompensatedTallyDecryptionShare> compensated_decryptions = new ArrayList<>();
-    Map<String, Group.ElementModQ> lagrange_coefficients = new HashMap<>();
-
-    // Loop through each of the available guardians and calculate a decryption shares for the missing one
+    // Loop through each of the available guardians and calculate decryption shares for the missing one
     for (Guardian available_guardian : this.available_guardians.values()) {
       Optional<CompensatedTallyDecryptionShare> share = Decryptions.compute_compensated_decryption_share(
               available_guardian,
@@ -154,14 +159,14 @@ public class DecryptionMediator {
   }
 
   /**
-   * Decrypt the ciphertext Tally.
+   * Decrypt the ciphertext Tally. Python method: get_plaintext_tally().
    * Get the plaintext tally for the election by composing each Guardian's
    * decrypted representation of each selection into a decrypted representation.
    * <p>
    * @param recompute: Specify if the function should recompute the result, even if one already exists. default false
    * @return a `PlaintextTally` or `None`
    */
-  public Optional<PlaintextTally> getDecryptedTally(boolean recompute, @Nullable Auxiliary.Decryptor decryptor) {
+  public Optional<PlaintextTally> decrypt_tally(boolean recompute, @Nullable Auxiliary.Decryptor decryptor) {
     if (decryptor == null) {
       decryptor = Rsa::decrypt;
     }
@@ -241,8 +246,16 @@ public class DecryptionMediator {
       return Optional.empty();
     }
 
-    return DecryptWithShares.decrypt_tally(this.encryptedTally, merged_decryption_shares, this.context,
+    // Optional<Map<String, Ballot.PlaintextBallot>> decrypt_spoiled_ballots2(
+    //          Map<String, Ballot.CiphertextAcceptedBallot> spoiled_ballots, // Map(BALLOT_ID, CiphertextAcceptedBallot)
+    //          Map<String, TallyDecryptionShare> shares, // Map(AVAILABLE_GUARDIAN_ID, TallyDecryptionShare)
+    //          ElementModQ extended_base_hash)
+    this.spoiled_ballots = DecryptWithShares.decrypt_spoiled_ballots2(
+            this.encryptedTally.spoiled_ballots, merged_decryption_shares, this.context.crypto_extended_base_hash) ;
+
+    this.decryptedTally = DecryptWithShares.decrypt_tally(this.encryptedTally, merged_decryption_shares, this.context,
             lagrange_coefficients, guardianStates);
+    return this.decryptedTally;
   }
 
   /** Submit the decryption share to be used in the decryption. */
