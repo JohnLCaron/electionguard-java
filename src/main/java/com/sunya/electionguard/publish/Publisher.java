@@ -8,6 +8,8 @@ import com.sunya.electionguard.proto.ElectionRecordToProto;
 import com.sunya.electionguard.proto.KeyCeremonyProto;
 import com.sunya.electionguard.proto.PlaintextBallotProto;
 import com.sunya.electionguard.proto.PlaintextBallotToProto;
+import com.sunya.electionguard.proto.PlaintextTallyProto;
+import com.sunya.electionguard.proto.PlaintextTallyToProto;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -52,6 +54,7 @@ public class Publisher {
   static final String GUARDIANS_FILE = "guardians.proto";
   static final String CIPHERTEXT_BALLOT_FILE = "ciphertextAcceptedBallot.proto";
   static final String SPOILED_BALLOT_FILE = "spoiledPlaintextBallot.proto";
+  static final String SPOILED_TALLY_FILE = "spoiledPlaintextTally.proto";
 
   // TODO #148 Revert PlaintextTally to PublishedPlaintextTally after moving spoiled info
 
@@ -170,6 +173,10 @@ public class Publisher {
 
   public Path spoiledBallotProtoPath() {
     return publishDirectory.resolve(SPOILED_BALLOT_FILE).toAbsolutePath();
+  }
+
+  public Path spoiledTallyProtoPath() {
+    return publishDirectory.resolve(SPOILED_TALLY_FILE).toAbsolutePath();
   }
 
   //////////////////////////////////////////////////////////////////
@@ -305,7 +312,8 @@ public class Publisher {
           Iterable<KeyCeremony.CoefficientValidationSet> coefficient_validation_sets,
           PublishedCiphertextTally ciphertext_tally,
           PlaintextTally decryptedTally,
-          @Nullable Iterable<Ballot.PlaintextBallot> spoiledBallots) throws IOException {
+          @Nullable Iterable<Ballot.PlaintextBallot> spoiledBallots,
+          @Nullable  Iterable<PlaintextTally> spoiledDecryptedTallies) throws IOException {
 
     if (spoiledBallots != null) {
       // the spoiledBallots are written into their own file
@@ -313,6 +321,16 @@ public class Publisher {
         for (Ballot.PlaintextBallot ballot : spoiledBallots) {
           PlaintextBallotProto.PlaintextBallot ballotProto = PlaintextBallotToProto.translateToProto(ballot);
           ballotProto.writeDelimitedTo(out);
+        }
+      }
+    }
+
+    if (spoiledDecryptedTallies != null) {
+      // the spoiledDecryptedTallies are written into their own file
+      try (FileOutputStream out = new FileOutputStream(spoiledTallyProtoPath().toFile())) {
+        for (PlaintextTally tally : spoiledDecryptedTallies) {
+          PlaintextTallyProto.PlaintextTally tallyProto = PlaintextTallyToProto.translateToProto(tally);
+          tallyProto.writeDelimitedTo(out);
         }
       }
     }

@@ -84,7 +84,7 @@ public class DecryptBallots {
       ElectionRecord electionRecord = consumer.readElectionRecordProto();
 
       System.out.printf(" BallotDecryptor read from %s%n Write to %s%n", cmdLine.encryptDir, cmdLine.outputDir);
-      decryptor = new DecryptBallots(electionRecord, guardiansProvider);
+      decryptor = new DecryptBallots(consumer, electionRecord, guardiansProvider);
       decryptor.accumulateTally();
       decryptor.decryptTally();
       decryptor.publish(cmdLine.encryptDir, cmdLine.outputDir);
@@ -109,6 +109,7 @@ public class DecryptBallots {
   }
 
   ///////////////////////////////////////////////////////////////////////////
+  final Consumer consumer;
   final ElectionRecord electionRecord;
   final Election.InternalElectionDescription metadata; // dont see much point to this.
 
@@ -116,11 +117,13 @@ public class DecryptBallots {
   CiphertextTallyBuilder ciphertextTally;
   PublishedCiphertextTally publishedTally;
   PlaintextTally decryptedTally;
-  Map<String, Ballot.PlaintextBallot> spoiledBallots;
+  Iterable<Ballot.PlaintextBallot> spoiledDecryptedBallots;
+  Map<String, PlaintextTally> spoiledDecryptedTallies;
   int quorum;
   int numberOfGuardians;
 
-  public DecryptBallots(ElectionRecord electionRecord, GuardiansProvider provider) {
+  public DecryptBallots(Consumer consumer, ElectionRecord electionRecord, GuardiansProvider provider) {
+    this.consumer = consumer;
     this.electionRecord = electionRecord;
     this.metadata = new Election.InternalElectionDescription(electionRecord.election);
     this.quorum = electionRecord.context.quorum;
@@ -145,7 +148,7 @@ public class DecryptBallots {
     System.out.printf("%nDecrypt tally%n");
 
     // LOOK should use publishedTally? does it get mutated ???
-    DecryptionMediator mediator = new DecryptionMediator(this.metadata, electionRecord.context, this.ciphertextTally);
+    DecryptionMediator mediator = new DecryptionMediator(electionRecord.context, this.ciphertextTally);
 
     int count = 0;
     for (Guardian guardian : this.guardians) {
@@ -162,9 +165,12 @@ public class DecryptBallots {
     }
 
     // Here's where the ciphertext Tally is decrypted.
-    Optional<PlaintextTally> decryptedTallyO = mediator.decrypt_tally(false, null);
-    this.decryptedTally = decryptedTallyO.orElseThrow();
-    this.spoiledBallots = mediator.spoiled_ballots().orElseThrow();
+    this.decryptedTally = mediator.decrypt_tally(false, null).orElseThrow();
+    // LOOK must be efficiencies in computing both tally and plaintext ballot at the same time?
+    this.spoiledDecryptedBallots = mediator.decrypt_spoiled_ballots(
+            consumer.spoiledBallotsProto(), electionRecord.context.crypto_extended_base_hash).orElseThrow();
+    this.spoiledDecryptedTallies = mediator.decrypt_spoiled_tallies(
+            consumer.spoiledBallotsProto(), electionRecord.context.crypto_extended_base_hash).orElseThrow();
     System.out.printf("Done decrypting tally%n%n%s%n", this.decryptedTally);
   }
 
@@ -178,7 +184,8 @@ public class DecryptBallots {
             this.electionRecord.guardianCoefficients,
             this.publishedTally,
             this.decryptedTally,
-            this.spoiledBallots.values());
+            this.spoiledDecryptedBallots,
+            this.spoiledDecryptedTallies.values());
 
     publisher.copyAcceptedBallots(inputDir);
   }

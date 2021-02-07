@@ -199,7 +199,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
     ctally.batch_append(ballot_box.accepted());
 
     // now decrypt it
-    DecryptionMediator decryptionMediator = new DecryptionMediator(this.metadata, this.context, ctally);
+    DecryptionMediator decryptionMediator = new DecryptionMediator(this.context, ctally);
     this.guardians.forEach(decryptionMediator::announce);
     Optional<PlaintextTally> decrypted_tallies = decryptionMediator.decrypt_tally(false, null);
     assertThat(decrypted_tallies).isNotNull();
@@ -257,7 +257,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
     ctally.batch_append(ballot_box.accepted());
 
     // now decrypt it
-    DecryptionMediator decryptionMediator = new DecryptionMediator(this.metadata, this.context, ctally);
+    DecryptionMediator decryptionMediator = new DecryptionMediator(this.context, ctally);
     this.guardians.forEach(decryptionMediator::announce);
     Optional<PlaintextTally> decrypted_tallies = decryptionMediator.decrypt_tally(false, null);
     assertThat(decrypted_tallies).isNotNull();
@@ -309,7 +309,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
     ctally.batch_append(ballot_box.accepted());
 
     // now decrypt it
-    DecryptionMediator decryptionMediator = new DecryptionMediator(this.metadata, this.context, ctally);
+    DecryptionMediator decryptionMediator = new DecryptionMediator(this.context, ctally);
     this.guardians.forEach(decryptionMediator::announce);
     Optional<PlaintextTally> decrypted_tallies = decryptionMediator.decrypt_tally(false, null);
     assertThat(decrypted_tallies).isNotNull();
@@ -355,7 +355,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
     ctally.batch_append(ballot_box.accepted());
 
     // now decrypt it
-    DecryptionMediator decryptionMediator = new DecryptionMediator(this.metadata, this.context, ctally);
+    DecryptionMediator decryptionMediator = new DecryptionMediator(this.context, ctally);
     this.guardians.forEach(decryptionMediator::announce);
     Optional<PlaintextTally> decrypted_tallies = decryptionMediator.decrypt_tally(false, null);
     assertThat(decrypted_tallies).isNotNull();

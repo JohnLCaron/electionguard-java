@@ -1,6 +1,5 @@
 package com.sunya.electionguard;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.flogger.FluentLogger;
 
 import java.util.ArrayList;
@@ -16,11 +15,11 @@ import static com.sunya.electionguard.DecryptionShare.TallyDecryptionShare;
 import static com.sunya.electionguard.Group.*;
 
 /** Static methods for decryption. */
-class DecryptWithShares {
+public class DecryptWithShares {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   /**
-   * Decrypt the ciphertextTally and the spoiled ballots, into a PlaintextTally.
+   * Decrypt the ciphertextTally into a PlaintextTally.
    *
    * @param tally:   The CiphertextTally to decrypt
    * @param shares:  The guardian Decryption Shares for all guardians
@@ -43,20 +42,12 @@ class DecryptWithShares {
       return Optional.empty();
     }
 
-    // Map(BALLOT_ID, Map(AVAILABLE_GUARDIAN_ID, PlaintextTallyContest))
-    Optional<Map<String, Map<String, PlaintextTally.PlaintextTallyContest>>> decrypted_ballotsO = decrypt_spoiled_ballots(
-            tally.spoiled_ballots, shares, context.crypto_extended_base_hash);
-
-    if (decrypted_ballotsO.isEmpty()) {
-      return Optional.empty();
-    }
-
     return Optional.of(
-            new PlaintextTally(tally.object_id, contests.get(), decrypted_ballotsO.get(), lagrange_coefficients, guardianStates));
+            new PlaintextTally(tally.object_id, contests.get(), lagrange_coefficients, guardianStates));
   }
 
   /**
-   * Decrypt the ciphertextTallyContest into a PlaintextTallyContest.
+   * Decrypt the CiphertextTallyContestBuilder into a PlaintextTallyContest.
    *
    * @param tally:              the encrypted tally of contests
    * @param shares:             a collection of `TallyDecryptionShare` used to decrypt
@@ -95,7 +86,6 @@ class DecryptWithShares {
 
   /**
    * Decrypt the CiphertextSelection into a PlaintextTallySelection.
-   * Each share is expected to be passed with the corresponding public key so that the encryption can be validated
    *
    * @param selection:               a CiphertextSelection to decrypt
    * @param shares:                  the collection of shares used to decrypt the selection
@@ -119,6 +109,7 @@ class DecryptWithShares {
       }
     }
 
+    // LOOK can this be moved up?
     // accumulate all of the shares calculated for the selection
     // all_shares_product_M = mult_p( *[decryption.share for (_, decryption) in shares.values()]);
     List<ElementModP> decryption_shares = shares.values().stream().map(t -> t.decryption.share()).collect(Collectors.toList());
@@ -139,17 +130,22 @@ class DecryptWithShares {
     ));
   }
 
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+  // spoiled ballots -> tally
+
   /**
-   * Try to decrypt each of the spoiled ballots using the provided decryption shares.
+   * Decrypt each of the ciphertext spoiled ballots into a decrypted tally.
    * @return Map(BALLOT_ID, Map(AVAILABLE_GUARDIAN_ID, PlaintextTallyContest))
    */
-  static Optional<Map<String, Map<String, PlaintextTally.PlaintextTallyContest>>> decrypt_spoiled_ballots(
-          Map<String, Ballot.CiphertextAcceptedBallot> spoiled_ballots, // Map(BALLOT_ID, CiphertextAcceptedBallot)
+  static Optional<Map<String, PlaintextTally>> decrypt_spoiled_tallies(
+          Iterable<Ballot.CiphertextAcceptedBallot> spoiled_ballots,
           Map<String, TallyDecryptionShare> shares, // Map(AVAILABLE_GUARDIAN_ID, TallyDecryptionShare)
           ElementModQ extended_base_hash) {
 
-    HashMap<String, Map<String, PlaintextTally.PlaintextTallyContest>> plaintext_spoiled_ballots = new HashMap<>();
-    for (Ballot.CiphertextAcceptedBallot spoiled_ballot : spoiled_ballots.values()) {
+    HashMap<String, PlaintextTally> result = new HashMap<>();
+    for (Ballot.CiphertextAcceptedBallot spoiled_ballot : spoiled_ballots) {
+
+      // LOOK can this be moved up, or is it ballot specific?
       HashMap<String, BallotDecryptionShare> ballot_shares = new HashMap<>();
       for (Map.Entry<String, TallyDecryptionShare> entry : shares.entrySet()) {
         TallyDecryptionShare share = entry.getValue();
@@ -157,19 +153,20 @@ class DecryptWithShares {
       }
 
       // Map(CONTEST_ID, PlaintextTallyContest)
-      Optional<Map<String, PlaintextTally.PlaintextTallyContest>> decrypted_ballot =
-              decrypt_ballot(spoiled_ballot, ballot_shares, extended_base_hash);
-      if (decrypted_ballot.isPresent()) {
-        plaintext_spoiled_ballots.put(spoiled_ballot.object_id, decrypted_ballot.get());
+      Optional<Map<String, PlaintextTally.PlaintextTallyContest>> decrypted_contests =
+              decrypt_tally(spoiled_ballot, ballot_shares, extended_base_hash);
+      if (decrypted_contests.isPresent()) {
+        PlaintextTally tally = new PlaintextTally(spoiled_ballot.object_id, decrypted_contests.get(), null, null);
+        result.put(spoiled_ballot.object_id, tally);
       } else {
         return Optional.empty();
       }
     }
-    return Optional.of(plaintext_spoiled_ballots);
+    return Optional.of(result);
   }
 
-  /** Decrypt a single ballot using the provided decryption shares. */
-  static Optional<Map<String, PlaintextTally.PlaintextTallyContest>> decrypt_ballot(
+  /** Decrypt one ciphertext spoiled ballot into a decrypted tally. */
+  static Optional<Map<String, PlaintextTally.PlaintextTallyContest>> decrypt_tally(
           Ballot.CiphertextAcceptedBallot ballot,
           Map<String, BallotDecryptionShare> shares,
           ElementModQ extended_base_hash) {
@@ -199,31 +196,37 @@ class DecryptWithShares {
     return Optional.of(contests);
   }
 
-  static Optional<ImmutableMap<String, Ballot.PlaintextBallot>> decrypt_spoiled_ballots2(
-          Map<String, Ballot.CiphertextAcceptedBallot> spoiled_ballots, // Map(BALLOT_ID, CiphertextAcceptedBallot)
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+  // spoiled ballots -> plaintext ballot
+
+  /**
+   * Decrypt a collection of ciphertext spoiled ballots into decrypted plaintext ballots.
+   */
+  static Optional<Iterable<Ballot.PlaintextBallot>> decrypt_spoiled_ballots(
+          Iterable<Ballot.CiphertextAcceptedBallot> spoiled_ballots,
           Map<String, TallyDecryptionShare> shares, // Map(AVAILABLE_GUARDIAN_ID, TallyDecryptionShare)
           ElementModQ extended_base_hash) {
 
-    ImmutableMap.Builder<String, Ballot.PlaintextBallot> plaintext_spoiled_ballots = ImmutableMap.builder();
-    for (Ballot.CiphertextAcceptedBallot spoiled_ballot : spoiled_ballots.values()) {
+    List<Ballot.PlaintextBallot> result = new ArrayList<>();
+    for (Ballot.CiphertextAcceptedBallot spoiled_ballot : spoiled_ballots) {
       HashMap<String, BallotDecryptionShare> ballot_shares = new HashMap<>();
       for (Map.Entry<String, TallyDecryptionShare> entry : shares.entrySet()) {
         TallyDecryptionShare share = entry.getValue();
         ballot_shares.put(entry.getKey(), share.spoiled_ballots().get(spoiled_ballot.object_id));
       }
 
-      Optional<Ballot.PlaintextBallot> decrypted_ballot = decrypt_ballot2(spoiled_ballot, ballot_shares, extended_base_hash);
+      Optional<Ballot.PlaintextBallot> decrypted_ballot = decrypt_ballot(spoiled_ballot, ballot_shares, extended_base_hash);
       if (decrypted_ballot.isPresent()) {
-        plaintext_spoiled_ballots.put(spoiled_ballot.object_id, decrypted_ballot.get());
+        result.add(decrypted_ballot.get());
       } else {
         return Optional.empty();
       }
     }
-    return Optional.of(plaintext_spoiled_ballots.build());
+    return Optional.of(result);
   }
 
-  /** Decrypt a single ballot using the provided decryption shares. */
-  static Optional<Ballot.PlaintextBallot> decrypt_ballot2(
+  /** Decrypt a ciphertext ballot into a decrypted plaintext ballot. */
+  private static Optional<Ballot.PlaintextBallot> decrypt_ballot(
           Ballot.CiphertextAcceptedBallot ballot,
           Map<String, BallotDecryptionShare> shares,
           ElementModQ extended_base_hash) {
@@ -236,7 +239,7 @@ class DecryptWithShares {
         if (selection.is_placeholder_selection) {
           continue;
         }
-        // LOOK is this duplicated in decrypt_spoiled_ballots?
+        // LOOK is this duplicated in decrypt_spoiled_tallies?
         Map<String, KeyAndSelection> selection_shares = DecryptionShare.get_ballot_shares_for_selection(selection.object_id, shares);
         Optional<PlaintextTally.PlaintextTallySelection> plaintext_selectionO = decrypt_selection_with_decryption_shares(
                 selection, selection_shares, extended_base_hash, false);

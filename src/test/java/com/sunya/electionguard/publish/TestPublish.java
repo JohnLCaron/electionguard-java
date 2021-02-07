@@ -48,7 +48,7 @@ public class TestPublish {
     List<KeyCeremony.CoefficientValidationSet> coefficients = ImmutableList.of(
             KeyCeremony.CoefficientValidationSet.create("hiD", ImmutableList.of(), ImmutableList.of()));
     PlaintextTally plaintext_tally = new PlaintextTally("PlaintextTallyId", ImmutableMap.of(), ImmutableMap.of(),
-            ImmutableMap.of(), ImmutableList.of());
+            ImmutableList.of());
 
     PublishedCiphertextTally ciphertext_tally =
             new CiphertextTallyBuilder("CiphertextTallyId", metadata, context).build();

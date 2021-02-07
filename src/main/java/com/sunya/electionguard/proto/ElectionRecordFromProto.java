@@ -46,7 +46,7 @@ public class ElectionRecordFromProto {
             PlaintextTallyFromProto.translateFromProto(proto.getDecryptedTally()) : null;
 
     return new ElectionRecord(constants, context, description, guardianCoefficients,
-            devices, null, null, ciphertextTally, decryptedTally);
+            devices, ciphertextTally, decryptedTally, null, null, null);
   }
 
   static Election.ElectionConstants convertConstants(ElectionRecordProto.Constants constants) {

@@ -36,18 +36,17 @@ public class CiphertextTallyBuilder {
   /** Local cache of ballots id's that have already been cast. */
   private final Set<String> cast_ballot_ids;
 
-  /** A encrypted representation of each contest and selection for all the cast ballots. */
+  /** An encrypted representation of each contest and selection for all the cast ballots. */
   public final Map<String, CiphertextTallyContestBuilder> cast; // Map(CONTEST_ID, CiphertextTallyContest)
 
   // LOOK can we store these in a seperate iterable?
   /** All of the ballots marked spoiled in the election. */
-  final Map<String, CiphertextAcceptedBallot> spoiled_ballots; // Map(BALLOT_ID, CiphertextAcceptedBallot)
+  // final Map<String, CiphertextAcceptedBallot> spoiled_ballots; // Map(BALLOT_ID, CiphertextAcceptedBallot)
 
   public CiphertextTallyBuilder(String object_id, Election.InternalElectionDescription metadata, Election.CiphertextElectionContext encryption) {
     this.object_id = object_id;
     this.metadata = metadata;
     this.encryption = encryption;
-    this.spoiled_ballots = new HashMap<>();
     this.cast_ballot_ids = new HashSet<>();
     this.cast = build_tally_collection(this.metadata);
   }
@@ -67,21 +66,9 @@ public class CiphertextTallyBuilder {
     return cast_collection;
   }
 
-  int len() {
-    return this.cast_ballot_ids.size() + this.spoiled_ballots.size();
-  }
-
   /** Get the number of cast ballots (just the count, not the tally). */
   int count() {
     return this.cast_ballot_ids.size();
-  }
-
-  private boolean contains(Object item) {
-    if (!(item instanceof CiphertextAcceptedBallot)) {
-      return false;
-    }
-    CiphertextAcceptedBallot ballot = (CiphertextAcceptedBallot) item;
-    return this.cast_ballot_ids.contains(ballot.object_id) || this.spoiled_ballots.containsKey(ballot.object_id);
   }
 
   /** Append a collection of Ballots to the tally. Potentially parellizable over ballots. */
@@ -94,40 +81,33 @@ public class CiphertextTallyBuilder {
     try (CloseableIterator<CiphertextAcceptedBallot> ballotsIter = ballots.iterator()) {
       while (ballotsIter.hasNext()) {
         CiphertextAcceptedBallot ballot = ballotsIter.next();
-        if (!this.contains(ballot) &&
-                BallotValidations.ballot_is_valid_for_election(ballot, this.metadata, this.encryption)) {
-
-          if (ballot.state == BallotBoxState.CAST) {
-            // collect the selections so they can be accumulated in parallel
-            for (Ballot.CiphertextBallotContest contest : ballot.contests) {
-              for (Ballot.CiphertextBallotSelection selection : contest.ballot_selections) {
-                Map<String, ElGamal.Ciphertext> map2 = cast_ballot_selections.computeIfAbsent(selection.object_id, map1 -> new HashMap<>());
-                map2.put(ballot.object_id, selection.ciphertext());
-              }
-            }
-          } else if (ballot.state == BallotBoxState.SPOILED) {
-            // just append the spoiled ballots
-            this.add_spoiled(ballot);
+        if (ballot.state != BallotBoxState.CAST) {
+          continue;
+        }
+        // make sure no double counting
+        if (cast_ballot_ids.contains(ballot.object_id)) {
+          continue;
+        }
+        if (!BallotValidations.ballot_is_valid_for_election(ballot, this.metadata, this.encryption)) {
+          continue;
+        }
+        // collect the selections so they can be accumulated in parallel
+        for (Ballot.CiphertextBallotContest contest : ballot.contests) {
+          for (Ballot.CiphertextBallotSelection selection : contest.ballot_selections) {
+            Map<String, ElGamal.Ciphertext> map2 = cast_ballot_selections.computeIfAbsent(selection.object_id, map1 -> new HashMap<>());
+            map2.put(ballot.object_id, selection.ciphertext());
           }
         }
+        this.cast_ballot_ids.add(ballot.object_id);
         count++;
       }
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
 
-    // LOOK can we not read it twice? Just put into cast_ballot_ids in the loop above?
-    // cache the cast ballot id's so they are not double counted
-    if (this.execute_accumulate(cast_ballot_selections)) {
-      for (CiphertextAcceptedBallot ballot : ballots) {
-        if (ballot.state == BallotBoxState.CAST) {
-          this.cast_ballot_ids.add(ballot.object_id);
-        }
-      }
-      return count;
-    }
-
-    return 0;
+    // heres where the tallies are actually accumulated
+    boolean ok = this.execute_accumulate(cast_ballot_selections);
+    return ok ? count : 0;
   }
 
   /** Append a ballot to the tally. Potentially parellizable over this ballot's selections. */
@@ -137,7 +117,7 @@ public class CiphertextTallyBuilder {
       return false;
     }
 
-    if (this.contains(ballot)) {
+    if (this.cast_ballot_ids.contains(ballot.object_id)) {
       logger.atWarning().log("append cannot add %s that is already tallied", ballot.object_id);
       return false;
     }
@@ -148,10 +128,6 @@ public class CiphertextTallyBuilder {
 
     if (ballot.state == BallotBoxState.CAST) {
       return this.add_cast(ballot);
-    }
-
-    if (ballot.state == BallotBoxState.SPOILED) {
-      return this.add_spoiled(ballot);
     }
 
     logger.atWarning().log("append cannot add %s", ballot);
@@ -177,12 +153,6 @@ public class CiphertextTallyBuilder {
       this.cast.put(contest.object_id, use_contest);
     }
     this.cast_ballot_ids.add(ballot.object_id);
-    return true;
-  }
-
-  /** Add a spoiled ballot. */
-  boolean add_spoiled(CiphertextAcceptedBallot ballot) {
-    this.spoiled_ballots.put(ballot.object_id, ballot);
     return true;
   }
 

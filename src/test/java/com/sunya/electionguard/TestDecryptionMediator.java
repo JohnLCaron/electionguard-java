@@ -40,6 +40,7 @@ public class TestDecryptionMediator extends TestProperties {
   PlaintextBallot fake_spoiled_ballot;
   CiphertextAcceptedBallot encrypted_fake_cast_ballot;
   CiphertextAcceptedBallot encrypted_fake_spoiled_ballot;
+  List<CiphertextAcceptedBallot> encrypted_spoiled_ballots;
   Map<String, Integer> expected_plaintext_tally;
   CiphertextTallyBuilder ciphertext_tally;
 
@@ -147,15 +148,9 @@ public class TestDecryptionMediator extends TestProperties {
     this.ciphertext_tally.batch_append(ballot_box.accepted());
   }
 
-  /*
-  @AfterExample
-  public void tearDown() {
-    this.key_ceremony.reset(CeremonyDetails.create(NUMBER_OF_GUARDIANS, QUORUM));
-  } */
-
   @Example
   public void test_announce() {
-    DecryptionMediator subject = new DecryptionMediator(this.metadata, this.context, this.ciphertext_tally);
+    DecryptionMediator subject = new DecryptionMediator(this.context, this.ciphertext_tally);
 
     Optional<DecryptionShare.TallyDecryptionShare> result = subject.announce(this.guardians.get(0));
 
@@ -366,7 +361,7 @@ public class TestDecryptionMediator extends TestProperties {
               Decryptions.compute_decryption_share_for_ballot(guardian, encrypted_ballot, this.context).orElseThrow());
     }
 
-    Optional<Map<String, PlaintextTally.PlaintextTallyContest>> resultO = DecryptWithShares.decrypt_ballot(
+    Optional<Map<String, PlaintextTally.PlaintextTallyContest>> resultO = DecryptWithShares.decrypt_tally(
             encrypted_ballot, shares, this.context.crypto_extended_base_hash);
     assertThat(resultO).isPresent();
     Map<String, PlaintextTally.PlaintextTallyContest> result = resultO.get();
@@ -424,7 +419,7 @@ public class TestDecryptionMediator extends TestProperties {
     // Ballot.CiphertextAcceptedBallot ballot,
     //          Map<String, BallotDecryptionShare> shares,
     //          ElementModQ extended_base_hash
-    Optional<Map<String, PlaintextTally.PlaintextTallyContest>> resultO = DecryptWithShares.decrypt_ballot(
+    Optional<Map<String, PlaintextTally.PlaintextTallyContest>> resultO = DecryptWithShares.decrypt_tally(
             encrypted_ballot,
             all_shares,
             this.context.crypto_extended_base_hash);
@@ -475,7 +470,7 @@ public class TestDecryptionMediator extends TestProperties {
 
   @Example
   public void test_get_plaintext_tally_all_guardians_present_simple() {
-    DecryptionMediator subject = new DecryptionMediator(this.metadata, this.context, this.ciphertext_tally);
+    DecryptionMediator subject = new DecryptionMediator(this.context, this.ciphertext_tally);
 
     for (Guardian guardian : this.guardians) {
       assertThat(subject.announce(guardian)).isPresent();
@@ -497,7 +492,7 @@ public class TestDecryptionMediator extends TestProperties {
 
   @Example
   public void test_get_plaintext_tally_compensate_missing_guardian_simple() {
-    DecryptionMediator subject = new DecryptionMediator(this.metadata, this.context, this.ciphertext_tally);
+    DecryptionMediator subject = new DecryptionMediator(this.context, this.ciphertext_tally);
 
     assertThat(subject.announce(this.guardians.get(0))).isPresent();
     assertThat(subject.announce(this.guardians.get(1))).isPresent();
@@ -529,7 +524,7 @@ public class TestDecryptionMediator extends TestProperties {
 
     Map<String, Integer> plaintext_tallies = TallyTestHelper.accumulate_plaintext_ballots(plaintext_ballots);
     CiphertextTallyBuilder encrypted_tally = this.generate_encrypted_tally(metadata, context, plaintext_ballots);
-    DecryptionMediator subject = new DecryptionMediator(metadata, context, encrypted_tally);
+    DecryptionMediator subject = new DecryptionMediator(context, encrypted_tally);
 
     for (Guardian guardian : this.guardians) {
       assertThat(subject.announce(guardian)).isPresent();

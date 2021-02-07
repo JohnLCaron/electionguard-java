@@ -3,7 +3,6 @@ package com.sunya.electionguard.verifier;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
-import com.sunya.electionguard.proto.ElectionRecordFromProto;
 import com.sunya.electionguard.publish.Consumer;
 import com.sunya.electionguard.workflow.EncryptBallots;
 
@@ -61,10 +60,10 @@ public class VerifyElectionRecord {
     }
 
     System.out.printf(" VerifyElectionRecord read from %s isProto = %s%n", cmdLine.inputDir, cmdLine.isProto);
-    verifyElectionRecord(electionRecord);
+    verifyElectionRecord(consumer, electionRecord);
   }
 
-  static void verifyElectionRecord(ElectionRecord electionRecord) throws IOException {
+  static void verifyElectionRecord(Consumer consumer, ElectionRecord electionRecord) throws IOException {
     System.out.println("============ Ballot Verification =========================");
     System.out.println("------------ [box 1] Parameter Validation ------------");
     ParameterVerifier blv = new ParameterVerifier(electionRecord);
@@ -97,7 +96,7 @@ public class VerifyElectionRecord {
 
     System.out.println("------------ [box 8, 9] Correctness of Decryptions ------------");
     DecryptionVerifier dv = new DecryptionVerifier(electionRecord);
-    boolean dvOk = dv.verify_cast_ballot_tallies();
+    boolean dvOk = dv.verify_election_tally();
 
     System.out.println("------------ [box 10] Correctness of Replacement Partial Decryptions ------------");
     PartialDecryptionVerifier pdv = new PartialDecryptionVerifier(electionRecord);
@@ -107,7 +106,8 @@ public class VerifyElectionRecord {
     boolean bavt = bav.verify_tally_decryption();
 
     System.out.println("------------ [box 12] Correct Decryption of Spoiled Ballots ------------");
-    boolean dvsOk = dv.verify_spoiled_ballots();
+    boolean dvsOk = dv.verify_spoiled_ballots(consumer.decryptedSpoiledTalliesProto());
+
     PlaintextBallotVerifier pbv = new PlaintextBallotVerifier(electionRecord);
     boolean pbvOk = pbv.verify_plaintext_ballot();
 

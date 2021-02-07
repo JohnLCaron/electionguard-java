@@ -5,6 +5,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
+import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import java.util.Formatter;
 import java.util.List;
@@ -12,7 +13,7 @@ import java.util.Map;
 
 import static com.sunya.electionguard.Group.ElementModP;
 
-/* The decrypted plaintext representation of the counts of some collection of ballots */
+/* The decrypted plaintext representation of the counts of a collection of ballots */
 @Immutable
 public class PlaintextTally {
   public final String object_id; // matches the CiphertextTally object_id
@@ -21,7 +22,7 @@ public class PlaintextTally {
   public final ImmutableMap<String, PlaintextTallyContest> contests;
 
   // Tally of spoiled ballots: Map(BALLOT_ID, Map(CONTEST_ID, PlaintextTallyContest))
-  public final ImmutableMap<String, ImmutableMap<String, PlaintextTallyContest>> spoiledBallotTally;
+  // public final ImmutableMap<String, ImmutableMap<String, PlaintextTallyContest>> spoiledBallotTally;
 
   /** The lagrange coefficients w_ij for verification of section 10. */
   public final ImmutableMap<String, Group.ElementModQ> lagrange_coefficients;
@@ -31,24 +32,13 @@ public class PlaintextTally {
 
   public PlaintextTally(String object_id,
                         Map<String, PlaintextTallyContest> contests,
-                        Map<String, Map<String, PlaintextTallyContest>> spoiledTally,
-                        Map<String, Group.ElementModQ> lagrange_coefficients,
-                        List<GuardianState> guardianState) {
+                        // Map<String, Map<String, PlaintextTallyContest>> spoiledTally,
+                        @Nullable Map<String, Group.ElementModQ> lagrange_coefficients,
+                        @Nullable List<GuardianState> guardianState) {
     this.object_id = Preconditions.checkNotNull(object_id);
     this.contests =  ImmutableMap.copyOf(Preconditions.checkNotNull(contests));
-
-    ImmutableMap.Builder<String, ImmutableMap<String, PlaintextTallyContest>> builder = ImmutableMap.builder();
-    for (Map.Entry<String, Map<String, PlaintextTallyContest>> entry : spoiledTally.entrySet()) {
-      ImmutableMap.Builder<String, PlaintextTallyContest> builder2 = ImmutableMap.builder();
-      for (Map.Entry<String, PlaintextTallyContest> entry2 : entry.getValue().entrySet()) {
-        builder2.put(entry2.getKey(), entry2.getValue());
-      }
-      builder.put(entry.getKey(), builder2.build());
-    }
-    this.spoiledBallotTally = builder.build();
-
-    this.lagrange_coefficients = ImmutableMap.copyOf(lagrange_coefficients);
-    this.guardianStates = ImmutableList.copyOf(guardianState);
+    this.lagrange_coefficients = (lagrange_coefficients != null) ? ImmutableMap.copyOf(lagrange_coefficients) : ImmutableMap.of();
+    this.guardianStates = (guardianState != null) ? ImmutableList.copyOf(guardianState) : ImmutableList.of();
   }
 
   @Override

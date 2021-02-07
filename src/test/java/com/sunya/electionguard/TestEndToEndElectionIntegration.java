@@ -238,11 +238,10 @@ public class TestEndToEndElectionIntegration {
 
     System.out.printf("%n4. cast %d spoiled %d total %d%n",
             this.ciphertext_tally.count(),
-            this.ciphertext_tally.spoiled_ballots.size(),
-            this.ciphertext_tally.len());
+            0, 0);
 
     // Configure the Decryption
-    this.decrypter = new DecryptionMediator(this.metadata, this.context, this.ciphertext_tally);
+    this.decrypter = new DecryptionMediator(this.context, this.ciphertext_tally);
 
     // Announce each guardian as present
     int count = 0;
@@ -301,7 +300,7 @@ public class TestEndToEndElectionIntegration {
       System.out.printf("----------------------------------%n");
     }
 
-    // Compare the expected values for each spoiled ballot
+    /* LOOK Compare the expected values for each spoiled ballot
     for (Map.Entry<String, Ballot.CiphertextAcceptedBallot> entry : this.ciphertext_tally.spoiled_ballots.entrySet()) {
       String ballot_id = entry.getKey();
       Ballot.CiphertextAcceptedBallot accepted_ballot = entry.getValue();
@@ -324,7 +323,7 @@ public class TestEndToEndElectionIntegration {
           }
         }
       }
-    }
+    } */
   }
 
   // Publish and verify steps of the election

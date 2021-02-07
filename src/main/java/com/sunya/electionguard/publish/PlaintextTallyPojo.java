@@ -101,7 +101,6 @@ public class PlaintextTallyPojo {
     return new PlaintextTally(
             pojo.object_id,
             contests,
-            spoiled_ballots,
             pojo.lagrange_coefficients,
             convertList(pojo.guardian_states, PlaintextTallyPojo::translateGuardianState));
   }
@@ -193,12 +192,12 @@ public class PlaintextTallyPojo {
             Map.Entry::getKey,
             e2 -> convertContest(e2.getValue())));
 
-    pojo.spoiled_ballots =
+    /* pojo.spoiled_ballots =
             org.spoiledBallotTally.entrySet().stream().collect(Collectors.toMap(
                     Map.Entry::getKey,
                     e -> e.getValue().entrySet().stream().collect(Collectors.toMap(
                             Map.Entry::getKey,
-                            e2 -> convertContest(e2.getValue())))));
+                            e2 -> convertContest(e2.getValue()))))); */
 
     pojo.lagrange_coefficients = org.lagrange_coefficients;
     pojo.guardian_states = convertList(org.guardianStates, PlaintextTallyPojo::convertGuardianState);

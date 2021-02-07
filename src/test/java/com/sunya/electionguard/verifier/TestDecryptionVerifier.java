@@ -22,7 +22,7 @@ public class TestDecryptionVerifier {
 
   @Example
   public void testSelectionEncryptionValidation() throws IOException {
-    boolean sevOk = validator.verify_cast_ballot_tallies();
+    boolean sevOk = validator.verify_election_tally();
     assertThat(sevOk).isTrue();
   }
 

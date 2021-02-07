@@ -27,9 +27,11 @@ public class ElectionRecord {
   public final ImmutableList<KeyCeremony.CoefficientValidationSet> guardianCoefficients;
   public final ImmutableList<Encrypt.EncryptionDevice> devices;
   public final CloseableIterable<Ballot.CiphertextAcceptedBallot> acceptedBallots; // LOOK all ballots, not just cast!
-  public final CloseableIterable<Ballot.PlaintextBallot> spoiledBallots;
   @Nullable public final PublishedCiphertextTally ciphertextTally;
-  @Nullable  public final PlaintextTally decryptedTally;
+  @Nullable public final PlaintextTally decryptedTally;
+  public final CloseableIterable<Ballot.PlaintextBallot> spoiledBallots;
+  public final CloseableIterable<PlaintextTally> spoiledTallies;
+
   private final ImmutableMap<String, Integer> contest_vote_limits;
 
   public ElectionRecord(Election.ElectionConstants constants,
@@ -37,19 +39,21 @@ public class ElectionRecord {
                         Election.ElectionDescription election,
                         List<KeyCeremony.CoefficientValidationSet> guardianCoefficients,
                         @Nullable List<Encrypt.EncryptionDevice> devices,
+                        @Nullable PublishedCiphertextTally ciphertextTally,
+                        @Nullable PlaintextTally decryptedTally,
                         @Nullable CloseableIterable<Ballot.CiphertextAcceptedBallot> castBallots,
                         @Nullable CloseableIterable<Ballot.PlaintextBallot> spoiledBallots,
-                        @Nullable PublishedCiphertextTally ciphertextTally,
-                        @Nullable PlaintextTally decryptedTally) {
+                        @Nullable CloseableIterable<PlaintextTally> spoiledTallies) {
     this.constants = constants;
     this.context = context;
     this.election = election;
     this.guardianCoefficients = ImmutableList.copyOf(guardianCoefficients);
     this.devices = devices == null ? ImmutableList.of() : ImmutableList.copyOf(devices);
     this.acceptedBallots = castBallots == null ? CloseableIterableAdapter.empty() : castBallots;
-    this.spoiledBallots = spoiledBallots == null ? CloseableIterableAdapter.empty() : spoiledBallots;
     this.ciphertextTally = ciphertextTally;
     this.decryptedTally = decryptedTally;
+    this.spoiledBallots = spoiledBallots == null ? CloseableIterableAdapter.empty() : spoiledBallots;
+    this.spoiledTallies = spoiledTallies == null ? CloseableIterableAdapter.empty() : spoiledTallies;
 
     int num_guardians = context.number_of_guardians;
     if (num_guardians != this.guardianCoefficients.size()) {
@@ -68,16 +72,20 @@ public class ElectionRecord {
   }
 
   public ElectionRecord setBallots(CloseableIterable<Ballot.CiphertextAcceptedBallot> acceptedBallots,
-                                   CloseableIterable<Ballot.PlaintextBallot> spoiledBallots) {
+                                   CloseableIterable<Ballot.PlaintextBallot> spoiledBallots,
+                                   CloseableIterable<PlaintextTally> spoiledBallotTallies
+                                   ) {
     return new ElectionRecord(this.constants,
             this.context,
             this.election,
             this.guardianCoefficients,
             this.devices,
+            this.ciphertextTally,
+            this.decryptedTally,
             acceptedBallots,
             spoiledBallots,
-            this.ciphertextTally,
-            this.decryptedTally);
+            spoiledBallotTallies
+            );
   }
 
   public BigInteger generator() {

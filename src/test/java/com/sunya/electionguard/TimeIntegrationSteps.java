@@ -259,7 +259,7 @@ public class TimeIntegrationSteps {
     this.ciphertext_tally.batch_append(this.ballot_box.accepted());
 
     // Configure the Decryption
-    this.decryptionMediator = new DecryptionMediator(this.election, this.context, this.ciphertext_tally);
+    this.decryptionMediator = new DecryptionMediator(this.context, this.ciphertext_tally);
 
     // Announce each guardian as present
     for (Guardian guardian : this.guardians) {

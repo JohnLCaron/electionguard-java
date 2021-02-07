@@ -25,9 +25,9 @@ public class PlaintextTallyFromProto {
     Map<String, PlaintextTally.PlaintextTallyContest> contests = tally.getContestsMap().entrySet().stream()
             .collect(Collectors.toMap(Map.Entry::getKey, e -> convertContest(e.getValue())));
 
-    Map<String, Map<String, PlaintextTally.PlaintextTallyContest>> spoiled = tally.getSpoiledBallotsMap().entrySet().stream()
+    /* Map<String, Map<String, PlaintextTally.PlaintextTallyContest>> spoiled = tally.getSpoiledBallotsMap().entrySet().stream()
             .collect(Collectors.toMap(Map.Entry::getKey,
-                    e -> convertSpoiled(e.getValue())));
+                    e -> convertSpoiled(e.getValue()))); */
 
     Map<String, Group.ElementModQ> lagrange_coefficients = tally.getLagrangeCoefficientsMap().entrySet().stream()
             .collect(Collectors.toMap(Map.Entry::getKey, e -> convertElementModQ(e.getValue())));
@@ -35,7 +35,6 @@ public class PlaintextTallyFromProto {
     return new PlaintextTally(
             tally.getObjectId(),
             contests,
-            spoiled,
             lagrange_coefficients,
             convertList(tally.getGuardianStatesList(), PlaintextTallyFromProto::convertState));
   }

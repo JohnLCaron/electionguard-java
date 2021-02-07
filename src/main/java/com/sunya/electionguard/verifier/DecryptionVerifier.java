@@ -7,7 +7,10 @@ import com.sunya.electionguard.ChaumPedersen;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.Hash;
 import com.sunya.electionguard.PlaintextTally;
+import com.sunya.electionguard.publish.CloseableIterable;
+import com.sunya.electionguard.publish.CloseableIterator;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -31,8 +34,8 @@ public class DecryptionVerifier {
     this.decryptedTally = Preconditions.checkNotNull(electionRecord.decryptedTally);
   }
 
-  /** Verify 8,9 for all cast ballots in the tally. */
-  boolean verify_cast_ballot_tallies() {
+  /** Verify 8,9 for the election tally. */
+  boolean verify_election_tally() {
     boolean error = !this.make_all_contest_verification(this.decryptedTally.object_id, this.decryptedTally.contests);
     if (error) {
       System.out.printf(" ***Decryptions of cast ballots failure. %n");
@@ -43,19 +46,19 @@ public class DecryptionVerifier {
   }
 
   /**
-   * Verify spoiled ballots in the tally.
+   * Verify spoiled ballot tallies.
    * 12. An election verifier should confirm the correct decryption of each spoiled ballot using the same
    * process that was used to confirm the election tallies.
    */
-  boolean verify_spoiled_ballots() {
+  boolean verify_spoiled_ballots(CloseableIterable<PlaintextTally> tallies) throws IOException {
     boolean error = false;
 
-    for (Map.Entry<String, ImmutableMap<String, PlaintextTally.PlaintextTallyContest>> entry : this.decryptedTally.spoiledBallotTally.entrySet()) {
-      if (!this.make_all_contest_verification(entry.getKey(), entry.getValue())) {
-        error = true;
+    try (CloseableIterator<PlaintextTally> iter = tallies.iterator()) {
+      while (iter.hasNext()) {
+        PlaintextTally spoiled_tally = iter.next();
+        error |= this.make_all_contest_verification(spoiled_tally.object_id, spoiled_tally.contests);
       }
     }
-
     if (error) {
       System.out.printf(" *** 12.A Spoiled ballot decryption failure. %n");
     } else {

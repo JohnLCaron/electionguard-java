@@ -1,5 +1,6 @@
 package com.sunya.electionguard;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.flogger.FluentLogger;
 
 import java.util.*;
@@ -63,6 +64,7 @@ public class Decryptions {
           Guardian guardian,
           String missing_guardian_id,
           CiphertextTallyBuilder tally,
+          Map<String, Ballot.CiphertextAcceptedBallot> spoiled_ballots,
           CiphertextElectionContext context,
           Auxiliary.Decryptor decryptor) {
 
@@ -75,9 +77,9 @@ public class Decryptions {
     }
 
     // Parallizable over each of the tally's contests.
-    Optional<Map<String, DecryptionShare.CompensatedBallotDecryptionShare>> spoiled_ballots =
+    Optional<Map<String, DecryptionShare.CompensatedBallotDecryptionShare>> spoiled_ballots_shares =
             compute_compensated_decryption_share_for_spoiled_ballots(
-                    guardian, missing_guardian_id, tally.spoiled_ballots, context, decryptor);
+                    guardian, missing_guardian_id, spoiled_ballots, context, decryptor);
     if (spoiled_ballots.isEmpty()) {
       return Optional.empty();
     }
@@ -87,7 +89,7 @@ public class Decryptions {
             missing_guardian_id,
             guardian.share_election_public_key().key(),
             contests.get(),
-            spoiled_ballots.get()));
+            spoiled_ballots_shares.get()));
   }
 
   /**
@@ -266,21 +268,22 @@ public class Decryptions {
   static Optional<Map<String, BallotDecryptionShare>> compute_decryption_share_for_spoiled_ballots(
           Guardian guardian,
           CiphertextTallyBuilder tally,
+          ImmutableMap<String, Ballot.CiphertextAcceptedBallot> spoiled_ballots,
           CiphertextElectionContext context) {
 
-    Map<String, BallotDecryptionShare> spoiled_ballots = new HashMap<>();
+    Map<String, BallotDecryptionShare> spoiled_ballots_shares = new HashMap<>();
 
-    for (Ballot.CiphertextAcceptedBallot spoiled_ballot : tally.spoiled_ballots.values()) {
+    for (Ballot.CiphertextAcceptedBallot spoiled_ballot : spoiled_ballots.values()) {
       Optional<BallotDecryptionShare> computed_share = compute_decryption_share_for_ballot(guardian, spoiled_ballot, context);
 
       if (computed_share.isPresent()) {
-        spoiled_ballots.put(spoiled_ballot.object_id, computed_share.get());
+        spoiled_ballots_shares.put(spoiled_ballot.object_id, computed_share.get());
       } else {
         return Optional.empty();
       }
     }
 
-    return Optional.of(spoiled_ballots);
+    return Optional.of(spoiled_ballots_shares);
   }
 
   /**
