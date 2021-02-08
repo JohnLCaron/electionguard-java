@@ -10,8 +10,6 @@ message PlaintextTally {
   string object_id = 1;
   // Map(CONTEST_ID, PlaintextTallyContest)
   map<string, PlaintextTallyContest> contests = 2;
-  // Map(BALLOT_ID, Map(CONTEST_ID, PlaintextTallyContest))
-  // map<string, PlaintextTallyContestMap> spoiled_ballots = 3;
   //  Map(AVAILABLE_GUARDIAN_ID, ElementModQ)
   map<string, ElementModQ> lagrange_coefficients = 4;
   // track guardians sequence numbers

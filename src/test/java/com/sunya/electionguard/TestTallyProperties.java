@@ -76,7 +76,6 @@ public class TestTallyProperties extends TestProperties {
     for (Integer value : decrypted_tallies.values()) {
       assertThat(value).isEqualTo(0);
     }
-    assertThat(result.spoiled_ballots.size()).isEqualTo(everything.ballots.size());
   }
 
   // LOOK this assumes mutability, must be rewritten

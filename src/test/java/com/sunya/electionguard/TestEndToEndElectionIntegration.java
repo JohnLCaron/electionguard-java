@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.google.common.truth.Truth.assertWithMessage;
 import static com.sunya.electionguard.Ballot.*;
@@ -67,7 +68,8 @@ public class TestEndToEndElectionIntegration {
   DecryptionMediator decrypter;
   CiphertextTallyBuilder ciphertext_tally;
   PlaintextTally decryptedTally;
-  Map<String, Ballot.PlaintextBallot> spoiledBallots;
+  List<Ballot.PlaintextBallot> spoiledDecryptedBallots;
+  List<PlaintextTally> spoiledDecryptedTallies;
 
   // Execute the simplified end-to-end test demonstrating each component of the system.
   @Example
@@ -241,14 +243,13 @@ public class TestEndToEndElectionIntegration {
             0, 0);
 
     // Configure the Decryption
-    this.decrypter = new DecryptionMediator(this.context, this.ciphertext_tally);
+    this.decrypter = new DecryptionMediator(this.context, this.ciphertext_tally, this.ballot_box.getSpoiledBallots());
 
     // Announce each guardian as present
     int count = 0;
     for (Guardian guardian : this.guardians) {
-      Optional<DecryptionShare.TallyDecryptionShare> decryption_share = this.decrypter.announce(guardian);
       System.out.printf("Guardian Present: %s%n", guardian.object_id);
-      assertThat(decryption_share).isPresent();
+      assertThat(this.decrypter.announce(guardian)).isTrue();
       count++;
       if (count == QUORUM) {
         System.out.printf(" Only %d Guardians are available%n", count);
@@ -258,7 +259,10 @@ public class TestEndToEndElectionIntegration {
 
     // Here's where the ciphertext Tally is decrypted.
     this.decryptedTally = this.decrypter.decrypt_tally(false, null).orElseThrow();
-    this.spoiledBallots = this.decrypter.spoiled_ballots().orElseThrow();
+    List<DecryptWithShares.SpoiledTallyAndBallot> spoiledTallyAndBallot =
+            this.decrypter.decrypt_spoiled_ballots().orElseThrow();
+    this.spoiledDecryptedBallots = spoiledTallyAndBallot.stream().map(e -> e.ballot).collect(Collectors.toList());
+    this.spoiledDecryptedTallies = spoiledTallyAndBallot.stream().map(e -> e.tally).collect(Collectors.toList());
     System.out.printf("Tally Decrypted%n");
 
     // Now, compare the results
@@ -339,7 +343,7 @@ public class TestEndToEndElectionIntegration {
             this.ciphertext_tally.build(),
             this.decryptedTally,
             this.coefficient_validation_sets,
-            this.spoiledBallots.values());
+            this.spoiledDecryptedBallots);
 
     System.out.printf("%n6. verify%n");
     this.verify_results(publisher);

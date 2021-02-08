@@ -28,7 +28,7 @@ public class TestDecryptionVerifier {
 
   @Example
   public void testSelectionSpoiledBallots() throws IOException {
-    boolean sevOk = validator.verify_spoiled_ballots();
+    boolean sevOk = validator.verify_spoiled_tallies(consumer.decryptedSpoiledTalliesProto());
     assertThat(sevOk).isTrue();
   }
 }

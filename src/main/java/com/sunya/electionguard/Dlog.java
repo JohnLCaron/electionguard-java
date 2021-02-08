@@ -13,6 +13,7 @@ import static com.sunya.electionguard.Group.*;
  * Performance will degrade if it's much larger.
  */
 public class Dlog {
+  private static final int MAX = 1000;
   private static final Cache<BigInteger, Integer> cache = CacheBuilder.newBuilder().build();
   static {
     cache.put(BigInteger.ONE, 0);
@@ -34,8 +35,9 @@ public class Dlog {
     while (!e.equals(dlog_max_elem)) {
       dlog_max_exp = dlog_max_exp + 1;
       // System.out.printf("dlog_max_exp %d%n", dlog_max_exp);
-      if (dlog_max_exp % 1000 == 0)
-        System.out.printf("HEY discrete_log_internal %d%n", dlog_max_exp);
+      if (dlog_max_exp > MAX) {
+        throw new RuntimeException(String.format("Discrete_log_internal exceeds max %d%n", dlog_max_exp));
+      }
       dlog_max_elem = mult_pi(G, dlog_max_elem);
       cache.put(dlog_max_elem, dlog_max_exp);
     }

@@ -276,7 +276,7 @@ public class Publisher {
     }
   }
 
-  /** Publishes the election record as proto. */
+  /** Publishes the ballot Encryptions part of election record as proto. */
   public void writeEncryptionResultsProto(
           ElectionDescription description,
           CiphertextElectionContext context,
@@ -303,8 +303,8 @@ public class Publisher {
     }
   }
 
-  /** Publishes the election record as proto. */
-  public void writeElectionRecordProto(
+  /** Publishes the ballot and tally Decryptions part election record as proto. */
+  public void writeDecryptionResultsProto(
           ElectionDescription description,
           CiphertextElectionContext context,
           ElectionConstants constants,
@@ -313,7 +313,7 @@ public class Publisher {
           PublishedCiphertextTally ciphertext_tally,
           PlaintextTally decryptedTally,
           @Nullable Iterable<Ballot.PlaintextBallot> spoiledBallots,
-          @Nullable  Iterable<PlaintextTally> spoiledDecryptedTallies) throws IOException {
+          @Nullable Iterable<PlaintextTally> spoiledDecryptedTallies) throws IOException {
 
     if (spoiledBallots != null) {
       // the spoiledBallots are written into their own file
@@ -346,6 +346,7 @@ public class Publisher {
     }
   }
 
+  /** Copy accepted ballots file from the inputDir to this election record. */
   public void copyAcceptedBallots(String inputDir) throws IOException {
     Path source = new Publisher(inputDir, false, false).ciphertextBallotProtoPath();
     Path dest = ciphertextBallotProtoPath();

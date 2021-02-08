@@ -106,7 +106,7 @@ public class VerifyElectionRecord {
     boolean bavt = bav.verify_tally_decryption();
 
     System.out.println("------------ [box 12] Correct Decryption of Spoiled Ballots ------------");
-    boolean dvsOk = dv.verify_spoiled_ballots(consumer.decryptedSpoiledTalliesProto());
+    boolean dvsOk = dv.verify_spoiled_tallies(consumer.decryptedSpoiledTalliesProto());
 
     PlaintextBallotVerifier pbv = new PlaintextBallotVerifier(electionRecord);
     boolean pbvOk = pbv.verify_plaintext_ballot();

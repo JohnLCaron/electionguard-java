@@ -54,7 +54,7 @@ public class PlaintextBallotVerifier {
     if (error) {
       System.out.printf(" ***12.B Spoiled PlaintextBallot Names Validation failed.%n");
     } else {
-      System.out.printf(" 12.B Spoiled PlaintextBallot Names Validatio success.%n");
+      System.out.printf(" 12.B Spoiled PlaintextBallot Names Validation success.%n");
     }
     return !error;
   }

@@ -29,6 +29,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
   CiphertextElectionContext context;
   Map<String, Integer> expected_plaintext_tally;
 
+  BallotBox ballot_box;
   PlaintextBallot fake_cast_ballot;
   PlaintextBallot fake_spoiled_ballot;
   CiphertextAcceptedBallot encrypted_fake_cast_ballot;
@@ -183,7 +184,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
 
     // configure the ballot box
     DataStore ballot_store = new DataStore();
-    BallotBox ballot_box = new BallotBox(this.metadata, this.context, ballot_store);
+    this.ballot_box = new BallotBox(this.metadata, this.context, ballot_store);
 
     // cast the ballots
     for (CiphertextBallot cballot : allECastBallots) {
@@ -199,7 +200,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
     ctally.batch_append(ballot_box.accepted());
 
     // now decrypt it
-    DecryptionMediator decryptionMediator = new DecryptionMediator(this.context, ctally);
+    DecryptionMediator decryptionMediator = new DecryptionMediator(this.context, ctally, this.ballot_box.getSpoiledBallots());
     this.guardians.forEach(decryptionMediator::announce);
     Optional<PlaintextTally> decrypted_tallies = decryptionMediator.decrypt_tally(false, null);
     assertThat(decrypted_tallies).isNotNull();
@@ -257,7 +258,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
     ctally.batch_append(ballot_box.accepted());
 
     // now decrypt it
-    DecryptionMediator decryptionMediator = new DecryptionMediator(this.context, ctally);
+    DecryptionMediator decryptionMediator = new DecryptionMediator(this.context, ctally, this.ballot_box.getSpoiledBallots());
     this.guardians.forEach(decryptionMediator::announce);
     Optional<PlaintextTally> decrypted_tallies = decryptionMediator.decrypt_tally(false, null);
     assertThat(decrypted_tallies).isNotNull();
@@ -309,7 +310,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
     ctally.batch_append(ballot_box.accepted());
 
     // now decrypt it
-    DecryptionMediator decryptionMediator = new DecryptionMediator(this.context, ctally);
+    DecryptionMediator decryptionMediator = new DecryptionMediator(this.context, ctally, this.ballot_box.getSpoiledBallots());
     this.guardians.forEach(decryptionMediator::announce);
     Optional<PlaintextTally> decrypted_tallies = decryptionMediator.decrypt_tally(false, null);
     assertThat(decrypted_tallies).isNotNull();
@@ -355,7 +356,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
     ctally.batch_append(ballot_box.accepted());
 
     // now decrypt it
-    DecryptionMediator decryptionMediator = new DecryptionMediator(this.context, ctally);
+    DecryptionMediator decryptionMediator = new DecryptionMediator(this.context, ctally, this.ballot_box.getSpoiledBallots());
     this.guardians.forEach(decryptionMediator::announce);
     Optional<PlaintextTally> decrypted_tallies = decryptionMediator.decrypt_tally(false, null);
     assertThat(decrypted_tallies).isNotNull();

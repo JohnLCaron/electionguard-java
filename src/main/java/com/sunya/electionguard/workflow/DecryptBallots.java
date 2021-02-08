@@ -6,8 +6,8 @@ import com.beust.jcommander.ParameterException;
 import com.google.common.base.Preconditions;
 import com.sunya.electionguard.Ballot;
 import com.sunya.electionguard.CiphertextTallyBuilder;
+import com.sunya.electionguard.DecryptWithShares;
 import com.sunya.electionguard.DecryptionMediator;
-import com.sunya.electionguard.DecryptionShare;
 import com.sunya.electionguard.Election;
 import com.sunya.electionguard.Guardian;
 import com.sunya.electionguard.PlaintextTally;
@@ -19,8 +19,8 @@ import com.sunya.electionguard.verifier.ElectionRecord;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
-import java.util.Map;
-import java.util.Optional;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /** Decrypt a collection of ballots. */
 public class DecryptBallots {
@@ -117,8 +117,8 @@ public class DecryptBallots {
   CiphertextTallyBuilder ciphertextTally;
   PublishedCiphertextTally publishedTally;
   PlaintextTally decryptedTally;
-  Iterable<Ballot.PlaintextBallot> spoiledDecryptedBallots;
-  Map<String, PlaintextTally> spoiledDecryptedTallies;
+  List<Ballot.PlaintextBallot> spoiledDecryptedBallots;
+  List<PlaintextTally> spoiledDecryptedTallies;
   int quorum;
   int numberOfGuardians;
 
@@ -147,16 +147,16 @@ public class DecryptBallots {
   void decryptTally() {
     System.out.printf("%nDecrypt tally%n");
 
-    // LOOK should use publishedTally? does it get mutated ???
-    DecryptionMediator mediator = new DecryptionMediator(electionRecord.context, this.ciphertextTally);
+    // LOOK should use publishedTally instead of mutable tally? does it get mutated ???
+    DecryptionMediator mediator = new DecryptionMediator(electionRecord.context, this.ciphertextTally, consumer.spoiledBallotsProto());
 
     int count = 0;
     for (Guardian guardian : this.guardians) {
       // LOOK not using TallyDecryptionShare?
       // LOOK test Guardians against whats in the electionRecord.
-      Optional<DecryptionShare.TallyDecryptionShare> decryption_share = mediator.announce(guardian);
+      boolean ok = mediator.announce(guardian);
+      Preconditions.checkArgument(ok);
       System.out.printf(" Guardian Present: %s%n", guardian.object_id);
-      Preconditions.checkArgument(decryption_share.isPresent());
       count++;
       if (count == this.quorum) {
         System.out.printf("Quorum of %d reached%n", this.quorum);
@@ -166,17 +166,16 @@ public class DecryptBallots {
 
     // Here's where the ciphertext Tally is decrypted.
     this.decryptedTally = mediator.decrypt_tally(false, null).orElseThrow();
-    // LOOK must be efficiencies in computing both tally and plaintext ballot at the same time?
-    this.spoiledDecryptedBallots = mediator.decrypt_spoiled_ballots(
-            consumer.spoiledBallotsProto(), electionRecord.context.crypto_extended_base_hash).orElseThrow();
-    this.spoiledDecryptedTallies = mediator.decrypt_spoiled_tallies(
-            consumer.spoiledBallotsProto(), electionRecord.context.crypto_extended_base_hash).orElseThrow();
+    List<DecryptWithShares.SpoiledTallyAndBallot> spoiledTallyAndBallot =
+            mediator.decrypt_spoiled_ballots().orElseThrow();
+    this.spoiledDecryptedBallots = spoiledTallyAndBallot.stream().map(e -> e.ballot).collect(Collectors.toList());
+    this.spoiledDecryptedTallies = spoiledTallyAndBallot.stream().map(e -> e.tally).collect(Collectors.toList());
     System.out.printf("Done decrypting tally%n%n%s%n", this.decryptedTally);
   }
 
   void publish(String inputDir, String publishDir) throws IOException {
     Publisher publisher = new Publisher(publishDir, true, false);
-    publisher.writeElectionRecordProto(
+    publisher.writeDecryptionResultsProto(
             this.electionRecord.election,
             this.electionRecord.context,
             this.electionRecord.constants,
@@ -185,7 +184,7 @@ public class DecryptBallots {
             this.publishedTally,
             this.decryptedTally,
             this.spoiledDecryptedBallots,
-            this.spoiledDecryptedTallies.values());
+            this.spoiledDecryptedTallies);
 
     publisher.copyAcceptedBallots(inputDir);
   }

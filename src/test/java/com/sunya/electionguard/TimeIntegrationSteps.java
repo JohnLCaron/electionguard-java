@@ -14,6 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
@@ -64,7 +65,8 @@ public class TimeIntegrationSteps {
   DecryptionMediator decryptionMediator;
   CiphertextTallyBuilder ciphertext_tally;
   PlaintextTally decryptedTally;
-  Map<String, Ballot.PlaintextBallot> spoiledBallots;
+  List<Ballot.PlaintextBallot> spoiledDecryptedBallots;
+  List<PlaintextTally> spoiledDecryptedTallies;
 
   public TimeIntegrationSteps(int nballots) throws IOException {
     Path tmp = Files.createTempDirectory(null);
@@ -259,18 +261,20 @@ public class TimeIntegrationSteps {
     this.ciphertext_tally.batch_append(this.ballot_box.accepted());
 
     // Configure the Decryption
-    this.decryptionMediator = new DecryptionMediator(this.context, this.ciphertext_tally);
+    this.decryptionMediator = new DecryptionMediator(this.context, this.ciphertext_tally, this.ballot_box.getSpoiledBallots());
 
     // Announce each guardian as present
     for (Guardian guardian : this.guardians) {
-      Optional<DecryptionShare.TallyDecryptionShare> decryption_share = this.decryptionMediator.announce(guardian);
       System.out.printf("Guardian Present: %s%n", guardian.object_id);
-      assertThat(decryption_share).isPresent();
+      assertThat(this.decryptionMediator.announce(guardian)).isTrue();
     }
 
     // Here's where the ciphertext Tally is decrypted.
     this.decryptedTally = this.decryptionMediator.decrypt_tally(false, null).orElseThrow();
-    this.spoiledBallots = this.decryptionMediator.spoiled_ballots().orElseThrow();
+    List<DecryptWithShares.SpoiledTallyAndBallot> spoiledTallyAndBallot =
+            this.decryptionMediator.decrypt_spoiled_ballots().orElseThrow();
+    this.spoiledDecryptedBallots = spoiledTallyAndBallot.stream().map(e -> e.ballot).collect(Collectors.toList());
+    this.spoiledDecryptedTallies = spoiledTallyAndBallot.stream().map(e -> e.tally).collect(Collectors.toList());
     System.out.printf("Tally Decrypted%n");
 
     // Now, compare the results
@@ -309,26 +313,16 @@ public class TimeIntegrationSteps {
     }
 
     // Compare the expected values for each spoiled ballot
-    for (Map.Entry<String, CiphertextAcceptedBallot> entry : this.ciphertext_tally.spoiled_ballots.entrySet()) {
-      String ballot_id = entry.getKey();
-      CiphertextAcceptedBallot accepted_ballot = entry.getValue();
-      if (accepted_ballot.state == BallotBoxState.SPOILED) {
-        for (PlaintextBallot plaintext_ballot : this.plaintext_ballots) {
-          if (ballot_id.equals(plaintext_ballot.object_id)) {
-            for (PlaintextBallotContest contest : plaintext_ballot.contests) {
-              for (PlaintextBallotSelection selection : contest.ballot_selections) {
-                int expected = selection.to_int();
-                PlaintextTally.PlaintextTallySelection decrypted_selection = (
-                        this.decryptedTally.spoiledBallotTally.get(ballot_id).get(contest.contest_id)
-                                .selections().get(selection.selection_id));
-                assertThat(expected).isEqualTo(decrypted_selection.tally());
-              }
-            }
-          }
-        }
-      }
+    for (CiphertextAcceptedBallot spoiled_ballot : this.ballot_box.getSpoiledBallots()) {
+      assertThat(spoiled_ballot.state).isEqualTo(BallotBoxState.SPOILED);
+      String ballot_id = spoiled_ballot.object_id;
+      PlaintextBallot expected_ballot = this.plaintext_ballots.stream().filter(b -> ballot_id.equals(b.object_id)).findFirst().orElseThrow();
+      PlaintextBallot actual_ballot = this.spoiledDecryptedBallots.stream().filter(b -> ballot_id.equals(b.object_id)).findFirst().orElseThrow();
+      assertThat(actual_ballot).isEqualTo(expected_ballot);
     }
   }
+
+
 
   // Publish and verify steps of the election
   Publisher step_5_publish_and_verify() throws IOException {
@@ -343,7 +337,7 @@ public class TimeIntegrationSteps {
             this.ciphertext_tally.build(),
             this.decryptedTally,
             this.coefficient_validation_sets,
-            this.spoiledBallots.values());
+            this.spoiledDecryptedBallots);
 
     System.out.printf("%n5.5. verify%n");
     this.verify_results_json(publisher);
@@ -402,7 +396,7 @@ public class TimeIntegrationSteps {
   Publisher step_6_publish_election_record_proto() throws IOException {
     System.out.printf("%n6. publish election record as proto%n");
     Publisher publisher = new Publisher("/home/snake/tmp/TimeIntegrationStepsProto", true, false);
-    publisher.writeElectionRecordProto(
+    publisher.writeDecryptionResultsProto(
             this.description,
             this.context,
             this.constants,
@@ -410,7 +404,8 @@ public class TimeIntegrationSteps {
             this.coefficient_validation_sets,
             this.ciphertext_tally.build(),
             this.decryptedTally,
-            this.spoiledBallots.values());
+            this.spoiledDecryptedBallots,
+            this.spoiledDecryptedTallies);
 
     System.out.printf("%n6.5. verify%n");
     this.verify_results_proto(publisher);

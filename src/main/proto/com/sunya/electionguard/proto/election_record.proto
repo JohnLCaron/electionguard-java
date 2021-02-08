@@ -19,7 +19,7 @@ message ElectionRecord {
   repeated EncryptionDevice device = 4;
   repeated CoefficientValidationSet guardian_coefficients = 5;
   PublishedCiphertextTally ciphertext_tally = 6;
-  PlaintextTally decrypted_tally = 7; // LOOK move spoiled_ballots
+  PlaintextTally decrypted_tally = 7;
 }
 
 // The device that does the encryption.

@@ -50,13 +50,12 @@ public class DecryptionVerifier {
    * 12. An election verifier should confirm the correct decryption of each spoiled ballot using the same
    * process that was used to confirm the election tallies.
    */
-  boolean verify_spoiled_ballots(CloseableIterable<PlaintextTally> tallies) throws IOException {
+  boolean verify_spoiled_tallies(CloseableIterable<PlaintextTally> tallies) throws IOException {
     boolean error = false;
-
     try (CloseableIterator<PlaintextTally> iter = tallies.iterator()) {
       while (iter.hasNext()) {
         PlaintextTally spoiled_tally = iter.next();
-        error |= this.make_all_contest_verification(spoiled_tally.object_id, spoiled_tally.contests);
+        error |= !this.make_all_contest_verification(spoiled_tally.object_id, spoiled_tally.contests);
       }
     }
     if (error) {

@@ -43,7 +43,7 @@ public class TestElectionRecordProtoRoundtrip {
   public void testElectionRecordPublishRoundtrip() throws IOException {
     String dest = "/home/snake/tmp/electionguard/publishElectionRecordProtoRoundtrip/";
     Publisher publisher = new Publisher(dest, true, false);
-    publisher.writeElectionRecordProto(
+    publisher.writeDecryptionResultsProto(
             consumer.election(),
             consumer.context(),
             consumer.constants(),
@@ -51,7 +51,7 @@ public class TestElectionRecordProtoRoundtrip {
             consumer.guardianCoefficients(),
             consumer.ciphertextTally(),
             consumer.decryptedTally(),
-            null);
+            null, null);
 
     ElectionRecord roundtrip = ElectionRecordFromProto.read(publisher.electionRecordProtoPath().toFile().getAbsolutePath());
     assertThat(roundtrip.election).isEqualTo(consumer.election());
