@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Optional;
 
-import static com.sunya.electionguard.Group.TWO_MOD_P;
 import static com.sunya.electionguard.KeyCeremony.CoefficientValidationSet;
 import static com.google.common.truth.Truth.assertThat;
 
@@ -54,8 +53,7 @@ public class TestJsonRoundtrip {
     String outputFile = file.getAbsolutePath();
 
     // original
-    // String object_id, ElementModQ description_hash, Map<String, CiphertextTallySelection> tally_selections
-    PlaintextTally org = new PlaintextTally("testTally", new HashMap<>(), new HashMap<>(), new HashMap<>(), new ArrayList<>());
+    PlaintextTally org = new PlaintextTally("testTally", new HashMap<>(), new HashMap<>(), new ArrayList<>());
     // write json
     ConvertToJson.write(org, file.toPath());
     // read it back

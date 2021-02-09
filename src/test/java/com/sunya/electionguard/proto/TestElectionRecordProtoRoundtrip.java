@@ -24,9 +24,8 @@ public class TestElectionRecordProtoRoundtrip {
             consumer.election(),
             consumer.context(),
             consumer.constants(),
-            consumer.devices(),
-            consumer.ballots(),
             consumer.guardianCoefficients(),
+            consumer.devices(),
             consumer.ciphertextTally(),
             consumer.decryptedTally());
 
@@ -35,7 +34,6 @@ public class TestElectionRecordProtoRoundtrip {
     assertThat(roundtrip.context).isEqualTo(consumer.context());
     assertThat(roundtrip.constants).isEqualTo(consumer.constants());
     assertThat(roundtrip.devices).isEqualTo(consumer.devices());
-    assertThat(roundtrip.castBallots).isEqualTo(consumer.ballots());
     assertThat(roundtrip.ciphertextTally).isEqualTo(consumer.ciphertextTally());
     assertThat(roundtrip.decryptedTally).isEqualTo(consumer.decryptedTally());
     assertThat(roundtrip.guardianCoefficients).isEqualTo(consumer.guardianCoefficients());
@@ -45,22 +43,22 @@ public class TestElectionRecordProtoRoundtrip {
   public void testElectionRecordPublishRoundtrip() throws IOException {
     String dest = "/home/snake/tmp/electionguard/publishElectionRecordProtoRoundtrip/";
     Publisher publisher = new Publisher(dest, true, false);
-    publisher.writeElectionRecordProto(
+    publisher.writeDecryptionResultsProto(
             consumer.election(),
             consumer.context(),
             consumer.constants(),
             consumer.devices(),
-            consumer.ballots(),
             consumer.guardianCoefficients(),
             consumer.ciphertextTally(),
-            consumer.decryptedTally());
+            consumer.decryptedTally(),
+            consumer.spoiledBallots(),
+            consumer.spoiledTallies());
 
-    ElectionRecord roundtrip = ElectionRecordFromProto.read(publisher.electionRecordProtoFile().toFile().getAbsolutePath());
+    ElectionRecord roundtrip = ElectionRecordFromProto.read(publisher.electionRecordProtoPath().toFile().getAbsolutePath());
     assertThat(roundtrip.election).isEqualTo(consumer.election());
     assertThat(roundtrip.context).isEqualTo(consumer.context());
     assertThat(roundtrip.constants).isEqualTo(consumer.constants());
     assertThat(roundtrip.devices).isEqualTo(consumer.devices());
-    assertThat(roundtrip.castBallots).isEqualTo(consumer.ballots());
     assertThat(roundtrip.ciphertextTally).isEqualTo(consumer.ciphertextTally());
     assertThat(roundtrip.decryptedTally).isEqualTo(consumer.decryptedTally());
     assertThat(roundtrip.guardianCoefficients).isEqualTo(consumer.guardianCoefficients());

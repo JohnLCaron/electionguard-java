@@ -43,8 +43,8 @@ public class SchnorrProof extends Proof {
     boolean in_bounds_h = h.is_in_bounds();
     boolean in_bounds_u = u.is_in_bounds();
 
-    // LOOK changed to follow validation spec 2.A. see issue #278
-    boolean valid_2A = this.challenge.equals(Hash.hash_elems(crypto_base_hash, k, h));
+    // LOOK changed validation spec 2.A. see issue #278
+    boolean valid_2A = this.challenge.equals(Hash.hash_elems(k, h));
     boolean valid_2B = g_pow_p(u).equals(Group.mult_p(h, Group.pow_p(k, this.challenge)));
 
     boolean success = valid_public_key && in_bounds_h && in_bounds_u && valid_2A && valid_2B;
@@ -71,6 +71,16 @@ public class SchnorrProof extends Proof {
     return Objects.hash(super.hashCode(), public_key, commitment, challenge, response);
   }
 
+  @Override
+  public String toString() {
+    return "SchnorrProof{" +
+            "public_key=" + public_key +
+            ", commitment=" + commitment +
+            ", challenge=" + challenge +
+            ", response=" + response +
+            "} " + super.toString();
+  }
+
   /**
    * Given an ElGamal keypair, generates a proof that the prover knows the secret key without revealing it.
    * @param keypair An ElGamal keypair.
@@ -79,10 +89,12 @@ public class SchnorrProof extends Proof {
   static SchnorrProof make_schnorr_proof(ElGamal.KeyPair keypair, ElementModQ nonce, ElementModQ crypto_base_hash) {
     ElementModP k = keypair.public_key;
     ElementModP h = g_pow_p(nonce);
-    // LOOK changed to follow validation spec 2.A. see issue #278
-    ElementModQ c = Hash.hash_elems(crypto_base_hash, k, h);
+    // LOOK changed validation spec 2.A. see issue #278
+    ElementModQ c = Hash.hash_elems(k, h);
     ElementModQ u = a_plus_bc_q(nonce, keypair.secret_key, c);
-
     return new SchnorrProof(k, h, c, u);
   }
+
+  static boolean first = true;
+  static ElementModQ first_crypto_base_hash;
 }

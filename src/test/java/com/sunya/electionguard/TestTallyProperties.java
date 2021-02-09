@@ -24,20 +24,19 @@ public class TestTallyProperties extends TestProperties {
     System.out.printf("%n test_tally_cast_ballots_accumulates_valid_tally expected %s%n", plaintext_tallies);
 
     // encrypt each ballot
-    DataStore store = new DataStore();
+    BallotBox store = new BallotBox(everything.metadata, everything.context, new DataStore());
     Group.ElementModQ seed_hash = new Encrypt.EncryptionDevice("Location").get_hash();
     for (PlaintextBallot ballot : everything.ballots) {
       Optional<CiphertextBallot> encrypted_ballotO = Encrypt.encrypt_ballot(
-              ballot, everything.internal_election_description, everything.context, seed_hash, Optional.empty(), true);
+              ballot, everything.metadata, everything.context, seed_hash, Optional.empty(), true);
       assertThat(encrypted_ballotO).isPresent();
       CiphertextBallot encrypted_ballot = encrypted_ballotO.get();
       seed_hash = encrypted_ballot.tracking_hash;
-      // add to the ballot store
-      store.put(encrypted_ballot.object_id, from_ciphertext_ballot(encrypted_ballot, BallotBoxState.CAST));
+      store.accept_ballot(encrypted_ballot, BallotBoxState.CAST);
     }
 
-    CiphertextTallyBuilder result = new CiphertextTallyBuilder("whatever", everything.internal_election_description, everything.context);
-    result.tally_ballots(store);
+    CiphertextTallyBuilder result = new CiphertextTallyBuilder("whatever", everything.metadata, everything.context);
+    result.batch_append(store.accepted());
 
     Map<String, Integer> decrypted_tallies = this._decrypt_with_secret(result, everything.secret_key);
     System.out.printf("%n test_tally_cast_ballots_accumulates_valid_tally actual %s%n", decrypted_tallies);
@@ -53,21 +52,20 @@ public class TestTallyProperties extends TestProperties {
     System.out.printf("%n test_tally_spoiled_ballots_accumulates_valid_tally expected %s%n", plaintext_tallies);
 
     // encrypt each ballot
-    DataStore store = new DataStore();
+    BallotBox store = new BallotBox(everything.metadata, everything.context, new DataStore());
     Group.ElementModQ seed_hash = new Encrypt.EncryptionDevice("Location").get_hash();
     for (PlaintextBallot ballot : everything.ballots) {
       Optional<CiphertextBallot> encrypted_ballotO = Encrypt.encrypt_ballot(
-              ballot, everything.internal_election_description, everything.context, seed_hash, Optional.empty(), true);
+              ballot, everything.metadata, everything.context, seed_hash, Optional.empty(), true);
       assertThat(encrypted_ballotO).isPresent();
       CiphertextBallot encrypted_ballot = encrypted_ballotO.get();
       seed_hash = encrypted_ballot.tracking_hash;
       // add to the ballot store
-      store.put(encrypted_ballot.object_id, from_ciphertext_ballot(encrypted_ballot, BallotBoxState.SPOILED));
+      store.accept_ballot(encrypted_ballot, BallotBoxState.SPOILED);
     }
 
-
-    CiphertextTallyBuilder result = new CiphertextTallyBuilder("whatever", everything.internal_election_description, everything.context);
-    result.tally_ballots(store);
+    CiphertextTallyBuilder result = new CiphertextTallyBuilder("whatever", everything.metadata, everything.context);
+    result.batch_append(store.accepted());
 
     Map<String, Integer> decrypted_tallies = this._decrypt_with_secret(result, everything.secret_key);
     System.out.printf("%n test_tally_spoiled_ballots_accumulates_valid_tally decrypted_tallies %s%n%n", decrypted_tallies);
@@ -78,7 +76,6 @@ public class TestTallyProperties extends TestProperties {
     for (Integer value : decrypted_tallies.values()) {
       assertThat(value).isEqualTo(0);
     }
-    assertThat(result.spoiled_ballots.size()).isEqualTo(everything.ballots.size());
   }
 
   // LOOK this assumes mutability, must be rewritten
@@ -93,7 +90,7 @@ public class TestTallyProperties extends TestProperties {
     int count = 0;
     for (PlaintextBallot ballot : everything.ballots) {
       Optional<CiphertextBallot> encrypted_ballotO = Encrypt.encrypt_ballot(
-              ballot, everything.internal_election_description, everything.context, seed_hash, Optional.empty(), true);
+              ballot, everything.metadata, everything.context, seed_hash, Optional.empty(), true);
       assertThat(encrypted_ballotO).isPresent();
       CiphertextBallot encrypted_ballot = encrypted_ballotO.get();
       seed_hash = encrypted_ballot.tracking_hash;
@@ -105,44 +102,43 @@ public class TestTallyProperties extends TestProperties {
       count++;
     }
 
-    CiphertextTallyBuilder tally = new CiphertextTallyBuilder("my-tally", everything.internal_election_description, everything.context);
+    CiphertextTallyBuilder tally = new CiphertextTallyBuilder("my-tally", everything.metadata, everything.context);
 
-    CiphertextAcceptedBallot first_ballot = acceptedBallots[0];
-    assertThat(first_ballot.state).isEqualTo(BallotBoxState.UNKNOWN);
+    CiphertextAcceptedBallot unknownBallot = acceptedBallots[0];
+    assertThat(unknownBallot.state).isEqualTo(BallotBoxState.UNKNOWN);
 
     //  verify an UNKNOWN state ballot fails
-    assertThat(tally.append(first_ballot)).isFalse();
+    assertThat(tally.append(unknownBallot)).isFalse();
 
     //  cast a ballot
-    CiphertextAcceptedBallot second_ballot = acceptedBallots[1];
-    assertThat(second_ballot.state).isEqualTo(BallotBoxState.CAST);
-    assertThat(tally.append(second_ballot)).isTrue();
+    CiphertextAcceptedBallot castBallot = acceptedBallots[1];
+    assertThat(castBallot.state).isEqualTo(BallotBoxState.CAST);
+    assertThat(tally.append(castBallot)).isTrue();
     //  verify a cast ballot cannot be added twice
-    assertThat(tally.append(second_ballot)).isFalse();
+    assertThat(tally.append(castBallot)).isFalse();
 
     //  spoil a ballot
-    CiphertextAcceptedBallot third_ballot = acceptedBallots[2];
-    assertThat(third_ballot.state).isEqualTo(BallotBoxState.SPOILED);
-    assertThat(tally.append(third_ballot)).isTrue();
+    CiphertextAcceptedBallot spoiledBallot = acceptedBallots[2];
+    assertThat(spoiledBallot.state).isEqualTo(BallotBoxState.SPOILED);
+    assertThat(tally.append(spoiledBallot)).isTrue();
     //  verify a spoiled ballot cannot be added twice
-    assertThat(tally.append(third_ballot)).isFalse();
+    assertThat(tally.append(spoiledBallot)).isFalse();
 
-    // LOOK tests that use the same ballot id with different state
-
-    /*  verify an already spoiled ballot cannot be cast
-    first_ballot.state = BallotBoxState.CAST;
-    assertThat(tally.append(first_ballot)).isFalse();
+    //// tests that use the same ballot id with different state
+    // verify an already spoiled ballot cannot be cast
+    CiphertextAcceptedBallot again = Ballot.from_ciphertext_ballot(spoiledBallot, BallotBoxState.CAST);
+    assertThat(tally.append(again)).isFalse();
 
     //  verify an already cast ballot cannot be spoiled
-    first_ballot.state = BallotBoxState.SPOILED;
-    assertThat(tally.append(first_ballot)).isFalse(); */
+    CiphertextAcceptedBallot again2 = Ballot.from_ciphertext_ballot(castBallot, BallotBoxState.SPOILED);
+    assertThat(tally.append(again2)).isFalse();
   }
 
 
   /** Demonstrates how to decrypt a tally with a known secret key. */
   private Map<String, Integer> _decrypt_with_secret(CiphertextTallyBuilder tally, Group.ElementModQ secret_key) {
     Map<String, Integer> plaintext_selections = new HashMap<>();
-    for (CiphertextTallyBuilder.CiphertextTallyContestBuilder contest : tally.cast.values()) {
+    for (CiphertextTallyBuilder.CiphertextTallyContestBuilder contest : tally.contests.values()) {
       for (Map.Entry<String, CiphertextTallyBuilder.CiphertextTallySelectionBuilder> entry : contest.tally_selections.entrySet()) {
         Integer plaintext_tally = entry.getValue().ciphertext().decrypt(secret_key);
         plaintext_selections.put(entry.getKey(), plaintext_tally);

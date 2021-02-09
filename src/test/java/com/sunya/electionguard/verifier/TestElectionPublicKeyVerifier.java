@@ -19,7 +19,7 @@ public class TestElectionPublicKeyVerifier {
 
     // set up
     consumer = new Consumer(topdir);
-    validator = new ElectionPublicKeyVerifier(consumer.getElectionRecord());
+    validator = new ElectionPublicKeyVerifier(consumer.readElectionRecordJson());
   }
 
   @Example

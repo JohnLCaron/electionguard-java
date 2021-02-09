@@ -13,7 +13,7 @@ import static com.sunya.electionguard.Group.*;
 public class TestDlogProperties {
 
   @Property
-  public void test_cached(@ForAll @IntRange(min = 0, max = 10000) int exp) {
+  public void test_cached(@ForAll @IntRange(min = 0, max = 1000) int exp) {
     BigInteger bigExp = BigInteger.valueOf(exp);
     ElementModQ plaintext = int_to_q(bigExp).orElseThrow(RuntimeException::new);
     ElementModP exp_plaintext = g_pow_p(plaintext); // g^e mod p.

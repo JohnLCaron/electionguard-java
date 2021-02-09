@@ -19,7 +19,7 @@ public class TestBallotChainingVerifier {
 
     // set up
     consumer = new Consumer(topdir);
-    validator = new BallotChainingVerifier(consumer.getElectionRecord());
+    validator = new BallotChainingVerifier(consumer.readElectionRecordJson());
   }
 
   @Example

@@ -10,6 +10,8 @@ import com.sunya.electionguard.Group;
 import com.sunya.electionguard.KeyCeremony;
 import com.sunya.electionguard.PublishedCiphertextTally;
 import com.sunya.electionguard.PlaintextTally;
+import com.sunya.electionguard.publish.CloseableIterable;
+import com.sunya.electionguard.publish.CloseableIterableAdapter;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
@@ -22,29 +24,36 @@ public class ElectionRecord {
   public final Election.ElectionConstants constants;
   public final Election.CiphertextElectionContext context;
   public final Election.ElectionDescription election;
-  public final ImmutableList<Encrypt.EncryptionDevice> devices;
-  public final ImmutableList<Ballot.CiphertextAcceptedBallot> castBallots;
   public final ImmutableList<KeyCeremony.CoefficientValidationSet> guardianCoefficients;
+  public final ImmutableList<Encrypt.EncryptionDevice> devices;
+  public final CloseableIterable<Ballot.CiphertextAcceptedBallot> acceptedBallots; // LOOK all ballots, not just cast!
   @Nullable public final PublishedCiphertextTally ciphertextTally;
-  @Nullable  public final PlaintextTally decryptedTally;
+  @Nullable public final PlaintextTally decryptedTally;
+  public final CloseableIterable<Ballot.PlaintextBallot> spoiledBallots;
+  public final CloseableIterable<PlaintextTally> spoiledTallies;
+
   private final ImmutableMap<String, Integer> contest_vote_limits;
 
   public ElectionRecord(Election.ElectionConstants constants,
                         Election.CiphertextElectionContext context,
                         Election.ElectionDescription election,
-                        List<Encrypt.EncryptionDevice> devices,
-                        List<Ballot.CiphertextAcceptedBallot> castBallots,
                         List<KeyCeremony.CoefficientValidationSet> guardianCoefficients,
+                        @Nullable List<Encrypt.EncryptionDevice> devices,
                         @Nullable PublishedCiphertextTally ciphertextTally,
-                        @Nullable PlaintextTally decryptedTally) {
+                        @Nullable PlaintextTally decryptedTally,
+                        @Nullable CloseableIterable<Ballot.CiphertextAcceptedBallot> castBallots,
+                        @Nullable CloseableIterable<Ballot.PlaintextBallot> spoiledBallots,
+                        @Nullable CloseableIterable<PlaintextTally> spoiledTallies) {
     this.constants = constants;
     this.context = context;
     this.election = election;
-    this.devices = ImmutableList.copyOf(devices);
-    this.castBallots = ImmutableList.copyOf(castBallots);
     this.guardianCoefficients = ImmutableList.copyOf(guardianCoefficients);
+    this.devices = devices == null ? ImmutableList.of() : ImmutableList.copyOf(devices);
+    this.acceptedBallots = castBallots == null ? CloseableIterableAdapter.empty() : castBallots;
     this.ciphertextTally = ciphertextTally;
     this.decryptedTally = decryptedTally;
+    this.spoiledBallots = spoiledBallots == null ? CloseableIterableAdapter.empty() : spoiledBallots;
+    this.spoiledTallies = spoiledTallies == null ? CloseableIterableAdapter.empty() : spoiledTallies;
 
     int num_guardians = context.number_of_guardians;
     if (num_guardians != this.guardianCoefficients.size()) {
@@ -60,6 +69,23 @@ public class ElectionRecord {
                       String.format("Contest description %s does not have number of allowed votes", contest.object_id))));
     }
     contest_vote_limits = builder.build();
+  }
+
+  public ElectionRecord setBallots(CloseableIterable<Ballot.CiphertextAcceptedBallot> acceptedBallots,
+                                   CloseableIterable<Ballot.PlaintextBallot> spoiledBallots,
+                                   CloseableIterable<PlaintextTally> spoiledBallotTallies
+                                   ) {
+    return new ElectionRecord(this.constants,
+            this.context,
+            this.election,
+            this.guardianCoefficients,
+            this.devices,
+            this.ciphertextTally,
+            this.decryptedTally,
+            acceptedBallots,
+            spoiledBallots,
+            spoiledBallotTallies
+            );
   }
 
   public BigInteger generator() {
@@ -98,9 +124,7 @@ public class ElectionRecord {
     return this.context.elgamal_public_key;
   }
 
-  /**
-   * return map of guardian_id, public_key.
-   */
+  /** return map of guardian_id, public_key. */
   public ImmutableMap<String, Group.ElementModP> public_keys_of_all_guardians() {
     ImmutableMap.Builder<String, Group.ElementModP> result = ImmutableMap.builder();
     for (KeyCeremony.CoefficientValidationSet coeff : this.guardianCoefficients) {
@@ -109,10 +133,6 @@ public class ElectionRecord {
       result.put(coeff.owner_id(), cc.get(0));
     }
     return result.build();
-  }
-
-  public Election.ElectionDescription description() {
-    return this.election;
   }
 
   public int quorum() {
@@ -132,7 +152,7 @@ public class ElectionRecord {
             context.equals(that.context) &&
             election.equals(that.election) &&
             devices.equals(that.devices) &&
-            castBallots.equals(that.castBallots) &&
+            acceptedBallots.equals(that.acceptedBallots) &&
             guardianCoefficients.equals(that.guardianCoefficients) &&
             Objects.equals(ciphertextTally, that.ciphertextTally) &&
             Objects.equals(decryptedTally, that.decryptedTally) &&
@@ -141,7 +161,7 @@ public class ElectionRecord {
 
   @Override
   public int hashCode() {
-    return Objects.hash(constants, context, election, devices, castBallots, guardianCoefficients, ciphertextTally,
+    return Objects.hash(constants, context, election, devices, acceptedBallots, guardianCoefficients, ciphertextTally,
             decryptedTally, contest_vote_limits);
   }
 }

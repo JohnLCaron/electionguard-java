@@ -15,6 +15,7 @@ import com.sunya.electionguard.proto.KeyCeremonyProto;
 import com.sunya.electionguard.proto.KeyCeremonyToProto;
 import com.sunya.electionguard.publish.Consumer;
 import com.sunya.electionguard.publish.Publisher;
+import com.sunya.electionguard.verifier.ElectionRecord;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
@@ -84,7 +85,7 @@ public class PerformKeyCeremony {
     Consumer consumer = new Consumer(cmdLine.inputDir);
     Election.ElectionDescription election;
     if (cmdLine.isProto) {
-      election = ElectionRecordFromProto.read(consumer.electionRecordProtoFile().toString()).election;
+      election = consumer.readElectionRecordProto().election;
     } else {
       election = consumer.election();
     }

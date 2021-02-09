@@ -35,7 +35,7 @@ public class TestEncryptHypothesisProperties extends TestProperties {
           @ForAll("elections_and_ballots") ElectionTestHelper.EverythingTuple everything,
           @ForAll("elements_mod_q") Group.ElementModQ nonce) {
 
-    Election.InternalElectionDescription metadata = everything.internal_election_description;
+    Election.InternalElectionDescription metadata = everything.metadata;
     List<Ballot.PlaintextBallot> ballots = everything.ballots;
     Group.ElementModQ secret_key = everything.secret_key;
     Election.CiphertextElectionContext context = everything.context;

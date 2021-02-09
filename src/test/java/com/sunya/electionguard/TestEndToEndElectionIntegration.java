@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.google.common.truth.Truth.assertWithMessage;
 import static com.sunya.electionguard.Ballot.*;
@@ -35,7 +36,7 @@ public class TestEndToEndElectionIntegration {
   public void setUp() throws IOException {
     Path tmp = Files.createTempDirectory(null);
     tmp.toFile().deleteOnExit();
-    outputDir = "/home/snake/tmp/publishEndToEnd";
+    outputDir = "/home/snake/tmp/electionguard/publishEndToEnd";
     // outputDir = tmp.toAbsolutePath().toString();
     System.out.printf("=========== outputDir = %s%n", outputDir);
   }
@@ -64,9 +65,11 @@ public class TestEndToEndElectionIntegration {
   BallotBox ballot_box;
 
   // Step 4 - Decrypt Tally
+  DecryptionMediator decrypter;
   CiphertextTallyBuilder ciphertext_tally;
   PlaintextTally decryptedTally;
-  DecryptionMediator decrypter;
+  List<Ballot.PlaintextBallot> spoiledDecryptedBallots;
+  List<PlaintextTally> spoiledDecryptedTallies;
 
   // Execute the simplified end-to-end test demonstrating each component of the system.
   @Example
@@ -127,7 +130,7 @@ public class TestEndToEndElectionIntegration {
     Group.ElementModQ crypto_base_hash = Election.make_crypto_base_hash(NUMBER_OF_GUARDIANS, QUORUM, description);
     // Setup Guardians
     for (int i = 1; i <= NUMBER_OF_GUARDIANS; i++) {
-      this.guardianBuilders.add(GuardianBuilder.createForTesting("guardian_" + i, i, NUMBER_OF_GUARDIANS, QUORUM, crypto_base_hash));
+      this.guardianBuilders.add(GuardianBuilder.createForTesting("guardian_" + i, i, NUMBER_OF_GUARDIANS, QUORUM, crypto_base_hash, null));
     }
 
     // Setup Mediator
@@ -169,7 +172,7 @@ public class TestEndToEndElectionIntegration {
     // Save Validation Keys
     for (GuardianBuilder guardianBuilder : this.guardianBuilders) {
       Guardian guardian = guardianBuilder.build();
-      this.guardianBuilders.add(guardianBuilder);
+      this.guardians.add(guardian);
       this.coefficient_validation_sets.add(guardian.share_coefficient_validation_set());
     }
 
@@ -179,6 +182,8 @@ public class TestEndToEndElectionIntegration {
     this.metadata = tuple.metadata;
     this.context = tuple.context;
     this.constants = new ElectionConstants();
+
+    assertThat(this.context.crypto_base_hash).isEqualTo(crypto_base_hash);
   }
 
   // Move on to encrypting ballots
@@ -233,22 +238,15 @@ public class TestEndToEndElectionIntegration {
     System.out.printf("%n4. Homomorphically Accumulate and decrypt tally%n");
     // Generate a Homomorphically Accumulated Tally of the ballots
     this.ciphertext_tally = new CiphertextTallyBuilder("tally_object_id", this.metadata, this.context);
-    this.ciphertext_tally.tally_ballots(this.ballot_store);
-
-    System.out.printf("%n4. cast %d spoiled %d total %d%n",
-            this.ciphertext_tally.count(),
-            this.ciphertext_tally.spoiled_ballots.size(),
-            this.ciphertext_tally.len());
-
+    this.ciphertext_tally.batch_append(this.ballot_box.accepted());
     // Configure the Decryption
-    this.decrypter = new DecryptionMediator(this.metadata, this.context, this.ciphertext_tally);
+    this.decrypter = new DecryptionMediator(this.context, this.ciphertext_tally, this.ballot_box.getSpoiledBallots());
 
     // Announce each guardian as present
     int count = 0;
     for (Guardian guardian : this.guardians) {
-      Optional<DecryptionShare.TallyDecryptionShare> decryption_share = this.decrypter.announce(guardian);
       System.out.printf("Guardian Present: %s%n", guardian.object_id);
-      assertThat(decryption_share).isPresent();
+      assertThat(this.decrypter.announce(guardian)).isTrue();
       count++;
       if (count == QUORUM) {
         System.out.printf(" Only %d Guardians are available%n", count);
@@ -257,7 +255,11 @@ public class TestEndToEndElectionIntegration {
     }
 
     // Here's where the ciphertext Tally is decrypted.
-    this.decryptedTally = this.decrypter.getDecryptedTally(false, null).orElseThrow();
+    this.decryptedTally = this.decrypter.decrypt_tally(false, null).orElseThrow();
+    List<DecryptWithShares.SpoiledTallyAndBallot> spoiledTallyAndBallot =
+            this.decrypter.decrypt_spoiled_ballots().orElseThrow();
+    this.spoiledDecryptedBallots = spoiledTallyAndBallot.stream().map(e -> e.ballot).collect(Collectors.toList());
+    this.spoiledDecryptedTallies = spoiledTallyAndBallot.stream().map(e -> e.tally).collect(Collectors.toList());
     System.out.printf("Tally Decrypted%n");
 
     // Now, compare the results
@@ -299,7 +301,7 @@ public class TestEndToEndElectionIntegration {
       System.out.printf("----------------------------------%n");
     }
 
-    // Compare the expected values for each spoiled ballot
+    /* LOOK Compare the expected values for each spoiled ballot
     for (Map.Entry<String, Ballot.CiphertextAcceptedBallot> entry : this.ciphertext_tally.spoiled_ballots.entrySet()) {
       String ballot_id = entry.getKey();
       Ballot.CiphertextAcceptedBallot accepted_ballot = entry.getValue();
@@ -312,7 +314,7 @@ public class TestEndToEndElectionIntegration {
               for (PlaintextBallotSelection selection : contest.ballot_selections) {
                 int expected = selection.to_int();
                 PlaintextTally.PlaintextTallySelection decrypted_selection = (
-                        this.decryptedTally.spoiled_ballots.get(ballot_id).get(contest.contest_id)
+                        this.decryptedTally.spoiledBallotTally.get(ballot_id).get(contest.contest_id)
                                 .selections().get(selection.selection_id));
                 System.out.printf("   - Selection: %s expected: %d, actual: %d%n",
                         selection.selection_id, expected, decrypted_selection.tally());
@@ -322,7 +324,7 @@ public class TestEndToEndElectionIntegration {
           }
         }
       }
-    }
+    } */
   }
 
   // Publish and verify steps of the election
@@ -335,10 +337,11 @@ public class TestEndToEndElectionIntegration {
             this.constants,
             ImmutableList.of(this.device),
             this.ballot_box.getAllBallots(),
-            // this.ciphertext_tally.spoiled_ballots.values(),
             this.ciphertext_tally.build(),
             this.decryptedTally,
-            this.coefficient_validation_sets);
+            this.coefficient_validation_sets,
+            this.spoiledDecryptedBallots,
+            this.spoiledDecryptedTallies);
 
     System.out.printf("%n6. verify%n");
     this.verify_results(publisher);
@@ -347,26 +350,26 @@ public class TestEndToEndElectionIntegration {
   // Verify results of election
   void verify_results(Publisher publisher) throws IOException {
     ElectionDescriptionFromJson builder = new ElectionDescriptionFromJson(
-            publisher.electionFile().toString());
+            publisher.electionPath().toString());
     ElectionDescription description_from_file = builder.build();
     assertThat(description_from_file).isEqualTo(this.description);
 
     CiphertextElectionContext context_from_file = ConvertFromJson.readContext(
-            publisher.contextFile().toString());
+            publisher.contextPath().toString());
     assertThat(context_from_file).isEqualTo(this.context);
 
     ElectionConstants constants_from_file = ConvertFromJson.readConstants(
-            publisher.constantsFile().toString());
+            publisher.constantsPath().toString());
     assertThat(constants_from_file).isEqualTo(this.constants);
 
     Encrypt.EncryptionDevice device_from_file = ConvertFromJson.readDevice(
-            publisher.deviceFile(this.device.uuid).toString());
+            publisher.devicePath(this.device.uuid).toString());
     assertThat(device_from_file).isEqualTo(this.device);
 
     for (CiphertextAcceptedBallot ballot : this.ballot_box.getAllBallots()) {
       CiphertextAcceptedBallot ballot_from_file = ConvertFromJson.readCiphertextBallot(
-              publisher.ballotFile(ballot.object_id).toString());
-      assertWithMessage(publisher.ballotFile(ballot.object_id).toString())
+              publisher.ballotPath(ballot.object_id).toString());
+      assertWithMessage(publisher.ballotPath(ballot.object_id).toString())
               .that(ballot_from_file).isEqualTo(ballot);
     }
 
@@ -379,16 +382,16 @@ public class TestEndToEndElectionIntegration {
 
     for (KeyCeremony.CoefficientValidationSet coefficient_validation_set : this.coefficient_validation_sets) {
       KeyCeremony.CoefficientValidationSet coefficient_validation_set_from_file = ConvertFromJson.readCoefficient(
-              publisher.coefficientsFile(coefficient_validation_set.owner_id()).toString());
+              publisher.coefficientsPath(coefficient_validation_set.owner_id()).toString());
       assertThat(coefficient_validation_set_from_file).isEqualTo(coefficient_validation_set);
     }
 
     PublishedCiphertextTally ciphertext_tally_from_file = ConvertFromJson.readCiphertextTally(
-            publisher.encryptedTallyFile().toString());
+            publisher.encryptedTallyPath().toString());
     assertThat(ciphertext_tally_from_file).isEqualTo(this.ciphertext_tally.build());
 
     PlaintextTally plaintext_tally_from_file = ConvertFromJson.readPlaintextTally(
-            publisher.tallyFile().toString());
+            publisher.tallyPath().toString());
     assertThat(plaintext_tally_from_file).isEqualTo(this.decryptedTally);
   }
 

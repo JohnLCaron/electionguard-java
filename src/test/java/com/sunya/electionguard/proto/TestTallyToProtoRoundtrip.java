@@ -21,7 +21,7 @@ public class TestTallyToProtoRoundtrip {
 
   @Example
   public void testCiphertextTallyRoundtrip() throws IOException {
-    PublishedCiphertextTally fromPython = ConvertFromJson.readCiphertextTally(publisher.encryptedTallyFile().toString());
+    PublishedCiphertextTally fromPython = ConvertFromJson.readCiphertextTally(publisher.encryptedTallyPath().toString());
     assertThat(fromPython).isNotNull();
     CiphertextTallyProto.PublishedCiphertextTally proto = CiphertextTallyToProto.translateToProto(fromPython);
     PublishedCiphertextTally roundtrip = CiphertextTallyFromProto.translateFromProto(proto);
@@ -30,7 +30,7 @@ public class TestTallyToProtoRoundtrip {
 
   @Example
   public void testPlaintextTallyRoundtrip() throws IOException {
-    PlaintextTally fromPython = ConvertFromJson.readPlaintextTally(publisher.tallyFile().toString());
+    PlaintextTally fromPython = ConvertFromJson.readPlaintextTally(publisher.tallyPath().toString());
     assertThat(fromPython).isNotNull();
     PlaintextTallyProto.PlaintextTally proto = PlaintextTallyToProto.translateToProto(fromPython);
     PlaintextTally roundtrip = PlaintextTallyFromProto.translateFromProto(proto);

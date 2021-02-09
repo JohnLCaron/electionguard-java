@@ -10,7 +10,7 @@ message PublishedCiphertextTally {
   string object_id = 1;
 
   // Map(CONTEST_ID, CiphertextTallyContest)
-  map<string, CiphertextTallyContest> cast = 2;
+  map<string, CiphertextTallyContest> contests = 2;
 }
 
 message CiphertextTallyContest {

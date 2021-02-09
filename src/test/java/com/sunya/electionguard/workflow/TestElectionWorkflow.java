@@ -3,13 +3,16 @@ package com.sunya.electionguard.workflow;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
+import com.google.common.base.Stopwatch;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Formatter;
+import java.util.concurrent.TimeUnit;
 
 public class TestElectionWorkflow {
+  private static final String classpath = "build/libs/electionguard-java-0.8-SNAPSHOT-all.jar";
 
   private static class CommandLine {
     @Parameter(names = {"-in"},
@@ -18,6 +21,16 @@ public class TestElectionWorkflow {
 
     @Parameter(names = {"--proto"}, description = "Input election record is in proto format")
     boolean isProto = false;
+
+    @Parameter(names = {"-coefficients"},
+            description = "CoefficientsProvider classname")
+    String coefficientsProviderClass;
+
+    @Parameter(names = {"-nguardians"}, description = "Number of quardians to create (required if no coefficients)")
+    int nguardians = 6;
+
+    @Parameter(names = {"-quorum"}, description = "Number of quardians that make a quorum (required if no coefficients)")
+    int quorum = 5;
 
     @Parameter(names = {"-guardians"},
             description = "GuardianProvider classname", required = true)
@@ -54,6 +67,7 @@ public class TestElectionWorkflow {
   public static void main(String[] args) {
     String progName = TestElectionWorkflow.class.getName();
     CommandLine cmdLine;
+    Stopwatch stopwatch = Stopwatch.createStarted();
 
     try {
       cmdLine = new CommandLine(progName, args);
@@ -72,24 +86,26 @@ public class TestElectionWorkflow {
     RunCommand command0 = new RunCommand();
     Formatter out = new Formatter();
     command0.run(out, "java",
-            "-classpath", "build/libs/electionguard-java-0.7-SNAPSHOT-all.jar",
+            "-classpath", classpath,
             "com.sunya.electionguard.workflow.PerformKeyCeremony",
             "-in", cmdLine.inputDir,
             "-out", cmdLine.encryptDir,
-            "-nguardians", "6",
-            "-quorum", "5"
+            "-nguardians", Integer.toString(cmdLine.nguardians),
+            "-quorum", Integer.toString(cmdLine.quorum)
     );
     System.out.printf("%s", out);
     if (command0.statusReturn != 0) {
       System.exit(command0.statusReturn);
     }
+    System.out.printf("*** elapsed = %d ms%n", stopwatch.elapsed(TimeUnit.MILLISECONDS));
+    stopwatch.reset().start();
     System.out.printf("%n==============================================================%n");
 
     // EncryptBallots
     RunCommand command1 = new RunCommand();
     out = new Formatter();
     command1.run(out, "java",
-            "-classpath", "build/libs/electionguard-java-0.7-SNAPSHOT-all.jar",
+            "-classpath", classpath,
             "com.sunya.electionguard.workflow.EncryptBallots",
             "-in", cmdLine.encryptDir,
             "--proto",
@@ -101,12 +117,14 @@ public class TestElectionWorkflow {
     if (command1.statusReturn != 0) {
       System.exit(command1.statusReturn);
     }
+    System.out.printf("*** elapsed = %d ms%n", stopwatch.elapsed(TimeUnit.SECONDS));
+    stopwatch.reset().start();
     System.out.printf("%n==============================================================%n");
 
     // DecryptBallots
     RunCommand command2 = new RunCommand();
     out = new Formatter();
-    command2.run(out, "java", "-classpath", "build/libs/electionguard-java-0.7-SNAPSHOT-all.jar",
+    command2.run(out, "java", "-classpath", classpath,
             "com.sunya.electionguard.workflow.DecryptBallots",
             "-in", cmdLine.encryptDir,
             "-guardians", cmdLine.guardianProviderClass,
@@ -116,17 +134,21 @@ public class TestElectionWorkflow {
     if (command2.statusReturn != 0) {
       System.exit(command2.statusReturn);
     }
+    System.out.printf("*** elapsed = %d ms%n", stopwatch.elapsed(TimeUnit.SECONDS));
+    stopwatch.reset().start();
     System.out.printf("%n==============================================================%n");
 
     // VerifyElectionRecord
     RunCommand command3 = new RunCommand();
     out = new Formatter();
-    command3.run(out, "java", "-classpath", "build/libs/electionguard-java-0.7-SNAPSHOT-all.jar",
+    command3.run(out, "java", "-classpath", classpath,
             "com.sunya.electionguard.verifier.VerifyElectionRecord",
             "-in", cmdLine.outputDir,
             "--proto"
     );
     System.out.printf("%s", out);
+    System.out.printf("*** elapsed = %d ms%n", stopwatch.elapsed(TimeUnit.SECONDS));
+    stopwatch.reset().start();
     System.exit(command3.statusReturn);
   }
 

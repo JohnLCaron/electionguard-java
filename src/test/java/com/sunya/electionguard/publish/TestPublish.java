@@ -48,7 +48,7 @@ public class TestPublish {
     List<KeyCeremony.CoefficientValidationSet> coefficients = ImmutableList.of(
             KeyCeremony.CoefficientValidationSet.create("hiD", ImmutableList.of(), ImmutableList.of()));
     PlaintextTally plaintext_tally = new PlaintextTally("PlaintextTallyId", ImmutableMap.of(), ImmutableMap.of(),
-            ImmutableMap.of(), ImmutableList.of());
+            ImmutableList.of());
 
     PublishedCiphertextTally ciphertext_tally =
             new CiphertextTallyBuilder("CiphertextTallyId", metadata, context).build();
@@ -62,7 +62,8 @@ public class TestPublish {
             ImmutableList.of(),
             ciphertext_tally,
             plaintext_tally,
-            coefficients);
+            coefficients,
+            null, null);
 
     File testFile = new File(outputDir, Publisher.DEVICES_DIR);
     assertThat(testFile.exists()).isTrue();

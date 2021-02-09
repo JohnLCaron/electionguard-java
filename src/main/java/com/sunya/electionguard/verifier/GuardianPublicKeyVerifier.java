@@ -51,9 +51,8 @@ public class GuardianPublicKeyVerifier {
       ElementModQ response = proof.response;     // u
 
       // compute challenge 2.A
-      // LOOK changed to follow validation spec 2.A. see issue #278
-      //  return Hash.hash_elems(this.electionRecord.base_hash(), public_key, commitment);
-      ElementModQ challenge_computed =  Hash.hash_elems(this.electionRecord.base_hash(), public_key, commitment);
+      // LOOK changed tvalidation spec 2.A. see issue #278
+      ElementModQ challenge_computed =  Hash.hash_elems(public_key, commitment);
       if (!challenge_computed.equals(challenge)) {
         error = true;
         System.out.printf("Guardian %s coefficient_proof %d: equation 2A challenge validation failed.%n", coeffSet.owner_id(), i);

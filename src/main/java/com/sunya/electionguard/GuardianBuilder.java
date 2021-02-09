@@ -40,7 +40,7 @@ public class GuardianBuilder extends ElectionObjectBase {
   private final Map<String, KeyCeremony.ElectionPartialKeyVerification> otherGuardianVerifications;
 
   /**
-   * Create a guardian for production, passing in coefficients
+   * Create a guardian for production, passing in coefficients, random nonce.
    * @param coeff the secret polynomial coefficients
    * @param number_of_guardians: the total number of guardians that will participate in the election
    * @param quorum: the count of guardians necessary to decrypt
@@ -55,7 +55,7 @@ public class GuardianBuilder extends ElectionObjectBase {
   }
 
   /**
-   * Create a guardian for production, using random coefficients.
+   * Create a guardian for production, using random coefficients, random nonce.
    * @param id: the unique identifier for the guardian
    * @param sequence: a unique number in [1, 256) that is the polynomial x value for this guardian
    * @param number_of_guardians: the total number of guardians that will participate in the election
@@ -69,11 +69,11 @@ public class GuardianBuilder extends ElectionObjectBase {
          int quorum,
          ElementModQ crypto_base_hash) {
 
-    return new GuardianBuilder(id, sequence, number_of_guardians, quorum, null, crypto_base_hash);
+    return new GuardianBuilder(id, sequence, number_of_guardians, quorum, crypto_base_hash, null);
   }
 
   /**
-   * Create a guardian used only for testing. The crypto_base_hash is random.
+   * Create a guardian used only for testing.
    * @param id: the unique identifier for the guardian
    * @param sequence: a unique number in [1, 256) that is the polynomial x value for this guardian
    * @param number_of_guardians: the total number of guardians that will participate in the election
@@ -85,9 +85,10 @@ public class GuardianBuilder extends ElectionObjectBase {
                                                  int sequence,
                                                  int number_of_guardians,
                                                  int quorum,
+                                                 ElementModQ crypto_base_hash,
                                                  @Nullable ElementModQ nonce_seed) {
 
-    return new GuardianBuilder(id, sequence, number_of_guardians, quorum, nonce_seed, Group.rand_q());
+    return new GuardianBuilder(id, sequence, number_of_guardians, quorum, crypto_base_hash, nonce_seed);
   }
 
   // Coefficients are generated at random
@@ -95,8 +96,8 @@ public class GuardianBuilder extends ElectionObjectBase {
                           int sequence_order,
                           int number_of_guardians,
                           int quorum,
-                          @Nullable ElementModQ nonce_seed,
-                          ElementModQ crypto_base_hash) {
+                          ElementModQ crypto_base_hash,
+                          @Nullable ElementModQ nonce_seed) {
 
     super(id);
     Preconditions.checkArgument(sequence_order > 0 && sequence_order < 256);

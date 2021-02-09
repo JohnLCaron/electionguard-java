@@ -22,7 +22,7 @@ public class TestElectionDescriptionToProtoRoundtrip {
 
   @Example
   public void testElectionRoundtrip() throws IOException {
-    Election.ElectionDescription fromPython = ConvertFromJson.readElection(publisher.electionFile().toString());
+    Election.ElectionDescription fromPython = ConvertFromJson.readElection(publisher.electionPath().toString());
     assertThat(fromPython).isNotNull();
     ElectionProto.ElectionDescription proto = ElectionDescriptionToProto.translateToProto(fromPython);
     Election.ElectionDescription roundtrip = ElectionDescriptionFromProto.translateFromProto(proto);

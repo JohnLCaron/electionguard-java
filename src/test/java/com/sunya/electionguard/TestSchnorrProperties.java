@@ -54,18 +54,6 @@ public class TestSchnorrProperties extends TestProperties {
   }
 
   @Property
-  public void test_schnorr_proofs_invalid_crypto_hash(
-          @ForAll("elgamal_keypairs") ElGamal.KeyPair keypair,
-          @ForAll("elements_mod_q") Group.ElementModQ nonce,
-          @ForAll("elements_mod_q") Group.ElementModQ other) {
-
-    SchnorrProof proof = make_schnorr_proof(keypair, nonce, crypto_hash);
-    assertThat(other).isNotEqualTo(crypto_hash); // otherwise wont fail
-    SchnorrProof proof_bad = new SchnorrProof(proof.public_key, proof.commitment, proof.challenge, proof.response);
-    assertThat(proof_bad.is_valid(other)).isFalse();
-  }
-
-  @Property
   public void test_schnorr_proofs_invalid_public_key(
           @ForAll("elgamal_keypairs") ElGamal.KeyPair keypair,
           @ForAll("elements_mod_q") Group.ElementModQ nonce,

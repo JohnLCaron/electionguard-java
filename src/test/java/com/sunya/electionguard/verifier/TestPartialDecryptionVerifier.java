@@ -17,7 +17,7 @@ public class TestPartialDecryptionVerifier {
     String topdir = TestParameterVerifier.topdir;
 
     consumer = new Consumer(topdir);
-    validator = new PartialDecryptionVerifier(consumer.getElectionRecord());
+    validator = new PartialDecryptionVerifier(consumer.readElectionRecordJson());
   }
 
   @Example
