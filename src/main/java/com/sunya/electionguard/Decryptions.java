@@ -478,7 +478,6 @@ public class Decryptions {
               selection.object_id,
               available_guardian.object_id,
               missing_guardian_id,
-              selection.description_hash,
               tuple.decryption,
               recovery_public_key.get(),
               tuple.proof);

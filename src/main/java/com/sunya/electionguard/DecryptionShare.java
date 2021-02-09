@@ -24,9 +24,6 @@ public class DecryptionShare {
     /** The Missing Guardian for whom this share is calculated on behalf of. */
     public abstract String missing_guardian_id();
 
-    /**  The Ballot.CiphertextSelection description_hash. */
-    public abstract ElementModQ description_hash(); // LOOK Not used
-
     /** The Share of the decryption of a selection. M_il in the spec. */
     public abstract ElementModP share();
 
@@ -40,7 +37,6 @@ public class DecryptionShare {
             String object_id,
             String guardian_id,
             String missing_guardian_id,
-            ElementModQ description_hash,
             ElementModP share,
             ElementModP recovery_key,
             ChaumPedersen.ChaumPedersenProof proof) {
@@ -48,7 +44,6 @@ public class DecryptionShare {
               Preconditions.checkNotNull(object_id),
               Preconditions.checkNotNull(guardian_id),
               Preconditions.checkNotNull(missing_guardian_id),
-              Preconditions.checkNotNull(description_hash),
               Preconditions.checkNotNull(share),
               Preconditions.checkNotNull(recovery_key),
               Preconditions.checkNotNull(proof));

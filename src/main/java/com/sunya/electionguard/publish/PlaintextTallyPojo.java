@@ -51,7 +51,6 @@ public class PlaintextTallyPojo {
     public String object_id;
     public String guardian_id;
     public String missing_guardian_id;
-    public Group.ElementModQ description_hash;
     public Group.ElementModP share;
     public Group.ElementModP recovery_key;
     public ChaumPedersenProofPojo proof;
@@ -141,7 +140,6 @@ public class PlaintextTallyPojo {
             pojo.object_id,
             pojo.guardian_id,
             pojo.missing_guardian_id,
-            pojo.description_hash,
             pojo.share,
             pojo.recovery_key,
             translateProof(pojo.proof));
@@ -234,7 +232,6 @@ public class PlaintextTallyPojo {
     pojo.object_id = org.object_id();
     pojo.guardian_id = org.guardian_id();
     pojo.missing_guardian_id = org.missing_guardian_id();
-    pojo.description_hash = org.description_hash();
     pojo.share = org.share();
     pojo.recovery_key = org.recovery_key();
     pojo.proof = convertProof(org.proof());
