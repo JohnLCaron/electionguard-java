@@ -215,9 +215,9 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
                     description.votes_allowed)).isTrue();
 
     // Assert the ballot selections sum to the expected number of selections
-    int key_selected = result_from_key.get().ballot_selections.stream().mapToInt(s -> s.to_int()).sum();
-    int nonce_selected = result_from_nonce.get().ballot_selections.stream().mapToInt(s -> s.to_int()).sum();
-    int seed_selected = result_from_nonce_seed.get().ballot_selections.stream().mapToInt(s -> s.to_int()).sum();
+    int key_selected = result_from_key.get().ballot_selections.stream().mapToInt(s -> s.vote).sum();
+    int nonce_selected = result_from_nonce.get().ballot_selections.stream().mapToInt(s -> s.vote).sum();
+    int seed_selected = result_from_nonce_seed.get().ballot_selections.stream().mapToInt(s -> s.vote).sum();
 
     assertThat(key_selected).isEqualTo(nonce_selected);
     assertThat(seed_selected).isEqualTo(nonce_selected);
@@ -242,9 +242,9 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
       // It 's possible there are no selections in the original data collection
       // since it is valid to pass in a ballot that is not complete
       if (data_selections_exist.size() > 0) {
-        assertThat(data_selections_exist.get(0).to_int()).isEqualTo(key_selection.to_int());
-        assertThat(data_selections_exist.get(0).to_int()).isEqualTo(nonce_selection.to_int());
-        assertThat(data_selections_exist.get(0).to_int()).isEqualTo(seed_selection.to_int());
+        assertThat(data_selections_exist.get(0).vote).isEqualTo(key_selection.vote);
+        assertThat(data_selections_exist.get(0).vote).isEqualTo(nonce_selection.vote);
+        assertThat(data_selections_exist.get(0).vote).isEqualTo(seed_selection.vote);
       }
 
       // TODO: also check edge cases such as: placeholder selections are true for under votes
@@ -462,9 +462,9 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
 
         if (!data_selection_exist.isEmpty()) {
           Ballot.PlaintextBallotSelection data_selection = data_selection_exist.get(0);
-          assertThat(data_selection.to_int()).isEqualTo(key_selection.to_int());
-          assertThat(data_selection.to_int()).isEqualTo(nonce_selection.to_int());
-          assertThat(data_selection.to_int()).isEqualTo(seed_selection.to_int());
+          assertThat(data_selection.vote).isEqualTo(key_selection.vote);
+          assertThat(data_selection.vote).isEqualTo(nonce_selection.vote);
+          assertThat(data_selection.vote).isEqualTo(seed_selection.vote);
         }
 
         // TODO: also check edge cases such as: placeholder selections are true for under votes

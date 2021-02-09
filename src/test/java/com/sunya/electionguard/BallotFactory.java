@@ -41,8 +41,8 @@ public class BallotFactory {
     for (SelectionDescription selection_description : description.ballot_selections) {
       PlaintextBallotSelection selection = get_random_selection_from(selection_description);
       // the caller may force a true value
-      voted += selection.to_int();
-      if (with_trues && voted <= 1 && selection.to_int() == 1) {
+      voted += selection.vote;
+      if (with_trues && voted <= 1 && selection.vote == 1) {
         selections.add(selection);
         continue;
       }
@@ -80,7 +80,7 @@ public class BallotFactory {
   static PlaintextBallotSelection get_selection_well_formed() {
     ExtendedData extra_data = new ExtendedData("random", 33);
     return new PlaintextBallotSelection("selection-{draw(uuids)}",
-                TestUtils.randomBool() ? "true" : "false",
+                TestUtils.randomBool() ? 1 : 0,
                 false,
                 TestUtils.randomBool() ? extra_data : null);
   }
@@ -88,7 +88,7 @@ public class BallotFactory {
   static PlaintextBallotSelection get_selection_poorly_formed() {
     ExtendedData extra_data = new ExtendedData("random", 33);
     return new PlaintextBallotSelection("selection-{draw(uuids)}",
-            TestUtils.randomBool() ? "yeah" : "nope",
+            TestUtils.randomBool() ? 2 : 3,
             TestUtils.randomBool(),
             TestUtils.randomBool() ? extra_data : null);
   }

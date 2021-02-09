@@ -47,7 +47,7 @@ public class TestBallotProperties extends TestProperties {
                     "john-adams-selection", "john-adams-selection", "referendum-pineapple-affirmative-selection",
                     "referendum-pineapple-negative-selection");
           }
-          assertThat(selection.vote).isEqualTo("True");
+          assertThat(selection.vote).isEqualTo(1);
         }
       }
     }
@@ -58,7 +58,7 @@ public class TestBallotProperties extends TestProperties {
           @ForAll("get_selection_well_formed") PlaintextBallotSelection selection) {
     assertThat(selection.is_valid(selection.selection_id)).isTrue();
 
-    int as_int = selection.to_int();
+    int as_int = selection.vote;
     assertThat(as_int >= 0 && as_int <= 1).isTrue();
   }
 
@@ -67,7 +67,7 @@ public class TestBallotProperties extends TestProperties {
     @ForAll("get_selection_poorly_formed") PlaintextBallotSelection selection) {
     assertThat(selection.is_valid(selection.selection_id)).isFalse();
 
-    int as_int = selection.to_int();
+    int as_int = selection.vote;
     assertThat(as_int >= 0 && as_int <= 1).isFalse();
   }
 

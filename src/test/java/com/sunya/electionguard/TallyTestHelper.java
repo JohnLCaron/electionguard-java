@@ -27,7 +27,7 @@ public class TallyTestHelper {
           assertWithMessage("Placeholder selections should not exist in the plaintext ballots")
                   .that(selection.is_placeholder_selection).isFalse();
           // returns 1 or 0 for n-of-m ballot selections
-          result.merge(selection.selection_id, selection.to_int(), Integer::sum);
+          result.merge(selection.selection_id, selection.vote, Integer::sum);
         }
       }
     }

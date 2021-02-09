@@ -12,7 +12,7 @@ import java.util.Random;
 // Create nballots randomly generated fake Ballots
 public class TestBallotProvider implements BallotProvider {
   private static final Random random = new Random(System.currentTimeMillis());
-  private static final int nballots = 1100;
+  private static final int nballots = 21;
   private final Election.ElectionDescription election;
 
   public TestBallotProvider(Election.ElectionDescription election) {
@@ -54,7 +54,7 @@ public class TestBallotProvider implements BallotProvider {
       List<Ballot.PlaintextBallotSelection> selections = new ArrayList<>();
       for (Election.SelectionDescription selection_description : contest.ballot_selections) {
         Ballot.PlaintextBallotSelection selection = get_random_selection_from(selection_description);
-        voted += selection.to_int();
+        voted += selection.vote;
         if (voted <= contest.number_elected) {
           selections.add(selection);
         }
@@ -64,7 +64,7 @@ public class TestBallotProvider implements BallotProvider {
 
     static Ballot.PlaintextBallotSelection get_random_selection_from(Election.SelectionDescription description) {
       boolean choice = random.nextBoolean();
-      return new Ballot.PlaintextBallotSelection(description.object_id, choice ? "true" : "false", false, null);
+      return new Ballot.PlaintextBallotSelection(description.object_id, choice ? 1 : 0, false, null);
     }
 
   }

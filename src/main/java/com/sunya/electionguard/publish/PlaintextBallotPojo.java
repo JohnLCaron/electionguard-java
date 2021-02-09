@@ -30,7 +30,7 @@ public class PlaintextBallotPojo {
 
   public static class PlaintextBallotSelection {
     public String object_id;
-    public String vote;
+    public int vote;
     public boolean is_placeholder_selection;
     public String extra_data; // optional
   }
