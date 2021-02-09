@@ -264,6 +264,7 @@ public class TestEndToEndElectionIntegration {
 
     // Now, compare the results
     this.compare_results();
+    this.compare_spoiled_tallies();
   }
 
   // Compare the results to ensure the decryption was done correctly
@@ -283,7 +284,7 @@ public class TestEndToEndElectionIntegration {
         for (PlaintextBallotContest contest : ballot.contests) {
           for (PlaintextBallotSelection selection : contest.ballot_selections) {
             Integer value = expected_plaintext_tally.get(selection.selection_id);
-            expected_plaintext_tally.put(selection.selection_id, value + selection.to_int()); // use merge
+            expected_plaintext_tally.put(selection.selection_id, value + selection.vote); // use merge
           }
         }
       }
@@ -300,34 +301,41 @@ public class TestEndToEndElectionIntegration {
       }
       System.out.printf("----------------------------------%n");
     }
-
-    /* LOOK Compare the expected values for each spoiled ballot
-    for (Map.Entry<String, Ballot.CiphertextAcceptedBallot> entry : this.ciphertext_tally.spoiled_ballots.entrySet()) {
-      String ballot_id = entry.getKey();
-      Ballot.CiphertextAcceptedBallot accepted_ballot = entry.getValue();
-      if (accepted_ballot.state == BallotBoxState.SPOILED) {
-        for (PlaintextBallot plaintext_ballot : this.plaintext_ballots) {
-          if (ballot_id.equals(plaintext_ballot.object_id)) {
-            System.out.printf("%nSpoiled Ballot: %s%n", ballot_id);
-            for (PlaintextBallotContest contest : plaintext_ballot.contests) {
-              System.out.printf("%nContest: %s%n", contest.contest_id);
-              for (PlaintextBallotSelection selection : contest.ballot_selections) {
-                int expected = selection.to_int();
-                PlaintextTally.PlaintextTallySelection decrypted_selection = (
-                        this.decryptedTally.spoiledBallotTally.get(ballot_id).get(contest.contest_id)
-                                .selections().get(selection.selection_id));
-                System.out.printf("   - Selection: %s expected: %d, actual: %d%n",
-                        selection.selection_id, expected, decrypted_selection.tally());
-                assertThat(expected).isEqualTo(decrypted_selection.tally());
-              }
-            }
-          }
-        }
-      }
-    } */
   }
 
-  // Publish and verify steps of the election
+  // Compare the decrypted spolied tally to original ballot
+  void compare_spoiled_tallies() {
+    Map<String, PlaintextTally> plaintextTalliesMap = this.spoiledDecryptedTallies.stream().collect(Collectors.toMap(t -> t.object_id, t -> t));
+
+    for (Ballot.CiphertextAcceptedBallot accepted_ballot : this.ballot_box.getSpoiledBallots()) {
+      String ballot_id = accepted_ballot.object_id;
+      assertThat(accepted_ballot.state).isEqualTo(BallotBoxState.SPOILED);
+      for (PlaintextBallot orgBallot : this.plaintext_ballots) {
+        if (ballot_id.equals(orgBallot.object_id)) {
+          System.out.printf("%nSpoiled Ballot: %s%n", ballot_id);
+          PlaintextTally plaintextTally = plaintextTalliesMap.get(orgBallot.object_id);
+          compare_spoiled_tally(orgBallot, plaintextTally);
+        }
+      }
+    }
+  }
+
+  void compare_spoiled_tally(PlaintextBallot orgBallot, PlaintextTally plaintextTally) {
+    System.out.printf("%nSpoiled Ballot: %s%n", orgBallot.object_id);
+    for (PlaintextBallotContest contest : orgBallot.contests) {
+      System.out.printf("%nContest: %s%n", contest.contest_id);
+      PlaintextTally.PlaintextTallyContest contestTally = plaintextTally.contests.get(contest.contest_id);
+      for (PlaintextBallotSelection selection : contest.ballot_selections) {
+        int expected = selection.vote;
+        PlaintextTally.PlaintextTallySelection selectionTally = contestTally.selections().get(selection.selection_id);
+        System.out.printf("   - Selection: %s expected: %d, actual: %d%n",
+                selection.selection_id, expected, selectionTally.tally());
+        assertThat(selectionTally.tally()).isEqualTo(expected);
+      }
+    }
+  }
+
+    // Publish and verify steps of the election
   void step_5_publish_and_verify() throws IOException {
     System.out.printf("%n5. publish%n");
     Publisher publisher = new Publisher(outputDir, true, true);

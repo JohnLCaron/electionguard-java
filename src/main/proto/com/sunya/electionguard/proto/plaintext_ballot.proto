@@ -17,7 +17,7 @@ message PlaintextBallotContest {
 
 message PlaintextBallotSelection {
   string selection_id = 1; // matches the SelectionDescription.object_id
-  string vote = 2;
+  uint32 vote = 2;
   bool is_placeholder_selection = 3;
   ExtendedData extended_data = 4;
 }

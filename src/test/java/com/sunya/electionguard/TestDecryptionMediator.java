@@ -374,7 +374,7 @@ public class TestDecryptionMediator extends TestProperties {
 
     for (PlaintextBallotContest contest : plaintext_ballot.contests) {
       for (PlaintextBallotSelection selection : contest.ballot_selections) {
-        int expected_tally = selection.vote.equalsIgnoreCase("False") ? 0 : 1;
+        int expected_tally = selection.vote;
         Integer actual_tally = result.get(contest.contest_id).selections().get(selection.selection_id).tally();
         assertThat(expected_tally).isEqualTo(actual_tally);
       }
@@ -434,7 +434,7 @@ public class TestDecryptionMediator extends TestProperties {
 
     for (PlaintextBallotContest contest : plaintext_ballot.contests) {
       for (PlaintextBallotSelection selection : contest.ballot_selections) {
-        int expected_tally = selection.vote.equalsIgnoreCase("False") ? 0 : 1;
+        int expected_tally = selection.vote;
         Integer actual_tally = result.get(contest.contest_id).selections().get(selection.selection_id).tally();
         assertThat(expected_tally).isEqualTo(actual_tally);
       }
@@ -475,8 +475,8 @@ public class TestDecryptionMediator extends TestProperties {
 
       for (PlaintextBallotSelection selection : contest.ballot_selections) {
         PlaintextBallotSelection actual_selection = actual_contest.ballot_selections.stream().filter(s -> s.selection_id.equals(selection.selection_id)).findFirst().orElseThrow();
-        Integer expected_tally = selection.to_int();
-        Integer actual_tally = actual_selection.to_int();
+        Integer expected_tally = selection.vote;
+        Integer actual_tally = actual_selection.vote;
         assertThat(expected_tally).isEqualTo(actual_tally);
       }
     }

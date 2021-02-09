@@ -300,7 +300,7 @@ public class TimeIntegrationSteps {
         for (PlaintextBallotContest contest : ballot.contests) {
           for (PlaintextBallotSelection selection : contest.ballot_selections) {
             Integer value = expected_plaintext_tally.get(selection.selection_id);
-            expected_plaintext_tally.put(selection.selection_id, value + selection.to_int()); // could use merge
+            expected_plaintext_tally.put(selection.selection_id, value + selection.vote); // could use merge
           }
         }
       }

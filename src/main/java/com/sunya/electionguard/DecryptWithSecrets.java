@@ -43,7 +43,7 @@ public class DecryptWithSecrets {
 
     return Optional.of(new PlaintextBallotSelection(
             selection.object_id,
-            Utils.isTrue(plaintext_vote),
+            plaintext_vote,
             selection.is_placeholder_selection,
             null));
   }
@@ -101,7 +101,7 @@ public class DecryptWithSecrets {
 
     return Optional.of(new PlaintextBallotSelection(
             selection.object_id,
-            Utils.isTrue(plaintext_vote),
+            plaintext_vote,
             selection.is_placeholder_selection,
             null));
   }

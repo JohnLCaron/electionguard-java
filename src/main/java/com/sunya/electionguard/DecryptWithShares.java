@@ -238,7 +238,7 @@ public class DecryptWithShares {
           //                                    @Nullable ExtendedData extended_data
           Ballot.PlaintextBallotSelection decryptedBallot = new Ballot.PlaintextBallotSelection(
                   plaintext_selection.object_id(),
-                  plaintext_selection.tally() > 0 ? "true" : "false",
+                  plaintext_selection.tally(),
                   false, null);
           ballot_selections.add(decryptedBallot);
         }

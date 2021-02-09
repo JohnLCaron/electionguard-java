@@ -118,9 +118,9 @@ public class Ballot {
 
       // Verify the selections are well-formed
       for (PlaintextBallotSelection selection : this.ballot_selections) {
-        int selection_count = selection.to_int();
+        int selection_count = selection.vote;
         votes += selection_count;
-        if (selection_count >= 1) {
+        if (selection_count >= 1) { // LOOK I dont understand this
           number_elected += 1;
         }
       }
@@ -164,12 +164,6 @@ public class Ballot {
   /**
    * A BallotSelection represents an individual selection on a ballot.
    * <p>
-   * This accepts a `vote` string field which has no constraints
-   * in the ElectionGuard Data Specification, but is constrained logically
-   * in the application to resolve to `True` or `False`.  This implies that the
-   * data specification supports passing any string that can be represented as
-   * an integer, however only 0 and 1 is supported for now.
-   * <p>
    * This can also be designated as `is_placeholder_selection` which has no
    * context to the data specification but is useful for running validity checks internally
    * <p>
@@ -181,14 +175,13 @@ public class Ballot {
   @Immutable
   public static class PlaintextBallotSelection {
     public final String selection_id; // matches the SelectionDescription.object_id
-    public final String vote;
+    public final int vote;
     public final boolean is_placeholder_selection; // default false
     public final Optional<ExtendedData> extended_data; // default None
 
-    public PlaintextBallotSelection(String selection_id, String vote, boolean is_placeholder_selection,
+    public PlaintextBallotSelection(String selection_id, int vote, boolean is_placeholder_selection,
                                     @Nullable ExtendedData extended_data) {
       Preconditions.checkArgument(!Strings.isNullOrEmpty(selection_id));
-      Preconditions.checkArgument(!Strings.isNullOrEmpty(vote));
       this.selection_id = selection_id;
       this.vote = vote;
       this.is_placeholder_selection = is_placeholder_selection;
@@ -201,31 +194,11 @@ public class Ballot {
                 expected_selection_id, this.selection_id);
         return false;
       }
-      int choice = to_int();
-      if (choice < 0 || choice > 1) {
+      if (vote < 0 || vote > 1) {
         logger.atInfo().log("Currently only supporting choices of 0 or 1: %s", this);
         return false;
       }
       return true;
-    }
-
-    /**
-     * Represent a Truthy string as 1, or if the string is Falsy, 0
-     * See: https://docs.python.org/3/distutils/apiref.html#distutils.util.strtobool
-     * @return an integer 0 or 1 for valid data, or 0 if the data is malformed
-     */
-    public int to_int() {
-      boolean asBool;
-      try {
-        asBool = Utils.strtobool(vote);
-      } catch (Exception e) {
-        logger.atInfo().log("to_int could not convert plaintext: '%s' to bool", vote);
-        return -1;
-      }
-
-      // TODO: ISSUE #33: If the boolean coercion above fails, support integer votes
-      //  greater than 1 for cases such as cumulative voting
-      return asBool ? 1 : 0;
     }
 
     @Override
@@ -233,9 +206,9 @@ public class Ballot {
       if (this == o) return true;
       if (o == null || getClass() != o.getClass()) return false;
       PlaintextBallotSelection that = (PlaintextBallotSelection) o;
-      return is_placeholder_selection == that.is_placeholder_selection &&
+      return vote == that.vote &&
+              is_placeholder_selection == that.is_placeholder_selection &&
               selection_id.equals(that.selection_id) &&
-              vote.equals(that.vote) &&
               extended_data.equals(that.extended_data);
     }
 
@@ -248,7 +221,7 @@ public class Ballot {
     public String toString() {
       return "PlaintextBallotSelection{" +
               "selection_id='" + selection_id + '\'' +
-              ", vote='" + vote + '\'' +
+              ", vote=" + vote +
               ", is_placeholder_selection=" + is_placeholder_selection +
               ", extended_data=" + extended_data +
               '}';

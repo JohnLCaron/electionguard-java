@@ -110,9 +110,6 @@ public class CiphertextAcceptedBallotPojo {
   }
 
   private static Ballot.CiphertextBallotContest translateContest(CiphertextBallotContestPojo contest) {
-    if (contest.encrypted_total == null) {
-      System.out.printf("HEY");
-    }
     return new Ballot.CiphertextBallotContest(
             contest.object_id,
             contest.description_hash,

@@ -100,7 +100,7 @@ public class Encrypt {
    */
   // selection_from( description: SelectionDescription, is_placeholder: bool = False, is_affirmative: bool = False,
   static PlaintextBallotSelection selection_from(SelectionDescription description, boolean is_placeholder, boolean is_affirmative) {
-    return new PlaintextBallotSelection(description.object_id, is_affirmative ? "true" : "false", is_placeholder, null);
+    return new PlaintextBallotSelection(description.object_id, is_affirmative ? 1 : 0, is_placeholder, null);
   }
 
   /**
@@ -153,7 +153,7 @@ public class Encrypt {
 
     ElementModQ disjunctive_chaum_pedersen_nonce = nonce_sequence.get(0);
 
-    int selection_representation = selection.to_int();
+    int selection_representation = selection.vote;
 
     // Generate the encryption
     Optional<ElGamal.Ciphertext> elgamal_encryption =
@@ -267,7 +267,7 @@ public class Encrypt {
             // track the selection count so we can append the
             // appropriate number of true placeholder votes
             has_selection = true;
-            selection_count += selection.to_int();
+            selection_count += selection.vote;
             encrypted_selection = encrypt_selection(
                     selection,
                     description,
