@@ -67,9 +67,6 @@ message CiphertextCompensatedDecryptionSelection {
   // The Missing Guardian for whom this share is calculated on behalf of.
   string missing_guardian_id = 3;
 
-  // The SelectionDescription hash. Not used?
-  ElementModQ description_hash = 4;
-
   // The Share of the decryption of a selection. M_il in the spec.
   ElementModP share = 5;
 

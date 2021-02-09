@@ -92,7 +92,6 @@ public class PlaintextTallyFromProto {
             proto.getObjectId(),
             proto.getGuardianId(),
             proto.getMissingGuardianId(),
-            convertElementModQ(proto.getDescriptionHash()),
             convertElementModP(proto.getShare()),
             convertElementModP(proto.getRecoveryKey()),
             convertProof(proto.getProof()));

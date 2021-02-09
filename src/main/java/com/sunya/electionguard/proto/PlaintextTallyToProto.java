@@ -92,7 +92,6 @@ public class PlaintextTallyToProto {
     builder.setObjectId(org.object_id());
     builder.setGuardianId(org.guardian_id());
     builder.setMissingGuardianId(org.missing_guardian_id());
-    builder.setDescriptionHash(convertElementModQ(org.description_hash()));
     builder.setShare(convertElementModP(org.share()));
     builder.setRecoveryKey(convertElementModP(org.recovery_key()));
     builder.setProof(convertProof(org.proof()));
