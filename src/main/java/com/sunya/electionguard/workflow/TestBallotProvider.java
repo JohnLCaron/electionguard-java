@@ -12,7 +12,7 @@ import java.util.Random;
 // Create nballots randomly generated fake Ballots
 public class TestBallotProvider implements BallotProvider {
   private static final Random random = new Random(System.currentTimeMillis());
-  private static final int nballots = 11;
+  private static final int nballots = 1100;
   private final Election.ElectionDescription election;
 
   public TestBallotProvider(Election.ElectionDescription election) {

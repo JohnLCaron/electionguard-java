@@ -21,6 +21,7 @@ import static com.google.common.truth.Truth.assertWithMessage;
 import static com.google.common.truth.Truth8.assertThat;
 import static com.sunya.electionguard.Ballot.*;
 import static com.sunya.electionguard.Election.*;
+import static com.sunya.electionguard.Group.rand_q;
 
 /** Time steps for an End-to-End encrypted election. */
 public class TimeIntegrationSteps {
@@ -149,10 +150,11 @@ public class TimeIntegrationSteps {
    */
   void step_1_key_ceremony() {
     System.out.printf("%n1. Key Ceremony%n");
+    Group.ElementModQ crypto_hash = rand_q();
     // Setup Guardians
     for (int i = 0; i < NUMBER_OF_GUARDIANS; i++) {
       int sequence = i + 1;
-      this.guardianBuilders.add(GuardianBuilder.createForTesting("guardian_" + sequence, sequence, NUMBER_OF_GUARDIANS, QUORUM, null));
+      this.guardianBuilders.add(GuardianBuilder.createForTesting("guardian_" + sequence, sequence, NUMBER_OF_GUARDIANS, QUORUM, crypto_hash, null));
     }
 
     // Setup Mediator
@@ -337,7 +339,8 @@ public class TimeIntegrationSteps {
             this.ciphertext_tally.build(),
             this.decryptedTally,
             this.coefficient_validation_sets,
-            this.spoiledDecryptedBallots);
+            this.spoiledDecryptedBallots,
+            this.spoiledDecryptedTallies);
 
     System.out.printf("%n5.5. verify%n");
     this.verify_results_json(publisher);

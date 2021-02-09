@@ -48,10 +48,11 @@ public class TestDecryptionMediator extends TestProperties {
     this.key_ceremony = new KeyCeremonyMediator(CEREMONY_DETAILS);
 
     // Setup Guardians
+    ElementModQ crypto_hash = rand_q();
     List<GuardianBuilder> guardianBuilders = new ArrayList<>();
     for (int i = 0; i < NUMBER_OF_GUARDIANS; i++) {
       int sequence = i + 2;
-      guardianBuilders.add(GuardianBuilder.createForTesting("guardian_" + sequence, sequence, NUMBER_OF_GUARDIANS, QUORUM, null));
+      guardianBuilders.add(GuardianBuilder.createForTesting("guardian_" + sequence, sequence, NUMBER_OF_GUARDIANS, QUORUM, crypto_hash, null));
     }
     guardianBuilders.forEach(gb -> this.key_ceremony.announce(gb));
     this.key_ceremony.orchestrate(identity_auxiliary_encrypt);
@@ -172,7 +173,7 @@ public class TestDecryptionMediator extends TestProperties {
   @Example
   public void test_compute_selection() {
     CiphertextTallyBuilder.CiphertextTallySelectionBuilder first_selection =
-            this.ciphertext_tally.cast.values().stream().flatMap(contest -> contest.tally_selections.values().stream())
+            this.ciphertext_tally.contests.values().stream().flatMap(contest -> contest.tally_selections.values().stream())
                     .findFirst().orElseThrow(RuntimeException::new);
 
     Optional<DecryptionShare.CiphertextDecryptionSelection> result =
@@ -210,7 +211,7 @@ public class TestDecryptionMediator extends TestProperties {
   @Example
   public void test_compute_compensated_selection() {
     CiphertextTallyBuilder.CiphertextTallySelectionBuilder first_selection =
-            this.ciphertext_tally.cast.values().stream().flatMap(contest -> contest.tally_selections.values().stream())
+            this.ciphertext_tally.contests.values().stream().flatMap(contest -> contest.tally_selections.values().stream())
                     .findFirst().orElseThrow(RuntimeException::new);
 
     // Compute lagrange coefficients for the guardians that are present
@@ -319,7 +320,7 @@ public class TestDecryptionMediator extends TestProperties {
 
     // find the first selection
     CiphertextTallyBuilder.CiphertextTallyContestBuilder first_contest =
-            this.ciphertext_tally.cast.values().stream().findFirst().orElseThrow(IllegalStateException::new);
+            this.ciphertext_tally.contests.values().stream().findFirst().orElseThrow(IllegalStateException::new);
     CiphertextTallyBuilder.CiphertextTallySelectionBuilder first_selection =
             first_contest.tally_selections.values().stream().findFirst().orElseThrow(IllegalStateException::new);
 

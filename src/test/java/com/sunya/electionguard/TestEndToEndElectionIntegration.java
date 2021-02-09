@@ -130,7 +130,7 @@ public class TestEndToEndElectionIntegration {
     Group.ElementModQ crypto_base_hash = Election.make_crypto_base_hash(NUMBER_OF_GUARDIANS, QUORUM, description);
     // Setup Guardians
     for (int i = 1; i <= NUMBER_OF_GUARDIANS; i++) {
-      this.guardianBuilders.add(GuardianBuilder.createForTesting("guardian_" + i, i, NUMBER_OF_GUARDIANS, QUORUM, crypto_base_hash));
+      this.guardianBuilders.add(GuardianBuilder.createForTesting("guardian_" + i, i, NUMBER_OF_GUARDIANS, QUORUM, crypto_base_hash, null));
     }
 
     // Setup Mediator
@@ -182,6 +182,8 @@ public class TestEndToEndElectionIntegration {
     this.metadata = tuple.metadata;
     this.context = tuple.context;
     this.constants = new ElectionConstants();
+
+    assertThat(this.context.crypto_base_hash).isEqualTo(crypto_base_hash);
   }
 
   // Move on to encrypting ballots
@@ -237,11 +239,6 @@ public class TestEndToEndElectionIntegration {
     // Generate a Homomorphically Accumulated Tally of the ballots
     this.ciphertext_tally = new CiphertextTallyBuilder("tally_object_id", this.metadata, this.context);
     this.ciphertext_tally.batch_append(this.ballot_box.accepted());
-
-    System.out.printf("%n4. cast %d spoiled %d total %d%n",
-            this.ciphertext_tally.count(),
-            0, 0);
-
     // Configure the Decryption
     this.decrypter = new DecryptionMediator(this.context, this.ciphertext_tally, this.ballot_box.getSpoiledBallots());
 
@@ -343,7 +340,8 @@ public class TestEndToEndElectionIntegration {
             this.ciphertext_tally.build(),
             this.decryptedTally,
             this.coefficient_validation_sets,
-            this.spoiledDecryptedBallots);
+            this.spoiledDecryptedBallots,
+            this.spoiledDecryptedTallies);
 
     System.out.printf("%n6. verify%n");
     this.verify_results(publisher);

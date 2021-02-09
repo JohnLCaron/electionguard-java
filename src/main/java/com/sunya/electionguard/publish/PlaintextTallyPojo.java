@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 public class PlaintextTallyPojo {
   public String object_id;
   public Map<String, PlaintextTallyContestPojo> contests;
-  public Map<String, Map<String, PlaintextTallyContestPojo>> spoiled_ballots;
   public Map<String, Group.ElementModQ> lagrange_coefficients;
   public List<GuardianStatePojo> guardian_states;
 
@@ -90,13 +89,6 @@ public class PlaintextTallyPojo {
     Map<String, PlaintextTally.PlaintextTallyContest> contests = pojo.contests.entrySet().stream().collect(Collectors.toMap(
             Map.Entry::getKey,
             e2 -> translateContest(e2.getValue())));
-
-    Map<String, Map<String, PlaintextTally.PlaintextTallyContest>> spoiled_ballots =
-            pojo.spoiled_ballots.entrySet().stream().collect(Collectors.toMap(
-                    Map.Entry::getKey,
-                    e -> e.getValue().entrySet().stream().collect(Collectors.toMap(
-                            Map.Entry::getKey,
-                            e2 -> translateContest(e2.getValue())))));
 
     return new PlaintextTally(
             pojo.object_id,
@@ -191,13 +183,6 @@ public class PlaintextTallyPojo {
     pojo.contests = org.contests.entrySet().stream().collect(Collectors.toMap(
             Map.Entry::getKey,
             e2 -> convertContest(e2.getValue())));
-
-    /* pojo.spoiled_ballots =
-            org.spoiledBallotTally.entrySet().stream().collect(Collectors.toMap(
-                    Map.Entry::getKey,
-                    e -> e.getValue().entrySet().stream().collect(Collectors.toMap(
-                            Map.Entry::getKey,
-                            e2 -> convertContest(e2.getValue()))))); */
 
     pojo.lagrange_coefficients = org.lagrange_coefficients;
     pojo.guardian_states = convertList(org.guardianStates, PlaintextTallyPojo::convertGuardianState);

@@ -4,9 +4,6 @@ import com.sunya.electionguard.PublishedCiphertextTally;
 
 import java.util.Map;
 
-import static com.sunya.electionguard.proto.CiphertextTallyProto.CiphertextTallyContest;
-import static com.sunya.electionguard.proto.CiphertextTallyProto.CiphertextTallySelection;
-
 import static com.sunya.electionguard.proto.CommonConvert.convertCiphertext;
 import static com.sunya.electionguard.proto.CommonConvert.convertElementModQ;
 
@@ -16,7 +13,7 @@ public class CiphertextTallyToProto {
     CiphertextTallyProto.PublishedCiphertextTally.Builder builder = CiphertextTallyProto.PublishedCiphertextTally.newBuilder();
     builder.setObjectId(tally.object_id);
     for (Map.Entry<String, PublishedCiphertextTally.CiphertextTallyContest> contest : tally.contests.entrySet()) {
-      builder.putCast(contest.getKey(), convertContest(contest.getValue()));
+      builder.putContests(contest.getKey(), convertContest(contest.getValue()));
     }
     return builder.build();
   }

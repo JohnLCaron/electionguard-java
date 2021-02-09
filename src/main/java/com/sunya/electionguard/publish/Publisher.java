@@ -31,7 +31,8 @@ public class Publisher {
   static final String DEVICES_DIR = "devices";
   static final String COEFFICIENTS_DIR = "coefficients";
   static final String BALLOTS_DIR = "encrypted_ballots";
-  static final String SPOILED_DIR = "spoiled_ballots";
+  static final String SPOILED_BALLOT_DIR = "spoiled_ballots";
+  static final String SPOILED_TALLY_DIR = "spoiled_tallies";
 
   static final String DESCRIPTION_FILE_NAME = "description" + SUFFIX;
   static final String CONTEXT_FILE_NAME = "context" + SUFFIX;
@@ -62,7 +63,8 @@ public class Publisher {
   private final Path devicesDirPath;
   private final Path coefficientsDirPath;
   private final Path ballotsDirPath;
-  private final Path spoiledDirPath;
+  private final Path spoiledBallotDirPath;
+  private final Path spoiledTallyDirPath;
   private final Path privateDirPath;
 
   public Publisher(String where, boolean removeAllFiles, boolean createDirs) throws IOException {
@@ -70,7 +72,8 @@ public class Publisher {
     this.devicesDirPath = publishDirectory.resolve(DEVICES_DIR);
     this.coefficientsDirPath = publishDirectory.resolve(COEFFICIENTS_DIR);
     this.ballotsDirPath = publishDirectory.resolve(BALLOTS_DIR);
-    this.spoiledDirPath = publishDirectory.resolve(SPOILED_DIR);
+    this.spoiledBallotDirPath = publishDirectory.resolve(SPOILED_BALLOT_DIR);
+    this.spoiledTallyDirPath = publishDirectory.resolve(SPOILED_TALLY_DIR);
     this.privateDirPath = publishDirectory.resolve(PRIVATE_DIR);
 
     if (removeAllFiles) {
@@ -82,7 +85,8 @@ public class Publisher {
   }
 
   private void createDirs() throws IOException {
-    Files.createDirectories(spoiledDirPath);
+    Files.createDirectories(spoiledTallyDirPath);
+    Files.createDirectories(spoiledBallotDirPath);
     Files.createDirectories(ballotsDirPath);
     Files.createDirectories(coefficientsDirPath);
     Files.createDirectories(devicesDirPath);
@@ -131,6 +135,9 @@ public class Publisher {
   }
 
   public File[] deviceFiles() {
+    if (!Files.exists(devicesDirPath)) {
+      return new File[0];
+    }
     return devicesDirPath.toFile().listFiles();
   }
 
@@ -140,6 +147,9 @@ public class Publisher {
   }
 
   public File[] coefficientsFiles() {
+    if (!Files.exists(coefficientsDirPath)) {
+      return new File[0];
+    }
     return coefficientsDirPath.toFile().listFiles();
   }
 
@@ -149,16 +159,34 @@ public class Publisher {
   }
 
   public File[] ballotFiles() {
+    if (!Files.exists(ballotsDirPath)) {
+      return new File[0];
+    }
     return ballotsDirPath.toFile().listFiles();
   }
 
   public Path spoiledBallotPath(String id) {
-    String fileName = SPOILED_DIR + id + SUFFIX;
-    return spoiledDirPath.resolve(fileName);
+    String fileName = BALLOT_PREFIX + id + SUFFIX;
+    return spoiledBallotDirPath.resolve(fileName);
   }
 
   public File[] spoiledBallotFiles() {
-    return spoiledDirPath.toFile().listFiles();
+    if (!Files.exists(spoiledBallotDirPath)) {
+      return new File[0];
+    }
+    return spoiledBallotDirPath.toFile().listFiles();
+  }
+
+  public Path spoiledTallyPath(String id) {
+    String fileName = BALLOT_PREFIX + id + SUFFIX;
+    return spoiledTallyDirPath.resolve(fileName);
+  }
+
+  public File[] spoiledTallyFiles() {
+    if (!Files.exists(spoiledTallyDirPath)) {
+      return new File[0];
+    }
+    return spoiledTallyDirPath.toFile().listFiles();
   }
 
   ///
@@ -192,7 +220,8 @@ public class Publisher {
           PublishedCiphertextTally ciphertext_tally,
           PlaintextTally decryptedTally,
           @Nullable Iterable<KeyCeremony.CoefficientValidationSet> coefficient_validation_sets,
-          @Nullable Iterable<Ballot.PlaintextBallot> spoiledBallots) throws IOException {
+          @Nullable Iterable<Ballot.PlaintextBallot> spoiledBallots,
+          @Nullable Iterable<PlaintextTally> spoiledTallies) throws IOException {
 
     ConvertToJson.write(description, this.electionPath());
     ConvertToJson.write(context, this.contextPath());
@@ -202,18 +231,30 @@ public class Publisher {
       ConvertToJson.write(device, this.devicePath(device.uuid));
     }
 
-    if (coefficient_validation_sets != null) {
-      for (KeyCeremony.CoefficientValidationSet coefficient_validation_set : coefficient_validation_sets) {
-        ConvertToJson.write(coefficient_validation_set, this.coefficientsPath(coefficient_validation_set.owner_id()));
-      }
-    }
-
     for (Ballot.CiphertextAcceptedBallot ballot : ciphertext_ballots) {
       ConvertToJson.write(ballot, this.ballotPath(ballot.object_id));
     }
 
     ConvertToJson.write(ciphertext_tally, encryptedTallyPath());
     ConvertToJson.write(decryptedTally, tallyPath());
+
+    if (coefficient_validation_sets != null) {
+      for (KeyCeremony.CoefficientValidationSet coefficient_validation_set : coefficient_validation_sets) {
+        ConvertToJson.write(coefficient_validation_set, this.coefficientsPath(coefficient_validation_set.owner_id()));
+      }
+    }
+
+    if (spoiledBallots != null) {
+      for (Ballot.PlaintextBallot ballot : spoiledBallots) {
+        ConvertToJson.write(ballot, this.spoiledBallotPath(ballot.object_id));
+      }
+    }
+
+    if (spoiledTallies != null) {
+      for (PlaintextTally tally : spoiledTallies) {
+        ConvertToJson.write(tally, this.spoiledTallyPath(tally.object_id));
+      }
+    }
   }
 
   /**

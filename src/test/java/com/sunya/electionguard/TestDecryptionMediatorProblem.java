@@ -41,10 +41,11 @@ public class TestDecryptionMediatorProblem extends TestProperties {
     this.key_ceremony = new KeyCeremonyMediator(CEREMONY_DETAILS);
 
     // Setup Guardians
+    ElementModQ crypto_hash = rand_q();
     List<GuardianBuilder> guardianBuilders = new ArrayList<>();
     for (int i = 0; i < NUMBER_OF_GUARDIANS; i++) {
       int sequence = i + 2;
-      guardianBuilders.add(GuardianBuilder.createForTesting("guardian_" + sequence, sequence, NUMBER_OF_GUARDIANS, QUORUM, null));
+      guardianBuilders.add(GuardianBuilder.createForTesting("guardian_" + sequence, sequence, NUMBER_OF_GUARDIANS, QUORUM, crypto_hash,null));
     }
     guardianBuilders.forEach(gb -> this.key_ceremony.announce(gb));
     this.key_ceremony.orchestrate(identity_auxiliary_encrypt);
@@ -124,7 +125,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
 
     // configure the ballot box
     DataStore ballot_store = new DataStore();
-    BallotBox ballot_box = new BallotBox(this.metadata, this.context, ballot_store);
+    this.ballot_box = new BallotBox(this.metadata, this.context, ballot_store);
     this.encrypted_fake_cast_ballot = ballot_box.cast(temp_encrypted_fake_cast_ballot).orElseThrow();
     this.encrypted_fake_spoiled_ballot = ballot_box.spoil(temp_encrypted_fake_spoiled_ballot).orElseThrow();
 

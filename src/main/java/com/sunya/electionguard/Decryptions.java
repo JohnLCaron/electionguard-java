@@ -71,7 +71,7 @@ public class Decryptions {
 
     Map<String, CiphertextDecryptionContest> contests = new HashMap<>();
 
-    for (CiphertextTallyBuilder.CiphertextTallyContestBuilder tallyContest : tally.cast.values()) {
+    for (CiphertextTallyBuilder.CiphertextTallyContestBuilder tallyContest : tally.contests.values()) {
       Map<String, CiphertextDecryptionSelection> selections = new HashMap<>();
 
       // [(guardian, selection, context) for (_, selection) in contest.tally_selections.items()],
@@ -283,7 +283,7 @@ public class Decryptions {
 
     Map<String, CiphertextCompensatedDecryptionContest> contests = new HashMap<>();
 
-    for (CiphertextTallyBuilder.CiphertextTallyContestBuilder contest : tally.cast.values()) {
+    for (CiphertextTallyBuilder.CiphertextTallyContestBuilder contest : tally.contests.values()) {
       Map<String, CiphertextCompensatedDecryptionSelection> selections = new HashMap<>();
 
       // [ (guardian, missing_guardian_id, selection, context, decrypt)
@@ -541,7 +541,7 @@ public class Decryptions {
       // iterate through the tallies and accumulate all of the shares for this guardian
       Map<String, CiphertextDecryptionContest> contests = reconstruct_decryption_contests(
               missing_guardian_id,
-              ciphertext_tally.cast,
+              ciphertext_tally.contests,
               shares,
               lagrange_coefficients);
 
@@ -657,7 +657,7 @@ public class Decryptions {
       // iterate through the tallies and accumulate all of the shares for this guardian
       Map<String, CiphertextDecryptionContest> contests = reconstruct_decryption_contests(
               missing_guardian_id,
-              ciphertext_tally.cast,
+              ciphertext_tally.contests,
               shares,
               lagrange_coefficients);
 

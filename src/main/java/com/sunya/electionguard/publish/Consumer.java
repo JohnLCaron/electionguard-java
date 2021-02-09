@@ -83,6 +83,16 @@ public class Consumer {
     return result;
   }
 
+  // Decrypted, spoiled tallies
+  public List<PlaintextTally> spoiledTallies() throws IOException {
+    List<PlaintextTally> result = new ArrayList<>();
+    for (File file : publisher.spoiledTallyFiles()) {
+      PlaintextTally fromPython = ConvertFromJson.readPlaintextTally(file.getAbsolutePath());
+      result.add(fromPython);
+    }
+    return result;
+  }
+
   public List<KeyCeremony.CoefficientValidationSet> guardianCoefficients() throws IOException {
     List<KeyCeremony.CoefficientValidationSet> result = new ArrayList<>();
     for (File file : publisher.coefficientsFiles()) {
@@ -103,7 +113,7 @@ public class Consumer {
             this.decryptedTally(),
             CloseableIterableAdapter.wrap(this.acceptedBallots()),
             CloseableIterableAdapter.wrap(this.spoiledBallots()),
-            null); // TODO
+            CloseableIterableAdapter.wrap(this.spoiledTallies()));
   }
 
   /////////////////////////////////////////////////////////////////////

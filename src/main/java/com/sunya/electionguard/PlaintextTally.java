@@ -10,6 +10,7 @@ import javax.annotation.concurrent.Immutable;
 import java.util.Formatter;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.sunya.electionguard.Group.ElementModP;
 
@@ -21,9 +22,6 @@ public class PlaintextTally {
   // Map(CONTEST_ID, PlaintextTallyContest)
   public final ImmutableMap<String, PlaintextTallyContest> contests;
 
-  // Tally of spoiled ballots: Map(BALLOT_ID, Map(CONTEST_ID, PlaintextTallyContest))
-  // public final ImmutableMap<String, ImmutableMap<String, PlaintextTallyContest>> spoiledBallotTally;
-
   /** The lagrange coefficients w_ij for verification of section 10. */
   public final ImmutableMap<String, Group.ElementModQ> lagrange_coefficients;
 
@@ -32,13 +30,28 @@ public class PlaintextTally {
 
   public PlaintextTally(String object_id,
                         Map<String, PlaintextTallyContest> contests,
-                        // Map<String, Map<String, PlaintextTallyContest>> spoiledTally,
                         @Nullable Map<String, Group.ElementModQ> lagrange_coefficients,
                         @Nullable List<GuardianState> guardianState) {
     this.object_id = Preconditions.checkNotNull(object_id);
     this.contests =  ImmutableMap.copyOf(Preconditions.checkNotNull(contests));
     this.lagrange_coefficients = (lagrange_coefficients != null) ? ImmutableMap.copyOf(lagrange_coefficients) : ImmutableMap.of();
     this.guardianStates = (guardianState != null) ? ImmutableList.copyOf(guardianState) : ImmutableList.of();
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    PlaintextTally that = (PlaintextTally) o;
+    return object_id.equals(that.object_id) &&
+            contests.equals(that.contests) &&
+            Objects.equals(lagrange_coefficients, that.lagrange_coefficients) &&
+            Objects.equals(guardianStates, that.guardianStates);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(object_id, contests, lagrange_coefficients, guardianStates);
   }
 
   @Override
@@ -71,7 +84,7 @@ public class PlaintextTally {
       out.format("   %-40s = %d%n", "Total votes", sum);
       return out.toString();
     }
-  } // PlaintextTallyContest
+  }
 
   /**
    * The plaintext representation of the counts of one selection of one contest in the election.
@@ -100,7 +113,7 @@ public class PlaintextTally {
     public String toString() {
       return String.format("   %-40s = %d", object_id(), tally());
     }
-  } // PlaintextTallySelection
+  }
 
   /** The state of the Guardian when decrypting: missing or available. */
   @AutoValue

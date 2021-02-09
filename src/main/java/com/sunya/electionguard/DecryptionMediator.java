@@ -22,7 +22,6 @@ public class DecryptionMediator {
   private final CiphertextTallyBuilder encryptedTally;
   private final Iterable<Ballot.CiphertextAcceptedBallot> spoiled_ballots;
 
-  private Optional<PlaintextTally> decryptedTally = Optional.empty();
 
   // Map(AVAILABLE_GUARDIAN_ID, Guardian)
   private final Map<String, Guardian> available_guardians = new HashMap<>();
@@ -37,8 +36,10 @@ public class DecryptionMediator {
   private final Map<String, Map<String, CompensatedTallyDecryptionShare>> compensated_decryption_shares = new HashMap<>();
 
   // intermediate results, created in decrypt_tally(), used in decrypt_spoiled_ballots()
-  // / Map(AVAILABLE_GUARDIAN_ID, TallyDecryptionShare)
+  private Optional<PlaintextTally> decryptedTally = Optional.empty();
+  // Map(AVAILABLE_GUARDIAN_ID, ElementModQ)
   private Map<String, Group.ElementModQ> lagrange_coefficients;
+  // Map(ALL?_GUARDIAN_ID, TallyDecryptionShare)
   private Map<String, TallyDecryptionShare> merged_decryption_shares;
 
   public DecryptionMediator(CiphertextElectionContext context,

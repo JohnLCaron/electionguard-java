@@ -1,5 +1,6 @@
 package com.sunya.electionguard.verifier;
 
+import com.sunya.electionguard.publish.CloseableIterableAdapter;
 import com.sunya.electionguard.publish.Consumer;
 import net.jqwik.api.Example;
 import net.jqwik.api.lifecycle.BeforeContainer;
@@ -15,20 +16,19 @@ public class TestDecryptionVerifier {
   @BeforeContainer
   public static void setUp() throws IOException {
     String topdir = TestParameterVerifier.topdir;
-
     consumer = new Consumer(topdir);
     validator = new DecryptionVerifier(consumer.readElectionRecordJson());
   }
 
   @Example
-  public void testSelectionEncryptionValidation() throws IOException {
+  public void testSelectionEncryptionValidation() {
     boolean sevOk = validator.verify_election_tally();
     assertThat(sevOk).isTrue();
   }
 
   @Example
   public void testSelectionSpoiledBallots() throws IOException {
-    boolean sevOk = validator.verify_spoiled_tallies(consumer.decryptedSpoiledTalliesProto());
+    boolean sevOk = validator.verify_spoiled_tallies(CloseableIterableAdapter.wrap(consumer.spoiledTallies()));
     assertThat(sevOk).isTrue();
   }
 }

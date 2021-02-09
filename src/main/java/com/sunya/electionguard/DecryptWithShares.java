@@ -35,7 +35,7 @@ public class DecryptWithShares {
           List<PlaintextTally.GuardianState> guardianStates) {
 
     Optional<Map<String, PlaintextTally.PlaintextTallyContest>> contests = decrypt_tally_contests_with_decryption_shares(
-            tally.cast, shares, context.crypto_extended_base_hash);
+            tally.contests, shares, context.crypto_extended_base_hash);
 
     if (contests.isEmpty()) {
       return Optional.empty();

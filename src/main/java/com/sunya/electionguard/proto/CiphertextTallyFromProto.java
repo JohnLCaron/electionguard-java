@@ -13,7 +13,7 @@ import static com.sunya.electionguard.proto.CommonConvert.convertElementModQ;
 public class CiphertextTallyFromProto {
 
   public static PublishedCiphertextTally translateFromProto(CiphertextTallyProto.PublishedCiphertextTally tally) {
-    Map<String, PublishedCiphertextTally.CiphertextTallyContest> contests = tally.getCastMap().entrySet().stream()
+    Map<String, PublishedCiphertextTally.CiphertextTallyContest> contests = tally.getContestsMap().entrySet().stream()
             .collect(Collectors.toMap(Map.Entry::getKey,
                     e -> convertContest(e.getValue())));
 

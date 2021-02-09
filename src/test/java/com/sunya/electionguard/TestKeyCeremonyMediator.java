@@ -9,6 +9,7 @@ import java.util.Optional;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 
+import static com.sunya.electionguard.Group.rand_q;
 import static com.sunya.electionguard.KeyCeremony.*;
 
 
@@ -19,9 +20,10 @@ public class TestKeyCeremonyMediator {
   private static final String GUARDIAN_1_ID = "Guardian 1";
   private static final String GUARDIAN_2_ID = "Guardian 2";
   private static final String VERIFIER_ID = "Guardian 3";
-  private static final GuardianBuilder GUARDIAN_1 = GuardianBuilder.createForTesting(GUARDIAN_1_ID, 1, NUMBER_OF_GUARDIANS, QUORUM, null);
-  private static final GuardianBuilder GUARDIAN_2 = GuardianBuilder.createForTesting(GUARDIAN_2_ID, 2, NUMBER_OF_GUARDIANS, QUORUM, null);
-  private static final GuardianBuilder VERIFIER =   GuardianBuilder.createForTesting(VERIFIER_ID, 3, NUMBER_OF_GUARDIANS, QUORUM, null);
+  private static Group.ElementModQ crypto_hash = rand_q();
+  private static final GuardianBuilder GUARDIAN_1 = GuardianBuilder.createForTesting(GUARDIAN_1_ID, 1, NUMBER_OF_GUARDIANS, QUORUM, crypto_hash,null);
+  private static final GuardianBuilder GUARDIAN_2 = GuardianBuilder.createForTesting(GUARDIAN_2_ID, 2, NUMBER_OF_GUARDIANS, QUORUM, crypto_hash, null);
+  private static final GuardianBuilder VERIFIER =   GuardianBuilder.createForTesting(VERIFIER_ID, 3, NUMBER_OF_GUARDIANS, QUORUM, crypto_hash, null);
 
   static Auxiliary.Decryptor identity_auxiliary_decrypt = (m, k) -> Optional.of(new String(m.getBytes()));
   static Auxiliary.Encryptor identity_auxiliary_encrypt = (m, k) -> Optional.of(new Auxiliary.ByteString(m.getBytes()));
@@ -33,16 +35,6 @@ public class TestKeyCeremonyMediator {
     GUARDIAN_1.generate_election_partial_key_backups(identity_auxiliary_encrypt);
     GUARDIAN_2.generate_election_partial_key_backups(identity_auxiliary_encrypt);
   }
-
-  /* @Example
-  public void test_reset() {
-    KeyCeremonyMediator mediator = new KeyCeremonyMediator(CEREMONY_DETAILS);
-    CeremonyDetails new_ceremony_details = CeremonyDetails.create(3, 3);
-
-    // LOOK mutating
-    mediator.reset(new_ceremony_details);
-    assertThat(mediator.ceremony_details).isEqualTo(new_ceremony_details);
-  } */
 
   @Example
   public void test_mediator_takes_attendance() {

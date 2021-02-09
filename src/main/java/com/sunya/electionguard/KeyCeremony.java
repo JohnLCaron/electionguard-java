@@ -191,7 +191,7 @@ public class KeyCeremony {
   /**
    * Generate election key pair, proof, and polynomial.
    * @param quorum: Quorum of guardians needed to decrypt
-   * @param nonce: Optional nonce for testing, do not use in production.
+   * @param nonce: Optional nonce for testing, use null in production.
    */
   static ElectionKeyPair generate_election_key_pair(int quorum, @Nullable ElementModQ nonce, ElementModQ crypto_base_hash) {
     ElectionPolynomial polynomial = ElectionPolynomial.generate_polynomial(quorum, nonce, crypto_base_hash);
