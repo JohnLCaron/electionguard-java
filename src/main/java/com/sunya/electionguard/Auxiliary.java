@@ -20,6 +20,20 @@ public class Auxiliary {
       this.secret_key = Preconditions.checkNotNull(secret_key);
       this.public_key = Preconditions.checkNotNull(public_key);
     }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      KeyPair keyPair = (KeyPair) o;
+      return secret_key.equals(keyPair.secret_key) &&
+              public_key.equals(keyPair.public_key);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(secret_key, public_key);
+    }
   }
 
   /** A tuple of auxiliary public key and owner information. */

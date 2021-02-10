@@ -16,13 +16,27 @@ public class ElGamal {
 
   /** A tuple of an ElGamal secret key and public key. */
   @Immutable
-  static class KeyPair {
-    final ElementModQ secret_key;
-    final ElementModP public_key;
+  public static class KeyPair {
+    public final ElementModQ secret_key;
+    public final ElementModP public_key;
 
     public KeyPair(ElementModQ secret_key, ElementModP public_key) {
       this.secret_key = Preconditions.checkNotNull(secret_key);
       this.public_key = Preconditions.checkNotNull(public_key);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      KeyPair keyPair = (KeyPair) o;
+      return secret_key.equals(keyPair.secret_key) &&
+              public_key.equals(keyPair.public_key);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(secret_key, public_key);
     }
   }
 

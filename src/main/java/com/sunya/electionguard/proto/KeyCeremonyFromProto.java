@@ -2,6 +2,8 @@ package com.sunya.electionguard.proto;
 
 import com.google.common.collect.ImmutableList;
 import com.sunya.electionguard.Auxiliary;
+import com.sunya.electionguard.ElGamal;
+import com.sunya.electionguard.ElectionPolynomial;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.Guardian;
 import com.sunya.electionguard.GuardianBuilder;
@@ -43,8 +45,9 @@ public class KeyCeremonyFromProto {
                                           Group.ElementModQ cryptoBaseHash) {
 
     KeyCeremony.CoefficientSet coefficients = convertCoefficients(proto.getCoefficients());
-    GuardianBuilder builder = GuardianBuilder.create(coefficients, nguardians, quorum, cryptoBaseHash);
-    builder.setAuxiliaryKeyPair( convertAuxiliaryKeyPair(proto.getAuxiliaryKeys()));
+    GuardianBuilder builder = new GuardianBuilder(coefficients, nguardians, quorum, cryptoBaseHash,
+            convertAuxiliaryKeyPair(proto.getAuxiliaryKeys()),
+            convertElectionKeys(proto.getElectionKeys()));
 
     proto.getOtherGuardianAuxiliaryKeysList()
             .forEach(k -> builder.save_auxiliary_public_key(convertAuxiliaryPublicKey(k)));
@@ -71,6 +74,13 @@ public class KeyCeremonyFromProto {
             convertJavaPublicKey(proto.getKey()));
   }
 
+  private static KeyCeremony.ElectionKeyPair convertElectionKeys(KeyCeremonyProto.ElectionKeyPair proto) {
+    return KeyCeremony.ElectionKeyPair.create(
+            convertElgamalKeypair(proto.getKeyPair()),
+            CommonConvert.convertSchnorrProof(proto.getProof()),
+            convertElectionPolynomial(proto.getPolynomial()));
+  }
+
   private static KeyCeremony.ElectionPublicKey convertElectionPublicKey(KeyCeremonyProto.ElectionPublicKey proto) {
     return KeyCeremony.ElectionPublicKey.create(
             proto.getOwnerId(),
@@ -87,6 +97,19 @@ public class KeyCeremonyFromProto {
             new Auxiliary.ByteString(proto.getEncryptedValue().toByteArray()),
             CommonConvert.convertList(proto.getCoefficientCommitmentsList(), CommonConvert::convertElementModP),
             CommonConvert.convertList(proto.getCoefficientProofsList(), CommonConvert::convertSchnorrProof));
+  }
+
+  private static ElectionPolynomial convertElectionPolynomial(KeyCeremonyProto.ElectionPolynomial proto) {
+    return new ElectionPolynomial(
+            CommonConvert.convertList(proto.getCoefficientsList(), CommonConvert::convertElementModQ),
+            CommonConvert.convertList(proto.getCoefficientCommitmentsList(), CommonConvert::convertElementModP),
+            CommonConvert.convertList(proto.getCoefficientProofsList(), CommonConvert::convertSchnorrProof));
+  }
+
+  private static ElGamal.KeyPair convertElgamalKeypair(KeyCeremonyProto.ElGamalKeyPair keypair) {
+    return new ElGamal.KeyPair(
+            CommonConvert.convertElementModQ(keypair.getSecretKey()),
+            CommonConvert.convertElementModP(keypair.getPublicKey()));
   }
 
   // LOOK there may be something better to do when serializing. Find out before use in production.

@@ -12,7 +12,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class TestCoefficientsProvider implements CoefficientsProvider {
+public class FakeCoefficientsProvider implements CoefficientsProvider {
   private static final String WHERE = "/home/snake/tmp/electionguard/coeff.proto";
   private static final int NUMBER_OF_GUARDIANS = 6;
   private static final int QUORUM = 6;

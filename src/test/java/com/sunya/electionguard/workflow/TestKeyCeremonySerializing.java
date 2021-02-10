@@ -1,9 +1,6 @@
 package com.sunya.electionguard.workflow;
 
-import com.beust.jcommander.JCommander;
-import com.beust.jcommander.Parameter;
-import com.beust.jcommander.ParameterException;
-import com.google.common.collect.Iterables;
+import com.google.common.collect.ImmutableList;
 import com.sunya.electionguard.Election;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.Guardian;
@@ -11,125 +8,23 @@ import com.sunya.electionguard.GuardianBuilder;
 import com.sunya.electionguard.Hash;
 import com.sunya.electionguard.KeyCeremony;
 import com.sunya.electionguard.KeyCeremonyMediator;
+import com.sunya.electionguard.proto.KeyCeremonyFromProto;
 import com.sunya.electionguard.proto.KeyCeremonyProto;
 import com.sunya.electionguard.proto.KeyCeremonyToProto;
 import com.sunya.electionguard.publish.Consumer;
 import com.sunya.electionguard.publish.Publisher;
+import net.jqwik.api.Example;
 
 import java.io.IOException;
-import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static com.google.common.truth.Truth.assertThat;
+
 /** KeyCeremony to create the Guardians. */
-public class PerformKeyCeremony {
-
-  private static class CommandLine {
-    @Parameter(names = {"-in"},
-            description = "Directory containing input election description", required = true)
-    String inputDir;
-
-    @Parameter(names = {"--proto"}, description = "Input election record is in proto format")
-    boolean isProto = false;
-
-    @Parameter(names = {"-out"},
-            description = "Directory where Guardians and election context is written", required = true)
-    String outputDir;
-
-    @Parameter(names = {"-coefficients"},
-            description = "CoefficientsProvider classname")
-    String coefficientsProviderClass;
-
-    @Parameter(names = {"-nguardians"}, description = "Number of quardians to create (required if no coefficients)")
-    int nguardians;
-
-    @Parameter(names = {"-quorum"}, description = "Number of quardians that make a quorum (required if no coefficients)")
-    int quorum;
-
-    @Parameter(names = {"-h", "--help"}, description = "Display this help and exit", help = true)
-    boolean help = false;
-
-    private final JCommander jc;
-
-    public CommandLine(String progName, String[] args) throws ParameterException {
-      this.jc = new JCommander(this);
-      this.jc.parse(args);
-      jc.setProgramName(progName); // Displayed in the usage information.
-    }
-
-    public void printUsage() {
-      jc.usage();
-    }
-  }
-
-  public static void main(String[] args) throws IOException {
-    String progName = PerformKeyCeremony.class.getName();
-    CommandLine cmdLine = null;
-
-    try {
-      cmdLine = new CommandLine(progName, args);
-      if (cmdLine.help) {
-        cmdLine.printUsage();
-        return;
-      }
-    } catch (ParameterException e) {
-      System.err.println(e.getMessage());
-      System.err.printf("Try '%s --help' for more information.%n", progName);
-      System.exit(1);
-    }
-
-    // all we need from election record is the ElectionDescription.
-    Consumer consumer = new Consumer(cmdLine.inputDir);
-    Election.ElectionDescription election;
-    if (cmdLine.isProto) {
-      election = consumer.readElectionRecordProto().election;
-    } else {
-      election = consumer.election();
-    }
-
-    CoefficientsProvider coefficientsProvider = null;
-    if (cmdLine.coefficientsProviderClass != null) {
-      try {
-        coefficientsProvider = makeCoefficientsProvider(cmdLine.coefficientsProviderClass);
-      } catch (Throwable t) {
-        t.printStackTrace();
-        System.exit(2);
-      }
-    }
-
-    System.out.printf("KeyCeremony read election description from directory %s%n", cmdLine.inputDir);
-    System.out.printf("  write Guardians to directory %s%n", cmdLine.outputDir);
-    if (coefficientsProvider == null) {
-      System.out.printf("  generate random Guardian coefficients%n");
-    } else {
-      System.out.printf("  Guardian coefficients provided by %s%n", coefficientsProvider);
-    }
-    if (coefficientsProvider == null) {
-      coefficientsProvider = new RandomCoefficientsProvider(cmdLine.nguardians, cmdLine.quorum);
-    }
-    PerformKeyCeremony keyCeremony = new PerformKeyCeremony(election, coefficientsProvider);
-
-    try {
-      // publish
-      keyCeremony.publish(cmdLine.outputDir);
-      System.exit(0);
-
-    } catch (Throwable t) {
-      t.printStackTrace();
-      System.exit(5);
-    }
-  }
-
-  static CoefficientsProvider makeCoefficientsProvider(String className) throws Throwable {
-    Class<?> c = Class.forName(className);
-    if (!(CoefficientsProvider.class.isAssignableFrom(c))) {
-      throw new IllegalArgumentException(String.format("CoefficientsProvider '%s' does not implement %s", c.getName(), CoefficientsProvider.class));
-    }
-    Constructor<CoefficientsProvider> constructor = (Constructor<CoefficientsProvider>) c.getConstructor();
-    return constructor.newInstance();
-  }
+public class TestKeyCeremonySerializing {
 
   static class RandomCoefficientsProvider implements CoefficientsProvider {
     final int nguardians;
@@ -146,24 +41,27 @@ public class PerformKeyCeremony {
     }
 
     @Override
-    public Iterable<com.sunya.electionguard.KeyCeremony.CoefficientSet> guardianCoefficients() {
-      ArrayList<com.sunya.electionguard.KeyCeremony.CoefficientSet> coeffSets = new ArrayList<>();
+    public Iterable<KeyCeremony.CoefficientSet> guardianCoefficients() {
+      ArrayList<KeyCeremony.CoefficientSet> coeffSets = new ArrayList<>();
       for (int k = 0; k < this.nguardians; k++) {
         int sequence = k + 1;
         ArrayList<Group.ElementModQ> coefficients = new ArrayList<>();
         for (int j = 0; j < this.quorum; j++) {
           coefficients.add(Group.rand_q()); // ramdomly chosen
         }
-        coeffSets.add(com.sunya.electionguard.KeyCeremony.CoefficientSet.create("guardian_" + sequence, sequence, coefficients));
+        coeffSets.add(KeyCeremony.CoefficientSet.create("guardian_" + sequence, sequence, coefficients));
       }
       return coeffSets;
     }
   }
 
   ///////////////////////////////////////////////////////////////////////////
+  final int numberOfGuardians = 4;
+  final int quorum = 4;
   final Election.ElectionDescription election;
-  final int numberOfGuardians;
-  final int quorum;
+  final String inputDir = "/home/snake/tmp/electionguard/publishEndToEnd";
+  final String outputDir = "/home/snake/tmp/electionguard/publishTest";
+  final Publisher publisher;
 
   Group.ElementModP jointKey;
   Election.CiphertextElectionContext context;
@@ -171,12 +69,13 @@ public class PerformKeyCeremony {
   Group.ElementModQ crypto_base_hash;
 
   List<GuardianBuilder> guardianBuilders;
-  List<com.sunya.electionguard.KeyCeremony.CoefficientValidationSet> coefficientValidationSets = new ArrayList<>();
+  List<KeyCeremony.CoefficientValidationSet> coefficientValidationSets = new ArrayList<>();
+  List<Guardian> guardians;
 
-  public PerformKeyCeremony(Election.ElectionDescription election, CoefficientsProvider coefficientsProvider) {
-    this.election = election;
-    this.quorum = coefficientsProvider.quorum();
-    this.numberOfGuardians = Iterables.size(coefficientsProvider.guardianCoefficients());
+  public TestKeyCeremonySerializing() throws IOException {
+    Consumer consumer = new Consumer(inputDir);
+    this.election = consumer.election();
+    CoefficientsProvider coefficientsProvider = new RandomCoefficientsProvider(numberOfGuardians, quorum);
     System.out.printf("  Create %d Guardians, quorum = %d%n", this.numberOfGuardians, this.quorum);
 
     this.crypto_base_hash = Election.make_crypto_base_hash(this.numberOfGuardians, this.quorum, election);
@@ -190,7 +89,10 @@ public class PerformKeyCeremony {
     if (!keyCeremony()) {
       throw new RuntimeException("*** Key Ceremony failed");
     }
-    buildElectionContext(this.election, this.jointKey);
+    buildElectionContext(election, this.jointKey);
+
+    this.publisher = new Publisher(outputDir, false, false);
+    publish();
   }
 
   /**
@@ -200,8 +102,8 @@ public class PerformKeyCeremony {
    */
   boolean keyCeremony() {
     // Setup Mediator
-    com.sunya.electionguard.KeyCeremony.CeremonyDetails details =
-            com.sunya.electionguard.KeyCeremony.CeremonyDetails.create(this.numberOfGuardians,  this.quorum);
+    KeyCeremony.CeremonyDetails details =
+            KeyCeremony.CeremonyDetails.create(this.numberOfGuardians,  this.quorum);
     KeyCeremonyMediator keyCeremony = new KeyCeremonyMediator(details);
 
     // Attendance (Public Key Share)
@@ -281,20 +183,32 @@ public class PerformKeyCeremony {
             crypto_extended_base_hash);
   }
 
-  void publish(String publishDir) throws IOException {
-    // the election record
-    Publisher publisher = new Publisher(publishDir, false, false);
+  void publish() throws IOException {
     publisher.writeKeyCeremonyProto(
             this.election,
             this.context,
             new Election.ElectionConstants(),
             this.coefficientValidationSets);
 
-    // the quardians - private info
-    List<Guardian> guardians = guardianBuilders.stream().map(gb -> gb.build()).collect(Collectors.toList());
+    this.guardians = guardianBuilders.stream().map(GuardianBuilder::build).collect(Collectors.toList());
     KeyCeremonyProto.Guardians guardianProto = KeyCeremonyToProto.convertGuardians(guardians,
             this.quorum, this.crypto_base_hash);
 
     publisher.writeGuardiansProto(guardianProto);
   }
+
+  @Example
+  public void checkGuardians() throws IOException {
+    ImmutableList<Guardian> roundtrip = KeyCeremonyFromProto.readGuardians(this.publisher.guardiansPath().toString());
+
+    assertThat(roundtrip).hasSize(this.guardians.size());
+    for (Guardian guardian : this.guardians) {
+      System.out.printf("Test Guardian %s%n", guardian.object_id);
+      Guardian rguardian = roundtrip.stream().filter(g -> g.object_id.equals(guardian.object_id)).findFirst().orElseThrow();
+      assertThat(rguardian.equals(guardian)).isTrue();
+      assertThat(rguardian).isEqualTo(guardian);
+    }
+
+  }
+
 }

@@ -8,6 +8,7 @@ import javax.annotation.concurrent.Immutable;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.sunya.electionguard.Group.ElementModQ;
@@ -33,20 +34,35 @@ import static com.sunya.electionguard.Group.rand_q;
 public class ElectionPolynomial {
 
   /** The secret coefficients `a_ij`. */
-  final ImmutableList<Group.ElementModQ> coefficients;
+  public final ImmutableList<Group.ElementModQ> coefficients;
 
   /** The public keys `K_ij`generated from secret coefficients. */
-  final ImmutableList<Group.ElementModP> coefficient_commitments;
+  public final ImmutableList<Group.ElementModP> coefficient_commitments;
 
   /** A proof of possession of the private key for each secret coefficient. */
-  final ImmutableList<SchnorrProof> coefficient_proofs;
+  public final ImmutableList<SchnorrProof> coefficient_proofs;
 
   // LOOK test all sizes == quorum
-  ElectionPolynomial(List<Group.ElementModQ> coefficients, List<Group.ElementModP> coefficient_commitments,
+  public ElectionPolynomial(List<Group.ElementModQ> coefficients, List<Group.ElementModP> coefficient_commitments,
                      List<SchnorrProof> coefficient_proofs) {
     this.coefficients = ImmutableList.copyOf(coefficients);
     this.coefficient_commitments = ImmutableList.copyOf(coefficient_commitments);
     this.coefficient_proofs = ImmutableList.copyOf(coefficient_proofs);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    ElectionPolynomial that = (ElectionPolynomial) o;
+    return coefficients.equals(that.coefficients) &&
+            coefficient_commitments.equals(that.coefficient_commitments) &&
+            coefficient_proofs.equals(that.coefficient_proofs);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(coefficients, coefficient_commitments, coefficient_proofs);
   }
 
   /**

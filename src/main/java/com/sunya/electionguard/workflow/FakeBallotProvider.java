@@ -10,13 +10,14 @@ import java.util.List;
 import java.util.Random;
 
 // Create nballots randomly generated fake Ballots
-public class TestBallotProvider implements BallotProvider {
+public class FakeBallotProvider implements BallotProvider {
   private static final Random random = new Random(System.currentTimeMillis());
-  private static final int nballots = 21;
-  private final Election.ElectionDescription election;
+  private int nballots;
+  private Election.ElectionDescription election;
 
-  public TestBallotProvider(Election.ElectionDescription election) {
+  public FakeBallotProvider(Election.ElectionDescription election, Integer nballots) {
     this.election = election;
+    this.nballots = nballots != null && nballots > 0 ? nballots : 11;
   }
 
   @Override

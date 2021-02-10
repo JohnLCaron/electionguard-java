@@ -2,6 +2,8 @@ package com.sunya.electionguard.proto;
 
 import com.google.protobuf.ByteString;
 import com.sunya.electionguard.Auxiliary;
+import com.sunya.electionguard.ElGamal;
+import com.sunya.electionguard.ElectionPolynomial;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.Guardian;
 import com.sunya.electionguard.KeyCeremony;
@@ -28,6 +30,7 @@ public class KeyCeremonyToProto {
     KeyCeremonyProto.Guardian.Builder builder = KeyCeremonyProto.Guardian.newBuilder();
     builder.setCoefficients(convertCoefficients(guardian.coefficients()));
     builder.setAuxiliaryKeys(convertAuxiliaryKeyPair(guardian.auxiliary_keys()));
+    builder.setElectionKeys(convertElectionKeys(guardian.election_keys()));
 
     guardian.auxiliary_public_keys().forEach(k -> builder.addOtherGuardianAuxiliaryKeys(convertAuxiliaryPublicKey(k)));
     guardian.election_public_keys().forEach(k -> builder.addOtherGuardianElectionKeys(convertElectionPublicKey(k)));
@@ -51,6 +54,14 @@ public class KeyCeremonyToProto {
     return builder.build();
   }
 
+  private static KeyCeremonyProto.ElectionKeyPair convertElectionKeys(KeyCeremony.ElectionKeyPair org) {
+    KeyCeremonyProto.ElectionKeyPair.Builder builder = KeyCeremonyProto.ElectionKeyPair.newBuilder();
+    builder.setKeyPair(convertElgamalKeypair(org.key_pair()));
+    builder.setProof(CommonConvert.convertSchnorrProof(org.proof()));
+    builder.setPolynomial(convertElectionPolynomial(org.polynomial()));
+    return builder.build();
+  }
+
   private static KeyCeremonyProto.ElectionPublicKey convertElectionPublicKey(KeyCeremony.ElectionPublicKey org) {
     KeyCeremonyProto.ElectionPublicKey.Builder builder = KeyCeremonyProto.ElectionPublicKey.newBuilder();
     builder.setOwnerId(org.owner_id());
@@ -68,6 +79,21 @@ public class KeyCeremonyToProto {
     builder.setEncryptedValue(ByteString.copyFrom(org.encrypted_value().getBytes()));
     org.coefficient_commitments().forEach(c -> builder.addCoefficientCommitments(convertElementModP(c)));
     org.coefficient_proofs().forEach(p -> builder.addCoefficientProofs(convertSchnorrProof(p)));
+    return builder.build();
+  }
+
+  private static KeyCeremonyProto.ElectionPolynomial convertElectionPolynomial(ElectionPolynomial org) {
+    KeyCeremonyProto.ElectionPolynomial.Builder builder = KeyCeremonyProto.ElectionPolynomial.newBuilder();
+    org.coefficients.forEach(c -> builder.addCoefficients(convertElementModQ(c)));
+    org.coefficient_commitments.forEach(c -> builder.addCoefficientCommitments(convertElementModP(c)));
+    org.coefficient_proofs.forEach(p -> builder.addCoefficientProofs(convertSchnorrProof(p)));
+    return builder.build();
+  }
+
+  private static KeyCeremonyProto.ElGamalKeyPair convertElgamalKeypair(ElGamal.KeyPair keypair) {
+    KeyCeremonyProto.ElGamalKeyPair.Builder builder = KeyCeremonyProto.ElGamalKeyPair.newBuilder();
+    builder.setSecretKey(CommonConvert.convertElementModQ(keypair.secret_key));
+    builder.setPublicKey(CommonConvert.convertElementModP(keypair.public_key));
     return builder.build();
   }
 

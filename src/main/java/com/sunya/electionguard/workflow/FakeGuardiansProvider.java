@@ -6,8 +6,8 @@ import com.sunya.electionguard.proto.KeyCeremonyFromProto;
 
 import java.io.IOException;
 
-public class TestGuardiansProvider implements GuardiansProvider {
-  private static final String WHERE = "/home/snake/tmp/electionguard/publishBallotEncryptor/private/guardians.proto";
+public class FakeGuardiansProvider implements GuardiansProvider {
+  private static final String WHERE = "/home/snake/tmp/electionguard/publishWorkflowEncryptor/private/guardians.proto";
   private Iterable<Guardian> guardians;
 
   @Override

@@ -152,8 +152,6 @@ public class DecryptBallots {
 
     int count = 0;
     for (Guardian guardian : this.guardians) {
-      // LOOK not using TallyDecryptionShare?
-      // LOOK test Guardians against whats in the electionRecord.
       boolean ok = mediator.announce(guardian);
       Preconditions.checkArgument(ok);
       System.out.printf(" Guardian Present: %s%n", guardian.object_id);
@@ -179,8 +177,8 @@ public class DecryptBallots {
             this.electionRecord.election,
             this.electionRecord.context,
             this.electionRecord.constants,
-            this.electionRecord.devices,
             this.electionRecord.guardianCoefficients,
+            this.electionRecord.devices,
             this.publishedTally,
             this.decryptedTally,
             this.spoiledDecryptedBallots,

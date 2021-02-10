@@ -476,7 +476,7 @@ public class Ballot {
     public CiphertextBallotContest(String object_id, ElementModQ description_hash,
                                    List<CiphertextBallotSelection> ballot_selections,
                                    ElementModQ crypto_hash,
-                                   ElGamal.Ciphertext encrypted_total,
+                                   ElGamal.Ciphertext encrypted_total, // PR #304 calls it "ciphertext"
                                    Optional<ElementModQ> nonce,
                                    Optional<ChaumPedersen.ConstantChaumPedersenProof> proof) {
       super(object_id);
@@ -556,8 +556,15 @@ public class Ballot {
         return false;
       }
 
-      // Verify the sum of the selections matches the proof
       ElGamal.Ciphertext elgamal_accumulation = this.elgamal_accumulate();
+
+      // Verify that the contest ciphertext matches the elgamal accumulation of all selections
+      if (!this.encrypted_total.equals(elgamal_accumulation)) {
+        logger.atInfo().log("ciphertext does not equal elgamal accumulation for: %s", this.object_id);
+        return false;
+      }
+
+      // Verify the sum of the selections matches the proof
       return this.proof.get().is_valid(elgamal_accumulation, elgamal_public_key, crypto_extended_base_hash);
     }
 

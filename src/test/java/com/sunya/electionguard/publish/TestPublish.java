@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import com.sunya.electionguard.Ballot;
 import com.sunya.electionguard.CiphertextTallyBuilder;
 import com.sunya.electionguard.Guardian;
+import com.sunya.electionguard.GuardianBuilder;
 import com.sunya.electionguard.KeyCeremony;
 import com.sunya.electionguard.PublishedCiphertextTally;
 import com.sunya.electionguard.PlaintextTally;
@@ -77,7 +78,8 @@ public class TestPublish {
             Ballot.make_ciphertext_ballot("CipherTextBallotId", "ballot_style", int_to_q_unchecked(BigInteger.ZERO),
                     Optional.of(int_to_q_unchecked(BigInteger.ZERO)), ImmutableList.of(), Optional.empty(),Optional.empty(), Optional.empty()));
 
-    List<Guardian> guardians = ImmutableList.of(Guardian.createForTesting("GuardianId", 1, 1, 1, null, null));
+    List<Guardian> guardians = ImmutableList.of(
+            GuardianBuilder.createForTesting("GuardianId", 1, 1, 1, rand_q(), null).build());
 
     Publisher publisher = new Publisher(outputDir, false, false);
     publisher.publish_private_data(
