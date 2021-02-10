@@ -31,10 +31,10 @@ public class KeyCeremony {
 
   /** Pair of keys (public & secret) used to encrypt/decrypt election. */
   @AutoValue
-  abstract static class ElectionKeyPair {
-    abstract ElGamal.KeyPair key_pair(); // Ki = (si, g^si)
-    abstract SchnorrProof proof(); // proof of knowledge of possession of the associated private key
-    abstract ElectionPolynomial polynomial();
+  public abstract static class ElectionKeyPair {
+    public abstract ElGamal.KeyPair key_pair(); // Ki = (si, g^si)
+    public abstract SchnorrProof proof(); // proof of knowledge of possession of the associated private key
+    public abstract ElectionPolynomial polynomial();
 
     public static ElectionKeyPair create(ElGamal.KeyPair key_pair, SchnorrProof proof, ElectionPolynomial polynomial) {
       return new AutoValue_KeyCeremony_ElectionKeyPair(key_pair, proof, polynomial);
@@ -191,7 +191,7 @@ public class KeyCeremony {
   /**
    * Generate election key pair, proof, and polynomial.
    * @param quorum: Quorum of guardians needed to decrypt
-   * @param nonce: Optional nonce for testing, use null in production.
+   * @param nonce: Optional nonce for determinism, use null when generating in production.
    */
   static ElectionKeyPair generate_election_key_pair(int quorum, @Nullable ElementModQ nonce, ElementModQ crypto_base_hash) {
     ElectionPolynomial polynomial = ElectionPolynomial.generate_polynomial(quorum, nonce, crypto_base_hash);

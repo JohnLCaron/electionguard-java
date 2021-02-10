@@ -2,32 +2,41 @@ package com.sunya.electionguard;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableList;
-import com.sunya.electionguard.publish.Consumer;
-import com.sunya.electionguard.publish.Publisher;
-import com.sunya.electionguard.verifier.ElectionRecord;
 import net.jqwik.api.Example;
 import net.jqwik.api.lifecycle.BeforeProperty;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Random;
 import java.util.stream.Collectors;
-
-import static com.google.common.truth.Truth.assertWithMessage;
-import static com.sunya.electionguard.Ballot.*;
-import static com.sunya.electionguard.Election.*;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
+import static com.sunya.electionguard.Ballot.BallotBoxState;
+import static com.sunya.electionguard.Ballot.CiphertextAcceptedBallot;
+import static com.sunya.electionguard.Ballot.CiphertextBallot;
+import static com.sunya.electionguard.Ballot.PlaintextBallot;
+import static com.sunya.electionguard.Ballot.PlaintextBallotContest;
+import static com.sunya.electionguard.Ballot.PlaintextBallotSelection;
+import static com.sunya.electionguard.Election.CiphertextElectionContext;
+import static com.sunya.electionguard.Election.ContestDescriptionWithPlaceholders;
+import static com.sunya.electionguard.Election.ElectionConstants;
+import static com.sunya.electionguard.Election.ElectionDescription;
+import static com.sunya.electionguard.Election.InternalElectionDescription;
+import static com.sunya.electionguard.Election.SelectionDescription;
 
 /**
- * Test a complete simple example of executing an End-to-End encrypted election.
- * Puplishing to JSON.
+ * Test decrypting on specific ballots.
  */
-public class TestEndToEndElectionIntegration {
-  private static final int NUMBER_OF_GUARDIANS = 7;
-  private static final int QUORUM = 7;
+public class TestDecryptProblem {
+  private static final int NUMBER_OF_GUARDIANS = 3;
+  private static final int QUORUM = 3;
   private static final Random random = new Random(System.currentTimeMillis());
 
   String outputDir;
@@ -68,7 +77,7 @@ public class TestEndToEndElectionIntegration {
   DecryptionMediator decrypter;
   CiphertextTallyBuilder ciphertext_tally;
   PlaintextTally decryptedTally;
-  List<Ballot.PlaintextBallot> spoiledDecryptedBallots;
+  List<PlaintextBallot> spoiledDecryptedBallots;
   List<PlaintextTally> spoiledDecryptedTallies;
 
   // Execute the simplified end-to-end test demonstrating each component of the system.
@@ -95,8 +104,8 @@ public class TestEndToEndElectionIntegration {
     System.out.printf("*** step4 elapsed = %s%n", stopwatch);
     stopwatch.reset().start();
 
-    this.step_5_publish_and_verify();
-    System.out.printf("*** step5 elapsed = %s%n", stopwatch);
+    // this.step_5_publish_and_verify();
+    // System.out.printf("*** step5 elapsed = %s%n", stopwatch);
   }
 
   void step_0_configure_election() throws IOException {
@@ -195,7 +204,8 @@ public class TestEndToEndElectionIntegration {
     System.out.printf("%n2. Ready to encrypt at location: %s%n", this.device.location);
 
     // Load some Ballots
-    this.originalPlaintextBallots = new BallotFactory().get_simple_ballots_from_file();
+    String ballotFilename = "/home/snake/tmp/electionguard/publishBallotEncryptor/private/plaintext/plaintext_ballot_ballot-id-1522966651.json";
+    this.originalPlaintextBallots = ImmutableList.of(BallotFactory.get_ballot_from_file(ballotFilename));
     System.out.printf("Loaded ballots: %d%n", this.originalPlaintextBallots.size());
     assertThat(this.originalPlaintextBallots).isNotEmpty();
 
@@ -213,17 +223,12 @@ public class TestEndToEndElectionIntegration {
   void step_3_cast_and_spoil() {
     System.out.printf("%n3. cast_and_spoil%n");
 
-    // LOOK why not hide the datastore in the ballot_box ?
     this.ballot_store = new DataStore();
     this.ballot_box = new BallotBox(this.metadata, this.context, this.ballot_store);
-    // Randomly cast or spoil the ballots
+    // cast the ballots
     for (CiphertextBallot ballot : this.ciphertext_ballots) {
       Optional<CiphertextAcceptedBallot> accepted_ballot;
-      if (random.nextBoolean()) {
-        accepted_ballot = this.ballot_box.cast(ballot);
-      } else {
-        accepted_ballot = this.ballot_box.spoil(ballot);
-      }
+      accepted_ballot = this.ballot_box.cast(ballot);
       assertThat(accepted_ballot).isPresent();
       System.out.printf("Accepted Ballot Id: %s state = %s%n", ballot.object_id, accepted_ballot.get().state);
     }
@@ -307,7 +312,7 @@ public class TestEndToEndElectionIntegration {
   void compare_spoiled_tallies() {
     Map<String, PlaintextTally> plaintextTalliesMap = this.spoiledDecryptedTallies.stream().collect(Collectors.toMap(t -> t.object_id, t -> t));
 
-    for (Ballot.CiphertextAcceptedBallot accepted_ballot : this.ballot_box.getSpoiledBallots()) {
+    for (CiphertextAcceptedBallot accepted_ballot : this.ballot_box.getSpoiledBallots()) {
       String ballot_id = accepted_ballot.object_id;
       assertThat(accepted_ballot.state).isEqualTo(BallotBoxState.SPOILED);
       for (PlaintextBallot orgBallot : this.originalPlaintextBallots) {
@@ -317,61 +322,6 @@ public class TestEndToEndElectionIntegration {
           TimeIntegrationSteps.compare_spoiled_tally(orgBallot, plaintextTally);
         }
       }
-    }
-  }
-
-    // Publish and verify steps of the election
-  void step_5_publish_and_verify() throws IOException {
-    System.out.printf("%n5. publish%n");
-    Publisher publisher = new Publisher(outputDir, true, true);
-    publisher.writeElectionRecordJson(
-            this.description,
-            this.context,
-            this.constants,
-            ImmutableList.of(this.device),
-            this.ballot_box.getAllBallots(),
-            this.ciphertext_tally.build(),
-            this.decryptedTally,
-            this.coefficient_validation_sets,
-            this.spoiledDecryptedBallots,
-            this.spoiledDecryptedTallies);
-
-    System.out.printf("%n6. verify%n");
-    this.verify_results(publisher);
-  }
-
-  // Verify results of election
-  void verify_results(Publisher publisher) throws IOException {
-    Consumer consumer = new Consumer(publisher);
-    ElectionRecord roundtrip = consumer.readElectionRecordJson();
-
-    assertThat(roundtrip.election).isEqualTo(this.description);
-    assertThat(roundtrip.context).isEqualTo(this.context);
-    assertThat(roundtrip.constants).isEqualTo(this.constants);
-    assertThat(roundtrip.devices.size()).isEqualTo(1);
-    assertThat(roundtrip.devices.get(0)).isEqualTo(this.device);
-    assertThat(roundtrip.ciphertextTally).isEqualTo(this.ciphertext_tally.build());
-    assertThat(roundtrip.decryptedTally).isEqualTo(this.decryptedTally);
-
-    Map<String, KeyCeremony.CoefficientValidationSet> coeffMap = this.coefficient_validation_sets.stream()
-            .collect(Collectors.toMap(b->b.owner_id(), b -> b));
-    for (KeyCeremony.CoefficientValidationSet coeff : roundtrip.guardianCoefficients) {
-      KeyCeremony.CoefficientValidationSet expected = coeffMap.get(coeff.owner_id());
-      assertThat(expected).isNotNull();
-      assertWithMessage(coeff.owner_id()).that(coeff).isEqualTo(expected);
-    }
-
-    for (CiphertextAcceptedBallot ballot : roundtrip.acceptedBallots) {
-      CiphertextAcceptedBallot expected = this.ballot_box.get(ballot.object_id).orElseThrow();
-      assertWithMessage(ballot.object_id).that(ballot).isEqualTo(expected);
-    }
-
-    Map<String, PlaintextBallot> originalMap = this.originalPlaintextBallots.stream()
-            .collect(Collectors.toMap(b->b.object_id, b -> b));
-    for (PlaintextBallot ballot : roundtrip.spoiledBallots) {
-      PlaintextBallot expected = originalMap.get(ballot.object_id);
-      assertThat(expected).isNotNull();
-      TimeIntegrationSteps.compare_spoiled_ballot(ballot, expected);
     }
   }
 

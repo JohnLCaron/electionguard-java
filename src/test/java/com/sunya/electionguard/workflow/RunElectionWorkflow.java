@@ -11,7 +11,7 @@ import java.io.InputStreamReader;
 import java.util.Formatter;
 import java.util.concurrent.TimeUnit;
 
-public class TestElectionWorkflow {
+public class RunElectionWorkflow {
   private static final String classpath = "build/libs/electionguard-java-0.8-SNAPSHOT-all.jar";
 
   private static class CommandLine {
@@ -48,6 +48,10 @@ public class TestElectionWorkflow {
             description = "BallotProvider classname")
     String ballotProviderClass;
 
+    @Parameter(names = {"-nballots"},
+            description = "number of ballots to generate (if supported by BallotProvider)")
+    int nballots;
+
     @Parameter(names = {"-h", "--help"}, description = "Display this help and exit", help = true)
     boolean help = false;
 
@@ -65,8 +69,9 @@ public class TestElectionWorkflow {
   }
 
   public static void main(String[] args) {
-    String progName = TestElectionWorkflow.class.getName();
+    String progName = RunElectionWorkflow.class.getName();
     CommandLine cmdLine;
+    Stopwatch stopwatchAll = Stopwatch.createStarted();
     Stopwatch stopwatch = Stopwatch.createStarted();
 
     try {
@@ -110,6 +115,7 @@ public class TestElectionWorkflow {
             "-in", cmdLine.encryptDir,
             "--proto",
             "-ballots", cmdLine.ballotProviderClass,
+            "-nballots", Integer.toString(cmdLine.nballots),
             "-out", cmdLine.encryptDir,
             "-device", "deviceName"
             );
@@ -117,7 +123,7 @@ public class TestElectionWorkflow {
     if (command1.statusReturn != 0) {
       System.exit(command1.statusReturn);
     }
-    System.out.printf("*** elapsed = %d ms%n", stopwatch.elapsed(TimeUnit.SECONDS));
+    System.out.printf("*** elapsed = %d sec%n", stopwatch.elapsed(TimeUnit.SECONDS));
     stopwatch.reset().start();
     System.out.printf("%n==============================================================%n");
 
@@ -134,7 +140,7 @@ public class TestElectionWorkflow {
     if (command2.statusReturn != 0) {
       System.exit(command2.statusReturn);
     }
-    System.out.printf("*** elapsed = %d ms%n", stopwatch.elapsed(TimeUnit.SECONDS));
+    System.out.printf("*** elapsed = %d sec%n", stopwatch.elapsed(TimeUnit.SECONDS));
     stopwatch.reset().start();
     System.out.printf("%n==============================================================%n");
 
@@ -147,8 +153,9 @@ public class TestElectionWorkflow {
             "--proto"
     );
     System.out.printf("%s", out);
-    System.out.printf("*** elapsed = %d ms%n", stopwatch.elapsed(TimeUnit.SECONDS));
-    stopwatch.reset().start();
+    System.out.printf("*** elapsed = %d sec%n", stopwatch.elapsed(TimeUnit.SECONDS));
+
+    System.out.printf("%n*** All took = %d min%n", stopwatchAll.elapsed(TimeUnit.MINUTES));
     System.exit(command3.statusReturn);
   }
 

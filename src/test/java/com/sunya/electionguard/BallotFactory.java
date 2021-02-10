@@ -97,19 +97,19 @@ public class BallotFactory {
 
   List<PlaintextBallot> get_simple_ballots_from_file() throws IOException {
     String current = new java.io.File("./src/test/resources/").getCanonicalPath();
-    return this._get_ballots_from_file(current + "/" + simple_ballots_filename);
+    return get_ballots_from_file(current + "/" + simple_ballots_filename);
   }
 
-  private List<PlaintextBallot> _get_ballots_from_file(String filename) throws IOException {
+  public static List<PlaintextBallot> get_ballots_from_file(String filename) throws IOException {
     return PlaintextBallotPojo.get_ballots_from_file(filename);
   }
 
   PlaintextBallot get_simple_ballot_from_file() throws IOException {
     String current = new java.io.File("./src/test/resources/").getCanonicalPath();
-    return this._get_ballot_from_file(current + "/" + simple_ballot_filename);
+    return get_ballot_from_file(current + "/" + simple_ballot_filename);
   }
 
-  private PlaintextBallot _get_ballot_from_file(String filename) throws IOException {
+  public static PlaintextBallot get_ballot_from_file(String filename) throws IOException {
     return PlaintextBallotPojo.get_ballot_from_file(filename);
   }
 

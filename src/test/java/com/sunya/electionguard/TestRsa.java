@@ -49,6 +49,8 @@ public class TestRsa {
     //  but was:
     //    Sun RSA private key, 4096 bits
     // assertThat(roundtrip).isEqualTo(privateKey);
+    System.out.printf("PrivateKey original=  %s%n", privateKey.getClass().getName());
+    System.out.printf("PrivateKey roundtrip= %s%n", roundtrip.getClass().getName());
   }
 
   private static java.security.PublicKey convertJavaPublicKey(KeyCeremonyProto.RSAPublicKey proto) {

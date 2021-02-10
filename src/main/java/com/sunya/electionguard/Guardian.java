@@ -9,6 +9,7 @@ import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import java.math.BigInteger;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import static com.sunya.electionguard.Group.*;
@@ -50,52 +51,17 @@ public class Guardian extends ElectionObjectBase {
     this.otherGuardianPartialKeyBackups = ImmutableMap.copyOf(otherGuardianPartialKeyBackups);
   }
 
-  /**
-   * Create a guardian used for testing. The crypto_base_hash is random.
-   * @param id: the unique identifier for the guardian
-   * @param sequence_order: a unique number in (0, 256) that identifies this guardian
-   * @param number_of_guardians: the total number of guardians that will participate in the election
-   * @param quorum: the count of guardians necessary to decrypt
-   * @param nonce_seed: an optional `ElementModQ` value that can be used to generate the `ElectionKeyPair`,
-   *                    recommended to only use this field for testing. When null, a random nonce is used.
-   */
-  public static Guardian createForTesting(String id,
-                                                 int sequence_order,
-                                                 int number_of_guardians,
-                                                 int quorum,
-                                                 @Nullable ElementModQ nonce_seed,
-                                                 @Nullable ElementModQ crypto_base_hash) {
-
-    return new Guardian(id, sequence_order, number_of_guardians, quorum, nonce_seed, crypto_base_hash);
+  public int sequence_order() {
+    return sequence_order;
   }
-
-  private Guardian(String id,
-                    int sequence_order,
-                    int number_of_guardians,
-                    int quorum,
-                    @Nullable ElementModQ nonce_seed,
-                    @Nullable ElementModQ crypto_base_hash) {
-
-    super(id);
-    Preconditions.checkArgument(sequence_order > 0 && sequence_order < 256);
-    this.sequence_order = sequence_order;
-    this.ceremony_details = KeyCeremony.CeremonyDetails.create(number_of_guardians, quorum);
-    this.auxiliary_keys = KeyCeremony.generate_rsa_auxiliary_key_pair();
-    if (crypto_base_hash == null) {
-      crypto_base_hash = Group.rand_q();
-    }
-    this.election_keys =  KeyCeremony.generate_election_key_pair(quorum, nonce_seed, crypto_base_hash);
-
-    this.otherGuardianAuxiliaryKeys = ImmutableMap.of(this.object_id, this.share_auxiliary_public_key());
-    this.otherGuardianElectionKeys = ImmutableMap.of(this.object_id, this.share_election_public_key());
-    this.otherGuardianPartialKeyBackups = ImmutableMap.of();
-  }
-
   public KeyCeremony.CeremonyDetails ceremony_details() {
     return ceremony_details;
   }
   public Auxiliary.KeyPair auxiliary_keys() {
     return auxiliary_keys;
+  }
+  public KeyCeremony.ElectionKeyPair election_keys() {
+    return election_keys;
   }
   public ImmutableCollection<Auxiliary.PublicKey> auxiliary_public_keys() {
     return otherGuardianAuxiliaryKeys.values();
@@ -106,16 +72,9 @@ public class Guardian extends ElectionObjectBase {
   public ImmutableCollection<KeyCeremony.ElectionPartialKeyBackup> election_partial_key_backups() {
     return otherGuardianPartialKeyBackups.values();
   }
-
   public KeyCeremony.CoefficientSet coefficients() {
     return KeyCeremony.CoefficientSet.create(object_id, sequence_order, this.election_keys.polynomial().coefficients);
   }
-
-  int sequence_order() {
-    return sequence_order;
-  }
-
-  /////////////////////////////////////////////////////////////////////////////////////////////////
 
   /**
    * Share public election and auxiliary keys for guardian.
@@ -140,11 +99,6 @@ public class Guardian extends ElectionObjectBase {
     return otherGuardianElectionKeys.get(guardian_id);
   }
 
-  /** Share auxiliary public key with another guardian. */
-  Auxiliary.PublicKey share_auxiliary_public_key() {
-    return new Auxiliary.PublicKey(this.object_id, this.sequence_order, this.auxiliary_keys.public_key);
-  }
-
   /** Share coefficient validation set to be used for validating the coefficients post election. */
   public KeyCeremony.CoefficientValidationSet share_coefficient_validation_set() {
     return KeyCeremony.get_coefficient_validation_set(this.object_id, this.election_keys.polynomial());
@@ -163,7 +117,7 @@ public class Guardian extends ElectionObjectBase {
   }
 
   /////////////////////////////////////////////////////////////////////////////////////////////////
-
+  // decrypting
 
   /**
    * Compute a partial decryption of an elgamal encryption.
@@ -283,5 +237,39 @@ public class Guardian extends ElectionObjectBase {
     }
 
     return Optional.of(pub_key);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    if (!super.equals(o)) return false;
+    Guardian guardian = (Guardian) o;
+    boolean ok1 = sequence_order == guardian.sequence_order;
+    boolean ok2 = ceremony_details.equals(guardian.ceremony_details);
+    boolean ok3 = equalAuxilaryKeys(auxiliary_keys, guardian.auxiliary_keys); // LOOK fails, is that ok?
+    boolean ok4 = equalElectionKeys(election_keys, guardian.election_keys);
+    boolean ok5 = otherGuardianAuxiliaryKeys.equals(guardian.otherGuardianAuxiliaryKeys);
+    boolean ok6 = otherGuardianElectionKeys.equals(guardian.otherGuardianElectionKeys);
+    boolean ok7 = otherGuardianPartialKeyBackups.equals(guardian.otherGuardianPartialKeyBackups);
+    return ok1 && ok2 && ok4 && ok5 && ok6 && ok7;
+  }
+
+  public boolean equalAuxilaryKeys(Auxiliary.KeyPair o1, Auxiliary.KeyPair o2) {
+      boolean ok1 = o1.secret_key.equals(o2.secret_key);
+      boolean ok2 = o1.public_key.equals(o2.public_key);
+    return ok1 && ok2;
+  }
+
+  public boolean equalElectionKeys(KeyCeremony.ElectionKeyPair o1, KeyCeremony.ElectionKeyPair o2) {
+    boolean ok1 = o1.key_pair().equals(o2.key_pair());
+    boolean ok2 =         o1.proof().equals(o2.proof());
+    boolean ok3 =         o1.polynomial().equals(o2.polynomial());
+    return ok1 && ok2 && ok3;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(super.hashCode(), sequence_order, ceremony_details, auxiliary_keys, election_keys, otherGuardianAuxiliaryKeys, otherGuardianElectionKeys, otherGuardianPartialKeyBackups);
   }
 }

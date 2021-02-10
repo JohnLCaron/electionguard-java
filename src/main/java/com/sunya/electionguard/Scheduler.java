@@ -39,7 +39,7 @@ public class Scheduler<T> {
     }
   }
 
-  // LOOK call this
+  // LOOK make sure to call this, or the process may hang.
   public static void shutdown() {
     service.shutdown();
   }

@@ -14,16 +14,13 @@ message Guardians {
 message Guardian {
   CoefficientSet coefficients = 1;
   AuxiliaryKeyPair auxiliary_keys = 2;
-  // dont need to store the election_keys because they are generated from the coefficients
-
-  // The collection of other guardians' auxiliary public keys that are shared with this guardian
-  repeated AuxiliaryPublicKey other_guardian_auxiliary_keys = 3;
-
-  // Other guardians' election public keys that are shared with this guardian
-  repeated ElectionPublicKey other_guardian_election_keys = 4;
-
-  // Other guardians' partial key backups that are shared with this guardian
-  repeated ElectionPartialKeyBackup other_guardian_backups = 5;
+  ElectionKeyPair election_keys = 3;
+  // Other guardians' auxiliary public keys shared with this guardian
+  repeated AuxiliaryPublicKey other_guardian_auxiliary_keys = 4;
+  // Other guardians' election public keys shared with this guardian
+  repeated ElectionPublicKey other_guardian_election_keys = 5;
+  // Other guardians' partial key backups shared with this guardian
+  repeated ElectionPartialKeyBackup other_guardian_backups = 6;
 }
 
 message AuxiliaryKeyPair {
@@ -56,6 +53,21 @@ message CoefficientSet {
 message CoefficientValidationSet {
   string owner_id = 1; // guardian id
   repeated ElementModP coefficient_commitments = 2;
+  repeated SchnorrProof coefficient_proofs = 3;
+}
+
+message ElectionKeyPair {
+  ElGamalKeyPair key_pair = 1; // Ki = (si, g^si)
+  SchnorrProof proof = 2; // proof of knowledge of possession of the associated private key
+  ElectionPolynomial polynomial = 3;
+}
+
+message ElectionPolynomial {
+  // The secret coefficients a_ij.
+  repeated ElementModQ coefficients = 1;
+  // The public keys K_ij generated from secret coefficients.
+  repeated ElementModP coefficient_commitments = 2;
+  // A proof of possession of the private key for each secret coefficient.
   repeated SchnorrProof coefficient_proofs = 3;
 }
 

@@ -12,10 +12,13 @@ import com.sunya.electionguard.PublishedCiphertextTally;
 import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.publish.CloseableIterable;
 import com.sunya.electionguard.publish.CloseableIterableAdapter;
+import com.sunya.electionguard.publish.CloseableIterator;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
+import java.io.IOException;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -141,6 +144,18 @@ public class ElectionRecord {
 
   public Integer getVoteLimitForContest(String contest_id) {
     return contest_vote_limits.get(contest_id);
+  }
+
+  public List<PlaintextTally> spoiledTalliesAsList() {
+    List<PlaintextTally> result = new ArrayList<>();
+    try (CloseableIterator<PlaintextTally> iter = spoiledTallies.iterator()) {
+      while(iter.hasNext()) {
+        result.add(iter.next());
+      }
+    } catch (IOException e) {
+      throw new RuntimeException();
+    }
+    return result;
   }
 
   @Override

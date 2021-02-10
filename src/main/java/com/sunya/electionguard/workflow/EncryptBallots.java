@@ -8,13 +8,14 @@ import com.sunya.electionguard.BallotBox;
 import com.sunya.electionguard.DataStore;
 import com.sunya.electionguard.Election;
 import com.sunya.electionguard.Encrypt;
-import com.sunya.electionguard.proto.ElectionRecordFromProto;
 import com.sunya.electionguard.publish.Consumer;
 import com.sunya.electionguard.publish.Publisher;
 import com.sunya.electionguard.verifier.ElectionRecord;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
@@ -34,12 +35,19 @@ public class EncryptBallots {
             description = "BallotProvider classname", required = true)
     String ballotProviderClass;
 
+    @Parameter(names = {"-nballots"},
+            description = "number of ballots to generate (if supported by BallotProvider)")
+    int nballots;
+
     @Parameter(names = {"-device"},
             description = "Name of this device", required = true)
     String deviceName;
 
     @Parameter(names = {"--proto"}, description = "Input election record is in proto format")
     boolean isProto = false;
+
+    @Parameter(names = {"--save"}, description = "Save the original ballots for debugging", help = true)
+    boolean save = false;
 
     @Parameter(names = {"-h", "--help"}, description = "Display this help and exit", help = true)
     boolean help = false;
@@ -83,7 +91,7 @@ public class EncryptBallots {
 
     BallotProvider ballotProvider = null;
     try {
-      ballotProvider = makeBallotProvider(cmdLine.ballotProviderClass, electionRecord.election);
+      ballotProvider = makeBallotProvider(cmdLine.ballotProviderClass, electionRecord.election, cmdLine.nballots);
     } catch (Throwable t) {
       t.printStackTrace();
       System.exit(3);
@@ -93,6 +101,7 @@ public class EncryptBallots {
             cmdLine.inputDir, cmdLine.ballotProviderClass, cmdLine.encryptDir);
     EncryptBallots encryptor = new EncryptBallots(electionRecord, cmdLine.deviceName);
 
+    List<Ballot.PlaintextBallot> originalBallots = new ArrayList<>();
     try {
       for (Ballot.PlaintextBallot ballot : ballotProvider.ballots()) {
         Optional<Ballot.CiphertextBallot> encrypted_ballot = encryptor.encryptBallot(ballot);
@@ -104,10 +113,15 @@ public class EncryptBallots {
         } else {
           System.out.printf("***Encryption failed%n");
         }
+        originalBallots.add(ballot);
       }
     } catch (Throwable t) {
       t.printStackTrace();
       System.exit(4);
+    }
+
+    if (cmdLine.save) {
+      encryptor.saveOriginalBallots(cmdLine.encryptDir, originalBallots);
     }
 
     try {
@@ -121,14 +135,14 @@ public class EncryptBallots {
     }
   }
 
-  public static BallotProvider makeBallotProvider(String className, Election.ElectionDescription election) throws Throwable {
+  public static BallotProvider makeBallotProvider(String className, Election.ElectionDescription election, int nballots) throws Throwable {
     Class<?> c = Class.forName(className);
     if (!(BallotProvider.class.isAssignableFrom(c))) {
       throw new IllegalArgumentException(String.format("%s must implement %s", c.getName(), BallotProvider.class));
     }
     java.lang.reflect.Constructor<BallotProvider> constructor =
-            (Constructor<BallotProvider>) c.getConstructor(Election.ElectionDescription.class);
-    return constructor.newInstance(election);
+            (Constructor<BallotProvider>) c.getConstructor(Election.ElectionDescription.class, Integer.class);
+    return constructor.newInstance(election, nballots);
   }
 
   ///////////////////////////////////////////////////////////////////////////
@@ -189,5 +203,11 @@ public class EncryptBallots {
             ImmutableList.of(this.device), // add the device
             this.ballotBox.getAllBallots() // add the encrypted ballots
             );
+  }
+
+  void saveOriginalBallots(String publishDir, List<Ballot.PlaintextBallot> ballots) throws IOException {
+    Publisher publisher = new Publisher(publishDir, false, false);
+    publisher.publish_private_data(ballots, null, null);
+    System.out.printf("Save private ballot in %s%n", publisher.privateDirPath());
   }
 }
