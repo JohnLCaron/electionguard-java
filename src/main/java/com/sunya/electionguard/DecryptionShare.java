@@ -66,9 +66,6 @@ public class DecryptionShare {
     /** The Available Guardian that this share belongs to */
     public abstract String guardian_id();
 
-    /** The SelectionDescription hash. */
-    public abstract ElementModQ description_hash(); // LOOK not used
-
     /** The Share of the decryption of a selection. `M_i` in the spec. */
     public abstract ElementModP share();
 
@@ -84,7 +81,6 @@ public class DecryptionShare {
     public static CiphertextDecryptionSelection create(
             String object_id,
             String guardian_id,
-            ElementModQ description_hash,
             ElementModP share,
             Optional<ChaumPedersen.ChaumPedersenProof> proof,
             Optional<Map<String, CiphertextCompensatedDecryptionSelection>> recovered_parts) {
@@ -94,7 +90,6 @@ public class DecryptionShare {
       return new AutoValue_DecryptionShare_CiphertextDecryptionSelection(
               Preconditions.checkNotNull(object_id),
               Preconditions.checkNotNull(guardian_id),
-              Preconditions.checkNotNull(description_hash),
               Preconditions.checkNotNull(share),
               Preconditions.checkNotNull(proof),
               recovered_parts.map(ImmutableMap::copyOf));
@@ -136,14 +131,12 @@ public class DecryptionShare {
   static CiphertextDecryptionSelection create_ciphertext_decryption_selection(
           String object_id,
           String guardian_id,
-          ElementModQ description_hash,
           ElementModP share,
           Optional<ChaumPedersen.ChaumPedersenProof> proof,
           Optional<Map<String, CiphertextCompensatedDecryptionSelection>> recovered_parts) {
 
     return CiphertextDecryptionSelection.create(
-            object_id, guardian_id, description_hash, share,
-            proof, recovered_parts);
+            object_id, guardian_id, share, proof, recovered_parts);
   }
 
   /** A Guardian's Partial Decryption of a contest. */

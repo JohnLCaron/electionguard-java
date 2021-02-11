@@ -41,7 +41,6 @@ public class PlaintextTallyPojo {
   public static class CiphertextDecryptionSelectionPojo {
     public String object_id;
     public String guardian_id;
-    public Group.ElementModQ description_hash;
     public Group.ElementModP share;
     public ChaumPedersenProofPojo proof; // Optional
     public Map<String, CiphertextCompensatedDecryptionSelectionPojo> recovered_parts; // Optional
@@ -127,7 +126,6 @@ public class PlaintextTallyPojo {
     return DecryptionShare.CiphertextDecryptionSelection.create(
             pojo.object_id,
             pojo.guardian_id,
-            pojo.description_hash,
             pojo.share,
             Optional.ofNullable(translateProof(pojo.proof)),
             Optional.ofNullable(recovered));
@@ -218,7 +216,6 @@ public class PlaintextTallyPojo {
     CiphertextDecryptionSelectionPojo pojo = new CiphertextDecryptionSelectionPojo();
     pojo.object_id = org.object_id();
     pojo.guardian_id = org.guardian_id();
-    pojo.description_hash = org.description_hash();
     pojo.share = org.share();
     org.proof().ifPresent( proof -> pojo.proof = convertProof(proof));
     pojo.recovered_parts = org.recovered_parts().isPresent() ? recovered : null;

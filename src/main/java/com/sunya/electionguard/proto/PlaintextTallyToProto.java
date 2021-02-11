@@ -1,6 +1,5 @@
 package com.sunya.electionguard.proto;
 
-import com.google.common.collect.ImmutableMap;
 import com.sunya.electionguard.ChaumPedersen;
 import com.sunya.electionguard.DecryptionShare;
 import com.sunya.electionguard.Group;
@@ -72,7 +71,6 @@ public class PlaintextTallyToProto {
 
     builder.setObjectId(org.object_id());
     builder.setGuardianId(org.guardian_id());
-    builder.setDescriptionHash(convertElementModQ(org.description_hash()));
     builder.setShare(convertElementModP(org.share()));
     // Optional
     org.proof().ifPresent( proof -> builder.setProof(convertProof(proof)));

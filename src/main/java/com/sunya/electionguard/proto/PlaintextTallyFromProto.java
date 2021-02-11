@@ -79,7 +79,6 @@ public class PlaintextTallyFromProto {
     return DecryptionShare.CiphertextDecryptionSelection.create(
             proto.getObjectId(),
             proto.getGuardianId(),
-            convertElementModQ(proto.getDescriptionHash()),
             convertElementModP(proto.getShare()),
             proto.hasProof() ? Optional.of(convertProof(proto.getProof())) : Optional.empty(),
             recovered.size() > 0 ? Optional.of(recovered) : Optional.empty());

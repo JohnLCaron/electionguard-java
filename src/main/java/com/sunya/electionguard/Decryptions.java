@@ -210,7 +210,6 @@ public class Decryptions {
         return Optional.of(DecryptionShare.create_ciphertext_decryption_selection(
                 selection.object_id,
                 guardian.object_id,
-                selection.description_hash,
                 tuple.decryption,
                 Optional.of(tuple.proof),
                 Optional.empty()));
@@ -616,7 +615,6 @@ public class Decryptions {
         selections.put(selection_id, create_ciphertext_decryption_selection(
                 selection_id,
                 missing_guardian_id,
-                tally_selection.description_hash,
                 reconstructed_share,
                 Optional.empty(),
                 Optional.of(compensated_selection_shares)));
@@ -777,7 +775,6 @@ public class Decryptions {
         selections.put(selection.object_id, DecryptionShare.create_ciphertext_decryption_selection(
                 selection.object_id,
                 missing_guardian_id,
-                selection.description_hash,
                 reconstructed_share,
                 Optional.empty(),
                 Optional.of(compensated_selection_shares)));
