@@ -24,7 +24,7 @@ import static com.google.common.truth.Truth8.assertThat;
 
 /**
  * Test a complete simple example of executing an End-to-End encrypted election.
- * Puplishing to JSON.
+ * Publishing to JSON.
  */
 public class TestEndToEndElectionIntegration {
   private static final int NUMBER_OF_GUARDIANS = 7;
@@ -115,9 +115,6 @@ public class TestEndToEndElectionIntegration {
     System.out.printf("----------------------------------%n");
 
     assertThat(this.election.is_valid()).isTrue();
-
-    // Create an Election Builder
-    this.election_builder = new ElectionBuilder(NUMBER_OF_GUARDIANS, QUORUM, this.election);
     System.out.printf("Created with number_of_guardians: %d quorum: %d%n", NUMBER_OF_GUARDIANS, QUORUM);
   }
 
@@ -165,25 +162,38 @@ public class TestEndToEndElectionIntegration {
     assertThat(this.mediator.all_election_partial_key_backups_verified()).isTrue();
 
     // Joint Key
-    Optional<Group.ElementModP> joint_key = this.mediator.publish_joint_key();
+    Group.ElementModP joint_key = this.mediator.publish_joint_key().orElseThrow();
     System.out.printf("Publishes the Joint Election Key%n");
-    assertThat(joint_key).isPresent();
 
     // Save Validation Keys
+    List<Group.ElementModP> commitments = new ArrayList<>();
     for (GuardianBuilder guardianBuilder : this.guardianBuilders) {
       Guardian guardian = guardianBuilder.build();
       this.guardians.add(guardian);
-      this.coefficient_validation_sets.add(guardian.share_coefficient_validation_set());
+      KeyCeremony.CoefficientValidationSet coeffSet = guardian.share_coefficient_validation_set();
+      this.coefficient_validation_sets.add(coeffSet);
+      commitments.addAll(coeffSet.coefficient_commitments());
+
+      Group.ElementModQ commitmentHash = Hash.hash_elems(coeffSet.coefficient_commitments());
+      System.out.printf(" %d commitmentHash %s%n", guardian.sequence_order(), commitmentHash);
     }
+    Group.ElementModQ commitmentHash = Hash.hash_elems(commitments);
 
     // Build the Election
-    this.election_builder.set_public_key(joint_key.get());
+    this.election_builder = new ElectionBuilder(NUMBER_OF_GUARDIANS, QUORUM, this.election);
+    this.election_builder.set_public_key(joint_key);
+    this.election_builder.set_commitment_hash(commitmentHash);
+
     ElectionBuilder.DescriptionAndContext tuple = this.election_builder.build().orElseThrow();
     this.election = tuple.metadata.election;
-    this.context = tuple.context; // LOOK cant use a random extended_hash here and expect it to validate
+    this.context = tuple.context;
     this.constants = new ElectionConstants();
     Group.ElementModQ crypto_base_hash = Election.make_crypto_base_hash(NUMBER_OF_GUARDIANS, QUORUM, election);
     assertThat(this.context.crypto_base_hash).isEqualTo(crypto_base_hash);
+
+    Group.ElementModQ extended_hash = Hash.hash_elems(crypto_base_hash, commitmentHash);
+    assertThat(this.context.crypto_extended_base_hash).isEqualTo(extended_hash);
+    System.out.printf("commitmentHash %s%n", commitmentHash);
   }
 
   // Move on to encrypting ballots

@@ -7,6 +7,8 @@ import net.jqwik.api.Example;
 import net.jqwik.api.lifecycle.BeforeContainer;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -41,8 +43,10 @@ public class TestElectionRecordProtoRoundtrip {
 
   @Example
   public void testElectionRecordPublishRoundtrip() throws IOException {
-    String dest = "/home/snake/tmp/electionguard/publishElectionRecordProtoRoundtrip/";
-    Publisher publisher = new Publisher(dest, true, false);
+    Path tmp = Files.createTempDirectory("publish");
+    tmp.toFile().deleteOnExit();
+    String protoDir = tmp.toAbsolutePath().toString();
+    Publisher publisher = new Publisher(protoDir, true, false);
     publisher.writeDecryptionResultsProto(
             consumer.election(),
             consumer.context(),

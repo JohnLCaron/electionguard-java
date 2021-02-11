@@ -2,27 +2,27 @@ package com.sunya.electionguard.verifier;
 
 import com.sunya.electionguard.publish.Consumer;
 import net.jqwik.api.Example;
-import net.jqwik.api.lifecycle.BeforeContainer;
-
 import java.io.IOException;
-
 import static com.google.common.truth.Truth.assertThat;
 
 public class TestContestVoteLimitsVerifier {
 
-  static Consumer consumer;
-  static ContestVoteLimitsVerifier validator;
+  @Example
+  public void testContestVoteLimitsValidatorProto() throws IOException {
+    String topdir = TestParameterVerifier.topdirProto;
+    Consumer consumer = new Consumer(topdir);
+    ContestVoteLimitsVerifier validator = new ContestVoteLimitsVerifier(consumer.readElectionRecordProto());
 
-  @BeforeContainer
-  public static void setUp() throws IOException {
-    String topdir = TestParameterVerifier.topdir;
-
-    consumer = new Consumer(topdir);
-    validator = new ContestVoteLimitsVerifier(consumer.readElectionRecordProto());
+    boolean sevOk = validator.verify_all_contests();
+    assertThat(sevOk).isTrue();
   }
 
   @Example
-  public void testContestVoteLimitsValidator() {
+  public void testContestVoteLimitsValidatorJson() throws IOException {
+    String topdir = TestParameterVerifier.topdirJson;
+    Consumer consumer = new Consumer(topdir);
+    ContestVoteLimitsVerifier validator = new ContestVoteLimitsVerifier(consumer.readElectionRecordJson());
+
     boolean sevOk = validator.verify_all_contests();
     assertThat(sevOk).isTrue();
   }

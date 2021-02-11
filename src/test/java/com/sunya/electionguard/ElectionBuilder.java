@@ -21,6 +21,7 @@ public class ElectionBuilder {
   int number_of_guardians; // The number of guardians necessary to generate the public key
   int quorum; // The quorum of guardians necessary to decrypt an election.  Must be less than `number_of_guardians`
   ElectionDescription description;
+  Group.ElementModQ commitment_hash;
   Optional<Group.ElementModP> elgamal_public_key = Optional.empty();
 
   public ElectionBuilder(int number_of_guardians, int quorum, ElectionDescription description) {
@@ -31,6 +32,11 @@ public class ElectionBuilder {
 
   ElectionBuilder set_public_key(Group.ElementModP elgamal_public_key) {
     this.elgamal_public_key = Optional.of(elgamal_public_key);
+    return this;
+  }
+
+  ElectionBuilder set_commitment_hash(Group.ElementModQ commitment_hash) {
+    this.commitment_hash = commitment_hash;
     return this;
   }
 
@@ -49,7 +55,7 @@ public class ElectionBuilder {
               this.quorum,
               this.elgamal_public_key.get(),
               this.description,
-              rand_q())));
+              commitment_hash == null ? rand_q() : commitment_hash)));
   }
 
 }
