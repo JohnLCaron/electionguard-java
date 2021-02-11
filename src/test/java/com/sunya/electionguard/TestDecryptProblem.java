@@ -131,10 +131,9 @@ public class TestDecryptProblem {
    */
   void step_1_key_ceremony() {
     System.out.printf("%n1. Key Ceremony%n");
-    Group.ElementModQ crypto_base_hash = Election.make_crypto_base_hash(NUMBER_OF_GUARDIANS, QUORUM, election);
     // Setup Guardians
     for (int i = 1; i <= NUMBER_OF_GUARDIANS; i++) {
-      this.guardianBuilders.add(GuardianBuilder.createForTesting("guardian_" + i, i, NUMBER_OF_GUARDIANS, QUORUM, crypto_base_hash, null));
+      this.guardianBuilders.add(GuardianBuilder.createForTesting("guardian_" + i, i, NUMBER_OF_GUARDIANS, QUORUM,  null));
     }
 
     // Setup Mediator
@@ -187,6 +186,7 @@ public class TestDecryptProblem {
     this.context = tuple.context;
     this.constants = new ElectionConstants();
 
+    Group.ElementModQ crypto_base_hash = Election.make_crypto_base_hash(NUMBER_OF_GUARDIANS, QUORUM, election);
     assertThat(this.context.crypto_base_hash).isEqualTo(crypto_base_hash);
   }
 

@@ -81,7 +81,7 @@ public class TestKeyCeremonySerializing {
 
     this.guardianBuilders = new ArrayList<>();
     for (KeyCeremony.CoefficientSet coeffSet : coefficientsProvider.guardianCoefficients()) {
-      this.guardianBuilders.add(GuardianBuilder.createRandom(coeffSet, numberOfGuardians, quorum, this.crypto_base_hash));
+      this.guardianBuilders.add(GuardianBuilder.createRandom(coeffSet, numberOfGuardians, quorum));
     }
 
     System.out.printf("%nKey Ceremony%n");
@@ -189,8 +189,7 @@ public class TestKeyCeremonySerializing {
             this.coefficientValidationSets);
 
     this.guardians = guardianBuilders.stream().map(GuardianBuilder::build).collect(Collectors.toList());
-    KeyCeremonyProto.Guardians guardianProto = KeyCeremonyToProto.convertGuardians(guardians,
-            this.quorum, this.crypto_base_hash);
+    KeyCeremonyProto.Guardians guardianProto = KeyCeremonyToProto.convertGuardians(guardians, this.quorum);
 
     publisher.writeGuardiansProto(guardianProto);
   }

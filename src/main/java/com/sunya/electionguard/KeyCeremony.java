@@ -144,11 +144,11 @@ public class KeyCeremony {
     }
 
     // This is what the Guardian needs.
-    ElectionKeyPair generate_election_key_pair(ElementModQ crypto_base_hash) {
-      ElectionPolynomial polynomial = ElectionPolynomial.generate_polynomial(coefficients(), crypto_base_hash);
+    ElectionKeyPair generate_election_key_pair() {
+      ElectionPolynomial polynomial = ElectionPolynomial.generate_polynomial(coefficients());
       ElGamal.KeyPair key_pair = new ElGamal.KeyPair(
               polynomial.coefficients.get(0), polynomial.coefficient_commitments.get(0));
-      SchnorrProof proof = SchnorrProof.make_schnorr_proof(key_pair, rand_q(), crypto_base_hash);
+      SchnorrProof proof = SchnorrProof.make_schnorr_proof(key_pair, rand_q());
       return ElectionKeyPair.create(key_pair, proof, polynomial);
     }
   }
@@ -193,14 +193,14 @@ public class KeyCeremony {
    * @param quorum: Quorum of guardians needed to decrypt
    * @param nonce: Optional nonce for determinism, use null when generating in production.
    */
-  static ElectionKeyPair generate_election_key_pair(int quorum, @Nullable ElementModQ nonce, ElementModQ crypto_base_hash) {
-    ElectionPolynomial polynomial = ElectionPolynomial.generate_polynomial(quorum, nonce, crypto_base_hash);
+  static ElectionKeyPair generate_election_key_pair(int quorum, @Nullable ElementModQ nonce) {
+    ElectionPolynomial polynomial = ElectionPolynomial.generate_polynomial(quorum, nonce);
     // the 0th coefficient is the secret s for the ith Guardian
     // the 0th commitment is the public key = g^s mod p
     // The key_pair is Ki = election keypair for ith Guardian
     ElGamal.KeyPair key_pair = new ElGamal.KeyPair(
             polynomial.coefficients.get(0), polynomial.coefficient_commitments.get(0));
-    SchnorrProof proof = SchnorrProof.make_schnorr_proof(key_pair, rand_q(), crypto_base_hash);
+    SchnorrProof proof = SchnorrProof.make_schnorr_proof(key_pair, rand_q());
     return ElectionKeyPair.create(key_pair, proof, polynomial);
   }
 

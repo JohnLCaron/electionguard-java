@@ -35,7 +35,7 @@ public class SchnorrProof extends Proof {
    * This is specification 2A and 2.B.
    * @return true if the transcript is valid, false if anything is wrong
    */
-  boolean is_valid(ElementModQ crypto_base_hash) {
+  boolean is_valid() {
     ElementModP k = this.public_key;
     ElementModP h = this.commitment;
     ElementModQ u = this.response;
@@ -43,7 +43,7 @@ public class SchnorrProof extends Proof {
     boolean in_bounds_h = h.is_in_bounds();
     boolean in_bounds_u = u.is_in_bounds();
 
-    // LOOK changed validation spec 2.A. see issue #278
+    // Changed validation spec 2.A. see issue #278
     boolean valid_2A = this.challenge.equals(Hash.hash_elems(k, h));
     boolean valid_2B = g_pow_p(u).equals(Group.mult_p(h, Group.pow_p(k, this.challenge)));
 
@@ -86,10 +86,10 @@ public class SchnorrProof extends Proof {
    * @param keypair An ElGamal keypair.
    * @param nonce   A random element in [0,Q).
    */
-  static SchnorrProof make_schnorr_proof(ElGamal.KeyPair keypair, ElementModQ nonce, ElementModQ crypto_base_hash) {
+  static SchnorrProof make_schnorr_proof(ElGamal.KeyPair keypair, ElementModQ nonce) {
     ElementModP k = keypair.public_key;
     ElementModP h = g_pow_p(nonce);
-    // LOOK changed validation spec 2.A. see issue #278
+    // Changed validation spec 2.A. see issue #278
     ElementModQ c = Hash.hash_elems(k, h);
     ElementModQ u = a_plus_bc_q(nonce, keypair.secret_key, c);
     return new SchnorrProof(k, h, c, u);

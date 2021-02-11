@@ -80,7 +80,7 @@ public class TestPublish {
                     Optional.of(int_to_q_unchecked(BigInteger.ZERO)), ImmutableList.of(), Optional.empty(),Optional.empty(), Optional.empty()));
 
     List<Guardian> guardians = ImmutableList.of(
-            GuardianBuilder.createForTesting("GuardianId", 1, 1, 1, rand_q(), null).build());
+            GuardianBuilder.createForTesting("GuardianId", 1, 1, 1, null).build());
 
     Publisher publisher = new Publisher(outputDir, false, false);
     publisher.publish_private_data(

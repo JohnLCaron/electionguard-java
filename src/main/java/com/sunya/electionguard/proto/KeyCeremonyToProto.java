@@ -18,10 +18,9 @@ import static com.sunya.electionguard.proto.CommonConvert.convertSchnorrProof;
 
 public class KeyCeremonyToProto {
 
-  public static KeyCeremonyProto.Guardians convertGuardians(List<Guardian> guardians, int quorum, Group.ElementModQ crypto_base_hash) {
+  public static KeyCeremonyProto.Guardians convertGuardians(List<Guardian> guardians, int quorum) {
     KeyCeremonyProto.Guardians.Builder builder = KeyCeremonyProto.Guardians.newBuilder();
     builder.setQuorum(quorum);
-    builder.setCryptoBaseHash(convertElementModQ(crypto_base_hash));
     guardians.forEach(g -> builder.addGuardians(convertGuardian(g)));
     return builder.build();
   }

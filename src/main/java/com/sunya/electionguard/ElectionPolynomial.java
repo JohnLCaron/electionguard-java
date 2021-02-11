@@ -69,17 +69,16 @@ public class ElectionPolynomial {
    * Generates a polynomial when the coefficients are already chosen
    *
    * @param coefficients:           the k coefficients of the polynomial
-   * @param crypto_base_hash:       needed for the Schnorr proof.
    * @return Polynomial used to share election keys
    */
-  static ElectionPolynomial generate_polynomial(List<Group.ElementModQ> coefficients, ElementModQ crypto_base_hash) {
+  static ElectionPolynomial generate_polynomial(List<Group.ElementModQ> coefficients) {
     ArrayList<Group.ElementModP> commitments = new ArrayList<>();
     ArrayList<SchnorrProof> proofs = new ArrayList<>();
 
     for (Group.ElementModQ coefficient : coefficients) {
       Group.ElementModP commitment = g_pow_p(coefficient);
       // TODO Alternate schnorr proof method that doesn't need KeyPair
-      SchnorrProof proof = SchnorrProof.make_schnorr_proof(new ElGamal.KeyPair(coefficient, commitment), rand_q(), crypto_base_hash);
+      SchnorrProof proof = SchnorrProof.make_schnorr_proof(new ElGamal.KeyPair(coefficient, commitment), rand_q());
       commitments.add(commitment);
       proofs.add(proof);
     }
@@ -92,10 +91,9 @@ public class ElectionPolynomial {
    *
    * @param number_of_coefficients: Number of coefficients of polynomial: the quorum, k.
    * @param nonce:                  an optional nonce parameter that may be provided (only for testing)
-   * @param crypto_base_hash:       needed for the Schnorr proof.
    * @return Polynomial used to share election keys
    */
-  static ElectionPolynomial generate_polynomial(int number_of_coefficients, @Nullable Group.ElementModQ nonce, ElementModQ crypto_base_hash) {
+  static ElectionPolynomial generate_polynomial(int number_of_coefficients, @Nullable Group.ElementModQ nonce) {
     ArrayList<Group.ElementModQ> coefficients = new ArrayList<>();
     ArrayList<Group.ElementModP> commitments = new ArrayList<>();
     ArrayList<SchnorrProof> proofs = new ArrayList<>();
@@ -107,7 +105,7 @@ public class ElectionPolynomial {
       Group.ElementModQ coefficient = (nonce == null) ? rand_q() : add_q(nonce, coeff_value);
       Group.ElementModP commitment = g_pow_p(coefficient);
       // TODO Alternate schnorr proof method that doesn't need KeyPair
-      SchnorrProof proof = SchnorrProof.make_schnorr_proof(new ElGamal.KeyPair(coefficient, commitment), rand_q(), crypto_base_hash);
+      SchnorrProof proof = SchnorrProof.make_schnorr_proof(new ElGamal.KeyPair(coefficient, commitment), rand_q());
 
       coefficients.add(coefficient);
       commitments.add(commitment);
