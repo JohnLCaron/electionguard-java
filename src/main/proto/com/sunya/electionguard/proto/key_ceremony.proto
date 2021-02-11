@@ -78,26 +78,17 @@ message ElectionPublicKey {
 }
 
 message ElectionPartialKeyBackup {
-  /** The Id of the guardian that generated this backup. */
+  // The Id of the guardian that generated this backup.
   string owner_id = 1;
-  /** The Id of the guardian to receive this backup. */
+  // The Id of the guardian to receive this backup.
   string designated_id = 2;
-  /** // The sequence order of the designated guardian. */
+  // // The sequence order of the designated guardian.
   uint32 designated_sequence_order = 3;
-  /** The encrypted coordinate corresponding to a secret election polynomial. */
+  // The encrypted coordinate corresponding to a secret election polynomial.
   bytes encrypted_value = 4;
-  /** The public keys `K_ij`generated from the election polynomial coefficients. */
+  // The public keys K_ij generated from the election polynomial coefficients.
   repeated ElementModP coefficient_commitments = 5;
-  /** The proofs of possession of the private keys for the election polynomial secret coefficients. */
-  repeated SchnorrProof coefficient_proofs = 6;
-}
-
-message ElectionPartialKeyChallenge {
-  string owner_id = 1;
-  string designated_id = 2;
-  uint32 designated_sequence_order = 3; // The sequence order of the designated guardian
-  ElementModQ value = 4;
-  repeated ElementModP coefficient_commitments = 5;
+  // The proofs of possession of the private keys for the election polynomial secret coefficients.
   repeated SchnorrProof coefficient_proofs = 6;
 }
 
