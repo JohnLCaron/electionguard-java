@@ -19,7 +19,7 @@ public class TestGuardianPublicKeyVerifier {
     String topdir = TestParameterVerifier.topdir;
 
     Consumer consumer = new Consumer(topdir);
-    electionRecord = consumer.readElectionRecordJson();
+    electionRecord = consumer.readElectionRecordProto();
     kgv = new GuardianPublicKeyVerifier(electionRecord);
   }
 

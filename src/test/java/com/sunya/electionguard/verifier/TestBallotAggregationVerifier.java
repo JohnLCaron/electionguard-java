@@ -17,17 +17,17 @@ public class TestBallotAggregationVerifier {
 
     // set up
     Consumer consumer = new Consumer(topdir);
-    validator = new BallotAggregationVerifier(consumer.readElectionRecordJson());
+    validator = new BallotAggregationVerifier(consumer.readElectionRecordProto());
   }
 
   @Example
-  public void testVerifyBallotAggregation() throws IOException {
+  public void testVerifyBallotAggregation() {
     boolean sevOk = validator.verify_ballot_aggregation();
     assertThat(sevOk).isTrue();
   }
 
   @Example
-  public void testVerifyTallyDecryption() throws IOException {
+  public void testVerifyTallyDecryption() {
     boolean sevOk = validator.verify_tally_decryption();
     assertThat(sevOk).isTrue();
   }

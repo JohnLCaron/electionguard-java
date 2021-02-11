@@ -226,8 +226,7 @@ public class Guardian extends ElectionObjectBase {
       return Optional.empty();
     }
 
-    // compute the recovery public key,
-    // corresponding to the secret share Pi(l)
+    // compute the recovery public key, corresponding to the secret share Pi(l)
     // K_ij^(l^j) for j in 0..k-1.  K_ij is coefficients[j].public_key
     ElementModP pub_key = ONE_MOD_P;
     int count = 0;

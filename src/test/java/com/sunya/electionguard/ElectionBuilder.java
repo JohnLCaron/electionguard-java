@@ -3,6 +3,7 @@ package com.sunya.electionguard;
 import java.util.Optional;
 
 import static com.sunya.electionguard.Election.*;
+import static com.sunya.electionguard.Group.rand_q;
 
 // LOOK this should go away, keeping it as convenience for now.
 public class ElectionBuilder {
@@ -47,7 +48,8 @@ public class ElectionBuilder {
               this.number_of_guardians,
               this.quorum,
               this.elgamal_public_key.get(),
-              this.description)));
+              this.description,
+              rand_q())));
   }
 
 }

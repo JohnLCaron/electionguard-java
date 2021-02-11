@@ -17,7 +17,7 @@ public class TestDecryptionVerifier {
   public static void setUp() throws IOException {
     String topdir = TestParameterVerifier.topdir;
     consumer = new Consumer(topdir);
-    validator = new DecryptionVerifier(consumer.readElectionRecordJson());
+    validator = new DecryptionVerifier(consumer.readElectionRecordProto());
   }
 
   @Example

@@ -17,11 +17,11 @@ public class TestPartialDecryptionVerifier {
     String topdir = TestParameterVerifier.topdir;
 
     consumer = new Consumer(topdir);
-    validator = new PartialDecryptionVerifier(consumer.readElectionRecordJson());
+    validator = new PartialDecryptionVerifier(consumer.readElectionRecordProto());
   }
 
   @Example
-  public void testSelectionEncryptionValidation() throws IOException {
+  public void testSelectionEncryptionValidation() {
     boolean sevOk = validator.verify_lagrange_coefficients();
     assertThat(sevOk).isTrue();
   }

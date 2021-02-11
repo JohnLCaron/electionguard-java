@@ -518,14 +518,10 @@ public class ElectionTestHelper {
     }
   }
 
-
   /**
-   *     Generates a `CiphertextElectionContext` with a single public-private key pair as the encryption context.
-   *
-   *     In a real election, the key ceremony would be used to generate a shared public key.
-   *
-   *     @param election_description: An `ElectionDescription` object, with which the `CiphertextElectionContext` will be associated
-   *     @return a tuple of a `CiphertextElectionContext` and the secret key associated with it
+   * Generates a `CiphertextElectionContext` with a single public-private key pair as the encryption context, and
+   * a random number foe the commitments_hash.
+   * In a real election, the key ceremony would be used to generate a shared public key.
    */
   CIPHERTEXT_ELECTIONS_TUPLE_TYPE ciphertext_elections(ElectionDescription election_description) {
     ElGamal.KeyPair keypair = elgamal_keypairs();
@@ -535,7 +531,8 @@ public class ElectionTestHelper {
                     1,
                     1,
                     keypair.public_key,
-                    election_description));
+                    election_description,
+                    rand_q()));
   }
 
   public static class EverythingTuple {

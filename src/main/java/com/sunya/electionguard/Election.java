@@ -1069,17 +1069,19 @@ public class Election {
 
   /**
    * Makes a CiphertextElectionContext object.
-   * <p>
-   * @param number_of_guardians: The number of guardians necessary to generate the public key
-   * @param quorum: The quorum of guardians necessary to decrypt an election.  Must be less than `number_of_guardians`
-   * @param elgamal_public_key: the public key of the election
-   * @param description: the election description
+   * @param number_of_guardians The number of guardians necessary to generate the public key.
+   * @param quorum The quorum of guardians necessary to decrypt an election.  Must be less than number_of_guardians.
+   * @param elgamal_public_key the public key of the election.
+   * @param description the election description.
+   * @param commitment_hash all the public commitments for all the guardians = H(K 1,0 , K 1,1 , K 1,2 , ... ,
+   *    K 1,k−1 , K 2,0 , K 2,1 , K 2,2 , ... , K 2,k−1 , ... , K n,0 , K n,1 , K n,2 , ... , K n,k−1 )
    */
   public static CiphertextElectionContext make_ciphertext_election_context(
           int number_of_guardians,
           int quorum,
           ElementModP elgamal_public_key,
-          ElectionDescription description) {
+          ElectionDescription description,
+          ElementModQ commitment_hash) {
 
     // What's a crypto_base_hash?
     // The metadata of this object are hashed together with the
@@ -1098,7 +1100,7 @@ public class Election {
     //  form the basis of subsequent hash computations.
 
     ElementModQ crypto_base_hash = make_crypto_base_hash(number_of_guardians, quorum, description);
-    ElementModQ crypto_extended_base_hash = Hash.hash_elems(crypto_base_hash, elgamal_public_key);
+    ElementModQ crypto_extended_base_hash = Hash.hash_elems(crypto_base_hash, commitment_hash);
 
     return new CiphertextElectionContext(
             number_of_guardians,

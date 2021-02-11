@@ -1,6 +1,8 @@
 package com.sunya.electionguard.verifier;
 
 import com.sunya.electionguard.ElGamal;
+import com.sunya.electionguard.Group;
+import com.sunya.electionguard.GuardianBuilder;
 import com.sunya.electionguard.Hash;
 import com.sunya.electionguard.KeyCeremony;
 
@@ -28,8 +30,13 @@ public class ElectionPublicKeyVerifier {
       return false;
     }
 
-    // Equation 3.A LOOK probably wrong, see issue #279.
-    ElementModQ expectedExtendedHash = Hash.hash_elems(this.electionRecord.base_hash(), public_key);
+    // Equation 3.A
+    List<Group.ElementModP> commitments = new ArrayList<>();
+    for (KeyCeremony.CoefficientValidationSet coeff : this.electionRecord.guardianCoefficients) {
+      commitments.addAll(coeff.coefficient_commitments());
+    }
+    ElementModQ commitment_hash = Hash.hash_elems(commitments);
+    ElementModQ expectedExtendedHash = Hash.hash_elems(this.electionRecord.base_hash(), commitment_hash);
     if (!this.electionRecord.extended_hash().equals(expectedExtendedHash)) {
       System.out.printf(" ***Expected extended hash does not match.%n");
       return false;

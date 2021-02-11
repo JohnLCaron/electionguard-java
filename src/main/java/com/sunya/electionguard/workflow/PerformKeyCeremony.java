@@ -8,6 +8,7 @@ import com.sunya.electionguard.Election;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.Guardian;
 import com.sunya.electionguard.GuardianBuilder;
+import com.sunya.electionguard.Hash;
 import com.sunya.electionguard.KeyCeremony;
 import com.sunya.electionguard.KeyCeremonyMediator;
 import com.sunya.electionguard.proto.KeyCeremonyProto;
@@ -165,8 +166,8 @@ public class PerformKeyCeremony {
   final int quorum;
 
   Group.ElementModP jointKey;
+  Group.ElementModQ commitmentsHash;
   Election.CiphertextElectionContext context;
-  Group.ElementModQ crypto_base_hash;
 
   List<GuardianBuilder> guardianBuilders;
   List<com.sunya.electionguard.KeyCeremony.CoefficientValidationSet> coefficientValidationSets = new ArrayList<>();
@@ -177,8 +178,6 @@ public class PerformKeyCeremony {
     this.numberOfGuardians = Iterables.size(coefficientsProvider.guardianCoefficients());
     System.out.printf("  Create %d Guardians, quorum = %d%n", this.numberOfGuardians, this.quorum);
 
-    this.crypto_base_hash = Election.make_crypto_base_hash(this.numberOfGuardians, this.quorum, election);
-
     this.guardianBuilders = new ArrayList<>();
     for (KeyCeremony.CoefficientSet coeffSet : coefficientsProvider.guardianCoefficients()) {
       this.guardianBuilders.add(GuardianBuilder.createRandom(coeffSet, numberOfGuardians, quorum));
@@ -188,7 +187,9 @@ public class PerformKeyCeremony {
     if (!keyCeremony()) {
       throw new RuntimeException("*** Key Ceremony failed");
     }
-    buildElectionContext(this.election, this.jointKey);
+
+    this.context = Election.make_ciphertext_election_context(this.numberOfGuardians, this.quorum,
+            this.jointKey, this.election, this.commitmentsHash);
   }
 
   /**
@@ -256,17 +257,16 @@ public class PerformKeyCeremony {
     }
     this.jointKey = joint_key.get();
 
-    // Save Validation Keys
+    // Save CoefficientValidations, calculate commitment hash
+    List<Group.ElementModP> commitments = new ArrayList<>();
     for (GuardianBuilder guardian : this.guardianBuilders) {
-      this.coefficientValidationSets.add(guardian.share_coefficient_validation_set());
+      KeyCeremony.CoefficientValidationSet coeffSet = guardian.share_coefficient_validation_set();
+      commitments.addAll(coeffSet.coefficient_commitments());
+      this.coefficientValidationSets.add(coeffSet);
     }
+    this.commitmentsHash = Hash.hash_elems(commitments);
 
     return true;
-  }
-
-  void buildElectionContext(Election.ElectionDescription description, Group.ElementModP joint_key) {
-    this.context = Election.make_ciphertext_election_context(this.numberOfGuardians, this.quorum,
-            joint_key, description);
   }
 
   void publish(String publishDir) throws IOException {

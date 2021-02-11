@@ -46,7 +46,7 @@ public class TestPublish {
             ImmutableList.of(), ImmutableList.of(), ImmutableList.of(), null, null);
     ElectionWithPlaceholders metadata = new ElectionWithPlaceholders(election);
 
-    CiphertextElectionContext context = make_ciphertext_election_context(1, 1, ONE_MOD_P, election);
+    CiphertextElectionContext context = make_ciphertext_election_context(1, 1, ONE_MOD_P, election, rand_q());
     List<KeyCeremony.CoefficientValidationSet> coefficients = ImmutableList.of(
             KeyCeremony.CoefficientValidationSet.create("hiD", ImmutableList.of(), ImmutableList.of()));
     PlaintextTally plaintext_tally = new PlaintextTally("PlaintextTallyId", ImmutableMap.of(), ImmutableMap.of(),

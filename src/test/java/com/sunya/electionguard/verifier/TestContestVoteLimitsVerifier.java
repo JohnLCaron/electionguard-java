@@ -18,11 +18,11 @@ public class TestContestVoteLimitsVerifier {
     String topdir = TestParameterVerifier.topdir;
 
     consumer = new Consumer(topdir);
-    validator = new ContestVoteLimitsVerifier(consumer.readElectionRecordJson());
+    validator = new ContestVoteLimitsVerifier(consumer.readElectionRecordProto());
   }
 
   @Example
-  public void testContestVoteLimitsValidator() throws IOException {
+  public void testContestVoteLimitsValidator() {
     boolean sevOk = validator.verify_all_contests();
     assertThat(sevOk).isTrue();
   }
