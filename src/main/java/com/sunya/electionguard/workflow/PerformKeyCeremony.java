@@ -261,8 +261,8 @@ public class PerformKeyCeremony {
     List<Group.ElementModP> commitments = new ArrayList<>();
     for (GuardianBuilder guardian : this.guardianBuilders) {
       KeyCeremony.CoefficientValidationSet coeffSet = guardian.share_coefficient_validation_set();
-      commitments.addAll(coeffSet.coefficient_commitments());
       this.coefficientValidationSets.add(coeffSet);
+      commitments.addAll(coeffSet.coefficient_commitments());
     }
     this.commitmentsHash = Hash.hash_elems(commitments);
 

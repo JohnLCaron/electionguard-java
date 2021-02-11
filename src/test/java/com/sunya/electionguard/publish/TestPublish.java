@@ -34,7 +34,7 @@ public class TestPublish {
     Path tempPath = Files.createTempDirectory("electionguardPublish.");
     File tempDir = tempPath.toFile();
     tempDir.deleteOnExit();
-    outputDir = tempDir.getAbsolutePath(); // "/home/snake/tmp/testPublish";
+    outputDir = tempDir.getAbsolutePath();
     System.out.printf("outputDir %s%n", outputDir);
   }
 

@@ -74,7 +74,6 @@ public class TimeIntegrationSteps {
     Path tmp = Files.createTempDirectory("publish");
     tmp.toFile().deleteOnExit();
     outputDir = tmp.toAbsolutePath().toString();
-    outputDir = "/home/snake/tmp/electionguard/publishTimeIntegrationSteps";
     System.out.printf("=========== outputDir = %s nballots = %d%n", outputDir, nballots);
     this.nballots = nballots;
   }
@@ -402,7 +401,6 @@ public class TimeIntegrationSteps {
     Path tmp = Files.createTempDirectory("publish");
     tmp.toFile().deleteOnExit();
     String protoDir = tmp.toAbsolutePath().toString();
-    protoDir = "/home/snake/tmp/electionguard/publishTimeIntegrationStepsProto";
     Publisher publisher = new Publisher(protoDir, true, false);
     publisher.writeElectionRecordProto(
             this.election,

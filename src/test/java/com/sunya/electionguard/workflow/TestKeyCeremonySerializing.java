@@ -75,10 +75,12 @@ public class TestKeyCeremonySerializing {
     System.out.printf("  Create %d Guardians, quorum = %d%n", this.numberOfGuardians, this.quorum);
 
     this.guardianBuilders = new ArrayList<>();
-    List<Group.ElementModQ> commitments = new ArrayList<>();
+    List<Group.ElementModP> commitments = new ArrayList<>();
     for (KeyCeremony.CoefficientSet coeffSet : coefficientsProvider.guardianCoefficients()) {
-      this.guardianBuilders.add(GuardianBuilder.createRandom(coeffSet, numberOfGuardians, quorum));
-      commitments.addAll(coeffSet.coefficients());
+      GuardianBuilder guardian = GuardianBuilder.createRandom(coeffSet, numberOfGuardians, quorum);
+      this.guardianBuilders.add(guardian);
+      KeyCeremony.CoefficientValidationSet coeffValidSet = guardian.share_coefficient_validation_set();
+      commitments.addAll(coeffValidSet.coefficient_commitments());
     }
     Group.ElementModQ commitmentsHash = Hash.hash_elems(commitments);
 
