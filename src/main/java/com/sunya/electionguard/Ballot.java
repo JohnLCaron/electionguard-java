@@ -680,7 +680,7 @@ public class Ballot {
   @Immutable
   public static class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoHashCheckable {
     public final String ballot_style;
-    public final ElementModQ description_hash;
+    public final ElementModQ description_hash; // election description hash
     public final ElementModQ previous_tracking_hash;
     public final ImmutableList<CiphertextBallotContest> contests;
     public final ElementModQ tracking_hash; // not optional
@@ -939,7 +939,7 @@ public class Ballot {
    * <p>
    * @param object_id: the object_id of this specific ballot
    * @param ballot_style: The `object_id` of the `BallotStyle` in the `Election` Manifest
-   * @param description_hash: Hash of the election metadata
+   * @param description_hash: Hash of the election description
    * @param previous_tracking_hashO: Previous tracking hash or seed hash
    * @param contests: List of contests for this ballot
    * @param tracking_hash: This ballot's tracking hash

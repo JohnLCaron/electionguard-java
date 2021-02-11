@@ -25,8 +25,9 @@ public class TestDecryptionMediatorProblem extends TestProperties {
   KeyCeremonyMediator key_ceremony;
   List<Guardian> guardians = new ArrayList<>();
   ElementModP joint_public_key;
-  InternalElectionDescription metadata;
+  ElectionDescription election;
   CiphertextElectionContext context;
+  ElectionWithPlaceholders metadata;
   Map<String, Integer> expected_plaintext_tally;
 
   BallotBox ballot_box;
@@ -62,10 +63,10 @@ public class TestDecryptionMediatorProblem extends TestProperties {
     assertThat(builder.build()).isEmpty();  // Can't build without the public key
     builder.set_public_key(this.joint_public_key);
 
-    Optional<ElectionBuilder.DescriptionAndContext> tuple = builder.build();
-    assertThat(tuple).isPresent();
-    this.metadata = tuple.get().metadata;
-    this.context = tuple.get().context;
+    ElectionBuilder.DescriptionAndContext tuple = builder.build().orElseThrow();
+    this.metadata = tuple.metadata;
+    this.election = tuple.metadata.election;
+    this.context = tuple.context;
 
     Encrypt.EncryptionDevice encryption_device = new Encrypt.EncryptionDevice("location");
     Encrypt.EncryptionMediator ballot_marking_device = new Encrypt.EncryptionMediator(this.metadata, this.context, encryption_device);
@@ -84,8 +85,8 @@ public class TestDecryptionMediatorProblem extends TestProperties {
               ballot_factory.get_fake_ballot(this.metadata, "some-unique-ballot-id-spoiled" + i, true));
     }
 
-    assertThat(this.fake_cast_ballot.is_valid(this.metadata.ballot_styles.get(0).object_id)).isTrue();
-    assertThat(this.fake_spoiled_ballot.is_valid(this.metadata.ballot_styles.get(0).object_id)).isTrue();
+    assertThat(this.fake_cast_ballot.is_valid(this.election.ballot_styles.get(0).object_id)).isTrue();
+    assertThat(this.fake_spoiled_ballot.is_valid(this.election.ballot_styles.get(0).object_id)).isTrue();
     ArrayList<PlaintextBallot> all = new ArrayList<>(more_fake_ballots);
     all.add(this.fake_cast_ballot);
 
@@ -93,7 +94,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
 
     // Fill in the expected values with any missing selections
     // that were not made on any ballots
-    Set<String> selection_ids = this.metadata.contests.stream().flatMap(c -> c.ballot_selections.stream())
+    Set<String> selection_ids = this.election.contests.stream().flatMap(c -> c.ballot_selections.stream())
             .map(s -> s.object_id).collect(Collectors.toSet());
     // missing_selection_ids = selection_ids.difference( set(this.expected_plaintext_tally) )
     Sets.SetView<String> missing_selection_ids = Sets.difference(selection_ids, this.expected_plaintext_tally.keySet());
@@ -107,7 +108,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
     assertThat(temp_encrypted_fake_cast_ballot).isNotNull();
     assertThat(temp_encrypted_fake_spoiled_ballot).isNotNull();
     assertThat(temp_encrypted_fake_cast_ballot.is_valid_encryption(
-            this.metadata.description_hash,
+            this.election.crypto_hash,
             this.joint_public_key,
             this.context.crypto_extended_base_hash))
             .isTrue();
@@ -125,7 +126,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
 
     // configure the ballot box
     DataStore ballot_store = new DataStore();
-    this.ballot_box = new BallotBox(this.metadata, this.context, ballot_store);
+    this.ballot_box = new BallotBox(this.election, this.context, ballot_store);
     this.encrypted_fake_cast_ballot = ballot_box.cast(temp_encrypted_fake_cast_ballot).orElseThrow();
     this.encrypted_fake_spoiled_ballot = ballot_box.spoil(temp_encrypted_fake_spoiled_ballot).orElseThrow();
 
@@ -139,7 +140,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
     }
 
     // generate encrypted tally
-    this.ciphertext_tally = new CiphertextTallyBuilder("whatever", metadata, context);
+    this.ciphertext_tally = new CiphertextTallyBuilder("whatever", this.metadata, context);
     this.ciphertext_tally.batch_append(ballot_box.accepted());
   }
 
@@ -162,7 +163,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
 
     // Fill in the expected values with any missing selections
     // that were not made on any ballots
-    Set<String> selection_ids = this.metadata.contests.stream().flatMap(c -> c.ballot_selections.stream())
+    Set<String> selection_ids = this.election.contests.stream().flatMap(c -> c.ballot_selections.stream())
             .map(s -> s.object_id).collect(Collectors.toSet());
     // missing_selection_ids = selection_ids.difference( set(this.expected_plaintext_tally) )
     Sets.SetView<String> missing_selection_ids = Sets.difference(selection_ids, expected_tally.keySet());
@@ -185,7 +186,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
 
     // configure the ballot box
     DataStore ballot_store = new DataStore();
-    this.ballot_box = new BallotBox(this.metadata, this.context, ballot_store);
+    this.ballot_box = new BallotBox(this.election, this.context, ballot_store);
 
     // cast the ballots
     for (CiphertextBallot cballot : allECastBallots) {
@@ -199,9 +200,10 @@ public class TestDecryptionMediatorProblem extends TestProperties {
     // generate encrypted tally
     CiphertextTallyBuilder ctally  = new CiphertextTallyBuilder("whatever", this.metadata, this.context);
     ctally.batch_append(ballot_box.accepted());
+    PublishedCiphertextTally ptally = ctally.build();
 
     // now decrypt it
-    DecryptionMediator decryptionMediator = new DecryptionMediator(this.context, ctally, this.ballot_box.getSpoiledBallots());
+    DecryptionMediator decryptionMediator = new DecryptionMediator(this.context, ptally, this.ballot_box.getSpoiledBallots());
     this.guardians.forEach(decryptionMediator::announce);
     Optional<PlaintextTally> decrypted_tallies = decryptionMediator.decrypt_tally(false, null);
     assertThat(decrypted_tallies).isNotNull();
@@ -243,7 +245,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
 
     // configure the ballot box
     DataStore ballot_store = new DataStore();
-    BallotBox ballot_box = new BallotBox(this.metadata, this.context, ballot_store);
+    BallotBox ballot_box = new BallotBox(this.election, this.context, ballot_store);
 
     // cast the ballots
     for (CiphertextBallot cballot : allECastBallots) {
@@ -257,9 +259,10 @@ public class TestDecryptionMediatorProblem extends TestProperties {
     // generate encrypted tally
     CiphertextTallyBuilder ctally  = new CiphertextTallyBuilder("whatever", this.metadata, this.context);
     ctally.batch_append(ballot_box.accepted());
+    PublishedCiphertextTally ptally = ctally.build();
 
     // now decrypt it
-    DecryptionMediator decryptionMediator = new DecryptionMediator(this.context, ctally, this.ballot_box.getSpoiledBallots());
+    DecryptionMediator decryptionMediator = new DecryptionMediator(this.context, ptally, this.ballot_box.getSpoiledBallots());
     this.guardians.forEach(decryptionMediator::announce);
     Optional<PlaintextTally> decrypted_tallies = decryptionMediator.decrypt_tally(false, null);
     assertThat(decrypted_tallies).isNotNull();
@@ -280,7 +283,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
 
     // Fill in the expected values with any missing selections
     // that were not made on any ballots
-    Set<String> selection_ids = this.metadata.contests.stream().flatMap(c -> c.ballot_selections.stream())
+    Set<String> selection_ids = this.election.contests.stream().flatMap(c -> c.ballot_selections.stream())
             .map(s -> s.object_id).collect(Collectors.toSet());
     // missing_selection_ids = selection_ids.difference( set(this.expected_plaintext_tally) )
     Sets.SetView<String> missing_selection_ids = Sets.difference(selection_ids, expected_tally.keySet());
@@ -299,7 +302,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
 
     // configure the ballot box
     DataStore ballot_store = new DataStore();
-    BallotBox ballot_box = new BallotBox(this.metadata, this.context, ballot_store);
+    BallotBox ballot_box = new BallotBox(this.election, this.context, ballot_store);
 
     // cast the ballots
     for (CiphertextBallot cballot : allEncryptedBallots) {
@@ -309,9 +312,10 @@ public class TestDecryptionMediatorProblem extends TestProperties {
     // generate encrypted tally
     CiphertextTallyBuilder ctally  = new CiphertextTallyBuilder("whatever", this.metadata, this.context);
     ctally.batch_append(ballot_box.accepted());
+    PublishedCiphertextTally ptally = ctally.build();
 
     // now decrypt it
-    DecryptionMediator decryptionMediator = new DecryptionMediator(this.context, ctally, this.ballot_box.getSpoiledBallots());
+    DecryptionMediator decryptionMediator = new DecryptionMediator(this.context, ptally, this.ballot_box.getSpoiledBallots());
     this.guardians.forEach(decryptionMediator::announce);
     Optional<PlaintextTally> decrypted_tallies = decryptionMediator.decrypt_tally(false, null);
     assertThat(decrypted_tallies).isNotNull();
@@ -334,7 +338,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
 
     // Fill in the expected values with any missing selections
     // that were not made on any ballots
-    Set<String> selection_ids = this.metadata.contests.stream().flatMap(c -> c.ballot_selections.stream())
+    Set<String> selection_ids = this.election.contests.stream().flatMap(c -> c.ballot_selections.stream())
             .map(s -> s.object_id).collect(Collectors.toSet());
     // missing_selection_ids = selection_ids.difference( set(this.expected_plaintext_tally) )
     Sets.SetView<String> missing_selection_ids = Sets.difference(selection_ids, expected_tally.keySet());
@@ -348,16 +352,17 @@ public class TestDecryptionMediatorProblem extends TestProperties {
 
     // configure the ballot box
     DataStore ballot_store = new DataStore();
-    BallotBox ballot_box = new BallotBox(this.metadata, this.context, ballot_store);
+    BallotBox ballot_box = new BallotBox(this.election, this.context, ballot_store);
     CiphertextAcceptedBallot acceptedCastBallot = ballot_box.cast(encryptedCastBallot).orElseThrow();
     assertThat(acceptedCastBallot).isNotNull();
 
     // generate encrypted tally
     CiphertextTallyBuilder ctally  = new CiphertextTallyBuilder("whatever", this.metadata, this.context);
     ctally.batch_append(ballot_box.accepted());
+    PublishedCiphertextTally ptally = ctally.build();
 
     // now decrypt it
-    DecryptionMediator decryptionMediator = new DecryptionMediator(this.context, ctally, this.ballot_box.getSpoiledBallots());
+    DecryptionMediator decryptionMediator = new DecryptionMediator(this.context, ptally, this.ballot_box.getSpoiledBallots());
     this.guardians.forEach(decryptionMediator::announce);
     Optional<PlaintextTally> decrypted_tallies = decryptionMediator.decrypt_tally(false, null);
     assertThat(decrypted_tallies).isNotNull();

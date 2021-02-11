@@ -10,7 +10,6 @@ import javax.annotation.concurrent.Immutable;
 import java.math.BigInteger;
 import java.time.OffsetDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.sunya.electionguard.Group.*;
 
@@ -733,70 +732,6 @@ public class Election {
   }
 
   /**
-   * ContestDescriptionWithPlaceholders is a `ContestDescription` with ElectionGuard `placeholder_selections`.
-   * (The ElectionGuard spec requires for n-of-m elections that there be *exactly* n counters that are one,
-   * with the rest zero, so if a voter deliberately undervotes, one or more of the placeholder counters will
-   * become one. This allows the `ConstantChaumPedersenProof` to verify correctly for undervoted contests.)
-   */
-  @Immutable
-  public static class ContestDescriptionWithPlaceholders extends ContestDescription {
-    final ImmutableList<SelectionDescription> placeholder_selections;
-
-    public ContestDescriptionWithPlaceholders(String object_id,
-                                              String electoral_district_id,
-                                              int sequence_order,
-                                              VoteVariationType vote_variation,
-                                              int number_elected,
-                                              int votes_allowed,
-                                              String name,
-                                              List<SelectionDescription> ballot_selections,
-                                              @Nullable InternationalizedText ballot_title,
-                                              @Nullable InternationalizedText ballot_subtitle,
-                                              List<SelectionDescription> placeholder_selections) {
-
-      super(object_id, electoral_district_id, sequence_order, vote_variation, number_elected, votes_allowed, name,
-              ballot_selections, ballot_title, ballot_subtitle);
-      this.placeholder_selections = toImmutableListEmpty(placeholder_selections);
-    }
-
-    boolean is_valid() {
-      boolean contest_description_validates = super.is_valid();
-      return contest_description_validates && this.placeholder_selections.size() == this.number_elected;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) return true;
-      if (o == null || getClass() != o.getClass()) return false;
-      if (!super.equals(o)) return false;
-      ContestDescriptionWithPlaceholders that = (ContestDescriptionWithPlaceholders) o;
-      return placeholder_selections.equals(that.placeholder_selections);
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(super.hashCode(), placeholder_selections);
-    }
-
-    /**
-     * Gets the description for a particular id
-     * @param selection_id: Id of Selection
-     * @return description
-     */
-    Optional<SelectionDescription> selection_for(String selection_id) {
-
-      Optional<SelectionDescription> first_match = this.ballot_selections.stream()
-              .filter(s -> s.object_id.equals(selection_id)).findFirst();
-      if (first_match.isPresent()) {
-        return first_match;
-      }
-
-      return this.placeholder_selections.stream()
-              .filter(s -> s.object_id.equals(selection_id)).findFirst();
-    }
-  }
-
-  /**
    * The election metadata that describes the structure and type of the election, including geopolitical units,
    * contests, candidates, and ballot styles, etc.
    * This class is based on the NIST Election Common Standard Data Specification.
@@ -817,6 +752,7 @@ public class Election {
     public final ImmutableList<BallotStyle> ballot_styles;
     public final Optional<InternationalizedText> name;
     public final Optional<ContactInformation> contact_information;
+    public final ElementModQ crypto_hash;
 
     public ElectionDescription(String election_scope_id,
                                ElectionType type,
@@ -842,6 +778,18 @@ public class Election {
       this.ballot_styles = toImmutableListEmpty(ballot_styles);
       this.name = Optional.ofNullable(name);
       this.contact_information = Optional.ofNullable(contact_information);
+
+      this.crypto_hash = Hash.hash_elems(
+              this.election_scope_id,
+              this.type.name(),
+              this.start_date.toEpochSecond(), // to_ticks(self.start_date), number of seconds since the unix epoch
+              this.end_date.toEpochSecond(),
+              this.name,
+              this.contact_information,
+              this.geopolitical_units,
+              this.parties,
+              this.contests,
+              this.ballot_styles);
     }
 
     @Override
@@ -884,21 +832,9 @@ public class Election {
               '}';
     }
 
-    // LOOK this isnt going to generate the same hash as the python code. So when reading in a published Election,
-    //  take Election.crypto_hash as given.
     @Override
     public Group.ElementModQ crypto_hash() {
-      return Hash.hash_elems(
-              this.election_scope_id,
-              this.type.name(),
-              this.start_date.toEpochSecond(), // to_ticks(self.start_date), number of seconds since the unix epoch
-              this.end_date.toEpochSecond(),
-              this.name,
-              this.contact_information,
-              this.geopolitical_units,
-              this.parties,
-              this.contests,
-              this.ballot_styles);
+      return this.crypto_hash;
     }
 
     /**
@@ -983,7 +919,6 @@ public class Election {
       }
 
       // TODO: ISSUE //55: verify that the contest sequence order set is in the proper order
-
       boolean contests_have_valid_object_ids = contest_ids.size() == this.contests.size();
       boolean contests_have_valid_sequence_ids = contest_sequence_ids.size() == this.contests.size();
       boolean contests_valid = (
@@ -1020,79 +955,6 @@ public class Election {
                           "candidate_contests_have_valid_party_ids", candidate_contests_have_valid_party_ids);
       }
       return success;
-    }
-  }
-
-  /**
-   * The subset of the election description required by ElectionGuard to validate ballots are
-   * correctly associated with an election.
-   * LOOK this could go away I think, or at least not be in this class
-   */
-  public static class InternalElectionDescription {
-    final ElectionDescription description;
-
-    final ImmutableList<GeopoliticalUnit> geopolitical_units;
-    final ImmutableList<ContestDescriptionWithPlaceholders> contests;
-    public final ImmutableList<BallotStyle> ballot_styles;
-    final Group.ElementModQ description_hash;
-
-    public InternalElectionDescription(ElectionDescription description) {
-      this.description = Preconditions.checkNotNull(description);
-      this.geopolitical_units = description.geopolitical_units;
-      this.contests = generate_contests_with_placeholders(description);
-      this.ballot_styles = description.ballot_styles;
-      this.description_hash = description.crypto_hash();
-    }
-
-    Optional<ContestDescriptionWithPlaceholders> contest_for(String contest_id) {
-      return contests.stream().filter(c -> c.object_id.equals(contest_id)).findFirst();
-    }
-
-    /** Find the ballot style for a specified ballot_style_id */
-    Optional<BallotStyle> get_ballot_style(String ballot_style_id) {
-      return ballot_styles.stream().filter(bs -> bs.object_id.equals(ballot_style_id)).findFirst();
-    }
-
-    /** Get contests that have the given ballot style. */
-    public List<ContestDescriptionWithPlaceholders> get_contests_for(String ballot_style_id) {
-      Optional<BallotStyle> style = this.get_ballot_style(ballot_style_id);
-      if (style.isEmpty() || style.get().geopolitical_unit_ids.isEmpty()) {
-        return new ArrayList<>();
-      }
-      List<String> gp_unit_ids = new ArrayList<>(style.get().geopolitical_unit_ids);
-      return this.contests.stream().filter(c -> gp_unit_ids.contains(c.electoral_district_id)).collect(Collectors.toList());
-    }
-
-    /**
-     * For each contest, append the `number_elected` number
-     * of placeholder selections to the end of the contest collection.
-     */
-    private ImmutableList<ContestDescriptionWithPlaceholders> generate_contests_with_placeholders(
-            ElectionDescription description) {
-
-      List<ContestDescriptionWithPlaceholders> contests = new ArrayList<>();
-      for (ContestDescription contest : description.contests) {
-        List<SelectionDescription> placeholder_selections = generate_placeholder_selections_from(contest, contest.number_elected);
-        contests.add(contest_description_with_placeholders_from(contest, placeholder_selections));
-      }
-      return ImmutableList.copyOf(contests);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) return true;
-      if (o == null || getClass() != o.getClass()) return false;
-      InternalElectionDescription that = (InternalElectionDescription) o;
-      return description.equals(that.description) &&
-              geopolitical_units.equals(that.geopolitical_units) &&
-              contests.equals(that.contests) &&
-              ballot_styles.equals(that.ballot_styles) &&
-              description_hash.equals(that.description_hash);
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(description, geopolitical_units, contests, ballot_styles, description_hash);
     }
   }
 
@@ -1245,79 +1107,6 @@ public class Election {
             description.crypto_hash(),
             crypto_base_hash,
             crypto_extended_base_hash);
-  }
-
-  /**
-   * Generates a placeholder selection description.
-   * @param description: contest description
-   * @param placeholders: list of placeholder descriptions of selections
-   * @return a SelectionDescription or None
-   */
-  static ContestDescriptionWithPlaceholders contest_description_with_placeholders_from(
-          ContestDescription description, List<SelectionDescription> placeholders) {
-
-    return new ContestDescriptionWithPlaceholders(
-            description.object_id,
-            description.electoral_district_id,
-            description.sequence_order,
-            description.vote_variation,
-            description.number_elected,
-            description.votes_allowed.orElse(0),
-            description.name,
-            description.ballot_selections,
-            description.ballot_title.orElse(null),
-            description.ballot_subtitle.orElse(null),
-            placeholders);
-  }
-
-  /**
-   * Generates a placeholder selection description that is unique so it can be hashed.
-   *
-   * @param use_sequence_idO: an optional integer unique to the contest identifying this selection's place in the contest
-   * @return a SelectionDescription or None
-   */
-  static Optional<SelectionDescription> generate_placeholder_selection_from(
-          ContestDescription contest, Optional<Integer> use_sequence_idO) {
-
-    // sequence_ids = [selection.sequence_order for selection in contest.ballot_selections]
-    List<Integer> sequence_ids = contest.ballot_selections.stream().map(s -> s.sequence_order).collect(Collectors.toList());
-
-    int use_sequence_id;
-    if (use_sequence_idO.isEmpty()) {
-      // if no sequence order is specified, take the max
-      use_sequence_id = sequence_ids.stream().max(Integer::compare).orElse(0) + 1;
-    } else {
-      use_sequence_id = use_sequence_idO.get();
-      if (sequence_ids.contains(use_sequence_id)) {
-        logger.atWarning().log("mismatched placeholder selection %s already exists", use_sequence_id);
-        return Optional.empty();
-      }
-    }
-
-    String placeholder_object_id = String.format("%s-%s", contest.object_id, use_sequence_id);
-    return Optional.of(new SelectionDescription(
-            String.format("%s-placeholder", placeholder_object_id),
-            String.format("%s-candidate", placeholder_object_id),
-            use_sequence_id));
-  }
-
-  /**
-   * Generates the specified number of placeholder selections in ascending sequence order from the max selection sequence order
-   * <p>
-   * @param contest: ContestDescription for input
-   * @param count: optionally specify a number of placeholders to generate
-   * @return a collection of `SelectionDescription` objects, which may be empty
-   */
-  static List<SelectionDescription> generate_placeholder_selections_from(ContestDescription contest, int count) {
-    //  max_sequence_order = max([selection.sequence_order for selection in contest.ballot_selections]);
-    int max_sequence_order = contest.ballot_selections.stream().map(s -> s.sequence_order).max(Integer::compare).orElse(0);
-    List<SelectionDescription> selections = new ArrayList<>();
-    for (int i = 0; i < count; i++) {
-      int sequence_order = max_sequence_order + 1 + i;
-      Optional<SelectionDescription> sd = generate_placeholder_selection_from(contest, Optional.of(sequence_order));
-      selections.add(sd.orElseThrow(IllegalStateException::new));
-    }
-    return selections;
   }
 
   private static <T> ImmutableList<T> toImmutableListEmpty(List<T> from) {

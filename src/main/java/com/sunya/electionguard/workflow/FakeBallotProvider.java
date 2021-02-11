@@ -4,6 +4,9 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.sunya.electionguard.Ballot;
 import com.sunya.electionguard.Election;
+import com.sunya.electionguard.ElectionWithPlaceholders;
+
+import static com.sunya.electionguard.ElectionWithPlaceholders.ContestWithPlaceholders;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,9 +25,8 @@ public class FakeBallotProvider implements BallotProvider {
 
   @Override
   public Iterable<Ballot.PlaintextBallot> ballots() {
-    // LOOK get rid of InternalElectionDescription
-    Election.InternalElectionDescription metadata = new Election.InternalElectionDescription(election);
     BallotFactory ballotFactory = new BallotFactory();
+    ElectionWithPlaceholders metadata = new ElectionWithPlaceholders(election);
 
     ImmutableList.Builder<Ballot.PlaintextBallot> builder = ImmutableList.builder();
     for (int i = 0; i < nballots; i++) {
@@ -36,17 +38,13 @@ public class FakeBallotProvider implements BallotProvider {
 
 
   private static class BallotFactory {
-    Ballot.PlaintextBallot get_fake_ballot(
-            Election.InternalElectionDescription election,
-            String ballot_id) {
-
+    Ballot.PlaintextBallot get_fake_ballot(ElectionWithPlaceholders metadata, String ballot_id) {
       Preconditions.checkNotNull(ballot_id);
-      String ballotStyleId = election.ballot_styles.get(0).object_id;
+      String ballotStyleId = metadata.election.ballot_styles.get(0).object_id;
       List<Ballot.PlaintextBallotContest> contests = new ArrayList<>();
-      for (Election.ContestDescriptionWithPlaceholders contest : election.get_contests_for(ballotStyleId)) {
+      for (ContestWithPlaceholders contest : metadata.get_contests_for(ballotStyleId)) {
         contests.add(this.get_random_contest_from(contest));
       }
-
       return new Ballot.PlaintextBallot(ballot_id, ballotStyleId, contests);
     }
 

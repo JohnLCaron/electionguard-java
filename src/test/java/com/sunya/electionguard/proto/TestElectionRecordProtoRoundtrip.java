@@ -54,8 +54,8 @@ public class TestElectionRecordProtoRoundtrip {
             consumer.spoiledBallots(),
             consumer.spoiledTallies());
 
-    Consumer consumer = new Consumer(publisher);
-    ElectionRecord roundtrip = consumer.readElectionRecordProto();
+    Consumer consumer2 = new Consumer(publisher);
+    ElectionRecord roundtrip = consumer2.readElectionRecordProto();
 
     assertThat(roundtrip.election).isEqualTo(consumer.election());
     assertThat(roundtrip.context).isEqualTo(consumer.context());

@@ -21,6 +21,8 @@ import static com.google.common.truth.Truth8.assertThat;
 import static com.sunya.electionguard.Ballot.*;
 import static com.sunya.electionguard.Election.*;
 import static com.sunya.electionguard.Group.rand_q;
+import static com.sunya.electionguard.ElectionWithPlaceholders.ContestWithPlaceholders;
+
 import static org.junit.Assert.fail;
 
 /** Time steps for an End-to-End encrypted election, publish to both Json and proto. */
@@ -40,11 +42,11 @@ public class TimeIntegrationSteps {
   int nballots;
 
   // Step 0 - Configure Election
-  ElectionDescription description;
+  ElectionDescription election;
   ElectionBuilder election_builder;
-  InternalElectionDescription election;
   CiphertextElectionContext context;
   ElectionConstants constants;
+  ElectionWithPlaceholders metadata;
 
   // Step 1 - Key Ceremony;
   KeyCeremonyMediator mediator;
@@ -64,7 +66,7 @@ public class TimeIntegrationSteps {
 
   // Step 4 - Decrypt Tally
   DecryptionMediator decryptionMediator;
-  CiphertextTallyBuilder ciphertext_tally;
+  PublishedCiphertextTally publishedTally;
   PlaintextTally decryptedTally;
   List<Ballot.PlaintextBallot> spoiledDecryptedBallots;
   List<PlaintextTally> spoiledDecryptedTallies;
@@ -127,21 +129,21 @@ public class TimeIntegrationSteps {
   void step_0_configure_election() throws IOException {
     System.out.printf("%n0. Verify that the input election meta-data is well-formed%n");
     // TODO: replace with complex election
-    this.description = ElectionFactory.get_simple_election_from_file();
+    this.election = ElectionFactory.get_simple_election_from_file();
 
     System.out.printf("----------------------------------%n");
-    System.out.printf("Election Summary:%nScope: %s%n", this.description.election_scope_id);
-    System.out.printf("Geopolitical Units: %d%n", this.description.geopolitical_units.size());
-    System.out.printf("Parties: %d%n", this.description.parties.size());
-    System.out.printf("Candidates: %d%n", this.description.candidates.size());
-    System.out.printf("Contests: %d%n", this.description.contests.size());
-    System.out.printf("Ballot Styles: %d%n", this.description.ballot_styles.size());
+    System.out.printf("Election Summary:%nScope: %s%n", this.election.election_scope_id);
+    System.out.printf("Geopolitical Units: %d%n", this.election.geopolitical_units.size());
+    System.out.printf("Parties: %d%n", this.election.parties.size());
+    System.out.printf("Candidates: %d%n", this.election.candidates.size());
+    System.out.printf("Contests: %d%n", this.election.contests.size());
+    System.out.printf("Ballot Styles: %d%n", this.election.ballot_styles.size());
     System.out.printf("----------------------------------%n");
 
-    assertThat(this.description.is_valid()).isTrue();
+    assertThat(this.election.is_valid()).isTrue();
 
     // Create an Election Builder
-    this.election_builder = new ElectionBuilder(NUMBER_OF_GUARDIANS, QUORUM, this.description);
+    this.election_builder = new ElectionBuilder(NUMBER_OF_GUARDIANS, QUORUM, this.election);
     System.out.printf("Created with number_of_guardians: %d quorum: %d%n", NUMBER_OF_GUARDIANS, QUORUM);
   }
 
@@ -205,7 +207,8 @@ public class TimeIntegrationSteps {
     // Build the Election
     this.election_builder.set_public_key(joint_key.get());
     ElectionBuilder.DescriptionAndContext tuple = this.election_builder.build().orElseThrow();
-    this.election = tuple.metadata;
+    this.election = tuple.metadata.election;
+    this.metadata = tuple.metadata;
     this.context = tuple.context;
     this.constants = new ElectionConstants();
   }
@@ -215,14 +218,14 @@ public class TimeIntegrationSteps {
   void step_2_encrypt_votes(int nballots) {
     // Configure the Encryption Device
     this.device = new Encrypt.EncryptionDevice("polling-place-one");
-    this.encrypter = new Encrypt.EncryptionMediator(this.election, this.context, this.device);
+    this.encrypter = new Encrypt.EncryptionMediator(metadata, this.context, this.device);
     System.out.printf("%n2. Ready to encrypt at location: %s%n", this.device.location);
 
     // Encrypt nballots randomly generated fake Ballots
     BallotFactory ballotFactory = new BallotFactory();
     for (int i = 0; i < nballots; i++) {
       String ballot_id = "ballot-id-" + random.nextInt();
-      PlaintextBallot plaintext_ballot = ballotFactory.get_fake_ballot(this.election, ballot_id, true);
+      PlaintextBallot plaintext_ballot = ballotFactory.get_fake_ballot(this.metadata, ballot_id, true);
       Optional<CiphertextBallot> encrypted_ballot = this.encrypter.encrypt(plaintext_ballot);
       assertThat(encrypted_ballot).isPresent();
       this.ciphertext_ballots.add(encrypted_ballot.get());
@@ -261,11 +264,12 @@ public class TimeIntegrationSteps {
   void step_4_decrypt_tally() {
     System.out.printf("%n4. Homomorphically Accumulate and decrypt tally%n");
     // Generate a Homomorphically Accumulated Tally of the ballots
-    this.ciphertext_tally = new CiphertextTallyBuilder("whatever", this.election, this.context);
-    this.ciphertext_tally.batch_append(this.ballot_box.accepted());
+    CiphertextTallyBuilder ciphertext_tally = new CiphertextTallyBuilder("whatever", this.metadata, this.context);
+    ciphertext_tally.batch_append(this.ballot_box.accepted());
+    publishedTally = ciphertext_tally.build();
 
     // Configure the Decryption
-    this.decryptionMediator = new DecryptionMediator(this.context, this.ciphertext_tally, this.ballot_box.getSpoiledBallots());
+    this.decryptionMediator = new DecryptionMediator(this.context, publishedTally, this.ballot_box.getSpoiledBallots());
 
     // Announce each guardian as present
     for (Guardian guardian : this.guardians) {
@@ -291,7 +295,7 @@ public class TimeIntegrationSteps {
     System.out.printf("%n4.5 Compare results%n");
 
     Map<String, Integer> expected_plaintext_tally = new HashMap<>(); // Map of selection_id to votes counted
-    for (ContestDescriptionWithPlaceholders contest : this.election.contests) {
+    for (ContestWithPlaceholders contest : this.metadata.contests) {
       for (SelectionDescription selection : contest.ballot_selections) {
         expected_plaintext_tally.put(selection.object_id, 0);
       }
@@ -343,12 +347,12 @@ public class TimeIntegrationSteps {
     System.out.printf("%n5. publish results as JSON%n");
     Publisher publisher = new Publisher(outputDir, true, true);
     publisher.writeElectionRecordJson(
-            this.description,
+            this.election,
             this.context,
             this.constants,
             ImmutableList.of(this.device),
             this.ballot_box.getAllBallots(),
-            this.ciphertext_tally.build(),
+            this.publishedTally,
             this.decryptedTally,
             this.coefficient_validation_sets,
             this.spoiledDecryptedBallots,
@@ -364,12 +368,12 @@ public class TimeIntegrationSteps {
     Consumer consumer = new Consumer(publisher);
     ElectionRecord roundtrip = consumer.readElectionRecordJson();
 
-    assertThat(roundtrip.election).isEqualTo(this.description);
+    assertThat(roundtrip.election).isEqualTo(this.election);
     assertThat(roundtrip.context).isEqualTo(this.context);
     assertThat(roundtrip.constants).isEqualTo(this.constants);
     assertThat(roundtrip.devices.size()).isEqualTo(1);
     assertThat(roundtrip.devices.get(0)).isEqualTo(this.device);
-    assertThat(roundtrip.ciphertextTally).isEqualTo(this.ciphertext_tally.build());
+    assertThat(roundtrip.ciphertextTally).isEqualTo(this.publishedTally);
     assertThat(roundtrip.decryptedTally).isEqualTo(this.decryptedTally);
 
     Map<String, KeyCeremony.CoefficientValidationSet> coeffMap = this.coefficient_validation_sets.stream()
@@ -403,13 +407,13 @@ public class TimeIntegrationSteps {
     protoDir = "/home/snake/tmp/electionguard/publishTimeIntegrationStepsProto";
     Publisher publisher = new Publisher(protoDir, true, false);
     publisher.writeElectionRecordProto(
-            this.description,
+            this.election,
             this.context,
             this.constants,
             this.coefficient_validation_sets,
             ImmutableList.of(this.device),
             this.ballot_box.accepted(),
-            this.ciphertext_tally.build(),
+            this.publishedTally,
             this.decryptedTally,
             this.spoiledDecryptedBallots,
             this.spoiledDecryptedTallies);
@@ -424,12 +428,12 @@ public class TimeIntegrationSteps {
     Consumer consumer = new Consumer(publisher);
     ElectionRecord roundtrip = consumer.readElectionRecordProto();
 
-    assertThat(roundtrip.election).isEqualTo(this.description);
+    assertThat(roundtrip.election).isEqualTo(this.election);
     assertThat(roundtrip.context).isEqualTo(this.context);
     assertThat(roundtrip.constants).isEqualTo(this.constants);
     assertThat(roundtrip.devices.size()).isEqualTo(1);
     assertThat(roundtrip.devices.get(0)).isEqualTo(this.device);
-    assertThat(roundtrip.ciphertextTally).isEqualTo(this.ciphertext_tally.build());
+    assertThat(roundtrip.ciphertextTally).isEqualTo(this.publishedTally);
     assertThat(roundtrip.decryptedTally).isEqualTo(this.decryptedTally);
 
     Map<String, KeyCeremony.CoefficientValidationSet> coeffMap = this.coefficient_validation_sets.stream()

@@ -8,6 +8,8 @@ import java.util.Optional;
 
 import static com.sunya.electionguard.Ballot.*;
 import static com.sunya.electionguard.Group.*;
+import static com.sunya.electionguard.ElectionWithPlaceholders.ContestWithPlaceholders;
+
 
 /** Static methods for decryption when you know the secret keys. */
 public class DecryptWithSecrets {
@@ -119,7 +121,7 @@ public class DecryptWithSecrets {
    */
   static Optional<PlaintextBallotContest> decrypt_contest_with_secret(
           CiphertextBallotContest contest,
-          Election.ContestDescriptionWithPlaceholders description,
+          ContestWithPlaceholders description,
           ElementModP public_key,
           ElementModQ secret_key,
           ElementModQ crypto_extended_base_hash,
@@ -171,7 +173,7 @@ public class DecryptWithSecrets {
    */
   static Optional<PlaintextBallotContest> decrypt_contest_with_nonce(
           CiphertextBallotContest contest,
-          Election.ContestDescriptionWithPlaceholders description,
+          ContestWithPlaceholders description,
           ElementModP public_key,
           ElementModQ crypto_extended_base_hash,
           Optional<ElementModQ> nonce_seed,
@@ -247,7 +249,7 @@ public class DecryptWithSecrets {
    */
   static Optional<PlaintextBallot> decrypt_ballot_with_secret(
           CiphertextBallot ballot,
-          Election.InternalElectionDescription metadata,
+          ElectionWithPlaceholders metadata,
           ElementModQ crypto_extended_base_hash,
           ElementModP public_key,
           ElementModQ secret_key,
@@ -256,14 +258,14 @@ public class DecryptWithSecrets {
     ) {
 
     if (!suppress_validity_check && !ballot.is_valid_encryption(
-            metadata.description_hash, public_key, crypto_extended_base_hash)) {
+            metadata.election.crypto_hash, public_key, crypto_extended_base_hash)) {
       return Optional.empty();
     }
 
     List<PlaintextBallotContest> plaintext_contests = new ArrayList<>();
 
     for (CiphertextBallotContest contest : ballot.contests) {
-      Election.ContestDescriptionWithPlaceholders description =
+      ContestWithPlaceholders description =
               metadata.contest_for(contest.object_id).orElseThrow(IllegalStateException::new);
       Optional<PlaintextBallotContest> plaintext_contest = decrypt_contest_with_secret(
               contest,
@@ -299,7 +301,7 @@ public class DecryptWithSecrets {
    */
   static Optional<PlaintextBallot> decrypt_ballot_with_nonce(
           CiphertextBallot ballot,
-          Election.InternalElectionDescription metadata,
+          ElectionWithPlaceholders metadata,
           ElementModQ crypto_extended_base_hash,
           ElementModP public_key,
           Optional<ElementModQ> nonce,
@@ -308,13 +310,13 @@ public class DecryptWithSecrets {
     ) {
 
     if (!suppress_validity_check && !ballot.is_valid_encryption(
-            metadata.description_hash, public_key, crypto_extended_base_hash)) {
+            metadata.election.crypto_hash, public_key, crypto_extended_base_hash)) {
       return Optional.empty();
     }
 
     // Use the hashed representation included in the ballot or override with the provided values
     Optional<ElementModQ> nonce_seed = nonce.isEmpty() ? ballot.hashed_ballot_nonce() :
-            Optional.of(CiphertextBallot.nonce_seed(metadata.description_hash, ballot.object_id, nonce.get()));
+            Optional.of(CiphertextBallot.nonce_seed(metadata.election.crypto_hash, ballot.object_id, nonce.get()));
 
     if (nonce_seed.isEmpty()) {
       logger.atWarning().log(
@@ -325,7 +327,7 @@ public class DecryptWithSecrets {
     List<PlaintextBallotContest> plaintext_contests = new ArrayList<>();
 
     for (CiphertextBallotContest contest : ballot.contests) {
-      Election.ContestDescriptionWithPlaceholders description =
+      ContestWithPlaceholders description =
               metadata.contest_for(contest.object_id).orElseThrow(IllegalStateException::new);
       Optional<PlaintextBallotContest> plaintext_contest = decrypt_contest_with_nonce(
               contest,

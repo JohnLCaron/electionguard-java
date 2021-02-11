@@ -9,6 +9,7 @@ import com.sunya.electionguard.CiphertextTallyBuilder;
 import com.sunya.electionguard.DecryptWithShares;
 import com.sunya.electionguard.DecryptionMediator;
 import com.sunya.electionguard.Election;
+import com.sunya.electionguard.ElectionWithPlaceholders;
 import com.sunya.electionguard.Guardian;
 import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.PublishedCiphertextTally;
@@ -111,10 +112,9 @@ public class DecryptBallots {
   ///////////////////////////////////////////////////////////////////////////
   final Consumer consumer;
   final ElectionRecord electionRecord;
-  final Election.InternalElectionDescription metadata; // dont see much point to this.
+  final Election.ElectionDescription election;
 
   Iterable<Guardian> guardians;
-  CiphertextTallyBuilder ciphertextTally;
   PublishedCiphertextTally publishedTally;
   PlaintextTally decryptedTally;
   List<Ballot.PlaintextBallot> spoiledDecryptedBallots;
@@ -125,7 +125,7 @@ public class DecryptBallots {
   public DecryptBallots(Consumer consumer, ElectionRecord electionRecord, GuardiansProvider provider) {
     this.consumer = consumer;
     this.electionRecord = electionRecord;
-    this.metadata = new Election.InternalElectionDescription(electionRecord.election);
+    this.election = electionRecord.election;
     this.quorum = electionRecord.context.quorum;
     this.numberOfGuardians = electionRecord.context.number_of_guardians;
 
@@ -138,17 +138,16 @@ public class DecryptBallots {
 
   void accumulateTally() {
     System.out.printf("%nAccumulate tally%n");
-    this.ciphertextTally = new CiphertextTallyBuilder("DecryptBallots", this.metadata, electionRecord.context);
-    int nballots = this.ciphertextTally.batch_append(electionRecord.acceptedBallots);
-    this.publishedTally = this.ciphertextTally.build();
+    ElectionWithPlaceholders metadata = new ElectionWithPlaceholders(this.election);
+    CiphertextTallyBuilder ciphertextTally = new CiphertextTallyBuilder("DecryptBallots", metadata, electionRecord.context);
+    int nballots = ciphertextTally.batch_append(electionRecord.acceptedBallots);
+    this.publishedTally = ciphertextTally.build();
     System.out.printf(" done accumulating %d ballots in the tally%n", nballots);
   }
 
   void decryptTally() {
     System.out.printf("%nDecrypt tally%n");
-
-    // LOOK should use publishedTally instead of mutable tally? does it get mutated ???
-    DecryptionMediator mediator = new DecryptionMediator(electionRecord.context, this.ciphertextTally, consumer.spoiledBallotsProto());
+    DecryptionMediator mediator = new DecryptionMediator(electionRecord.context, this.publishedTally, consumer.spoiledBallotsProto());
 
     int count = 0;
     for (Guardian guardian : this.guardians) {

@@ -11,6 +11,7 @@ import java.util.Optional;
 import static com.sunya.electionguard.Ballot.*;
 import static com.sunya.electionguard.Election.*;
 import static com.sunya.electionguard.Group.*;
+import static com.sunya.electionguard.ElectionWithPlaceholders.ContestWithPlaceholders;
 
 public class Encrypt {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
@@ -57,11 +58,11 @@ public class Encrypt {
    * See discussion on Issue #272 about "ballot chaining".
    */
   public static class EncryptionMediator {
-    private final InternalElectionDescription metadata;
+    private final ElectionWithPlaceholders metadata;
     private final CiphertextElectionContext encryption;
     private ElementModQ last_hash;
 
-    public EncryptionMediator(InternalElectionDescription metadata, CiphertextElectionContext encryption,
+    public EncryptionMediator(ElectionWithPlaceholders metadata, CiphertextElectionContext encryption,
                               EncryptionDevice encryption_device) {
       this.metadata = metadata;
       this.encryption = encryption;
@@ -217,7 +218,7 @@ public class Encrypt {
    */
   static Optional<CiphertextBallotContest> encrypt_contest(
           PlaintextBallotContest contest,
-          ContestDescriptionWithPlaceholders contest_description,
+          ContestWithPlaceholders contest_description,
           ElementModP elgamal_public_key,
           ElementModQ crypto_extended_base_hash,
           ElementModQ nonce_seed,
@@ -386,14 +387,14 @@ public class Encrypt {
   //    bool = True,
   static Optional<CiphertextBallot> encrypt_ballot(
           PlaintextBallot ballot,
-          InternalElectionDescription election_metadata,
+          ElectionWithPlaceholders metadata,
           CiphertextElectionContext context,
           ElementModQ seed_hash,
           Optional<ElementModQ> nonce,
           boolean should_verify_proofs)  {
 
     // Determine the relevant range of contests for this ballot style
-    Optional<BallotStyle> style = election_metadata.get_ballot_style(ballot.ballot_style);
+    Optional<BallotStyle> style = metadata.get_ballot_style(ballot.ballot_style);
 
     // Validate Input
     if (style.isEmpty() || !ballot.is_valid(style.get().object_id)) {
@@ -406,28 +407,28 @@ public class Encrypt {
 
     // Include a representation of the election and the external Id in the nonce's used
     // to derive other nonce values on the ballot
-    ElementModQ nonce_seed = CiphertextBallot.nonce_seed(election_metadata.description_hash, ballot.object_id, random_master_nonce);
+    ElementModQ nonce_seed = CiphertextBallot.nonce_seed(metadata.election.crypto_hash, ballot.object_id, random_master_nonce);
 
     List<CiphertextBallotContest> encrypted_contests = new ArrayList<>();
 
     // only iterate on contests for this specific ballot style
     if (show) System.out.printf("Ballot %s.%n", ballot.object_id);
-    for (ContestDescriptionWithPlaceholders description : election_metadata.get_contests_for(ballot.ballot_style)) {
+    for (ContestWithPlaceholders contestDescription : metadata.get_contests_for(ballot.ballot_style)) {
       PlaintextBallotContest use_contest = null;
       for (PlaintextBallotContest contest : ballot.contests) {
-        if (contest.contest_id.equals(description.object_id)) {
+        if (contest.contest_id.equals(contestDescription.object_id)) {
           use_contest = contest;
           break;
         }
       }
       // no selections provided for the contest, so create a placeholder contest
       if (use_contest == null) {
-        use_contest = contest_from(description);
+        use_contest = contest_from(contestDescription);
       }
 
       Optional<CiphertextBallotContest> encrypted_contest = encrypt_contest(
               use_contest,
-              description,
+              contestDescription,
               context.elgamal_public_key,
               context.crypto_extended_base_hash,
               nonce_seed, true);
@@ -442,7 +443,7 @@ public class Encrypt {
     CiphertextBallot encrypted_ballot = Ballot.make_ciphertext_ballot(
           ballot.object_id,
           ballot.ballot_style,
-          election_metadata.description_hash,
+          metadata.election.crypto_hash,
           Optional.of(seed_hash),
           encrypted_contests,
           Optional.of(random_master_nonce), Optional.empty(), Optional.empty());
@@ -452,10 +453,11 @@ public class Encrypt {
     }
 
     // Verify the proofs
-    if (encrypted_ballot.is_valid_encryption(election_metadata.description_hash, context.elgamal_public_key, context.crypto_extended_base_hash)) {
+    if (encrypted_ballot.is_valid_encryption(metadata.election.crypto_hash, context.elgamal_public_key, context.crypto_extended_base_hash)) {
       return Optional.of(encrypted_ballot);
     } else {
       return Optional.empty(); // log error will have happened earlier
     }
   }
+
 }

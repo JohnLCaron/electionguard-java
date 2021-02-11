@@ -4,18 +4,15 @@ import java.util.Optional;
 
 import static com.sunya.electionguard.Election.*;
 
-/**
- * `ElectionBuilder` is a stateful builder object that constructs `CiphertextElectionContext` objects
- * following the initialization process that ElectionGuard Expects.
- */
+// LOOK this should go away, keeping it as convenience for now.
 public class ElectionBuilder {
 
   public static class DescriptionAndContext {
-    final InternalElectionDescription metadata;
+    final ElectionWithPlaceholders metadata;
     final CiphertextElectionContext context;
 
-    public DescriptionAndContext(InternalElectionDescription metadata, CiphertextElectionContext context) {
-      this.metadata = metadata;
+    public DescriptionAndContext(ElectionDescription election, CiphertextElectionContext context) {
+      this.metadata = new ElectionWithPlaceholders(election);
       this.context = context;
     }
   }
@@ -23,14 +20,12 @@ public class ElectionBuilder {
   int number_of_guardians; // The number of guardians necessary to generate the public key
   int quorum; // The quorum of guardians necessary to decrypt an election.  Must be less than `number_of_guardians`
   ElectionDescription description;
-  InternalElectionDescription internal_description;
   Optional<Group.ElementModP> elgamal_public_key = Optional.empty();
 
   public ElectionBuilder(int number_of_guardians, int quorum, ElectionDescription description) {
     this.number_of_guardians = number_of_guardians;
     this.quorum = quorum;
     this.description = description;
-    this.internal_description = new InternalElectionDescription(description);
   }
 
   ElectionBuilder set_public_key(Group.ElementModP elgamal_public_key) {
@@ -47,7 +42,7 @@ public class ElectionBuilder {
       return Optional.empty();
     }
 
-    return Optional.of(new DescriptionAndContext(this.internal_description,
+    return Optional.of(new DescriptionAndContext(this.description,
       make_ciphertext_election_context(
               this.number_of_guardians,
               this.quorum,

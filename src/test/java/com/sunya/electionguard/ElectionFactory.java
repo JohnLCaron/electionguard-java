@@ -13,6 +13,7 @@ import java.util.Random;
 
 import static com.sunya.electionguard.Election.*;
 import static com.sunya.electionguard.Group.*;
+import static com.sunya.electionguard.ElectionWithPlaceholders.ContestWithPlaceholders;
 
 public class ElectionFactory {
   private static final String simple_election_manifest_filename = "election_manifest_simple.json";
@@ -138,7 +139,7 @@ public class ElectionFactory {
     return new SelectionTuple(object_id, new SelectionDescription(object_id, candidate_id, sequence_order));
   }
 
-  static ContestDescriptionWithPlaceholders get_contest_description_well_formed() {
+  static ContestWithPlaceholders get_contest_description_well_formed() {
     int sequence_order = TestUtils.randomInt(20);
     String electoral_district_id = "{draw(emails)}-gp-unit";
 
@@ -168,8 +169,8 @@ public class ElectionFactory {
             selection_descriptions,
             null, null);
 
-    List<SelectionDescription> placeholder_selections = generate_placeholder_selections_from(contest_description, number_elected);
-    return contest_description_with_placeholders_from(contest_description, placeholder_selections);
+    List<SelectionDescription> placeholder_selections = ElectionWithPlaceholders.generate_placeholder_selections_from(contest_description, number_elected);
+    return ElectionWithPlaceholders.contest_description_with_placeholders_from(contest_description, placeholder_selections);
   }
 
 }

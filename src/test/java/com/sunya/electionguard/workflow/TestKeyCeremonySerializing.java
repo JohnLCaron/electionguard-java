@@ -65,7 +65,6 @@ public class TestKeyCeremonySerializing {
 
   Group.ElementModP jointKey;
   Election.CiphertextElectionContext context;
-  Election.InternalElectionDescription metadata;
   Group.ElementModQ crypto_base_hash;
 
   List<GuardianBuilder> guardianBuilders;
@@ -169,7 +168,6 @@ public class TestKeyCeremonySerializing {
   }
 
   void buildElectionContext(Election.ElectionDescription description, Group.ElementModP joint_key) {
-    this.metadata = new Election.InternalElectionDescription(description);
 
     // LOOK this will change, add static method in Election
     Group.ElementModQ crypto_extended_base_hash = Hash.hash_elems(crypto_base_hash, joint_key);

@@ -19,7 +19,7 @@ public class DecryptionMediator {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   private final CiphertextElectionContext context;
-  private final CiphertextTallyBuilder encryptedTally;
+  private final PublishedCiphertextTally encryptedTally;
   private final Iterable<Ballot.CiphertextAcceptedBallot> spoiled_ballots;
 
 
@@ -43,7 +43,7 @@ public class DecryptionMediator {
   private Map<String, TallyDecryptionShare> merged_decryption_shares;
 
   public DecryptionMediator(CiphertextElectionContext context,
-                            CiphertextTallyBuilder encryptedTally,
+                            PublishedCiphertextTally encryptedTally,
                             Iterable<Ballot.CiphertextAcceptedBallot> spoiled_ballots) {
     this.context = context;
     this.encryptedTally = encryptedTally;

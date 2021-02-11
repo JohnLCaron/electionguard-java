@@ -23,8 +23,8 @@ public class TestTallyProperties extends TestProperties {
     Map<String, Integer> plaintext_tallies = TallyTestHelper.accumulate_plaintext_ballots(everything.ballots);
     System.out.printf("%n test_tally_cast_ballots_accumulates_valid_tally expected %s%n", plaintext_tallies);
 
-    // encrypt each ballot
-    BallotBox store = new BallotBox(everything.metadata, everything.context, new DataStore());
+    // encrypt and cast each ballot
+    BallotBox store = new BallotBox(everything.election_description, everything.context, new DataStore());
     Group.ElementModQ seed_hash = new Encrypt.EncryptionDevice("Location").get_hash();
     for (PlaintextBallot ballot : everything.ballots) {
       Optional<CiphertextBallot> encrypted_ballotO = Encrypt.encrypt_ballot(
@@ -38,7 +38,7 @@ public class TestTallyProperties extends TestProperties {
     CiphertextTallyBuilder result = new CiphertextTallyBuilder("whatever", everything.metadata, everything.context);
     result.batch_append(store.accepted());
 
-    Map<String, Integer> decrypted_tallies = this._decrypt_with_secret(result, everything.secret_key);
+    Map<String, Integer> decrypted_tallies = this.decrypt_with_secret(result, everything.secret_key);
     System.out.printf("%n test_tally_cast_ballots_accumulates_valid_tally actual %s%n", decrypted_tallies);
     assertThat(plaintext_tallies).isEqualTo(decrypted_tallies);
   }
@@ -52,7 +52,7 @@ public class TestTallyProperties extends TestProperties {
     System.out.printf("%n test_tally_spoiled_ballots_accumulates_valid_tally expected %s%n", plaintext_tallies);
 
     // encrypt each ballot
-    BallotBox store = new BallotBox(everything.metadata, everything.context, new DataStore());
+    BallotBox store = new BallotBox(everything.election_description, everything.context, new DataStore());
     Group.ElementModQ seed_hash = new Encrypt.EncryptionDevice("Location").get_hash();
     for (PlaintextBallot ballot : everything.ballots) {
       Optional<CiphertextBallot> encrypted_ballotO = Encrypt.encrypt_ballot(
@@ -67,7 +67,7 @@ public class TestTallyProperties extends TestProperties {
     CiphertextTallyBuilder result = new CiphertextTallyBuilder("whatever", everything.metadata, everything.context);
     result.batch_append(store.accepted());
 
-    Map<String, Integer> decrypted_tallies = this._decrypt_with_secret(result, everything.secret_key);
+    Map<String, Integer> decrypted_tallies = this.decrypt_with_secret(result, everything.secret_key);
     System.out.printf("%n test_tally_spoiled_ballots_accumulates_valid_tally decrypted_tallies %s%n%n", decrypted_tallies);
 
      // self.assertCountEqual(plaintext_tallies, decrypted_tallies)
@@ -136,7 +136,7 @@ public class TestTallyProperties extends TestProperties {
 
 
   /** Demonstrates how to decrypt a tally with a known secret key. */
-  private Map<String, Integer> _decrypt_with_secret(CiphertextTallyBuilder tally, Group.ElementModQ secret_key) {
+  private Map<String, Integer> decrypt_with_secret(CiphertextTallyBuilder tally, Group.ElementModQ secret_key) {
     Map<String, Integer> plaintext_selections = new HashMap<>();
     for (CiphertextTallyBuilder.CiphertextTallyContestBuilder contest : tally.contests.values()) {
       for (Map.Entry<String, CiphertextTallyBuilder.CiphertextTallySelectionBuilder> entry : contest.tally_selections.entrySet()) {

@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import static com.google.common.truth.Truth.assertWithMessage;
 import static com.sunya.electionguard.Ballot.*;
 import static com.sunya.electionguard.Election.*;
+import static com.sunya.electionguard.ElectionWithPlaceholders.ContestWithPlaceholders;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
@@ -42,11 +43,11 @@ public class TestEndToEndElectionIntegration {
   }
 
   // Step 0 - Configure Election
-  ElectionDescription description;
+  ElectionDescription election;
   ElectionBuilder election_builder;
-  InternalElectionDescription metadata;
   CiphertextElectionContext context;
   ElectionConstants constants;
+  ElectionWithPlaceholders metadata;
 
   // Step 1 - Key Ceremony;
   KeyCeremonyMediator mediator;
@@ -66,7 +67,7 @@ public class TestEndToEndElectionIntegration {
 
   // Step 4 - Decrypt Tally
   DecryptionMediator decrypter;
-  CiphertextTallyBuilder ciphertext_tally;
+  PublishedCiphertextTally publishedTally;
   PlaintextTally decryptedTally;
   List<Ballot.PlaintextBallot> spoiledDecryptedBallots;
   List<PlaintextTally> spoiledDecryptedTallies;
@@ -102,21 +103,21 @@ public class TestEndToEndElectionIntegration {
   void step_0_configure_election() throws IOException {
     System.out.printf("%n0. Verify that the input election meta-data is well-formed%n");
     // TODO: replace with complex election
-    this.description = ElectionFactory.get_simple_election_from_file();
+    this.election = ElectionFactory.get_simple_election_from_file();
 
     System.out.printf("----------------------------------%n");
-    System.out.printf("Election Summary:%nScope: %s%n", this.description.election_scope_id);
-    System.out.printf("Geopolitical Units: %d%n", this.description.geopolitical_units.size());
-    System.out.printf("Parties: %d%n", this.description.parties.size());
-    System.out.printf("Candidates: %d%n", this.description.candidates.size());
-    System.out.printf("Contests: %d%n", this.description.contests.size());
-    System.out.printf("Ballot Styles: %d%n", this.description.ballot_styles.size());
+    System.out.printf("Election Summary:%nScope: %s%n", this.election.election_scope_id);
+    System.out.printf("Geopolitical Units: %d%n", this.election.geopolitical_units.size());
+    System.out.printf("Parties: %d%n", this.election.parties.size());
+    System.out.printf("Candidates: %d%n", this.election.candidates.size());
+    System.out.printf("Contests: %d%n", this.election.contests.size());
+    System.out.printf("Ballot Styles: %d%n", this.election.ballot_styles.size());
     System.out.printf("----------------------------------%n");
 
-    assertThat(this.description.is_valid()).isTrue();
+    assertThat(this.election.is_valid()).isTrue();
 
     // Create an Election Builder
-    this.election_builder = new ElectionBuilder(NUMBER_OF_GUARDIANS, QUORUM, this.description);
+    this.election_builder = new ElectionBuilder(NUMBER_OF_GUARDIANS, QUORUM, this.election);
     System.out.printf("Created with number_of_guardians: %d quorum: %d%n", NUMBER_OF_GUARDIANS, QUORUM);
   }
 
@@ -127,7 +128,7 @@ public class TestEndToEndElectionIntegration {
    */
   void step_1_key_ceremony() {
     System.out.printf("%n1. Key Ceremony%n");
-    Group.ElementModQ crypto_base_hash = Election.make_crypto_base_hash(NUMBER_OF_GUARDIANS, QUORUM, description);
+    Group.ElementModQ crypto_base_hash = Election.make_crypto_base_hash(NUMBER_OF_GUARDIANS, QUORUM, election);
     // Setup Guardians
     for (int i = 1; i <= NUMBER_OF_GUARDIANS; i++) {
       this.guardianBuilders.add(GuardianBuilder.createForTesting("guardian_" + i, i, NUMBER_OF_GUARDIANS, QUORUM, crypto_base_hash, null));
@@ -179,7 +180,7 @@ public class TestEndToEndElectionIntegration {
     // Build the Election
     this.election_builder.set_public_key(joint_key.get());
     ElectionBuilder.DescriptionAndContext tuple = this.election_builder.build().orElseThrow();
-    this.metadata = tuple.metadata;
+    this.election = tuple.metadata.election;
     this.context = tuple.context;
     this.constants = new ElectionConstants();
 
@@ -190,6 +191,7 @@ public class TestEndToEndElectionIntegration {
   // Using the `CiphertextElectionContext` encrypt ballots for the election
   void step_2_encrypt_votes() throws IOException {
     // Configure the Encryption Device
+    this.metadata = new ElectionWithPlaceholders(this.election);
     this.device = new Encrypt.EncryptionDevice("polling-place-one");
     this.encrypter = new Encrypt.EncryptionMediator(this.metadata, this.context, this.device);
     System.out.printf("%n2. Ready to encrypt at location: %s%n", this.device.location);
@@ -215,7 +217,7 @@ public class TestEndToEndElectionIntegration {
 
     // LOOK why not hide the datastore in the ballot_box ?
     this.ballot_store = new DataStore();
-    this.ballot_box = new BallotBox(this.metadata, this.context, this.ballot_store);
+    this.ballot_box = new BallotBox(this.election, this.context, this.ballot_store);
     // Randomly cast or spoil the ballots
     for (CiphertextBallot ballot : this.ciphertext_ballots) {
       Optional<CiphertextAcceptedBallot> accepted_ballot;
@@ -237,10 +239,12 @@ public class TestEndToEndElectionIntegration {
   void step_4_decrypt_tally() {
     System.out.printf("%n4. Homomorphically Accumulate and decrypt tally%n");
     // Generate a Homomorphically Accumulated Tally of the ballots
-    this.ciphertext_tally = new CiphertextTallyBuilder("tally_object_id", this.metadata, this.context);
-    this.ciphertext_tally.batch_append(this.ballot_box.accepted());
+    CiphertextTallyBuilder ciphertext_tally = new CiphertextTallyBuilder("tally_object_id", this.metadata, this.context);
+    ciphertext_tally.batch_append(this.ballot_box.accepted());
+    this.publishedTally = ciphertext_tally.build();
+
     // Configure the Decryption
-    this.decrypter = new DecryptionMediator(this.context, this.ciphertext_tally, this.ballot_box.getSpoiledBallots());
+    this.decrypter = new DecryptionMediator(this.context, this.publishedTally, this.ballot_box.getSpoiledBallots());
 
     // Announce each guardian as present
     int count = 0;
@@ -272,7 +276,7 @@ public class TestEndToEndElectionIntegration {
     System.out.printf("%n4.5 Compare results%n");
     // Create a representation of each contest's tally
     Map<String, Integer> expected_plaintext_tally = new HashMap<>();
-    for (ContestDescriptionWithPlaceholders contest : this.metadata.contests) {
+    for (ContestWithPlaceholders contest : this.metadata.contests) {
       for (SelectionDescription selection : contest.ballot_selections) {
         expected_plaintext_tally.put(selection.object_id, 0);
       }
@@ -325,12 +329,12 @@ public class TestEndToEndElectionIntegration {
     System.out.printf("%n5. publish%n");
     Publisher publisher = new Publisher(outputDir, true, true);
     publisher.writeElectionRecordJson(
-            this.description,
+            this.election,
             this.context,
             this.constants,
             ImmutableList.of(this.device),
             this.ballot_box.getAllBallots(),
-            this.ciphertext_tally.build(),
+            this.publishedTally,
             this.decryptedTally,
             this.coefficient_validation_sets,
             this.spoiledDecryptedBallots,
@@ -345,12 +349,12 @@ public class TestEndToEndElectionIntegration {
     Consumer consumer = new Consumer(publisher);
     ElectionRecord roundtrip = consumer.readElectionRecordJson();
 
-    assertThat(roundtrip.election).isEqualTo(this.description);
+    assertThat(roundtrip.election).isEqualTo(this.election);
     assertThat(roundtrip.context).isEqualTo(this.context);
     assertThat(roundtrip.constants).isEqualTo(this.constants);
     assertThat(roundtrip.devices.size()).isEqualTo(1);
     assertThat(roundtrip.devices.get(0)).isEqualTo(this.device);
-    assertThat(roundtrip.ciphertextTally).isEqualTo(this.ciphertext_tally.build());
+    assertThat(roundtrip.ciphertextTally).isEqualTo(this.publishedTally);
     assertThat(roundtrip.decryptedTally).isEqualTo(this.decryptedTally);
 
     Map<String, KeyCeremony.CoefficientValidationSet> coeffMap = this.coefficient_validation_sets.stream()

@@ -6,6 +6,7 @@ import net.jqwik.api.ShrinkingMode;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import static com.sunya.electionguard.ElectionWithPlaceholders.ContestWithPlaceholders;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
@@ -35,7 +36,6 @@ public class TestEncryptHypothesisProperties extends TestProperties {
           @ForAll("elections_and_ballots") ElectionTestHelper.EverythingTuple everything,
           @ForAll("elements_mod_q") Group.ElementModQ nonce) {
 
-    Election.InternalElectionDescription metadata = everything.metadata;
     List<Ballot.PlaintextBallot> ballots = everything.ballots;
     Group.ElementModQ secret_key = everything.secret_key;
     Election.CiphertextElectionContext context = everything.context;
@@ -43,7 +43,7 @@ public class TestEncryptHypothesisProperties extends TestProperties {
     // Tally the plaintext ballots for comparison later
     Map<String, Integer> plaintext_tallies = TallyTestHelper.accumulate_plaintext_ballots(ballots);
     int num_ballots = ballots.size();
-    int num_contests = metadata.contests.size();
+    int num_contests = everything.metadata.contests.size();
 
     Nonces nonce_gen = new Nonces(nonce);
     Group.ElementModQ zero_nonce = nonce_gen.get(0);
@@ -51,7 +51,7 @@ public class TestEncryptHypothesisProperties extends TestProperties {
     for (int i=0; i<num_ballots; i++) {
       nonces.add(nonce_gen.get(i));
     }
-    assertThat(metadata.contests.size() > 0).isTrue();
+    assertThat(everything.metadata.contests.size() > 0).isTrue();
 
     // Generate a valid encryption of zero
     Optional<ElGamal.Ciphertext> encrypted_zero = ElGamal.elgamal_encrypt(0, zero_nonce, context.elgamal_public_key);
@@ -62,7 +62,7 @@ public class TestEncryptHypothesisProperties extends TestProperties {
     // encrypt each ballot
     for (int i = 0; i < num_ballots; i++) {
       Optional<Ballot.CiphertextBallot> encrypted_ballotO = Encrypt.encrypt_ballot(
-              ballots.get(i), metadata, context, SEED_HASH, Optional.of(nonces.get(i)), true);
+              ballots.get(i), everything.metadata, context, SEED_HASH, Optional.of(nonces.get(i)), true);
       assertThat(encrypted_ballotO).isPresent();
       Ballot.CiphertextBallot encrypted_ballot = encrypted_ballotO.get();
 
@@ -73,7 +73,7 @@ public class TestEncryptHypothesisProperties extends TestProperties {
       // decrypt the ballot with secret and verify it matches the plaintext
       Optional<Ballot.PlaintextBallot> decrypted_ballot = DecryptWithSecrets.decrypt_ballot_with_secret(
               encrypted_ballot,
-              metadata,
+              everything.metadata,
               context.crypto_extended_base_hash,
               context.elgamal_public_key,
                secret_key,
@@ -92,7 +92,7 @@ public class TestEncryptHypothesisProperties extends TestProperties {
 
     // loop through the contest descriptions and verify
     // the decrypted tallies match the plaintext tallies
-    for (Election.ContestDescriptionWithPlaceholders contest : metadata.contests) {
+    for (ContestWithPlaceholders contest : everything.metadata.contests) {
       // Sanity check the generated data
       assertThat(contest.ballot_selections).isNotEmpty();
       assertThat(contest.placeholder_selections).isNotEmpty();

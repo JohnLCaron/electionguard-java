@@ -10,6 +10,7 @@ import java.util.List;
 import static com.google.common.truth.Truth.assertWithMessage;
 import static com.sunya.electionguard.Ballot.*;
 import static com.sunya.electionguard.Election.*;
+import static com.sunya.electionguard.ElectionWithPlaceholders.ContestWithPlaceholders;
 
 public class BallotFactory {
   private static final String simple_ballot_filename = "ballot_in_simple.json";
@@ -61,14 +62,14 @@ public class BallotFactory {
 
   /** Get a single Fake Ballot object that is manually constructed with default values . */
   PlaintextBallot get_fake_ballot(
-          InternalElectionDescription election,
+          ElectionWithPlaceholders metadata,
           String ballot_id,
           boolean with_trues) { // default true
 
     Preconditions.checkNotNull(ballot_id);
-    String ballotStyleId = election.ballot_styles.get(0).object_id;
+    String ballotStyleId = metadata.election.ballot_styles.get(0).object_id;
     List<PlaintextBallotContest> contests = new ArrayList<>();
-    for (ContestDescriptionWithPlaceholders contest : election.get_contests_for(ballotStyleId)) {
+    for (ContestWithPlaceholders contest : metadata.get_contests_for(ballotStyleId)) {
       contests.add(this.get_random_contest_from(contest, true, with_trues));
     }
 
