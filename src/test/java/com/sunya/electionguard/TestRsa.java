@@ -43,14 +43,23 @@ public class TestRsa {
     KeyPair key_pair = rsa_keypair();
     java.security.PrivateKey privateKey = key_pair.getPrivate();
     KeyCeremonyProto.RSAPrivateKey proto = convertJavaPrivateKey(privateKey);
-    java.security.PrivateKey roundtrip = convertJavaPrivateKey(proto);
-    // LOOK how to compare? this fails with expected:
+    java.security.PrivateKey orgKey = convertJavaPrivateKey(proto);
+    // This fails with expected:
     //    SunRsaSign RSA private CRT key, 4096 bits
     //  but was:
     //    Sun RSA private key, 4096 bits
     // assertThat(roundtrip).isEqualTo(privateKey);
     System.out.printf("PrivateKey original=  %s%n", privateKey.getClass().getName());
-    System.out.printf("PrivateKey roundtrip= %s%n", roundtrip.getClass().getName());
+    System.out.printf("PrivateKey roundtrip= %s%n", orgKey.getClass().getName());
+    assertThat(comparePrivateKeys(orgKey, privateKey)).isTrue();
+  }
+
+  private static boolean comparePrivateKeys(java.security.PrivateKey key1, java.security.PrivateKey key2) {
+    RSAPrivateKey rsa1 = (RSAPrivateKey) key1;
+    RSAPrivateKey rsa2 = (RSAPrivateKey) key2;
+    boolean modOk = rsa1.getModulus().equals(rsa2.getModulus());
+    boolean expOk = rsa1.getPrivateExponent().equals(rsa2.getPrivateExponent());
+    return modOk && expOk;
   }
 
   private static java.security.PublicKey convertJavaPublicKey(KeyCeremonyProto.RSAPublicKey proto) {

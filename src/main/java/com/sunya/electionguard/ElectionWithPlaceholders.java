@@ -33,7 +33,6 @@ public class ElectionWithPlaceholders {
   static ContestWithPlaceholders contest_description_with_placeholders_from(
           Election.ContestDescription contest, List<Election.SelectionDescription> placeholders) {
 
-
     return new ContestWithPlaceholders(
             contest.object_id,
             contest.electoral_district_id,

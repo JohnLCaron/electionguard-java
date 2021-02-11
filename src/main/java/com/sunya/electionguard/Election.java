@@ -1014,6 +1014,7 @@ public class Election {
    * Refer to the [Electionguard Specification](https://github.com/microsoft/electionguard) for more information.
    * <p>
    * To make an instance of this class, don't construct it directly. Use `make_ciphertext_election_context` instead.
+   * LOOK doesnt belong in this class?
    * LOOK: add serialization version?
    */
   @Immutable
@@ -1033,11 +1034,11 @@ public class Election {
     // the `extended base hash code (𝑄')` in the [ElectionGuard Spec](https://github.com/microsoft/electionguard/wiki)
     public final Group.ElementModQ crypto_extended_base_hash;
 
-    public CiphertextElectionContext(int number_of_guardians, int quorum, ElementModP elgamal_public_key,
+    public CiphertextElectionContext(int number_of_guardians, int quorum, ElementModP jointPublicKey,
            ElementModQ description_hash, ElementModQ crypto_base_hash, ElementModQ crypto_extended_base_hash) {
       this.number_of_guardians = number_of_guardians;
       this.quorum = quorum;
-      this.elgamal_public_key = Preconditions.checkNotNull(elgamal_public_key);
+      this.elgamal_public_key = Preconditions.checkNotNull(jointPublicKey);
       this.description_hash = Preconditions.checkNotNull(description_hash);
       this.crypto_base_hash = Preconditions.checkNotNull(crypto_base_hash);
       this.crypto_extended_base_hash = Preconditions.checkNotNull(crypto_extended_base_hash);
@@ -1073,7 +1074,6 @@ public class Election {
    * @param quorum: The quorum of guardians necessary to decrypt an election.  Must be less than `number_of_guardians`
    * @param elgamal_public_key: the public key of the election
    * @param description: the election description
-   * LOOK doesnt belong in this class
    */
   public static CiphertextElectionContext make_ciphertext_election_context(
           int number_of_guardians,

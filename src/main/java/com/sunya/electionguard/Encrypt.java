@@ -283,8 +283,7 @@ public class Encrypt {
 
         // LOOK what is this?
         if (!has_selection) {
-          // No selection was made for this possible value
-          // so we explicitly set it to false
+          // No selection was made for this possible value so we explicitly set it to false
           encrypted_selection = encrypt_selection(
                   selection_from(description, false, false),
                   description,

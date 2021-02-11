@@ -265,17 +265,8 @@ public class PerformKeyCeremony {
   }
 
   void buildElectionContext(Election.ElectionDescription description, Group.ElementModP joint_key) {
-    // this.metadata = new Election.InternalElectionDescription(description);
     this.context = Election.make_ciphertext_election_context(this.numberOfGuardians, this.quorum,
-            this.jointKey, this.election);
-
-    this.context = new Election.CiphertextElectionContext(
-            this.numberOfGuardians,
-            this.quorum,
-            joint_key,
-            description.crypto_hash(),
-            context.crypto_base_hash,
-            context.crypto_extended_base_hash);
+            joint_key, description);
   }
 
   void publish(String publishDir) throws IOException {

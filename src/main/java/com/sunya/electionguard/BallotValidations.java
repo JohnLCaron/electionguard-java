@@ -71,7 +71,7 @@ public class BallotValidations {
   static boolean ballot_is_valid_for_style(CiphertextBallot ballot, ElectionWithPlaceholders metadata) {
     List<ContestWithPlaceholders> descriptions = metadata.get_contests_for(ballot.ballot_style);
 
-    // LOOK WTF?
+    // LOOK I dont understand this?
     for (ContestWithPlaceholders description : descriptions) {
       CiphertextBallotContest use_contest = null;
       for (CiphertextBallotContest contest : ballot.contests) {

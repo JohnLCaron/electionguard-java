@@ -6,17 +6,7 @@ import java.math.BigInteger;
 
 /**
  * This verifies specification section "1. Parameter Validation".
- * <p>
- * If alternative parameters are allowed, election verifiers must confirm that p, q, r, g, and ghat are such that
- * <ol>
- * <li> both p and q are prime (this may be done probabilistically using the Miller-Rabin algorithm),
- * <li> p − 1 = q * r is satisfied,
- * <li> q is not a divisor of r
- * <li> 1 < g < p
- * <li> g^q mod p = 1
- * <li> g * ghat mod p = 1 LOOK what is ghat?
- * <li> and that generation of the parameters is consistent with the cited standard. LOOK what does this mean ??
- * </ol>
+ * Currently just checks that the constants are the standard ones.
  */
 public class ParameterVerifier {
   private final ElectionRecord electionRecord;

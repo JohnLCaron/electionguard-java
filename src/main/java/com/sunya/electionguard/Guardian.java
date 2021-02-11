@@ -8,6 +8,7 @@ import com.google.common.flogger.FluentLogger;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import java.math.BigInteger;
+import java.security.interfaces.RSAPrivateKey;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -247,21 +248,29 @@ public class Guardian extends ElectionObjectBase {
     Guardian guardian = (Guardian) o;
     boolean ok1 = sequence_order == guardian.sequence_order;
     boolean ok2 = ceremony_details.equals(guardian.ceremony_details);
-    boolean ok3 = equalAuxilaryKeys(auxiliary_keys, guardian.auxiliary_keys); // LOOK fails, is that ok?
+    boolean ok3 = equalAuxilaryKeys(auxiliary_keys, guardian.auxiliary_keys);
     boolean ok4 = equalElectionKeys(election_keys, guardian.election_keys);
     boolean ok5 = otherGuardianAuxiliaryKeys.equals(guardian.otherGuardianAuxiliaryKeys);
     boolean ok6 = otherGuardianElectionKeys.equals(guardian.otherGuardianElectionKeys);
     boolean ok7 = otherGuardianPartialKeyBackups.equals(guardian.otherGuardianPartialKeyBackups);
-    return ok1 && ok2 && ok4 && ok5 && ok6 && ok7;
+    return ok1 && ok2 && ok3 && ok4 && ok5 && ok6 && ok7;
   }
 
-  public boolean equalAuxilaryKeys(Auxiliary.KeyPair o1, Auxiliary.KeyPair o2) {
-      boolean ok1 = o1.secret_key.equals(o2.secret_key);
+  private boolean equalAuxilaryKeys(Auxiliary.KeyPair o1, Auxiliary.KeyPair o2) {
+      boolean ok1 = comparePrivateKeys(o1.secret_key, o2.secret_key);
       boolean ok2 = o1.public_key.equals(o2.public_key);
     return ok1 && ok2;
   }
 
-  public boolean equalElectionKeys(KeyCeremony.ElectionKeyPair o1, KeyCeremony.ElectionKeyPair o2) {
+  private static boolean comparePrivateKeys(java.security.PrivateKey key1, java.security.PrivateKey key2) {
+    RSAPrivateKey rsa1 = (RSAPrivateKey) key1;
+    RSAPrivateKey rsa2 = (RSAPrivateKey) key2;
+    boolean modOk = rsa1.getModulus().equals(rsa2.getModulus());
+    boolean expOk = rsa1.getPrivateExponent().equals(rsa2.getPrivateExponent());
+    return modOk && expOk;
+  }
+
+  private boolean equalElectionKeys(KeyCeremony.ElectionKeyPair o1, KeyCeremony.ElectionKeyPair o2) {
     boolean ok1 = o1.key_pair().equals(o2.key_pair());
     boolean ok2 =         o1.proof().equals(o2.proof());
     boolean ok3 =         o1.polynomial().equals(o2.polynomial());
