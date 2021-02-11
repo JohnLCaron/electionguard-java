@@ -7,7 +7,6 @@ option java_outer_classname = "KeyCeremonyProto";
 
 message Guardians {
   uint32 quorum = 2;
-  ElementModQ crypto_base_hash = 3;
   repeated Guardian guardians = 1;
 }
 

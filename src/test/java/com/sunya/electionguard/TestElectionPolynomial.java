@@ -14,11 +14,10 @@ import static com.sunya.electionguard.Group.*;
 public class TestElectionPolynomial {
   private static final int TEST_POLYNOMIAL_DEGREE = 3;
   private static final BigInteger TEST_EXPONENT_MODIFIER = BigInteger.ONE;
-  private static final ElementModQ crypto_hash = Group.rand_q();
 
   @Example
   public void test_contest_description_valid_input_succeeds() {
-    ElectionPolynomial polynomial = generate_polynomial(TEST_POLYNOMIAL_DEGREE, null, crypto_hash);
+    ElectionPolynomial polynomial = generate_polynomial(TEST_POLYNOMIAL_DEGREE, null);
     assertThat(polynomial).isNotNull();
   }
 
@@ -35,7 +34,7 @@ public class TestElectionPolynomial {
 
   @Example
   public void test_verify_polynomial_coordinate() {
-    ElectionPolynomial polynomial = generate_polynomial(TEST_POLYNOMIAL_DEGREE, null, crypto_hash);
+    ElectionPolynomial polynomial = generate_polynomial(TEST_POLYNOMIAL_DEGREE, null);
 
     Group.ElementModQ value = compute_polynomial_coordinate(TEST_EXPONENT_MODIFIER, polynomial);
     assertThat(verify_polynomial_coordinate(

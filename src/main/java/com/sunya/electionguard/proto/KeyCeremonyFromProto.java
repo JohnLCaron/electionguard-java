@@ -33,19 +33,17 @@ public class KeyCeremonyFromProto {
   private static ImmutableList<Guardian> convertGuardians(KeyCeremonyProto.Guardians proto) {
     int quorum = proto.getQuorum();
     int nguardians = proto.getGuardiansCount();
-    Group.ElementModQ cryptoBaseHash = CommonConvert.convertElementModQ(proto.getCryptoBaseHash());
     ImmutableList.Builder<Guardian> builder = ImmutableList.builder();
     for (KeyCeremonyProto.Guardian guardianProto : proto.getGuardiansList()) {
-      builder.add(convertGuardian(guardianProto, nguardians, quorum, cryptoBaseHash));
+      builder.add(convertGuardian(guardianProto, nguardians, quorum));
     }
     return builder.build();
   }
 
-  private static Guardian convertGuardian(KeyCeremonyProto.Guardian proto, int nguardians, int quorum,
-                                          Group.ElementModQ cryptoBaseHash) {
+  private static Guardian convertGuardian(KeyCeremonyProto.Guardian proto, int nguardians, int quorum) {
 
     KeyCeremony.CoefficientSet coefficients = convertCoefficients(proto.getCoefficients());
-    GuardianBuilder builder = new GuardianBuilder(coefficients, nguardians, quorum, cryptoBaseHash,
+    GuardianBuilder builder = new GuardianBuilder(coefficients, nguardians, quorum,
             convertAuxiliaryKeyPair(proto.getAuxiliaryKeys()),
             convertElectionKeys(proto.getElectionKeys()));
 

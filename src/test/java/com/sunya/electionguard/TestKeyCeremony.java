@@ -19,8 +19,6 @@ public class TestKeyCeremony {
   private static final int NUMBER_OF_GUARDIANS = 5;
   private static final int QUORUM = 3;
 
-  private static final Group.ElementModQ crypto_hash = Group.rand_q();
-
   static Auxiliary.Decryptor identity_auxiliary_decrypt = (m, k) -> Optional.of(new String(m.getBytes()));
   static Auxiliary.Encryptor identity_auxiliary_encrypt = (m, k) -> Optional.of(new Auxiliary.ByteString(m.getBytes()));
 
@@ -35,21 +33,21 @@ public class TestKeyCeremony {
 
   @Example
   public void test_generate_election_key_pair() {
-    ElectionKeyPair election_key_pair = generate_election_key_pair(NUMBER_OF_GUARDIANS, null, crypto_hash);
+    ElectionKeyPair election_key_pair = generate_election_key_pair(NUMBER_OF_GUARDIANS, null);
 
     assertThat(election_key_pair).isNotNull();
     assertThat(election_key_pair.key_pair().public_key).isNotNull();
     assertThat(election_key_pair.key_pair().secret_key).isNotNull();
     assertThat(election_key_pair.polynomial()).isNotNull();
-    assertThat(election_key_pair.proof().is_valid(crypto_hash)).isTrue();
+    assertThat(election_key_pair.proof().is_valid()).isTrue();
     for (SchnorrProof proof : election_key_pair.polynomial().coefficient_proofs) {
-      assertThat(proof.is_valid(crypto_hash)).isTrue();
+      assertThat(proof.is_valid()).isTrue();
     }
   }
 
   @Example
   public void test_generate_election_partial_key_backup() {
-    ElectionKeyPair election_key_pair = generate_election_key_pair(QUORUM, null, crypto_hash);
+    ElectionKeyPair election_key_pair = generate_election_key_pair(QUORUM, null);
     Auxiliary.KeyPair auxiliary_key_pair = generate_rsa_auxiliary_key_pair();
     Auxiliary.PublicKey auxiliary_public_key = new Auxiliary.PublicKey(
             RECIPIENT_GUARDIAN_ID,
@@ -70,14 +68,14 @@ public class TestKeyCeremony {
     assertThat(backup.coefficient_commitments().size()).isEqualTo(QUORUM);
     assertThat(backup.coefficient_proofs().size()).isEqualTo(QUORUM);
     for (SchnorrProof proof : backup.coefficient_proofs()) {
-      assertThat(proof.is_valid(crypto_hash)).isTrue();
+      assertThat(proof.is_valid()).isTrue();
     }
   }
 
   @Example
   public void test_verify_election_partial_key_backup() {
     Auxiliary.KeyPair recipient_auxiliary_key_pair = generate_rsa_auxiliary_key_pair();
-    ElectionKeyPair sender_election_key_pair = generate_election_key_pair(QUORUM, null, crypto_hash);
+    ElectionKeyPair sender_election_key_pair = generate_election_key_pair(QUORUM, null);
     Auxiliary.PublicKey recipient_auxiliary_public_key = new Auxiliary.PublicKey(
             RECIPIENT_GUARDIAN_ID,
             RECIPIENT_SEQUENCE_ORDER,
@@ -105,7 +103,7 @@ public class TestKeyCeremony {
   @Example
   public void test_generate_election_partial_key_challenge() {
     Auxiliary.KeyPair recipient_auxiliary_key_pair = generate_rsa_auxiliary_key_pair();
-    ElectionKeyPair sender_election_key_pair = generate_election_key_pair(QUORUM, null, crypto_hash);
+    ElectionKeyPair sender_election_key_pair = generate_election_key_pair(QUORUM, null);
     Auxiliary.PublicKey recipient_auxiliary_public_key = new Auxiliary.PublicKey(
             RECIPIENT_GUARDIAN_ID,
             RECIPIENT_SEQUENCE_ORDER,
@@ -126,14 +124,14 @@ public class TestKeyCeremony {
     assertThat(challenge.coefficient_commitments().size()).isEqualTo(QUORUM);
     assertThat(challenge.coefficient_proofs().size()).isEqualTo(QUORUM);
     for (SchnorrProof proof : challenge.coefficient_proofs()) {
-      assertThat(proof.is_valid(crypto_hash)).isTrue();
+      assertThat(proof.is_valid()).isTrue();
     }
   }
 
   @Example
   public void test_verify_election_partial_key_challenge() {
     Auxiliary.KeyPair recipient_auxiliary_key_pair = generate_rsa_auxiliary_key_pair();
-    ElectionKeyPair sender_election_key_pair = generate_election_key_pair(QUORUM, null, crypto_hash);
+    ElectionKeyPair sender_election_key_pair = generate_election_key_pair(QUORUM, null);
     Auxiliary.PublicKey recipient_auxiliary_public_key = new Auxiliary.PublicKey(
             RECIPIENT_GUARDIAN_ID,
             RECIPIENT_SEQUENCE_ORDER,
@@ -158,8 +156,8 @@ public class TestKeyCeremony {
 
   @Example
   public void test_combine_election_public_keys() {
-    ElectionKeyPair random_keypair = generate_election_key_pair(QUORUM, null, crypto_hash);
-    ElectionKeyPair random_keypair_two = generate_election_key_pair(QUORUM, null, crypto_hash);
+    ElectionKeyPair random_keypair = generate_election_key_pair(QUORUM, null);
+    ElectionKeyPair random_keypair_two = generate_election_key_pair(QUORUM, null);
     Map<String, ElectionPublicKey> public_keys = new HashMap<>();
     public_keys.put(
             RECIPIENT_GUARDIAN_ID,
