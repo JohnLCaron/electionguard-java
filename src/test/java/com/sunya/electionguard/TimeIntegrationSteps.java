@@ -511,7 +511,7 @@ public class TimeIntegrationSteps {
 
   // roundtrip was encrypted, then decrypted. Now it has all selections, when original may only have the ones voted for.
   // If there are no votes for a contest, it may be missing in the original.
-  // The yes votes must match LOOK should equal?
+  // The yes votes must match LOOK should equal? Placeholders?
   public static void compare_spoiled_ballot(PlaintextBallot roundtrip, PlaintextBallot expected) {
     for (PlaintextBallotContest roundtripContest : roundtrip.contests) {
       Optional<PlaintextBallotContest> contest = expected.contests.stream()

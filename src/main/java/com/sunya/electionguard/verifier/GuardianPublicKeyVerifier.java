@@ -50,8 +50,7 @@ public class GuardianPublicKeyVerifier {
       ElementModQ challenge = proof.challenge;   // c
       ElementModQ response = proof.response;     // u
 
-      // compute challenge 2.A
-      // LOOK changed tvalidation spec 2.A. see issue #278
+      // Changed validation spec 2.A. see issue #278
       ElementModQ challenge_computed =  Hash.hash_elems(public_key, commitment);
       if (!challenge_computed.equals(challenge)) {
         error = true;

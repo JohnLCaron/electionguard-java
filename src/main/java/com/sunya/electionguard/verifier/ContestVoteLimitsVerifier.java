@@ -57,8 +57,8 @@ public class ContestVoteLimitsVerifier {
     ContestVerifier(CiphertextBallotContest contest) {
       this.contest = contest;
       this.proof = contest.proof.orElseThrow();
-      this.contest_alpha = contest.encrypted_total.pad; // LOOK changed see Issue #280
-      this.contest_beta = contest.encrypted_total.data; // LOOK changed see Issue #280
+      this.contest_alpha = contest.encrypted_total.pad;
+      this.contest_beta = contest.encrypted_total.data;
       this.contest_response = proof.response;
       this.contest_challenge = proof.challenge;
       this.contest_id = contest.object_id;
@@ -134,7 +134,7 @@ public class ContestVoteLimitsVerifier {
       ElementModP b = proof.data;
       ElementModQ challenge_computed =
               Hash.hash_elems(electionRecord.extended_hash(),
-                      selection_alpha_product, // LOOK BigInteger or ModP ?
+                      selection_alpha_product,
                       selection_beta_product, a, b);
       if (!challenge_computed.equals(this.contest_challenge)) {
         System.out.printf("5.E Challenge fails verification for contest %s.%n", contest.object_id);

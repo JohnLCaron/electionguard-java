@@ -131,7 +131,7 @@ public class CiphertextTallyBuilder {
     }
 
     if (ballot.state == BallotBoxState.SPOILED) {
-      // LOOK we dont do anything other than record its been spoiled, so it  cant be again
+      // LOOK we dont do anything other than record its been spoiled, so it wont be processed again
       this.spoiled_ballot_ids.add(ballot.object_id);
 
       return true;

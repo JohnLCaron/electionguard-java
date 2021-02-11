@@ -168,17 +168,11 @@ public class TestKeyCeremonySerializing {
   }
 
   void buildElectionContext(Election.ElectionDescription description, Group.ElementModP joint_key) {
-
-    // LOOK this will change, add static method in Election
-    Group.ElementModQ crypto_extended_base_hash = Hash.hash_elems(crypto_base_hash, joint_key);
-
-    this.context = new Election.CiphertextElectionContext(
+    this.context = Election.make_ciphertext_election_context(
             this.numberOfGuardians,
             this.quorum,
             joint_key,
-            description.crypto_hash(),
-            this.crypto_base_hash,
-            crypto_extended_base_hash);
+            description);
   }
 
   void publish() throws IOException {

@@ -41,7 +41,8 @@ public class Decryptions {
       return Optional.empty();
     }
 
-    // LOOK old way, ballots shares are computed here by compute_decryption_share_for_spoiled_ballots()
+    // LOOK old way, spoiled ballots shares are computed here by compute_decryption_share_for_spoiled_ballots().
+    //   Would like to change to process spoiled ballots in seperate stream.
     // Map(BALLOT_ID, TallyDecryptionShare)
     // Parallizable over each of the tally's contests.
     Optional<Map<String, TallyDecryptionShare>> spoiled_ballot_shares =
@@ -253,6 +254,7 @@ public class Decryptions {
     }
 
     // LOOK old way, ballots shares are computed here by compute_compensated_decryption_share_for_spoiled_ballots()
+    //    Would like to change to process spoiled ballots in seperate stream.
     // Parallizable over each of the tally's contests.
     Optional<Map<String, DecryptionShare.CompensatedTallyDecryptionShare>> spoiled_ballots_shares =
             compute_compensated_decryption_share_for_spoiled_ballots(

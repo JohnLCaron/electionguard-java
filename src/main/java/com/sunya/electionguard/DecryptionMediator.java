@@ -59,8 +59,7 @@ public class DecryptionMediator {
    * A Decryption Share will be generated for the Guardian.
    * <p>
    * @param guardian: The guardian who will participate in the decryption.
-   * @return a `TallyDecryptionShare` for this `Guardian` or `None` if there is an error.
-   * LOOK return value never used, except to mean "success".
+   * @return true on "success".
    */
   public boolean announce(Guardian guardian) {
     // Only allow a guardian to announce once

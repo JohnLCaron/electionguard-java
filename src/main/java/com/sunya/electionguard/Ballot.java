@@ -629,7 +629,7 @@ public class Ballot {
   /**
    * Constructs a `CipherTextBallotContest` object. Computes a Chaum-Pedersen proof if the
    * ballot selections include their encryption nonces.
-   * LOOK changed for Issue #280: A crypto_hash and a contest_total are always computed and saved
+   * Changed for Issue #280: A crypto_hash and a contest_total are always computed and saved
    *  in the CiphertextBallotContest.
    */
   static CiphertextBallotContest make_ciphertext_ballot_contest(

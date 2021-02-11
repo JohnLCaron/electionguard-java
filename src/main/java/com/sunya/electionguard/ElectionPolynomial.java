@@ -28,7 +28,6 @@ import static com.sunya.electionguard.Group.rand_q;
  * <p>
  * The 0-index coefficient is used for a secret key which can
  * be discovered by a quorum of n guardians corresponding to n coefficients.
- * // LOOK this is what is needed to create the same Guardian.
  */
 @Immutable
 public class ElectionPolynomial {
