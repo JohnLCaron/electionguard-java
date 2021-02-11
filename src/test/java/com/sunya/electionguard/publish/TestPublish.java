@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.sunya.electionguard.Ballot;
 import com.sunya.electionguard.CiphertextTallyBuilder;
+import com.sunya.electionguard.ElectionWithPlaceholders;
 import com.sunya.electionguard.Guardian;
 import com.sunya.electionguard.GuardianBuilder;
 import com.sunya.electionguard.KeyCeremony;
@@ -40,12 +41,12 @@ public class TestPublish {
   @Example
   public void test_publish() throws IOException {
     OffsetDateTime now = OffsetDateTime.now();
-    ElectionDescription description = new ElectionDescription(
+    ElectionDescription election = new ElectionDescription(
             "scope", ElectionType.unknown, now, now, ImmutableList.of(), ImmutableList.of(),
             ImmutableList.of(), ImmutableList.of(), ImmutableList.of(), null, null);
-    InternalElectionDescription metadata = new InternalElectionDescription(description);
+    ElectionWithPlaceholders metadata = new ElectionWithPlaceholders(election);
 
-    CiphertextElectionContext context = make_ciphertext_election_context(1, 1, ONE_MOD_P, description);
+    CiphertextElectionContext context = make_ciphertext_election_context(1, 1, ONE_MOD_P, election);
     List<KeyCeremony.CoefficientValidationSet> coefficients = ImmutableList.of(
             KeyCeremony.CoefficientValidationSet.create("hiD", ImmutableList.of(), ImmutableList.of()));
     PlaintextTally plaintext_tally = new PlaintextTally("PlaintextTallyId", ImmutableMap.of(), ImmutableMap.of(),
@@ -56,7 +57,7 @@ public class TestPublish {
 
     Publisher publisher = new Publisher(outputDir, false, true);
     publisher.writeElectionRecordJson(
-            description,
+            election,
             context,
             new ElectionConstants(),
             ImmutableList.of(),

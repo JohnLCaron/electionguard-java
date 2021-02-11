@@ -7,6 +7,7 @@ import com.sunya.electionguard.Ballot;
 import com.sunya.electionguard.BallotBox;
 import com.sunya.electionguard.DataStore;
 import com.sunya.electionguard.Election;
+import com.sunya.electionguard.ElectionWithPlaceholders;
 import com.sunya.electionguard.Encrypt;
 import com.sunya.electionguard.publish.Consumer;
 import com.sunya.electionguard.publish.Publisher;
@@ -164,12 +165,12 @@ public class EncryptBallots {
     this.numberOfGuardians = electionRecord.context.number_of_guardians;
 
     // Configure the Encryption Device
-    Election.InternalElectionDescription metadata = new Election.InternalElectionDescription(electionRecord.election);
+    ElectionWithPlaceholders metadata = new ElectionWithPlaceholders(electionRecord.election);
     this.device = new Encrypt.EncryptionDevice(deviceName);
     this.encryptor = new Encrypt.EncryptionMediator(metadata, electionRecord.context, this.device);
 
     this.ballotStore = new DataStore();
-    this.ballotBox = new BallotBox(metadata, electionRecord.context, this.ballotStore);
+    this.ballotBox = new BallotBox(electionRecord.election, electionRecord.context, this.ballotStore);
     System.out.printf("%nReady to encrypt at location: '%s'%n", this.device.location);
   }
 

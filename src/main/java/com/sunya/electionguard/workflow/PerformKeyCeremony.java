@@ -8,7 +8,6 @@ import com.sunya.electionguard.Election;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.Guardian;
 import com.sunya.electionguard.GuardianBuilder;
-import com.sunya.electionguard.Hash;
 import com.sunya.electionguard.KeyCeremony;
 import com.sunya.electionguard.KeyCeremonyMediator;
 import com.sunya.electionguard.proto.KeyCeremonyProto;
@@ -167,7 +166,6 @@ public class PerformKeyCeremony {
 
   Group.ElementModP jointKey;
   Election.CiphertextElectionContext context;
-  Election.InternalElectionDescription metadata;
   Group.ElementModQ crypto_base_hash;
 
   List<GuardianBuilder> guardianBuilders;
@@ -267,18 +265,17 @@ public class PerformKeyCeremony {
   }
 
   void buildElectionContext(Election.ElectionDescription description, Group.ElementModP joint_key) {
-    this.metadata = new Election.InternalElectionDescription(description);
-
-    // LOOK this will change, add static method in Election
-    Group.ElementModQ crypto_extended_base_hash = Hash.hash_elems(crypto_base_hash, joint_key);
+    // this.metadata = new Election.InternalElectionDescription(description);
+    this.context = Election.make_ciphertext_election_context(this.numberOfGuardians, this.quorum,
+            this.jointKey, this.election);
 
     this.context = new Election.CiphertextElectionContext(
             this.numberOfGuardians,
             this.quorum,
             joint_key,
             description.crypto_hash(),
-            this.crypto_base_hash,
-            crypto_extended_base_hash);
+            context.crypto_base_hash,
+            context.crypto_extended_base_hash);
   }
 
   void publish(String publishDir) throws IOException {

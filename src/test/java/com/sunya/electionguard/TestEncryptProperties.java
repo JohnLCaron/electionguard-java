@@ -22,6 +22,7 @@ import static com.sunya.electionguard.ChaumPedersen.*;
 import static com.sunya.electionguard.Encrypt.*;
 import static com.sunya.electionguard.ElGamal.*;
 import static com.sunya.electionguard.Group.*;
+import static com.sunya.electionguard.ElectionWithPlaceholders.ContestWithPlaceholders;
 
 public class TestEncryptProperties extends TestProperties {
   static final ElementModQ SEED_HASH = new EncryptionDevice("Location").get_hash();
@@ -144,7 +145,7 @@ public class TestEncryptProperties extends TestProperties {
     Election.SelectionDescription desc2 = new Election.SelectionDescription("some-object-id-negative", "some-candidate-id-negative", 1);
     Election.SelectionDescription descp = new Election.SelectionDescription("some-object-id-placeholder", "some-candidate-id-placeholder", 2);
 
-    Election.ContestDescriptionWithPlaceholders metadata = new Election.ContestDescriptionWithPlaceholders(
+    ContestWithPlaceholders metadata = new ContestWithPlaceholders(
             "some-contest-object-id",
             "some-electoral-district-id",
             0,
@@ -169,7 +170,7 @@ public class TestEncryptProperties extends TestProperties {
 
   @Property(tries = 10, shrinking = ShrinkingMode.OFF)
   public void test_encrypt_contest_valid_input_succeeds(
-          @ForAll("contest_description_well_formed") Election.ContestDescriptionWithPlaceholders description,
+          @ForAll("contest_description_well_formed") ContestWithPlaceholders description,
           @ForAll("elgamal_keypairs") ElGamal.KeyPair keypair,
           @ForAll("elements_mod_q_no_zero") ElementModQ nonce_seed,
           @ForAll @IntRange(min = 0, max = 100) int random_seed) {
@@ -190,7 +191,7 @@ public class TestEncryptProperties extends TestProperties {
 
   @Property(tries = 10, shrinking = ShrinkingMode.OFF)
   public void test_encrypt_contest_valid_input_tampered_proof_fails(
-          @ForAll("contest_description_well_formed") Election.ContestDescriptionWithPlaceholders description,
+          @ForAll("contest_description_well_formed") ContestWithPlaceholders description,
           @ForAll("elgamal_keypairs") ElGamal.KeyPair keypair,
           @ForAll("elements_mod_q_no_zero") ElementModQ nonce_seed,
           @ForAll @IntRange(min = 0, max = 100) int random_seed) {
@@ -277,9 +278,9 @@ public class TestEncryptProperties extends TestProperties {
 
     PlaintextBallotContest data = ballot_factory.get_random_contest_from(description, false, false);
 
-    List<Election.SelectionDescription> placeholders = Election.generate_placeholder_selections_from(description, description.number_elected);
-    Election.ContestDescriptionWithPlaceholders description_with_placeholders =
-            Election.contest_description_with_placeholders_from(description, placeholders);
+    List<Election.SelectionDescription> placeholders = ElectionWithPlaceholders.generate_placeholder_selections_from(description, description.number_elected);
+    ContestWithPlaceholders description_with_placeholders =
+            ElectionWithPlaceholders.contest_description_with_placeholders_from(description, placeholders);
 
     Optional<CiphertextBallotContest> subject = encrypt_contest(
             data,
@@ -322,9 +323,9 @@ public class TestEncryptProperties extends TestProperties {
     // Bypass checking the validity of the description
     PlaintextBallotContest data = ballot_factory.get_random_contest_from(description, true, false);
 
-    List<Election.SelectionDescription> placeholders = Election.generate_placeholder_selections_from(description, description.number_elected);
-    Election.ContestDescriptionWithPlaceholders description_with_placeholders =
-            Election.contest_description_with_placeholders_from(description, placeholders);
+    List<Election.SelectionDescription> placeholders = ElectionWithPlaceholders.generate_placeholder_selections_from(description, description.number_elected);
+    ContestWithPlaceholders description_with_placeholders =
+            ElectionWithPlaceholders.contest_description_with_placeholders_from(description, placeholders);
 
     Optional<CiphertextBallotContest> subject = encrypt_contest(
             data,
@@ -341,30 +342,29 @@ public class TestEncryptProperties extends TestProperties {
     KeyPair keypair = elgamal_keypair_from_secret(int_to_q_unchecked(BigInteger.TWO)).orElseThrow();
     Election.ElectionDescription election = ElectionFactory.get_fake_election();
     ElectionBuilder.DescriptionAndContext tuple = ElectionFactory.get_fake_ciphertext_election(election, keypair.public_key).orElseThrow();
-    Election.InternalElectionDescription metadata = tuple.metadata;
     Election.CiphertextElectionContext context = tuple.context;
 
-    PlaintextBallot subject = ElectionFactory.get_fake_ballot(metadata.description, null);
-    assertThat(subject.is_valid(metadata.ballot_styles.get(0).object_id)).isTrue();
+    PlaintextBallot subject = ElectionFactory.get_fake_ballot(election, null);
+    assertThat(subject.is_valid(election.ballot_styles.get(0).object_id)).isTrue();
 
-    Optional<CiphertextBallot> resultO = encrypt_ballot(subject, metadata, context, SEED_HASH, Optional.empty(), true);
+    Optional<CiphertextBallot> resultO = encrypt_ballot(subject, tuple.metadata, context, SEED_HASH, Optional.empty(), true);
     assertThat(resultO).isPresent();
     CiphertextBallot result = resultO.get();
 
     Optional<String> tracker_code = result.get_tracker_code();
-    Optional<CiphertextBallot> result_from_seed = encrypt_ballot(subject, metadata, context, SEED_HASH, Optional.of(TWO_MOD_Q), true);
+    Optional<CiphertextBallot> result_from_seed = encrypt_ballot(subject, tuple.metadata, context, SEED_HASH, Optional.of(TWO_MOD_Q), true);
 
     assertThat(result.tracking_hash).isNotNull();
     assertThat(tracker_code).isPresent();
     assertThat(result_from_seed).isPresent();
     assertThat(
             result.is_valid_encryption(
-                    metadata.description_hash,
+                    election.crypto_hash,
                     keypair.public_key,
                     context.crypto_extended_base_hash)).isTrue();
     assertThat(
             result_from_seed.get().is_valid_encryption(
-                    metadata.description_hash,
+                    election.crypto_hash,
                     keypair.public_key,
                     context.crypto_extended_base_hash)).isTrue();
   }
@@ -375,18 +375,17 @@ public class TestEncryptProperties extends TestProperties {
     KeyPair keypair = elgamal_keypair_from_secret(int_to_q_unchecked(BigInteger.TWO)).orElseThrow();
     Election.ElectionDescription election = ElectionFactory.get_fake_election();
     ElectionBuilder.DescriptionAndContext tuple = ElectionFactory.get_fake_ciphertext_election(election, keypair.public_key).orElseThrow();
-    Election.InternalElectionDescription metadata = tuple.metadata;
     Election.CiphertextElectionContext context = tuple.context;
 
-    PlaintextBallot data = ElectionFactory.get_fake_ballot(metadata.description, null);
-    assertThat(data.is_valid(metadata.ballot_styles.get(0).object_id)).isTrue();
+    PlaintextBallot data = ElectionFactory.get_fake_ballot(election, null);
+    assertThat(data.is_valid(election.ballot_styles.get(0).object_id)).isTrue();
 
     EncryptionDevice device = new EncryptionDevice("Location");
-    EncryptionMediator subject = new EncryptionMediator(metadata, context, device);
+    EncryptionMediator subject = new EncryptionMediator(tuple.metadata, context, device);
 
     Optional<CiphertextBallot> result = subject.encrypt(data);
     assertThat(result).isPresent();
-    assertThat(result.get().is_valid_encryption(metadata.description_hash, keypair.public_key, context.crypto_extended_base_hash)).isTrue();
+    assertThat(result.get().is_valid_encryption(election.crypto_hash, keypair.public_key, context.crypto_extended_base_hash)).isTrue();
   }
 
   @Example
@@ -394,19 +393,18 @@ public class TestEncryptProperties extends TestProperties {
     KeyPair keypair = elgamal_keypair_from_secret(int_to_q_unchecked(BigInteger.TWO)).orElseThrow();
     Election.ElectionDescription election = ElectionFactory.get_simple_election_from_file();
     ElectionBuilder.DescriptionAndContext tuple = ElectionFactory.get_fake_ciphertext_election(election, keypair.public_key).orElseThrow();
-    Election.InternalElectionDescription metadata = tuple.metadata;
     Election.CiphertextElectionContext context = tuple.context;
 
     PlaintextBallot data = ballot_factory.get_simple_ballot_from_file();
-    assertThat(data.is_valid(metadata.ballot_styles.get(0).object_id)).isTrue();
+    assertThat(data.is_valid(election.ballot_styles.get(0).object_id)).isTrue();
 
     EncryptionDevice device = new EncryptionDevice("Location");
-    EncryptionMediator subject = new EncryptionMediator(metadata, context, device);
+    EncryptionMediator subject = new EncryptionMediator(tuple.metadata, context, device);
 
     Optional<CiphertextBallot> result = subject.encrypt(data);
     assertThat(result).isPresent();
     assertThat(data.object_id).isEqualTo(result.get().object_id);
-    assertThat(result.get().is_valid_encryption(metadata.description_hash, keypair.public_key, context.crypto_extended_base_hash)).isTrue();
+    assertThat(result.get().is_valid_encryption(election.crypto_hash, keypair.public_key, context.crypto_extended_base_hash)).isTrue();
   }
 
   /**         This test verifies that we can regenerate the contest and selection proofs from the cached nonce values. */
@@ -418,24 +416,23 @@ public class TestEncryptProperties extends TestProperties {
 
      Election.ElectionDescription election = ElectionFactory.get_simple_election_from_file();
      ElectionBuilder.DescriptionAndContext tuple = ElectionFactory.get_fake_ciphertext_election(election, keypair.public_key).orElseThrow();
-     Election.InternalElectionDescription metadata = tuple.metadata;
      Election.CiphertextElectionContext context = tuple.context;
 
      PlaintextBallot data = ballot_factory.get_simple_ballot_from_file();
-     assertThat(data.is_valid(metadata.ballot_styles.get(0).object_id)).isTrue();
+     assertThat(data.is_valid(election.ballot_styles.get(0).object_id)).isTrue();
 
      EncryptionDevice device = new EncryptionDevice("Location");
-     EncryptionMediator subject = new EncryptionMediator(metadata, context, device);
+     EncryptionMediator subject = new EncryptionMediator(tuple.metadata, context, device);
 
      Optional<CiphertextBallot> resultO = subject.encrypt(data);
      assertThat(resultO).isPresent();
      CiphertextBallot result = resultO.get();
-     assertThat(result.is_valid_encryption(metadata.description_hash, keypair.public_key, context.crypto_extended_base_hash)).isTrue();
+     assertThat(result.is_valid_encryption(election.crypto_hash, keypair.public_key, context.crypto_extended_base_hash)).isTrue();
 
      for (CiphertextBallotContest contest : result.contests) {
        // Find the contest description
-       Election.ContestDescriptionWithPlaceholders contest_description =
-               metadata.contests.stream().filter(c -> c.object_id.equals(contest.object_id)).findFirst().orElseThrow();
+       ContestWithPlaceholders contest_description =
+               tuple.metadata.contests.stream().filter(c -> c.object_id.equals(contest.object_id)).findFirst().orElseThrow();
 
        // Homomorpically accumulate the selection encryptions
        List<ElGamal.Ciphertext> ciphertexts = contest.ballot_selections.stream().map(s -> s.ciphertext()).collect(Collectors.toList());

@@ -6,15 +6,17 @@ import java.util.List;
 
 import static com.sunya.electionguard.Ballot.*;
 import static com.sunya.electionguard.Election.*;
+import static com.sunya.electionguard.ElectionWithPlaceholders.ContestWithPlaceholders;
 
 /** Static helper methods for ballot validation. */
 public class BallotValidations {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   /** Determine if a ballot is valid for a given election . */
+  // LOOK why ElectionDescriptionWithPlaceholders?
   static boolean ballot_is_valid_for_election(
           CiphertextBallot ballot,
-          InternalElectionDescription metadata,
+          ElectionWithPlaceholders metadata,
           CiphertextElectionContext context) {
 
     if (!ballot_is_valid_for_style(ballot, metadata)) {
@@ -22,7 +24,7 @@ public class BallotValidations {
     }
 
     if (!ballot.is_valid_encryption(
-            metadata.description_hash,
+            metadata.election.crypto_hash,
             context.elgamal_public_key,
             context.crypto_extended_base_hash)) {
       logger.atInfo().log("ballot_is_valid_for_election: mismatching ballot encryption %s", ballot.object_id);
@@ -46,7 +48,7 @@ public class BallotValidations {
 
   /** Determine if contest is valid for ballot style. */
   static boolean contest_is_valid_for_style(
-          CiphertextBallotContest contest, ContestDescriptionWithPlaceholders description) {
+          CiphertextBallotContest contest, ContestWithPlaceholders description) {
 
     // verify the hash matches
     if (!contest.description_hash.equals(description.crypto_hash())) {
@@ -66,10 +68,11 @@ public class BallotValidations {
   }
 
   /** Determine if ballot is valid for ballot style. */
-  static boolean ballot_is_valid_for_style(CiphertextBallot ballot, InternalElectionDescription metadata) {
-    List<ContestDescriptionWithPlaceholders> descriptions = metadata.get_contests_for(ballot.ballot_style);
+  static boolean ballot_is_valid_for_style(CiphertextBallot ballot, ElectionWithPlaceholders metadata) {
+    List<ContestWithPlaceholders> descriptions = metadata.get_contests_for(ballot.ballot_style);
 
-    for (ContestDescriptionWithPlaceholders description : descriptions) {
+    // LOOK WTF?
+    for (ContestWithPlaceholders description : descriptions) {
       CiphertextBallotContest use_contest = null;
       for (CiphertextBallotContest contest : ballot.contests) {
         if (description.object_id.equals(contest.object_id)) {

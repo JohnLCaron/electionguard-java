@@ -38,7 +38,7 @@ public abstract class TestProperties {
   }
 
   @Provide
-  Arbitrary<Election.ContestDescriptionWithPlaceholders> contest_description_well_formed() {
+  Arbitrary<ElectionWithPlaceholders.ContestWithPlaceholders> contest_description_well_formed() {
     return Arbitraries.of(ElectionFactory.get_contest_description_well_formed());
   }
 

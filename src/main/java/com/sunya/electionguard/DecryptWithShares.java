@@ -28,7 +28,7 @@ public class DecryptWithShares {
    * @return A PlaintextTally or None if there is an error
    */
   static Optional<PlaintextTally> decrypt_tally(
-          CiphertextTallyBuilder tally,
+          PublishedCiphertextTally tally,
           Map<String, TallyDecryptionShare> shares, // Map(AVAILABLE_GUARDIAN_ID, TallyDecryptionShare)
           Election.CiphertextElectionContext context,
           Map<String, Group.ElementModQ> lagrange_coefficients,
@@ -54,17 +54,17 @@ public class DecryptWithShares {
    * @return Map(CONTEST_ID, PlaintextTallyContest)
    */
   static Optional<Map<String, PlaintextTally.PlaintextTallyContest>> decrypt_tally_contests_with_decryption_shares(
-          Map<String, CiphertextTallyBuilder.CiphertextTallyContestBuilder> tally, // Map(CONTEST_ID, CiphertextTallyContest)
+          Map<String, PublishedCiphertextTally.CiphertextTallyContest> tally, // Map(CONTEST_ID, CiphertextTallyContest)
           Map<String, DecryptionShare.TallyDecryptionShare> shares, // Map(AVAILABLE_GUARDIAN_ID, TallyDecryptionShare)
           ElementModQ extended_base_hash) {
 
     HashMap<String, PlaintextTally.PlaintextTallyContest> contests = new HashMap<>();
 
     // iterate through the tally contests
-    for (CiphertextTallyBuilder.CiphertextTallyContestBuilder contest : tally.values()) {
+    for (PublishedCiphertextTally.CiphertextTallyContest contest : tally.values()) {
       HashMap<String, PlaintextTally.PlaintextTallySelection> selections = new HashMap<>();
 
-      for (CiphertextTallyBuilder.CiphertextTallySelectionBuilder selection : contest.tally_selections.values()) {
+      for (PublishedCiphertextTally.CiphertextTallySelection selection : contest.tally_selections.values()) {
         // Map(AVAILABLE_GUARDIAN_ID, KeyAndSelection)
         Map<String, KeyAndSelection> tally_shares = DecryptionShare.get_tally_shares_for_selection(selection.object_id, shares);
         Optional<PlaintextTally.PlaintextTallySelection> plaintext_selectionO = decrypt_selection_with_decryption_shares(

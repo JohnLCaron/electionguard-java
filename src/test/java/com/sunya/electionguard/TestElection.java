@@ -1,6 +1,5 @@
 package com.sunya.electionguard;
 
-import com.google.common.collect.ImmutableList;
 import net.jqwik.api.Example;
 
 import java.io.IOException;
@@ -28,80 +27,18 @@ public class TestElection {
 
   @Example
   public void test_election_from_file_generates_consistent_internal_description_contest_hashes() throws IOException {
-    ElectionDescription comparator = ElectionFactory.get_simple_election_from_file();
-    InternalElectionDescription subject = new InternalElectionDescription(comparator);
+    ElectionDescription election = ElectionFactory.get_simple_election_from_file();
+    ElectionWithPlaceholders metadata = new ElectionWithPlaceholders(election);
 
-    assertThat(comparator.contests.size()).isEqualTo(subject.contests.size());
+    assertThat(election.contests.size()).isEqualTo(election.contests.size());
 
-    for (ContestDescription expected : comparator.contests) {
-      for (ContestDescription actual : subject.contests) {
+    for (ContestDescription expected : election.contests) {
+      for (ContestDescription actual : metadata.contests) {
         if (expected.object_id.equals(actual.object_id)) {
           assertThat(expected.crypto_hash()).isEqualTo(actual.crypto_hash());
         }
       }
     }
   }
-
-  @Example
-  public void test_contest_description_valid_input_succeeds() {
-    ContestDescriptionWithPlaceholders description = new ContestDescriptionWithPlaceholders(
-            "0@A.com-contest",
-            "0@A.com-gp-unit",
-            1,
-            VoteVariationType.n_of_m,
-            1,
-            1,
-            "",
-            ImmutableList.of(
-                    new SelectionDescription(
-                            "0@A.com-selection",
-                            "0@A.com",
-                            0),
-                    new SelectionDescription(
-                            "0@B.com-selection",
-                            "0@B.com",
-                            1)),
-            null, null,
-            ImmutableList.of(
-                    new SelectionDescription(
-                            "0@A.com-contest-2-placeholder",
-                            "0@A.com-contest-2-candidate",
-                            2)
-            ));
-
-    assertThat(description.is_valid()).isTrue();
-  }
-
-  @Example
-  public void test_contest_description_invalid_input_fails() {
-    ContestDescriptionWithPlaceholders description = new ContestDescriptionWithPlaceholders(
-            "0@A.com-contest",
-            "0@A.com-gp-unit",
-            1,
-            VoteVariationType.n_of_m,
-            1,
-            1,
-            "",
-            ImmutableList.of(
-                    new SelectionDescription(
-                            "0@A.com-selection",
-                            "0@A.com",
-                            0),
-                    // simulate a bad selection description input
-                    new SelectionDescription(
-                            "0@A.com-selection",
-                            "0@A.com",
-                            1)),
-            null, null,
-            ImmutableList.of(
-                    new SelectionDescription(
-                            "0@A.com-contest-2-placeholder",
-                            "0@A.com-contest-2-candidate",
-                            2)
-            ));
-
-    assertThat(description.is_valid()).isFalse();
-  }
-
 
 }

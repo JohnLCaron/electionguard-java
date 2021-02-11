@@ -15,7 +15,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 import static com.sunya.electionguard.Group.*;
 import static com.sunya.electionguard.DecryptWithSecrets.*;
-
+import static com.sunya.electionguard.ElectionWithPlaceholders.ContestWithPlaceholders;
 
 public class TestDecryptWithSecretsProperties extends TestProperties {
 
@@ -147,11 +147,11 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
           @ForAll("elgamal_keypairs") ElGamal.KeyPair keypair,
           @ForAll("elements_mod_q_no_zero") Group.ElementModQ nonce_seed) {
 
-    Election.ContestDescriptionWithPlaceholders description = ElectionFactory.get_contest_description_well_formed();
+    ContestWithPlaceholders description = ElectionFactory.get_contest_description_well_formed();
     Ballot.PlaintextBallotContest data = new BallotFactory().get_random_contest_from(description, false, false);
 
-    List<Election.SelectionDescription> placeholders = Election.generate_placeholder_selections_from(description, description.number_elected);
-    Election.ContestDescriptionWithPlaceholders description_with_placeholders = Election.contest_description_with_placeholders_from(description, placeholders);
+    List<Election.SelectionDescription> placeholders = ElectionWithPlaceholders.generate_placeholder_selections_from(description, description.number_elected);
+    ContestWithPlaceholders description_with_placeholders = ElectionWithPlaceholders.contest_description_with_placeholders_from(description, placeholders);
     assertThat(description_with_placeholders.is_valid()).isTrue();
 
     Optional<Ballot.CiphertextBallotContest> subjectO = Encrypt.encrypt_contest(
@@ -260,11 +260,11 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
           @ForAll("elgamal_keypairs") ElGamal.KeyPair keypair,
           @ForAll("elements_mod_q_no_zero") Group.ElementModQ nonce_seed) {
 
-    Election.ContestDescriptionWithPlaceholders description = ElectionFactory.get_contest_description_well_formed();
+    ContestWithPlaceholders description = ElectionFactory.get_contest_description_well_formed();
     Ballot.PlaintextBallotContest data = new BallotFactory().get_random_contest_from(description, false, false);
 
-    List<Election.SelectionDescription> placeholders = Election.generate_placeholder_selections_from(description, description.number_elected);
-    Election.ContestDescriptionWithPlaceholders description_with_placeholders = Election.contest_description_with_placeholders_from(description, placeholders);
+    List<Election.SelectionDescription> placeholders = ElectionWithPlaceholders.generate_placeholder_selections_from(description, description.number_elected);
+    ContestWithPlaceholders description_with_placeholders = ElectionWithPlaceholders.contest_description_with_placeholders_from(description, placeholders);
 
     assertThat(description_with_placeholders.is_valid()).isTrue();
 
@@ -357,7 +357,7 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
 
     Election.ElectionDescription election = ElectionFactory.get_simple_election_from_file();
     ElectionBuilder.DescriptionAndContext celection = ElectionFactory.get_fake_ciphertext_election(election, keypair.public_key).orElseThrow();
-    Election.InternalElectionDescription metadata = celection.metadata;
+    ElectionWithPlaceholders metadata = celection.metadata;
     Election.CiphertextElectionContext context = celection.context;
 
     Ballot.PlaintextBallot data = new BallotFactory().get_simple_ballot_from_file();
@@ -400,7 +400,7 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
     assertThat(data.object_id).isEqualTo(result_from_nonce.get().object_id);
     assertThat(data.object_id).isEqualTo(result_from_nonce_seed.get().object_id);
 
-    for (Election.ContestDescriptionWithPlaceholders description : metadata.get_contests_for(data.ballot_style)) {
+    for (ContestWithPlaceholders description : metadata.get_contests_for(data.ballot_style)) {
       int expected_entries = description.ballot_selections.size() + description.number_elected;
 
       Ballot.PlaintextBallotContest key_contest = result_from_key.get().contests.stream()
@@ -482,7 +482,7 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
 
     Election.ElectionDescription election = ElectionFactory.get_simple_election_from_file();
     ElectionBuilder.DescriptionAndContext celection = ElectionFactory.get_fake_ciphertext_election(election, keypair.public_key).orElseThrow();
-    Election.InternalElectionDescription metadata = celection.metadata;
+    ElectionWithPlaceholders metadata = celection.metadata;
     Election.CiphertextElectionContext context = celection.context;
 
     Ballot.PlaintextBallot data = new BallotFactory().get_simple_ballot_from_file();

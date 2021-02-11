@@ -13,16 +13,18 @@ import static com.sunya.electionguard.Ballot.*;
 public class BallotBox {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
-  private final Election.InternalElectionDescription metadata;
+  private final Election.ElectionDescription election;
   private final Election.CiphertextElectionContext context;
   private final DataStore store;
+  private final ElectionWithPlaceholders metadata;
 
-  public BallotBox(Election.InternalElectionDescription metadata,
+  public BallotBox(Election.ElectionDescription election,
                    Election.CiphertextElectionContext context,
                    DataStore store) {
-    this.metadata = metadata;
+    this.election = election;
     this.context = context;
     this.store = store;
+    this.metadata = new ElectionWithPlaceholders(election);
   }
 
   public Optional<CiphertextAcceptedBallot> cast(CiphertextBallot ballot) {
@@ -40,7 +42,7 @@ public class BallotBox {
    * @return a `CiphertextAcceptedBallot` or `None` if there was an error
    */
   Optional<CiphertextAcceptedBallot> accept_ballot(CiphertextBallot ballot, BallotBoxState state) {
-    if (!BallotValidations.ballot_is_valid_for_election(ballot, metadata, context)) {
+    if (!BallotValidations.ballot_is_valid_for_election(ballot, this.metadata, context)) {
       return Optional.empty();
     }
 

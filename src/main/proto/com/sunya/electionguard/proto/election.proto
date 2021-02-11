@@ -146,15 +146,6 @@ message GeopoliticalUnit {
   ContactInformation contact_information = 4;
 }
 
-// LOOK shouldnt be here
-message InternalElectionDescription {
-  ElectionDescription description = 1;
-  repeated GeopoliticalUnit geopolitical_units = 2;
-  repeated ContestDescriptionWithPlaceholders contests = 3;
-  repeated BallotStyle ballot_styles = 4;
-  ElementModQ description_hash = 5;
-}
-
 message InternationalizedText {
   repeated Language text = 1;
 }

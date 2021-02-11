@@ -11,8 +11,10 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 import static com.sunya.electionguard.Election.*;
 import static com.sunya.electionguard.Group.*;
+import static com.sunya.electionguard.ElectionWithPlaceholders.ContestWithPlaceholders;
 import static com.sunya.electionguard.TestUtils.elgamal_keypairs;
 
+// Helper methods for testing, esp for property based testing
 public class ElectionTestHelper {
 
   private static final List<String> _first_names = ImmutableList.of(
@@ -104,9 +106,7 @@ public class ElectionTestHelper {
           "PATEL",
           "GUPTA",
           "ĐẶNG");
-
   private static final String alphabet = "abcdefghijklmnopqrstuvwxyz";
-
 
   // valid email
   private static String email() {
@@ -190,13 +190,11 @@ public class ElectionTestHelper {
     return new InternationalizedText(ImmutableList.of(language_human_names()));
   }
 
-
   //     Generates an `AnnotatedString` object with one `Language` and an associated `value` string.
   AnnotatedString annotated_strings() {
     Language s = languages();
     return new AnnotatedString(s.language, s.value);
   }
-
 
   /**
    * Generates a `BallotStyle` object, which rolls up a list of parties and
@@ -271,7 +269,7 @@ public class ElectionTestHelper {
    * `object_id` within, but will have a "c-" prefix attached, so you'll be able to
    * tell that they're related.
    */
-  private SelectionDescription _candidate_to_selection_description(Candidate candidate, int sequence_order) {
+  private SelectionDescription candidate_to_selection_description(Candidate candidate, int sequence_order) {
     return new SelectionDescription(
             String.format("c-%s", candidate.object_id), candidate.get_candidate_id(), sequence_order);
   }
@@ -320,7 +318,7 @@ public class ElectionTestHelper {
     // selection_descriptions = [ _candidate_to_selection_description(contest_candidates[i], i) for i in range(m) ]
     List<SelectionDescription> selection_descriptions = new ArrayList<>();
     for (int i = 0; i < m; i++) {
-      selection_descriptions.add(_candidate_to_selection_description(contest_candidates.get(i), i));
+      selection_descriptions.add(candidate_to_selection_description(contest_candidates.get(i), i));
     }
 
     VoteVariationType vote_variation = (n == 1) ? VoteVariationType.one_of_m : VoteVariationType.n_of_m;
@@ -385,7 +383,7 @@ public class ElectionTestHelper {
     // selection_descriptions = [_candidate_to_selection_description(contest_candidates[i], i) for i in range(n)]
     List<SelectionDescription> selection_descriptions = new ArrayList<>();
     for (int i = 0; i < n; i++) {
-      selection_descriptions.add(_candidate_to_selection_description(contest_candidates.get(i), i));
+      selection_descriptions.add(candidate_to_selection_description(contest_candidates.get(i), i));
     }
 
     return new CandidateTuple(
@@ -464,7 +462,7 @@ public class ElectionTestHelper {
             contact_infos());
   }
 
-  List<Ballot.PlaintextBallot> plaintext_voted_ballots(InternalElectionDescription metadata, int count) {
+  List<Ballot.PlaintextBallot> plaintext_voted_ballots(ElectionWithPlaceholders metadata, int count) {
     // ballots: List[PlaintextBallot] = [] for i in range(count):ballots.append(draw(plaintext_voted_ballot(metadata)))
     List<Ballot.PlaintextBallot> ballots = new ArrayList<>();
     for (int i = 0; i < count; i++) {
@@ -473,23 +471,19 @@ public class ElectionTestHelper {
     return ballots;
   }
 
-  /**
-   *     Given an `InternalElectionDescription` object, generates an arbitrary `PlaintextBallot` with the
-   *     choices made randomly.
-   *     @param metadata: Any `InternalElectionDescription
-   */
-  Ballot.PlaintextBallot plaintext_voted_ballot(InternalElectionDescription metadata) {
-    int num_ballot_styles = metadata.ballot_styles.size();
+  /** Generates an arbitrary `PlaintextBallot` with the choices made randomly. */
+  Ballot.PlaintextBallot plaintext_voted_ballot(ElectionWithPlaceholders metadata) {
+    int num_ballot_styles = metadata.election.ballot_styles.size();
     assertWithMessage("invalid election with no ballot styles").that(num_ballot_styles > 0).isTrue();
 
           // pick a ballot style at random
-    BallotStyle ballot_style = drawList(metadata.ballot_styles);
+    BallotStyle ballot_style = drawList(metadata.election.ballot_styles);
 
-    List<ContestDescriptionWithPlaceholders> contests = metadata.get_contests_for(ballot_style.object_id);
+    List<ContestWithPlaceholders> contests = metadata.get_contests_for(ballot_style.object_id);
     assertWithMessage("invalid ballot style with no contests in it").that(contests.size() > 0).isTrue();
 
     List<Ballot.PlaintextBallotContest> voted_contests = new ArrayList<>();
-    for (ContestDescriptionWithPlaceholders contest : contests) {
+    for (ContestWithPlaceholders contest : contests) {
       assertWithMessage("every contest needs to be valid").that(contest.is_valid()).isTrue();
       // LOOK dont understand "we need exactly this many 1 's, and the rest 0' s"
       int n = contest.number_elected ; // we need exactly this many 1 's, and the rest 0' s
@@ -546,13 +540,14 @@ public class ElectionTestHelper {
 
   public static class EverythingTuple {
     ElectionDescription election_description;
-    InternalElectionDescription metadata;
+    ElectionWithPlaceholders metadata;
     List<Ballot.PlaintextBallot> ballots;
     ElementModQ secret_key;
     CiphertextElectionContext context;
 
-    public EverythingTuple(ElectionDescription election_description,
-                 InternalElectionDescription metadata,
+    public EverythingTuple(
+                 ElectionDescription election_description,
+                 ElectionWithPlaceholders metadata,
                  List<Ballot.PlaintextBallot> ballots,
                  ElementModQ secret_key,
                  CiphertextElectionContext context) {
@@ -571,25 +566,25 @@ public class ElectionTestHelper {
    * <p>
    *
    * @param num_ballots: The number of ballots to generate (default: 3).
-   * @return a tuple of an `InternalElectionDescription`, a list of plaintext ballots, an ElGamal secret key,
+   * @return a tuple of an `ElectionDescription`, a list of plaintext ballots, an ElGamal secret key,
    * and a `CiphertextElectionContext`.
    */
   EverythingTuple elections_and_ballots(int num_ballots) {
     Preconditions.checkArgument(num_ballots >= 0, "You're asking for a negative number of ballots?");
     ElectionDescription election_description = election_descriptions(3, 3);
-    InternalElectionDescription internal_election_description = new InternalElectionDescription(election_description);
+    ElectionWithPlaceholders metadata = new ElectionWithPlaceholders(election_description);
 
     // ballots = [draw(plaintext_voted_ballots(internal_election_description)) for _ in range(num_ballots)]
     List<Ballot.PlaintextBallot> ballots = new ArrayList<>();
     for (int i=0; i<num_ballots; i++) {
-      ballots.addAll(plaintext_voted_ballots(internal_election_description, 1));
+      ballots.addAll(plaintext_voted_ballots(metadata, 1));
     }
 
     CIPHERTEXT_ELECTIONS_TUPLE_TYPE tuple = ciphertext_elections(election_description);
 
     return new EverythingTuple(
             election_description,
-            internal_election_description,
+            metadata,
             ballots,
             tuple.secret_key,
             tuple.context);
