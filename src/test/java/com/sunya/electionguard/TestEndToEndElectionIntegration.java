@@ -180,7 +180,7 @@ public class TestEndToEndElectionIntegration {
     this.election_builder.set_public_key(joint_key.get());
     ElectionBuilder.DescriptionAndContext tuple = this.election_builder.build().orElseThrow();
     this.election = tuple.metadata.election;
-    this.context = tuple.context;
+    this.context = tuple.context; // LOOK cant use a random extended_hash here and expect it to validate
     this.constants = new ElectionConstants();
     Group.ElementModQ crypto_base_hash = Election.make_crypto_base_hash(NUMBER_OF_GUARDIANS, QUORUM, election);
     assertThat(this.context.crypto_base_hash).isEqualTo(crypto_base_hash);

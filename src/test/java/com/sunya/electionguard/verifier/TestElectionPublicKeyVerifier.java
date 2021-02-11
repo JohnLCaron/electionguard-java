@@ -19,11 +19,11 @@ public class TestElectionPublicKeyVerifier {
 
     // set up
     consumer = new Consumer(topdir);
-    validator = new ElectionPublicKeyVerifier(consumer.readElectionRecordJson());
+    validator = new ElectionPublicKeyVerifier(consumer.readElectionRecordProto());
   }
 
   @Example
-  public void testVerifyPublicKeys() throws IOException {
+  public void testVerifyPublicKeys() {
     boolean sevOk = validator.verify_public_keys();
     assertThat(sevOk).isTrue();
   }

@@ -167,7 +167,6 @@ public class GuardianBuilder extends ElectionObjectBase {
    * @param public_key_set: Public set of election and auxiliary keys
    */
   void save_guardian_public_keys(KeyCeremony.PublicKeySet public_key_set) {
-
     this.save_auxiliary_public_key(
             new Auxiliary.PublicKey(
                     public_key_set.owner_id(),
@@ -210,10 +209,7 @@ public class GuardianBuilder extends ElectionObjectBase {
     return KeyCeremony.get_coefficient_validation_set(this.object_id, this.election_keys.polynomial());
   }
 
-  /**
-   * Share election public key with another guardian.
-   * @return Election public key
-   */
+  /** Share election public key with another guardian. */
   KeyCeremony.ElectionPublicKey share_election_public_key() {
     return KeyCeremony.ElectionPublicKey.create(
             this.object_id,
@@ -253,7 +249,6 @@ public class GuardianBuilder extends ElectionObjectBase {
       }
       this.backups_to_share.put(auxiliary_key.owner_id, backup.get());
     }
-
     return true;
   }
 

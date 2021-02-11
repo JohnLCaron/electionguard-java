@@ -64,9 +64,6 @@ public class TestKeyCeremonySerializing {
   final Publisher publisher;
 
   Group.ElementModP jointKey;
-  Election.CiphertextElectionContext context;
-  Group.ElementModQ crypto_base_hash;
-
   List<GuardianBuilder> guardianBuilders;
   List<KeyCeremony.CoefficientValidationSet> coefficientValidationSets = new ArrayList<>();
   List<Guardian> guardians;
@@ -77,21 +74,28 @@ public class TestKeyCeremonySerializing {
     CoefficientsProvider coefficientsProvider = new RandomCoefficientsProvider(numberOfGuardians, quorum);
     System.out.printf("  Create %d Guardians, quorum = %d%n", this.numberOfGuardians, this.quorum);
 
-    this.crypto_base_hash = Election.make_crypto_base_hash(this.numberOfGuardians, this.quorum, election);
-
     this.guardianBuilders = new ArrayList<>();
+    List<Group.ElementModQ> commitments = new ArrayList<>();
     for (KeyCeremony.CoefficientSet coeffSet : coefficientsProvider.guardianCoefficients()) {
       this.guardianBuilders.add(GuardianBuilder.createRandom(coeffSet, numberOfGuardians, quorum));
+      commitments.addAll(coeffSet.coefficients());
     }
+    Group.ElementModQ commitmentsHash = Hash.hash_elems(commitments);
 
     System.out.printf("%nKey Ceremony%n");
-    if (!keyCeremony()) {
+    if (!keyCeremony()) { // jointKey is set here
       throw new RuntimeException("*** Key Ceremony failed");
     }
-    buildElectionContext(election, this.jointKey);
+
+    Election.CiphertextElectionContext context = Election.make_ciphertext_election_context(
+            this.numberOfGuardians,
+            this.quorum,
+            this.jointKey,
+            this.election,
+            commitmentsHash);
 
     this.publisher = new Publisher(outputDir, false, false);
-    publish();
+    publish(context);
   }
 
   /**
@@ -167,18 +171,10 @@ public class TestKeyCeremonySerializing {
     return true;
   }
 
-  void buildElectionContext(Election.ElectionDescription description, Group.ElementModP joint_key) {
-    this.context = Election.make_ciphertext_election_context(
-            this.numberOfGuardians,
-            this.quorum,
-            joint_key,
-            description);
-  }
-
-  void publish() throws IOException {
+  void publish(Election.CiphertextElectionContext context) throws IOException {
     publisher.writeKeyCeremonyProto(
             this.election,
-            this.context,
+            context,
             new Election.ElectionConstants(),
             this.coefficientValidationSets);
 

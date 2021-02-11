@@ -19,11 +19,11 @@ public class TestBallotChainingVerifier {
 
     // set up
     consumer = new Consumer(topdir);
-    validator = new BallotChainingVerifier(consumer.readElectionRecordJson());
+    validator = new BallotChainingVerifier(consumer.readElectionRecordProto());
   }
 
   @Example
-  public void testContestVoteLimitsValidator() throws IOException {
+  public void testContestVoteLimitsValidator() {
     boolean sevOk = validator.verify_all_ballots();
     assertThat(sevOk).isTrue();
   }

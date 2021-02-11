@@ -466,7 +466,7 @@ public class Ballot {
     public final ElementModQ description_hash; // Hash from contestDescription
     public final ImmutableList<CiphertextBallotSelection> ballot_selections; // Collection of ballot selections
     public final ElementModQ crypto_hash; // Hash of the encrypted values
-    public final ElGamal.Ciphertext encrypted_total; // The contest total (A, B)
+    public final ElGamal.Ciphertext encrypted_total; // The contest total (A, B). python name: ciphertext_accumulation
     public final Optional<ElementModQ> nonce; // The nonce used to generate the encryption. Sensitive & should be treated as a secret.
 
     // The proof demonstrates the sum of the selections does not exceed the maximum
