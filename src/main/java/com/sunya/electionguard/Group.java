@@ -80,6 +80,7 @@ public class Group {
     }
   }
 
+  /** Elements in the Group Z_q: integers mod q. */
   @Immutable
   public static class ElementModQ extends ElementMod {
     private ElementModQ(BigInteger elem) {
@@ -97,6 +98,7 @@ public class Group {
     }
   }
 
+  /** Elements in the Group Z_p: integers mod p. */
   @Immutable
   public static class ElementModP extends ElementMod {
     private ElementModP(BigInteger elem) {

@@ -13,7 +13,7 @@ import static com.sunya.electionguard.Group.*;
 public class ChaumPedersen {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
-  /** Representation of disjunctive Chaum Pederson proof. */
+  /** A disjunctive Chaum Pederson proof. */
   @Immutable
   public static class DisjunctiveChaumPedersenProof extends Proof {
     public final ElementModP proof_zero_pad; // a0 in the spec
@@ -111,7 +111,7 @@ public class ChaumPedersen {
     }
   }
 
-  /** Representation of a generic Chaum-Pedersen Zero Knowledge proof. */
+  /** A generic Chaum-Pedersen Zero Knowledge proof. */
   @Immutable
   public static class ChaumPedersenProof extends Proof {
     public final ElementModP pad; // a in the spec
@@ -192,7 +192,7 @@ public class ChaumPedersen {
     }
   }
 
-  /** Representation of constant Chaum Pederson proof */
+  /** A constant Chaum Pederson proof */
   @Immutable
   public static class ConstantChaumPedersenProof extends Proof {
     public final ElementModP pad; // a in the spec

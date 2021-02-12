@@ -17,8 +17,9 @@ public class Ballot {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   /**
-   * The plaintext representation of a voter's selections.
+   * The plaintext representation of a voter's selections for all the contests in an election.
    * The object_id is a unique Ballot ID created by the external system.
+   * This is used both as input, and for the roundtrip: input -&gt; encrypt -&gt; decrypt -&gt; output.
    */
   @Immutable
   public static class PlaintextBallot extends ElectionObjectBase {
@@ -33,7 +34,7 @@ public class Ballot {
     }
 
     /**
-     * Check if expected ballot style is valid
+     * Is the ballot style valid?
      * @param expected_ballot_style_id: Expected ballot style id
      */
     boolean is_valid(String expected_ballot_style_id) {
@@ -71,7 +72,7 @@ public class Ballot {
   }
 
   /**
-   * A PlaintextBallotContest represents the selections made by a voter for a specific ContestDescription.
+   * The plaintext representation of a voter's selections for one contest.
    * <p>
    * This can be either a partial or a complete representation of a contest dataset.  Specifically,
    * a partial representation must include at a minimum the "affirmative" selections of a contest.
@@ -94,7 +95,7 @@ public class Ballot {
     }
 
     /**
-     * Given a PlaintextBallotContest returns true if the state is representative of the expected values.
+     * Are all of the selections valid?
      * Note: because this class supports partial representations, undervotes are considered a valid state.
      */
     boolean is_valid(
@@ -137,7 +138,6 @@ public class Ballot {
       return true;
     }
 
-
     @Override
     public boolean equals(Object o) {
       if (this == o) return true;
@@ -162,15 +162,15 @@ public class Ballot {
   }
 
   /**
-   * A BallotSelection represents an individual selection on a ballot.
+   * The plaintext representation of one selection for a particular contest.
    * <p>
    * This can also be designated as `is_placeholder_selection` which has no
    * context to the data specification but is useful for running validity checks internally
    * <p>
    * An `extended_data` field exists to support any arbitrary data to be associated
    * with the selection.  In practice, this field is the cleartext representation
-   * of a write-in candidate value.  In the current implementation these values are
-   * discarded when encrypting.
+   * of a write-in candidate value.
+   * LOOK In the current implementation these write-in are discarded when encrypting.
    */
   @Immutable
   public static class PlaintextBallotSelection {
@@ -228,10 +228,7 @@ public class Ballot {
     }
   }
 
-  /**
-   * ExtendedData represents any arbitrary data expressible as a string with a length.
-   * This is used primarily as a field on a selection to indicate a write-in candidate text value.
-   */
+  /** Used as a field on a selection to indicate a write-in candidate. */
   @Immutable
   public static class ExtendedData {
     public final String value;
@@ -265,7 +262,7 @@ public class Ballot {
     }
   }
 
-  /** Encrypted selection. */
+  /** Superclass for encrypted selections. */
   @Immutable
   public static class CiphertextSelection extends ElectionObjectBase {
     public final ElementModQ description_hash; // Election.SelectionDescription.crypto_hash().
@@ -283,26 +280,69 @@ public class Ballot {
   }
 
   /**
-   * A CiphertextBallotSelection represents an individual encrypted selection on a ballot.
-   * This requires a `description_hash` and a `ciphertext` as required parameters in its constructor.
+   * An encrypted selection for a particular contest.
    * <p>
    * When a selection is encrypted, the `description_hash` and `ciphertext` required fields must
    * be populated at construction however the `nonce` is also usually provided by convention.
-   * <p>
    * A consumer of this object has the option to discard the `nonce` and/or discard the `proof`,
    * or keep both values.
-   * <p>
    * By discarding the `nonce`, the encrypted representation and `proof`
    * can only be regenerated if the nonce was derived from the ballot's master nonce.  If the nonce
    * used for this selection is truly random, and it is discarded, then the proofs cannot be regenerated.
-   * <p>
    * By keeping the `nonce`, or deriving the selection nonce from the ballot nonce, an external system can
    * regenerate the proofs on demand.  This is useful for storage or memory constrained systems.
-   * <p>
    * By keeping the `proof` the nonce is not required to verify the encrypted selection.
    */
   @Immutable
   public static class CiphertextBallotSelection extends CiphertextSelection {
+
+    /**
+     * Constructs a CipherTextBallotSelection object. Compute the Chaum-Pedersen proof if not
+     * given but a nonce is. Compute the crypto_hash if not given.
+     */
+    static CiphertextBallotSelection create(
+            String object_id,
+            ElementModQ description_hash,
+            ElGamal.Ciphertext ciphertext,
+            ElementModP elgamal_public_key,
+            ElementModQ crypto_extended_base_hash,
+            ElementModQ proof_seed,
+            int selection_representation,
+            boolean is_placeholder_selection,
+            Optional<ElementModQ> nonce,
+            Optional<ElementModQ> crypto_hash,
+            Optional<ChaumPedersen.DisjunctiveChaumPedersenProof> proof,
+            Optional<ElGamal.Ciphertext> extended_data) {
+
+      if (crypto_hash.isEmpty()) {
+        crypto_hash = Optional.of(Hash.hash_elems(object_id, description_hash, ciphertext));
+      }
+
+      if (proof.isEmpty() && nonce.isPresent()) { // LOOK python?
+        proof = nonce.map(n ->
+                ChaumPedersen.make_disjunctive_chaum_pedersen(
+                        ciphertext,
+                        n,
+                        elgamal_public_key,
+                        crypto_extended_base_hash,
+                        proof_seed,
+                        selection_representation)
+        );
+      }
+
+      return new CiphertextBallotSelection(
+              object_id,
+              description_hash,
+              ciphertext,
+              crypto_hash.get(),
+              is_placeholder_selection,
+              nonce,
+              proof,
+              extended_data);
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     public final ElementModQ crypto_hash;
     public final boolean is_placeholder_selection;
     public final Optional<ElementModQ> nonce;
@@ -310,8 +350,8 @@ public class Ballot {
     public final Optional<ElGamal.Ciphertext> extended_data;
 
     public CiphertextBallotSelection(String object_id, ElementModQ description_hash, ElGamal.Ciphertext ciphertext,
-                              ElementModQ crypto_hash, boolean is_placeholder_selection, Optional<ElementModQ> nonce,
-                              Optional<ChaumPedersen.DisjunctiveChaumPedersenProof> proof, Optional<ElGamal.Ciphertext> extended_data) {
+              ElementModQ crypto_hash, boolean is_placeholder_selection, Optional<ElementModQ> nonce,
+              Optional<ChaumPedersen.DisjunctiveChaumPedersenProof> proof, Optional<ElGamal.Ciphertext> extended_data) {
       super(object_id, description_hash, ciphertext);
 
       this.crypto_hash = Preconditions.checkNotNull(crypto_hash);
@@ -362,17 +402,15 @@ public class Ballot {
     }
 
     /**
-     * Given an encrypted BallotSelection, generates a hash, suitable for rolling up
-     * into a hash / tracking code for an entire ballot. Of note, this particular hash examines
-     * the `seed_hash` and `message`, but not the proof.
+     * Generates a hash, suitable for rolling up into a hash / tracking code for an entire ballot.
+     * Of note, this particular hash uses the `seed_hash` and `message`, but not the proof.
      * This is deliberate, allowing for the possibility of ElectionGuard variants running on
-     * much more limited hardware, wherein the Disjunctive Chaum-Pedersen proofs might be computed
-     * later on.
+     * much more limited hardware, where the Disjunctive Chaum-Pedersen proofs might be computed later.
      * <p>
      * In most cases the seed_hash should match the `description_hash`
      */
     ElementModQ crypto_hash_with(ElementModQ seedHash) {
-      return ciphertext_ballot_selection_crypto_hash_with(this.object_id, seedHash, this.ciphertext());
+      return Hash.hash_elems(this.object_id, seedHash, this.ciphertext());
     }
 
     @Override
@@ -394,60 +432,8 @@ public class Ballot {
     }
   }
 
-  private static ElementModQ ciphertext_ballot_selection_crypto_hash_with(
-          String object_id, ElementModQ seed_hash, ElGamal.Ciphertext ciphertext) {
-    return Hash.hash_elems(object_id, seed_hash, ciphertext.crypto_hash());
-  }
-
   /**
-   * Constructs a `CipherTextBallotSelection` object. Most of the parameters here match up to fields
-   * in the class, but this helper function will optionally compute a Chaum-Pedersen proof if the
-   * given nonce isn't `None`. Likewise, if a crypto_hash is not provided, it will be derived from
-   * the other fields.
-   */
-  static CiphertextBallotSelection make_ciphertext_ballot_selection(
-          String object_id,
-          ElementModQ description_hash,
-          ElGamal.Ciphertext ciphertext,
-          ElementModP elgamal_public_key,
-          ElementModQ crypto_extended_base_hash,
-          ElementModQ proof_seed,
-          int selection_representation,
-          boolean is_placeholder_selection,
-          Optional<ElementModQ> nonce,
-          Optional<ElementModQ> crypto_hash,
-          Optional<ChaumPedersen.DisjunctiveChaumPedersenProof> proof,
-          Optional<ElGamal.Ciphertext> extended_data) {
-
-    if (crypto_hash.isEmpty()) {
-      crypto_hash = Optional.of(ciphertext_ballot_selection_crypto_hash_with(object_id, description_hash, ciphertext));
-    }
-
-    if (proof.isEmpty()) {
-      proof = nonce.map(n ->
-              ChaumPedersen.make_disjunctive_chaum_pedersen(
-                      ciphertext,
-                      n,
-                      elgamal_public_key,
-                      crypto_extended_base_hash,
-                      proof_seed,
-                      selection_representation)
-      );
-    }
-
-    return new CiphertextBallotSelection(
-            object_id,
-            description_hash,
-            ciphertext,
-            crypto_hash.get(),
-            is_placeholder_selection,
-            nonce,
-            proof,
-            extended_data);
-  }
-
-  /**
-   * A CiphertextBallotContest represents the selections made by a voter for a specific ContestDescription.
+   * The encrypted selections made by a voter for a specific contest.
    * The object_id is the PlaintextBallotContest.object_id.
    * <p>
    * CiphertextBallotContest can only be a complete representation of a contest dataset.  While
@@ -463,6 +449,48 @@ public class Ballot {
    */
   @Immutable
   public static class CiphertextBallotContest extends ElectionObjectBase implements Hash.CryptoHashCheckable {
+
+    /**
+     * Constructs a CiphertextBallotContest object. Computes a Chaum-Pedersen proof if the
+     * ballot selections include their encryption nonces.
+     * Changed for Issue #280: A crypto_hash and a contest_total are always computed and saved.
+     */
+    static CiphertextBallotContest create(
+            String object_id,
+            ElementModQ description_hash,
+            List<CiphertextBallotSelection> ballot_selections,
+            ElementModP elgamal_public_key,
+            ElementModQ crypto_extended_base_hash,
+            ElementModQ proof_seed,
+            int number_elected,
+            Optional<ElementModQ> nonce) {
+
+      ElementModQ crypto_hash = ciphertext_ballot_context_crypto_hash(object_id, ballot_selections, description_hash);
+      ElGamal.Ciphertext contest_total = ciphertext_ballot_elgamal_accumulate(ballot_selections);
+      Optional<ElementModQ> aggregate = ciphertext_ballot_contest_aggregate_nonce(object_id, ballot_selections);
+
+      Optional<ChaumPedersen.ConstantChaumPedersenProof> proof = aggregate.map(ag ->
+              ChaumPedersen.make_constant_chaum_pedersen(
+                      contest_total,
+                      number_elected,
+                      ag,
+                      elgamal_public_key,
+                      proof_seed,
+                      crypto_extended_base_hash
+              )
+      );
+
+      return new CiphertextBallotContest(
+              object_id,
+              description_hash,
+              ballot_selections,
+              crypto_hash,
+              contest_total,
+              nonce,  // Optional
+              proof); // Optional
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public final ElementModQ description_hash; // Hash from contestDescription
     public final ImmutableList<CiphertextBallotSelection> ballot_selections; // Collection of ballot selections
     public final ElementModQ crypto_hash; // Hash of the encrypted values
@@ -627,48 +655,8 @@ public class Ballot {
   }
 
   /**
-   * Constructs a `CipherTextBallotContest` object. Computes a Chaum-Pedersen proof if the
-   * ballot selections include their encryption nonces.
-   * Changed for Issue #280: A crypto_hash and a contest_total are always computed and saved
-   *  in the CiphertextBallotContest.
-   */
-  static CiphertextBallotContest make_ciphertext_ballot_contest(
-          String object_id,
-          ElementModQ description_hash,
-          List<CiphertextBallotSelection> ballot_selections,
-          ElementModP elgamal_public_key,
-          ElementModQ crypto_extended_base_hash,
-          ElementModQ proof_seed,
-          int number_elected,
-          Optional<ElementModQ> nonce) {
-
-    ElementModQ crypto_hash = ciphertext_ballot_context_crypto_hash(object_id, ballot_selections, description_hash);
-    ElGamal.Ciphertext contest_total = ciphertext_ballot_elgamal_accumulate(ballot_selections);
-    Optional<ElementModQ> aggregate = ciphertext_ballot_contest_aggregate_nonce(object_id, ballot_selections);
-
-    Optional<ChaumPedersen.ConstantChaumPedersenProof> proof = aggregate.map(ag ->
-            ChaumPedersen.make_constant_chaum_pedersen(
-                    contest_total,
-                    number_elected,
-                    ag,
-                    elgamal_public_key,
-                    proof_seed,
-                    crypto_extended_base_hash
-            )
-    );
-
-    return new CiphertextBallotContest(
-            object_id,
-            description_hash,
-            ballot_selections,
-            crypto_hash,
-            contest_total,
-            nonce,  // Optional
-            proof); // Optional
-  }
-
-  /**
    * An encrypted representation of a voter's filled-in ballot.
+   * The object_id is from the original input ballot: a unique id given by the external system
    * <p>
    * When a ballot is in its complete, encrypted state, the `nonce` is the master nonce
    * from which all other nonces can be derived to encrypt the ballot.  Along with the `nonce`
@@ -679,6 +667,52 @@ public class Ballot {
    */
   @Immutable
   public static class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoHashCheckable {
+
+    /**
+     * Makes a `CiphertextBallot`, initially in the state where it's neither been cast nor spoiled.
+     * <p>
+     * @param object_id: the object_id of this specific ballot
+     * @param ballot_style: The `object_id` of the `BallotStyle` in the `Election` Manifest
+     * @param description_hash: Hash of the election description
+     * @param previous_tracking_hashO: Previous tracking hash or seed hash
+     * @param contests: List of contests for this ballot
+     * @param nonce: optional nonce used as part of the encryption process
+     * @param timestamp: Timestamp at which the ballot encryption is generated in tick
+     */
+    public static CiphertextBallot create(
+            String object_id,
+            String ballot_style,
+            ElementModQ description_hash,
+            Optional<ElementModQ> previous_tracking_hashO,
+            List<CiphertextBallotContest> contests,
+            Optional<ElementModQ> nonce,
+            Optional<Long> timestamp,
+            Optional<ElementModQ> tracking_hashO) {
+
+      if (contests.isEmpty()) {
+        logger.atInfo().log("ciphertext ballot with no contests: %s", object_id);
+      }
+
+      List<ElementModQ> contest_hashes = contests.stream().map(c -> c.crypto_hash).collect(Collectors.toList());
+      ElementModQ contest_hash = Hash.hash_elems(object_id, description_hash, contest_hashes);
+
+      long time = timestamp.orElse(System.currentTimeMillis());
+      ElementModQ previous_tracking_hash = previous_tracking_hashO.orElse(description_hash);
+      ElementModQ tracking_hash = tracking_hashO.orElse(Tracker.get_rotating_tracker_hash(previous_tracking_hash, time, contest_hash));
+
+      return new CiphertextBallot(
+              object_id,
+              ballot_style,
+              description_hash,
+              previous_tracking_hash,
+              contests,
+              tracking_hash,
+              time,
+              contest_hash,
+              nonce);
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public final String ballot_style;
     public final ElementModQ description_hash; // election description hash
     public final ElementModQ previous_tracking_hash;
@@ -704,8 +738,21 @@ public class Ballot {
       this.nonce = Preconditions.checkNotNull(nonce);
     }
 
+    /** Convert into a `CiphertextAcceptedBallot`, with the given state, and all nonces removed. */
+    CiphertextAcceptedBallot acceptWithState(BallotBoxState state) {
+      return CiphertextAcceptedBallot.create (
+              this.object_id,
+              this.ballot_style,
+              this.description_hash,
+              Optional.of(this.previous_tracking_hash),
+              this.contests,
+              this.tracking_hash,
+              Optional.of(this.timestamp),
+              state);
+    }
+
     /**
-     * @return a hash of the election, the external objext_id and nonce, used
+     * Makea hash of the election, the external object_id and nonce, used
      * to derive other nonce values on the ballot.
      */
     static ElementModQ nonce_seed(ElementModQ description_hash, String object_id, ElementModQ nonce) {
@@ -721,7 +768,6 @@ public class Ballot {
         logger.atWarning().log("missing nonce for ballot %s could not derive from null nonce", this.object_id);
         return Optional.empty();
       }
-
       return Optional.of(nonce_seed(this.description_hash, this.object_id, this.nonce.get()));
     }
 
@@ -826,7 +872,7 @@ public class Ballot {
     }
   }
 
-  /** Enumeration used when marking a ballot as cast or spoiled. */
+  /** Enumeration used when marking a ballot as cast or spoiled. Ordering same as python. */
   public enum BallotBoxState {
     /** A ballot that has been explicitly cast */
     CAST,
@@ -837,15 +883,62 @@ public class Ballot {
   }
 
   /**
-   * A `CiphertextAcceptedBallot` represents a ballot that is accepted for inclusion in election results.
-   * An accepted ballot is either cast or spoiled. Note that this class is immutable, and the state cannot be changed.
-   * <p>
-   * Note, additionally, this ballot includes all proofs but no nonces.
-   * <p>
-   * Do not construct directly. Use `make_ciphertext_accepted_ballot` or `from_ciphertext_ballot` instead.
+   * An encrypted ballot that is accepted for inclusion in election results. An accepted ballot is either cast or spoiled.
+   * Note that this class is immutable, and the state cannot be changed.
+   * Note this ballot includes all proofs but no nonces.
    */
   @Immutable
   public static class CiphertextAcceptedBallot extends CiphertextBallot {
+
+    /**
+     * Makes a `CiphertextAcceptedBallot`, ensuring that no nonces are part of the contests.
+     * <p>
+     * @param object_id: the object_id of this specific ballot
+     * @param ballot_style: The `object_id` of the `BallotStyle` in the `Election` Manifest
+     * @param description_hash: Hash of the election description
+     * @param previous_tracking_hashO: Previous tracking hash or seed hash
+     * @param contests: List of contests for this ballot
+     * @param tracking_hash: This ballot's tracking hash
+     * @param timestampO: Timestamp at which the ballot encryption is generated in tick
+     * @param state: ballot box state
+     */
+    static CiphertextAcceptedBallot create(
+            String object_id,
+            String ballot_style,
+            ElementModQ description_hash,
+            Optional<ElementModQ> previous_tracking_hashO,
+            List<CiphertextBallotContest> contests,
+            ElementModQ tracking_hash,
+            Optional<Long> timestampO,
+            BallotBoxState state) { // default BallotBoxState.UNKNOWN,
+
+      if (contests.isEmpty()) {
+        logger.atInfo().log("ciphertext ballot with no contest: %s", object_id);
+      }
+
+      List<ElementModQ> contest_hashes = contests.stream().map(c -> c.crypto_hash).collect(Collectors.toList());
+      ElementModQ contest_hash = Hash.hash_elems(object_id, description_hash, contest_hashes);
+
+      long timestamp = timestampO.orElse(System.currentTimeMillis());
+      ElementModQ previous_tracking_hash = previous_tracking_hashO.orElse(description_hash); // LOOK spec #6.A says H0 = H(Qbar)
+
+      // copy the contests and selections, removing all nonces
+      List<CiphertextBallotContest> new_contests = contests.stream().map(CiphertextBallotContest::removeNonces).collect(Collectors.toList());
+
+      return new CiphertextAcceptedBallot(
+              object_id,
+              ballot_style,
+              description_hash,
+              previous_tracking_hash,
+              new_contests,
+              tracking_hash,
+              timestamp,
+              contest_hash,
+              Optional.empty(),
+              state);
+    }
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public final BallotBoxState state;
 
     public CiphertextAcceptedBallot(CiphertextBallot ballot, BallotBoxState state) {
@@ -888,123 +981,6 @@ public class Ballot {
               "state=" + state +
               "} " + super.toString();
     }
-  }
-
-  /**
-   * Makes a `CiphertextBallot`, initially in the state where it's neither been cast nor spoiled.
-   * <p>
-   * @param object_id: the object_id of this specific ballot
-   * @param ballot_style: The `object_id` of the `BallotStyle` in the `Election` Manifest
-   * @param description_hash: Hash of the election description
-   * @param previous_tracking_hashO: Previous tracking hash or seed hash
-   * @param contests: List of contests for this ballot
-   * @param nonce: optional nonce used as part of the encryption process
-   * @param timestamp: Timestamp at which the ballot encryption is generated in tick
-   */
-  public static CiphertextBallot make_ciphertext_ballot(
-          String object_id,
-          String ballot_style,
-          ElementModQ description_hash,
-          Optional<ElementModQ> previous_tracking_hashO,
-          List<CiphertextBallotContest> contests,
-          Optional<ElementModQ> nonce,
-          Optional<Long> timestamp,
-          Optional<ElementModQ> tracking_hashO) {
-
-    if (contests.isEmpty()) {
-      logger.atInfo().log("ciphertext ballot with no contests: %s", object_id);
-    }
-
-    List<ElementModQ> contest_hashes = contests.stream().map(c -> c.crypto_hash).collect(Collectors.toList());
-    ElementModQ contest_hash = Hash.hash_elems(object_id, description_hash, contest_hashes);
-
-    long time = timestamp.orElse(System.currentTimeMillis());
-    ElementModQ previous_tracking_hash = previous_tracking_hashO.orElse(description_hash);
-    ElementModQ tracking_hash = tracking_hashO.orElse(Tracker.get_rotating_tracker_hash(previous_tracking_hash, time, contest_hash));
-
-    return new CiphertextBallot(
-            object_id,
-            ballot_style,
-            description_hash,
-            previous_tracking_hash,
-            contests,
-            tracking_hash,
-            time,
-            contest_hash,
-            nonce);
-  }
-
-  /**
-   * Makes a `CiphertextAcceptedBallot`, ensuring that no nonces are part of the contests.
-   * <p>
-   * @param object_id: the object_id of this specific ballot
-   * @param ballot_style: The `object_id` of the `BallotStyle` in the `Election` Manifest
-   * @param description_hash: Hash of the election description
-   * @param previous_tracking_hashO: Previous tracking hash or seed hash
-   * @param contests: List of contests for this ballot
-   * @param tracking_hash: This ballot's tracking hash
-   * @param timestampO: Timestamp at which the ballot encryption is generated in tick
-   * @param state: ballot box state
-   */
-  static CiphertextAcceptedBallot make_ciphertext_accepted_ballot(
-          String object_id,
-          String ballot_style,
-          ElementModQ description_hash,
-          Optional<ElementModQ> previous_tracking_hashO,
-          List<CiphertextBallotContest> contests,
-          ElementModQ tracking_hash,
-          Optional<Long> timestampO,
-          BallotBoxState state) { // default BallotBoxState.UNKNOWN,
-
-    if (contests.isEmpty()) {
-      logger.atInfo().log("ciphertext ballot with no contest: %s", object_id);
-    }
-
-    List<ElementModQ> contest_hashes = contests.stream().map(c -> c.crypto_hash).collect(Collectors.toList());
-    ElementModQ contest_hash = Hash.hash_elems(object_id, description_hash, contest_hashes);
-
-    long timestamp = timestampO.orElse(System.currentTimeMillis());
-    ElementModQ previous_tracking_hash = previous_tracking_hashO.orElse(description_hash); // LOOK spec #6.A says H0 = H(Qbar)
-
-    // copy the contests and selections, removing all nonces
-    List<CiphertextBallotContest> new_contests = contests.stream().map(CiphertextBallotContest::removeNonces).collect(Collectors.toList());
-
-    // String object_id,
-    //                                    String ballot_style,
-    //                                    ElementModQ description_hash,
-    //                                    ElementModQ previous_tracking_hash,
-    //                                    List<CiphertextBallotContest> contests,
-    //                                    ElementModQ tracking_hash,
-    //                                    long timestamp,
-    //                                    ElementModQ crypto_hash,
-    //                                    Optional<ElementModQ> nonce,
-    //                                    BallotBoxState state
-    return new CiphertextAcceptedBallot(
-            object_id,
-            ballot_style,
-            description_hash,
-            previous_tracking_hash,
-            new_contests,
-            tracking_hash,
-            timestamp,
-            contest_hash,
-            Optional.empty(),
-            state);
-  }
-
-  /**
-   * Convert a `CiphertextBallot` into a `CiphertextAcceptedBallot`, with all nonces removed.
-   */
-  static CiphertextAcceptedBallot from_ciphertext_ballot(CiphertextBallot ballot, BallotBoxState state) {
-    return make_ciphertext_accepted_ballot(
-            ballot.object_id,
-            ballot.ballot_style,
-            ballot.description_hash,
-            Optional.of(ballot.previous_tracking_hash),
-            ballot.contests,
-            ballot.tracking_hash,
-            Optional.of(ballot.timestamp),
-            state);
   }
 
 }

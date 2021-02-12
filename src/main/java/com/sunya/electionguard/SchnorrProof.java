@@ -9,6 +9,10 @@ import java.util.Objects;
 import static com.sunya.electionguard.Group.*;
 import static com.sunya.electionguard.Proof.Usage.SecretValue;
 
+/**
+ * A zero-knowledge proof that the holder knows x = log_g(y) (discrete log base g, mod p) without revealing x.
+ * @see <a href="https://en.wikipedia.org/wiki/Proof_of_knowledge#Schnorr_protocol">Schnorr Proof</a>
+ */
 @Immutable
 public class SchnorrProof extends Proof {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();

@@ -11,8 +11,20 @@ import java.io.InputStreamReader;
 import java.util.Formatter;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Runs the entire workflow from start to finish.
+ * <p>
+ * For command line help:
+ * <strong>
+ * <pre>
+ *  java -classpath electionguard-java.jar com.sunya.electionguard.workflow.RunElectionWorkflow --help
+ * </pre>
+ * </strong>
+ *
+ */
+
 public class RunElectionWorkflow {
-  private static final String classpath = "build/libs/electionguard-java-0.8-SNAPSHOT-all.jar";
+  private static final String classpath = "build/libs/electionguard-java-0.9-SNAPSHOT-all.jar";
 
   private static class CommandLine {
     @Parameter(names = {"-in"},

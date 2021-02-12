@@ -1,7 +1,9 @@
 package com.sunya.electionguard.proto;
 
 import com.google.protobuf.ByteString;
+import com.sunya.electionguard.CiphertextElectionContext;
 import com.sunya.electionguard.Election;
+import com.sunya.electionguard.ElectionConstants;
 import com.sunya.electionguard.PublishedCiphertextTally;
 import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.verifier.ElectionRecord;
@@ -32,8 +34,8 @@ public class ElectionRecordFromProto {
   }
 
   public static ElectionRecord translateFromProto(ElectionRecordProto.ElectionRecord proto) {
-    Election.ElectionConstants constants = convertConstants(proto.getConstants());
-    Election.CiphertextElectionContext context = convertContext(proto.getContext());
+    ElectionConstants constants = convertConstants(proto.getConstants());
+    CiphertextElectionContext context = convertContext(proto.getContext());
     Election.ElectionDescription description = ElectionDescriptionFromProto.translateFromProto(proto.getElection());
     List<KeyCeremony.CoefficientValidationSet> guardianCoefficients =
             proto.getGuardianCoefficientsList().stream().map(ElectionRecordFromProto::convertValidationCoefficients).collect(Collectors.toList());
@@ -49,8 +51,8 @@ public class ElectionRecordFromProto {
             devices, ciphertextTally, decryptedTally, null, null, null);
   }
 
-  static Election.ElectionConstants convertConstants(ElectionRecordProto.Constants constants) {
-    return new Election.ElectionConstants(
+  static ElectionConstants convertConstants(ElectionRecordProto.Constants constants) {
+    return new ElectionConstants(
             convertBigInteger(constants.getLargePrime()),
             convertBigInteger(constants.getSmallPrime()),
             convertBigInteger(constants.getCofactor()),
@@ -61,8 +63,8 @@ public class ElectionRecordFromProto {
     return new BigInteger(bs.toByteArray());
   }
 
-  static Election.CiphertextElectionContext convertContext(ElectionRecordProto.ElectionContext context) {
-    return new Election.CiphertextElectionContext(
+  static CiphertextElectionContext convertContext(ElectionRecordProto.ElectionContext context) {
+    return new CiphertextElectionContext(
             context.getNumberOfGuardians(),
             context.getQuorum(),
             convertElementModP(context.getElgamalPublicKey()),

@@ -20,7 +20,8 @@ import static com.sunya.electionguard.Group.ElementModQ;
 import static com.sunya.electionguard.Group.Q;
 
 /**
- * This verifies specification section "10. Correctness of Construction of Replacement Partial Decryptions"
+ * This verifies specification section "10 Correctness of Construction of Replacement Partial Decryptions".
+ * @see <a href="https://www.electionguard.vote/spec/0.95.0/9_Verifier_construction/#correctness-of-substitute-data-for-missing-guardians">Decryption with missing Guardians validation</a>
  */
 public class PartialDecryptionVerifier {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();

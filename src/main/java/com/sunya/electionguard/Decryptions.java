@@ -10,7 +10,6 @@ import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
 import static com.sunya.electionguard.DecryptionShare.*;
-import static com.sunya.electionguard.Election.*;
 
 /** Static methods for decryption. */
 public class Decryptions {

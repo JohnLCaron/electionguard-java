@@ -18,10 +18,10 @@ import java.util.stream.Collectors;
 import static com.sunya.electionguard.Election.*;
 
 /** Conversion of ElectionDescription to Json. */
-public class ElectionDescriptionToJson {
+class ElectionDescriptionToJson {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
-  public static JsonElement serialize(Election.ElectionDescription src) {
+  static JsonElement serialize(Election.ElectionDescription src) {
     Gson gson = GsonTypeAdapters.enhancedGson();
     ElectionDescriptionToJson converter = new ElectionDescriptionToJson(null);
     ElectionDescriptionPojo pojo = converter.convert(src);
@@ -30,12 +30,12 @@ public class ElectionDescriptionToJson {
   }
 
   private final String pathname;
-  public ElectionDescriptionToJson(String pathname) {
+  ElectionDescriptionToJson(String pathname) {
     this.pathname = pathname;
   }
 
   // used for testing
-  public void write(ElectionDescription org) throws IOException {
+  void write(ElectionDescription org) throws IOException {
     Gson gson = new GsonBuilder().setPrettyPrinting().create();
     try {
       ElectionDescriptionPojo pojo = convert(org);

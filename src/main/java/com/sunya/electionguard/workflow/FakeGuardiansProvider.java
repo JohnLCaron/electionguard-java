@@ -6,6 +6,10 @@ import com.sunya.electionguard.proto.KeyCeremonyFromProto;
 
 import java.io.IOException;
 
+/**
+ * A GuardiansProvider using serialized Guardian objects from a "secret" place on disk.
+ * Naive implementation for testing. Do not use in production.
+ */
 public class FakeGuardiansProvider implements GuardiansProvider {
   private static final String WHERE = "/home/snake/tmp/electionguard/publishWorkflowEncryptor/private/guardians.proto";
   private Iterable<Guardian> guardians;

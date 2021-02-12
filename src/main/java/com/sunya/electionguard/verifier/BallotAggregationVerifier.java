@@ -16,8 +16,9 @@ import java.util.stream.Collectors;
 import static com.sunya.electionguard.Group.ElementModP;
 
 /**
- * This verifies specification section "7. Correctness of Ballot Aggregation", and
- * section "11. Correct Decryption of Tallies"
+ * This verifies specification section "7 Correctness of Ballot Aggregation", and
+ * section "11 Correct Decryption of Tallies".
+ * @see <a href="https://www.electionguard.vote/spec/0.95.0/9_Verifier_construction/#correctness-of-ballot-aggregation">Ballot aggregation validation</a>
  */
 public class BallotAggregationVerifier {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();

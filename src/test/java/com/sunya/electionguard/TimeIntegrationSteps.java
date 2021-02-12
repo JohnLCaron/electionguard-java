@@ -60,7 +60,6 @@ public class TimeIntegrationSteps {
   List<CiphertextBallot> ciphertext_ballots = new ArrayList<>();
 
   // Step 3 - Cast and Spoil
-  DataStore ballot_store;
   BallotBox ballot_box;
 
   // Step 4 - Decrypt Tally
@@ -235,8 +234,7 @@ public class TimeIntegrationSteps {
     int ncast = 0;
     int nspoil = 0;
     // Configure the Ballot Box
-    this.ballot_store = new DataStore();
-    this.ballot_box = new BallotBox(this.election, this.context, this.ballot_store);
+    this.ballot_box = new BallotBox(this.election, this.context);
     System.out.printf("%n3. cast_and_spoil%n");
     // Randomly cast or spoil the ballots
     for (CiphertextBallot ballot : this.ciphertext_ballots) {
@@ -262,7 +260,7 @@ public class TimeIntegrationSteps {
     System.out.printf("%n4. Homomorphically Accumulate and decrypt tally%n");
     // Generate a Homomorphically Accumulated Tally of the ballots
     CiphertextTallyBuilder ciphertext_tally = new CiphertextTallyBuilder("whatever", this.metadata, this.context);
-    ciphertext_tally.batch_append(this.ballot_box.accepted());
+    ciphertext_tally.batch_append(this.ballot_box.getAcceptedBallots());
     publishedTally = ciphertext_tally.build();
 
     // Configure the Decryption
@@ -276,7 +274,7 @@ public class TimeIntegrationSteps {
 
     // Here's where the ciphertext Tally is decrypted.
     this.decryptedTally = this.decryptionMediator.decrypt_tally(false, null).orElseThrow();
-    List<DecryptWithShares.SpoiledTallyAndBallot> spoiledTallyAndBallot =
+    List<DecryptWithShares.SpoiledBallotAndTally> spoiledTallyAndBallot =
             this.decryptionMediator.decrypt_spoiled_ballots().orElseThrow();
     this.spoiledDecryptedBallots = spoiledTallyAndBallot.stream().map(e -> e.ballot).collect(Collectors.toList());
     this.spoiledDecryptedTallies = spoiledTallyAndBallot.stream().map(e -> e.tally).collect(Collectors.toList());
@@ -300,7 +298,7 @@ public class TimeIntegrationSteps {
 
     // Tally the expected values from the plaintext ballots that were cast.
     for (PlaintextBallot ballot : this.originalPlaintextBallots) {
-      if (this.ballot_store.get(ballot.object_id).orElseThrow().state == BallotBoxState.CAST) {
+      if (this.ballot_box.get(ballot.object_id).orElseThrow().state == BallotBoxState.CAST) {
         for (PlaintextBallotContest contest : ballot.contests) {
           for (PlaintextBallotSelection selection : contest.ballot_selections) {
             Integer value = expected_plaintext_tally.get(selection.selection_id);
@@ -408,7 +406,7 @@ public class TimeIntegrationSteps {
             this.constants,
             this.coefficient_validation_sets,
             ImmutableList.of(this.device),
-            this.ballot_box.accepted(),
+            this.ballot_box.getAcceptedBallots(),
             this.publishedTally,
             this.decryptedTally,
             this.spoiledDecryptedBallots,

@@ -9,7 +9,7 @@ import static com.sunya.electionguard.Election.*;
 import static com.sunya.electionguard.ElectionWithPlaceholders.ContestWithPlaceholders;
 
 /** Static helper methods for ballot validation. */
-public class BallotValidations {
+class BallotValidations {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   /** Determine if a ballot is valid for a given election . */

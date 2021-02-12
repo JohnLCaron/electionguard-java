@@ -38,7 +38,7 @@ public class TestEncryptHypothesisProperties extends TestProperties {
 
     List<Ballot.PlaintextBallot> ballots = everything.ballots;
     Group.ElementModQ secret_key = everything.secret_key;
-    Election.CiphertextElectionContext context = everything.context;
+    CiphertextElectionContext context = everything.context;
 
     // Tally the plaintext ballots for comparison later
     Map<String, Integer> plaintext_tallies = TallyTestHelper.accumulate_plaintext_ballots(ballots);

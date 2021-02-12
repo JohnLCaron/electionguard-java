@@ -2,7 +2,10 @@ package com.sunya.electionguard.workflow;
 
 import static com.sunya.electionguard.KeyCeremony.CoefficientSet;
 
-/** Externally provided guardians. */
+/**
+ * An interface for providing the Guardian's secret polynomial coefficients to electionguard.
+ * The Guardian objects are created from these.
+ */
 public interface CoefficientsProvider {
   int quorum();
   Iterable<CoefficientSet> guardianCoefficients();

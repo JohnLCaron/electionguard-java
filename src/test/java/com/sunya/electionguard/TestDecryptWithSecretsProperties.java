@@ -358,7 +358,7 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
     Election.ElectionDescription election = ElectionFactory.get_simple_election_from_file();
     ElectionBuilder.DescriptionAndContext celection = ElectionFactory.get_fake_ciphertext_election(election, keypair.public_key).orElseThrow();
     ElectionWithPlaceholders metadata = celection.metadata;
-    Election.CiphertextElectionContext context = celection.context;
+    CiphertextElectionContext context = celection.context;
 
     Ballot.PlaintextBallot data = new BallotFactory().get_simple_ballot_from_file();
     Encrypt.EncryptionDevice device = new Encrypt.EncryptionDevice("Location");
@@ -483,7 +483,7 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
     Election.ElectionDescription election = ElectionFactory.get_simple_election_from_file();
     ElectionBuilder.DescriptionAndContext celection = ElectionFactory.get_fake_ciphertext_election(election, keypair.public_key).orElseThrow();
     ElectionWithPlaceholders metadata = celection.metadata;
-    Election.CiphertextElectionContext context = celection.context;
+    CiphertextElectionContext context = celection.context;
 
     Ballot.PlaintextBallot data = new BallotFactory().get_simple_ballot_from_file();
     Encrypt.EncryptionDevice device = new Encrypt.EncryptionDevice("Location");

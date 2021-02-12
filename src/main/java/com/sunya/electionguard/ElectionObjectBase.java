@@ -6,7 +6,7 @@ import com.google.common.base.Strings;
 import java.util.Objects;
 
 /** Superclass for election objects that are identifiable by object_id. LOOK consider getting rid of this. */
-public class ElectionObjectBase {
+class ElectionObjectBase {
   /** Unique internal identifier that's used by other elements to reference this element. */
   public final String object_id;
 

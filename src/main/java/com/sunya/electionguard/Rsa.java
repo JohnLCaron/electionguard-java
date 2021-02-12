@@ -9,7 +9,7 @@ import javax.crypto.NoSuchPaddingException;
 import java.security.*;
 import java.util.Optional;
 
-/** Wrapper for java RSA encryption. */
+/** Wrapper for Java RSA encryption. */
 public class Rsa {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 

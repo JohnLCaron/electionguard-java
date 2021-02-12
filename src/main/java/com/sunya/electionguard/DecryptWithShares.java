@@ -13,7 +13,7 @@ import static com.sunya.electionguard.DecryptionShare.TallyDecryptionShare;
 import static com.sunya.electionguard.DecryptionShare.KeyAndSelection;
 import static com.sunya.electionguard.Group.*;
 
-/** Static methods for decryption. */
+/** Static methods for decryption with shares. */
 public class DecryptWithShares {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
@@ -30,7 +30,7 @@ public class DecryptWithShares {
   static Optional<PlaintextTally> decrypt_tally(
           PublishedCiphertextTally tally,
           Map<String, TallyDecryptionShare> shares, // Map(AVAILABLE_GUARDIAN_ID, TallyDecryptionShare)
-          Election.CiphertextElectionContext context,
+          CiphertextElectionContext context,
           Map<String, Group.ElementModQ> lagrange_coefficients,
           List<PlaintextTally.GuardianState> guardianStates) {
 
@@ -133,24 +133,25 @@ public class DecryptWithShares {
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
   // spoiled ballots -> plaintext ballot and tally
 
-  public static class SpoiledTallyAndBallot {
+  /** A tuple of a decrypted spoiled ballot and its tally. */
+  public static class SpoiledBallotAndTally {
     public final PlaintextTally tally;
     public final Ballot.PlaintextBallot ballot;
 
-    private SpoiledTallyAndBallot(PlaintextTally tally, Ballot.PlaintextBallot ballot) {
+    private SpoiledBallotAndTally(PlaintextTally tally, Ballot.PlaintextBallot ballot) {
       this.tally = tally;
       this.ballot = ballot;
     }
   }
 
   /** Decrypt a collection of ciphertext spoiled ballots into decrypted plaintext tallies and ballots. */
-  static Optional<List<SpoiledTallyAndBallot>> decrypt_spoiled_ballots(
+  static Optional<List<SpoiledBallotAndTally>> decrypt_spoiled_ballots(
           Iterable<Ballot.CiphertextAcceptedBallot> spoiled_ballots,
           Map<String, Guardian> guardians, // Map(AVAILABLE_GUARDIAN_ID, Guardian)
           Map<String, TallyDecryptionShare> shares, // Map(AVAILABLE_GUARDIAN_ID, TallyDecryptionShare)
-          Election.CiphertextElectionContext context) {
+          CiphertextElectionContext context) {
 
-    List<SpoiledTallyAndBallot> result = new ArrayList<>();
+    List<SpoiledBallotAndTally> result = new ArrayList<>();
     for (Ballot.CiphertextAcceptedBallot spoiled_ballot : spoiled_ballots) {
       HashMap<String, TallyDecryptionShare> ballot_shares = new HashMap<>();
       for (Map.Entry<String, TallyDecryptionShare> entry : shares.entrySet()) {
@@ -171,7 +172,7 @@ public class DecryptWithShares {
       if (decrypted_ballot.isEmpty()) {
          return Optional.empty();
       }
-      result.add(new SpoiledTallyAndBallot(tally, decrypted_ballot.get()));
+      result.add(new SpoiledBallotAndTally(tally, decrypted_ballot.get()));
     }
 
     return Optional.of(result);

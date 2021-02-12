@@ -18,7 +18,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-/** Conversion between CyphertextAcceptedBallot and Json, using python's object model. */
+/** Conversion between CiphertextAcceptedBallot and Json, using python's object model. */
 public class CiphertextAcceptedBallotPojo {
   public String object_id;
   public String ballot_style;

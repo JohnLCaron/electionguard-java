@@ -5,7 +5,7 @@ import java.util.Objects;
 
 /** Superclass of Proofs. */
 @Immutable
-public abstract class Proof {
+abstract class Proof {
   enum Usage {
     Unknown("Unknown"),
     SecretValue("Prove knowledge of secret value"),

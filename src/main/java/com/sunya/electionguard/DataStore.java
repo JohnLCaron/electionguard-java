@@ -4,7 +4,7 @@ import javax.annotation.Nullable;
 import java.util.*;
 
 /** A mutable store for CiphertextAcceptedBallot. */
-public class DataStore implements Iterable<Ballot.CiphertextAcceptedBallot> {
+class DataStore implements Iterable<Ballot.CiphertextAcceptedBallot> {
   private final HashMap<String, Ballot.CiphertextAcceptedBallot> map = new HashMap<>();
 
   /** Does the store contain the given key? */

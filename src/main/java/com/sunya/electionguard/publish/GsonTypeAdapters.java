@@ -1,8 +1,5 @@
 package com.sunya.electionguard.publish;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.reflect.TypeParameter;
-import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializationContext;
@@ -19,14 +16,12 @@ import com.sunya.electionguard.KeyCeremony;
 import com.sunya.electionguard.PublishedCiphertextTally;
 import com.sunya.electionguard.PlaintextTally;
 
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.math.BigInteger;
-import java.util.List;
 
-public class GsonTypeAdapters {
+class GsonTypeAdapters {
 
-  public static Gson enhancedGson() {
+  static Gson enhancedGson() {
     return new GsonBuilder().setPrettyPrinting().serializeNulls()
             .registerTypeAdapter(Group.ElementModQ.class, new ModQDeserializer())
             .registerTypeAdapter(Group.ElementModQ.class, new ModQSerializer())
@@ -169,6 +164,7 @@ public class GsonTypeAdapters {
     }
   }
 
+  /*
   @SuppressWarnings("UnstableApiUsage")
   public static final class ImmutableListDeserializer implements JsonDeserializer<ImmutableList<?>> {
     @Override
@@ -183,5 +179,5 @@ public class GsonTypeAdapters {
       return new TypeToken<List<E>>() {}
               .where(new TypeParameter<>() {}, (TypeToken<E>) TypeToken.of(arg));
     }
-  }
+  } */
 }

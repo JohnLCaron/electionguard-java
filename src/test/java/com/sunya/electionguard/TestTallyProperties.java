@@ -24,7 +24,7 @@ public class TestTallyProperties extends TestProperties {
     System.out.printf("%n test_tally_cast_ballots_accumulates_valid_tally expected %s%n", plaintext_tallies);
 
     // encrypt and cast each ballot
-    BallotBox store = new BallotBox(everything.election_description, everything.context, new DataStore());
+    BallotBox store = new BallotBox(everything.election_description, everything.context);
     Group.ElementModQ seed_hash = new Encrypt.EncryptionDevice("Location").get_hash();
     for (PlaintextBallot ballot : everything.ballots) {
       Optional<CiphertextBallot> encrypted_ballotO = Encrypt.encrypt_ballot(
@@ -36,7 +36,7 @@ public class TestTallyProperties extends TestProperties {
     }
 
     CiphertextTallyBuilder result = new CiphertextTallyBuilder("whatever", everything.metadata, everything.context);
-    result.batch_append(store.accepted());
+    result.batch_append(store.getAcceptedBallots());
 
     Map<String, Integer> decrypted_tallies = this.decrypt_with_secret(result, everything.secret_key);
     System.out.printf("%n test_tally_cast_ballots_accumulates_valid_tally actual %s%n", decrypted_tallies);
@@ -52,7 +52,7 @@ public class TestTallyProperties extends TestProperties {
     System.out.printf("%n test_tally_spoiled_ballots_accumulates_valid_tally expected %s%n", plaintext_tallies);
 
     // encrypt each ballot
-    BallotBox store = new BallotBox(everything.election_description, everything.context, new DataStore());
+    BallotBox store = new BallotBox(everything.election_description, everything.context);
     Group.ElementModQ seed_hash = new Encrypt.EncryptionDevice("Location").get_hash();
     for (PlaintextBallot ballot : everything.ballots) {
       Optional<CiphertextBallot> encrypted_ballotO = Encrypt.encrypt_ballot(
@@ -65,7 +65,7 @@ public class TestTallyProperties extends TestProperties {
     }
 
     CiphertextTallyBuilder result = new CiphertextTallyBuilder("whatever", everything.metadata, everything.context);
-    result.batch_append(store.accepted());
+    result.batch_append(store.getAcceptedBallots());
 
     Map<String, Integer> decrypted_tallies = this.decrypt_with_secret(result, everything.secret_key);
     System.out.printf("%n test_tally_spoiled_ballots_accumulates_valid_tally decrypted_tallies %s%n%n", decrypted_tallies);
@@ -96,7 +96,7 @@ public class TestTallyProperties extends TestProperties {
       seed_hash = encrypted_ballot.tracking_hash;
       // vary the state
       BallotBoxState state = (count % 3 == 0) ? BallotBoxState.UNKNOWN : (count % 3 == 1) ? BallotBoxState.CAST : BallotBoxState.SPOILED;
-      CiphertextAcceptedBallot acceptedBallot = from_ciphertext_ballot(encrypted_ballot, state);
+      CiphertextAcceptedBallot acceptedBallot = encrypted_ballot.acceptWithState(state);
       store.put(encrypted_ballot.object_id, acceptedBallot);
       acceptedBallots[count % 3] = acceptedBallot;
       count++;
@@ -126,11 +126,11 @@ public class TestTallyProperties extends TestProperties {
 
     //// tests that use the same ballot id with different state
     // verify an already spoiled ballot cannot be cast
-    CiphertextAcceptedBallot again = Ballot.from_ciphertext_ballot(spoiledBallot, BallotBoxState.CAST);
+    CiphertextAcceptedBallot again = spoiledBallot.acceptWithState(BallotBoxState.CAST);
     assertThat(tally.append(again)).isFalse();
 
     //  verify an already cast ballot cannot be spoiled
-    CiphertextAcceptedBallot again2 = Ballot.from_ciphertext_ballot(castBallot, BallotBoxState.SPOILED);
+    CiphertextAcceptedBallot again2 = castBallot.acceptWithState(BallotBoxState.SPOILED);
     assertThat(tally.append(again2)).isFalse();
   }
 

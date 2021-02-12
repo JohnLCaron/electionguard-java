@@ -4,7 +4,9 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.google.common.collect.Iterables;
+import com.sunya.electionguard.CiphertextElectionContext;
 import com.sunya.electionguard.Election;
+import com.sunya.electionguard.ElectionConstants;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.Guardian;
 import com.sunya.electionguard.GuardianBuilder;
@@ -23,7 +25,18 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-/** KeyCeremony to create the Guardians. */
+/**
+ * A command line program that performs the key ceremony to create the Guardians.
+ * <p>
+ * For command line help:
+ * <strong>
+ * <pre>
+ *  java -classpath electionguard-java.jar com.sunya.electionguard.workflow.PerformKeyCeremony --help
+ * </pre>
+ * </strong>
+ *
+ * @see <a href="https://www.electionguard.vote/spec/0.95.0/1_Overview/#key-generation">Key Generation</a>
+ */
 public class PerformKeyCeremony {
 
   private static class CommandLine {
@@ -167,7 +180,7 @@ public class PerformKeyCeremony {
 
   Group.ElementModP jointKey;
   Group.ElementModQ commitmentsHash;
-  Election.CiphertextElectionContext context;
+  CiphertextElectionContext context;
 
   List<GuardianBuilder> guardianBuilders;
   List<com.sunya.electionguard.KeyCeremony.CoefficientValidationSet> coefficientValidationSets = new ArrayList<>();
@@ -188,7 +201,7 @@ public class PerformKeyCeremony {
       throw new RuntimeException("*** Key Ceremony failed");
     }
 
-    this.context = Election.make_ciphertext_election_context(this.numberOfGuardians, this.quorum,
+    this.context = CiphertextElectionContext.create(this.numberOfGuardians, this.quorum,
             this.jointKey, this.election, this.commitmentsHash);
   }
 
@@ -275,7 +288,7 @@ public class PerformKeyCeremony {
     publisher.writeKeyCeremonyProto(
             this.election,
             this.context,
-            new Election.ElectionConstants(),
+            new ElectionConstants(),
             this.coefficientValidationSets);
 
     // the quardians - private info

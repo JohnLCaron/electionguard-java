@@ -1,7 +1,9 @@
 package com.sunya.electionguard.proto;
 
 import com.google.protobuf.ByteString;
+import com.sunya.electionguard.CiphertextElectionContext;
 import com.sunya.electionguard.Election;
+import com.sunya.electionguard.ElectionConstants;
 import com.sunya.electionguard.Encrypt;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.KeyCeremony;
@@ -19,8 +21,8 @@ public class ElectionRecordToProto {
 
   public static ElectionRecord buildElectionRecord(
           Election.ElectionDescription description,
-          Election.CiphertextElectionContext context,
-          Election.ElectionConstants constants,
+          CiphertextElectionContext context,
+          ElectionConstants constants,
           Iterable<KeyCeremony.CoefficientValidationSet> guardianCoefficients,
           @Nullable Iterable<Encrypt.EncryptionDevice> devices,
           @Nullable PublishedCiphertextTally ciphertext_tally,
@@ -49,7 +51,7 @@ public class ElectionRecordToProto {
     return builder.build();
   }
 
-  static ElectionRecordProto.Constants convertConstants(Election.ElectionConstants constants) {
+  static ElectionRecordProto.Constants convertConstants(ElectionConstants constants) {
     ElectionRecordProto.Constants.Builder builder = ElectionRecordProto.Constants.newBuilder();
     builder.setLargePrime(ByteString.copyFrom(constants.large_prime.toByteArray()));
     builder.setSmallPrime(ByteString.copyFrom(constants.small_prime.toByteArray()));
@@ -58,7 +60,7 @@ public class ElectionRecordToProto {
     return builder.build();
   }
 
-  static ElectionRecordProto.ElectionContext convertContext(Election.CiphertextElectionContext context) {
+  static ElectionRecordProto.ElectionContext convertContext(CiphertextElectionContext context) {
     ElectionRecordProto.ElectionContext.Builder builder = ElectionRecordProto.ElectionContext.newBuilder();
     builder.setNumberOfGuardians(context.number_of_guardians);
     builder.setQuorum(context.quorum);

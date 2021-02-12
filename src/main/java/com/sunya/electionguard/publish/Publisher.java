@@ -21,7 +21,7 @@ import java.nio.file.StandardCopyOption;
 
 import static com.sunya.electionguard.Election.*;
 
-/** Publishes the Election Record to Json or proto files. */
+/** Publishes the Election Record to Json or protobuf files. */
 public class Publisher {
   static final String PRIVATE_DIR = "private";
 

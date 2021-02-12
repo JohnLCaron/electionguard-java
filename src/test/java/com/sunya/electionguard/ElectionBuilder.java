@@ -50,7 +50,7 @@ public class ElectionBuilder {
     }
 
     return Optional.of(new DescriptionAndContext(this.description,
-      make_ciphertext_election_context(
+            CiphertextElectionContext.create(
               this.number_of_guardians,
               this.quorum,
               this.elgamal_public_key.get(),

@@ -10,7 +10,10 @@ import java.util.List;
 import static com.sunya.electionguard.Group.ElementModQ;
 import static com.sunya.electionguard.Group.ElementModP;
 
-/** This verifies specification section "2. Guardian Public-Key Validation". */
+/**
+ * This verifies specification section "2 Guardian Public-Key Validation".
+ * @see <a href="https://www.electionguard.vote/spec/0.95.0/9_Verifier_construction/#guardian-public-key-validation">Guardian public key validation</a>
+ */
 public class GuardianPublicKeyVerifier {
   private final ElectionRecord electionRecord;
 

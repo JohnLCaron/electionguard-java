@@ -9,10 +9,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.sunya.electionguard.DecryptionShare.*;
-import static com.sunya.electionguard.Election.*;
 
 /**
- * Create a plaintext tally by composing each guardian's partial decryptions or compensated decryptions.
+ * Orchestrates the decryption of encrypted Tallies and Ballots.
  * Mutable.
  */
 public class DecryptionMediator {
@@ -21,7 +20,6 @@ public class DecryptionMediator {
   private final CiphertextElectionContext context;
   private final PublishedCiphertextTally encryptedTally;
   private final Iterable<Ballot.CiphertextAcceptedBallot> spoiled_ballots;
-
 
   // Map(AVAILABLE_GUARDIAN_ID, Guardian)
   private final Map<String, Guardian> available_guardians = new HashMap<>();
@@ -291,7 +289,7 @@ public class DecryptionMediator {
   }
 
   /** You must call decrypt_tally() first */
-  public Optional<List<DecryptWithShares.SpoiledTallyAndBallot>> decrypt_spoiled_ballots() {
+  public Optional<List<DecryptWithShares.SpoiledBallotAndTally>> decrypt_spoiled_ballots() {
 
     if (this.available_guardians.size() == this.context.number_of_guardians) {
       // If all Guardians are present, decrypt the ballot using standard shares

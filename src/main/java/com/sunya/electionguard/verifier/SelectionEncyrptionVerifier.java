@@ -6,7 +6,10 @@ import static com.sunya.electionguard.Ballot.*;
 import static com.sunya.electionguard.Group.ElementModQ;
 import static com.sunya.electionguard.Group.ElementModP;
 
-/** This verifies specification section "4. Correctness of Selection Encryptions". */
+/**
+ * This verifies specification section "4 Correctness of Selection Encryptions".
+ * @see <a href="https://www.electionguard.vote/spec/0.95.0/9_Verifier_construction/#correctness-of-selection-encryptions">Encryption validation</a>
+ */
 public class SelectionEncyrptionVerifier {
   private final ElectionRecord electionRecord;
 
