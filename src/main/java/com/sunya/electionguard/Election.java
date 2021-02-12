@@ -1061,6 +1061,14 @@ public class Election {
     public int hashCode() {
       return Objects.hash(number_of_guardians, quorum, elgamal_public_key, description_hash, crypto_base_hash, crypto_extended_base_hash);
     }
+
+    @Override
+    public String toString() {
+      return "CiphertextElectionContext{" +
+              "number_of_guardians=" + number_of_guardians +
+              ", quorum=" + quorum +
+              '}';
+    }
   }
 
   public static ElementModQ make_crypto_base_hash(int number_of_guardians, int quorum, ElectionDescription election) {

@@ -43,9 +43,12 @@ public class PlaintextBallotVerifier {
           continue;
         }
         for (Ballot.PlaintextBallotSelection selection : contest.ballot_selections) {
+          if (selection.is_placeholder_selection) {
+            continue;
+          }
           if (!selectionNames.contains(selection.selection_id)) {
-            System.out.printf(" ***Ballot Selection id (%s) not contained in contest (%s).%n", selection.selection_id, contest.contest_id);
-            error = true;
+              System.out.printf(" ***Ballot Selection id (%s) not contained in contest (%s).%n", selection.selection_id, contest.contest_id);
+              error = true;
           }
         }
       }
