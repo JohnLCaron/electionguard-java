@@ -19,6 +19,14 @@ public class PublishedCiphertextTally extends ElectionObjectBase {
       this.contests = ImmutableMap.copyOf(contests);
     }
 
+  @Override
+  public String toString() {
+    return "PublishedCiphertextTally{" +
+            "object_id='" + object_id + '\'' +
+            ", contests=" + contests.keySet() +
+            "} ";
+  }
+
   /**
    * A CiphertextTallyContest groups the CiphertextTallySelection's for a specific Election.ContestDescription.
    * The object_id is the Election.ContestDescription.object_id.

@@ -57,7 +57,7 @@ public class PlaintextTally {
   @Override
   public String toString() {
     Formatter out = new Formatter();
-    contests.values().forEach(contest -> out.format("%s%n", contest.toString()));
+    contests.values().forEach(contest -> out.format("%s", contest.toString()));
     return out.toString();
   }
 

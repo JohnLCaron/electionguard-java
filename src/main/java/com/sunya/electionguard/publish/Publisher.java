@@ -117,6 +117,10 @@ public class Publisher {
     return publishDirectory.resolve(CONSTANTS_FILE_NAME).toAbsolutePath();
   }
 
+  public Path publishPath() {
+    return publishDirectory.toAbsolutePath();
+  }
+
   public Path privateDirPath() {
     return privateDirPath.toAbsolutePath();
   }
