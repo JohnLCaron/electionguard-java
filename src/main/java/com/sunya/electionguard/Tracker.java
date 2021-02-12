@@ -10,7 +10,7 @@ import java.util.Optional;
 
 import static com.sunya.electionguard.Group.*;
 
-public class Tracker {
+class Tracker {
   private static final String DEFAULT_SEPARATOR = "-";
 
   /**

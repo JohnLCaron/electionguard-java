@@ -7,93 +7,244 @@ import com.google.common.flogger.FluentLogger;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
-import java.math.BigInteger;
 import java.time.OffsetDateTime;
 import java.util.*;
 
 import static com.sunya.electionguard.Group.*;
 
 /**
- * Election Manifest.
- * see: https://developers.google.com/elections-data/reference
+ * The Election Manifest: defines the candidates, contests, and associated information for a specific election.
+ * @see <a href="https://developers.google.com/civics-data/reference/data-schema">Civics Common Standard Data Specification</a>
  */
 public class Election {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   /**
-   * enumerations for the `ElectionReport` entity
-   * see: https://developers.google.com/elections-data/reference/election-type
+   * The type of election.
+   * @see <a href="https://developers.google.com/elections-data/reference/election-type">Civics Common Standard Data Specification</a>
    */
   public enum ElectionType {
     unknown,
-    general,  // For an election held typically on the national day for elections.
-    partisan_primary_closed, //	For a primary election that is for a specific party where voter eligibility is based on registration.
-    partisan_primary_open, //	For a primary election that is for a specific party where voter declares desired party or chooses in private.
-    primary,  //	For a primary election without a specified type, such as a nonpartisan primary.
-    runoff,   //	For an election to decide a prior contest that ended with no candidate receiving a majority of the votes.
-    special,  //	For an election held out of sequence for special circumstances, for example, to fill a vacated office.
-    other     //	Used when the election type is not listed in this enumeration. If used, include a specific value of the OtherType element.
+    /**
+     * For an election held typically on the national day for elections.
+     */
+    general,
+    /**
+     * For a primary election that is for a specific party where voter eligibility is based on registration.
+     */
+    partisan_primary_closed,
+    /**
+     * For a primary election that is for a specific party where voter declares desired party or chooses in private.
+     */
+    partisan_primary_open,
+    /**
+     * For a primary election without a specified type, such as a nonpartisan primary.
+     */
+    primary,
+    /**
+     * For an election to decide a prior contest that ended with no candidate receiving a majority of the votes.
+     */
+    runoff,
+    /**
+     * For an election held out of sequence for special circumstances, for example, to fill a vacated office.
+     */
+    special,
+    /**
+     * Used when the election type is not listed in this enumeration. If used, include a specific value of the OtherType element.
+     */
+    other
   }
 
   /**
-   * Enumeration for the type of geopolitical unit
-   * see: https://developers.google.com/elections-data/reference/reporting-unit-type
+   * The type of geopolitical unit.
+   * @see <a href="https://developers.google.com/elections-data/reference/reporting-unit-type">Civics Common Standard Data Specification</a>
    */
   public enum ReportingUnitType {
     unknown,
+    /**
+     * Used to report batches of ballots that might cross precinct boundaries.
+     */
     ballot_batch,
+    /**
+     * Used for a ballot-style area that's generally composed of precincts.
+     */
     ballot_style_area,
+    /**
+     * Used as a synonym for a county.
+     */
     borough,
+    /**
+     * Used for a city that reports results or for the district that encompasses it.
+     */
     city,
+    /**
+     * Used for city council districts.
+     */
     city_council,
+    /**
+     * Used for one or more precincts that have been combined for the purposes of reporting. If the term ward is
+     * used interchangeably with combined precinct, use combined-precinct for the ReportingUnitType.
+     */
     combined_precinct,
+    /**
+     * Used for national legislative body districts.
+     */
     congressional,
+    /**
+     * Used for a country.
+     */
     country,
+    /**
+     * Used for a county or for the district that encompasses it. Synonymous with borough and parish in some localities.
+     */
     county,
+    /**
+     * Used for county council districts.
+     */
     county_council,
+    /**
+     * Used for a dropbox for absentee ballots.
+     */
     drop_box,
+    /**
+     * Used for judicial districts.
+     */
     judicial,
+    /**
+     * Used as applicable for various units such as towns, townships, villages that report votes, or for the
+     * district that encompasses them.
+     */
     municipality,
+    /**
+     * Used for a polling place.
+     */
     polling_place,
+    /**
+     * Used if the terms for ward or district are used interchangeably with precinct.
+     */
     precinct,
+    /**
+     * Used for a school district.
+     */
     school,
+    /**
+     * Used for a special district.
+     */
     special,
+    /**
+     * Used for splits of precincts.
+     */
     split_precinct,
+    /**
+     * Used for a state or for the district that encompasses it.
+     */
     state,
+    /**
+     * Used for a state house or assembly district.
+     */
     state_house,
+    /**
+     * Used for a state senate district.
+     */
     state_senate,
+    /**
+     * Used for type of municipality that reports votes or for the district that encompasses it.
+     */
+    town,
+    /**
+     * Used for type of municipality that reports votes or for the district that encompasses it.
+     */
     township,
+    /**
+     * Used for a utility district.
+     */
     utility,
+    /**
+     * Used for a type of municipality that reports votes or for the district that encompasses it.
+     */
     village,
+    /**
+     * Used for a vote center.
+     */
     vote_center,
+    /**
+     * Used for combinations or groupings of precincts or other units.
+     */
     ward,
+    /**
+     * Used for a water district.
+     */
     water,
+    /**
+     * Used for other types of reporting units that aren't included in this enumeration.
+     * If used, provide the item's custom type in an OtherType element.
+     */
     other
   }
 
   /**
-   * Enumeration for contest algorithm or rules in the `Contest` entity
-   * see: https://developers.google.com/elections-data/reference/vote-variation
+   * Enumeration for contest algorithm or rules in the contest.
+   * @see <a href="https://developers.google.com/elections-data/reference/vote-variation">Civics Common Standard Data Specification</a>
    */
   public enum VoteVariationType {
-    unknown,
+    /**
+     * Each voter can select up to one option.
+     */
     one_of_m,
+    /**
+     * Approval voting, where each voter can select as many options as desired.
+     */
     approval,
+    /**
+     * Borda count, where each voter can rank the options, and the rankings are assigned point values.
+     */
     borda,
+    /**
+     * Cumulative voting, where each voter can distribute their vote to up to N options.
+     */
     cumulative,
+    /**
+     * A 1-of-m method where the winner needs more than 50% of the vote to be elected.
+     */
     majority,
+    /**
+     * A method where each voter can select up to N options.
+     */
     n_of_m,
+    /**
+     * A 1-of-m method where the option with the most votes is elected, regardless of whether the option has
+     * more than 50% of the vote.
+     */
     plurality,
+    /**
+     * A proportional representation method, which is any system that elects winners in proportion to the total vote.
+     * For the single transferable vote (STV) method, use rcv instead.
+     */
     proportional,
+    /**
+     * Range voting, where each voter can select a score for each option.
+     */
     range,
+    /**
+     * Ranked choice voting (RCV), where each voter can rank the options, and the ballots are counted in rounds.
+     * Also known as instant-runoff voting (IRV) and the single transferable vote (STV).
+     */
     rcv,
+    /**
+     * A 1-of-m method where the winner needs more than some predetermined fraction of the vote to be elected,
+     * and where the fraction is more than 50%. For example, the winner might need three-fifths or two-thirds of the vote.
+     */
     super_majority,
+    /**
+     * The vote variation is a type that isn't included in this enumeration. If used, provide the item's custom type
+     * in an OtherType element.
+     */
     other
   }
 
   /**
-   * Use this as a type for character strings.
-   * See: https://developers.google.com/elections-data/reference/annotated-string
+   * An annotated character string.
+   * @see <a href="https://developers.google.com/elections-data/reference/annotated-string">Civics Common Standard Data Specification</a>
    */
   @Immutable
   public static class AnnotatedString implements Hash.CryptoHashable {
@@ -126,8 +277,8 @@ public class Election {
   }
 
   /**
-   * The ISO-639 language
-   * see: https://en.wikipedia.org/wiki/ISO_639
+   * The ISO-639 language code.
+   * @see <a href="https://en.wikipedia.org/wiki/ISO_639">ISO 639</a>
    */
   @Immutable
   public static class Language implements Hash.CryptoHashable {
@@ -160,8 +311,8 @@ public class Election {
   }
 
   /**
-   * Data entity used to represent multi-national text. Use when text on a ballot contains multi-national text.
-   * See: https://developers.google.com/elections-data/reference/internationalized-text
+   * Text that may have translations in multiple languages.
+   * @see <a href="https://developers.google.com/elections-data/reference/internationalized-text">Civics Common Standard Data Specification</a>
    */
   @Immutable
   public static class InternationalizedText implements Hash.CryptoHashable {
@@ -191,8 +342,8 @@ public class Election {
   }
 
   /**
-   * For defining contact information about objects such as persons, boards of authorities, and organizations.
-   * See: https://developers.google.com/elections-data/reference/contact-information
+   * Contact information about persons, boards of authorities, organizations, etc.
+   * @see <a href="https://developers.google.com/elections-data/reference/contact-information">Civics Common Standard Data Specification</a>
    */
   @Immutable
   public static class ContactInformation implements Hash.CryptoHashable {
@@ -234,9 +385,10 @@ public class Election {
   }
 
   /**
-   * Use this entity for defining geopolitical units such as cities, districts, jurisdictions, or precincts,
-   * for the purpose of associating contests, offices, vote counts, or other information with the geographies.
-   * See: https://developers.google.com/elections-data/reference/gp-unit
+   * A physical or virtual unit of representation or vote/seat aggregation.
+   * Use this entity to define geopolitical units such as cities, districts, jurisdictions, or precincts
+   * to associate contests, offices, vote counts, or other information with those geographies.
+   * @see <a href="https://developers.google.com/elections-data/reference/gp-unit">Civics Common Standard Data Specification</a>
    */
   @Immutable
   public static class GeopoliticalUnit extends ElectionObjectBase implements Hash.CryptoHashable {
@@ -276,13 +428,20 @@ public class Election {
     }
   }
 
-  /** A BallotStyle works as a key to uniquely specify a set of contests. */
+  /** Classifies a set of contests by their set of parties and geopolitical units */
   @Immutable
   public static class BallotStyle extends ElectionObjectBase implements Hash.CryptoHashable {
-    public final ImmutableList<String> geopolitical_unit_ids; // may be empty
-    public final ImmutableList<String> party_ids; // may be empty
+    public final ImmutableList<String> geopolitical_unit_ids; // matches Party.object_id; may be empty
+    public final ImmutableList<String> party_ids; // matches GeoPoliticalUnit.object_id; may be empty
     public final Optional<String> image_uri;
 
+    /**
+     * Constructor.
+     * @param object_id A unique name
+     * @param geopolitical_unit_ids matches GeoPoliticalUnit.object_id; may be empty
+     * @param party_ids matches Party.object_id; may be empty
+     * @param image_uri an optional image_uri for this BallotStyle
+     */
     public BallotStyle(String object_id,
                        @Nullable List<String> geopolitical_unit_ids,
                        @Nullable List<String> party_ids,
@@ -292,7 +451,6 @@ public class Election {
       this.party_ids = toImmutableListEmpty(party_ids);
       this.image_uri = Optional.ofNullable(Strings.emptyToNull(image_uri));
     }
-
 
     @Override
     public Group.ElementModQ crypto_hash() {
@@ -323,8 +481,8 @@ public class Election {
   }
 
   /**
-   * Use this entity to describe a political party that can then be referenced from other entities.
-   * See: https://developers.google.com/elections-data/reference/party
+   * A political party.
+   * @see <a href="https://developers.google.com/elections-data/reference/party">Civics Common Standard Data Specification</a>
    */
   @Immutable
   public static class Party extends ElectionObjectBase implements Hash.CryptoHashable {
@@ -333,6 +491,7 @@ public class Election {
     public final Optional<String> color;
     public final Optional<String> logo_uri;
 
+    /** A Party with only an object_id. */
     public Party(String object_id) {
       super(object_id);
       this.name = new InternationalizedText(ImmutableList.of());
@@ -341,6 +500,7 @@ public class Election {
       this.logo_uri = Optional.empty();
     }
 
+    /** A Party with an object_id and a name, and optional other fields. */
     public Party(String object_id,
                  InternationalizedText name,
                  @Nullable String abbreviation,
@@ -386,13 +546,11 @@ public class Election {
   }
 
   /**
-   * Entity describing information about a candidate in a contest.
-   * See: https://developers.google.com/elections-data/reference/candidate
-   * Note: The ElectionGuard Data Spec deviates from the NIST model in that
-   * selections for any contest type are considered a "candidate".
-   * for instance, on a yes-no referendum contest, two `candidate` objects
-   * would be included in the model to represent the `affirmative` and `negative`
-   * selections for the contest.  See the wiki, readme's, and tests in this repo for more info
+   * A candidate in a contest.
+   * Note: The ElectionGuard Data Spec deviates from the NIST model in that selections for any contest type
+   * are considered a "candidate". for instance, on a yes-no referendum contest, two `candidate` objects
+   * would be included in the model to represent the `affirmative` and `negative` selections for the contest.
+   * @see <a href="https://developers.google.com/elections-data/reference/candidate">Civics Common Standard Data Specification</a>
    */
   @Immutable
   public static class Candidate extends ElectionObjectBase implements Hash.CryptoHashable {
@@ -401,6 +559,7 @@ public class Election {
     public final Optional<String> image_uri;
     public final boolean is_write_in;
 
+    /** A Candidate with only an object_id. */
     public Candidate(String object_id) {
       super(object_id);
       this.name = new InternationalizedText(ImmutableList.of());
@@ -409,6 +568,7 @@ public class Election {
       this.is_write_in = false;
     }
 
+    /** A Candidate with an object_id and a name, and optional other fields. */
     public Candidate(String object_id,
                      InternationalizedText name,
                      @Nullable String party_id,
@@ -456,17 +616,8 @@ public class Election {
   }
 
   /**
-   * Data entity for the ballot selections in a contest,
-   * for example linking candidates and parties to their vote counts.
-   * See: https://developers.google.com/elections-data/reference/ballot-selection
-   * <p>
-   * Note: The ElectionGuard Data Spec deviates from the NIST model in that
-   * there is no difference for different types of selections.
-   * The ElectionGuard Data Spec deviates from the NIST model in that
-   * `sequence_order` is a required field since it is used for ordering selections
-   * in a contest to ensure various encryption primitives are deterministic.
-   * For a given election, the sequence of selections displayed to a user may be different
-   * however that information is not captured by default when encrypting a specific ballot.
+   * A ballot selection for a specific candidate in a contest.
+   * @see <a href="https://developers.google.com/elections-data/reference/ballot-selection">Civics Common Standard Data Specification</a>
    */
   @Immutable
   public static class SelectionDescription extends ElectionObjectBase implements Hash.CryptoHashable {
@@ -517,14 +668,8 @@ public class Election {
   }
 
   /**
-   * Use to describe a contest and link the contest to the associated candidates and parties.
-   * See: https://developers.google.com/elections-data/reference/contest
-   * <p>
-   * Note: The ElectionGuard Data Spec deviates from the NIST model in that
-   * `sequence_order` is a required field since it is used for ordering selections
-   * in a contest to ensure various encryption primitives are deterministic.
-   * For a given election, the sequence of contests displayed to a user may be different,
-   * however that information is not captured by default when encrypting a specific ballot.
+   * The metadata that describes the structure and type of one contest in the election.
+   * @see <a href="https://developers.google.com/elections-data/reference/contest">Civics Common Standard Data Specification</a>
    */
   @Immutable
   public static class ContestDescription extends ElectionObjectBase implements Hash.CryptoHashable {
@@ -667,10 +812,8 @@ public class Election {
   }
 
   /**
-   * Use this entity to describe a contest that involves selecting one or more candidates.
-   * See: https://developers.google.com/elections-data/reference/contest
-   * Note: The ElectionGuard Data Spec deviates from the NIST model in that
-   * this subclass is used purely for convenience
+   * A type of contest that involves selecting one or more candidates.
+   * @see <a href="https://developers.google.com/elections-data/reference/contest">Civics Common Standard Data Specification</a>
    */
   @Immutable
   public static class CandidateContestDescription extends ContestDescription {
@@ -708,10 +851,8 @@ public class Election {
   }
 
   /**
-   * Use this entity to describe a contest that involves selecting exactly one 'candidate'.
-   * See: https://developers.google.com/elections-data/reference/contest
-   * Note: The ElectionGuard Data Spec deviates from the NIST model in that
-   * this subclass is used purely for convenience.
+   * A type of contest that involves selecting exactly one 'candidate'. LOOK why needed?
+   * @see <a href="https://developers.google.com/elections-data/reference/contest">Civics Common Standard Data Specification</a>
    */
   @Immutable
   public static class ReferendumContestDescription extends ContestDescription {
@@ -732,12 +873,9 @@ public class Election {
   }
 
   /**
-   * The election metadata that describes the structure and type of the election, including geopolitical units,
-   * contests, candidates, and ballot styles, etc.
-   * This class is based on the NIST Election Common Standard Data Specification.
-   * Some deviations from the standard exist.
-   * <p>
-   * See: https://developers.google.com/elections-data/reference/election
+   * The election metadata that describes the structure and type of the election.
+   * An election has a list of contests, and each contests has a list of candidates.
+   * @see <a href="https://developers.google.com/elections-data/reference/election">Civics Common Standard Data Specification</a>
    */
   @Immutable
   public static class ElectionDescription implements Hash.CryptoHashable {
@@ -837,9 +975,7 @@ public class Election {
       return this.crypto_hash;
     }
 
-    /**
-     * Verifies the dataset to ensure it is well-formed.
-     */
+    /** Verifies the dataset to ensure it is well-formed. */
     boolean is_valid() {
       HashSet<String> gp_unit_ids = new HashSet<>();
       HashSet<String> ballot_style_ids = new HashSet<>();
@@ -956,167 +1092,6 @@ public class Election {
       }
       return success;
     }
-  }
-
-  /** The constants for mathematical functions used for this election. LOOK maybe another class? */
-  @Immutable
-  public static class ElectionConstants {
-    public final BigInteger large_prime; // large prime or p
-    public final BigInteger small_prime; // small prime or q
-    public final BigInteger cofactor;    // cofactor or r
-    public final BigInteger generator;   // generator or g
-
-    public ElectionConstants() {
-      this(Group.P, Group.Q, Group.R, Group.G);
-    }
-
-    public ElectionConstants(BigInteger large_prime, BigInteger small_prime, BigInteger cofactor, BigInteger generator) {
-      this.large_prime = Preconditions.checkNotNull(large_prime);
-      this.small_prime = Preconditions.checkNotNull(small_prime);
-      this.cofactor = Preconditions.checkNotNull(cofactor);
-      this.generator = Preconditions.checkNotNull(generator);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) return true;
-      if (o == null || getClass() != o.getClass()) return false;
-      ElectionConstants that = (ElectionConstants) o;
-      return large_prime.equals(that.large_prime) &&
-              small_prime.equals(that.small_prime) &&
-              cofactor.equals(that.cofactor) &&
-              generator.equals(that.generator);
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(large_prime, small_prime, cofactor, generator);
-    }
-
-    @Override
-    public String toString() {
-      return "ElectionConstants{" +
-              "\n large_prime= " + large_prime +
-              "\n small_prime= " + small_prime +
-              "\n cofactor= " + cofactor +
-              "\n generator= " + generator +
-              "}";
-    }
-  }
-
-  /**
-   * The cryptographic context of an election that is configured during the Key Ceremony.
-   * <p>
-   * Note: The ElectionGuard Data Spec deviates from the NIST model in that
-   * this object includes fields that are populated in the course of encrypting an election
-   * Specifically, `crypto_base_hash`, `crypto_extended_base_hash` and `elgamal_public_key`
-   * are populated with election-specific information necessary for encrypting the election.
-   * Refer to the [Electionguard Specification](https://github.com/microsoft/electionguard) for more information.
-   * <p>
-   * To make an instance of this class, don't construct it directly. Use `make_ciphertext_election_context` instead.
-   * LOOK doesnt belong in this class?
-   * LOOK: add serialization version?
-   */
-  @Immutable
-  public static class CiphertextElectionContext {
-    public final int number_of_guardians; // The number of guardians necessary to generate the public key
-    public final int quorum; // The quorum of guardians necessary to decrypt an election.  Must be less than `number_of_guardians`
-
-    // the `joint public key (K)` in the [ElectionGuard Spec](https://github.com/microsoft/electionguard/wiki)
-    public final Group.ElementModP elgamal_public_key;
-
-    // The hash of the election metadata
-    public final Group.ElementModQ description_hash;
-
-    // the `base hash code (𝑄)` in the [ElectionGuard Spec](https://github.com/microsoft/electionguard/wiki)
-    public final Group.ElementModQ crypto_base_hash;
-
-    // the `extended base hash code (𝑄')` in the [ElectionGuard Spec](https://github.com/microsoft/electionguard/wiki)
-    public final Group.ElementModQ crypto_extended_base_hash;
-
-    public CiphertextElectionContext(int number_of_guardians, int quorum, ElementModP jointPublicKey,
-           ElementModQ description_hash, ElementModQ crypto_base_hash, ElementModQ crypto_extended_base_hash) {
-      this.number_of_guardians = number_of_guardians;
-      this.quorum = quorum;
-      this.elgamal_public_key = Preconditions.checkNotNull(jointPublicKey);
-      this.description_hash = Preconditions.checkNotNull(description_hash);
-      this.crypto_base_hash = Preconditions.checkNotNull(crypto_base_hash);
-      this.crypto_extended_base_hash = Preconditions.checkNotNull(crypto_extended_base_hash);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) return true;
-      if (o == null || getClass() != o.getClass()) return false;
-      CiphertextElectionContext that = (CiphertextElectionContext) o;
-      return number_of_guardians == that.number_of_guardians &&
-              quorum == that.quorum &&
-              elgamal_public_key.equals(that.elgamal_public_key) &&
-              description_hash.equals(that.description_hash) &&
-              crypto_base_hash.equals(that.crypto_base_hash) &&
-              crypto_extended_base_hash.equals(that.crypto_extended_base_hash);
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(number_of_guardians, quorum, elgamal_public_key, description_hash, crypto_base_hash, crypto_extended_base_hash);
-    }
-
-    @Override
-    public String toString() {
-      return "CiphertextElectionContext{" +
-              "number_of_guardians=" + number_of_guardians +
-              ", quorum=" + quorum +
-              '}';
-    }
-  }
-
-  public static ElementModQ make_crypto_base_hash(int number_of_guardians, int quorum, ElectionDescription election) {
-    return Hash.hash_elems(P, Q, G, number_of_guardians, quorum, election.crypto_hash());
-  }
-
-  /**
-   * Makes a CiphertextElectionContext object.
-   * @param number_of_guardians The number of guardians necessary to generate the public key.
-   * @param quorum The quorum of guardians necessary to decrypt an election.  Must be less than number_of_guardians.
-   * @param elgamal_public_key the public key of the election.
-   * @param description the election description.
-   * @param commitment_hash all the public commitments for all the guardians = H(K 1,0 , K 1,1 , K 1,2 , ... ,
-   *    K 1,k−1 , K 2,0 , K 2,1 , K 2,2 , ... , K 2,k−1 , ... , K n,0 , K n,1 , K n,2 , ... , K n,k−1 )
-   */
-  public static CiphertextElectionContext make_ciphertext_election_context(
-          int number_of_guardians,
-          int quorum,
-          ElementModP elgamal_public_key,
-          ElectionDescription description,
-          ElementModQ commitment_hash) {
-
-    // What's a crypto_base_hash?
-    // The metadata of this object are hashed together with the
-    //  - prime modulus (𝑝),
-    //  - subgroup order (𝑞),
-    //  - generator (𝑔),
-    //  - number of guardians (𝑛),
-    //  - decryption threshold value (𝑘),
-    //  to form a base hash code (𝑄) which will be incorporated
-    //  into every subsequent hash computation in the election.
-
-    //  What's a crypto_extended_base_hash?
-    //  Once the baseline parameters have been produced and confirmed,
-    //  all of the public guardian commitments 𝐾𝑖,𝑗 are hashed together
-    //  with the base hash 𝑄 to form an extended base hash 𝑄' that will
-    //  form the basis of subsequent hash computations.
-
-    ElementModQ crypto_base_hash = make_crypto_base_hash(number_of_guardians, quorum, description);
-    ElementModQ crypto_extended_base_hash = Hash.hash_elems(crypto_base_hash, commitment_hash);
-
-    return new CiphertextElectionContext(
-            number_of_guardians,
-            quorum,
-            elgamal_public_key,
-            description.crypto_hash(),
-            crypto_base_hash,
-            crypto_extended_base_hash);
   }
 
   private static <T> ImmutableList<T> toImmutableListEmpty(List<T> from) {

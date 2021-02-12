@@ -197,9 +197,7 @@ public class ElectionTestHelper {
   }
 
   /**
-   * Generates a `BallotStyle` object, which rolls up a list of parties and
-   * geopolitical units (passed as arguments), with some additional information
-   * added on as well.
+   * Generates a `BallotStyle` object for a list of parties and geopolitical units.
    * @param parties: a list of `Party` objects to be used in this ballot style
    * @param geo_units: a list of `GeopoliticalUnit` objects to be used in this ballot style
    */
@@ -527,7 +525,7 @@ public class ElectionTestHelper {
     ElGamal.KeyPair keypair = elgamal_keypairs();
     return new CIPHERTEXT_ELECTIONS_TUPLE_TYPE(
             keypair.secret_key,
-            make_ciphertext_election_context(
+            CiphertextElectionContext.create(
                     1,
                     1,
                     keypair.public_key,

@@ -2,7 +2,7 @@ package com.sunya.electionguard.publish;
 
 import java.util.List;
 
-/** Helper class for conversion of Election description to/from Json. */
+/** Helper class for conversion of Election description to/from Json, using python's object model. */
 public class ElectionDescriptionPojo {
   public InternationalizedText name;
   public String election_scope_id;

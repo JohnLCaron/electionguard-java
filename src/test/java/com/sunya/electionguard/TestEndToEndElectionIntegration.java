@@ -62,7 +62,6 @@ public class TestEndToEndElectionIntegration {
   List<CiphertextBallot> ciphertext_ballots = new ArrayList<>();
 
   // Step 3 - Cast and Spoil
-  DataStore ballot_store;
   BallotBox ballot_box;
 
   // Step 4 - Decrypt Tally
@@ -188,7 +187,7 @@ public class TestEndToEndElectionIntegration {
     this.election = tuple.metadata.election;
     this.context = tuple.context;
     this.constants = new ElectionConstants();
-    Group.ElementModQ crypto_base_hash = Election.make_crypto_base_hash(NUMBER_OF_GUARDIANS, QUORUM, election);
+    Group.ElementModQ crypto_base_hash = CiphertextElectionContext.make_crypto_base_hash(NUMBER_OF_GUARDIANS, QUORUM, election);
     assertThat(this.context.crypto_base_hash).isEqualTo(crypto_base_hash);
 
     Group.ElementModQ extended_hash = Hash.hash_elems(crypto_base_hash, commitmentHash);
@@ -223,10 +222,7 @@ public class TestEndToEndElectionIntegration {
   //  This example demonstrates one way to accept ballots using the `BallotBox` class
   void step_3_cast_and_spoil() {
     System.out.printf("%n3. cast_and_spoil%n");
-
-    // LOOK why not hide the datastore in the ballot_box ?
-    this.ballot_store = new DataStore();
-    this.ballot_box = new BallotBox(this.election, this.context, this.ballot_store);
+    this.ballot_box = new BallotBox(this.election, this.context);
     // Randomly cast or spoil the ballots
     for (CiphertextBallot ballot : this.ciphertext_ballots) {
       Optional<CiphertextAcceptedBallot> accepted_ballot;
@@ -249,7 +245,7 @@ public class TestEndToEndElectionIntegration {
     System.out.printf("%n4. Homomorphically Accumulate and decrypt tally%n");
     // Generate a Homomorphically Accumulated Tally of the ballots
     CiphertextTallyBuilder ciphertext_tally = new CiphertextTallyBuilder("tally_object_id", this.metadata, this.context);
-    ciphertext_tally.batch_append(this.ballot_box.accepted());
+    ciphertext_tally.batch_append(this.ballot_box.getAcceptedBallots());
     this.publishedTally = ciphertext_tally.build();
 
     // Configure the Decryption
@@ -269,7 +265,7 @@ public class TestEndToEndElectionIntegration {
 
     // Here's where the ciphertext Tally is decrypted.
     this.decryptedTally = this.decrypter.decrypt_tally(false, null).orElseThrow();
-    List<DecryptWithShares.SpoiledTallyAndBallot> spoiledTallyAndBallot =
+    List<DecryptWithShares.SpoiledBallotAndTally> spoiledTallyAndBallot =
             this.decrypter.decrypt_spoiled_ballots().orElseThrow();
     this.spoiledDecryptedBallots = spoiledTallyAndBallot.stream().map(e -> e.ballot).collect(Collectors.toList());
     this.spoiledDecryptedTallies = spoiledTallyAndBallot.stream().map(e -> e.tally).collect(Collectors.toList());
@@ -293,7 +289,7 @@ public class TestEndToEndElectionIntegration {
 
     // Tally the expected values from the loaded ballots
     for (PlaintextBallot ballot : this.originalPlaintextBallots) {
-      if (this.ballot_store.get(ballot.object_id).orElseThrow().state == BallotBoxState.CAST) {
+      if (this.ballot_box.get(ballot.object_id).orElseThrow().state == BallotBoxState.CAST) {
         for (PlaintextBallotContest contest : ballot.contests) {
           for (PlaintextBallotSelection selection : contest.ballot_selections) {
             Integer value = expected_plaintext_tally.get(selection.selection_id);

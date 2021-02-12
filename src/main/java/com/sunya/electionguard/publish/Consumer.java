@@ -21,7 +21,7 @@ import java.util.function.Predicate;
 import static com.sunya.electionguard.Ballot.CiphertextAcceptedBallot;
 import static com.sunya.electionguard.Ballot.PlaintextBallot;
 
-/** Helper class for consumers of published data in Json. */
+/** Helper class for consumers of published election records in Json or protobuf. */
 public class Consumer {
   private final Publisher publisher;
 
@@ -39,11 +39,11 @@ public class Consumer {
     return builder.build();
   }
 
-  public Election.CiphertextElectionContext context() throws IOException {
+  public CiphertextElectionContext context() throws IOException {
     return ConvertFromJson.readContext(publisher.contextPath().toString());
   }
 
-  public Election.ElectionConstants constants() throws IOException {
+  public ElectionConstants constants() throws IOException {
     return ConvertFromJson.readConstants(publisher.constantsPath().toString());
   }
 

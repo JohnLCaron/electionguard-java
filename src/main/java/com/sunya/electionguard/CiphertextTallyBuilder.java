@@ -33,7 +33,7 @@ public class CiphertextTallyBuilder {
 
   public final String object_id;
   private final ElectionWithPlaceholders metadata;
-  private final Election.CiphertextElectionContext encryption;
+  private final CiphertextElectionContext encryption;
 
   /** Local cache of ballots id's that have already been cast. */
   private final Set<String> cast_ballot_ids;
@@ -42,7 +42,7 @@ public class CiphertextTallyBuilder {
   /** An encrypted representation of each contest and selection for all the cast ballots. */
   public final Map<String, CiphertextTallyContestBuilder> contests; // Map(CONTEST_ID, CiphertextTallyContest)
 
-  public CiphertextTallyBuilder(String object_id, ElectionWithPlaceholders metadata, Election.CiphertextElectionContext encryption) {
+  public CiphertextTallyBuilder(String object_id, ElectionWithPlaceholders metadata, CiphertextElectionContext encryption) {
     this.object_id = object_id;
     this.metadata = metadata;
     this.encryption = encryption;
@@ -51,7 +51,7 @@ public class CiphertextTallyBuilder {
     this.contests = build_contests(this.metadata);
   }
 
-  /** Build the object graph for the tally from the InternalElectionDescription. */
+  /** Build the object graph for the tally from the ElectionWithPlaceholders. */
   private Map<String, CiphertextTallyContestBuilder> build_contests(ElectionWithPlaceholders metadata) {
     Map<String, CiphertextTallyContestBuilder> cast_collection = new HashMap<>();
     for (ContestWithPlaceholders contest : metadata.contests) {

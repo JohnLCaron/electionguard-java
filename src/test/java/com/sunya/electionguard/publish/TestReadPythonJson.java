@@ -22,13 +22,13 @@ public class TestReadPythonJson {
 
   @Example
   public void testConstantsPythonJson() throws IOException {
-    Election.ElectionConstants fromPython = ConvertFromJson.readConstants(publisher.constantsPath().toString());
+    ElectionConstants fromPython = ConvertFromJson.readConstants(publisher.constantsPath().toString());
     assertThat(fromPython).isNotNull();
   }
 
   @Example
   public void testContextPythonJson() throws IOException {
-    Election.CiphertextElectionContext fromPython = ConvertFromJson.readContext(publisher.contextPath().toString());
+    CiphertextElectionContext fromPython = ConvertFromJson.readContext(publisher.contextPath().toString());
     assertThat(fromPython).isNotNull();
     System.out.printf("CiphertextElectionContext %s%n", fromPython);
   }

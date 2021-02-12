@@ -23,7 +23,18 @@ import java.lang.reflect.Constructor;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/** Decrypt a collection of ballots. */
+/**
+ * A command line program to decrypt a collection of ballots.
+ * <p>
+ * For command line help:
+ * <strong>
+ * <pre>
+ *  java -classpath electionguard-java.jar com.sunya.electionguard.workflow.DecryptBallots --help
+ * </pre>
+ * </strong>
+ *
+ * @see <a href="https://www.electionguard.vote/spec/0.95.0/7_Verifiable_decryption/">Ballot Decryption</a>
+ */
 public class DecryptBallots {
 
   private static class CommandLine {
@@ -163,7 +174,7 @@ public class DecryptBallots {
 
     // Here's where the ciphertext Tally is decrypted.
     this.decryptedTally = mediator.decrypt_tally(false, null).orElseThrow();
-    List<DecryptWithShares.SpoiledTallyAndBallot> spoiledTallyAndBallot =
+    List<DecryptWithShares.SpoiledBallotAndTally> spoiledTallyAndBallot =
             mediator.decrypt_spoiled_ballots().orElseThrow();
     this.spoiledDecryptedBallots = spoiledTallyAndBallot.stream().map(e -> e.ballot).collect(Collectors.toList());
     this.spoiledDecryptedTallies = spoiledTallyAndBallot.stream().map(e -> e.tally).collect(Collectors.toList());

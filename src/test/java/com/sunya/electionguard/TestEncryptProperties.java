@@ -342,7 +342,7 @@ public class TestEncryptProperties extends TestProperties {
     KeyPair keypair = elgamal_keypair_from_secret(int_to_q_unchecked(BigInteger.TWO)).orElseThrow();
     Election.ElectionDescription election = ElectionFactory.get_fake_election();
     ElectionBuilder.DescriptionAndContext tuple = ElectionFactory.get_fake_ciphertext_election(election, keypair.public_key).orElseThrow();
-    Election.CiphertextElectionContext context = tuple.context;
+    CiphertextElectionContext context = tuple.context;
 
     PlaintextBallot subject = ElectionFactory.get_fake_ballot(election, null);
     assertThat(subject.is_valid(election.ballot_styles.get(0).object_id)).isTrue();
@@ -375,7 +375,7 @@ public class TestEncryptProperties extends TestProperties {
     KeyPair keypair = elgamal_keypair_from_secret(int_to_q_unchecked(BigInteger.TWO)).orElseThrow();
     Election.ElectionDescription election = ElectionFactory.get_fake_election();
     ElectionBuilder.DescriptionAndContext tuple = ElectionFactory.get_fake_ciphertext_election(election, keypair.public_key).orElseThrow();
-    Election.CiphertextElectionContext context = tuple.context;
+    CiphertextElectionContext context = tuple.context;
 
     PlaintextBallot data = ElectionFactory.get_fake_ballot(election, null);
     assertThat(data.is_valid(election.ballot_styles.get(0).object_id)).isTrue();
@@ -393,7 +393,7 @@ public class TestEncryptProperties extends TestProperties {
     KeyPair keypair = elgamal_keypair_from_secret(int_to_q_unchecked(BigInteger.TWO)).orElseThrow();
     Election.ElectionDescription election = ElectionFactory.get_simple_election_from_file();
     ElectionBuilder.DescriptionAndContext tuple = ElectionFactory.get_fake_ciphertext_election(election, keypair.public_key).orElseThrow();
-    Election.CiphertextElectionContext context = tuple.context;
+    CiphertextElectionContext context = tuple.context;
 
     PlaintextBallot data = ballot_factory.get_simple_ballot_from_file();
     assertThat(data.is_valid(election.ballot_styles.get(0).object_id)).isTrue();
@@ -416,7 +416,7 @@ public class TestEncryptProperties extends TestProperties {
 
      Election.ElectionDescription election = ElectionFactory.get_simple_election_from_file();
      ElectionBuilder.DescriptionAndContext tuple = ElectionFactory.get_fake_ciphertext_election(election, keypair.public_key).orElseThrow();
-     Election.CiphertextElectionContext context = tuple.context;
+     CiphertextElectionContext context = tuple.context;
 
      PlaintextBallot data = ballot_factory.get_simple_ballot_from_file();
      assertThat(data.is_valid(election.ballot_styles.get(0).object_id)).isTrue();

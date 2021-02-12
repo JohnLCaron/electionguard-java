@@ -15,10 +15,9 @@ import java.util.stream.Collectors;
 
 import static com.sunya.electionguard.Group.*;
 
-/** The process to create the joint encryption context for encrypting ballots. */
 public class KeyCeremony {
 
-  /** Details of key ceremony. */
+  /** Details of key ceremony: number of guardians and quorum size. */
   @AutoValue
   public abstract static class CeremonyDetails {
     abstract int number_of_guardians();
@@ -29,7 +28,7 @@ public class KeyCeremony {
     }
   }
 
-  /** Pair of keys (public & secret) used to encrypt/decrypt election. */
+  /** Pair of keys (public and secret) used to encrypt/decrypt election. */
   @AutoValue
   public abstract static class ElectionKeyPair {
     public abstract ElGamal.KeyPair key_pair(); // Ki = (si, g^si)
@@ -112,13 +111,19 @@ public class KeyCeremony {
     }
   }
 
-  /** Set of validation pieces for election key coefficients. */
+  /** The public validation pieces for election key coefficients for the ith Guardian. */
   @AutoValue
   public abstract static class CoefficientValidationSet {
     public abstract String owner_id(); // Guardian.object_id
-    public abstract ImmutableList<ElementModP> coefficient_commitments();
+    public abstract ImmutableList<ElementModP> coefficient_commitments(); // the Kij of the specification
     public abstract ImmutableList<SchnorrProof> coefficient_proofs();
 
+    /**
+     * Create a CoefficientValidationSet for a guardian
+     * @param guardian_id the Guardian.object_id
+     * @param coefficient_commitments the public polynomial coefficient commitments
+     * @param coefficient_proofs the proofs for the coefficient commitments
+     */
     public static CoefficientValidationSet create(String guardian_id, List<ElementModP> coefficient_commitments,
                                                   List<SchnorrProof> coefficient_proofs) {
       Preconditions.checkArgument(!Strings.isNullOrEmpty(guardian_id));
@@ -129,18 +134,24 @@ public class KeyCeremony {
     }
   }
 
-  /** These are the secret coefficients Kij for the ith Guardian. */
+  /** The secret polynomial coefficients for the ith Guardian. */
   @AutoValue
   public abstract static class CoefficientSet {
     public abstract String guardianId(); // Guardian.object_id
-    public abstract int guardianSequence(); // a unique number in [1, 256) that is the polynomial x value for this guardian
-    public abstract ImmutableList<ElementModQ> coefficients(); // Kij, j=0..quorum-1
+    public abstract int guardianSequence(); // i: a unique number in [1, 256) that is the polynomial x value for this guardian
+    public abstract ImmutableList<ElementModQ> coefficients(); // the secret polynomial coefficients
 
-    public static CoefficientSet create(String id, int guardian, List<ElementModQ> coefficients) {
-      Preconditions.checkArgument(!Strings.isNullOrEmpty(id));
+    /**
+     * Create a CoefficientSet for the ith guardian, i &gt; 0
+     * @param guardian_id the Guardian.object_id
+     * @param guardian the guardian value i, must be &gt; 0
+     * @param coefficients the secret polynomial coefficients
+     */
+    public static CoefficientSet create(String guardian_id, int guardian, List<ElementModQ> coefficients) {
+      Preconditions.checkArgument(!Strings.isNullOrEmpty(guardian_id));
       Preconditions.checkArgument(guardian > 0);
       Preconditions.checkNotNull(coefficients);
-      return new AutoValue_KeyCeremony_CoefficientSet(id, guardian, ImmutableList.copyOf(coefficients));
+      return new AutoValue_KeyCeremony_CoefficientSet(guardian_id, guardian, ImmutableList.copyOf(coefficients));
     }
 
     // This is what the Guardian needs.

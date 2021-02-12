@@ -20,8 +20,10 @@ import static com.sunya.electionguard.Group.ElementModQ;
 import static com.sunya.electionguard.Group.ElementModP;
 
 /**
- * This verifies specification sections "8. Correctness of Partial Decryptions",
- * "9. Correctness of Substitute Data for Missing Data", and "12. Correct Decryption of Spoiled Ballots"
+ * This verifies specification sections "8 Correctness of Partial Decryptions",
+ * "9 Correctness of Substitute Data for Missing Data", and "12 Correct Decryption of Spoiled Ballots".
+ * @see <a href="https://www.electionguard.vote/spec/0.95.0/9_Verifier_construction/#correctness-of-partial-decryptions">Decryption validation</a>
+ * @see <a href="https://www.electionguard.vote/spec/0.95.0/9_Verifier_construction/#validation-of-correct-decryption-of-tallies">Tally decryption validation</a>
  */
 public class DecryptionVerifier {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();

@@ -3,7 +3,9 @@ package com.sunya.electionguard.publish;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.sunya.electionguard.Ballot;
+import com.sunya.electionguard.CiphertextElectionContext;
 import com.sunya.electionguard.CiphertextTallyBuilder;
+import com.sunya.electionguard.ElectionConstants;
 import com.sunya.electionguard.ElectionWithPlaceholders;
 import com.sunya.electionguard.Guardian;
 import com.sunya.electionguard.GuardianBuilder;
@@ -46,7 +48,7 @@ public class TestPublish {
             ImmutableList.of(), ImmutableList.of(), ImmutableList.of(), null, null);
     ElectionWithPlaceholders metadata = new ElectionWithPlaceholders(election);
 
-    CiphertextElectionContext context = make_ciphertext_election_context(1, 1, ONE_MOD_P, election, rand_q());
+    CiphertextElectionContext context = CiphertextElectionContext.create(1, 1, ONE_MOD_P, election, rand_q());
     List<KeyCeremony.CoefficientValidationSet> coefficients = ImmutableList.of(
             KeyCeremony.CoefficientValidationSet.create("hiD", ImmutableList.of(), ImmutableList.of()));
     PlaintextTally plaintext_tally = new PlaintextTally("PlaintextTallyId", ImmutableMap.of(), ImmutableMap.of(),
@@ -76,7 +78,7 @@ public class TestPublish {
     List<Ballot.PlaintextBallot> plaintext_ballots = ImmutableList.of(
             new Ballot.PlaintextBallot("PlaintextBallotId", "ballot_style", ImmutableList.of()));
     List<Ballot.CiphertextBallot> encrypted_ballots = ImmutableList.of(
-            Ballot.make_ciphertext_ballot("CipherTextBallotId", "ballot_style", int_to_q_unchecked(BigInteger.ZERO),
+            Ballot.CiphertextBallot.create("CipherTextBallotId", "ballot_style", int_to_q_unchecked(BigInteger.ZERO),
                     Optional.of(int_to_q_unchecked(BigInteger.ZERO)), ImmutableList.of(), Optional.empty(),Optional.empty(), Optional.empty()));
 
     List<Guardian> guardians = ImmutableList.of(

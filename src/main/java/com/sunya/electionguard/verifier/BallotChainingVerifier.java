@@ -8,7 +8,10 @@ import java.util.Set;
 import static com.sunya.electionguard.Ballot.CiphertextAcceptedBallot;
 import static com.sunya.electionguard.Group.ElementModQ;
 
- /** This verifies specification section "6. Ballot Chaining". */
+/**
+ * This verifies specification section "6 Ballot Chaining".
+ * @see <a href="https://www.electionguard.vote/spec/0.95.0/9_Verifier_construction/#validation-of-ballot-chaining">Ballot chaining validation</a>
+ */
 public class BallotChainingVerifier {
   private final ElectionRecord electionRecord;
 

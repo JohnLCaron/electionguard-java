@@ -124,8 +124,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
     }
 
     // configure the ballot box
-    DataStore ballot_store = new DataStore();
-    this.ballot_box = new BallotBox(this.election, this.context, ballot_store);
+    this.ballot_box = new BallotBox(this.election, this.context);
     this.encrypted_fake_cast_ballot = ballot_box.cast(temp_encrypted_fake_cast_ballot).orElseThrow();
     this.encrypted_fake_spoiled_ballot = ballot_box.spoil(temp_encrypted_fake_spoiled_ballot).orElseThrow();
 
@@ -140,7 +139,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
 
     // generate encrypted tally
     this.ciphertext_tally = new CiphertextTallyBuilder("whatever", this.metadata, context);
-    this.ciphertext_tally.batch_append(ballot_box.accepted());
+    this.ciphertext_tally.batch_append(ballot_box.getAcceptedBallots());
   }
 
   @Example
@@ -184,8 +183,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
     }
 
     // configure the ballot box
-    DataStore ballot_store = new DataStore();
-    this.ballot_box = new BallotBox(this.election, this.context, ballot_store);
+    this.ballot_box = new BallotBox(this.election, this.context);
 
     // cast the ballots
     for (CiphertextBallot cballot : allECastBallots) {
@@ -198,7 +196,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
 
     // generate encrypted tally
     CiphertextTallyBuilder ctally  = new CiphertextTallyBuilder("whatever", this.metadata, this.context);
-    ctally.batch_append(ballot_box.accepted());
+    ctally.batch_append(ballot_box.getAcceptedBallots());
     PublishedCiphertextTally ptally = ctally.build();
 
     // now decrypt it
@@ -243,8 +241,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
     }
 
     // configure the ballot box
-    DataStore ballot_store = new DataStore();
-    BallotBox ballot_box = new BallotBox(this.election, this.context, ballot_store);
+    BallotBox ballot_box = new BallotBox(this.election, this.context);
 
     // cast the ballots
     for (CiphertextBallot cballot : allECastBallots) {
@@ -257,7 +254,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
 
     // generate encrypted tally
     CiphertextTallyBuilder ctally  = new CiphertextTallyBuilder("whatever", this.metadata, this.context);
-    ctally.batch_append(ballot_box.accepted());
+    ctally.batch_append(ballot_box.getAcceptedBallots());
     PublishedCiphertextTally ptally = ctally.build();
 
     // now decrypt it
@@ -300,8 +297,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
     }
 
     // configure the ballot box
-    DataStore ballot_store = new DataStore();
-    BallotBox ballot_box = new BallotBox(this.election, this.context, ballot_store);
+    BallotBox ballot_box = new BallotBox(this.election, this.context);
 
     // cast the ballots
     for (CiphertextBallot cballot : allEncryptedBallots) {
@@ -310,7 +306,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
 
     // generate encrypted tally
     CiphertextTallyBuilder ctally  = new CiphertextTallyBuilder("whatever", this.metadata, this.context);
-    ctally.batch_append(ballot_box.accepted());
+    ctally.batch_append(ballot_box.getAcceptedBallots());
     PublishedCiphertextTally ptally = ctally.build();
 
     // now decrypt it
@@ -350,14 +346,13 @@ public class TestDecryptionMediatorProblem extends TestProperties {
     CiphertextBallot encryptedCastBallot = ballot_marking_device.encrypt(castBallot).orElseThrow();
 
     // configure the ballot box
-    DataStore ballot_store = new DataStore();
-    BallotBox ballot_box = new BallotBox(this.election, this.context, ballot_store);
+    BallotBox ballot_box = new BallotBox(this.election, this.context);
     CiphertextAcceptedBallot acceptedCastBallot = ballot_box.cast(encryptedCastBallot).orElseThrow();
     assertThat(acceptedCastBallot).isNotNull();
 
     // generate encrypted tally
     CiphertextTallyBuilder ctally  = new CiphertextTallyBuilder("whatever", this.metadata, this.context);
-    ctally.batch_append(ballot_box.accepted());
+    ctally.batch_append(ballot_box.getAcceptedBallots());
     PublishedCiphertextTally ptally = ctally.build();
 
     // now decrypt it

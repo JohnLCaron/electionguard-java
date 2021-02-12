@@ -5,8 +5,9 @@ import com.sunya.electionguard.Group;
 import java.math.BigInteger;
 
 /**
- * This verifies specification section "1. Parameter Validation".
+ * This verifies specification section "1 Parameter Validation".
  * Currently just checks that the constants are the standard ones.
+ * @see <a href="https://www.electionguard.vote/spec/0.95.0/9_Verifier_construction/#parameter-validation">Parameter validation</a>
  */
 public class ParameterVerifier {
   private final ElectionRecord electionRecord;

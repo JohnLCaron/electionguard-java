@@ -3,6 +3,9 @@ package com.sunya.electionguard.publish;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+/**
+ * Adapt a Iterable to create a CloseableIterable.
+ */
 public class CloseableIterableAdapter<T> implements Iterable<T>, CloseableIterable<T> {
   public static <T> CloseableIterable<T> empty() {
     return wrap(new ArrayList<T>());

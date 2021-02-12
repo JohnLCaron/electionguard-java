@@ -8,8 +8,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
 
-/** Given zero or more elements, calculate their cryptographic hash using SHA256.
- * @see "https://www.electionguard.vote/spec/0.95.0/9_Verifier_construction/#hash-computation"
+/** Create a cryptographic hash using SHA256.
+ *  @see <a href="https://www.electionguard.vote/spec/0.95.0/9_Verifier_construction/#hash-computation">Hash computation</a>
  */
 public class Hash {
 

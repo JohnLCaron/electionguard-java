@@ -1,7 +1,9 @@
 package com.sunya.electionguard.workflow;
 
 import com.google.common.collect.ImmutableList;
+import com.sunya.electionguard.CiphertextElectionContext;
 import com.sunya.electionguard.Election;
+import com.sunya.electionguard.ElectionConstants;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.Guardian;
 import com.sunya.electionguard.GuardianBuilder;
@@ -89,7 +91,7 @@ public class TestKeyCeremonySerializing {
       throw new RuntimeException("*** Key Ceremony failed");
     }
 
-    Election.CiphertextElectionContext context = Election.make_ciphertext_election_context(
+    CiphertextElectionContext context = CiphertextElectionContext.create(
             this.numberOfGuardians,
             this.quorum,
             this.jointKey,
@@ -173,11 +175,11 @@ public class TestKeyCeremonySerializing {
     return true;
   }
 
-  void publish(Election.CiphertextElectionContext context) throws IOException {
+  void publish(CiphertextElectionContext context) throws IOException {
     publisher.writeKeyCeremonyProto(
             this.election,
             context,
-            new Election.ElectionConstants(),
+            new ElectionConstants(),
             this.coefficientValidationSets);
 
     this.guardians = guardianBuilders.stream().map(GuardianBuilder::build).collect(Collectors.toList());

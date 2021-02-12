@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Immutable
-public class Words {
+class Words {
   private static final int MIN_INDEX = 0;
   private static final int MAX_INDEX = 4095;
   private static final ImmutableList<String> words = init();

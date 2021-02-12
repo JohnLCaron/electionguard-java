@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Objects;
 import static com.sunya.electionguard.Group.ElementModQ;
 
-/* The encrypted representation of the counts of some collection of ballots */
+/** The encrypted representation of the summed votes for a collection of ballots */
 @Immutable
 public class PublishedCiphertextTally extends ElectionObjectBase {
     /** A collection of each contest and selection in an election. Retains an encrypted representation of a tally for each selection. */
@@ -28,7 +28,7 @@ public class PublishedCiphertextTally extends ElectionObjectBase {
   }
 
   /**
-   * A CiphertextTallyContest groups the CiphertextTallySelection's for a specific Election.ContestDescription.
+   * The encrypted selections for a specific contest.
    * The object_id is the Election.ContestDescription.object_id.
    */
   @Immutable
@@ -62,8 +62,7 @@ public class PublishedCiphertextTally extends ElectionObjectBase {
   } // CiphertextTallyContest
 
   /**
-   * A CiphertextTallySelection is a homomorphic accumulation of all of the
-   * CiphertextBallotSelection instances for a specific selection and contest in an election.
+   * The homomorphic accumulation of all of the CiphertextBallotSelection for a specific selection and contest.
    * The object_id is the Election.SelectionDescription.object_id.
    */
   @Immutable

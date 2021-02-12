@@ -13,18 +13,15 @@ import static com.sunya.electionguard.Ballot.*;
 public class BallotBox {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
-  private final Election.ElectionDescription election;
-  private final Election.CiphertextElectionContext context;
-  private final DataStore store;
   private final ElectionWithPlaceholders metadata;
+  private final CiphertextElectionContext context;
+  private final DataStore store;
 
   public BallotBox(Election.ElectionDescription election,
-                   Election.CiphertextElectionContext context,
-                   DataStore store) {
-    this.election = election;
-    this.context = context;
-    this.store = store;
+                   CiphertextElectionContext context) {
     this.metadata = new ElectionWithPlaceholders(election);
+    this.context = context;
+    this.store = new DataStore();
   }
 
   public Optional<CiphertextAcceptedBallot> cast(CiphertextBallot ballot) {
@@ -55,7 +52,7 @@ public class BallotBox {
 
     // TODO: ISSUE #56: check if the ballot includes the nonce, and regenerate the proofs
     // TODO: ISSUE #56: check if the ballot includes the proofs, if it does not include the nonce
-    CiphertextAcceptedBallot ballot_box_ballot = from_ciphertext_ballot(ballot, state);
+    CiphertextAcceptedBallot ballot_box_ballot = ballot.acceptWithState(state);
     store.put(ballot_box_ballot.object_id, ballot_box_ballot);
     return Optional.of(ballot_box_ballot);
   }
@@ -77,7 +74,7 @@ public class BallotBox {
     return store.get(key);
   }
 
-  public CloseableIterable<CiphertextAcceptedBallot> accepted() {
+  public CloseableIterable<CiphertextAcceptedBallot> getAcceptedBallots() {
     return CloseableIterableAdapter.wrap(store);
   }
 

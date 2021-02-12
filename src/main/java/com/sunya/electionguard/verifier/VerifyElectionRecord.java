@@ -8,7 +8,18 @@ import com.sunya.electionguard.workflow.EncryptBallots;
 
 import java.io.IOException;
 
-/** Verify all sections of the spec, on a completed election record. */
+/**
+ * A command line program to verify a complete election record.
+ * <p>
+ * For command line help:
+ * <strong>
+ * <pre>
+ *  java -classpath electionguard-java.jar com.sunya.electionguard.verifier.VerifyElectionRecord --help
+ * </pre>
+ * </strong>
+ *
+ * @see <a href="https://www.electionguard.vote/spec/0.95.0/9_Verifier_construction/">Election Verifier</a>
+ */
 public class VerifyElectionRecord {
 
   private static class CommandLine {

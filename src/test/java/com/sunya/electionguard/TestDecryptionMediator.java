@@ -131,8 +131,7 @@ public class TestDecryptionMediator extends TestProperties {
     }
 
     // configure the ballot box
-    DataStore ballot_store = new DataStore();
-    this.ballot_box = new BallotBox(this.election, this.context, ballot_store);
+    this.ballot_box = new BallotBox(this.election, this.context);
     this.encrypted_fake_cast_ballot = ballot_box.cast(temp_encrypted_fake_cast_ballot).orElseThrow();
     this.encrypted_fake_spoiled_ballot = ballot_box.spoil(temp_encrypted_fake_spoiled_ballot).orElseThrow();
 
@@ -147,7 +146,7 @@ public class TestDecryptionMediator extends TestProperties {
 
     // generate encrypted tally
     CiphertextTallyBuilder ciphertext_tally = new CiphertextTallyBuilder("some-id", metadata, this.context);
-    ciphertext_tally.batch_append(ballot_box.accepted());
+    ciphertext_tally.batch_append(ballot_box.getAcceptedBallots());
     this.publishedTally = ciphertext_tally.build();
   }
 
@@ -459,13 +458,13 @@ public class TestDecryptionMediator extends TestProperties {
 
     Map<String, Guardian> guardianMap = this.guardians.stream().collect(Collectors.toMap(g -> g.object_id, g -> g));
 
-    Optional<List<DecryptWithShares.SpoiledTallyAndBallot>> resultO = DecryptWithShares.decrypt_spoiled_ballots(
+    Optional<List<DecryptWithShares.SpoiledBallotAndTally>> resultO = DecryptWithShares.decrypt_spoiled_ballots(
             this.ballot_box.getSpoiledBallots(),
             guardianMap,
             shares,
             this.context);
     assertThat(resultO).isPresent();
-    List<DecryptWithShares.SpoiledTallyAndBallot> result = resultO.get();
+    List<DecryptWithShares.SpoiledBallotAndTally> result = resultO.get();
     Map<String, Ballot.PlaintextBallot> spoiledBallots = result.stream().collect(Collectors.toMap(r -> r.ballot.object_id, r -> r.ballot));
 
     assertThat(spoiledBallots.containsKey(this.fake_spoiled_ballot.object_id)).isTrue();
@@ -558,7 +557,7 @@ public class TestDecryptionMediator extends TestProperties {
           List<PlaintextBallot> ballots) {
 
     // encrypt each ballot
-    BallotBox ballot_box = new BallotBox(metadata.election, context, new DataStore());
+    BallotBox ballot_box = new BallotBox(metadata.election, context);
     for (PlaintextBallot ballot : ballots) {
       Optional<CiphertextBallot> encrypted_ballot = Encrypt.encrypt_ballot(
               ballot, metadata, context, int_to_q_unchecked(BigInteger.ONE), Optional.empty(), true);
@@ -567,7 +566,7 @@ public class TestDecryptionMediator extends TestProperties {
     }
 
     CiphertextTallyBuilder result = new CiphertextTallyBuilder("whatever", metadata, context);
-    result.batch_append(ballot_box.accepted());
+    result.batch_append(ballot_box.getAcceptedBallots());
     return result;
   }
 

@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.sunya.electionguard.Ballot;
 import com.sunya.electionguard.BallotBox;
-import com.sunya.electionguard.DataStore;
 import com.sunya.electionguard.Election;
 import com.sunya.electionguard.ElectionWithPlaceholders;
 import com.sunya.electionguard.Encrypt;
@@ -20,7 +19,17 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
-/** Encrypt a collection of ballots. */
+/**
+ * A command line program to encrypt a collection of ballots.
+ * <p>
+ * For command line help:
+ * <strong>
+ * <pre>
+ *  java -classpath electionguard-java.jar com.sunya.electionguard.workflow.EncryptBallots --help
+ * </pre>
+ * </strong>
+ * @see <a href="https://www.electionguard.vote/spec/0.95.0/5_Ballot_encryption/">Ballot Encryption</a>
+ */
 public class EncryptBallots {
 
   private static class CommandLine {
@@ -156,7 +165,6 @@ public class EncryptBallots {
   int originalBallotsCount = 0;
   Encrypt.EncryptionDevice device;
   Encrypt.EncryptionMediator encryptor;
-  DataStore ballotStore;
   BallotBox ballotBox;
 
   public EncryptBallots(ElectionRecord electionRecord, String deviceName) {
@@ -169,8 +177,7 @@ public class EncryptBallots {
     this.device = new Encrypt.EncryptionDevice(deviceName);
     this.encryptor = new Encrypt.EncryptionMediator(metadata, electionRecord.context, this.device);
 
-    this.ballotStore = new DataStore();
-    this.ballotBox = new BallotBox(electionRecord.election, electionRecord.context, this.ballotStore);
+    this.ballotBox = new BallotBox(electionRecord.election, electionRecord.context);
     System.out.printf("%nReady to encrypt at location: '%s'%n", this.device.location);
   }
 

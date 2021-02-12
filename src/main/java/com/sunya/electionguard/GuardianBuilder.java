@@ -11,7 +11,7 @@ import java.util.Optional;
 import static com.sunya.electionguard.Group.ElementModP;
 import static com.sunya.electionguard.Group.ElementModQ;
 
-/** Builder of Guardian of election. */
+/** Builder of Guardians for an election. */
 public class GuardianBuilder extends ElectionObjectBase {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 

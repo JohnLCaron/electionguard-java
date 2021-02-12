@@ -4,7 +4,9 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.sunya.electionguard.Ballot;
+import com.sunya.electionguard.CiphertextElectionContext;
 import com.sunya.electionguard.Election;
+import com.sunya.electionguard.ElectionConstants;
 import com.sunya.electionguard.Encrypt;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.KeyCeremony;
@@ -22,10 +24,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+/** The published election record for a collection of ballots, eg from a single encryption device. */
 @Immutable
 public class ElectionRecord {
-  public final Election.ElectionConstants constants;
-  public final Election.CiphertextElectionContext context;
+  public final ElectionConstants constants;
+  public final CiphertextElectionContext context;
   public final Election.ElectionDescription election;
   public final ImmutableList<KeyCeremony.CoefficientValidationSet> guardianCoefficients;
   public final ImmutableList<Encrypt.EncryptionDevice> devices;
@@ -37,8 +40,8 @@ public class ElectionRecord {
 
   private final ImmutableMap<String, Integer> contest_vote_limits;
 
-  public ElectionRecord(Election.ElectionConstants constants,
-                        Election.CiphertextElectionContext context,
+  public ElectionRecord(ElectionConstants constants,
+                        CiphertextElectionContext context,
                         Election.ElectionDescription election,
                         List<KeyCeremony.CoefficientValidationSet> guardianCoefficients,
                         @Nullable List<Encrypt.EncryptionDevice> devices,

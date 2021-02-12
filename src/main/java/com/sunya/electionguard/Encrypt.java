@@ -53,7 +53,7 @@ public class Encrypt {
   }
 
   /**
-   * An object for caching election and encryption state. It composes Elections and Ballots.
+   * Orchestrates the encryption of Ballots.
    * Mutable, since it has to keep track of the last hash for ballot chaining.
    * See discussion on Issue #272 about "ballot chaining".
    */
@@ -167,8 +167,7 @@ public class Encrypt {
 
     // TODO: ISSUE #47: encrypt/decrypt: encrypt the extended_data field
 
-    // Create the return object
-    CiphertextBallotSelection encrypted_selection = make_ciphertext_ballot_selection(
+    CiphertextBallotSelection encrypted_selection = CiphertextBallotSelection.create(
             selection.selection_id,
             selection_description_hash,
             elgamal_encryption.get(),
@@ -331,7 +330,7 @@ public class Encrypt {
       logger.atInfo().log("mismatching selection count: only n-of-m style elections are currently supported");
     }
 
-    CiphertextBallotContest encrypted_contest = make_ciphertext_ballot_contest(
+    CiphertextBallotContest encrypted_contest = CiphertextBallotContest.create(
         contest.contest_id,
         contest_description_hash,
         encrypted_selections,
@@ -364,7 +363,7 @@ public class Encrypt {
   //  by traversing the collection of ballots encrypted by a specific device
 
   /**
-   * Encrypt a PlaintextBallot in the context of a specific InternalElectionDescription.
+   * Encrypt a PlaintextBallot in the context of a specific ElectionWithPlaceholders.
    * <p>
    * This method accepts a ballot representation that only includes `True` selections.
    * It will fill missing selections for a contest with `False` values, and generate `placeholder`
@@ -374,16 +373,13 @@ public class Encrypt {
    * It will fill missing contests with `False` selections and generate `placeholder` selections that are marked `True`.
    *
    * @param ballot:               the ballot in the valid input form
-   * @param election_metadata:    the `InternalElectionDescription` which defines this ballot's structure
+   * @param metadata:             the ElectionWithPlaceholders which defines this ballot's structure
    * @param context:              all the cryptographic context for the election
    * @param seed_hash:            Hash from previous ballot or starting hash from device
    * @param nonce:                an optional nonce used to encrypt this contest
    *                              if this value is not provided, a random nonce is used.
    * @param should_verify_proofs: specify if the proofs should be verified prior to returning (default True)
    */
-  // def encrypt_ballot( ballot: PlaintextBallot, election_metadata: InternalElectionDescription, context:
-  //    CiphertextElectionContext, seed_hash: ElementModQ, nonce: Optional[ElementModQ] = None, should_verify_proofs:
-  //    bool = True,
   static Optional<CiphertextBallot> encrypt_ballot(
           PlaintextBallot ballot,
           ElectionWithPlaceholders metadata,
@@ -439,7 +435,7 @@ public class Encrypt {
     }
 
     // Create the return object
-    CiphertextBallot encrypted_ballot = Ballot.make_ciphertext_ballot(
+    CiphertextBallot encrypted_ballot = CiphertextBallot.create(
           ballot.object_id,
           ballot.ballot_style,
           metadata.election.crypto_hash,

@@ -12,6 +12,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/** An election with contests that have been filled out with selection placeholders. */
 public class ElectionWithPlaceholders {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
@@ -118,10 +119,10 @@ public class ElectionWithPlaceholders {
   }
 
   /**
-   * ContestDescriptionWithPlaceholders is a `ContestDescription` with ElectionGuard `placeholder_selections`.
-   * (The ElectionGuard spec requires for n-of-m elections that there be *exactly* n counters that are one,
+   * A contest thats been filled with placeholder_selections.
+   * The ElectionGuard spec requires that n-of-m elections have *exactly* n counters that are one,
    * with the rest zero, so if a voter deliberately undervotes, one or more of the placeholder counters will
-   * become one. This allows the `ConstantChaumPedersenProof` to verify correctly for undervoted contests.)
+   * become one. This allows the `ConstantChaumPedersenProof` to verify correctly for undervoted contests.
    */
   @Immutable
   public static class ContestWithPlaceholders extends Election.ContestDescription {

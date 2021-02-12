@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 import static com.sunya.electionguard.Election.*;
 
-/** Conversion of ElectionDescription from Json. */
+/** Helper class for conversion of ElectionDescription from Json. */
 public class ElectionDescriptionFromJson {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 

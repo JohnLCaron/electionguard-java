@@ -13,7 +13,10 @@ import static com.sunya.electionguard.Ballot.CiphertextBallotSelection;
 import static com.sunya.electionguard.Group.ElementModP;
 import static com.sunya.electionguard.Group.ElementModQ;
 
-/** This verifies specification section "5. Adherence to Vote Limits". */
+/**
+ * This verifies specification section "5 Adherence to Vote Limits".
+ * @see <a href="https://www.electionguard.vote/spec/0.95.0/9_Verifier_construction/#adherence-to-vote-limits">Vote limits validation</a>
+ */
 public class ContestVoteLimitsVerifier {
   private static final boolean show = false;
 

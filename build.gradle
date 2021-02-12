@@ -14,7 +14,7 @@ plugins {
 }
 
 group 'com.sunya.electionguard'
-version '0.8-SNAPSHOT'
+version '0.9-SNAPSHOT'
 
 repositories {
     // Prefer JCenter to Maven Central. See
@@ -120,4 +120,11 @@ task fatJar(type: Jar) {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
     with jar
+}
+
+task myJavadocs(type: Javadoc) {
+    source = sourceSets.main.allJava
+    classpath = sourceSets.main.runtimeClasspath
+    options.showFromPublic()
+    options.noDeprecated()
 }
