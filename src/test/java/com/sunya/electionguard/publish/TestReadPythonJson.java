@@ -42,7 +42,7 @@ public class TestReadPythonJson {
 
   @Example
   public void testEncryptedTallyPythonJson() throws IOException {
-    PublishedCiphertextTally fromPython = ConvertFromJson.readCiphertextTally(publisher.encryptedTallyPath().toString());
+    CiphertextTally fromPython = ConvertFromJson.readCiphertextTally(publisher.encryptedTallyPath().toString());
     assertThat(fromPython).isNotNull();
     System.out.printf("EncryptedTallyPythonJson %s%n", fromPython);
   }
@@ -75,7 +75,7 @@ public class TestReadPythonJson {
   @Example
   public void testBallotsPythonJson() throws IOException {
     for (File file : publisher.ballotFiles()) {
-      Ballot.CiphertextAcceptedBallot fromPython = ConvertFromJson.readCiphertextBallot(file.getAbsolutePath());
+      CiphertextAcceptedBallot fromPython = ConvertFromJson.readCiphertextBallot(file.getAbsolutePath());
       assertThat(fromPython).isNotNull();
       System.out.printf("ballotFiles %s%n", fromPython.object_id);
     }
@@ -84,7 +84,7 @@ public class TestReadPythonJson {
   @Example
   public void testSpoiledPythonJson() throws IOException {
     for (File file : publisher.spoiledBallotFiles()) {
-      Ballot.PlaintextBallot fromPython = ConvertFromJson.readPlaintextBallot(file.getAbsolutePath());
+      PlaintextBallot fromPython = ConvertFromJson.readPlaintextBallot(file.getAbsolutePath());
       assertThat(fromPython).isNotNull();
       System.out.printf("spoiledBallotFiles %s%n", fromPython.object_id);
     }
@@ -94,7 +94,7 @@ public class TestReadPythonJson {
   public void testProblemPythonJson() throws IOException {
     // this is failing because Optional is encoded as "None".
     String filename = pythonPublish + "/encrypted_ballots/ballot_03a29d15-667c-4ac8-afd7-549f19b8e4eb.json";
-    Ballot.CiphertextAcceptedBallot fromPython = ConvertFromJson.readCiphertextBallot(filename);
+    CiphertextAcceptedBallot fromPython = ConvertFromJson.readCiphertextBallot(filename);
     assertThat(fromPython).isNotNull();
     System.out.printf("%s%n", fromPython);
   }

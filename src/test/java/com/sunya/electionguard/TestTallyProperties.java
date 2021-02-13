@@ -11,8 +11,6 @@ import java.util.Optional;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 
-import static com.sunya.electionguard.Ballot.*;
-
 public class TestTallyProperties extends TestProperties {
 
   @Property(tries = 3, shrinking = ShrinkingMode.OFF)
@@ -32,7 +30,7 @@ public class TestTallyProperties extends TestProperties {
       assertThat(encrypted_ballotO).isPresent();
       CiphertextBallot encrypted_ballot = encrypted_ballotO.get();
       seed_hash = encrypted_ballot.tracking_hash;
-      store.accept_ballot(encrypted_ballot, BallotBoxState.CAST);
+      store.accept_ballot(encrypted_ballot, BallotBox.State.CAST);
     }
 
     CiphertextTallyBuilder result = new CiphertextTallyBuilder("whatever", everything.metadata, everything.context);
@@ -61,7 +59,7 @@ public class TestTallyProperties extends TestProperties {
       CiphertextBallot encrypted_ballot = encrypted_ballotO.get();
       seed_hash = encrypted_ballot.tracking_hash;
       // add to the ballot store
-      store.accept_ballot(encrypted_ballot, BallotBoxState.SPOILED);
+      store.accept_ballot(encrypted_ballot, BallotBox.State.SPOILED);
     }
 
     CiphertextTallyBuilder result = new CiphertextTallyBuilder("whatever", everything.metadata, everything.context);
@@ -95,7 +93,7 @@ public class TestTallyProperties extends TestProperties {
       CiphertextBallot encrypted_ballot = encrypted_ballotO.get();
       seed_hash = encrypted_ballot.tracking_hash;
       // vary the state
-      BallotBoxState state = (count % 3 == 0) ? BallotBoxState.UNKNOWN : (count % 3 == 1) ? BallotBoxState.CAST : BallotBoxState.SPOILED;
+      BallotBox.State state = (count % 3 == 0) ? BallotBox.State.UNKNOWN : (count % 3 == 1) ? BallotBox.State.CAST : BallotBox.State.SPOILED;
       CiphertextAcceptedBallot acceptedBallot = encrypted_ballot.acceptWithState(state);
       store.put(encrypted_ballot.object_id, acceptedBallot);
       acceptedBallots[count % 3] = acceptedBallot;
@@ -105,32 +103,32 @@ public class TestTallyProperties extends TestProperties {
     CiphertextTallyBuilder tally = new CiphertextTallyBuilder("my-tally", everything.metadata, everything.context);
 
     CiphertextAcceptedBallot unknownBallot = acceptedBallots[0];
-    assertThat(unknownBallot.state).isEqualTo(BallotBoxState.UNKNOWN);
+    assertThat(unknownBallot.state).isEqualTo(BallotBox.State.UNKNOWN);
 
     //  verify an UNKNOWN state ballot fails
     assertThat(tally.append(unknownBallot)).isFalse();
 
     //  cast a ballot
     CiphertextAcceptedBallot castBallot = acceptedBallots[1];
-    assertThat(castBallot.state).isEqualTo(BallotBoxState.CAST);
+    assertThat(castBallot.state).isEqualTo(BallotBox.State.CAST);
     assertThat(tally.append(castBallot)).isTrue();
     //  verify a cast ballot cannot be added twice
     assertThat(tally.append(castBallot)).isFalse();
 
     //  spoil a ballot
     CiphertextAcceptedBallot spoiledBallot = acceptedBallots[2];
-    assertThat(spoiledBallot.state).isEqualTo(BallotBoxState.SPOILED);
+    assertThat(spoiledBallot.state).isEqualTo(BallotBox.State.SPOILED);
     assertThat(tally.append(spoiledBallot)).isTrue();
     //  verify a spoiled ballot cannot be added twice
     assertThat(tally.append(spoiledBallot)).isFalse();
 
     //// tests that use the same ballot id with different state
     // verify an already spoiled ballot cannot be cast
-    CiphertextAcceptedBallot again = spoiledBallot.acceptWithState(BallotBoxState.CAST);
+    CiphertextAcceptedBallot again = spoiledBallot.acceptWithState(BallotBox.State.CAST);
     assertThat(tally.append(again)).isFalse();
 
     //  verify an already cast ballot cannot be spoiled
-    CiphertextAcceptedBallot again2 = castBallot.acceptWithState(BallotBoxState.SPOILED);
+    CiphertextAcceptedBallot again2 = castBallot.acceptWithState(BallotBox.State.SPOILED);
     assertThat(tally.append(again2)).isFalse();
   }
 
@@ -138,8 +136,8 @@ public class TestTallyProperties extends TestProperties {
   /** Demonstrates how to decrypt a tally with a known secret key. */
   private Map<String, Integer> decrypt_with_secret(CiphertextTallyBuilder tally, Group.ElementModQ secret_key) {
     Map<String, Integer> plaintext_selections = new HashMap<>();
-    for (CiphertextTallyBuilder.CiphertextTallyContestBuilder contest : tally.contests.values()) {
-      for (Map.Entry<String, CiphertextTallyBuilder.CiphertextTallySelectionBuilder> entry : contest.tally_selections.entrySet()) {
+    for (CiphertextTallyBuilder.Contest contest : tally.contests.values()) {
+      for (Map.Entry<String, CiphertextTallyBuilder.Selection> entry : contest.tally_selections.entrySet()) {
         Integer plaintext_tally = entry.getValue().ciphertext().decrypt(secret_key);
         plaintext_selections.put(entry.getKey(), plaintext_tally);
       }

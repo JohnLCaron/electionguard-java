@@ -3,6 +3,7 @@ package com.sunya.electionguard.proto;
 import com.sunya.electionguard.ChaumPedersen;
 import com.sunya.electionguard.DecryptionShare;
 import com.sunya.electionguard.Group;
+import com.sunya.electionguard.GuardianState;
 import com.sunya.electionguard.PlaintextTally;
 
 import java.util.HashMap;
@@ -22,12 +23,8 @@ import static com.sunya.electionguard.proto.CommonConvert.convertElementModQ;
 public class PlaintextTallyFromProto {
 
   public static PlaintextTally translateFromProto(PlaintextTallyProto.PlaintextTally tally) {
-    Map<String, PlaintextTally.PlaintextTallyContest> contests = tally.getContestsMap().entrySet().stream()
+    Map<String, PlaintextTally.Contest> contests = tally.getContestsMap().entrySet().stream()
             .collect(Collectors.toMap(Map.Entry::getKey, e -> convertContest(e.getValue())));
-
-    /* Map<String, Map<String, PlaintextTally.PlaintextTallyContest>> spoiled = tally.getSpoiledBallotsMap().entrySet().stream()
-            .collect(Collectors.toMap(Map.Entry::getKey,
-                    e -> convertSpoiled(e.getValue()))); */
 
     Map<String, Group.ElementModQ> lagrange_coefficients = tally.getLagrangeCoefficientsMap().entrySet().stream()
             .collect(Collectors.toMap(Map.Entry::getKey, e -> convertElementModQ(e.getValue())));
@@ -39,30 +36,22 @@ public class PlaintextTallyFromProto {
             convertList(tally.getGuardianStatesList(), PlaintextTallyFromProto::convertState));
   }
 
-  static Map<String, PlaintextTally.PlaintextTallyContest> convertSpoiled(PlaintextTallyProto.PlaintextTallyContestMap spoiledMap) {
-    Map<String, PlaintextTally.PlaintextTallyContest> result = new HashMap<>();
-    for (Map.Entry<String, PlaintextTallyProto.PlaintextTallyContest> selection : spoiledMap.getContestsMap().entrySet()) {
-      result.put(selection.getKey(), convertContest(selection.getValue()));
-    }
-    return result;
-  }
-
-  static PlaintextTally.PlaintextTallyContest convertContest(PlaintextTallyProto.PlaintextTallyContest proto) {
-    Map<String, PlaintextTally.PlaintextTallySelection> selections = proto.getSelectionsMap().entrySet().stream()
+  static PlaintextTally.Contest convertContest(PlaintextTallyProto.PlaintextTallyContest proto) {
+    Map<String, PlaintextTally.Selection> selections = proto.getSelectionsMap().entrySet().stream()
             .collect(Collectors.toMap(Map.Entry::getKey,
                     e -> convertSelection(e.getValue())));
 
-    return PlaintextTally.PlaintextTallyContest.create(
+    return PlaintextTally.Contest.create(
             proto.getObjectId(),
             selections);
   }
 
-  static PlaintextTally.PlaintextTallySelection convertSelection(PlaintextTallyProto.PlaintextTallySelection proto) {
+  static PlaintextTally.Selection convertSelection(PlaintextTallyProto.PlaintextTallySelection proto) {
     List<DecryptionShare.CiphertextDecryptionSelection> shares = proto.getSharesList().stream()
             .map(PlaintextTallyFromProto::convertShare)
             .collect(Collectors.toList());
 
-    return PlaintextTally.PlaintextTallySelection.create(
+    return PlaintextTally.Selection.create(
             proto.getObjectId(),
             proto.getTally(),
             convertElementModP(proto.getValue()),
@@ -104,8 +93,8 @@ public class PlaintextTallyFromProto {
             convertElementModQ(proof.getResponse()));
   }
 
-  private static PlaintextTally.GuardianState convertState(PlaintextTallyProto.GuardianState proto) {
-    return PlaintextTally.GuardianState.create(
+  private static GuardianState convertState(PlaintextTallyProto.GuardianState proto) {
+    return GuardianState.create(
             proto.getGuardianId(),
             proto.getSequence(),
             proto.getMissing());

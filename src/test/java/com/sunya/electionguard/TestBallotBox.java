@@ -5,7 +5,6 @@ import net.jqwik.api.Example;
 import java.math.BigInteger;
 import java.util.Optional;
 
-import static com.sunya.electionguard.Ballot.*;
 import static com.sunya.electionguard.Election.*;
 import static com.sunya.electionguard.Group.*;
 
@@ -50,8 +49,8 @@ public class TestBallotBox {
 
     CiphertextAcceptedBallot expected = ballotBox.get(source.object_id).orElse(null);
     assertThat(expected).isNotNull();
-    assertThat(expected.state).isEqualTo(BallotBoxState.CAST);
-    assertThat(result.state).isEqualTo(BallotBoxState.CAST);
+    assertThat(expected.state).isEqualTo(BallotBox.State.CAST);
+    assertThat(result.state).isEqualTo(BallotBox.State.CAST);
     assertThat(expected.object_id).isEqualTo(result.object_id);
 
     // Test failure modes
@@ -68,8 +67,8 @@ public class TestBallotBox {
     CiphertextAcceptedBallot expected = ballotBox.get(source.object_id).orElse(null);
     assertThat(expected).isNotNull();
 
-    assertThat(expected.state).isEqualTo(BallotBoxState.SPOILED);
-    assertThat(result.state).isEqualTo(BallotBoxState.SPOILED);
+    assertThat(expected.state).isEqualTo(BallotBox.State.SPOILED);
+    assertThat(result.state).isEqualTo(BallotBox.State.SPOILED);
     assertThat(expected.object_id).isEqualTo(result.object_id);
 
     //Test failure modes
@@ -79,34 +78,34 @@ public class TestBallotBox {
 
   @Example
   public void test_cast_ballot() {
-    CiphertextAcceptedBallot result = ballotBox.accept_ballot(data, BallotBoxState.CAST).orElse(null);
+    CiphertextAcceptedBallot result = ballotBox.accept_ballot(data, BallotBox.State.CAST).orElse(null);
     assertThat(result).isNotNull();
 
     CiphertextAcceptedBallot expected = ballotBox.get(source.object_id).orElse(null);
     assertThat(expected).isNotNull();
-    assertThat(expected.state).isEqualTo(BallotBoxState.CAST);
-    assertThat(result.state).isEqualTo(BallotBoxState.CAST);
+    assertThat(expected.state).isEqualTo(BallotBox.State.CAST);
+    assertThat(result.state).isEqualTo(BallotBox.State.CAST);
     assertThat(expected.object_id).isEqualTo(result.object_id);
 
     //Test failure modes
-    assertThat(ballotBox.accept_ballot(data, BallotBoxState.CAST)).isEmpty();  //cannot cast again
-    assertThat(ballotBox.accept_ballot(data, BallotBoxState.SPOILED)).isEmpty();  //cannot spoil a ballot already cast
+    assertThat(ballotBox.accept_ballot(data, BallotBox.State.CAST)).isEmpty();  //cannot cast again
+    assertThat(ballotBox.accept_ballot(data, BallotBox.State.SPOILED)).isEmpty();  //cannot spoil a ballot already cast
   }
 
   @Example
   public void test_spoil_ballot() {
-    CiphertextAcceptedBallot result = ballotBox.accept_ballot(data, BallotBoxState.SPOILED).orElse(null);
+    CiphertextAcceptedBallot result = ballotBox.accept_ballot(data, BallotBox.State.SPOILED).orElse(null);
     assertThat(result).isNotNull();
 
     CiphertextAcceptedBallot expected = ballotBox.get(source.object_id).orElse(null);
     assertThat(expected).isNotNull();
-    assertThat(expected.state).isEqualTo(BallotBoxState.SPOILED);
-    assertThat(result.state).isEqualTo(BallotBoxState.SPOILED);
+    assertThat(expected.state).isEqualTo(BallotBox.State.SPOILED);
+    assertThat(result.state).isEqualTo(BallotBox.State.SPOILED);
     assertThat(expected.object_id).isEqualTo(result.object_id);
 
     //Test failure modes
-    assertThat(ballotBox.accept_ballot(data, BallotBoxState.CAST)).isEmpty();  //cannot cast again
-    assertThat(ballotBox.accept_ballot(data, BallotBoxState.SPOILED)).isEmpty();  //cannot spoil a ballot already cast
+    assertThat(ballotBox.accept_ballot(data, BallotBox.State.CAST)).isEmpty();  //cannot cast again
+    assertThat(ballotBox.accept_ballot(data, BallotBox.State.SPOILED)).isEmpty();  //cannot spoil a ballot already cast
   }
 
 }

@@ -3,11 +3,13 @@ package com.sunya.electionguard.workflow;
 import com.beust.jcommander.*;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
-import com.sunya.electionguard.Ballot;
 import com.sunya.electionguard.BallotBox;
+import com.sunya.electionguard.CiphertextAcceptedBallot;
+import com.sunya.electionguard.CiphertextBallot;
 import com.sunya.electionguard.Election;
 import com.sunya.electionguard.ElectionWithPlaceholders;
 import com.sunya.electionguard.Encrypt;
+import com.sunya.electionguard.PlaintextBallot;
 import com.sunya.electionguard.publish.Consumer;
 import com.sunya.electionguard.publish.Publisher;
 import com.sunya.electionguard.verifier.ElectionRecord;
@@ -111,12 +113,12 @@ public class EncryptBallots {
             cmdLine.inputDir, cmdLine.ballotProviderClass, cmdLine.encryptDir);
     EncryptBallots encryptor = new EncryptBallots(electionRecord, cmdLine.deviceName);
 
-    List<Ballot.PlaintextBallot> originalBallots = new ArrayList<>();
+    List<PlaintextBallot> originalBallots = new ArrayList<>();
     try {
-      for (Ballot.PlaintextBallot ballot : ballotProvider.ballots()) {
-        Optional<Ballot.CiphertextBallot> encrypted_ballot = encryptor.encryptBallot(ballot);
+      for (PlaintextBallot ballot : ballotProvider.ballots()) {
+        Optional<CiphertextBallot> encrypted_ballot = encryptor.encryptBallot(ballot);
         if (encrypted_ballot.isPresent()) {
-          Optional<Ballot.CiphertextAcceptedBallot> accepted = encryptor.castOrSpoil(encrypted_ballot.get(), random.nextBoolean());
+          Optional<CiphertextAcceptedBallot> accepted = encryptor.castOrSpoil(encrypted_ballot.get(), random.nextBoolean());
           if (accepted.isEmpty()) {
             System.out.printf("***castOrSpoil failed%n");
           }
@@ -181,13 +183,13 @@ public class EncryptBallots {
     System.out.printf("%nReady to encrypt at location: '%s'%n", this.device.location);
   }
 
-  Optional<Ballot.CiphertextBallot> encryptBallot(Ballot.PlaintextBallot plaintextBallot) {
+  Optional<CiphertextBallot> encryptBallot(PlaintextBallot plaintextBallot) {
     originalBallotsCount++;
     return this.encryptor.encrypt(plaintextBallot);
   }
 
   // Accept each ballot by marking it as either cast or spoiled.
-  Optional<Ballot.CiphertextAcceptedBallot> castOrSpoil(Ballot.CiphertextBallot ballot, boolean spoil) {
+  Optional<CiphertextAcceptedBallot> castOrSpoil(CiphertextBallot ballot, boolean spoil) {
     if (spoil) {
       return this.ballotBox.spoil(ballot);
     } else {
@@ -213,7 +215,7 @@ public class EncryptBallots {
             );
   }
 
-  void saveOriginalBallots(String publishDir, List<Ballot.PlaintextBallot> ballots) throws IOException {
+  void saveOriginalBallots(String publishDir, List<PlaintextBallot> ballots) throws IOException {
     Publisher publisher = new Publisher(publishDir, false, false);
     publisher.publish_private_data(ballots, null, null);
     System.out.printf("Save private ballot in %s%n", publisher.privateDirPath());

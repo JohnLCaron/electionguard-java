@@ -55,30 +55,30 @@ public class ConvertFromJson {
     }
   }
 
-  public static Ballot.CiphertextAcceptedBallot readCiphertextBallot(String pathname) throws IOException {
+  public static CiphertextAcceptedBallot readCiphertextBallot(String pathname) throws IOException {
     try (InputStream is = new FileInputStream(pathname)) {
       Reader reader = new InputStreamReader(is);
-      return enhancedGson.fromJson(reader, Ballot.CiphertextAcceptedBallot.class);
+      return enhancedGson.fromJson(reader, CiphertextAcceptedBallot.class);
     } catch (Exception ioe) {
       logger.atSevere().log("Failed reading file '%s'", pathname);
       throw ioe;
     }
   }
 
-  public static Ballot.PlaintextBallot readPlaintextBallot(String pathname) throws IOException {
+  public static PlaintextBallot readPlaintextBallot(String pathname) throws IOException {
     try (InputStream is = new FileInputStream(pathname)) {
       Reader reader = new InputStreamReader(is);
-      return enhancedGson.fromJson(reader, Ballot.PlaintextBallot.class);
+      return enhancedGson.fromJson(reader, PlaintextBallot.class);
     } catch (Exception ioe) {
       logger.atSevere().log("Failed reading file '%s'", pathname);
       throw ioe;
     }
   }
 
-  public static PublishedCiphertextTally readCiphertextTally(String pathname) throws IOException {
+  public static CiphertextTally readCiphertextTally(String pathname) throws IOException {
     try (InputStream is = new FileInputStream(pathname)) {
       Reader reader = new InputStreamReader(is);
-      return enhancedGson.fromJson(reader, PublishedCiphertextTally.class);
+      return enhancedGson.fromJson(reader, CiphertextTally.class);
     } catch (Exception ioe) {
       logger.atSevere().log("Failed reading file '%s'", pathname);
       throw ioe;

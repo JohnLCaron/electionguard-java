@@ -23,12 +23,12 @@ public abstract class TestProperties {
   }
 
   @Provide
-  Arbitrary<Ballot.PlaintextBallotSelection> get_selection_poorly_formed() {
+  Arbitrary<PlaintextBallot.Selection> get_selection_poorly_formed() {
     return Arbitraries.of(BallotFactory.get_selection_poorly_formed());
   }
 
   @Provide
-  Arbitrary<Ballot.PlaintextBallotSelection> get_selection_well_formed() {
+  Arbitrary<PlaintextBallot.Selection> get_selection_well_formed() {
     return Arbitraries.of(BallotFactory.get_selection_well_formed());
   }
 

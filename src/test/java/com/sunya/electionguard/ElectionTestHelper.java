@@ -460,9 +460,9 @@ public class ElectionTestHelper {
             contact_infos());
   }
 
-  List<Ballot.PlaintextBallot> plaintext_voted_ballots(ElectionWithPlaceholders metadata, int count) {
+  List<PlaintextBallot> plaintext_voted_ballots(ElectionWithPlaceholders metadata, int count) {
     // ballots: List[PlaintextBallot] = [] for i in range(count):ballots.append(draw(plaintext_voted_ballot(metadata)))
-    List<Ballot.PlaintextBallot> ballots = new ArrayList<>();
+    List<PlaintextBallot> ballots = new ArrayList<>();
     for (int i = 0; i < count; i++) {
       ballots.add(plaintext_voted_ballot(metadata));
     }
@@ -470,7 +470,7 @@ public class ElectionTestHelper {
   }
 
   /** Generates an arbitrary `PlaintextBallot` with the choices made randomly. */
-  Ballot.PlaintextBallot plaintext_voted_ballot(ElectionWithPlaceholders metadata) {
+  PlaintextBallot plaintext_voted_ballot(ElectionWithPlaceholders metadata) {
     int num_ballot_styles = metadata.election.ballot_styles.size();
     assertWithMessage("invalid election with no ballot styles").that(num_ballot_styles > 0).isTrue();
 
@@ -480,7 +480,7 @@ public class ElectionTestHelper {
     List<ContestWithPlaceholders> contests = metadata.get_contests_for(ballot_style.object_id);
     assertWithMessage("invalid ballot style with no contests in it").that(contests.size() > 0).isTrue();
 
-    List<Ballot.PlaintextBallotContest> voted_contests = new ArrayList<>();
+    List<PlaintextBallot.Contest> voted_contests = new ArrayList<>();
     for (ContestWithPlaceholders contest : contests) {
       assertWithMessage("every contest needs to be valid").that(contest.is_valid()).isTrue();
       // LOOK dont understand "we need exactly this many 1 's, and the rest 0' s"
@@ -494,16 +494,16 @@ public class ElectionTestHelper {
       List<SelectionDescription> yes_votes = ballot_selections.subList(0, cut_point);
       List<SelectionDescription> no_votes = ballot_selections.subList(cut_point, ballot_selections.size());
 
-      List<Ballot.PlaintextBallotSelection> voted_selections = new ArrayList<>();
+      List<PlaintextBallot.Selection> voted_selections = new ArrayList<>();
       yes_votes.stream().map(d -> Encrypt.selection_from(d, false, true))
               .forEach(voted_selections::add);
       no_votes.stream().map(d -> Encrypt.selection_from(d, false, false))
               .forEach(voted_selections::add);
 
-      voted_contests.add(new Ballot.PlaintextBallotContest(contest.object_id, voted_selections));
+      voted_contests.add(new PlaintextBallot.Contest(contest.object_id, voted_selections));
     }
 
-    return new Ballot.PlaintextBallot(randomString("PlaintextBallot"), ballot_style.object_id, voted_contests);
+    return new PlaintextBallot(randomString("PlaintextBallot"), ballot_style.object_id, voted_contests);
   }
 
   static class CIPHERTEXT_ELECTIONS_TUPLE_TYPE {
@@ -536,14 +536,14 @@ public class ElectionTestHelper {
   public static class EverythingTuple {
     ElectionDescription election_description;
     ElectionWithPlaceholders metadata;
-    List<Ballot.PlaintextBallot> ballots;
+    List<PlaintextBallot> ballots;
     ElementModQ secret_key;
     CiphertextElectionContext context;
 
     public EverythingTuple(
                  ElectionDescription election_description,
                  ElectionWithPlaceholders metadata,
-                 List<Ballot.PlaintextBallot> ballots,
+                 List<PlaintextBallot> ballots,
                  ElementModQ secret_key,
                  CiphertextElectionContext context) {
       this.election_description = election_description;
@@ -570,7 +570,7 @@ public class ElectionTestHelper {
     ElectionWithPlaceholders metadata = new ElectionWithPlaceholders(election_description);
 
     // ballots = [draw(plaintext_voted_ballots(internal_election_description)) for _ in range(num_ballots)]
-    List<Ballot.PlaintextBallot> ballots = new ArrayList<>();
+    List<PlaintextBallot> ballots = new ArrayList<>();
     for (int i=0; i<num_ballots; i++) {
       ballots.addAll(plaintext_voted_ballots(metadata, 1));
     }

@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
-import static com.sunya.electionguard.Ballot.*;
 import static com.sunya.electionguard.Election.*;
 import static com.sunya.electionguard.Group.*;
 import static com.sunya.electionguard.KeyCeremony.*;
@@ -197,7 +196,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
     // generate encrypted tally
     CiphertextTallyBuilder ctally  = new CiphertextTallyBuilder("whatever", this.metadata, this.context);
     ctally.batch_append(ballot_box.getAcceptedBallots());
-    PublishedCiphertextTally ptally = ctally.build();
+    CiphertextTally ptally = ctally.build();
 
     // now decrypt it
     DecryptionMediator decryptionMediator = new DecryptionMediator(this.context, ptally, this.ballot_box.getSpoiledBallots());
@@ -255,7 +254,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
     // generate encrypted tally
     CiphertextTallyBuilder ctally  = new CiphertextTallyBuilder("whatever", this.metadata, this.context);
     ctally.batch_append(ballot_box.getAcceptedBallots());
-    PublishedCiphertextTally ptally = ctally.build();
+    CiphertextTally ptally = ctally.build();
 
     // now decrypt it
     DecryptionMediator decryptionMediator = new DecryptionMediator(this.context, ptally, this.ballot_box.getSpoiledBallots());
@@ -307,7 +306,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
     // generate encrypted tally
     CiphertextTallyBuilder ctally  = new CiphertextTallyBuilder("whatever", this.metadata, this.context);
     ctally.batch_append(ballot_box.getAcceptedBallots());
-    PublishedCiphertextTally ptally = ctally.build();
+    CiphertextTally ptally = ctally.build();
 
     // now decrypt it
     DecryptionMediator decryptionMediator = new DecryptionMediator(this.context, ptally, this.ballot_box.getSpoiledBallots());
@@ -353,7 +352,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
     // generate encrypted tally
     CiphertextTallyBuilder ctally  = new CiphertextTallyBuilder("whatever", this.metadata, this.context);
     ctally.batch_append(ballot_box.getAcceptedBallots());
-    PublishedCiphertextTally ptally = ctally.build();
+    CiphertextTally ptally = ctally.build();
 
     // now decrypt it
     DecryptionMediator decryptionMediator = new DecryptionMediator(this.context, ptally, this.ballot_box.getSpoiledBallots());
@@ -368,8 +367,8 @@ public class TestDecryptionMediatorProblem extends TestProperties {
 
   private Map<String, Integer> _convert_to_selections(PlaintextTally tally) {
     Map<String, Integer> plaintext_selections = new HashMap<>();
-    for (PlaintextTally.PlaintextTallyContest contest : tally.contests.values()) {
-      for (Map.Entry<String, PlaintextTally.PlaintextTallySelection> entry : contest.selections().entrySet()) {
+    for (PlaintextTally.Contest contest : tally.contests.values()) {
+      for (Map.Entry<String, PlaintextTally.Selection> entry : contest.selections().entrySet()) {
         plaintext_selections.put(entry.getKey(), entry.getValue().tally());
       }
     }

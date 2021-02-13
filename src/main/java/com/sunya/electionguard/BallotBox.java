@@ -7,11 +7,19 @@ import com.sunya.electionguard.publish.CloseableIterableAdapter;
 
 import java.util.Optional;
 
-import static com.sunya.electionguard.Ballot.*;
-
 /** A collection of ballots that have been either cast or spoiled. */
 public class BallotBox {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
+
+  /** Enumeration indicating a ballot has been cast or spoiled. Ordering same as python. */
+  public enum State {
+    /** A ballot that has been explicitly cast */
+    CAST,
+    /** A ballot that has been explicitly spoiled */
+    SPOILED,
+    /** A ballot whose state is unknown to ElectionGuard and will not be included in any election results. */
+    UNKNOWN
+  }
 
   private final ElectionWithPlaceholders metadata;
   private final CiphertextElectionContext context;
@@ -25,12 +33,12 @@ public class BallotBox {
   }
 
   public Optional<CiphertextAcceptedBallot> cast(CiphertextBallot ballot) {
-    return accept_ballot(ballot, BallotBoxState.CAST);
+    return accept_ballot(ballot, State.CAST);
   }
 
   /** Spoil a specific encrypted `CiphertextBallot` . */
   public Optional<CiphertextAcceptedBallot> spoil(CiphertextBallot ballot) {
-    return accept_ballot(ballot, BallotBoxState.SPOILED);
+    return accept_ballot(ballot, State.SPOILED);
   }
 
   /**
@@ -38,13 +46,13 @@ public class BallotBox {
    * Verify that the ballot is valid for the election and the ballot has not already been cast or spoiled.
    * @return a `CiphertextAcceptedBallot` or `None` if there was an error
    */
-  Optional<CiphertextAcceptedBallot> accept_ballot(CiphertextBallot ballot, BallotBoxState state) {
+  Optional<CiphertextAcceptedBallot> accept_ballot(CiphertextBallot ballot, State state) {
     if (!BallotValidations.ballot_is_valid_for_election(ballot, this.metadata, context)) {
       return Optional.empty();
     }
 
     if (store.containsKey(ballot.object_id)) {
-      Ballot.CiphertextAcceptedBallot existingBallot = store.get(ballot.object_id).orElseThrow(IllegalStateException::new);
+      CiphertextAcceptedBallot existingBallot = store.get(ballot.object_id).orElseThrow(IllegalStateException::new);
       logger.atWarning().log("error accepting ballot, %s already exists with state: %s",
           ballot.object_id, existingBallot.state);
       return Optional.empty();
@@ -62,20 +70,19 @@ public class BallotBox {
   }
 
   public Iterable<CiphertextAcceptedBallot> getCastBallots() {
-    return Iterables.filter(store, b -> b.state == BallotBoxState.CAST);
+    return Iterables.filter(store, b -> b.state == State.CAST);
   }
 
   public Iterable<CiphertextAcceptedBallot> getSpoiledBallots() {
-    return Iterables.filter(store, b -> b.state == BallotBoxState.SPOILED);
+    return Iterables.filter(store, b -> b.state == State.SPOILED);
   }
 
   /** Return the value for the given key, or empty. */
-  Optional<Ballot.CiphertextAcceptedBallot> get(String key) {
+  Optional<CiphertextAcceptedBallot> get(String key) {
     return store.get(key);
   }
 
   public CloseableIterable<CiphertextAcceptedBallot> getAcceptedBallots() {
     return CloseableIterableAdapter.wrap(store);
   }
-
 }

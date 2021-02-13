@@ -40,7 +40,7 @@ public class KeyCeremony {
     }
   }
 
-  /** Guardian's public key and owner information. */
+  /** A Guardian's public key and proof. */
   @AutoValue
   public abstract static class ElectionPublicKey {
     public abstract String owner_id(); // guardian object_id
@@ -53,7 +53,7 @@ public class KeyCeremony {
     }
   }
 
-  /** Public key set of auxiliary and election keys and owner information. */
+  /** A Guardian's public key set of auxiliary and election keys and proofs. */
   @AutoValue
   abstract static class PublicKeySet {
     abstract String owner_id(); // guardian object_id
@@ -80,7 +80,7 @@ public class KeyCeremony {
     }
   }
 
-  /** A point on a secret polynomial and commitments to verify this point for a designated guardian. */
+  /** A point on a secret polynomial, and commitments to verify this point for a designated guardian. */
   @AutoValue
   public abstract static class ElectionPartialKeyBackup {
     /** The Id of the guardian that generated this backup. */
@@ -111,7 +111,7 @@ public class KeyCeremony {
     }
   }
 
-  /** The public validation pieces for election key coefficients for the ith Guardian. */
+  /** The public validation pieces for election key coefficients for one Guardian. */
   @AutoValue
   public abstract static class CoefficientValidationSet {
     public abstract String owner_id(); // Guardian.object_id
@@ -134,7 +134,7 @@ public class KeyCeremony {
     }
   }
 
-  /** The secret polynomial coefficients for the ith Guardian. */
+  /** The secret polynomial coefficients for one Guardian. */
   @AutoValue
   public abstract static class CoefficientSet {
     public abstract String guardianId(); // Guardian.object_id

@@ -1,6 +1,6 @@
 package com.sunya.electionguard.proto;
 
-import com.sunya.electionguard.PublishedCiphertextTally;
+import com.sunya.electionguard.CiphertextTally;
 
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -12,29 +12,29 @@ import static com.sunya.electionguard.proto.CommonConvert.convertElementModQ;
 
 public class CiphertextTallyFromProto {
 
-  public static PublishedCiphertextTally translateFromProto(CiphertextTallyProto.PublishedCiphertextTally tally) {
-    Map<String, PublishedCiphertextTally.CiphertextTallyContest> contests = tally.getContestsMap().entrySet().stream()
+  public static CiphertextTally translateFromProto(CiphertextTallyProto.CiphertextTally tally) {
+    Map<String, CiphertextTally.Contest> contests = tally.getContestsMap().entrySet().stream()
             .collect(Collectors.toMap(Map.Entry::getKey,
                     e -> convertContest(e.getValue())));
 
-    return new PublishedCiphertextTally(
+    return new CiphertextTally(
             tally.getObjectId(), contests);
   }
 
-  static PublishedCiphertextTally.CiphertextTallyContest convertContest(CiphertextTallyContest proto) {
-    Map<String, PublishedCiphertextTally.CiphertextTallySelection> selections = proto.getTallySelectionsMap().entrySet().stream()
+  static CiphertextTally.Contest convertContest(CiphertextTallyContest proto) {
+    Map<String, CiphertextTally.Selection> selections = proto.getTallySelectionsMap().entrySet().stream()
             .collect(Collectors.toMap(Map.Entry::getKey,
                     e -> convertSelection(e.getValue())));
 
-    return new PublishedCiphertextTally.CiphertextTallyContest(
+    return new CiphertextTally.Contest(
             proto.getObjectId(),
             convertElementModQ(proto.getDescriptionHash()),
             selections);
   }
 
-  static PublishedCiphertextTally.CiphertextTallySelection convertSelection(CiphertextTallySelection proto) {
+  static CiphertextTally.Selection convertSelection(CiphertextTallySelection proto) {
 
-    return new PublishedCiphertextTally.CiphertextTallySelection(
+    return new CiphertextTally.Selection(
             proto.getObjectId(),
             convertElementModQ(proto.getDescriptionHash()),
             convertCiphertext(proto.getCiphertext()));

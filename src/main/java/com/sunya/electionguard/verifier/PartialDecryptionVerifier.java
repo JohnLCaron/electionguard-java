@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.flogger.FluentLogger;
 import com.sunya.electionguard.Group;
+import com.sunya.electionguard.GuardianState;
 import com.sunya.electionguard.PlaintextTally;
 
 import java.math.BigInteger;
@@ -28,21 +29,21 @@ public class PartialDecryptionVerifier {
 
   final ElectionRecord electionRecord;
   final PlaintextTally tally;
-  final Map<String, PlaintextTally.GuardianState> guardianStateMap;
+  final Map<String, GuardianState> guardianStateMap;
 
   PartialDecryptionVerifier(ElectionRecord electionRecord) {
     this.electionRecord = electionRecord;
-    this.tally = electionRecord.decryptedTally;
+    this.tally = Preconditions.checkNotNull(electionRecord.decryptedTally);
     this.guardianStateMap = new HashMap<>();
     tally.guardianStates.forEach(gs -> guardianStateMap.put(gs.guardian_id(), gs));
   }
 
   /** Verify 10.A for available guardians, if there are missing guardians. */
   boolean verify_replacement_partial_decryptions() {
-    /** Verify 10.A for available guardians, if there are missing guardians. */
+    // Verify 10.A for available guardians, if there are missing guardians.
     boolean error = !this.verify_lagrange_coefficients();
 
-    /** Verify 10.B for available guardians, if there are missing guardians. */
+    // Verify 10.B for available guardians, if there are missing guardians.
     error |= !this.make_all_contest_verification(this.tally.contests);
 
     if (error) {
@@ -58,7 +59,7 @@ public class PartialDecryptionVerifier {
     boolean error = false;
 
     for (Map.Entry<String, Group.ElementModQ> entry : tally.lagrange_coefficients.entrySet()) {
-      PlaintextTally.GuardianState available_state = guardianStateMap.get(entry.getKey());
+      GuardianState available_state = guardianStateMap.get(entry.getKey());
       if (available_state == null || available_state.is_missing()) {
         System.out.printf(" ***Inconsistent Guardian missing state. %n");
         return false;
@@ -90,9 +91,9 @@ public class PartialDecryptionVerifier {
     return numerator.equals(Group.mult_q(lagrange, denominator));
   }
 
-  private boolean make_all_contest_verification(Map<String, PlaintextTally.PlaintextTallyContest> contests) {
+  private boolean make_all_contest_verification(Map<String, PlaintextTally.Contest> contests) {
     boolean error = false;
-    for (PlaintextTally.PlaintextTallyContest contest : contests.values()) {
+    for (PlaintextTally.Contest contest : contests.values()) {
       DecryptionContestVerifier tcv = new DecryptionContestVerifier(contest);
       if (!tcv.verify_a_contest()) {
         error = true;
@@ -102,15 +103,15 @@ public class PartialDecryptionVerifier {
   }
 
   private class DecryptionContestVerifier {
-    PlaintextTally.PlaintextTallyContest contest;
+    PlaintextTally.Contest contest;
 
-    DecryptionContestVerifier(PlaintextTally.PlaintextTallyContest contest) {
+    DecryptionContestVerifier(PlaintextTally.Contest contest) {
       this.contest = contest;
     }
 
     boolean verify_a_contest() {
       boolean error = false;
-      for (PlaintextTally.PlaintextTallySelection selection : this.contest.selections().values()) {
+      for (PlaintextTally.Selection selection : this.contest.selections().values()) {
         String id = contest.object_id() + "-" + selection.object_id();
         DecryptionSelectionVerifier tsv = new DecryptionSelectionVerifier(id, selection);
         if (!tsv.verify_a_selection()) {
@@ -124,12 +125,12 @@ public class PartialDecryptionVerifier {
 
   private class DecryptionSelectionVerifier {
     final String id;
-    final PlaintextTally.PlaintextTallySelection selection;
+    final PlaintextTally.Selection selection;
     final String selection_id;
     final ElementModP pad;
     final ElementModP data;
 
-    DecryptionSelectionVerifier(String id, PlaintextTally.PlaintextTallySelection selection) {
+    DecryptionSelectionVerifier(String id, PlaintextTally.Selection selection) {
       this.id = id; // contest/selection
       this.selection = selection;
       this.selection_id = selection.object_id();

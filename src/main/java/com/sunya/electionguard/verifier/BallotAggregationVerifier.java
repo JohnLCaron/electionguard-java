@@ -1,10 +1,13 @@
 package com.sunya.electionguard.verifier;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.ListMultimap;
 import com.google.common.flogger.FluentLogger;
-import com.sunya.electionguard.Ballot;
+import com.sunya.electionguard.BallotBox;
+import com.sunya.electionguard.CiphertextAcceptedBallot;
+import com.sunya.electionguard.CiphertextBallot;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.PlaintextTally;
@@ -39,9 +42,10 @@ public class BallotAggregationVerifier {
   boolean verify_ballot_aggregation() {
     boolean error = false;
     SelectionAggregator agg = new SelectionAggregator(electionRecord.acceptedBallots);
+    Preconditions.checkNotNull(decryptedTally);
 
-    for (PlaintextTally.PlaintextTallyContest contest : decryptedTally.contests.values()) {
-      for (PlaintextTally.PlaintextTallySelection selection : contest.selections().values()) {
+    for (PlaintextTally.Contest contest : decryptedTally.contests.values()) {
+      for (PlaintextTally.Selection selection : contest.selections().values()) {
         String key = contest.object_id() + "." + selection.object_id();
         List<ElGamal.Ciphertext> encryptions = agg.selectionEncryptions.get(key);
         // LOOK its possible no ballots voted one way or another
@@ -73,9 +77,10 @@ public class BallotAggregationVerifier {
    */
   boolean verify_tally_decryption() {
     boolean error = false;
+    Preconditions.checkNotNull(decryptedTally);
 
-    for (PlaintextTally.PlaintextTallyContest contest : decryptedTally.contests.values()) {
-      for (PlaintextTally.PlaintextTallySelection selection : contest.selections().values()) {
+    for (PlaintextTally.Contest contest : decryptedTally.contests.values()) {
+      for (PlaintextTally.Selection selection : contest.selections().values()) {
         String key = contest.object_id() + "." + selection.object_id();
         List<ElementModP> partialDecryptions = selection.shares().stream().map(s -> s.share()).collect(Collectors.toList());
         ElementModP productMi = Group.mult_p(partialDecryptions);
@@ -105,11 +110,11 @@ public class BallotAggregationVerifier {
   private static class SelectionAggregator {
     ListMultimap<String, ElGamal.Ciphertext> selectionEncryptions = ArrayListMultimap.create();
 
-    SelectionAggregator(Iterable<Ballot.CiphertextAcceptedBallot> ballots) {
-      for (Ballot.CiphertextAcceptedBallot ballot : ballots) {
-        if (ballot.state == Ballot.BallotBoxState.CAST) {
-          for (Ballot.CiphertextBallotContest contest : ballot.contests) {
-            for (Ballot.CiphertextBallotSelection selection : contest.ballot_selections) {
+    SelectionAggregator(Iterable<CiphertextAcceptedBallot> ballots) {
+      for (CiphertextAcceptedBallot ballot : ballots) {
+        if (ballot.state == BallotBox.State.CAST) {
+          for (CiphertextBallot.Contest contest : ballot.contests) {
+            for (CiphertextBallot.Selection selection : contest.ballot_selections) {
               String key = contest.object_id + "." + selection.object_id;
               selectionEncryptions.put(key, selection.ciphertext());
             }

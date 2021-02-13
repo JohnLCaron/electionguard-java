@@ -1,12 +1,8 @@
 package com.sunya.electionguard.proto;
 
-import com.sunya.electionguard.Ballot;
-import com.sunya.electionguard.publish.ConvertFromJson;
 import com.sunya.electionguard.publish.Publisher;
-import net.jqwik.api.Example;
 import net.jqwik.api.lifecycle.BeforeContainer;
 
-import java.io.File;
 import java.io.IOException;
 
 import static com.google.common.truth.Truth.assertThat;

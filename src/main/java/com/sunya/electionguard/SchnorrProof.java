@@ -10,6 +10,7 @@ import static com.sunya.electionguard.Group.*;
 import static com.sunya.electionguard.Proof.Usage.SecretValue;
 
 /**
+ * Implements the Schnorr proof of knowledge protocol.
  * A zero-knowledge proof that the holder knows x = log_g(y) (discrete log base g, mod p) without revealing x.
  * @see <a href="https://en.wikipedia.org/wiki/Proof_of_knowledge#Schnorr_protocol">Schnorr Proof</a>
  */
@@ -98,7 +99,4 @@ public class SchnorrProof extends Proof {
     ElementModQ u = a_plus_bc_q(nonce, keypair.secret_key, c);
     return new SchnorrProof(k, h, c, u);
   }
-
-  static boolean first = true;
-  static ElementModQ first_crypto_base_hash;
 }

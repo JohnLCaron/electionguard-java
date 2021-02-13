@@ -15,7 +15,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.google.common.truth.Truth.assertWithMessage;
-import static com.sunya.electionguard.Ballot.*;
 import static com.sunya.electionguard.Election.*;
 import static com.sunya.electionguard.ElectionWithPlaceholders.ContestWithPlaceholders;
 
@@ -66,9 +65,9 @@ public class TestEndToEndElectionIntegration {
 
   // Step 4 - Decrypt Tally
   DecryptionMediator decrypter;
-  PublishedCiphertextTally publishedTally;
+  CiphertextTally publishedTally;
   PlaintextTally decryptedTally;
-  List<Ballot.PlaintextBallot> spoiledDecryptedBallots;
+  List<PlaintextBallot> spoiledDecryptedBallots;
   List<PlaintextTally> spoiledDecryptedTallies;
 
   // Execute the simplified end-to-end test demonstrating each component of the system.
@@ -265,7 +264,7 @@ public class TestEndToEndElectionIntegration {
 
     // Here's where the ciphertext Tally is decrypted.
     this.decryptedTally = this.decrypter.decrypt_tally(false, null).orElseThrow();
-    List<DecryptWithShares.SpoiledBallotAndTally> spoiledTallyAndBallot =
+    List<DecryptionMediator.SpoiledBallotAndTally> spoiledTallyAndBallot =
             this.decrypter.decrypt_spoiled_ballots().orElseThrow();
     this.spoiledDecryptedBallots = spoiledTallyAndBallot.stream().map(e -> e.ballot).collect(Collectors.toList());
     this.spoiledDecryptedTallies = spoiledTallyAndBallot.stream().map(e -> e.tally).collect(Collectors.toList());
@@ -289,9 +288,9 @@ public class TestEndToEndElectionIntegration {
 
     // Tally the expected values from the loaded ballots
     for (PlaintextBallot ballot : this.originalPlaintextBallots) {
-      if (this.ballot_box.get(ballot.object_id).orElseThrow().state == BallotBoxState.CAST) {
-        for (PlaintextBallotContest contest : ballot.contests) {
-          for (PlaintextBallotSelection selection : contest.ballot_selections) {
+      if (this.ballot_box.get(ballot.object_id).orElseThrow().state == BallotBox.State.CAST) {
+        for (PlaintextBallot.Contest contest : ballot.contests) {
+          for (PlaintextBallot.Selection selection : contest.ballot_selections) {
             Integer value = expected_plaintext_tally.get(selection.selection_id);
             expected_plaintext_tally.put(selection.selection_id, value + selection.vote); // use merge
           }
@@ -300,9 +299,9 @@ public class TestEndToEndElectionIntegration {
     }
 
     // Compare the expected tally to the decrypted tally
-    for (PlaintextTally.PlaintextTallyContest tally_contest : this.decryptedTally.contests.values()) {
+    for (PlaintextTally.Contest tally_contest : this.decryptedTally.contests.values()) {
       System.out.printf("Contest: %s%n", tally_contest.object_id());
-      for (PlaintextTally.PlaintextTallySelection tally_selection : tally_contest.selections().values()) {
+      for (PlaintextTally.Selection tally_selection : tally_contest.selections().values()) {
         Integer expected = expected_plaintext_tally.get(tally_selection.object_id());
         System.out.printf("  - Selection: %s expected: %s, actual: %s%n",
                 tally_selection.object_id(), expected, tally_selection.tally());
@@ -316,9 +315,9 @@ public class TestEndToEndElectionIntegration {
   void compare_spoiled_tallies() {
     Map<String, PlaintextTally> plaintextTalliesMap = this.spoiledDecryptedTallies.stream().collect(Collectors.toMap(t -> t.object_id, t -> t));
 
-    for (Ballot.CiphertextAcceptedBallot accepted_ballot : this.ballot_box.getSpoiledBallots()) {
+    for (CiphertextAcceptedBallot accepted_ballot : this.ballot_box.getSpoiledBallots()) {
       String ballot_id = accepted_ballot.object_id;
-      assertThat(accepted_ballot.state).isEqualTo(BallotBoxState.SPOILED);
+      assertThat(accepted_ballot.state).isEqualTo(BallotBox.State.SPOILED);
       for (PlaintextBallot orgBallot : this.originalPlaintextBallots) {
         if (ballot_id.equals(orgBallot.object_id)) {
           System.out.printf("%nSpoiled Ballot: %s%n", ballot_id);

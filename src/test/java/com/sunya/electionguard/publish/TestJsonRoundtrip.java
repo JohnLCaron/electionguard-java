@@ -69,11 +69,11 @@ public class TestJsonRoundtrip {
 
     // original
     // String object_id, ElementModQ description_hash, Map<String, CiphertextTallySelection> tally_selections
-    PublishedCiphertextTally org = new PublishedCiphertextTally("testTally", new HashMap<>());
+    CiphertextTally org = new CiphertextTally("testTally", new HashMap<>());
     // write json
     ConvertToJson.write(org, file.toPath());
     // read it back
-    PublishedCiphertextTally fromFile = ConvertFromJson.readCiphertextTally(outputFile);
+    CiphertextTally fromFile = ConvertFromJson.readCiphertextTally(outputFile);
     assertThat(fromFile).isEqualTo(org);
   }
 
@@ -83,7 +83,7 @@ public class TestJsonRoundtrip {
     file.deleteOnExit();
     String outputFile = file.getAbsolutePath();
 
-    Ballot.CiphertextBallotContest contest = new Ballot.CiphertextBallotContest(
+    CiphertextBallot.Contest contest = new CiphertextBallot.Contest(
             "testContestRoundtrip",
             Group.ONE_MOD_Q,
             ImmutableList.of(),
@@ -92,7 +92,7 @@ public class TestJsonRoundtrip {
             Optional.of(Group.ONE_MOD_Q),
             Optional.empty());
 
-    Ballot.CiphertextAcceptedBallot org = new Ballot.CiphertextAcceptedBallot(
+    CiphertextAcceptedBallot org = new CiphertextAcceptedBallot(
             "testBallotRoundtrip",
             "ballotStyle",
             Group.ONE_MOD_Q,
@@ -102,12 +102,12 @@ public class TestJsonRoundtrip {
             1234L,
             Group.ONE_MOD_Q,
             Optional.of(Group.ONE_MOD_Q),
-            Ballot.BallotBoxState.CAST);
+            BallotBox.State.CAST);
 
     // write json
     ConvertToJson.write(org, file.toPath());
     // read it back
-    Ballot.CiphertextAcceptedBallot fromFile = ConvertFromJson.readCiphertextBallot(outputFile);
+    CiphertextAcceptedBallot fromFile = ConvertFromJson.readCiphertextBallot(outputFile);
     assertThat(fromFile).isEqualTo(org);
   }
 

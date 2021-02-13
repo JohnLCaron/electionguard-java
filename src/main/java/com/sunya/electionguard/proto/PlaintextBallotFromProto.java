@@ -1,38 +1,38 @@
 package com.sunya.electionguard.proto;
 
-import com.sunya.electionguard.Ballot;
+import com.sunya.electionguard.CiphertextBallot;
+import com.sunya.electionguard.PlaintextBallot;
 
 import static com.sunya.electionguard.proto.CommonConvert.convertList;
 import static com.sunya.electionguard.proto.PlaintextBallotProto.ExtendedData;
-import static com.sunya.electionguard.proto.PlaintextBallotProto.PlaintextBallot;
 import static com.sunya.electionguard.proto.PlaintextBallotProto.PlaintextBallotContest;
 import static com.sunya.electionguard.proto.PlaintextBallotProto.PlaintextBallotSelection;
 
 public class PlaintextBallotFromProto {
 
-  public static Ballot.PlaintextBallot translateFromProto(PlaintextBallot ballot) {
-    return new Ballot.PlaintextBallot(
+  public static PlaintextBallot translateFromProto(PlaintextBallotProto.PlaintextBallot ballot) {
+    return new PlaintextBallot(
             ballot.getObjectId(),
             ballot.getBallotStyle(),
             convertList(ballot.getContestsList(), PlaintextBallotFromProto::convertContest));
   }
 
-  static Ballot.PlaintextBallotContest convertContest(PlaintextBallotContest contest) {
-    return new Ballot.PlaintextBallotContest(
+  static PlaintextBallot.Contest convertContest(PlaintextBallotContest contest) {
+    return new PlaintextBallot.Contest(
             contest.getContestId(),
             convertList(contest.getBallotSelectionsList(), PlaintextBallotFromProto::convertSelection));
   }
 
-  static Ballot.PlaintextBallotSelection convertSelection(PlaintextBallotSelection selection) {
-    return new Ballot.PlaintextBallotSelection(
+  static PlaintextBallot.Selection convertSelection(PlaintextBallotSelection selection) {
+    return new PlaintextBallot.Selection(
             selection.getSelectionId(),
             selection.getVote(),
             selection.getIsPlaceholderSelection(),
             selection.hasExtendedData() ? convertExtendedData(selection.getExtendedData()) : null);
   }
 
-  static Ballot.ExtendedData convertExtendedData(ExtendedData data) {
-    return new Ballot.ExtendedData(
+  static CiphertextBallot.ExtendedData convertExtendedData(ExtendedData data) {
+    return new CiphertextBallot.ExtendedData(
             data.getValue(),
             data.getLength());
   }

@@ -10,18 +10,18 @@ import static com.sunya.electionguard.Group.ElementModQ;
 
 /** The encrypted representation of the summed votes for a collection of ballots */
 @Immutable
-public class PublishedCiphertextTally extends ElectionObjectBase {
+public class CiphertextTally extends ElectionObjectBase {
     /** A collection of each contest and selection in an election. Retains an encrypted representation of a tally for each selection. */
-    public final ImmutableMap<String, CiphertextTallyContest> contests; // Map(CONTEST_ID, CiphertextTallyContest)
+    public final ImmutableMap<String, Contest> contests; // Map(CONTEST_ID, CiphertextTallyContest)
 
-    public PublishedCiphertextTally(String object_id, Map<String, CiphertextTallyContest> contests) {
+    public CiphertextTally(String object_id, Map<String, Contest> contests) {
       super(object_id);
       this.contests = ImmutableMap.copyOf(contests);
     }
 
   @Override
   public String toString() {
-    return "PublishedCiphertextTally{" +
+    return "CiphertextTally{" +
             "object_id='" + object_id + '\'' +
             ", contests=" + contests.keySet() +
             "} ";
@@ -32,14 +32,14 @@ public class PublishedCiphertextTally extends ElectionObjectBase {
    * The object_id is the Election.ContestDescription.object_id.
    */
   @Immutable
-  public static class CiphertextTallyContest extends ElectionObjectBase {
+  public static class Contest extends ElectionObjectBase {
     /** The ContestDescription hash. */
     public final ElementModQ description_hash;
 
     /** A collection of CiphertextTallySelection mapped by SelectionDescription.object_id. */
-    public final ImmutableMap<String, CiphertextTallySelection> tally_selections; // Map(SELECTION_ID, CiphertextTallySelection)
+    public final ImmutableMap<String, Selection> tally_selections; // Map(SELECTION_ID, CiphertextTallySelection)
 
-    public CiphertextTallyContest(String object_id, ElementModQ description_hash, Map<String, CiphertextTallySelection> tally_selections) {
+    public Contest(String object_id, ElementModQ description_hash, Map<String, Selection> tally_selections) {
       super(object_id);
       this.description_hash = description_hash;
       this.tally_selections = ImmutableMap.copyOf(tally_selections);
@@ -50,7 +50,7 @@ public class PublishedCiphertextTally extends ElectionObjectBase {
       if (this == o) return true;
       if (o == null || getClass() != o.getClass()) return false;
       if (!super.equals(o)) return false;
-      CiphertextTallyContest that = (CiphertextTallyContest) o;
+      Contest that = (Contest) o;
       return description_hash.equals(that.description_hash) &&
               tally_selections.equals(that.tally_selections);
     }
@@ -66,8 +66,8 @@ public class PublishedCiphertextTally extends ElectionObjectBase {
    * The object_id is the Election.SelectionDescription.object_id.
    */
   @Immutable
-  public static class CiphertextTallySelection extends Ballot.CiphertextSelection {
-    public CiphertextTallySelection(String selectionDescriptionId, ElementModQ description_hash, @Nullable ElGamal.Ciphertext ciphertext) {
+  public static class Selection extends CiphertextSelection {
+    public Selection(String selectionDescriptionId, ElementModQ description_hash, @Nullable ElGamal.Ciphertext ciphertext) {
       super(selectionDescriptionId, description_hash, ciphertext);
     }
   }

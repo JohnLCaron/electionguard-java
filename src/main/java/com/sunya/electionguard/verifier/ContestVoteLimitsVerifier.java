@@ -7,9 +7,9 @@ import com.sunya.electionguard.Hash;
 
 import java.math.BigInteger;
 
-import static com.sunya.electionguard.Ballot.CiphertextAcceptedBallot;
-import static com.sunya.electionguard.Ballot.CiphertextBallotContest;
-import static com.sunya.electionguard.Ballot.CiphertextBallotSelection;
+import com.sunya.electionguard.CiphertextAcceptedBallot;
+import static com.sunya.electionguard.CiphertextBallot.Contest;
+import static com.sunya.electionguard.CiphertextBallot.Selection;
 import static com.sunya.electionguard.Group.ElementModP;
 import static com.sunya.electionguard.Group.ElementModQ;
 
@@ -31,7 +31,7 @@ public class ContestVoteLimitsVerifier {
 
     for (CiphertextAcceptedBallot ballot : electionRecord.acceptedBallots) {
       if (show) System.out.printf("Ballot %s.%n", ballot.object_id);
-      for (CiphertextBallotContest contest : ballot.contests) {
+      for (Contest contest : ballot.contests) {
         if (show) System.out.printf(" Contest %s.%n", contest.object_id);
         ContestVerifier cv = new ContestVerifier(contest);
         if (!cv.verifyContest()) {
@@ -49,7 +49,7 @@ public class ContestVoteLimitsVerifier {
   }
 
   class ContestVerifier {
-    CiphertextBallotContest contest;
+    Contest contest;
     ChaumPedersen.ConstantChaumPedersenProof proof;
     ElementModP contest_alpha;
     ElementModP contest_beta;
@@ -57,7 +57,7 @@ public class ContestVoteLimitsVerifier {
     ElementModQ contest_challenge;
     String contest_id;
 
-    ContestVerifier(CiphertextBallotContest contest) {
+    ContestVerifier(Contest contest) {
       this.contest = contest;
       this.proof = contest.proof.orElseThrow();
       this.contest_alpha = contest.encrypted_total.pad;
@@ -80,7 +80,7 @@ public class ContestVoteLimitsVerifier {
       ElementModP selection_alpha_product = Group.ONE_MOD_P;
       ElementModP selection_beta_product = Group.ONE_MOD_P;
 
-      for (CiphertextBallotSelection selection : contest.ballot_selections) {
+      for (Selection selection : contest.ballot_selections) {
         if (show) System.out.printf("   Selection %s.%n", selection.object_id);
         ElementModP alpha = selection.ciphertext().pad;
         ElementModP beta = selection.ciphertext().data;

@@ -50,15 +50,15 @@ class ConvertToJson {
     }
   }
 
-  static void write(Ballot.CiphertextAcceptedBallot object, Path where) throws IOException {
-    Type type = new TypeToken<Ballot.CiphertextAcceptedBallot>(){}.getType();
+  static void write(CiphertextAcceptedBallot object, Path where) throws IOException {
+    Type type = new TypeToken<CiphertextAcceptedBallot>(){}.getType();
     try (FileWriter writer = new FileWriter(where.toFile())) {
       enhancedGson.toJson(object, type, writer);
     }
   }
 
-  static void write(PublishedCiphertextTally object, Path where) throws IOException {
-    Type type = new TypeToken<PublishedCiphertextTally>(){}.getType();
+  static void write(CiphertextTally object, Path where) throws IOException {
+    Type type = new TypeToken<CiphertextTally>(){}.getType();
     try (FileWriter writer = new FileWriter(where.toFile())) {
       enhancedGson.toJson(object, type, writer);
     }
@@ -78,15 +78,15 @@ class ConvertToJson {
     }
   }
 
-  static void write(Ballot.PlaintextBallot ballot, Path where) throws IOException {
-    Type type = new TypeToken<Ballot.PlaintextBallot>(){}.getType();
+  static void write(PlaintextBallot ballot, Path where) throws IOException {
+    Type type = new TypeToken<PlaintextBallot>(){}.getType();
     try (FileWriter writer = new FileWriter(where.toFile())) {
       enhancedGson.toJson(ballot, type, writer);
     }
   }
 
-  public static void write(Ballot.CiphertextBallot ballot, Path where) throws IOException {
-    Type type = new TypeToken<Ballot.CiphertextBallot>(){}.getType();
+  public static void write(CiphertextBallot ballot, Path where) throws IOException {
+    Type type = new TypeToken<CiphertextBallot>(){}.getType();
     try (FileWriter writer = new FileWriter(where.toFile())) {
       enhancedGson.toJson(ballot, type, writer);
     }

@@ -2,7 +2,7 @@ package com.sunya.electionguard.publish;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.sunya.electionguard.Ballot;
+import com.sunya.electionguard.CiphertextBallot;
 import com.sunya.electionguard.CiphertextElectionContext;
 import com.sunya.electionguard.CiphertextTallyBuilder;
 import com.sunya.electionguard.ElectionConstants;
@@ -10,7 +10,8 @@ import com.sunya.electionguard.ElectionWithPlaceholders;
 import com.sunya.electionguard.Guardian;
 import com.sunya.electionguard.GuardianBuilder;
 import com.sunya.electionguard.KeyCeremony;
-import com.sunya.electionguard.PublishedCiphertextTally;
+import com.sunya.electionguard.CiphertextTally;
+import com.sunya.electionguard.PlaintextBallot;
 import com.sunya.electionguard.PlaintextTally;
 import net.jqwik.api.Example;
 import net.jqwik.api.lifecycle.BeforeProperty;
@@ -54,7 +55,7 @@ public class TestPublish {
     PlaintextTally plaintext_tally = new PlaintextTally("PlaintextTallyId", ImmutableMap.of(), ImmutableMap.of(),
             ImmutableList.of());
 
-    PublishedCiphertextTally ciphertext_tally =
+    CiphertextTally ciphertext_tally =
             new CiphertextTallyBuilder("CiphertextTallyId", metadata, context).build();
 
     Publisher publisher = new Publisher(outputDir, false, true);
@@ -75,10 +76,10 @@ public class TestPublish {
 
   @Example
   public void test_publish_private_data() throws IOException {
-    List<Ballot.PlaintextBallot> plaintext_ballots = ImmutableList.of(
-            new Ballot.PlaintextBallot("PlaintextBallotId", "ballot_style", ImmutableList.of()));
-    List<Ballot.CiphertextBallot> encrypted_ballots = ImmutableList.of(
-            Ballot.CiphertextBallot.create("CipherTextBallotId", "ballot_style", int_to_q_unchecked(BigInteger.ZERO),
+    List<PlaintextBallot> plaintext_ballots = ImmutableList.of(
+            new PlaintextBallot("PlaintextBallotId", "ballot_style", ImmutableList.of()));
+    List<CiphertextBallot> encrypted_ballots = ImmutableList.of(
+            CiphertextBallot.create("CipherTextBallotId", "ballot_style", int_to_q_unchecked(BigInteger.ZERO),
                     Optional.of(int_to_q_unchecked(BigInteger.ZERO)), ImmutableList.of(), Optional.empty(),Optional.empty(), Optional.empty()));
 
     List<Guardian> guardians = ImmutableList.of(

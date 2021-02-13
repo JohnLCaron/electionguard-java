@@ -1,6 +1,6 @@
 package com.sunya.electionguard.proto;
 
-import com.sunya.electionguard.PublishedCiphertextTally;
+import com.sunya.electionguard.CiphertextTally;
 import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.publish.ConvertFromJson;
 import com.sunya.electionguard.publish.Publisher;
@@ -21,10 +21,10 @@ public class TestTallyToProtoRoundtrip {
 
   @Example
   public void testCiphertextTallyRoundtrip() throws IOException {
-    PublishedCiphertextTally fromPython = ConvertFromJson.readCiphertextTally(publisher.encryptedTallyPath().toString());
+    CiphertextTally fromPython = ConvertFromJson.readCiphertextTally(publisher.encryptedTallyPath().toString());
     assertThat(fromPython).isNotNull();
-    CiphertextTallyProto.PublishedCiphertextTally proto = CiphertextTallyToProto.translateToProto(fromPython);
-    PublishedCiphertextTally roundtrip = CiphertextTallyFromProto.translateFromProto(proto);
+    CiphertextTallyProto.CiphertextTally proto = CiphertextTallyToProto.translateToProto(fromPython);
+    CiphertextTally roundtrip = CiphertextTallyFromProto.translateFromProto(proto);
     assertThat(roundtrip).isEqualTo(fromPython);
   }
 

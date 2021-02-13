@@ -3,8 +3,10 @@ package com.sunya.electionguard.publish;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
-import com.sunya.electionguard.Ballot;
+import com.sunya.electionguard.BallotBox;
 import com.sunya.electionguard.ChaumPedersen;
+import com.sunya.electionguard.CiphertextAcceptedBallot;
+import com.sunya.electionguard.CiphertextBallot;
 import com.sunya.electionguard.ElGamal;
 
 import javax.annotation.Nullable;
@@ -29,7 +31,7 @@ public class CiphertextAcceptedBallotPojo {
   public long timestamp;
   public ElementModQ crypto_hash;
   public ElementModQ nonce;
-  public Ballot.BallotBoxState state;
+  public BallotBox.State state;
 
   public static class CiphertextBallotContestPojo {
     public String object_id;
@@ -85,7 +87,7 @@ public class CiphertextAcceptedBallotPojo {
   ////////////////////////////////////////////////////////////////////////////
   // deserialize
 
-  public static Ballot.CiphertextAcceptedBallot deserialize(JsonElement jsonElem) {
+  public static CiphertextAcceptedBallot deserialize(JsonElement jsonElem) {
     Gson gson = GsonTypeAdapters.enhancedGson();
     CiphertextAcceptedBallotPojo pojo = gson.fromJson(jsonElem, CiphertextAcceptedBallotPojo.class);
     return translateBallot(pojo);
@@ -95,8 +97,8 @@ public class CiphertextAcceptedBallotPojo {
   //                            ElementModQ previous_tracking_hash, List<CiphertextBallotContest> contests,
   //                            Optional<ElementModQ> tracking_hash, long timestamp, ElementModQ crypto_hash,
   //                            Optional<ElementModQ> nonce
-  private static Ballot.CiphertextAcceptedBallot translateBallot(CiphertextAcceptedBallotPojo pojo) {
-    return new Ballot.CiphertextAcceptedBallot(
+  private static CiphertextAcceptedBallot translateBallot(CiphertextAcceptedBallotPojo pojo) {
+    return new CiphertextAcceptedBallot(
             pojo.object_id,
             pojo.ballot_style,
             pojo.description_hash,
@@ -109,8 +111,8 @@ public class CiphertextAcceptedBallotPojo {
             pojo.state);
   }
 
-  private static Ballot.CiphertextBallotContest translateContest(CiphertextBallotContestPojo contest) {
-    return new Ballot.CiphertextBallotContest(
+  private static CiphertextBallot.Contest translateContest(CiphertextBallotContestPojo contest) {
+    return new CiphertextBallot.Contest(
             contest.object_id,
             contest.description_hash,
             convertList(contest.ballot_selections, CiphertextAcceptedBallotPojo::translateSelection),
@@ -120,8 +122,8 @@ public class CiphertextAcceptedBallotPojo {
             Optional.ofNullable(translateConstantProof(contest.proof)));
   }
 
-  private static Ballot.CiphertextBallotSelection translateSelection(CiphertextBallotSelectionPojo selection) {
-    return new Ballot.CiphertextBallotSelection(
+  private static CiphertextBallot.Selection translateSelection(CiphertextBallotSelectionPojo selection) {
+    return new CiphertextBallot.Selection(
             selection.object_id,
             selection.description_hash,
             translateCiphertext(selection.ciphertext),
@@ -175,14 +177,14 @@ public class CiphertextAcceptedBallotPojo {
   ////////////////////////////////////////////////////////////////////////////
   // serialize
 
-  public static JsonElement serialize(Ballot.CiphertextAcceptedBallot src) {
+  public static JsonElement serialize(CiphertextAcceptedBallot src) {
     Gson gson = GsonTypeAdapters.enhancedGson();
     CiphertextAcceptedBallotPojo pojo = convertAcceptedBallot(src);
     Type typeOfSrc = new TypeToken<CiphertextAcceptedBallotPojo>() {}.getType();
     return gson.toJsonTree(pojo, typeOfSrc);
   }
 
-  private static CiphertextAcceptedBallotPojo convertAcceptedBallot(Ballot.CiphertextAcceptedBallot org) {
+  private static CiphertextAcceptedBallotPojo convertAcceptedBallot(CiphertextAcceptedBallot org) {
     CiphertextAcceptedBallotPojo pojo = new CiphertextAcceptedBallotPojo();
     pojo.object_id = org.object_id;
     pojo.ballot_style = org.ballot_style;
@@ -197,7 +199,7 @@ public class CiphertextAcceptedBallotPojo {
     return pojo;
   }
 
-  private static CiphertextBallotContestPojo convertContest(Ballot.CiphertextBallotContest contest) {
+  private static CiphertextBallotContestPojo convertContest(CiphertextBallot.Contest contest) {
     CiphertextBallotContestPojo pojo = new CiphertextBallotContestPojo();
     pojo.object_id = contest.object_id;
     pojo.description_hash = contest.description_hash;
@@ -209,7 +211,7 @@ public class CiphertextAcceptedBallotPojo {
     return pojo;
   }
 
-  private static CiphertextBallotSelectionPojo convertSelection(Ballot.CiphertextBallotSelection selection) {
+  private static CiphertextBallotSelectionPojo convertSelection(CiphertextBallot.Selection selection) {
     CiphertextBallotSelectionPojo pojo = new CiphertextBallotSelectionPojo();
     pojo.object_id = selection.object_id;
     pojo.description_hash = selection.description_hash;

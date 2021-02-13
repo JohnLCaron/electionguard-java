@@ -5,12 +5,12 @@ import com.google.common.base.Preconditions;
 import java.util.Arrays;
 
 /**
- * A sequence of random elements in [0,Q), seeded from an initial element in [0,Q).
- * If you start with the same seed, you'll get exactly the same sequence. Optional string
- * or ElementModPOrQ "headers" can be included alongside the seed at construction time.
- * This is useful when specifying what a nonce is being used for, to avoid various kinds of subtle cryptographic attacks.
+ * A sequence of random elements in [0,Q). This is created from an initial "seed" ElementModQ.
+ * If you start with the same seed, you'll get exactly the same sequence. Optional
+ * "headers" can be included in the seed at construction time.
+ * This is useful to avoid various kinds of subtle cryptographic attacks.
  */
-public class Nonces {
+class Nonces {
   private final Group.ElementModQ seed;
 
   Nonces(Group.ElementModQ seed, Object... headers) {

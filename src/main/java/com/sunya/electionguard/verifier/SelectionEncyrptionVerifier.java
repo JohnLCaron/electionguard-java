@@ -2,7 +2,6 @@ package com.sunya.electionguard.verifier;
 
 import com.sunya.electionguard.*;
 
-import static com.sunya.electionguard.Ballot.*;
 import static com.sunya.electionguard.Group.ElementModQ;
 import static com.sunya.electionguard.Group.ElementModP;
 
@@ -21,8 +20,8 @@ public class SelectionEncyrptionVerifier {
     boolean error = false;
 
     for (CiphertextAcceptedBallot ballot : electionRecord.acceptedBallots) {
-      for (CiphertextBallotContest contest : ballot.contests) {
-        for (CiphertextBallotSelection selection : contest.ballot_selections) {
+      for (CiphertextBallot.Contest contest : ballot.contests) {
+        for (CiphertextBallot.Selection selection : contest.ballot_selections) {
           SelectionVerifier sv = new SelectionVerifier(selection);
           // check validity of a selection
           if (!sv.verifySelection()) {
@@ -41,11 +40,11 @@ public class SelectionEncyrptionVerifier {
   }
 
   private class SelectionVerifier {
-    CiphertextBallotSelection selection;
+    CiphertextBallot.Selection selection;
     ElementModP alpha;
     ElementModP beta;
 
-    SelectionVerifier(CiphertextBallotSelection selection) {
+    SelectionVerifier(CiphertextBallot.Selection selection) {
       this.selection = selection;
       this.alpha = selection.ciphertext().pad;
       this.beta = selection.ciphertext().data;

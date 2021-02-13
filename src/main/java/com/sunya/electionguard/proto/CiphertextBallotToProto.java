@@ -1,7 +1,9 @@
 package com.sunya.electionguard.proto;
 
-import com.sunya.electionguard.Ballot;
+import com.sunya.electionguard.BallotBox;
 import com.sunya.electionguard.ChaumPedersen;
+import com.sunya.electionguard.CiphertextAcceptedBallot;
+import com.sunya.electionguard.CiphertextBallot;
 
 import static com.sunya.electionguard.proto.CommonConvert.convertCiphertext;
 import static com.sunya.electionguard.proto.CommonConvert.convertElementModQ;
@@ -11,19 +13,19 @@ import static com.sunya.electionguard.proto.CiphertextBallotProto.*;
 
 public class CiphertextBallotToProto {
 
-  public static CiphertextAcceptedBallot translateToProto(Ballot.CiphertextAcceptedBallot ballot) {
-    CiphertextAcceptedBallot.Builder builder = CiphertextAcceptedBallot.newBuilder();
+  public static CiphertextBallotProto.CiphertextAcceptedBallot translateToProto(CiphertextAcceptedBallot ballot) {
+    CiphertextBallotProto.CiphertextAcceptedBallot.Builder builder = CiphertextBallotProto.CiphertextAcceptedBallot.newBuilder();
     builder.setCiphertextBallot(convertCiphertextBallot(ballot));
     builder.setState(convertBallotBoxState(ballot.state));
     return builder.build();
   }
 
-  static CiphertextAcceptedBallot.BallotBoxState convertBallotBoxState(Ballot.BallotBoxState type) {
-    return CiphertextAcceptedBallot.BallotBoxState.valueOf(type.name());
+  static CiphertextBallotProto.CiphertextAcceptedBallot.BallotBoxState convertBallotBoxState(BallotBox.State type) {
+    return CiphertextBallotProto.CiphertextAcceptedBallot.BallotBoxState.valueOf(type.name());
   }
 
-  static CiphertextBallot convertCiphertextBallot(Ballot.CiphertextBallot ballot) {
-    CiphertextBallot.Builder builder = CiphertextBallot.newBuilder();
+  static CiphertextBallotProto.CiphertextBallot convertCiphertextBallot(CiphertextBallot ballot) {
+    CiphertextBallotProto.CiphertextBallot.Builder builder = CiphertextBallotProto.CiphertextBallot.newBuilder();
     builder.setObjectId(ballot.object_id);
     builder.setBallotStyleId(ballot.ballot_style);
     builder.setDescriptionHash(convertElementModQ(ballot.description_hash));
@@ -36,7 +38,7 @@ public class CiphertextBallotToProto {
     return builder.build();
   }
 
-  static CiphertextBallotContest convertContest(Ballot.CiphertextBallotContest contest) {
+  static CiphertextBallotContest convertContest(CiphertextBallot.Contest contest) {
     CiphertextBallotContest.Builder builder = CiphertextBallotContest.newBuilder();
     builder.setObjectId(contest.object_id);
     builder.setDescriptionHash(convertElementModQ(contest.description_hash));
@@ -48,7 +50,7 @@ public class CiphertextBallotToProto {
     return builder.build();
   }
 
-  static CiphertextBallotSelection convertSelection(Ballot.CiphertextBallotSelection selection) {
+  static CiphertextBallotSelection convertSelection(CiphertextBallot.Selection selection) {
     CiphertextBallotSelection.Builder builder = CiphertextBallotSelection.newBuilder();
     builder.setObjectId(selection.object_id);
     builder.setDescriptionHash(convertElementModQ(selection.description_hash));

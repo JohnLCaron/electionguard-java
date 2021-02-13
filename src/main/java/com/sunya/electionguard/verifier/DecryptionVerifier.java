@@ -68,9 +68,9 @@ public class DecryptionVerifier {
     return !error;
   }
 
-  private boolean make_all_contest_verification(String name, Map<String, PlaintextTally.PlaintextTallyContest> contests) {
+  private boolean make_all_contest_verification(String name, Map<String, PlaintextTally.Contest> contests) {
     boolean error = false;
-    for (PlaintextTally.PlaintextTallyContest contest : contests.values()) {
+    for (PlaintextTally.Contest contest : contests.values()) {
       DecryptionContestVerifier tcv = new DecryptionContestVerifier(contest);
       if (!tcv.verify_a_contest()) {
         System.out.printf(" Contest %s decryption failure for %s. %n", contest.object_id(), name);
@@ -81,15 +81,15 @@ public class DecryptionVerifier {
   }
 
   class DecryptionContestVerifier {
-    PlaintextTally.PlaintextTallyContest contest;
+    PlaintextTally.Contest contest;
 
-    DecryptionContestVerifier(PlaintextTally.PlaintextTallyContest contest) {
+    DecryptionContestVerifier(PlaintextTally.Contest contest) {
       this.contest = contest;
     }
 
     boolean verify_a_contest() {
       boolean error = false;
-      for (PlaintextTally.PlaintextTallySelection selection : this.contest.selections().values()) {
+      for (PlaintextTally.Selection selection : this.contest.selections().values()) {
         String id = contest.object_id() + "-" + selection.object_id();
         DecryptionSelectionVerifier tsv = new DecryptionSelectionVerifier(id, selection);
         if (!tsv.verify_a_selection()) {
@@ -103,12 +103,12 @@ public class DecryptionVerifier {
 
   class DecryptionSelectionVerifier {
     final String id;
-    final PlaintextTally.PlaintextTallySelection selection;
+    final PlaintextTally.Selection selection;
     final String selection_id;
     final ElementModP pad;
     final ElementModP data;
 
-    DecryptionSelectionVerifier(String id, PlaintextTally.PlaintextTallySelection selection) {
+    DecryptionSelectionVerifier(String id, PlaintextTally.Selection selection) {
       this.id = id; // contest/selection
       this.selection = selection;
       this.selection_id = selection.object_id();

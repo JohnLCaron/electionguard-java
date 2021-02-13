@@ -26,8 +26,8 @@ public class TestSelectionEncryptionVerifier {
     assertThat(sevOk).isTrue();
 
     Tester tester = new Tester(electionRecord);
-    for (Ballot.CiphertextAcceptedBallot ballot : electionRecord.acceptedBallots) {
-      for (Ballot.CiphertextBallotContest contest : ballot.contests) {
+    for (CiphertextAcceptedBallot ballot : electionRecord.acceptedBallots) {
+      for (CiphertextBallot.Contest contest : ballot.contests) {
         tester.verify_a_contest(contest);
       }
     }
@@ -45,8 +45,8 @@ public class TestSelectionEncryptionVerifier {
     assertThat(sevOk).isTrue();
 
     Tester tester = new Tester(electionRecord);
-    for (Ballot.CiphertextAcceptedBallot ballot : electionRecord.acceptedBallots) {
-      for (Ballot.CiphertextBallotContest contest : ballot.contests) {
+    for (CiphertextAcceptedBallot ballot : electionRecord.acceptedBallots) {
+      for (CiphertextBallot.Contest contest : ballot.contests) {
         tester.verify_a_contest(contest);
       }
     }
@@ -59,7 +59,7 @@ public class TestSelectionEncryptionVerifier {
       this.electionRecord = electionRecord;
     }
 
-    void verify_a_contest(Ballot.CiphertextBallotContest contest) {
+    void verify_a_contest(CiphertextBallot.Contest contest) {
       Integer vote_limit = electionRecord.getVoteLimitForContest(contest.object_id);
       Preconditions.checkNotNull(vote_limit);
 
@@ -67,7 +67,7 @@ public class TestSelectionEncryptionVerifier {
       ElementModP selection_alpha_product = Group.ONE_MOD_P;
       ElementModP selection_beta_product = Group.ONE_MOD_P;
 
-      for (Ballot.CiphertextBallotSelection selection : contest.ballot_selections) {
+      for (CiphertextBallot.Selection selection : contest.ballot_selections) {
         ElementModP this_pad = selection.ciphertext().pad;
         ElementModP this_data = selection.ciphertext().data;
 
@@ -114,7 +114,7 @@ public class TestSelectionEncryptionVerifier {
       assertThat(equ2_check).isTrue();
     }
 
-    boolean verify_selection_validity(Ballot.CiphertextBallotSelection selection) {
+    boolean verify_selection_validity(CiphertextBallot.Selection selection) {
       boolean error = false;
       ElementModP this_pad = selection.ciphertext().pad;
       ElementModP this_data = selection.ciphertext().data;
@@ -284,7 +284,7 @@ public class TestSelectionEncryptionVerifier {
     /**
      * check if a selection's a and b are in set Z_r^p
      */
-    boolean verify_selection_limit(Ballot.CiphertextBallotSelection selection) {
+    boolean verify_selection_limit(CiphertextBallot.Selection selection) {
       ElementModP this_pad = selection.ciphertext().pad;
       ElementModP this_data = selection.ciphertext().data;
 
@@ -318,7 +318,7 @@ public class TestSelectionEncryptionVerifier {
      * @param alpha_product: the accumulative product of all the alpha/pad values on all selections within a contest
      * @return True if the equation is satisfied, False if not
      */
-    private boolean check_cp_proof_alpha(Ballot.CiphertextBallotContest contest, ElementModP alpha_product) {
+    private boolean check_cp_proof_alpha(CiphertextBallot.Contest contest, ElementModP alpha_product) {
       ChaumPedersen.ConstantChaumPedersenProof proof = contest.proof.orElseThrow(IllegalStateException::new);
 
       ElementModP left = Group.pow_p(electionRecord.generatorP(), proof.response);
@@ -340,7 +340,7 @@ public class TestSelectionEncryptionVerifier {
      * @param votes_allowed: the maximum votes allowed for this contest
      * @return True if the equation is satisfied, False if not
      */
-    private boolean check_cp_proof_beta(Ballot.CiphertextBallotContest contest, ElementModP beta_product, ElementModQ votes_allowed) {
+    private boolean check_cp_proof_beta(CiphertextBallot.Contest contest, ElementModP beta_product, ElementModQ votes_allowed) {
       ChaumPedersen.ConstantChaumPedersenProof proof = contest.proof.orElseThrow(IllegalStateException::new);
 
       ElementModP leftTerm1 = Group.pow_p(electionRecord.generatorP(), Group.mult_q(votes_allowed, proof.challenge));
@@ -358,7 +358,7 @@ public class TestSelectionEncryptionVerifier {
 
     @Example
     public void testTrackingHashes() {
-      for (Ballot.CiphertextAcceptedBallot ballot : electionRecord.acceptedBallots) {
+      for (CiphertextAcceptedBallot ballot : electionRecord.acceptedBallots) {
         ElementModQ crypto_hash = ballot.crypto_hash;
         ElementModQ prev_hash = ballot.previous_tracking_hash;
         ElementModQ curr_hash = ballot.tracking_hash;

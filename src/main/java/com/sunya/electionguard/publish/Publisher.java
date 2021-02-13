@@ -224,11 +224,11 @@ public class Publisher {
           CiphertextElectionContext context,
           ElectionConstants constants,
           Iterable<Encrypt.EncryptionDevice> devices,
-          Iterable<Ballot.CiphertextAcceptedBallot> ciphertext_ballots,
-          PublishedCiphertextTally ciphertext_tally,
+          Iterable<CiphertextAcceptedBallot> ciphertext_ballots,
+          CiphertextTally ciphertext_tally,
           PlaintextTally decryptedTally,
           @Nullable Iterable<KeyCeremony.CoefficientValidationSet> coefficient_validation_sets,
-          @Nullable Iterable<Ballot.PlaintextBallot> spoiledBallots,
+          @Nullable Iterable<PlaintextBallot> spoiledBallots,
           @Nullable Iterable<PlaintextTally> spoiledTallies) throws IOException {
 
     ConvertToJson.write(description, this.electionPath());
@@ -239,7 +239,7 @@ public class Publisher {
       ConvertToJson.write(device, this.devicePath(device.uuid));
     }
 
-    for (Ballot.CiphertextAcceptedBallot ballot : ciphertext_ballots) {
+    for (CiphertextAcceptedBallot ballot : ciphertext_ballots) {
       ConvertToJson.write(ballot, this.ballotPath(ballot.object_id));
     }
 
@@ -253,7 +253,7 @@ public class Publisher {
     }
 
     if (spoiledBallots != null) {
-      for (Ballot.PlaintextBallot ballot : spoiledBallots) {
+      for (PlaintextBallot ballot : spoiledBallots) {
         ConvertToJson.write(ballot, this.spoiledBallotPath(ballot.object_id));
       }
     }
@@ -271,8 +271,8 @@ public class Publisher {
    * Do not use this in a production application.
    */
   public void publish_private_data(
-          @Nullable Iterable<Ballot.PlaintextBallot> plaintext_ballots,
-          @Nullable Iterable<Ballot.CiphertextBallot> ciphertext_ballots,
+          @Nullable Iterable<PlaintextBallot> plaintext_ballots,
+          @Nullable Iterable<CiphertextBallot> ciphertext_ballots,
           @Nullable Iterable<Guardian> guardians) throws IOException {
 
     Files.createDirectories(privateDirPath);
@@ -287,7 +287,7 @@ public class Publisher {
     if (plaintext_ballots != null) {
       Path ballotsDirPath = privateDirPath.resolve(PRIVATE_PLAINTEXT_BALLOTS_DIR);
       Files.createDirectories(ballotsDirPath);
-      for (Ballot.PlaintextBallot plaintext_ballot : plaintext_ballots) {
+      for (PlaintextBallot plaintext_ballot : plaintext_ballots) {
         String ballot_name = PLAINTEXT_BALLOT_PREFIX + plaintext_ballot.object_id + SUFFIX;
         ConvertToJson.write(plaintext_ballot, ballotsDirPath.resolve(ballot_name));
       }
@@ -296,7 +296,7 @@ public class Publisher {
     if (ciphertext_ballots != null) {
       Path encryptedDirPath = privateDirPath.resolve(PRIVATE_ENCRYPTED_BALLOTS_DIR);
       Files.createDirectories(encryptedDirPath);
-      for (Ballot.CiphertextBallot ciphertext_ballot : ciphertext_ballots) {
+      for (CiphertextBallot ciphertext_ballot : ciphertext_ballots) {
         String ballot_name = BALLOT_PREFIX + ciphertext_ballot.object_id + SUFFIX;
         ConvertToJson.write(ciphertext_ballot, encryptedDirPath.resolve(ballot_name));
       }
@@ -336,12 +336,12 @@ public class Publisher {
           ElectionConstants constants,
           Iterable<KeyCeremony.CoefficientValidationSet> coefficient_validation_sets,
           Iterable<Encrypt.EncryptionDevice> devices,
-          Iterable<Ballot.CiphertextAcceptedBallot> accepted_ballots) throws IOException {
+          Iterable<CiphertextAcceptedBallot> accepted_ballots) throws IOException {
 
 
     // the accepted ballots are written into their own file
     try (FileOutputStream out = new FileOutputStream(ciphertextBallotProtoPath().toFile())) {
-      for (Ballot.CiphertextAcceptedBallot ballot : accepted_ballots) {
+      for (CiphertextAcceptedBallot ballot : accepted_ballots) {
         CiphertextBallotProto.CiphertextAcceptedBallot ballotProto = CiphertextBallotToProto.translateToProto(ballot);
         ballotProto.writeDelimitedTo(out);
       }
@@ -363,15 +363,15 @@ public class Publisher {
           ElectionConstants constants,
           Iterable<KeyCeremony.CoefficientValidationSet> coefficient_validation_sets,
           Iterable<Encrypt.EncryptionDevice> devices,
-          PublishedCiphertextTally ciphertext_tally,
+          CiphertextTally ciphertext_tally,
           PlaintextTally decryptedTally,
-          @Nullable Iterable<Ballot.PlaintextBallot> spoiledBallots,
+          @Nullable Iterable<PlaintextBallot> spoiledBallots,
           @Nullable Iterable<PlaintextTally> spoiledDecryptedTallies) throws IOException {
 
     if (spoiledBallots != null) {
       // the spoiledBallots are written into their own file
       try (FileOutputStream out = new FileOutputStream(spoiledBallotProtoPath().toFile())) {
-        for (Ballot.PlaintextBallot ballot : spoiledBallots) {
+        for (PlaintextBallot ballot : spoiledBallots) {
           PlaintextBallotProto.PlaintextBallot ballotProto = PlaintextBallotToProto.translateToProto(ballot);
           ballotProto.writeDelimitedTo(out);
         }
@@ -406,16 +406,16 @@ public class Publisher {
           ElectionConstants constants,
           Iterable<KeyCeremony.CoefficientValidationSet> coefficient_validation_sets,
           Iterable<Encrypt.EncryptionDevice> devices,
-          Iterable<Ballot.CiphertextAcceptedBallot> accepted_ballots,
-          PublishedCiphertextTally ciphertext_tally,
+          Iterable<CiphertextAcceptedBallot> accepted_ballots,
+          CiphertextTally ciphertext_tally,
           PlaintextTally decryptedTally,
-          @Nullable Iterable<Ballot.PlaintextBallot> spoiledBallots,
+          @Nullable Iterable<PlaintextBallot> spoiledBallots,
           @Nullable Iterable<PlaintextTally> spoiledDecryptedTallies) throws IOException {
 
 
     // the accepted ballots are written into their own file
     try (FileOutputStream out = new FileOutputStream(ciphertextBallotProtoPath().toFile())) {
-      for (Ballot.CiphertextAcceptedBallot ballot : accepted_ballots) {
+      for (CiphertextAcceptedBallot ballot : accepted_ballots) {
         CiphertextBallotProto.CiphertextAcceptedBallot ballotProto = CiphertextBallotToProto.translateToProto(ballot);
         ballotProto.writeDelimitedTo(out);
       }
@@ -424,7 +424,7 @@ public class Publisher {
     if (spoiledBallots != null) {
       // the spoiledBallots are written into their own file
       try (FileOutputStream out = new FileOutputStream(spoiledBallotProtoPath().toFile())) {
-        for (Ballot.PlaintextBallot ballot : spoiledBallots) {
+        for (PlaintextBallot ballot : spoiledBallots) {
           PlaintextBallotProto.PlaintextBallot ballotProto = PlaintextBallotToProto.translateToProto(ballot);
           ballotProto.writeDelimitedTo(out);
         }
