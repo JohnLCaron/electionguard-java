@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
  * For command line help:
  * <strong>
  * <pre>
- *  java -classpath electionguard-java.jar com.sunya.electionguard.workflow.PerformKeyCeremony --help
+ *  java -classpath electionguard-java-all.jar com.sunya.electionguard.workflow.PerformKeyCeremony --help
  * </pre>
  * </strong>
  *

@@ -14,7 +14,11 @@ import java.io.IOException;
  * For command line help:
  * <strong>
  * <pre>
- *  java -classpath electionguard-java.jar com.sunya.electionguard.verifier.VerifyElectionRecord --help
+ *  java -classpath electionguard-java-all.jar com.sunya.electionguard.verifier.VerifyElectionRecord --help
+ * </pre>
+ * or
+ * <pre>
+ *  java -jar electionguard-java-all.jar --help
  * </pre>
  * </strong>
  *
