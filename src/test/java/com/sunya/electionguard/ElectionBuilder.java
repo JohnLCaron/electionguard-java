@@ -2,7 +2,6 @@ package com.sunya.electionguard;
 
 import java.util.Optional;
 
-import static com.sunya.electionguard.Election.*;
 import static com.sunya.electionguard.Group.rand_q;
 
 // LOOK this should go away, keeping it as convenience for now.
@@ -12,7 +11,7 @@ public class ElectionBuilder {
     final ElectionWithPlaceholders metadata;
     final CiphertextElectionContext context;
 
-    public DescriptionAndContext(ElectionDescription election, CiphertextElectionContext context) {
+    public DescriptionAndContext(Election election, CiphertextElectionContext context) {
       this.metadata = new ElectionWithPlaceholders(election);
       this.context = context;
     }
@@ -20,11 +19,11 @@ public class ElectionBuilder {
 
   int number_of_guardians; // The number of guardians necessary to generate the public key
   int quorum; // The quorum of guardians necessary to decrypt an election.  Must be less than `number_of_guardians`
-  ElectionDescription description;
+  Election description;
   Group.ElementModQ commitment_hash;
   Optional<Group.ElementModP> elgamal_public_key = Optional.empty();
 
-  public ElectionBuilder(int number_of_guardians, int quorum, ElectionDescription description) {
+  public ElectionBuilder(int number_of_guardians, int quorum, Election description) {
     this.number_of_guardians = number_of_guardians;
     this.quorum = quorum;
     this.description = description;

@@ -25,7 +25,7 @@ public class BallotBox {
   private final CiphertextElectionContext context;
   private final DataStore store;
 
-  public BallotBox(Election.ElectionDescription election,
+  public BallotBox(Election election,
                    CiphertextElectionContext context) {
     this.metadata = new ElectionWithPlaceholders(election);
     this.context = context;

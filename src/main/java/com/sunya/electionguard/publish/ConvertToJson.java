@@ -15,8 +15,8 @@ import java.nio.file.Path;
 class ConvertToJson {
   private static final Gson enhancedGson = GsonTypeAdapters.enhancedGson();
 
-  static void write(Election.ElectionDescription object, Path where) throws IOException {
-    Type type = new TypeToken<Election.ElectionDescription>(){}.getType();
+  static void write(Election object, Path where) throws IOException {
+    Type type = new TypeToken<Election>(){}.getType();
     try (FileWriter writer = new FileWriter(where.toFile())) {
       enhancedGson.toJson(object, type, writer);
     }

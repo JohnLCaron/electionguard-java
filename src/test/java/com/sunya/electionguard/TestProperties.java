@@ -16,7 +16,7 @@ public abstract class TestProperties {
   }
 
   @Provide
-  Arbitrary<Election.ElectionDescription> election_description() {
+  Arbitrary<Election> election_description() {
     ElectionTestHelper helper = new ElectionTestHelper(random);
     return Arbitraries.of(helper.election_descriptions(
             1 + random.nextInt(2), 1 + random.nextInt(2)));

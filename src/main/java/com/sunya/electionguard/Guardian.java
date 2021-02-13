@@ -20,19 +20,22 @@ import static com.sunya.electionguard.Group.*;
 public class Guardian extends ElectionObjectBase {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
+  /** A unique number in [1, 256) that is the polynomial x value for this guardian. */
   private final int sequence_order;
   private final KeyCeremony.CeremonyDetails ceremony_details;
+  /** An auxiliary RSA keypair to do lighter duty encryption/decryption. . */
   private final Auxiliary.KeyPair auxiliary_keys;
-  private final KeyCeremony.ElectionKeyPair election_keys; // Ki = election keypair for this Guardian
+  /** The Ki = election keypair for this Guardian. */
+  private final KeyCeremony.ElectionKeyPair election_keys;
 
   //// From Other Guardians
-  // The collection of other guardians' auxiliary public keys that are shared with this guardian
+  /** The collection of other guardians' auxiliary public keys that are shared with this guardian. */
   private final ImmutableMap<String, Auxiliary.PublicKey> otherGuardianAuxiliaryKeys; // map(GUARDIAN_ID, Auxiliary.PublicKey)
 
-  // The collection of other guardians' election public keys that are shared with this guardian
+  /** The collection of other guardians' election public keys that are shared with this guardian. */
   private final ImmutableMap<String, KeyCeremony.ElectionPublicKey> otherGuardianElectionKeys; // map(GUARDIAN_ID, ElectionPublicKey)
 
-  // The collection of other guardians' partial key backups that are shared with this guardian
+  /** The collection of other guardians' partial key backups that are shared with this guardian. */
   private final ImmutableMap<String, KeyCeremony.ElectionPartialKeyBackup> otherGuardianPartialKeyBackups; // Map(GUARDIAN_ID, ElectionPartialKeyBackup)
 
   public Guardian(String object_id, int sequence_order,
@@ -52,24 +55,31 @@ public class Guardian extends ElectionObjectBase {
     this.otherGuardianPartialKeyBackups = ImmutableMap.copyOf(otherGuardianPartialKeyBackups);
   }
 
+  /** A unique number in [1, 256) that is the polynomial x value for this guardian. */
   public int sequence_order() {
     return sequence_order;
   }
+  /** An auxiliary RSA keypair to do lighter duty encryption/decryption. . */
   public Auxiliary.KeyPair auxiliary_keys() {
     return auxiliary_keys;
   }
+  /** The Ki = election keypair for this Guardian. */
   public KeyCeremony.ElectionKeyPair election_keys() {
     return election_keys;
   }
+  /** The collection of other guardians' auxiliary public keys that are shared with this guardian. */
   public ImmutableCollection<Auxiliary.PublicKey> auxiliary_public_keys() {
     return otherGuardianAuxiliaryKeys.values();
   }
+  /** The collection of other guardians' election public keys that are shared with this guardian. */
   public ImmutableCollection<KeyCeremony.ElectionPublicKey> election_public_keys() {
     return otherGuardianElectionKeys.values();
   }
+  /** The collection of other guardians' partial key backups that are shared with this guardian. */
   public ImmutableCollection<KeyCeremony.ElectionPartialKeyBackup> election_partial_key_backups() {
     return otherGuardianPartialKeyBackups.values();
   }
+  /** The guardian's secret polynomial coefficients. */
   public KeyCeremony.CoefficientSet coefficients() {
     return KeyCeremony.CoefficientSet.create(object_id, sequence_order, this.election_keys.polynomial().coefficients);
   }

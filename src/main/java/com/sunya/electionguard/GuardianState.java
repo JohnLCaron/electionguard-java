@@ -8,8 +8,11 @@ import com.google.common.base.Preconditions;
  */
 @AutoValue
 public abstract class GuardianState {
+  /** The guardian id. */
   public abstract String guardian_id();
+  /** The guardian x coordinate value. */
   public abstract int sequence();
+  /** True if the guardian is missing for the decryption. */
   public abstract boolean is_missing();
 
   public static GuardianState create(String guardianId, int sequence, boolean isMissing) {

@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
-import static com.sunya.electionguard.Election.*;
 import static com.sunya.electionguard.Group.*;
 import static com.sunya.electionguard.KeyCeremony.*;
 
@@ -24,7 +23,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
   KeyCeremonyMediator key_ceremony;
   List<Guardian> guardians = new ArrayList<>();
   ElementModP joint_public_key;
-  ElectionDescription election;
+  Election election;
   CiphertextElectionContext context;
   ElectionWithPlaceholders metadata;
   Map<String, Integer> expected_plaintext_tally;
@@ -56,7 +55,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
     this.joint_public_key = joinKeyO.get();
 
     // setup the election
-    ElectionDescription election = ElectionFactory.get_fake_election();
+    Election election = ElectionFactory.get_fake_election();
     ElectionBuilder builder = new ElectionBuilder(NUMBER_OF_GUARDIANS, QUORUM, election);
     assertThat(builder.build()).isEmpty();  // Can't build without the public key
     builder.set_public_key(this.joint_public_key);

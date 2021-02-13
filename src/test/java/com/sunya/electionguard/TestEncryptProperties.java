@@ -339,7 +339,7 @@ public class TestEncryptProperties extends TestProperties {
   @Example
   public void test_encrypt_ballot_simple_succeeds() {
     KeyPair keypair = elgamal_keypair_from_secret(int_to_q_unchecked(BigInteger.TWO)).orElseThrow();
-    Election.ElectionDescription election = ElectionFactory.get_fake_election();
+    Election election = ElectionFactory.get_fake_election();
     ElectionBuilder.DescriptionAndContext tuple = ElectionFactory.get_fake_ciphertext_election(election, keypair.public_key).orElseThrow();
     CiphertextElectionContext context = tuple.context;
 
@@ -372,7 +372,7 @@ public class TestEncryptProperties extends TestProperties {
   @Example
   public void test_encrypt_ballot_with_stateful_composer_succeeds() {
     KeyPair keypair = elgamal_keypair_from_secret(int_to_q_unchecked(BigInteger.TWO)).orElseThrow();
-    Election.ElectionDescription election = ElectionFactory.get_fake_election();
+    Election election = ElectionFactory.get_fake_election();
     ElectionBuilder.DescriptionAndContext tuple = ElectionFactory.get_fake_ciphertext_election(election, keypair.public_key).orElseThrow();
     CiphertextElectionContext context = tuple.context;
 
@@ -390,7 +390,7 @@ public class TestEncryptProperties extends TestProperties {
   @Example
   public void test_encrypt_simple_ballot_from_files_succeeds() throws IOException {
     KeyPair keypair = elgamal_keypair_from_secret(int_to_q_unchecked(BigInteger.TWO)).orElseThrow();
-    Election.ElectionDescription election = ElectionFactory.get_simple_election_from_file();
+    Election election = ElectionFactory.get_simple_election_from_file();
     ElectionBuilder.DescriptionAndContext tuple = ElectionFactory.get_fake_ciphertext_election(election, keypair.public_key).orElseThrow();
     CiphertextElectionContext context = tuple.context;
 
@@ -413,7 +413,7 @@ public class TestEncryptProperties extends TestProperties {
 
      // TODO: Hypothesis test instead
 
-     Election.ElectionDescription election = ElectionFactory.get_simple_election_from_file();
+     Election election = ElectionFactory.get_simple_election_from_file();
      ElectionBuilder.DescriptionAndContext tuple = ElectionFactory.get_fake_ciphertext_election(election, keypair.public_key).orElseThrow();
      CiphertextElectionContext context = tuple.context;
 

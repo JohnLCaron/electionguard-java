@@ -5,8 +5,8 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.google.common.collect.Iterables;
 import com.sunya.electionguard.CiphertextElectionContext;
-import com.sunya.electionguard.Election;
 import com.sunya.electionguard.ElectionConstants;
+import com.sunya.electionguard.Election;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.Guardian;
 import com.sunya.electionguard.GuardianBuilder;
@@ -95,7 +95,7 @@ public class PerformKeyCeremony {
 
     // all we need from election record is the ElectionDescription.
     Consumer consumer = new Consumer(cmdLine.inputDir);
-    Election.ElectionDescription election;
+    Election election;
     if (cmdLine.isProto) {
       election = consumer.readElectionRecordProto().election;
     } else {
@@ -174,7 +174,7 @@ public class PerformKeyCeremony {
   }
 
   ///////////////////////////////////////////////////////////////////////////
-  final Election.ElectionDescription election;
+  final Election election;
   final int numberOfGuardians;
   final int quorum;
 
@@ -185,7 +185,7 @@ public class PerformKeyCeremony {
   List<GuardianBuilder> guardianBuilders;
   List<com.sunya.electionguard.KeyCeremony.CoefficientValidationSet> coefficientValidationSets = new ArrayList<>();
 
-  public PerformKeyCeremony(Election.ElectionDescription election, CoefficientsProvider coefficientsProvider) {
+  public PerformKeyCeremony(Election election, CoefficientsProvider coefficientsProvider) {
     this.election = election;
     this.quorum = coefficientsProvider.quorum();
     this.numberOfGuardians = Iterables.size(coefficientsProvider.guardianCoefficients());

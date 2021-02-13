@@ -147,13 +147,13 @@ public class EncryptBallots {
     }
   }
 
-  public static BallotProvider makeBallotProvider(String className, Election.ElectionDescription election, int nballots) throws Throwable {
+  public static BallotProvider makeBallotProvider(String className, Election election, int nballots) throws Throwable {
     Class<?> c = Class.forName(className);
     if (!(BallotProvider.class.isAssignableFrom(c))) {
       throw new IllegalArgumentException(String.format("%s must implement %s", c.getName(), BallotProvider.class));
     }
     java.lang.reflect.Constructor<BallotProvider> constructor =
-            (Constructor<BallotProvider>) c.getConstructor(Election.ElectionDescription.class, Integer.class);
+            (Constructor<BallotProvider>) c.getConstructor(Election.class, Integer.class);
     return constructor.newInstance(election, nballots);
   }
 

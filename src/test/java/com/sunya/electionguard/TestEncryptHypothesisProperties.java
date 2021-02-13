@@ -20,7 +20,7 @@ public class TestEncryptHypothesisProperties extends TestProperties {
    */
   @Property(tries = 10, shrinking = ShrinkingMode.OFF)
   public void test_generators_yield_valid_output(
-          @ForAll("election_description") Election.ElectionDescription ed) {
+          @ForAll("election_description") Election ed) {
 
     assertThat(ed.is_valid()).isTrue();
   }

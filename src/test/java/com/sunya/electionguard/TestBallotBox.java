@@ -5,7 +5,6 @@ import net.jqwik.api.Example;
 import java.math.BigInteger;
 import java.util.Optional;
 
-import static com.sunya.electionguard.Election.*;
 import static com.sunya.electionguard.Group.*;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -24,7 +23,7 @@ public class TestBallotBox {
     ElGamal.KeyPair keypair = ElGamal.elgamal_keypair_from_secret(int_to_q_unchecked(BigInteger.TWO))
             .orElseThrow(RuntimeException::new);
 
-    ElectionDescription election = ElectionFactory.get_fake_election();
+    Election election = ElectionFactory.get_fake_election();
     ElectionBuilder.DescriptionAndContext tuple = ElectionFactory.get_fake_ciphertext_election(election, keypair.public_key).orElseThrow();
     this.metadata = tuple.metadata;
     context = tuple.context;

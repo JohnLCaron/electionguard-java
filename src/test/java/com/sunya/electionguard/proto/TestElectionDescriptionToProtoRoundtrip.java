@@ -22,10 +22,10 @@ public class TestElectionDescriptionToProtoRoundtrip {
 
   @Example
   public void testElectionRoundtrip() throws IOException {
-    Election.ElectionDescription fromPython = ConvertFromJson.readElection(publisher.electionPath().toString());
+    Election fromPython = ConvertFromJson.readElection(publisher.electionPath().toString());
     assertThat(fromPython).isNotNull();
     ElectionProto.ElectionDescription proto = ElectionDescriptionToProto.translateToProto(fromPython);
-    Election.ElectionDescription roundtrip = ElectionDescriptionFromProto.translateFromProto(proto);
+    Election roundtrip = ElectionDescriptionFromProto.translateFromProto(proto);
 
     assertThat(roundtrip.election_scope_id).isEqualTo(fromPython.election_scope_id);
     assertThat(roundtrip.type).isEqualTo(fromPython.type);

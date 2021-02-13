@@ -21,7 +21,6 @@ import static com.sunya.electionguard.BallotBox.State;
 
 import static com.sunya.electionguard.PlaintextBallot.Selection;
 
-import static com.sunya.electionguard.Election.ElectionDescription;
 import static com.sunya.electionguard.Election.SelectionDescription;
 import static com.sunya.electionguard.ElectionWithPlaceholders.ContestWithPlaceholders;
 
@@ -42,7 +41,7 @@ public class TestDecryptProblem {
   }
 
   // Step 0 - Configure Election
-  ElectionDescription election;
+  Election election;
   ElectionBuilder election_builder;
   CiphertextElectionContext context;
   ElectionConstants constants;

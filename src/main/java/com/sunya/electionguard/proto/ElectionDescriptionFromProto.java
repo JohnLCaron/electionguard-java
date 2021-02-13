@@ -11,7 +11,6 @@ import static com.sunya.electionguard.proto.ElectionProto.BallotStyle;
 import static com.sunya.electionguard.proto.ElectionProto.Candidate;
 import static com.sunya.electionguard.proto.ElectionProto.ContactInformation;
 import static com.sunya.electionguard.proto.ElectionProto.ContestDescription;
-import static com.sunya.electionguard.proto.ElectionProto.ElectionDescription;
 import static com.sunya.electionguard.proto.ElectionProto.GeopoliticalUnit;
 import static com.sunya.electionguard.proto.ElectionProto.InternationalizedText;
 import static com.sunya.electionguard.proto.ElectionProto.Language;
@@ -20,7 +19,7 @@ import static com.sunya.electionguard.proto.ElectionProto.SelectionDescription;
 
 public class ElectionDescriptionFromProto {
 
-  public static Election.ElectionDescription translateFromProto(ElectionProto.ElectionDescription election) {
+  public static Election translateFromProto(ElectionProto.ElectionDescription election) {
     OffsetDateTime start_date = OffsetDateTime.parse(election.getStartDate());
     OffsetDateTime end_date = OffsetDateTime.parse(election.getEndDate());
     Election.InternationalizedText name = election.hasName() ?
@@ -39,7 +38,7 @@ public class ElectionDescriptionFromProto {
     //            List< Election.BallotStyle > ballot_styles,
     //            @Nullable InternationalizedText name,
     //            @Nullable ContactInformation contact_information
-    return new Election.ElectionDescription(
+    return new Election(
             election.getElectionScopeId(),
             convert(election.getElectionType()),
             start_date,
@@ -104,7 +103,7 @@ public class ElectionDescriptionFromProto {
     return Election.VoteVariationType.valueOf(type.name());
   }
 
-  static Election.ElectionType convert(ElectionDescription.ElectionType type) {
+  static Election.ElectionType convert(ElectionProto.ElectionDescription.ElectionType type) {
     return Election.ElectionType.valueOf(type.name());
   }
 

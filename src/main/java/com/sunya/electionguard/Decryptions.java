@@ -54,7 +54,7 @@ class Decryptions {
     return Optional.of(TallyDecryptionShare.create(
             tally.object_id,
             guardian.object_id,
-            guardian.share_election_public_key().key(),
+            guardian.share_election_public_key().publicKey(),
             contests.get(),
             spoiled_ballot_shares.get()));
   }
@@ -166,7 +166,7 @@ class Decryptions {
     return Optional.of(TallyDecryptionShare.create(
             ballot.object_id,
             guardian.object_id,
-            guardian.share_election_public_key().key(),
+            guardian.share_election_public_key().publicKey(),
             contests, ImmutableMap.of()));
   }
 
@@ -204,7 +204,7 @@ class Decryptions {
     try {
       Guardian.DecryptionProofTuple tuple = guardian.partially_decrypt(selection.ciphertext(), context.crypto_extended_base_hash, null);
 
-      if (tuple.proof.is_valid(selection.ciphertext(), guardian.share_election_public_key().key(),
+      if (tuple.proof.is_valid(selection.ciphertext(), guardian.share_election_public_key().publicKey(),
               tuple.decryption, context.crypto_extended_base_hash)) {
         return Optional.of(DecryptionShare.create_ciphertext_decryption_selection(
                 selection.object_id,
@@ -265,7 +265,7 @@ class Decryptions {
             tally.object_id,
             guardian.object_id,
             missing_guardian_id,
-            guardian.share_election_public_key().key(),
+            guardian.share_election_public_key().publicKey(),
             contests.get(),
             spoiled_ballots_shares.get()));
   }
@@ -398,7 +398,7 @@ class Decryptions {
             ballot.object_id,
             guardian.object_id,
             missing_guardian_id,
-            guardian.share_election_public_key().key(),
+            guardian.share_election_public_key().publicKey(),
             contests,
             ImmutableMap.of()));
   }
@@ -554,7 +554,7 @@ class Decryptions {
               lagrange_coefficients);
       reconstructed_shares.put(
               missing_guardian_id,
-              TallyDecryptionShare.create(ciphertext_tally.object_id, missing_guardian_id, public_key.key(), contests, spoiled_ballots_shares));
+              TallyDecryptionShare.create(ciphertext_tally.object_id, missing_guardian_id, public_key.publicKey(), contests, spoiled_ballots_shares));
     }
 
     return Optional.of(reconstructed_shares);
@@ -669,7 +669,7 @@ class Decryptions {
               lagrange_coefficients);
       reconstructed_shares.put(
               missing_guardian_id,
-              TallyDecryptionShare.create(ciphertext_tally.object_id, missing_guardian_id, public_key.key(), contests, spoiled_ballots_shares));
+              TallyDecryptionShare.create(ciphertext_tally.object_id, missing_guardian_id, public_key.publicKey(), contests, spoiled_ballots_shares));
     }
 
     return Optional.of(reconstructed_shares);
@@ -789,7 +789,7 @@ class Decryptions {
     return TallyDecryptionShare.create(
             ballot.object_id,
             missing_guardian_id,
-            public_key.key(),
+            public_key.publicKey(),
             contests,
             ImmutableMap.of());
   }

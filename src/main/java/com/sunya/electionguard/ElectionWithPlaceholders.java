@@ -16,10 +16,10 @@ import java.util.stream.Collectors;
 public class ElectionWithPlaceholders {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
-  public final Election.ElectionDescription election;
+  public final Election election;
   public ImmutableList<ContestWithPlaceholders> contests;
 
-  public ElectionWithPlaceholders(Election.ElectionDescription election) {
+  public ElectionWithPlaceholders(Election election) {
     this.election = Preconditions.checkNotNull(election);
 
     // For each contest, append the `number_elected` number of placeholder selections to the end of the contest collection.

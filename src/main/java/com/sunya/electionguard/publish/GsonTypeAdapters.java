@@ -28,8 +28,8 @@ class GsonTypeAdapters {
             .registerTypeAdapter(Group.ElementModQ.class, new ModQSerializer())
             .registerTypeAdapter(Group.ElementModP.class, new ModPDeserializer())
             .registerTypeAdapter(Group.ElementModP.class, new ModPSerializer())
-            .registerTypeAdapter(Election.ElectionDescription.class, new ElectionDescriptionSerializer())
-            .registerTypeAdapter(Election.ElectionDescription.class, new ElectionDescriptionDeserializer())
+            .registerTypeAdapter(Election.class, new ElectionDescriptionSerializer())
+            .registerTypeAdapter(Election.class, new ElectionDescriptionDeserializer())
             .registerTypeAdapter(KeyCeremony.CoefficientValidationSet.class, new CoefficientsSerializer())
             .registerTypeAdapter(KeyCeremony.CoefficientValidationSet.class, new CoefficientsDeserializer())
             .registerTypeAdapter(CiphertextAcceptedBallot.class, new CiphertextBallotSerializer())
@@ -75,16 +75,16 @@ class GsonTypeAdapters {
     }
   }
 
-  private static class ElectionDescriptionSerializer implements JsonSerializer<Election.ElectionDescription> {
+  private static class ElectionDescriptionSerializer implements JsonSerializer<Election> {
     @Override
-    public JsonElement serialize(Election.ElectionDescription src, Type typeOfSrc, JsonSerializationContext context) {
+    public JsonElement serialize(Election src, Type typeOfSrc, JsonSerializationContext context) {
       return ElectionDescriptionToJson.serialize(src);
     }
   }
 
-  private static class ElectionDescriptionDeserializer implements JsonDeserializer<Election.ElectionDescription> {
+  private static class ElectionDescriptionDeserializer implements JsonDeserializer<Election> {
     @Override
-    public Election.ElectionDescription deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+    public Election deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
             throws JsonParseException {
       return ElectionDescriptionFromJson.deserialize(json);
     }

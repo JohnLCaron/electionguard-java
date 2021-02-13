@@ -15,13 +15,11 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static com.sunya.electionguard.Election.*;
-
 /** Conversion of ElectionDescription to Json. */
 class ElectionDescriptionToJson {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
-  static JsonElement serialize(Election.ElectionDescription src) {
+  static JsonElement serialize(Election src) {
     Gson gson = GsonTypeAdapters.enhancedGson();
     ElectionDescriptionToJson converter = new ElectionDescriptionToJson(null);
     ElectionDescriptionPojo pojo = converter.convert(src);
@@ -35,7 +33,7 @@ class ElectionDescriptionToJson {
   }
 
   // used for testing
-  void write(ElectionDescription org) throws IOException {
+  void write(Election org) throws IOException {
     Gson gson = new GsonBuilder().setPrettyPrinting().create();
     try {
       ElectionDescriptionPojo pojo = convert(org);
@@ -54,7 +52,7 @@ class ElectionDescriptionToJson {
     return from == null || from.isEmpty() ? null : from.stream().map(converter).collect(Collectors.toList());
   }
 
-  ElectionDescriptionPojo convert(ElectionDescription org) {
+  ElectionDescriptionPojo convert(Election org) {
     ElectionDescriptionPojo pojo = new ElectionDescriptionPojo();
     pojo.election_scope_id = org.election_scope_id;
     pojo.type = org.type.name();
@@ -72,7 +70,7 @@ class ElectionDescriptionToJson {
   }
 
   @Nullable
-  ElectionDescriptionPojo.AnnotatedString convertAnnotatedString(@Nullable AnnotatedString org) {
+  ElectionDescriptionPojo.AnnotatedString convertAnnotatedString(@Nullable Election.AnnotatedString org) {
     if (org == null) {
       return null;
     }
@@ -83,7 +81,7 @@ class ElectionDescriptionToJson {
   }
 
   @Nullable
-  ElectionDescriptionPojo.BallotStyle convertBallotStyle(@Nullable BallotStyle org) {
+  ElectionDescriptionPojo.BallotStyle convertBallotStyle(@Nullable Election.BallotStyle org) {
     if (org == null) {
       return null;
     }
@@ -97,7 +95,7 @@ class ElectionDescriptionToJson {
   }
 
   @Nullable
-  ElectionDescriptionPojo.Candidate convertCandidate(@Nullable Candidate org) {
+  ElectionDescriptionPojo.Candidate convertCandidate(@Nullable Election.Candidate org) {
     if (org == null) {
       return null;
     }
@@ -111,7 +109,7 @@ class ElectionDescriptionToJson {
   }
 
   @Nullable
-  ElectionDescriptionPojo.ContactInformation convertContactInformation(@Nullable ContactInformation org) {
+  ElectionDescriptionPojo.ContactInformation convertContactInformation(@Nullable Election.ContactInformation org) {
     if (org == null) {
       return null;
     }
@@ -124,7 +122,7 @@ class ElectionDescriptionToJson {
   }
 
   @Nullable
-  ElectionDescriptionPojo.ContestDescription convertContestDescription(@Nullable ContestDescription org) {
+  ElectionDescriptionPojo.ContestDescription convertContestDescription(@Nullable Election.ContestDescription org) {
     if (org == null) {
       return null;
     }
@@ -143,7 +141,7 @@ class ElectionDescriptionToJson {
   }
 
   @Nullable
-  ElectionDescriptionPojo.GeopoliticalUnit convertGeopoliticalUnit(@Nullable GeopoliticalUnit org) {
+  ElectionDescriptionPojo.GeopoliticalUnit convertGeopoliticalUnit(@Nullable Election.GeopoliticalUnit org) {
     if (org == null) {
       return null;
     }
@@ -156,7 +154,7 @@ class ElectionDescriptionToJson {
   }
 
   @Nullable
-  ElectionDescriptionPojo.InternationalizedText convertInternationalizedText(@Nullable InternationalizedText org) {
+  ElectionDescriptionPojo.InternationalizedText convertInternationalizedText(@Nullable Election.InternationalizedText org) {
     if (org == null) {
       return null;
     }
@@ -166,7 +164,7 @@ class ElectionDescriptionToJson {
   }
 
   @Nullable
-  ElectionDescriptionPojo.Language convertLanguage(@Nullable Language org) {
+  ElectionDescriptionPojo.Language convertLanguage(@Nullable Election.Language org) {
     if (org == null) {
       return null;
     }
@@ -177,7 +175,7 @@ class ElectionDescriptionToJson {
   }
 
   @Nullable
-  ElectionDescriptionPojo.Party convertParty(@Nullable Party org) {
+  ElectionDescriptionPojo.Party convertParty(@Nullable Election.Party org) {
     if (org == null) {
       return null;
     }
@@ -191,7 +189,7 @@ class ElectionDescriptionToJson {
   }
 
   @Nullable
-  ElectionDescriptionPojo.SelectionDescription convertSelectionDescription(@Nullable SelectionDescription org) {
+  ElectionDescriptionPojo.SelectionDescription convertSelectionDescription(@Nullable Election.SelectionDescription org) {
     if (org == null) {
       return null;
     }

@@ -4,7 +4,6 @@ import com.google.common.flogger.FluentLogger;
 
 import java.util.List;
 
-import static com.sunya.electionguard.Election.*;
 import static com.sunya.electionguard.ElectionWithPlaceholders.ContestWithPlaceholders;
 
 /** Static helper methods for ballot validation. */
@@ -34,7 +33,7 @@ class BallotValidations {
 
   /** Determine if selection is valid for ballot style. */
   static boolean selection_is_valid_for_style(
-          CiphertextBallot.Selection selection, SelectionDescription description) {
+          CiphertextBallot.Selection selection, Election.SelectionDescription description) {
 
     if (!selection.description_hash.equals(description.crypto_hash())) {
       logger.atInfo().log("ballot is not valid for style: mismatched selection description hash %s for selection %s hash %s",
@@ -91,7 +90,7 @@ class BallotValidations {
       }
 
       // verify the selection metadata
-      for (SelectionDescription selection_description : description.ballot_selections) {
+      for (Election.SelectionDescription selection_description : description.ballot_selections) {
         CiphertextBallot.Selection use_selection = null;
         for (CiphertextBallot.Selection selection : use_contest.ballot_selections) {
           if (selection_description.object_id.equals(selection.object_id)) {
