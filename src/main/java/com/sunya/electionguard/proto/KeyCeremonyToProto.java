@@ -40,7 +40,7 @@ public class KeyCeremonyToProto {
 
   private static KeyCeremonyProto.AuxiliaryKeyPair convertAuxiliaryKeyPair(Auxiliary.KeyPair org) {
     KeyCeremonyProto.AuxiliaryKeyPair.Builder builder = KeyCeremonyProto.AuxiliaryKeyPair.newBuilder();
-    builder.setSecretKey(convertJavaPrivateKey(org.secret_key));
+    builder.setSecretKey(convertJavaPrivateKey(org.secret_key)); // LOOK do we really need the private key ??
     builder.setPublicKey(convertJavaPublicKey(org.public_key));
     return builder.build();
   }

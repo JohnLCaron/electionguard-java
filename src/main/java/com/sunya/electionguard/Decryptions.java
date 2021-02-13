@@ -93,7 +93,7 @@ class Decryptions {
       }
 
       contests.put(tallyContest.object_id, CiphertextDecryptionContest.create(
-              tallyContest.object_id, guardian.object_id, tallyContest.description_hash, selections));
+              tallyContest.object_id, guardian.object_id, tallyContest.contestDescriptionHash, selections));
     }
 
     return Optional.of(contests);
@@ -160,7 +160,7 @@ class Decryptions {
       contests.put(contest.object_id, CiphertextDecryptionContest.create(
               contest.object_id,
               guardian.object_id,
-              contest.description_hash,
+              contest.contest_hash,
               selections));
     }
     return Optional.of(TallyDecryptionShare.create(
@@ -311,7 +311,7 @@ class Decryptions {
               contest.object_id,
               guardian.object_id,
               missing_guardian_id,
-              contest.description_hash,
+              contest.contestDescriptionHash,
               selections));
     }
     return Optional.of(contests);
@@ -391,7 +391,7 @@ class Decryptions {
               contest.object_id,
               guardian.object_id,
               missing_guardian_id,
-              contest.description_hash,
+              contest.contest_hash,
               selections));
     }
     return Optional.of(CompensatedTallyDecryptionShare.create(
@@ -621,7 +621,7 @@ class Decryptions {
       contests.put(contest_id, CiphertextDecryptionContest.create(
               contest_id,
               missing_guardian_id,
-              tally_contest.description_hash,
+              tally_contest.contestDescriptionHash,
               selections));
     }
 
@@ -782,7 +782,7 @@ class Decryptions {
       contests.put(contest.object_id, CiphertextDecryptionContest.create(
               contest.object_id,
               missing_guardian_id,
-              contest.description_hash,
+              contest.contest_hash,
               selections));
     }
 

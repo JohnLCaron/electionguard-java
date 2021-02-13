@@ -80,7 +80,7 @@ public class TestPublish {
             new PlaintextBallot("PlaintextBallotId", "ballot_style", ImmutableList.of()));
     List<CiphertextBallot> encrypted_ballots = ImmutableList.of(
             CiphertextBallot.create("CipherTextBallotId", "ballot_style", int_to_q_unchecked(BigInteger.ZERO),
-                    Optional.of(int_to_q_unchecked(BigInteger.ZERO)), ImmutableList.of(), Optional.empty(),Optional.empty(), Optional.empty()));
+                    int_to_q_unchecked(BigInteger.ZERO), ImmutableList.of(), Optional.empty(),Optional.empty(), Optional.empty()));
 
     List<Guardian> guardians = ImmutableList.of(
             GuardianBuilder.createForTesting("GuardianId", 1, 1, 1, null).build());

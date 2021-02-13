@@ -31,21 +31,27 @@ import static com.sunya.electionguard.ElectionWithPlaceholders.ContestWithPlaceh
 public class CiphertextTallyBuilder {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
-  public final String object_id;
+  private final String object_id;
   private final ElectionWithPlaceholders metadata;
-  private final CiphertextElectionContext encryption;
+  private final CiphertextElectionContext context;
 
   /** Local cache of ballots id's that have already been cast. */
   private final Set<String> cast_ballot_ids;
   private final Set<String> spoiled_ballot_ids;
 
   /** An encrypted representation of each contest and selection for all the cast ballots. */
-  public final Map<String, Contest> contests; // Map(CONTEST_ID, CiphertextTallyContest)
+  final Map<String, Contest> contests; // Map(CONTEST_ID, CiphertextTallyContest)
 
-  public CiphertextTallyBuilder(String object_id, ElectionWithPlaceholders metadata, CiphertextElectionContext encryption) {
+  /**
+   * Constructor
+   * @param object_id unique id for the CiphertextTally
+   * @param metadata the election metadata
+   * @param context the election context
+   */
+  public CiphertextTallyBuilder(String object_id, ElectionWithPlaceholders metadata, CiphertextElectionContext context) {
     this.object_id = object_id;
     this.metadata = metadata;
-    this.encryption = encryption;
+    this.context = context;
     this.cast_ballot_ids = new HashSet<>();
     this.spoiled_ballot_ids = new HashSet<>();
     this.contests = build_contests(this.metadata);
@@ -83,7 +89,7 @@ public class CiphertextTallyBuilder {
         if (cast_ballot_ids.contains(ballot.object_id)) {
           continue;
         }
-        if (!BallotValidations.ballot_is_valid_for_election(ballot, this.metadata, this.encryption)) {
+        if (!BallotValidations.ballot_is_valid_for_election(ballot, this.metadata, this.context)) {
           continue;
         }
         // collect the selections so they can be accumulated in parallel
@@ -117,7 +123,7 @@ public class CiphertextTallyBuilder {
       return false;
     }
 
-    if (!BallotValidations.ballot_is_valid_for_election(ballot, this.metadata, this.encryption)) {
+    if (!BallotValidations.ballot_is_valid_for_election(ballot, this.metadata, this.context)) {
       return false;
     }
 
@@ -224,6 +230,7 @@ public class CiphertextTallyBuilder {
     return true; // always true
   }
 
+  /** Build the immutable CiphertextTally. */
   public CiphertextTally build() {
     return new CiphertextTally(
             this.object_id,

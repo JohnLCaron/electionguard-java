@@ -164,6 +164,7 @@ public class Guardian extends ElectionObjectBase {
 
   /**
    * Compute a compensated partial decryption of an elgamal encryption on behalf of the missing guardian.
+   * LOOK this seems to be the only place we need the secret_key. Whats with ISSUE #47?
    * <p>
    * @param missing_guardian_id: the guardian
    * @param elgamal:             the `ElGamalCiphertext` that will be partially decrypted

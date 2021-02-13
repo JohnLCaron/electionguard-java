@@ -32,11 +32,12 @@ public class BallotBox {
     this.store = new DataStore();
   }
 
+  /** Cast a specific encrypted CiphertextBallot. */
   public Optional<CiphertextAcceptedBallot> cast(CiphertextBallot ballot) {
     return accept_ballot(ballot, State.CAST);
   }
 
-  /** Spoil a specific encrypted `CiphertextBallot` . */
+  /** Spoil a specific encrypted CiphertextBallot. */
   public Optional<CiphertextAcceptedBallot> spoil(CiphertextBallot ballot) {
     return accept_ballot(ballot, State.SPOILED);
   }
@@ -65,24 +66,28 @@ public class BallotBox {
     return Optional.of(ballot_box_ballot);
   }
 
+  /** Get all the ballots, cast or spoiled. */
   public Iterable<CiphertextAcceptedBallot> getAllBallots() {
     return store;
   }
 
+  /** Get just the cast ballots. */
   public Iterable<CiphertextAcceptedBallot> getCastBallots() {
     return Iterables.filter(store, b -> b.state == State.CAST);
   }
 
+  /** Get just the spoiled ballots. */
   public Iterable<CiphertextAcceptedBallot> getSpoiledBallots() {
     return Iterables.filter(store, b -> b.state == State.SPOILED);
   }
 
-  /** Return the value for the given key, or empty. */
+  /** Return the CiphertextAcceptedBallot with the given key, or empty if not exist. */
   Optional<CiphertextAcceptedBallot> get(String key) {
     return store.get(key);
   }
 
-  public CloseableIterable<CiphertextAcceptedBallot> getAcceptedBallots() {
+  /** Get all the ballots as a CloseableIterable. */
+  CloseableIterable<CiphertextAcceptedBallot> getAcceptedBallots() {
     return CloseableIterableAdapter.wrap(store);
   }
 }

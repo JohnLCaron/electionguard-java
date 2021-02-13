@@ -7,7 +7,7 @@ import java.util.Objects;
 
 /** Superclass for election objects that are identifiable by object_id. LOOK consider getting rid of this. */
 class ElectionObjectBase {
-  /** Unique internal identifier that's used by other elements to reference this element. */
+  /** Unique internal identifier used by other elements to reference this element. */
   public final String object_id;
 
   public ElectionObjectBase(String object_id) {

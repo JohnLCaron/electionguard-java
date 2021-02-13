@@ -50,9 +50,9 @@ class BallotValidations {
           CiphertextBallot.Contest contest, ContestWithPlaceholders description) {
 
     // verify the hash matches
-    if (!contest.description_hash.equals(description.crypto_hash())) {
+    if (!contest.contest_hash.equals(description.crypto_hash())) {
       logger.atInfo().log("ballot is not valid for style: mismatched description hash %s for contest %s hash %s",
-              contest.description_hash, description.object_id, description.crypto_hash());
+              contest.contest_hash, description.object_id, description.crypto_hash());
       return false;
     }
 

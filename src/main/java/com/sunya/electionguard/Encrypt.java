@@ -16,6 +16,8 @@ public class Encrypt {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
   private static final boolean show = false;
 
+  private Encrypt() {}
+
   /** The device that is doing the encryption. */
   @Immutable
   public static class EncryptionDevice {
@@ -59,7 +61,7 @@ public class Encrypt {
   public static class EncryptionMediator {
     private final ElectionWithPlaceholders metadata;
     private final CiphertextElectionContext encryption;
-    private ElementModQ last_hash;
+    private ElementModQ previous_tracking_hash;
 
     public EncryptionMediator(ElectionWithPlaceholders metadata, CiphertextElectionContext encryption,
                               EncryptionDevice encryption_device) {
@@ -67,14 +69,14 @@ public class Encrypt {
       this.encryption = encryption;
       // LOOK does not follow validation spec 6.A, which calls for crypto_base_hash.
       //   Ok to use device hash see Issue #272. Spec should be updated.
-      this.last_hash = encryption_device.get_hash();
+      this.previous_tracking_hash = encryption_device.get_hash();
     }
 
-    /** Encrypt the specified ballot using the cached election context. */
+    /** Encrypt the plaintext ballot using the joint public key K. */
     public Optional<CiphertextBallot> encrypt(PlaintextBallot ballot) {
       Optional<CiphertextBallot> encrypted_ballot =
-              encrypt_ballot(ballot, this.metadata, this.encryption, this.last_hash, Optional.empty(), true);
-      encrypted_ballot.ifPresent(ciphertextBallot -> this.last_hash = ciphertextBallot.tracking_hash);
+              encrypt_ballot(ballot, this.metadata, this.encryption, this.previous_tracking_hash, Optional.empty(), true);
+      encrypted_ballot.ifPresent(ciphertextBallot -> this.previous_tracking_hash = ciphertextBallot.tracking_hash);
       return encrypted_ballot;
     }
   }
@@ -151,11 +153,9 @@ public class Encrypt {
 
     ElementModQ disjunctive_chaum_pedersen_nonce = nonce_sequence.get(0);
 
-    int selection_representation = selection.vote;
-
     // Generate the encryption
     Optional<ElGamal.Ciphertext> elgamal_encryption =
-            ElGamal.elgamal_encrypt(selection_representation, selection_nonce, elgamal_public_key);
+            ElGamal.elgamal_encrypt(selection.vote, selection_nonce, elgamal_public_key);
 
     if (elgamal_encryption.isEmpty()){
       // will have logged about the failure earlier, so no need to log anything here
@@ -171,7 +171,7 @@ public class Encrypt {
             elgamal_public_key,
             crypto_extended_base_hash,
             disjunctive_chaum_pedersen_nonce,
-            selection_representation,
+            selection.vote,
             is_placeholder,
             Optional.of(selection_nonce),
             Optional.empty(),
@@ -372,7 +372,7 @@ public class Encrypt {
    * @param ballot:               the ballot in the valid input form
    * @param metadata:             the ElectionWithPlaceholders which defines this ballot's structure
    * @param context:              all the cryptographic context for the election
-   * @param seed_hash:            Hash from previous ballot or starting hash from device
+   * @param previous_tracking_hash Hash from previous ballot or starting hash from device. python: seed_hash
    * @param nonce:                an optional nonce used to encrypt this contest
    *                              if this value is not provided, a random nonce is used.
    * @param should_verify_proofs: specify if the proofs should be verified prior to returning (default True)
@@ -381,7 +381,7 @@ public class Encrypt {
           PlaintextBallot ballot,
           ElectionWithPlaceholders metadata,
           CiphertextElectionContext context,
-          ElementModQ seed_hash,
+          ElementModQ previous_tracking_hash,
           Optional<ElementModQ> nonce,
           boolean should_verify_proofs)  {
 
@@ -397,7 +397,7 @@ public class Encrypt {
     // Generate a random master nonce to use for the contest and selection nonce's on the ballot
     ElementModQ random_master_nonce = nonce.orElse(rand_q());
 
-    // Include a representation of the election and the external Id in the nonce's used
+    // Include a representation of the election and the ballot Id in the nonce's used
     // to derive other nonce values on the ballot
     ElementModQ nonce_seed = CiphertextBallot.nonce_seed(metadata.election.crypto_hash, ballot.object_id, random_master_nonce);
 
@@ -436,7 +436,7 @@ public class Encrypt {
           ballot.object_id,
           ballot.ballot_style,
           metadata.election.crypto_hash,
-          Optional.of(seed_hash),
+          previous_tracking_hash, // python uses Optional
           encrypted_contests,
           Optional.of(random_master_nonce), Optional.empty(), Optional.empty());
 

@@ -78,7 +78,7 @@ public class BallotFactory {
   ///////////////////////////////////////////////////
 
   static PlaintextBallot.Selection get_selection_well_formed() {
-    CiphertextBallot.ExtendedData extra_data = new CiphertextBallot.ExtendedData("random", 33);
+    PlaintextBallot.ExtendedData extra_data = new PlaintextBallot.ExtendedData("random", 33);
     return new PlaintextBallot.Selection("selection-{draw(uuids)}",
                 TestUtils.randomBool() ? 1 : 0,
                 false,
@@ -86,7 +86,7 @@ public class BallotFactory {
   }
 
   static PlaintextBallot.Selection get_selection_poorly_formed() {
-    CiphertextBallot.ExtendedData extra_data = new CiphertextBallot.ExtendedData("random", 33);
+    PlaintextBallot.ExtendedData extra_data = new PlaintextBallot.ExtendedData("random", 33);
     return new PlaintextBallot.Selection("selection-{draw(uuids)}",
             TestUtils.randomBool() ? 2 : 3,
             TestUtils.randomBool(),

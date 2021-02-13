@@ -21,7 +21,7 @@ public class CiphertextTallyToProto {
   static CiphertextTallyProto.CiphertextTallyContest convertContest(CiphertextTally.Contest contest) {
     CiphertextTallyProto.CiphertextTallyContest.Builder builder = CiphertextTallyProto.CiphertextTallyContest.newBuilder();
     builder.setObjectId(contest.object_id);
-    builder.setDescriptionHash(convertElementModQ(contest.description_hash));
+    builder.setDescriptionHash(convertElementModQ(contest.contestDescriptionHash));
     for (Map.Entry<String, CiphertextTally.Selection> selection : contest.tally_selections.entrySet()) {
       builder.putTallySelections(selection.getKey(), convertSelection(selection.getValue()));
     }

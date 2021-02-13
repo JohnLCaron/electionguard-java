@@ -211,7 +211,7 @@ public class TestEncryptProperties extends TestProperties {
             altered_a, proof.data, proof.challenge, proof.response, proof.constant);
 
     CiphertextBallot.Contest malformed_proof = new CiphertextBallot.Contest(
-            result.object_id, result.description_hash,
+            result.object_id, result.contest_hash,
             result.ballot_selections, result.crypto_hash,
             new ElGamal.Ciphertext(TWO_MOD_P, TWO_MOD_P),
             result.nonce,
@@ -220,7 +220,7 @@ public class TestEncryptProperties extends TestProperties {
 
     // remove the proof
     CiphertextBallot.Contest missing_proof = new CiphertextBallot.Contest(
-            result.object_id, result.description_hash,
+            result.object_id, result.contest_hash,
             result.ballot_selections, result.crypto_hash,
             new ElGamal.Ciphertext(TWO_MOD_P, TWO_MOD_P),
             result.nonce, Optional.empty());

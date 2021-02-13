@@ -41,7 +41,7 @@ public class CiphertextBallotToProto {
   static CiphertextBallotContest convertContest(CiphertextBallot.Contest contest) {
     CiphertextBallotContest.Builder builder = CiphertextBallotContest.newBuilder();
     builder.setObjectId(contest.object_id);
-    builder.setDescriptionHash(convertElementModQ(contest.description_hash));
+    builder.setDescriptionHash(convertElementModQ(contest.contest_hash));
     contest.ballot_selections.forEach(value -> builder.addSelections(convertSelection(value)));
     builder.setCryptoHash(convertElementModQ(contest.crypto_hash));
     builder.setEncryptedTotal(convertCiphertext(contest.encrypted_total));

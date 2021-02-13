@@ -9,7 +9,8 @@ import javax.annotation.concurrent.Immutable;
  */
 @Immutable
 class CiphertextSelection extends ElectionObjectBase {
-  public final Group.ElementModQ description_hash; // Election.SelectionDescription.crypto_hash().
+  /** Election.SelectionDescription.crypto_hash(). */
+  public final Group.ElementModQ description_hash;
   private final ElGamal.Ciphertext ciphertext; // only accessed through ciphertext(), so subclass can override
 
   CiphertextSelection(String object_id, Group.ElementModQ description_hash, ElGamal.Ciphertext ciphertext) {
@@ -18,6 +19,7 @@ class CiphertextSelection extends ElectionObjectBase {
     this.ciphertext = Preconditions.checkNotNull(ciphertext);
   }
 
+  /** The encrypted vote count. */
   public ElGamal.Ciphertext ciphertext() {
     return ciphertext;
   }

@@ -11,7 +11,7 @@ import static com.sunya.electionguard.Group.ElementModQ;
 /** The encrypted representation of the summed votes for a collection of ballots */
 @Immutable
 public class CiphertextTally extends ElectionObjectBase {
-    /** A collection of each contest and selection in an election. Retains an encrypted representation of a tally for each selection. */
+    /** The collection of contests in the election, keyed by contest_id. */
     public final ImmutableMap<String, Contest> contests; // Map(CONTEST_ID, CiphertextTallyContest)
 
     public CiphertextTally(String object_id, Map<String, Contest> contests) {
@@ -33,15 +33,15 @@ public class CiphertextTally extends ElectionObjectBase {
    */
   @Immutable
   public static class Contest extends ElectionObjectBase {
-    /** The ContestDescription hash. */
-    public final ElementModQ description_hash;
+    /** The ContestDescription crypto_hash. */
+    public final ElementModQ contestDescriptionHash;
 
-    /** A collection of CiphertextTallySelection mapped by SelectionDescription.object_id. */
+    /** The collection of selections in the contest, keyed by selection.object_id. */
     public final ImmutableMap<String, Selection> tally_selections; // Map(SELECTION_ID, CiphertextTallySelection)
 
-    public Contest(String object_id, ElementModQ description_hash, Map<String, Selection> tally_selections) {
+    public Contest(String object_id, ElementModQ contestDescriptionHash, Map<String, Selection> tally_selections) {
       super(object_id);
-      this.description_hash = description_hash;
+      this.contestDescriptionHash = contestDescriptionHash;
       this.tally_selections = ImmutableMap.copyOf(tally_selections);
     }
 
@@ -51,13 +51,13 @@ public class CiphertextTally extends ElectionObjectBase {
       if (o == null || getClass() != o.getClass()) return false;
       if (!super.equals(o)) return false;
       Contest that = (Contest) o;
-      return description_hash.equals(that.description_hash) &&
+      return contestDescriptionHash.equals(that.contestDescriptionHash) &&
               tally_selections.equals(that.tally_selections);
     }
 
     @Override
     public int hashCode() {
-      return Objects.hash(super.hashCode(), description_hash, tally_selections);
+      return Objects.hash(super.hashCode(), contestDescriptionHash, tally_selections);
     }
   } // CiphertextTallyContest
 

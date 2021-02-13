@@ -19,9 +19,10 @@ import java.util.Optional;
 @Immutable
 public class PlaintextBallot extends ElectionObjectBase {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
-
-  public final String ballot_style; // The `object_id` of the Election.BallotStyle
-  public final ImmutableList<Contest> contests; // The list of contests for this ballot
+  /** The object_id of the Election.BallotStyle. */
+  public final String ballot_style;
+  /** The list of contests for this ballot. */
+  public final ImmutableList<Contest> contests;
 
   public PlaintextBallot(String object_id, String ballot_style, List<Contest> contests) {
     super(object_id);
@@ -82,8 +83,10 @@ public class PlaintextBallot extends ElectionObjectBase {
    */
   @Immutable
   public static class Contest {
-    public final String contest_id; // matches the ContestDescription.object_id
-    public final ImmutableList<Selection> ballot_selections; // Collection of ballot selections
+    /** The ContestDescription.object_id. */
+    public final String contest_id;
+    /** The Collection of ballot selections. */
+    public final ImmutableList<Selection> ballot_selections;
 
     public Contest(String contest_id, List<Selection> ballot_selections) {
       Preconditions.checkArgument(!Strings.isNullOrEmpty(contest_id));
@@ -171,13 +174,17 @@ public class PlaintextBallot extends ElectionObjectBase {
    */
   @Immutable
   public static class Selection {
-    public final String selection_id; // matches the SelectionDescription.object_id
+    /** Matches the SelectionDescription.object_id. */
+    public final String selection_id;
+    /** The vote count. */
     public final int vote;
+    /** Is this a placeholder? */
     public final boolean is_placeholder_selection; // default false
-    public final Optional<CiphertextBallot.ExtendedData> extended_data; // default None
+    /** Optional write-in candidate. */
+    public final Optional<ExtendedData> extended_data; // default None
 
     public Selection(String selection_id, int vote, boolean is_placeholder_selection,
-                     @Nullable CiphertextBallot.ExtendedData extended_data) {
+                     @Nullable ExtendedData extended_data) {
       Preconditions.checkArgument(!Strings.isNullOrEmpty(selection_id));
       this.selection_id = selection_id;
       this.vote = vote;
@@ -221,6 +228,40 @@ public class PlaintextBallot extends ElectionObjectBase {
               ", vote=" + vote +
               ", is_placeholder_selection=" + is_placeholder_selection +
               ", extended_data=" + extended_data +
+              '}';
+    }
+  }
+
+  /** Used to indicate a write-in candidate. */
+  @Immutable
+  public static class ExtendedData {
+    public final String value;
+    public final int length;
+
+    public ExtendedData(String value, int length) {
+      this.value = value;
+      this.length = length;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      ExtendedData that = (ExtendedData) o;
+      return length == that.length &&
+              value.equals(that.value);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(value, length);
+    }
+
+    @Override
+    public String toString() {
+      return "ExtendedData{" +
+              "value='" + value + '\'' +
+              ", length=" + length +
               '}';
     }
   }
