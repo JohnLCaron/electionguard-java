@@ -279,7 +279,7 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
 
     // tamper with the nonce
     CiphertextBallot.Contest bad_subject = new CiphertextBallot.Contest(
-            subject.object_id, subject.description_hash,
+            subject.object_id, subject.contest_hash,
             subject.ballot_selections, subject.crypto_hash,
             new ElGamal.Ciphertext(TWO_MOD_P, TWO_MOD_P),
             Optional.of(int_to_q_unchecked(BigInteger.ONE)), subject.proof);
@@ -313,7 +313,7 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
     bad_selections.set(0, bad_selection);
 
     CiphertextBallot.Contest bad_contest = new CiphertextBallot.Contest(
-            subject.object_id, subject.description_hash,
+            subject.object_id, subject.contest_hash,
             bad_selections, subject.crypto_hash, new ElGamal.Ciphertext(TWO_MOD_P, TWO_MOD_P),
             Optional.of(int_to_q_unchecked(BigInteger.ONE)), subject.proof);
 

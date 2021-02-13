@@ -3,7 +3,6 @@ package com.sunya.electionguard.publish;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
-import com.sunya.electionguard.CiphertextBallot;
 import com.sunya.electionguard.PlaintextBallot;
 
 import javax.annotation.Nullable;
@@ -85,8 +84,8 @@ public class PlaintextBallotPojo {
   }
 
   private static PlaintextBallot.Selection convertPlaintextBallotSelection(PlaintextBallotPojo.PlaintextBallotSelection pojo) {
-    CiphertextBallot.ExtendedData extra = (pojo.extra_data == null) ? null :
-            new CiphertextBallot.ExtendedData(pojo.extra_data, pojo.extra_data.length());
+    PlaintextBallot.ExtendedData extra = (pojo.extra_data == null) ? null :
+            new PlaintextBallot.ExtendedData(pojo.extra_data, pojo.extra_data.length());
 
     return new PlaintextBallot.Selection(
             pojo.object_id,

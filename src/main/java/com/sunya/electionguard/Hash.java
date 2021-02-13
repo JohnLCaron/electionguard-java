@@ -17,6 +17,7 @@ public class Hash {
     Group.ElementModQ crypto_hash();
   }
 
+  // LOOK not used?
   interface CryptoHashCheckable {
     Group.ElementModQ crypto_hash_with(Group.ElementModQ seed);
   }

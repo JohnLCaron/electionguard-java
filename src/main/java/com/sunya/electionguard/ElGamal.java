@@ -14,6 +14,8 @@ import static com.sunya.electionguard.Group.*;
 public class ElGamal {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
+  private ElGamal() {}
+
   /** A tuple of an ElGamal secret key and public key. */
   @Immutable
   public static class KeyPair {
@@ -43,7 +45,7 @@ public class ElGamal {
   /**
    * An "exponential ElGamal ciphertext" (i.e., with the plaintext in the exponent to allow for
    * homomorphic addition). Create one with `elgamal_encrypt`. Add them with `elgamal_add`.
-   * Decrypt using one of the supplied instance methods.
+   * Decrypt using one of the decrypt() instance methods.
    */
   @Immutable
   public static class Ciphertext {
@@ -152,18 +154,18 @@ public class ElGamal {
   /**
    * Encrypts a message with a given random nonce and an ElGamal public key.
    *
-   * @param m          Message to elgamal_encrypt; must be an integer in [0,Q).
+   * @param message    Message to elgamal_encrypt; must be an integer in [0,Q).
    * @param nonce      Randomly chosen nonce in [1,Q).
    * @param public_key ElGamal public key.
    * @return A ciphertext tuple.
    */
-  static Optional<Ciphertext> elgamal_encrypt(int m, ElementModQ nonce, ElementModP public_key) {
+  static Optional<Ciphertext> elgamal_encrypt(int message, ElementModQ nonce, ElementModP public_key) {
     if (nonce.equals(ZERO_MOD_Q)) {
       logger.atSevere().log("ElGamal encryption requires a non-zero nonce");
       return Optional.empty();
     }
-    return int_to_q(BigInteger.valueOf(m)).map(bm ->
-            new Ciphertext(g_pow_p(nonce), mult_p(g_pow_p(bm), pow_p(public_key, nonce))));
+    return int_to_q(BigInteger.valueOf(message)).map(bi ->
+            new Ciphertext(g_pow_p(nonce), mult_p(g_pow_p(bi), pow_p(public_key, nonce))));
   }
 
   /**

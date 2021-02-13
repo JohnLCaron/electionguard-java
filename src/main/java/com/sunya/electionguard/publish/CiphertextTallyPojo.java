@@ -97,7 +97,7 @@ public class CiphertextTallyPojo {
     }
     CiphertextTallyContestPojo pojo = new CiphertextTallyContestPojo();
     pojo.object_id = org.object_id;
-    pojo.description_hash = org.description_hash;
+    pojo.description_hash = org.contestDescriptionHash;
     pojo.tally_selections = selections;
     return pojo;
   }

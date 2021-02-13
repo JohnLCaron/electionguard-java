@@ -9,10 +9,14 @@ import java.util.Objects;
 /** The constants for mathematical functions used for this election. */
 @Immutable
 public class ElectionConstants {
-  public final BigInteger large_prime; // large prime or p
-  public final BigInteger small_prime; // small prime or q
-  public final BigInteger cofactor;    // cofactor or r
-  public final BigInteger generator;   // generator or g
+  /** large prime or p. */
+  public final BigInteger large_prime;
+  /** small prime or q. */
+  public final BigInteger small_prime;
+  /** cofactor or r. */
+  public final BigInteger cofactor;
+  /** generator or g. */
+  public final BigInteger generator;
 
   public ElectionConstants() {
     this(Group.P, Group.Q, Group.R, Group.G);

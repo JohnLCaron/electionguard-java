@@ -1,6 +1,5 @@
 package com.sunya.electionguard.proto;
 
-import com.sunya.electionguard.CiphertextBallot;
 import com.sunya.electionguard.PlaintextBallot;
 
 import static com.sunya.electionguard.proto.CommonConvert.convertList;
@@ -31,8 +30,8 @@ public class PlaintextBallotFromProto {
             selection.hasExtendedData() ? convertExtendedData(selection.getExtendedData()) : null);
   }
 
-  static CiphertextBallot.ExtendedData convertExtendedData(ExtendedData data) {
-    return new CiphertextBallot.ExtendedData(
+  static PlaintextBallot.ExtendedData convertExtendedData(ExtendedData data) {
+    return new PlaintextBallot.ExtendedData(
             data.getValue(),
             data.getLength());
   }

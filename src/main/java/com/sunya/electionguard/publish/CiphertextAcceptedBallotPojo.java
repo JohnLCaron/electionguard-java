@@ -202,7 +202,7 @@ public class CiphertextAcceptedBallotPojo {
   private static CiphertextBallotContestPojo convertContest(CiphertextBallot.Contest contest) {
     CiphertextBallotContestPojo pojo = new CiphertextBallotContestPojo();
     pojo.object_id = contest.object_id;
-    pojo.description_hash = contest.description_hash;
+    pojo.description_hash = contest.contest_hash;
     pojo.ballot_selections = convertList(contest.ballot_selections, CiphertextAcceptedBallotPojo::convertSelection);
     pojo.crypto_hash = contest.crypto_hash;
     pojo.ciphertext_accumulation = convertCiphertext(contest.encrypted_total);

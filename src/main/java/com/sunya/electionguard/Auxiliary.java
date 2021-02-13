@@ -75,11 +75,13 @@ public class Auxiliary {
   public static final class ByteString {
     private final byte[] bytes;
 
+    /** Constructor makes a copy of the byte array. */
     public ByteString(byte[] bytes) {
       Preconditions.checkNotNull(bytes);
       this.bytes = bytes.clone();
     }
 
+    /** Get a copy of the byte array. */
     public byte[] getBytes() {
       return bytes.clone();
     }

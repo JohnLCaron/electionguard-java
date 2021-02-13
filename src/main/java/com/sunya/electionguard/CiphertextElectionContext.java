@@ -17,7 +17,7 @@ public class CiphertextElectionContext {
    * Makes a CiphertextElectionContext object.
    * @param number_of_guardians The number of guardians necessary to generate the public key.
    * @param quorum The quorum of guardians necessary to decrypt an election.  Must be less than number_of_guardians.
-   * @param elgamal_public_key the public key of the election.
+   * @param elgamal_public_key the joint public key of the election.
    * @param description the election description.
    * @param commitment_hash all the public commitments for all the guardians = H(K 1,0 , K 1,1 , K 1,2 , ... ,
    *    K 1,k−1 , K 2,0 , K 2,1 , K 2,2 , ... , K 2,k−1 , ... , K n,0 , K n,1 , K n,2 , ... , K n,k−1 )
@@ -62,19 +62,20 @@ public class CiphertextElectionContext {
   }
 
   /////////////////////////////////////////////////////////////////////////////////////////////////
-  public final int number_of_guardians; // The number of guardians necessary to generate the public key
-  public final int quorum; // The quorum of guardians necessary to decrypt an election.  Must be less than `number_of_guardians`
-
-  // the `joint public key (K)` in the [ElectionGuard Spec](https://github.com/microsoft/electionguard/wiki)
+  /** The number of guardians necessary to generate the public key. */
+  public final int number_of_guardians;
+  /** The quorum of guardians necessary to decrypt an election.  Must be less than number_of_guardians. */
+  public final int quorum;
+  /** The `joint public key (K)` in the ElectionGuard Spec. */
   public final Group.ElementModP elgamal_public_key;
 
-  // The hash of the election metadata
+  /** The Election.ElectionDescription crypto_hash. */
   public final Group.ElementModQ description_hash;
 
-  // the `base hash code (𝑄)` in the [ElectionGuard Spec](https://github.com/microsoft/electionguard/wiki)
+  /** The `base hash code (𝑄)` in the ElectionGuard Spec. */
   public final Group.ElementModQ crypto_base_hash;
 
-  // the `extended base hash code (𝑄')` in the [ElectionGuard Spec](https://github.com/microsoft/electionguard/wiki)
+  /** The `extended base hash code (𝑄')` in the ElectionGuard Spec. */
   public final Group.ElementModQ crypto_extended_base_hash;
 
   /** Do not use directly, use CiphertextElectionContext.create() */

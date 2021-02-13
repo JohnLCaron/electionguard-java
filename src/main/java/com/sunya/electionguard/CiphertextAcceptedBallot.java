@@ -68,6 +68,7 @@ public class CiphertextAcceptedBallot extends CiphertextBallot {
   }
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  /** The accepted state: CAST or SPOILED. */
   public final BallotBox.State state;
 
   public CiphertextAcceptedBallot(CiphertextBallot ballot, BallotBox.State state) {
