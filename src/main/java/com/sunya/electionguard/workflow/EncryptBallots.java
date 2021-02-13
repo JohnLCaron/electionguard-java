@@ -25,7 +25,7 @@ import java.util.Random;
  * For command line help:
  * <strong>
  * <pre>
- *  java -classpath electionguard-java.jar com.sunya.electionguard.workflow.EncryptBallots --help
+ *  java -classpath electionguard-java-all.jar com.sunya.electionguard.workflow.EncryptBallots --help
  * </pre>
  * </strong>
  * @see <a href="https://www.electionguard.vote/spec/0.95.0/5_Ballot_encryption/">Ballot Encryption</a>

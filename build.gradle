@@ -1,6 +1,6 @@
+// The "buildscript" configuration section is for gradle itself
 buildscript {
     repositories {
-        jcenter()
         mavenCentral()
     }
     dependencies {
@@ -8,56 +8,64 @@ buildscript {
     }
 }
 
+// What is "plugin"? They are just java classes, which implement Plugin interface.
 plugins {
     id 'java'
     id "com.google.protobuf" version "0.8.14"
+    id 'maven-publish'
+    id 'signing'
+    // id 'com.bmuschko.nexus' version "2.3.1"
 }
 
 group 'com.sunya.electionguard'
 version '0.9-SNAPSHOT'
 
 repositories {
-    // Prefer JCenter to Maven Central. See
-    // https://blog.bintray.com/2015/02/09/android-studio-migration-from-maven-central-to-jcenter/
-    jcenter()
-    mavenCentral()  // JCenter isn't quite a superset of Maven Central.
+    jcenter() // jcommander not on maven central
+    mavenCentral()
 }
 
 ext.junitPlatformVersion = '1.7.0'
 ext.junitJupiterVersion = '5.7.0'
 ext.jqwikVersion = '1.3.10'
 
-sourceSets {
-    integration {
-        java.srcDir "$projectDir/src/integration/java"
-        resources.srcDir "$projectDir/src/integration/resources"
-        compileClasspath += main.output + test.output
-        runtimeClasspath += main.output + test.output
-    }
-}
-
-sourceSets {
-    testproperties {
-        java.srcDir "$projectDir/src/testproperties/java"
-        resources.srcDir "$projectDir/src/testproperties/resources"
-        compileClasspath += main.output + test.output
-        runtimeClasspath += main.output + test.output
-    }
-}
-
-configurations {
-    integrationImplementation.extendsFrom testImplementation
-    integrationRuntime.extendsFrom testRuntime
-}
-
-configurations {
-    testpropertiesImplementation.extendsFrom testImplementation
-    testpropertiesRuntime.extendsFrom testRuntime
-}
-
 compileTestJava {
     // To enable argument names in reporting and debugging
     options.compilerArgs += '-parameters'
+}
+
+dependencies {
+    implementation 'com.beust:jcommander:1.80'
+    implementation 'com.google.code.findbugs:jsr305:3.0.2' // LOOK All we want is Nullable
+    implementation 'com.google.guava:guava:30.1-jre'
+    implementation 'com.google.protobuf:protobuf-java:3.14.0'
+    implementation 'com.google.code.gson:gson:2.8.6'
+    implementation "com.google.auto.value:auto-value-annotations:1.7.4"
+    implementation 'com.google.flogger:flogger:0.5.1'
+    runtimeOnly 'com.google.flogger:flogger-system-backend:0.5.1'
+
+    annotationProcessor "com.google.auto.value:auto-value:1.7.4"
+
+    testImplementation 'com.google.truth:truth:1.1'
+    testImplementation 'com.google.truth.extensions:truth-java8-extension:1.1'
+    testImplementation "net.jqwik:jqwik:${jqwikVersion}" // aggregate jqwik dependency
+    // Add if you also want to use the Jupiter engine or Assertions from it
+    testImplementation "org.junit.jupiter:junit-jupiter:5.7.0"
+}
+
+protobuf {
+    protoc {
+        // The artifact spec for the Protobuf Compiler
+        artifact = 'com.google.protobuf:protoc:3.14.0'
+    }
+}
+
+// Add generated sources to the main sourceSet, which keeps intellij happy.
+sourceSets.main.java.srcDirs += ['build/generated/source/proto/main/java']
+
+java {
+    withJavadocJar()
+    withSourcesJar()
 }
 
 test {
@@ -77,42 +85,9 @@ test {
     include '**/Test*.class'
 }
 
-dependencies {
-    // Annotations: Nullable
-    implementation 'com.beust:jcommander:1.80'
-    implementation 'com.google.code.findbugs:jsr305:3.0.2'
-    implementation 'com.google.guava:guava:28.0-jre'
-    implementation 'com.google.protobuf:protobuf-java:3.14.0'
-    implementation 'com.google.code.gson:gson:2.8.6'
-    implementation "com.google.auto.value:auto-value-annotations:1.7.4"
-    implementation 'com.google.flogger:flogger:0.5.1'
-    runtimeOnly 'com.google.flogger:flogger-system-backend:0.5.1'
-
-    annotationProcessor "com.google.auto.value:auto-value:1.7.4"
-
-    testImplementation 'com.google.truth:truth:1.1'
-    testImplementation 'com.google.truth.extensions:truth-java8-extension:1.1'
-
-    // aggregate jqwik dependency
-    testImplementation "net.jqwik:jqwik:${jqwikVersion}"
-
-    // Add if you also want to use the Jupiter engine or Assertions from it
-    testImplementation "org.junit.jupiter:junit-jupiter:5.7.0"
-}
-
-protobuf {
-    protoc {
-        // The artifact spec for the Protobuf Compiler
-        artifact = 'com.google.protobuf:protoc:3.14.0'
-    }
-}
-
-// Add generated sources to the main sourceSet, which keeps intellij happy.
-sourceSets.main.java.srcDirs += ['build/generated/source/proto/main/java']
-
 task fatJar(type: Jar) {
     manifest {
-        attributes 'Main-Class': 'com.yourpackage.Main'
+        attributes 'Main-Class': 'com.sunya.electionguard.verifier.VerifyElectionRecord'
     }
     archiveClassifier = "all"
     from {
@@ -125,6 +100,58 @@ task fatJar(type: Jar) {
 task myJavadocs(type: Javadoc) {
     source = sourceSets.main.allJava
     classpath = sourceSets.main.runtimeClasspath
+    title ='test'
     options.showFromPublic()
     options.noDeprecated()
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId = 'com.sunya'
+            artifactId = 'electionguard'
+            version = '0.9'
+
+            from components.java
+            pom {
+                name = 'ElectionGuard Java library'
+                description = 'A complete port of https://github.com/microsoft/electionguard-python/'
+                licenses {
+                    license {
+                        name = 'MIT License'
+                        url = 'https://opensource.org/licenses/MIT'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'jcaron1129'
+                        name = 'John L Caron'
+                        email = 'jcaron1129@gmail.com'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:https://github.com/JohnLCaron/electionguard-java.git'
+                    url = 'https://github.com/JohnLCaron/electionguard-java'
+                }
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            name = 'myRepo'
+            url = "file://${buildDir}/repo"
+        }
+        /* maven {
+            url = "https://oss.sonatype.org/content/repositories/snapshots/"
+            credentials {
+                username = nexusUsername
+                password = nexusPassword
+            }
+        } */
+    }
+}
+
+signing {
+    sign publishing.publications.mavenJava
 }

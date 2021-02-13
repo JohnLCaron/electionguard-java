@@ -17,12 +17,11 @@ import java.util.concurrent.TimeUnit;
  * For command line help:
  * <strong>
  * <pre>
- *  java -classpath electionguard-java.jar com.sunya.electionguard.workflow.RunElectionWorkflow --help
+ *  java -classpath electionguard-java-all.jar com.sunya.electionguard.workflow.RunElectionWorkflow --help
  * </pre>
  * </strong>
  *
  */
-
 public class RunElectionWorkflow {
   private static final String classpath = "build/libs/electionguard-java-0.9-SNAPSHOT-all.jar";
 
