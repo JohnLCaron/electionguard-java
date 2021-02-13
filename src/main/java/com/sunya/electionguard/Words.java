@@ -3,8 +3,6 @@ package com.sunya.electionguard;
 import com.google.common.collect.ImmutableList;
 
 import javax.annotation.concurrent.Immutable;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 @Immutable

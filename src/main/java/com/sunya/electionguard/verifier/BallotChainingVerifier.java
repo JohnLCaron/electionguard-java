@@ -5,7 +5,7 @@ import com.sunya.electionguard.Hash;
 import java.util.HashSet;
 import java.util.Set;
 
-import static com.sunya.electionguard.Ballot.CiphertextAcceptedBallot;
+import com.sunya.electionguard.CiphertextAcceptedBallot;
 import static com.sunya.electionguard.Group.ElementModQ;
 
 /**

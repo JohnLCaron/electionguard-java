@@ -6,13 +6,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static com.sunya.electionguard.Ballot.*;
 import static com.sunya.electionguard.Group.*;
 import static com.sunya.electionguard.ElectionWithPlaceholders.ContestWithPlaceholders;
 
 
 /** Static methods for decryption when you know the secret keys. */
-public class DecryptWithSecrets {
+class DecryptWithSecrets {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   /**
@@ -25,8 +24,8 @@ public class DecryptWithSecrets {
    * @param crypto_extended_base_hash: the extended base hash code (𝑄') for the election
    * @param suppress_validity_check: do not validate the encryption prior to decrypting (useful for tests)
    */
-  static Optional<PlaintextBallotSelection> decrypt_selection_with_secret(
-          CiphertextBallotSelection selection,
+  static Optional<PlaintextBallot.Selection> decrypt_selection_with_secret(
+          CiphertextBallot.Selection selection,
           Election.SelectionDescription description,
           ElementModP public_key,
           ElementModQ secret_key,
@@ -43,7 +42,7 @@ public class DecryptWithSecrets {
 
     // TODO: ISSUE #47: handle decryption of the extradata field if needed
 
-    return Optional.of(new PlaintextBallotSelection(
+    return Optional.of(new PlaintextBallot.Selection(
             selection.object_id,
             plaintext_vote,
             selection.is_placeholder_selection,
@@ -61,8 +60,8 @@ public class DecryptWithSecrets {
    *                    if no value is provided, the nonce field from the selection is used
    * @param suppress_validity_check: do not validate the encryption prior to decrypting (useful for tests)
    */
-  static Optional<PlaintextBallotSelection> decrypt_selection_with_nonce(
-          CiphertextBallotSelection selection,
+  static Optional<PlaintextBallot.Selection> decrypt_selection_with_nonce(
+          CiphertextBallot.Selection selection,
           Election.SelectionDescription description,
           ElementModP public_key,
           ElementModQ crypto_extended_base_hash,
@@ -101,7 +100,7 @@ public class DecryptWithSecrets {
 
     // TODO: ISSUE #35: encrypt/decrypt: handle decryption of the extradata field if needed
 
-    return Optional.of(new PlaintextBallotSelection(
+    return Optional.of(new PlaintextBallot.Selection(
             selection.object_id,
             plaintext_vote,
             selection.is_placeholder_selection,
@@ -119,8 +118,8 @@ public class DecryptWithSecrets {
    * @param suppress_validity_check: do not validate the encryption prior to decrypting (useful for tests)
    * @param remove_placeholders: filter out placeholder ciphertext selections after decryption
    */
-  static Optional<PlaintextBallotContest> decrypt_contest_with_secret(
-          CiphertextBallotContest contest,
+  static Optional<PlaintextBallot.Contest> decrypt_contest_with_secret(
+          CiphertextBallot.Contest contest,
           ContestWithPlaceholders description,
           ElementModP public_key,
           ElementModQ secret_key,
@@ -133,11 +132,11 @@ public class DecryptWithSecrets {
             !contest.is_valid_encryption(description.crypto_hash(), public_key, crypto_extended_base_hash)) {
       return Optional.empty();
     }
-    List<PlaintextBallotSelection> plaintext_selections = new ArrayList<>();
-    for (CiphertextBallotSelection selection : contest.ballot_selections) {
+    List<PlaintextBallot.Selection> plaintext_selections = new ArrayList<>();
+    for (CiphertextBallot.Selection selection : contest.ballot_selections) {
       Election.SelectionDescription selection_description =
               description.selection_for(selection.object_id).orElseThrow(IllegalStateException::new);
-      Optional<PlaintextBallotSelection> plaintext_selection = decrypt_selection_with_secret(
+      Optional<PlaintextBallot.Selection> plaintext_selection = decrypt_selection_with_secret(
               selection,
               selection_description,
               public_key,
@@ -156,7 +155,7 @@ public class DecryptWithSecrets {
       }
     }
 
-    return Optional.of(new PlaintextBallotContest(contest.object_id, plaintext_selections));
+    return Optional.of(new PlaintextBallot.Contest(contest.object_id, plaintext_selections));
   }
 
   /**
@@ -171,8 +170,8 @@ public class DecryptWithSecrets {
    * @param suppress_validity_check: do not validate the encryption prior to decrypting (useful for tests)
    * @param remove_placeholders: filter out placeholder ciphertext selections after decryption
    */
-  static Optional<PlaintextBallotContest> decrypt_contest_with_nonce(
-          CiphertextBallotContest contest,
+  static Optional<PlaintextBallot.Contest> decrypt_contest_with_nonce(
+          CiphertextBallot.Contest contest,
           ContestWithPlaceholders description,
           ElementModP public_key,
           ElementModQ crypto_extended_base_hash,
@@ -210,11 +209,11 @@ public class DecryptWithSecrets {
       return Optional.empty();
     }
 
-    List<PlaintextBallotSelection> plaintext_selections = new ArrayList<>();
-    for (CiphertextBallotSelection selection : contest.ballot_selections) {
+    List<PlaintextBallot.Selection> plaintext_selections = new ArrayList<>();
+    for (CiphertextBallot.Selection selection : contest.ballot_selections) {
       Election.SelectionDescription selection_description =
               description.selection_for(selection.object_id).orElseThrow(IllegalStateException::new);
-      Optional<PlaintextBallotSelection> plaintext_selection = decrypt_selection_with_nonce(
+      Optional<PlaintextBallot.Selection> plaintext_selection = decrypt_selection_with_nonce(
               selection,
               selection_description,
               public_key,
@@ -233,7 +232,7 @@ public class DecryptWithSecrets {
       }
     }
 
-    return Optional.of(new PlaintextBallotContest(contest.object_id, plaintext_selections));
+    return Optional.of(new PlaintextBallot.Contest(contest.object_id, plaintext_selections));
   }
 
   /**
@@ -262,12 +261,12 @@ public class DecryptWithSecrets {
       return Optional.empty();
     }
 
-    List<PlaintextBallotContest> plaintext_contests = new ArrayList<>();
+    List<PlaintextBallot.Contest> plaintext_contests = new ArrayList<>();
 
-    for (CiphertextBallotContest contest : ballot.contests) {
+    for (CiphertextBallot.Contest contest : ballot.contests) {
       ContestWithPlaceholders description =
               metadata.contest_for(contest.object_id).orElseThrow(IllegalStateException::new);
-      Optional<PlaintextBallotContest> plaintext_contest = decrypt_contest_with_secret(
+      Optional<PlaintextBallot.Contest> plaintext_contest = decrypt_contest_with_secret(
               contest,
               description,
               public_key,
@@ -324,12 +323,12 @@ public class DecryptWithSecrets {
       return Optional.empty();
     }
 
-    List<PlaintextBallotContest> plaintext_contests = new ArrayList<>();
+    List<PlaintextBallot.Contest> plaintext_contests = new ArrayList<>();
 
-    for (CiphertextBallotContest contest : ballot.contests) {
+    for (CiphertextBallot.Contest contest : ballot.contests) {
       ContestWithPlaceholders description =
               metadata.contest_for(contest.object_id).orElseThrow(IllegalStateException::new);
-      Optional<PlaintextBallotContest> plaintext_contest = decrypt_contest_with_nonce(
+      Optional<PlaintextBallot.Contest> plaintext_contest = decrypt_contest_with_nonce(
               contest,
               description,
               public_key,

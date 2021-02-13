@@ -4,15 +4,14 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.google.common.base.Preconditions;
-import com.sunya.electionguard.Ballot;
 import com.sunya.electionguard.CiphertextTallyBuilder;
-import com.sunya.electionguard.DecryptWithShares;
 import com.sunya.electionguard.DecryptionMediator;
 import com.sunya.electionguard.Election;
 import com.sunya.electionguard.ElectionWithPlaceholders;
 import com.sunya.electionguard.Guardian;
+import com.sunya.electionguard.PlaintextBallot;
 import com.sunya.electionguard.PlaintextTally;
-import com.sunya.electionguard.PublishedCiphertextTally;
+import com.sunya.electionguard.CiphertextTally;
 import com.sunya.electionguard.Scheduler;
 import com.sunya.electionguard.publish.Consumer;
 import com.sunya.electionguard.publish.Publisher;
@@ -126,9 +125,9 @@ public class DecryptBallots {
   final Election.ElectionDescription election;
 
   Iterable<Guardian> guardians;
-  PublishedCiphertextTally publishedTally;
+  CiphertextTally publishedTally;
   PlaintextTally decryptedTally;
-  List<Ballot.PlaintextBallot> spoiledDecryptedBallots;
+  List<PlaintextBallot> spoiledDecryptedBallots;
   List<PlaintextTally> spoiledDecryptedTallies;
   int quorum;
   int numberOfGuardians;
@@ -174,7 +173,7 @@ public class DecryptBallots {
 
     // Here's where the ciphertext Tally is decrypted.
     this.decryptedTally = mediator.decrypt_tally(false, null).orElseThrow();
-    List<DecryptWithShares.SpoiledBallotAndTally> spoiledTallyAndBallot =
+    List<DecryptionMediator.SpoiledBallotAndTally> spoiledTallyAndBallot =
             mediator.decrypt_spoiled_ballots().orElseThrow();
     this.spoiledDecryptedBallots = spoiledTallyAndBallot.stream().map(e -> e.ballot).collect(Collectors.toList());
     this.spoiledDecryptedTallies = spoiledTallyAndBallot.stream().map(e -> e.tally).collect(Collectors.toList());

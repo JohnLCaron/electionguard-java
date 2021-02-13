@@ -1,13 +1,13 @@
 package com.sunya.electionguard.proto;
 
-import com.sunya.electionguard.Ballot;
+import com.sunya.electionguard.BallotBox;
 import com.sunya.electionguard.ChaumPedersen;
+import com.sunya.electionguard.CiphertextAcceptedBallot;
+import com.sunya.electionguard.CiphertextBallot;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
 
-import static com.sunya.electionguard.proto.CiphertextBallotProto.CiphertextAcceptedBallot;
-import static com.sunya.electionguard.proto.CiphertextBallotProto.CiphertextBallot;
 import static com.sunya.electionguard.proto.CiphertextBallotProto.CiphertextBallotContest;
 import static com.sunya.electionguard.proto.CiphertextBallotProto.CiphertextBallotSelection;
 import static com.sunya.electionguard.proto.CiphertextBallotProto.ConstantChaumPedersenProof;
@@ -19,22 +19,18 @@ import static com.sunya.electionguard.proto.CommonConvert.convertList;
 
 public class CiphertextBallotFromProto {
 
-  public static Ballot.CiphertextAcceptedBallot translateFromProto(CiphertextAcceptedBallot ballot) {
-    return new Ballot.CiphertextAcceptedBallot(
+  public static CiphertextAcceptedBallot translateFromProto(CiphertextBallotProto.CiphertextAcceptedBallot ballot) {
+    return new CiphertextAcceptedBallot(
             convertCiphertextBallot(ballot.getCiphertextBallot()),
             convertBallotBoxState(ballot.getState()));
   }
 
-  static Ballot.BallotBoxState convertBallotBoxState(CiphertextAcceptedBallot.BallotBoxState type) {
-    return Ballot.BallotBoxState.valueOf(type.name());
+  static BallotBox.State convertBallotBoxState(CiphertextBallotProto.CiphertextAcceptedBallot.BallotBoxState type) {
+    return BallotBox.State.valueOf(type.name());
   }
 
-  static Ballot.CiphertextBallot convertCiphertextBallot(CiphertextBallot ballot) {
-    // String object_id, String ballot_style, ElementModQ description_hash,
-    //                            ElementModQ previous_tracking_hash, List<CiphertextBallotContest> contests,
-    //                            Optional<ElementModQ> tracking_hash, long timestamp, ElementModQ crypto_hash,
-    //                            Optional<ElementModQ> nonce
-    return new Ballot.CiphertextBallot(
+  static CiphertextBallot convertCiphertextBallot(CiphertextBallotProto.CiphertextBallot ballot) {
+    return new CiphertextBallot(
             ballot.getObjectId(),
             ballot.getBallotStyleId(),
             convertElementModQ(ballot.getDescriptionHash()),
@@ -46,8 +42,8 @@ public class CiphertextBallotFromProto {
             Optional.ofNullable(convertElementModQ(ballot.getNonce())));
   }
 
-  static Ballot.CiphertextBallotContest convertContest(CiphertextBallotContest contest) {
-    return new Ballot.CiphertextBallotContest(
+  static CiphertextBallot.Contest convertContest(CiphertextBallotContest contest) {
+    return new CiphertextBallot.Contest(
             contest.getObjectId(),
             convertElementModQ(contest.getDescriptionHash()),
             convertList(contest.getSelectionsList(), CiphertextBallotFromProto::convertSelection),
@@ -57,8 +53,8 @@ public class CiphertextBallotFromProto {
             Optional.ofNullable(convertConstantProof(contest.getProof())));
   }
 
-  static Ballot.CiphertextBallotSelection convertSelection(CiphertextBallotSelection selection) {
-    return new Ballot.CiphertextBallotSelection(
+  static CiphertextBallot.Selection convertSelection(CiphertextBallotSelection selection) {
+    return new CiphertextBallot.Selection(
             selection.getObjectId(),
             convertElementModQ(selection.getDescriptionHash()),
             convertCiphertext(selection.getCiphertext()),

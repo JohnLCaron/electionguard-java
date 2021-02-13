@@ -94,7 +94,7 @@ public class ElectionFactory {
   }
 
   /** Get a single Fake Ballot object that is manually constructed with default values. */
-  static Ballot.PlaintextBallot get_fake_ballot(@Nullable ElectionDescription election, @Nullable String ballot_id) {
+  static PlaintextBallot get_fake_ballot(@Nullable ElectionDescription election, @Nullable String ballot_id) {
     if (election == null) {
       election = get_fake_election();
     }
@@ -103,7 +103,7 @@ public class ElectionFactory {
       ballot_id = "some-unique-ballot-id-123";
     }
 
-    return new Ballot.PlaintextBallot(
+    return new PlaintextBallot(
             ballot_id,
             election.ballot_styles.get(0).object_id,
             ImmutableList.of(Encrypt.contest_from(election.contests.get(0)),

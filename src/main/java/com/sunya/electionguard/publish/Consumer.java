@@ -18,9 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
-import static com.sunya.electionguard.Ballot.CiphertextAcceptedBallot;
-import static com.sunya.electionguard.Ballot.PlaintextBallot;
-
 /** Helper class for consumers of published election records in Json or protobuf. */
 public class Consumer {
   private final Publisher publisher;
@@ -51,7 +48,7 @@ public class Consumer {
     return ConvertFromJson.readPlaintextTally(publisher.tallyPath().toString());
   }
 
-  public PublishedCiphertextTally ciphertextTally() throws IOException {
+  public CiphertextTally ciphertextTally() throws IOException {
     return ConvertFromJson.readCiphertextTally(publisher.encryptedTallyPath().toString());
   }
 
@@ -64,20 +61,20 @@ public class Consumer {
     return result;
   }
 
-  public List<Ballot.CiphertextAcceptedBallot> acceptedBallots() throws IOException {
-    List<Ballot.CiphertextAcceptedBallot> result = new ArrayList<>();
+  public List<CiphertextAcceptedBallot> acceptedBallots() throws IOException {
+    List<CiphertextAcceptedBallot> result = new ArrayList<>();
     for (File file : publisher.ballotFiles()) {
-      Ballot.CiphertextAcceptedBallot fromPython = ConvertFromJson.readCiphertextBallot(file.getAbsolutePath());
+      CiphertextAcceptedBallot fromPython = ConvertFromJson.readCiphertextBallot(file.getAbsolutePath());
       result.add(fromPython);
     }
     return result;
   }
 
   // Decrypted, spoiled ballots
-  public List<Ballot.PlaintextBallot> spoiledBallots() throws IOException {
-    List<Ballot.PlaintextBallot> result = new ArrayList<>();
+  public List<PlaintextBallot> spoiledBallots() throws IOException {
+    List<PlaintextBallot> result = new ArrayList<>();
     for (File file : publisher.spoiledBallotFiles()) {
-      Ballot.PlaintextBallot fromPython = ConvertFromJson.readPlaintextBallot(file.getAbsolutePath());
+      PlaintextBallot fromPython = ConvertFromJson.readPlaintextBallot(file.getAbsolutePath());
       result.add(fromPython);
     }
     return result;
@@ -123,16 +120,16 @@ public class Consumer {
     return fromProto.setBallots(acceptedBallotsProto(), decryptedSpoiledBallotsProto(), decryptedSpoiledTalliesProto());
   }
 
-  public CloseableIterable<Ballot.CiphertextAcceptedBallot> acceptedBallotsProto() {
+  public CloseableIterable<CiphertextAcceptedBallot> acceptedBallotsProto() {
     return () -> new CiphertextAcceptedBallotIterator(publisher.ciphertextBallotProtoPath().toString(), b -> true);
   }
 
-  public CloseableIterable<Ballot.CiphertextAcceptedBallot> spoiledBallotsProto() {
+  public CloseableIterable<CiphertextAcceptedBallot> spoiledBallotsProto() {
     return () -> new CiphertextAcceptedBallotIterator(publisher.ciphertextBallotProtoPath().toString(),
             b -> b.getState() == CiphertextBallotProto.CiphertextAcceptedBallot.BallotBoxState.SPOILED);
   }
 
-  public CloseableIterable<Ballot.PlaintextBallot> decryptedSpoiledBallotsProto() {
+  public CloseableIterable<PlaintextBallot> decryptedSpoiledBallotsProto() {
     return () -> new PlaintextBallotIterator(publisher.spoiledBallotProtoPath().toString());
   }
 

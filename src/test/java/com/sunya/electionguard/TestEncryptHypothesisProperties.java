@@ -36,7 +36,7 @@ public class TestEncryptHypothesisProperties extends TestProperties {
           @ForAll("elections_and_ballots") ElectionTestHelper.EverythingTuple everything,
           @ForAll("elements_mod_q") Group.ElementModQ nonce) {
 
-    List<Ballot.PlaintextBallot> ballots = everything.ballots;
+    List<PlaintextBallot> ballots = everything.ballots;
     Group.ElementModQ secret_key = everything.secret_key;
     CiphertextElectionContext context = everything.context;
 
@@ -57,21 +57,21 @@ public class TestEncryptHypothesisProperties extends TestProperties {
     Optional<ElGamal.Ciphertext> encrypted_zero = ElGamal.elgamal_encrypt(0, zero_nonce, context.elgamal_public_key);
     assertThat(encrypted_zero).isPresent();
 
-    List<Ballot.CiphertextBallot> encrypted_ballots = new ArrayList<>();
+    List<CiphertextBallot> encrypted_ballots = new ArrayList<>();
 
     // encrypt each ballot
     for (int i = 0; i < num_ballots; i++) {
-      Optional<Ballot.CiphertextBallot> encrypted_ballotO = Encrypt.encrypt_ballot(
+      Optional<CiphertextBallot> encrypted_ballotO = Encrypt.encrypt_ballot(
               ballots.get(i), everything.metadata, context, SEED_HASH, Optional.of(nonces.get(i)), true);
       assertThat(encrypted_ballotO).isPresent();
-      Ballot.CiphertextBallot encrypted_ballot = encrypted_ballotO.get();
+      CiphertextBallot encrypted_ballot = encrypted_ballotO.get();
 
       // sanity check the encryption
       assertThat(num_contests).isEqualTo(encrypted_ballot.contests.size());
       encrypted_ballots.add(encrypted_ballot);
 
       // decrypt the ballot with secret and verify it matches the plaintext
-      Optional<Ballot.PlaintextBallot> decrypted_ballot = DecryptWithSecrets.decrypt_ballot_with_secret(
+      Optional<PlaintextBallot> decrypted_ballot = DecryptWithSecrets.decrypt_ballot_with_secret(
               encrypted_ballot,
               everything.metadata,
               context.crypto_extended_base_hash,
@@ -131,13 +131,13 @@ public class TestEncryptHypothesisProperties extends TestProperties {
    * @return a dict from selection object_id's to `ElGamalCiphertext` totals
    */
   private Map<String, ElGamal.Ciphertext> _accumulate_encrypted_ballots(
-          ElGamal.Ciphertext encrypted_zero, List<Ballot.CiphertextBallot> ballots) {
+          ElGamal.Ciphertext encrypted_zero, List<CiphertextBallot> ballots) {
 
     Map<String, ElGamal.Ciphertext> tally = new HashMap<>();
 
-    for (Ballot.CiphertextBallot ballot : ballots) {
-      for (Ballot.CiphertextBallotContest contest : ballot.contests) {
-        for (Ballot.CiphertextBallotSelection selection : contest.ballot_selections) {
+    for (CiphertextBallot ballot : ballots) {
+      for (CiphertextBallot.Contest contest : ballot.contests) {
+        for (CiphertextBallot.Selection selection : contest.ballot_selections) {
           String desc_id = (selection.object_id); // this should be the same as in the PlaintextBallot!
           if (!tally.containsKey(desc_id)) {
             tally.put(desc_id, encrypted_zero);

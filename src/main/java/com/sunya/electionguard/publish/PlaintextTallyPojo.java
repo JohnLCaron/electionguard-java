@@ -7,6 +7,7 @@ import com.sunya.electionguard.ChaumPedersen;
 import com.sunya.electionguard.DecryptionShare;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.Group;
+import com.sunya.electionguard.GuardianState;
 import com.sunya.electionguard.PlaintextTally;
 
 import javax.annotation.Nullable;
@@ -60,7 +61,6 @@ public class PlaintextTallyPojo {
     public Group.ElementModP data;
     public Group.ElementModQ challenge;
     public Group.ElementModQ response;
-    public int constant;
   }
 
   public static class GuardianStatePojo {
@@ -84,7 +84,7 @@ public class PlaintextTallyPojo {
   }
 
   private static PlaintextTally translateTally(PlaintextTallyPojo pojo) {
-    Map<String, PlaintextTally.PlaintextTallyContest> contests = pojo.contests.entrySet().stream().collect(Collectors.toMap(
+    Map<String, PlaintextTally.Contest> contests = pojo.contests.entrySet().stream().collect(Collectors.toMap(
             Map.Entry::getKey,
             e2 -> translateContest(e2.getValue())));
 
@@ -95,18 +95,18 @@ public class PlaintextTallyPojo {
             convertList(pojo.guardian_states, PlaintextTallyPojo::translateGuardianState));
   }
 
-  private static PlaintextTally.PlaintextTallyContest translateContest(PlaintextTallyContestPojo pojo) {
-    Map<String, PlaintextTally.PlaintextTallySelection> selections = pojo.selections.entrySet().stream().collect(Collectors.toMap(
+  private static PlaintextTally.Contest translateContest(PlaintextTallyContestPojo pojo) {
+    Map<String, PlaintextTally.Selection> selections = pojo.selections.entrySet().stream().collect(Collectors.toMap(
             Map.Entry::getKey,
             e2 -> translateSelection(e2.getValue())));
 
-    return PlaintextTally.PlaintextTallyContest.create(
+    return PlaintextTally.Contest.create(
             pojo.object_id,
             selections);
   }
 
-  private static PlaintextTally.PlaintextTallySelection translateSelection(PlaintextTallySelectionPojo pojo) {
-    return PlaintextTally.PlaintextTallySelection.create(
+  private static PlaintextTally.Selection translateSelection(PlaintextTallySelectionPojo pojo) {
+    return PlaintextTally.Selection.create(
             pojo.object_id,
             pojo.tally,
             pojo.value,
@@ -155,8 +155,8 @@ public class PlaintextTallyPojo {
       proof.response);
   }
 
-  private static PlaintextTally.GuardianState translateGuardianState(GuardianStatePojo pojo) {
-    return PlaintextTally.GuardianState.create(
+  private static GuardianState translateGuardianState(GuardianStatePojo pojo) {
+    return GuardianState.create(
             pojo.guardian_id,
             pojo.sequence,
             pojo.is_missing);
@@ -186,7 +186,7 @@ public class PlaintextTallyPojo {
     return pojo;
   }
 
-  private static PlaintextTallyContestPojo convertContest(PlaintextTally.PlaintextTallyContest org) {
+  private static PlaintextTallyContestPojo convertContest(PlaintextTally.Contest org) {
     PlaintextTallyContestPojo pojo = new PlaintextTallyContestPojo();
     pojo.object_id = org.object_id();
     pojo.selections = org.selections().entrySet().stream().collect(Collectors.toMap(
@@ -195,7 +195,7 @@ public class PlaintextTallyPojo {
     return pojo;
   }
 
-  private static PlaintextTallySelectionPojo convertSelection(PlaintextTally.PlaintextTallySelection org) {
+  private static PlaintextTallySelectionPojo convertSelection(PlaintextTally.Selection org) {
     PlaintextTallySelectionPojo pojo = new PlaintextTallySelectionPojo();
     pojo.object_id = org.object_id();
     pojo.tally = org.tally();
@@ -244,7 +244,7 @@ public class PlaintextTallyPojo {
     return pojo;
   }
 
-  private static GuardianStatePojo convertGuardianState(PlaintextTally.GuardianState state) {
+  private static GuardianStatePojo convertGuardianState(GuardianState state) {
     GuardianStatePojo pojo = new GuardianStatePojo();
     pojo.guardian_id = state.guardian_id();
     pojo.sequence = state.sequence();

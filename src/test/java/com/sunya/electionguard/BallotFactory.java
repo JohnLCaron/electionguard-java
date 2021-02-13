@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.google.common.truth.Truth.assertWithMessage;
-import static com.sunya.electionguard.Ballot.*;
 import static com.sunya.electionguard.Election.*;
 import static com.sunya.electionguard.ElectionWithPlaceholders.ContestWithPlaceholders;
 
@@ -16,7 +15,7 @@ public class BallotFactory {
   private static final String simple_ballot_filename = "ballot_in_simple.json";
   private static final String simple_ballots_filename = "plaintext_ballots_simple.json";
 
-  static PlaintextBallotSelection get_random_selection_from(SelectionDescription description) {
+  static PlaintextBallot.Selection get_random_selection_from(SelectionDescription description) {
     return Encrypt.selection_from(description, false, TestUtils.randomBool());
   }
 
@@ -24,7 +23,7 @@ public class BallotFactory {
    * Get a randomly filled contest for the given description that
    * may be undervoted and may include explicitly false votes.
    */
-  PlaintextBallotContest get_random_contest_from(
+  PlaintextBallot.Contest get_random_contest_from(
           ContestDescription description,
           boolean suppress_validity_check, boolean with_trues) { // default false, false
 
@@ -36,11 +35,11 @@ public class BallotFactory {
       }
     }
 
-    List<PlaintextBallotSelection> selections = new ArrayList<>();
+    List<PlaintextBallot.Selection> selections = new ArrayList<>();
     int voted = 0;
 
     for (SelectionDescription selection_description : description.ballot_selections) {
-      PlaintextBallotSelection selection = get_random_selection_from(selection_description);
+      PlaintextBallot.Selection selection = get_random_selection_from(selection_description);
       // the caller may force a true value
       voted += selection.vote;
       if (with_trues && voted <= 1 && selection.vote == 1) {
@@ -57,7 +56,7 @@ public class BallotFactory {
       }
     }
 
-    return new PlaintextBallotContest(description.object_id, selections);
+    return new PlaintextBallot.Contest(description.object_id, selections);
   }
 
   /** Get a single Fake Ballot object that is manually constructed with default values . */
@@ -68,7 +67,7 @@ public class BallotFactory {
 
     Preconditions.checkNotNull(ballot_id);
     String ballotStyleId = metadata.election.ballot_styles.get(0).object_id;
-    List<PlaintextBallotContest> contests = new ArrayList<>();
+    List<PlaintextBallot.Contest> contests = new ArrayList<>();
     for (ContestWithPlaceholders contest : metadata.get_contests_for(ballotStyleId)) {
       contests.add(this.get_random_contest_from(contest, true, with_trues));
     }
@@ -78,17 +77,17 @@ public class BallotFactory {
 
   ///////////////////////////////////////////////////
 
-  static PlaintextBallotSelection get_selection_well_formed() {
-    ExtendedData extra_data = new ExtendedData("random", 33);
-    return new PlaintextBallotSelection("selection-{draw(uuids)}",
+  static PlaintextBallot.Selection get_selection_well_formed() {
+    CiphertextBallot.ExtendedData extra_data = new CiphertextBallot.ExtendedData("random", 33);
+    return new PlaintextBallot.Selection("selection-{draw(uuids)}",
                 TestUtils.randomBool() ? 1 : 0,
                 false,
                 TestUtils.randomBool() ? extra_data : null);
   }
 
-  static PlaintextBallotSelection get_selection_poorly_formed() {
-    ExtendedData extra_data = new ExtendedData("random", 33);
-    return new PlaintextBallotSelection("selection-{draw(uuids)}",
+  static PlaintextBallot.Selection get_selection_poorly_formed() {
+    CiphertextBallot.ExtendedData extra_data = new CiphertextBallot.ExtendedData("random", 33);
+    return new PlaintextBallot.Selection("selection-{draw(uuids)}",
             TestUtils.randomBool() ? 2 : 3,
             TestUtils.randomBool(),
             TestUtils.randomBool() ? extra_data : null);

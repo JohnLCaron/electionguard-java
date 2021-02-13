@@ -3,14 +3,15 @@ package com.sunya.electionguard.verifier;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.sunya.electionguard.Ballot;
+import com.sunya.electionguard.CiphertextAcceptedBallot;
 import com.sunya.electionguard.CiphertextElectionContext;
 import com.sunya.electionguard.Election;
 import com.sunya.electionguard.ElectionConstants;
 import com.sunya.electionguard.Encrypt;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.KeyCeremony;
-import com.sunya.electionguard.PublishedCiphertextTally;
+import com.sunya.electionguard.CiphertextTally;
+import com.sunya.electionguard.PlaintextBallot;
 import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.publish.CloseableIterable;
 import com.sunya.electionguard.publish.CloseableIterableAdapter;
@@ -32,10 +33,10 @@ public class ElectionRecord {
   public final Election.ElectionDescription election;
   public final ImmutableList<KeyCeremony.CoefficientValidationSet> guardianCoefficients;
   public final ImmutableList<Encrypt.EncryptionDevice> devices;
-  public final CloseableIterable<Ballot.CiphertextAcceptedBallot> acceptedBallots; // LOOK all ballots, not just cast!
-  @Nullable public final PublishedCiphertextTally ciphertextTally;
+  public final CloseableIterable<CiphertextAcceptedBallot> acceptedBallots; // LOOK all ballots, not just cast!
+  @Nullable public final CiphertextTally ciphertextTally;
   @Nullable public final PlaintextTally decryptedTally;
-  public final CloseableIterable<Ballot.PlaintextBallot> spoiledBallots;
+  public final CloseableIterable<PlaintextBallot> spoiledBallots;
   public final CloseableIterable<PlaintextTally> spoiledTallies;
 
   private final ImmutableMap<String, Integer> contest_vote_limits;
@@ -45,10 +46,10 @@ public class ElectionRecord {
                         Election.ElectionDescription election,
                         List<KeyCeremony.CoefficientValidationSet> guardianCoefficients,
                         @Nullable List<Encrypt.EncryptionDevice> devices,
-                        @Nullable PublishedCiphertextTally ciphertextTally,
+                        @Nullable CiphertextTally ciphertextTally,
                         @Nullable PlaintextTally decryptedTally,
-                        @Nullable CloseableIterable<Ballot.CiphertextAcceptedBallot> castBallots,
-                        @Nullable CloseableIterable<Ballot.PlaintextBallot> spoiledBallots,
+                        @Nullable CloseableIterable<CiphertextAcceptedBallot> castBallots,
+                        @Nullable CloseableIterable<PlaintextBallot> spoiledBallots,
                         @Nullable CloseableIterable<PlaintextTally> spoiledTallies) {
     this.constants = constants;
     this.context = context;
@@ -77,8 +78,8 @@ public class ElectionRecord {
     contest_vote_limits = builder.build();
   }
 
-  public ElectionRecord setBallots(CloseableIterable<Ballot.CiphertextAcceptedBallot> acceptedBallots,
-                                   CloseableIterable<Ballot.PlaintextBallot> spoiledBallots,
+  public ElectionRecord setBallots(CloseableIterable<CiphertextAcceptedBallot> acceptedBallots,
+                                   CloseableIterable<PlaintextBallot> spoiledBallots,
                                    CloseableIterable<PlaintextTally> spoiledBallotTallies
                                    ) {
     return new ElectionRecord(this.constants,

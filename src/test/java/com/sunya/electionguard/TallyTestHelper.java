@@ -18,12 +18,12 @@ public class TallyTestHelper {
    * @param ballots: a list of plaintext ballots
    * @return a map from PlaintextBallotSelection.selection_id's to integer totals
    */
-  static Map<String, Integer> accumulate_plaintext_ballots(List<Ballot.PlaintextBallot> ballots) {
+  static Map<String, Integer> accumulate_plaintext_ballots(List<PlaintextBallot> ballots) {
 
     Map<String, Integer> result = new HashMap<>();
-    for (Ballot.PlaintextBallot ballot : ballots) {
-      for (Ballot.PlaintextBallotContest contest : ballot.contests) {
-        for (Ballot.PlaintextBallotSelection selection : contest.ballot_selections) {
+    for (PlaintextBallot ballot : ballots) {
+      for (PlaintextBallot.Contest contest : ballot.contests) {
+        for (PlaintextBallot.Selection selection : contest.ballot_selections) {
           assertWithMessage("Placeholder selections should not exist in the plaintext ballots")
                   .that(selection.is_placeholder_selection).isFalse();
           // returns 1 or 0 for n-of-m ballot selections

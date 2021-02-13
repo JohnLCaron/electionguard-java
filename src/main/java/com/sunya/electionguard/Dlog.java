@@ -12,7 +12,7 @@ import static com.sunya.electionguard.Group.*;
  * Should run efficiently when called multiple times when the exponent is at most in the single-digit millions.
  * Performance will degrade if it's much larger.
  */
-public class Dlog {
+class Dlog {
   private static final int MAX = 1000;
   private static final Cache<BigInteger, Integer> cache = CacheBuilder.newBuilder().build();
   static {

@@ -3,7 +3,8 @@ package com.sunya.electionguard.publish;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
-import com.sunya.electionguard.Ballot;
+import com.sunya.electionguard.CiphertextBallot;
+import com.sunya.electionguard.PlaintextBallot;
 
 import javax.annotation.Nullable;
 import java.io.FileInputStream;
@@ -37,7 +38,7 @@ public class PlaintextBallotPojo {
 
   /////////////////////////////////////
 
-  public static List<Ballot.PlaintextBallot> get_ballots_from_file(String filename) throws IOException {
+  public static List<PlaintextBallot> get_ballots_from_file(String filename) throws IOException {
     try (InputStream is = new FileInputStream(filename)) {
       Reader reader = new InputStreamReader(is);
       Gson gson = GsonTypeAdapters.enhancedGson();
@@ -48,7 +49,7 @@ public class PlaintextBallotPojo {
     }
   }
 
-  public static Ballot.PlaintextBallot get_ballot_from_file(String filename) throws IOException {
+  public static PlaintextBallot get_ballot_from_file(String filename) throws IOException {
     try (InputStream is = new FileInputStream(filename)) {
       Reader reader = new InputStreamReader(is);
       Gson gson = GsonTypeAdapters.enhancedGson();
@@ -64,30 +65,30 @@ public class PlaintextBallotPojo {
 
   ///////////////////////////////////////////////////////////////////////////////////////
 
-  public static Ballot.PlaintextBallot deserialize(JsonElement jsonElem) {
+  public static PlaintextBallot deserialize(JsonElement jsonElem) {
     Gson gson = GsonTypeAdapters.enhancedGson();
     PlaintextBallotPojo pojo = gson.fromJson(jsonElem, PlaintextBallotPojo.class);
     return convertPlaintextBallot(pojo);
   }
 
-  private static Ballot.PlaintextBallot convertPlaintextBallot(PlaintextBallotPojo pojo) {
-    return new Ballot.PlaintextBallot(
+  private static PlaintextBallot convertPlaintextBallot(PlaintextBallotPojo pojo) {
+    return new PlaintextBallot(
             pojo.object_id,
             pojo.ballot_style,
             convertList(pojo.contests, PlaintextBallotPojo::convertPlaintextBallotContest));
   }
 
-  private static Ballot.PlaintextBallotContest convertPlaintextBallotContest(PlaintextBallotPojo.PlaintextBallotContest pojo) {
-    return new Ballot.PlaintextBallotContest(
+  private static PlaintextBallot.Contest convertPlaintextBallotContest(PlaintextBallotPojo.PlaintextBallotContest pojo) {
+    return new PlaintextBallot.Contest(
             pojo.object_id,
             convertList(pojo.ballot_selections, PlaintextBallotPojo::convertPlaintextBallotSelection));
   }
 
-  private static Ballot.PlaintextBallotSelection convertPlaintextBallotSelection(PlaintextBallotPojo.PlaintextBallotSelection pojo) {
-    Ballot.ExtendedData extra = (pojo.extra_data == null) ? null :
-            new Ballot.ExtendedData(pojo.extra_data, pojo.extra_data.length());
+  private static PlaintextBallot.Selection convertPlaintextBallotSelection(PlaintextBallotPojo.PlaintextBallotSelection pojo) {
+    CiphertextBallot.ExtendedData extra = (pojo.extra_data == null) ? null :
+            new CiphertextBallot.ExtendedData(pojo.extra_data, pojo.extra_data.length());
 
-    return new Ballot.PlaintextBallotSelection(
+    return new PlaintextBallot.Selection(
             pojo.object_id,
             pojo.vote,
             pojo.is_placeholder_selection,
@@ -96,14 +97,14 @@ public class PlaintextBallotPojo {
 
   ////////////////////////////////////////////////////////////////////////////////////////
 
-  public static JsonElement serialize(Ballot.PlaintextBallot src) {
+  public static JsonElement serialize(PlaintextBallot src) {
     Gson gson = GsonTypeAdapters.enhancedGson();
     PlaintextBallotPojo pojo = convertPlaintextBallot(src);
     Type typeOfSrc = new TypeToken<PlaintextBallotPojo>() {}.getType();
     return gson.toJsonTree(pojo, typeOfSrc);
   }
 
-  private static PlaintextBallotPojo convertPlaintextBallot(Ballot.PlaintextBallot src) {
+  private static PlaintextBallotPojo convertPlaintextBallot(PlaintextBallot src) {
      PlaintextBallotPojo pojo = new PlaintextBallotPojo();
     pojo.object_id = src.object_id;
     pojo.ballot_style = src.ballot_style;
@@ -111,14 +112,14 @@ public class PlaintextBallotPojo {
     return pojo;
   }
 
-  private static PlaintextBallotPojo.PlaintextBallotContest convertPlaintextBallotContest(Ballot.PlaintextBallotContest src) {
+  private static PlaintextBallotPojo.PlaintextBallotContest convertPlaintextBallotContest(PlaintextBallot.Contest src) {
     PlaintextBallotPojo.PlaintextBallotContest pojo = new PlaintextBallotPojo.PlaintextBallotContest ();
     pojo.object_id = src.contest_id;
     pojo.ballot_selections = convertList(src.ballot_selections, PlaintextBallotPojo::convertPlaintextBallotSelection);
     return pojo;
   }
 
-  private static PlaintextBallotPojo.PlaintextBallotSelection convertPlaintextBallotSelection(Ballot.PlaintextBallotSelection src) {
+  private static PlaintextBallotPojo.PlaintextBallotSelection convertPlaintextBallotSelection(PlaintextBallot.Selection src) {
     PlaintextBallotPojo.PlaintextBallotSelection pojo = new PlaintextBallotPojo.PlaintextBallotSelection ();
     pojo.object_id = src.selection_id;
     pojo.vote = src.vote;

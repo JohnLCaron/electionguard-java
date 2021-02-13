@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import static com.sunya.electionguard.Ballot.*;
 import static com.sunya.electionguard.Election.*;
 import static com.sunya.electionguard.Group.*;
 import static com.sunya.electionguard.ElectionWithPlaceholders.ContestWithPlaceholders;
@@ -75,9 +74,7 @@ public class Encrypt {
     public Optional<CiphertextBallot> encrypt(PlaintextBallot ballot) {
       Optional<CiphertextBallot> encrypted_ballot =
               encrypt_ballot(ballot, this.metadata, this.encryption, this.last_hash, Optional.empty(), true);
-      if (encrypted_ballot.isPresent()) {
-        this.last_hash = encrypted_ballot.get().tracking_hash;
-      }
+      encrypted_ballot.ifPresent(ciphertextBallot -> this.last_hash = ciphertextBallot.tracking_hash);
       return encrypted_ballot;
     }
   }
@@ -100,8 +97,8 @@ public class Encrypt {
    * @param is_affirmative: Mark this selection as `yes`
    */
   // selection_from( description: SelectionDescription, is_placeholder: bool = False, is_affirmative: bool = False,
-  static PlaintextBallotSelection selection_from(SelectionDescription description, boolean is_placeholder, boolean is_affirmative) {
-    return new PlaintextBallotSelection(description.object_id, is_affirmative ? 1 : 0, is_placeholder, null);
+  static PlaintextBallot.Selection selection_from(SelectionDescription description, boolean is_placeholder, boolean is_affirmative) {
+    return new PlaintextBallot.Selection(description.object_id, is_affirmative ? 1 : 0, is_placeholder, null);
   }
 
   /**
@@ -110,13 +107,13 @@ public class Encrypt {
    *
    * @param description: The `ContestDescription` used to derive the well-formed `BallotContest`
    */
-  static PlaintextBallotContest contest_from(ContestDescription description) {
-    List<PlaintextBallotSelection> selections = new ArrayList<>();
+  static PlaintextBallot.Contest contest_from(ContestDescription description) {
+    List<PlaintextBallot.Selection> selections = new ArrayList<>();
 
     for (SelectionDescription selection_description : description.ballot_selections) {
       selections.add(selection_from(selection_description, false, false));
     }
-    return new PlaintextBallotContest(description.object_id, selections);
+    return new PlaintextBallot.Contest(description.object_id, selections);
   }
 
   /**
@@ -131,8 +128,8 @@ public class Encrypt {
    * @param is_placeholder:            specifies if this is a placeholder selection
    * @param should_verify_proofs:      specify if the proofs should be verified prior to returning (default True)
    */
-  static Optional<CiphertextBallotSelection> encrypt_selection(
-          PlaintextBallotSelection selection,
+  static Optional<CiphertextBallot.Selection> encrypt_selection(
+          PlaintextBallot.Selection selection,
           SelectionDescription selection_description,
           ElementModP elgamal_public_key,
           ElementModQ crypto_extended_base_hash,
@@ -167,7 +164,7 @@ public class Encrypt {
 
     // TODO: ISSUE #47: encrypt/decrypt: encrypt the extended_data field
 
-    CiphertextBallotSelection encrypted_selection = CiphertextBallotSelection.create(
+    CiphertextBallot.Selection encrypted_selection = CiphertextBallot.Selection.create(
             selection.selection_id,
             selection_description_hash,
             elgamal_encryption.get(),
@@ -215,8 +212,8 @@ public class Encrypt {
    *                                   this value can be (or derived from) the Ballot nonce, but no relationship is required
    * @param should_verify_proofs:      specify if the proofs should be verified prior to returning (default True)
    */
-  static Optional<CiphertextBallotContest> encrypt_contest(
-          PlaintextBallotContest contest,
+  static Optional<CiphertextBallot.Contest> encrypt_contest(
+          PlaintextBallot.Contest contest,
           ContestWithPlaceholders contest_description,
           ElementModP elgamal_public_key,
           ElementModQ crypto_extended_base_hash,
@@ -244,7 +241,7 @@ public class Encrypt {
     ElementModQ contest_nonce = nonce_sequence.get(contest_description.sequence_order);
     ElementModQ chaum_pedersen_nonce = nonce_sequence.get(0);
 
-    List<CiphertextBallotSelection> encrypted_selections = new ArrayList<>();
+    List<CiphertextBallot.Selection> encrypted_selections = new ArrayList<>();
 
     int selection_count = 0;
 
@@ -256,13 +253,13 @@ public class Encrypt {
     if (show) System.out.printf(" Contest %s.%n", contest.contest_id);
     for (SelectionDescription description : contest_description.ballot_selections) {
         boolean has_selection = false;
-        Optional<CiphertextBallotSelection> encrypted_selection = Optional.empty();
+        Optional<CiphertextBallot.Selection> encrypted_selection = Optional.empty();
 
         // iterate over the actual selections for each contest description
         // and apply the selected value if it exists.  If it does not, an explicit
         // false is entered instead and the selection_count is not incremented
         // this allows consumers to only pass in the relevant selections made by a voter
-        for (PlaintextBallotSelection selection : contest.ballot_selections) {
+        for (PlaintextBallot.Selection selection : contest.ballot_selections) {
           if (selection.selection_id.equals(description.object_id)) {
             // track the selection count so we can append the
             // appropriate number of true placeholder votes
@@ -312,7 +309,7 @@ public class Encrypt {
         selection_count += 1;
       }
 
-      Optional<CiphertextBallotSelection> encrypted_selection = encrypt_selection(
+      Optional<CiphertextBallot.Selection> encrypted_selection = encrypt_selection(
          selection_from(placeholder, true, select_placeholder),
          placeholder,
          elgamal_public_key,
@@ -330,7 +327,7 @@ public class Encrypt {
       logger.atInfo().log("mismatching selection count: only n-of-m style elections are currently supported");
     }
 
-    CiphertextBallotContest encrypted_contest = CiphertextBallotContest.create(
+    CiphertextBallot.Contest encrypted_contest = CiphertextBallot.Contest.create(
         contest.contest_id,
         contest_description_hash,
         encrypted_selections,
@@ -404,13 +401,13 @@ public class Encrypt {
     // to derive other nonce values on the ballot
     ElementModQ nonce_seed = CiphertextBallot.nonce_seed(metadata.election.crypto_hash, ballot.object_id, random_master_nonce);
 
-    List<CiphertextBallotContest> encrypted_contests = new ArrayList<>();
+    List<CiphertextBallot.Contest> encrypted_contests = new ArrayList<>();
 
     // only iterate on contests for this specific ballot style
     if (show) System.out.printf("Ballot %s.%n", ballot.object_id);
     for (ContestWithPlaceholders contestDescription : metadata.get_contests_for(ballot.ballot_style)) {
-      PlaintextBallotContest use_contest = null;
-      for (PlaintextBallotContest contest : ballot.contests) {
+      PlaintextBallot.Contest use_contest = null;
+      for (PlaintextBallot.Contest contest : ballot.contests) {
         if (contest.contest_id.equals(contestDescription.object_id)) {
           use_contest = contest;
           break;
@@ -421,7 +418,7 @@ public class Encrypt {
         use_contest = contest_from(contestDescription);
       }
 
-      Optional<CiphertextBallotContest> encrypted_contest = encrypt_contest(
+      Optional<CiphertextBallot.Contest> encrypted_contest = encrypt_contest(
               use_contest,
               contestDescription,
               context.elgamal_public_key,

@@ -10,17 +10,11 @@ import java.security.*;
 import java.util.Optional;
 
 /** Wrapper for Java RSA encryption. */
-public class Rsa {
+class Rsa {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
-
-  private static final int PUBLIC_EXPONENT = 65537;
   private static final int KEY_SIZE = 4096;
-  private static final int PADDING = 11;
-  private static final int MAX_BITS = KEY_SIZE / 8 - PADDING;
-  private static final String ISO_ENCODING = "ISO-8859-1";
-  private static final String BYTE_ORDER = "big";
 
-  public static Optional<Auxiliary.ByteString> encrypt(String message, PublicKey public_key) {
+  static Optional<Auxiliary.ByteString> encrypt(String message, PublicKey public_key) {
     try {
       return Optional.of(new Auxiliary.ByteString(rsa_encrypt(message, public_key)));
     } catch (Exception e) {
@@ -29,7 +23,7 @@ public class Rsa {
     }
   }
 
-  public static Optional<String> decrypt(Auxiliary.ByteString encrypted_message, PrivateKey secret_key) {
+  static Optional<String> decrypt(Auxiliary.ByteString encrypted_message, PrivateKey secret_key) {
     try {
       return Optional.of(rsa_decrypt(encrypted_message.getBytes(), secret_key));
     } catch (Exception e) {

@@ -18,8 +18,8 @@ public class DecryptionMediator {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   private final CiphertextElectionContext context;
-  private final PublishedCiphertextTally encryptedTally;
-  private final Iterable<Ballot.CiphertextAcceptedBallot> spoiled_ballots;
+  private final CiphertextTally encryptedTally;
+  private final Iterable<CiphertextAcceptedBallot> spoiled_ballots;
 
   // Map(AVAILABLE_GUARDIAN_ID, Guardian)
   private final Map<String, Guardian> available_guardians = new HashMap<>();
@@ -41,15 +41,11 @@ public class DecryptionMediator {
   private Map<String, TallyDecryptionShare> merged_decryption_shares;
 
   public DecryptionMediator(CiphertextElectionContext context,
-                            PublishedCiphertextTally encryptedTally,
-                            Iterable<Ballot.CiphertextAcceptedBallot> spoiled_ballots) {
+                            CiphertextTally encryptedTally,
+                            Iterable<CiphertextAcceptedBallot> spoiled_ballots) {
     this.context = context;
     this.encryptedTally = encryptedTally;
     this.spoiled_ballots = spoiled_ballots;
-  }
-
-  public Iterable<Ballot.CiphertextAcceptedBallot> spoiled_ballots() {
-    return spoiled_ballots;
   }
 
   /**
@@ -150,10 +146,10 @@ public class DecryptionMediator {
     }
 
     // Compute GuardianState's for all of the guardians
-    List<PlaintextTally.GuardianState> guardianStates = new ArrayList<>();
-    this.available_guardians.values().forEach(g -> guardianStates.add(PlaintextTally.GuardianState.create(
+    List<GuardianState> guardianStates = new ArrayList<>();
+    this.available_guardians.values().forEach(g -> guardianStates.add(GuardianState.create(
             g.object_id, g.sequence_order(), false)));
-    this.missing_guardians.values().forEach(k -> guardianStates.add(PlaintextTally.GuardianState.create(
+    this.missing_guardians.values().forEach(k -> guardianStates.add(GuardianState.create(
             k.owner_id(), k.sequence_order(), true)));
 
     // Make sure a Quorum of Guardians have announced
@@ -289,19 +285,30 @@ public class DecryptionMediator {
   }
 
   /** You must call decrypt_tally() first */
-  public Optional<List<DecryptWithShares.SpoiledBallotAndTally>> decrypt_spoiled_ballots() {
+  public Optional<List<SpoiledBallotAndTally>> decrypt_spoiled_ballots() {
 
     if (this.available_guardians.size() == this.context.number_of_guardians) {
       // If all Guardians are present, decrypt the ballot using standard shares
-      return DecryptWithShares.decrypt_spoiled_ballots(this.spoiled_ballots, this.available_guardians, this.decryption_shares, this.context);
+      return DecryptWithShares.decrypt_spoiled_ballots(this.spoiled_ballots, this.decryption_shares, this.context);
 
     } else {
       // If all Guardians are not present, decrypt the ballot using compensated shares
-      return DecryptWithShares.decrypt_spoiled_ballots(this.spoiled_ballots, this.available_guardians, this.merged_decryption_shares, this.context);
+      return DecryptWithShares.decrypt_spoiled_ballots(this.spoiled_ballots, this.merged_decryption_shares, this.context);
     }
   }
 
-  /** One for each ballot. You must call decrypt_tally() first
+  /** A tuple of a decrypted spoiled ballot and its tally. */
+  public static class SpoiledBallotAndTally {
+    public final PlaintextTally tally;
+    public final PlaintextBallot ballot;
+
+    SpoiledBallotAndTally(PlaintextTally tally, PlaintextBallot ballot) {
+      this.tally = tally;
+      this.ballot = ballot;
+    }
+  }
+
+  /* One for each ballot. You must call decrypt_tally() first
   public Optional<Iterable<DecryptWithShares.SpoiledTallyAndBallot>> decrypt_spoiled_ballots2(
           Iterable<Ballot.CiphertextAcceptedBallot> spoiled_ballots) {
 

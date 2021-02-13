@@ -7,7 +7,7 @@ import com.sunya.electionguard.ElectionConstants;
 import com.sunya.electionguard.Encrypt;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.KeyCeremony;
-import com.sunya.electionguard.PublishedCiphertextTally;
+import com.sunya.electionguard.CiphertextTally;
 import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.SchnorrProof;
 
@@ -25,7 +25,7 @@ public class ElectionRecordToProto {
           ElectionConstants constants,
           Iterable<KeyCeremony.CoefficientValidationSet> guardianCoefficients,
           @Nullable Iterable<Encrypt.EncryptionDevice> devices,
-          @Nullable PublishedCiphertextTally ciphertext_tally,
+          @Nullable CiphertextTally ciphertext_tally,
           @Nullable PlaintextTally decryptedTally) {
 
     ElectionRecord.Builder builder = ElectionRecord.newBuilder();

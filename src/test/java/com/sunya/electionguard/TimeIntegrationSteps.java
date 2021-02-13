@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 import static com.google.common.truth.Truth8.assertThat;
-import static com.sunya.electionguard.Ballot.*;
 import static com.sunya.electionguard.Election.*;
 import static com.sunya.electionguard.ElectionWithPlaceholders.ContestWithPlaceholders;
 
@@ -64,9 +63,9 @@ public class TimeIntegrationSteps {
 
   // Step 4 - Decrypt Tally
   DecryptionMediator decryptionMediator;
-  PublishedCiphertextTally publishedTally;
+  CiphertextTally publishedTally;
   PlaintextTally decryptedTally;
-  List<Ballot.PlaintextBallot> spoiledDecryptedBallots;
+  List<PlaintextBallot> spoiledDecryptedBallots;
   List<PlaintextTally> spoiledDecryptedTallies;
 
   public TimeIntegrationSteps(int nballots) throws IOException {
@@ -274,7 +273,7 @@ public class TimeIntegrationSteps {
 
     // Here's where the ciphertext Tally is decrypted.
     this.decryptedTally = this.decryptionMediator.decrypt_tally(false, null).orElseThrow();
-    List<DecryptWithShares.SpoiledBallotAndTally> spoiledTallyAndBallot =
+    List<DecryptionMediator.SpoiledBallotAndTally> spoiledTallyAndBallot =
             this.decryptionMediator.decrypt_spoiled_ballots().orElseThrow();
     this.spoiledDecryptedBallots = spoiledTallyAndBallot.stream().map(e -> e.ballot).collect(Collectors.toList());
     this.spoiledDecryptedTallies = spoiledTallyAndBallot.stream().map(e -> e.tally).collect(Collectors.toList());
@@ -298,9 +297,9 @@ public class TimeIntegrationSteps {
 
     // Tally the expected values from the plaintext ballots that were cast.
     for (PlaintextBallot ballot : this.originalPlaintextBallots) {
-      if (this.ballot_box.get(ballot.object_id).orElseThrow().state == BallotBoxState.CAST) {
-        for (PlaintextBallotContest contest : ballot.contests) {
-          for (PlaintextBallotSelection selection : contest.ballot_selections) {
+      if (this.ballot_box.get(ballot.object_id).orElseThrow().state == BallotBox.State.CAST) {
+        for (PlaintextBallot.Contest contest : ballot.contests) {
+          for (PlaintextBallot.Selection selection : contest.ballot_selections) {
             Integer value = expected_plaintext_tally.get(selection.selection_id);
             expected_plaintext_tally.put(selection.selection_id, value + selection.vote); // could use merge
           }
@@ -309,8 +308,8 @@ public class TimeIntegrationSteps {
     }
 
     // Compare the expected tally to the decrypted tally
-    for (PlaintextTally.PlaintextTallyContest tally_contest : this.decryptedTally.contests.values()) {
-      for (PlaintextTally.PlaintextTallySelection tally_selection : tally_contest.selections().values()) {
+    for (PlaintextTally.Contest tally_contest : this.decryptedTally.contests.values()) {
+      for (PlaintextTally.Selection tally_selection : tally_contest.selections().values()) {
         Integer expected = expected_plaintext_tally.get(tally_selection.object_id());
         assertThat(expected).isEqualTo(tally_selection.tally());
       }
@@ -321,8 +320,8 @@ public class TimeIntegrationSteps {
   void compare_spoiled_tallies() {
     // the set of spoiled ballot ids.
     Set<String> spoiled = new HashSet<>();
-    for (Ballot.CiphertextAcceptedBallot accepted_ballot : ballot_box.getSpoiledBallots()) {
-      if (accepted_ballot.state == BallotBoxState.SPOILED) {
+    for (CiphertextAcceptedBallot accepted_ballot : ballot_box.getSpoiledBallots()) {
+      if (accepted_ballot.state == BallotBox.State.SPOILED) {
         spoiled.add(accepted_ballot.object_id);
       }
     }
@@ -490,12 +489,12 @@ public class TimeIntegrationSteps {
 
   public static void compare_spoiled_tally(PlaintextBallot orgBallot, PlaintextTally plaintextTally) {
     System.out.printf("%nSpoiled Ballot: %s%n", orgBallot.object_id);
-    for (PlaintextBallotContest contest : orgBallot.contests) {
+    for (PlaintextBallot.Contest contest : orgBallot.contests) {
       System.out.printf("%nContest: %s%n", contest.contest_id);
-      PlaintextTally.PlaintextTallyContest contestTally = plaintextTally.contests.get(contest.contest_id);
-      for (PlaintextBallotSelection selection : contest.ballot_selections) {
+      PlaintextTally.Contest contestTally = plaintextTally.contests.get(contest.contest_id);
+      for (PlaintextBallot.Selection selection : contest.ballot_selections) {
         int expected = selection.vote;
-        PlaintextTally.PlaintextTallySelection selectionTally = contestTally.selections().get(selection.selection_id);
+        PlaintextTally.Selection selectionTally = contestTally.selections().get(selection.selection_id);
         System.out.printf("   - Selection: %s expected: %d, actual: %d%n",
                 selection.selection_id, expected, selectionTally.tally());
         assertThat(selectionTally.tally()).isEqualTo(expected);
@@ -507,8 +506,8 @@ public class TimeIntegrationSteps {
   // If there are no votes for a contest, it may be missing in the original.
   // The yes votes must match LOOK should equal? Placeholders?
   public static void compare_spoiled_ballot(PlaintextBallot roundtrip, PlaintextBallot expected) {
-    for (PlaintextBallotContest roundtripContest : roundtrip.contests) {
-      Optional<PlaintextBallotContest> contest = expected.contests.stream()
+    for (PlaintextBallot.Contest roundtripContest : roundtrip.contests) {
+      Optional<PlaintextBallot.Contest> contest = expected.contests.stream()
               .filter(c -> c.contest_id.equals(roundtripContest.contest_id)).findFirst();
 
       if (contest.isEmpty()) { // all votes must be zero.
@@ -516,8 +515,8 @@ public class TimeIntegrationSteps {
         assertThat(total).isEqualTo(0);
         continue;
       }
-      for (PlaintextBallotSelection roundtripSelection : roundtripContest.ballot_selections) {
-        Optional<PlaintextBallotSelection> selection = contest.get().ballot_selections.stream()
+      for (PlaintextBallot.Selection roundtripSelection : roundtripContest.ballot_selections) {
+        Optional<PlaintextBallot.Selection> selection = contest.get().ballot_selections.stream()
                 .filter(s -> s.selection_id.equals(roundtripSelection.selection_id)).findFirst();
 
         if (roundtripSelection.vote == 1) {

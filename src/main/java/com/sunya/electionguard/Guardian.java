@@ -55,9 +55,6 @@ public class Guardian extends ElectionObjectBase {
   public int sequence_order() {
     return sequence_order;
   }
-  public KeyCeremony.CeremonyDetails ceremony_details() {
-    return ceremony_details;
-  }
   public Auxiliary.KeyPair auxiliary_keys() {
     return auxiliary_keys;
   }

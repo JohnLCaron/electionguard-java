@@ -6,7 +6,7 @@ option java_package = "com.sunya.electionguard.proto";
 option java_outer_classname = "CiphertextTallyProto";
 
 // Encrypted Tally of some collection of ballots.
-message PublishedCiphertextTally {
+message CiphertextTally {
   string object_id = 1;
 
   // Map(CONTEST_ID, CiphertextTallyContest)

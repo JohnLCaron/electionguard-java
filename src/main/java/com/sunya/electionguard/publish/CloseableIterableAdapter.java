@@ -8,7 +8,7 @@ import java.util.Iterator;
  */
 public class CloseableIterableAdapter<T> implements Iterable<T>, CloseableIterable<T> {
   public static <T> CloseableIterable<T> empty() {
-    return wrap(new ArrayList<T>());
+    return wrap(new ArrayList<>());
   }
 
   public static <T> CloseableIterable <T> wrap(Iterable<T> delegate) {

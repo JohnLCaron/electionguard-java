@@ -180,18 +180,4 @@ public class ElGamal {
     }
     return result;
   }
-
-  static Ciphertext elgamal_add_show(Ciphertext... ciphertexts) {
-    Preconditions.checkArgument(ciphertexts.length > 0, "Must have one or more ciphertexts for elgamal_add");
-
-    Ciphertext result = ciphertexts[0];
-    for (int i = 1; i < ciphertexts.length; i++) {
-      Ciphertext next = ciphertexts[i];
-      result = new Ciphertext(Group.mult_p(result.pad, next.pad), Group.mult_p(result.data, next.data));
-      System.out.printf("     accum_alpha %s%n", result.pad);
-      System.out.printf("     accum_beta %s%n", result.data);
-
-    }
-    return result;
-  }
 }

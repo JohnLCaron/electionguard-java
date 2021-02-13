@@ -4,7 +4,6 @@ import com.google.common.flogger.FluentLogger;
 
 import java.util.List;
 
-import static com.sunya.electionguard.Ballot.*;
 import static com.sunya.electionguard.Election.*;
 import static com.sunya.electionguard.ElectionWithPlaceholders.ContestWithPlaceholders;
 
@@ -35,7 +34,7 @@ class BallotValidations {
 
   /** Determine if selection is valid for ballot style. */
   static boolean selection_is_valid_for_style(
-          CiphertextBallotSelection selection, SelectionDescription description) {
+          CiphertextBallot.Selection selection, SelectionDescription description) {
 
     if (!selection.description_hash.equals(description.crypto_hash())) {
       logger.atInfo().log("ballot is not valid for style: mismatched selection description hash %s for selection %s hash %s",
@@ -48,7 +47,7 @@ class BallotValidations {
 
   /** Determine if contest is valid for ballot style. */
   static boolean contest_is_valid_for_style(
-          CiphertextBallotContest contest, ContestWithPlaceholders description) {
+          CiphertextBallot.Contest contest, ContestWithPlaceholders description) {
 
     // verify the hash matches
     if (!contest.description_hash.equals(description.crypto_hash())) {
@@ -73,8 +72,8 @@ class BallotValidations {
 
     // LOOK I dont understand this?
     for (ContestWithPlaceholders description : descriptions) {
-      CiphertextBallotContest use_contest = null;
-      for (CiphertextBallotContest contest : ballot.contests) {
+      CiphertextBallot.Contest use_contest = null;
+      for (CiphertextBallot.Contest contest : ballot.contests) {
         if (description.object_id.equals(contest.object_id)) {
           use_contest = contest;
           break;
@@ -93,8 +92,8 @@ class BallotValidations {
 
       // verify the selection metadata
       for (SelectionDescription selection_description : description.ballot_selections) {
-        CiphertextBallotSelection use_selection = null;
-        for (CiphertextBallotSelection selection : use_contest.ballot_selections) {
+        CiphertextBallot.Selection use_selection = null;
+        for (CiphertextBallot.Selection selection : use_contest.ballot_selections) {
           if (selection_description.object_id.equals(selection.object_id)) {
             use_selection = selection;
             break;

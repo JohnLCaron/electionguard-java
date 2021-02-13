@@ -14,13 +14,13 @@ import java.util.Objects;
 
 import static com.sunya.electionguard.Group.ElementModP;
 
-/* The decrypted plaintext representation of the counts of a collection of ballots */
+/** The decrypted plaintext representation of the counts of a collection of ballots. */
 @Immutable
 public class PlaintextTally {
   public final String object_id; // matches the CiphertextTally object_id
 
   // Map(CONTEST_ID, PlaintextTallyContest)
-  public final ImmutableMap<String, PlaintextTallyContest> contests;
+  public final ImmutableMap<String, Contest> contests;
 
   /** The lagrange coefficients w_ij for verification of section 10. */
   public final ImmutableMap<String, Group.ElementModQ> lagrange_coefficients;
@@ -29,7 +29,7 @@ public class PlaintextTally {
   public final ImmutableList<GuardianState> guardianStates;
 
   public PlaintextTally(String object_id,
-                        Map<String, PlaintextTallyContest> contests,
+                        Map<String, Contest> contests,
                         @Nullable Map<String, Group.ElementModQ> lagrange_coefficients,
                         @Nullable List<GuardianState> guardianState) {
     this.object_id = Preconditions.checkNotNull(object_id);
@@ -66,11 +66,11 @@ public class PlaintextTally {
    * The object_id is the same as the Election.ContestDescription.object_id or PlaintextBallotContest object_id.
    */
   @AutoValue
-  public static abstract class PlaintextTallyContest implements ElectionObjectBaseIF {
-    public abstract ImmutableMap<String, PlaintextTallySelection> selections(); // Map(SELECTION_ID, PlaintextTallySelection)
+  public static abstract class Contest implements ElectionObjectBaseIF {
+    public abstract ImmutableMap<String, Selection> selections(); // Map(SELECTION_ID, PlaintextTallySelection)
 
-    public static PlaintextTallyContest create(String object_id, Map<String, PlaintextTallySelection> selections) {
-      return new AutoValue_PlaintextTally_PlaintextTallyContest(
+    public static Contest create(String object_id, Map<String, Selection> selections) {
+      return new AutoValue_PlaintextTally_Contest(
               Preconditions.checkNotNull(object_id),
               ImmutableMap.copyOf(Preconditions.checkNotNull(selections)));
     }
@@ -91,7 +91,7 @@ public class PlaintextTally {
    * The object_id is the same as the encrypted selection (Ballot.CiphertextSelection) object_id.
    */
   @AutoValue
-  public static abstract class PlaintextTallySelection implements ElectionObjectBaseIF {
+  public static abstract class Selection implements ElectionObjectBaseIF {
     /** The actual count. */
     public abstract Integer tally();
     /** g^tally or M in the spec. */
@@ -99,9 +99,9 @@ public class PlaintextTally {
     public abstract ElGamal.Ciphertext message();
     public abstract ImmutableList<DecryptionShare.CiphertextDecryptionSelection> shares();
 
-    public static PlaintextTallySelection create(String object_id, Integer tally, ElementModP value, ElGamal.Ciphertext message,
-                                                 List<DecryptionShare.CiphertextDecryptionSelection> shares) {
-      return new AutoValue_PlaintextTally_PlaintextTallySelection(
+    public static Selection create(String object_id, Integer tally, ElementModP value, ElGamal.Ciphertext message,
+                                   List<DecryptionShare.CiphertextDecryptionSelection> shares) {
+      return new AutoValue_PlaintextTally_Selection(
               Preconditions.checkNotNull(object_id),
               Preconditions.checkNotNull(tally),
               Preconditions.checkNotNull(value),
@@ -112,21 +112,6 @@ public class PlaintextTally {
     @Override
     public String toString() {
       return String.format("   %-40s = %d", object_id(), tally());
-    }
-  }
-
-  /** The state of the Guardian when decrypting: missing or available. */
-  @AutoValue
-  public static abstract class GuardianState {
-    public abstract String guardian_id();
-    public abstract int sequence();
-    public abstract boolean is_missing();
-
-    public static GuardianState create(String guardianId, int sequence, boolean isMissing) {
-      return new AutoValue_PlaintextTally_GuardianState(
-              Preconditions.checkNotNull(guardianId),
-              sequence,
-              isMissing);
     }
   }
 

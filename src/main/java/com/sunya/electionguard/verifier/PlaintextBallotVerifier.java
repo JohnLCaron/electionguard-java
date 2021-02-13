@@ -1,8 +1,8 @@
 package com.sunya.electionguard.verifier;
 
 import com.google.common.flogger.FluentLogger;
-import com.sunya.electionguard.Ballot;
 import com.sunya.electionguard.Election;
+import com.sunya.electionguard.PlaintextBallot;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -35,15 +35,15 @@ public class PlaintextBallotVerifier {
 
   boolean verify_plaintext_ballot() {
     boolean error = false;
-    for (Ballot.PlaintextBallot ballot : electionRecord.spoiledBallots) {
-      for (Ballot.PlaintextBallotContest contest : ballot.contests) {
+    for (PlaintextBallot ballot : electionRecord.spoiledBallots) {
+      for (PlaintextBallot.Contest contest : ballot.contests) {
         Set<String> selectionNames = names.get(contest.contest_id);
         if (selectionNames == null) {
           System.out.printf(" ***Ballot Contest id (%s) not contained in ballot coding file.%n", contest.contest_id);
           error = true;
           continue;
         }
-        for (Ballot.PlaintextBallotSelection selection : contest.ballot_selections) {
+        for (PlaintextBallot.Selection selection : contest.ballot_selections) {
           if (selection.is_placeholder_selection) {
             continue;
           }

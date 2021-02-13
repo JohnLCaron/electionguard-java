@@ -1,6 +1,6 @@
 package com.sunya.electionguard.proto;
 
-import com.sunya.electionguard.Ballot;
+import com.sunya.electionguard.CiphertextAcceptedBallot;
 import com.sunya.electionguard.publish.ConvertFromJson;
 import com.sunya.electionguard.publish.Publisher;
 import net.jqwik.api.Example;
@@ -22,10 +22,10 @@ public class TestCiphertextBallotToProtoRoundtrip {
   @Example
   public void testBallotsRoundtrip() throws IOException {
     for (File file : publisher.ballotFiles()) {
-      Ballot.CiphertextAcceptedBallot fromPython = ConvertFromJson.readCiphertextBallot(file.getAbsolutePath());
+      CiphertextAcceptedBallot fromPython = ConvertFromJson.readCiphertextBallot(file.getAbsolutePath());
       assertThat(fromPython).isNotNull();
       CiphertextBallotProto.CiphertextAcceptedBallot proto = CiphertextBallotToProto.translateToProto(fromPython);
-      Ballot.CiphertextAcceptedBallot roundtrip = CiphertextBallotFromProto.translateFromProto(proto);
+      CiphertextAcceptedBallot roundtrip = CiphertextBallotFromProto.translateFromProto(proto);
       assertThat(roundtrip).isEqualTo(fromPython);
     }
   }
