@@ -19,8 +19,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
-import static com.sunya.electionguard.Election.*;
-
 /** Publishes the Election Record to Json or protobuf files. */
 public class Publisher {
   static final String PRIVATE_DIR = "private";
@@ -220,7 +218,7 @@ public class Publisher {
 
   /** Publishes the election record as json. */
   public void writeElectionRecordJson(
-          ElectionDescription description,
+          Election description,
           CiphertextElectionContext context,
           ElectionConstants constants,
           Iterable<Encrypt.EncryptionDevice> devices,
@@ -316,7 +314,7 @@ public class Publisher {
 
   /** Publishes the KeyCeremony part of the election record as proto. */
   public void writeKeyCeremonyProto(
-          ElectionDescription description,
+          Election description,
           CiphertextElectionContext context,
           ElectionConstants constants,
           Iterable<KeyCeremony.CoefficientValidationSet> coefficient_validation_sets) throws IOException {
@@ -331,7 +329,7 @@ public class Publisher {
 
   /** Publishes the ballot Encryptions part of election record as proto. */
   public void writeEncryptionResultsProto(
-          ElectionDescription description,
+          Election description,
           CiphertextElectionContext context,
           ElectionConstants constants,
           Iterable<KeyCeremony.CoefficientValidationSet> coefficient_validation_sets,
@@ -358,7 +356,7 @@ public class Publisher {
 
   /** Publishes the ballot and tally Decryptions part election record as proto. */
   public void writeDecryptionResultsProto(
-          ElectionDescription description,
+          Election description,
           CiphertextElectionContext context,
           ElectionConstants constants,
           Iterable<KeyCeremony.CoefficientValidationSet> coefficient_validation_sets,
@@ -401,7 +399,7 @@ public class Publisher {
 
   /** Publishes the entire election record as proto. */
   public void writeElectionRecordProto(
-          ElectionDescription description,
+          Election description,
           CiphertextElectionContext context,
           ElectionConstants constants,
           Iterable<KeyCeremony.CoefficientValidationSet> coefficient_validation_sets,

@@ -2,8 +2,8 @@ package com.sunya.electionguard.workflow;
 
 import com.google.common.collect.ImmutableList;
 import com.sunya.electionguard.CiphertextElectionContext;
-import com.sunya.electionguard.Election;
 import com.sunya.electionguard.ElectionConstants;
+import com.sunya.electionguard.Election;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.Guardian;
 import com.sunya.electionguard.GuardianBuilder;
@@ -60,7 +60,7 @@ public class TestKeyCeremonySerializing {
   ///////////////////////////////////////////////////////////////////////////
   final int numberOfGuardians = 4;
   final int quorum = 4;
-  final Election.ElectionDescription election;
+  final Election election;
   final String inputDir = "/home/snake/tmp/electionguard/publishEndToEnd";
   final String outputDir = "/home/snake/tmp/electionguard/publishTest";
   final Publisher publisher;

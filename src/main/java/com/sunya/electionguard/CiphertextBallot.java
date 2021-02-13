@@ -78,7 +78,7 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////
   /** The object_id of the Election.BallotStyle. */
   public final String ballot_style;
-  /** The Election.ElectionDescription hash. */
+  /** The ElectionDescription hash. */
   public final Group.ElementModQ description_hash;
   /** The previous Tracker hash in the ballot chain. */
   public final Group.ElementModQ previous_tracking_hash;

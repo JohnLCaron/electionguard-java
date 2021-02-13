@@ -17,9 +17,10 @@ import static com.sunya.electionguard.Group.ElementModP;
 /** The decrypted plaintext representation of the counts of a collection of ballots. */
 @Immutable
 public class PlaintextTally {
-  public final String object_id; // matches the CiphertextTally object_id
+  /** Matches the CiphertextTally object_id. */
+  public final String object_id;
 
-  // Map(CONTEST_ID, PlaintextTallyContest)
+  /** The list of contests for this tally, keyed by contest_id. */
   public final ImmutableMap<String, Contest> contests;
 
   /** The lagrange coefficients w_ij for verification of section 10. */
@@ -67,6 +68,7 @@ public class PlaintextTally {
    */
   @AutoValue
   public static abstract class Contest implements ElectionObjectBaseIF {
+    /** The collection of selections in the contest, keyed by selection.object_id. */
     public abstract ImmutableMap<String, Selection> selections(); // Map(SELECTION_ID, PlaintextTallySelection)
 
     public static Contest create(String object_id, Map<String, Selection> selections) {
@@ -96,7 +98,9 @@ public class PlaintextTally {
     public abstract Integer tally();
     /** g^tally or M in the spec. */
     public abstract ElementModP value();
+    /** The encrypted vote count. */
     public abstract ElGamal.Ciphertext message();
+    /** The Guardians' shares of the decryption of a selection. `M_i` in the spec. Must be quorum of them. */
     public abstract ImmutableList<DecryptionShare.CiphertextDecryptionSelection> shares();
 
     public static Selection create(String object_id, Integer tally, ElementModP value, ElGamal.Ciphertext message,

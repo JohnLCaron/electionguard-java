@@ -15,7 +15,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.google.common.truth.Truth.assertWithMessage;
-import static com.sunya.electionguard.Election.*;
 import static com.sunya.electionguard.ElectionWithPlaceholders.ContestWithPlaceholders;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -42,7 +41,7 @@ public class TestEndToEndElectionIntegration {
   }
 
   // Step 0 - Configure Election
-  ElectionDescription election;
+  Election election;
   ElectionBuilder election_builder;
   CiphertextElectionContext context;
   ElectionConstants constants;
@@ -281,7 +280,7 @@ public class TestEndToEndElectionIntegration {
     // Create a representation of each contest's tally
     Map<String, Integer> expected_plaintext_tally = new HashMap<>();
     for (ContestWithPlaceholders contest : this.metadata.contests) {
-      for (SelectionDescription selection : contest.ballot_selections) {
+      for (Election.SelectionDescription selection : contest.ballot_selections) {
         expected_plaintext_tally.put(selection.object_id, 0);
       }
     }

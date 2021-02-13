@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 import static com.google.common.truth.Truth8.assertThat;
-import static com.sunya.electionguard.Election.*;
 import static com.sunya.electionguard.ElectionWithPlaceholders.ContestWithPlaceholders;
 
 import static org.junit.Assert.fail;
@@ -40,7 +39,7 @@ public class TimeIntegrationSteps {
   int nballots;
 
   // Step 0 - Configure Election
-  ElectionDescription election;
+  Election election;
   ElectionBuilder election_builder;
   CiphertextElectionContext context;
   ElectionConstants constants;
@@ -290,7 +289,7 @@ public class TimeIntegrationSteps {
 
     Map<String, Integer> expected_plaintext_tally = new HashMap<>(); // Map of selection_id to votes counted
     for (ContestWithPlaceholders contest : this.metadata.contests) {
-      for (SelectionDescription selection : contest.ballot_selections) {
+      for (Election.SelectionDescription selection : contest.ballot_selections) {
         expected_plaintext_tally.put(selection.object_id, 0);
       }
     }

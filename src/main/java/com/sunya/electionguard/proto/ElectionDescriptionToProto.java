@@ -6,8 +6,8 @@ import static com.sunya.electionguard.proto.ElectionProto.*;
 
 public class ElectionDescriptionToProto {
 
-  public static ElectionProto.ElectionDescription translateToProto(Election.ElectionDescription election) {
-    ElectionDescription.Builder builder = ElectionDescription.newBuilder();
+  public static ElectionProto.ElectionDescription translateToProto(Election election) {
+    ElectionProto.ElectionDescription.Builder builder = ElectionProto.ElectionDescription.newBuilder();
     builder.setElectionScopeId(election.election_scope_id);
     builder.setElectionType(convertElectionType(election.type));
     builder.setStartDate(election.start_date.toString());
@@ -83,8 +83,8 @@ public class ElectionDescriptionToProto {
     return ContestDescription.VoteVariationType.valueOf(type.name());
   }
 
-  static ElectionDescription.ElectionType convertElectionType(Election.ElectionType type) {
-    return ElectionDescription.ElectionType.valueOf(type.name());
+  static ElectionProto.ElectionDescription.ElectionType convertElectionType(Election.ElectionType type) {
+    return ElectionProto.ElectionDescription.ElectionType.valueOf(type.name());
   }
 
   static GeopoliticalUnit.ReportingUnitType convertReportingUnitType(Election.ReportingUnitType type) {

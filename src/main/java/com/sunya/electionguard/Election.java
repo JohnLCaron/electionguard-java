@@ -8,16 +8,235 @@ import com.google.common.flogger.FluentLogger;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import java.time.OffsetDateTime;
-import java.util.*;
-
-import static com.sunya.electionguard.Group.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * The Election Manifest: defines the candidates, contests, and associated information for a specific election.
- * @see <a href="https://developers.google.com/civics-data/reference/data-schema">Civics Common Standard Data Specification</a>
+ * @see <a href="https://developers.google.com/elections-data/reference/election">Civics Common Standard Data Specification</a>
  */
-public class Election {
+@Immutable
+public class Election implements Hash.CryptoHashable {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
+
+  public final String election_scope_id;
+  public final ElectionType type;
+  public final OffsetDateTime start_date;
+  public final OffsetDateTime end_date;
+  public final ImmutableList<GeopoliticalUnit> geopolitical_units;
+  public final ImmutableList<Party> parties;
+  public final ImmutableList<Candidate> candidates;
+  public final ImmutableList<ContestDescription> contests;
+  public final ImmutableList<BallotStyle> ballot_styles;
+  public final Optional<InternationalizedText> name;
+  public final Optional<ContactInformation> contact_information;
+  public final Group.ElementModQ crypto_hash;
+
+  public Election(String election_scope_id,
+                  ElectionType type,
+                  OffsetDateTime start_date,
+                  OffsetDateTime end_date,
+                  List<GeopoliticalUnit> geopolitical_units,
+                  List<Party> parties,
+                  List<Candidate> candidates,
+                  List<ContestDescription> contests,
+                  List<BallotStyle> ballot_styles,
+                  @Nullable InternationalizedText name,
+                  @Nullable ContactInformation contact_information) {
+
+    Preconditions.checkArgument(!Strings.isNullOrEmpty(election_scope_id));
+    this.election_scope_id = election_scope_id;
+    this.type = Preconditions.checkNotNull(type);
+    this.start_date = Preconditions.checkNotNull(start_date);
+    this.end_date = Preconditions.checkNotNull(end_date);
+    this.geopolitical_units = toImmutableListEmpty(geopolitical_units);
+    this.parties = toImmutableListEmpty(parties);
+    this.candidates = toImmutableListEmpty(candidates);
+    this.contests = toImmutableListEmpty(contests);
+    this.ballot_styles = toImmutableListEmpty(ballot_styles);
+    this.name = Optional.ofNullable(name);
+    this.contact_information = Optional.ofNullable(contact_information);
+
+    this.crypto_hash = Hash.hash_elems(
+            this.election_scope_id,
+            this.type.name(),
+            this.start_date.toEpochSecond(), // to_ticks(self.start_date), number of seconds since the unix epoch
+            this.end_date.toEpochSecond(),
+            this.name,
+            this.contact_information,
+            this.geopolitical_units,
+            this.parties,
+            this.contests,
+            this.ballot_styles);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    Election that = (Election) o;
+    return election_scope_id.equals(that.election_scope_id) &&
+            type == that.type &&
+            start_date.equals(that.start_date) &&
+            end_date.equals(that.end_date) &&
+            geopolitical_units.equals(that.geopolitical_units) &&
+            parties.equals(that.parties) &&
+            candidates.equals(that.candidates) &&
+            contests.equals(that.contests) &&
+            ballot_styles.equals(that.ballot_styles) &&
+            name.equals(that.name) &&
+            contact_information.equals(that.contact_information);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(election_scope_id, type, start_date, end_date, geopolitical_units, parties, candidates, contests, ballot_styles, name, contact_information);
+  }
+
+  @Override
+  public String toString() {
+    return "Election{" +
+            "election_scope_id='" + election_scope_id + '\'' +
+            ", type=" + type +
+            ", start_date=" + start_date +
+            ", end_date=" + end_date +
+            ", geopolitical_units=" + geopolitical_units +
+            ", parties=" + parties +
+            ", candidates=" + candidates +
+            ", contests=" + contests +
+            ", ballot_styles=" + ballot_styles +
+            ", name=" + name +
+            ", contact_information=" + contact_information +
+            '}';
+  }
+
+  /** The Election (aka ElectionDescription) hash. */
+  @Override
+  public Group.ElementModQ crypto_hash() {
+    return this.crypto_hash;
+  }
+
+  /**
+   * Verifies the dataset to ensure it is well-formed.
+   */
+  boolean is_valid() {
+    HashSet<String> gp_unit_ids = new HashSet<>();
+    HashSet<String> ballot_style_ids = new HashSet<>();
+    HashSet<String> party_ids = new HashSet<>();
+    HashSet<String> candidate_ids = new HashSet<>();
+    HashSet<String> contest_ids = new HashSet<>();
+
+    // Validate GP Units
+    for (GeopoliticalUnit gp_unit : this.geopolitical_units) {
+      gp_unit_ids.add(gp_unit.object_id);
+    }
+    // fail if there are duplicates
+    boolean geopolitical_units_valid = gp_unit_ids.size() == this.geopolitical_units.size();
+
+    // Validate Ballot Styles
+    boolean ballot_styles_have_valid_gp_unit_ids = true;
+    for (BallotStyle style : this.ballot_styles) {
+      ballot_style_ids.add(style.object_id);
+
+      if (style.geopolitical_unit_ids.isEmpty()) {
+        ballot_styles_have_valid_gp_unit_ids = false;
+        break;
+      }
+      // validate associated gp unit ids
+      for (String gp_unit_id : style.geopolitical_unit_ids) {
+        ballot_styles_have_valid_gp_unit_ids &= gp_unit_ids.contains(gp_unit_id);
+      }
+    }
+
+    boolean ballot_styles_valid = (ballot_style_ids.size() == this.ballot_styles.size() &&
+            ballot_styles_have_valid_gp_unit_ids);
+
+    // Validate Parties
+    for (Party party : this.parties) {
+      party_ids.add(party.object_id);
+    }
+    boolean parties_valid = party_ids.size() == this.parties.size();
+
+    // Validate Candidates
+    boolean candidates_have_valid_party_ids = true;
+    for (Candidate candidate : this.candidates) {
+      candidate_ids.add(candidate.object_id);
+      // validate the associated party id
+      candidates_have_valid_party_ids &=
+              candidate.party_id.isEmpty() || party_ids.contains(candidate.party_id.get());
+    }
+
+    boolean candidates_have_valid_length = candidate_ids.size() == this.candidates.size();
+    boolean candidates_valid = (candidates_have_valid_length && candidates_have_valid_party_ids);
+
+    // Validate Contests
+    boolean contests_validate_their_properties = true;
+    boolean contests_have_valid_electoral_district_id = true;
+    boolean candidate_contests_have_valid_party_ids = true;
+
+    HashSet<Integer> contest_sequence_ids = new HashSet<>();
+
+    for (ContestDescription contest : this.contests) {
+
+      contests_validate_their_properties &= contest.is_valid();
+
+      contest_ids.add(contest.object_id);
+      contest_sequence_ids.add(contest.sequence_order);
+
+      // validate the associated gp unit id
+      contests_have_valid_electoral_district_id &= gp_unit_ids.contains(contest.electoral_district_id);
+
+      if (contest instanceof CandidateContestDescription) {
+        CandidateContestDescription candidate_contest = (CandidateContestDescription) contest;
+        if (candidate_contest.primary_party_ids != null) {
+          for (String primary_party_id : candidate_contest.primary_party_ids) {
+            // validate the party ids
+            candidate_contests_have_valid_party_ids &= party_ids.contains(primary_party_id);
+          }
+        }
+      }
+    }
+
+    // TODO: ISSUE //55: verify that the contest sequence order set is in the proper order
+    boolean contests_have_valid_object_ids = contest_ids.size() == this.contests.size();
+    boolean contests_have_valid_sequence_ids = contest_sequence_ids.size() == this.contests.size();
+    boolean contests_valid = (
+            contests_have_valid_object_ids
+                    && contests_have_valid_sequence_ids
+                    && contests_validate_their_properties
+                    && contests_have_valid_electoral_district_id
+                    && candidate_contests_have_valid_party_ids
+    );
+
+    boolean success = (
+            geopolitical_units_valid
+                    && ballot_styles_valid
+                    && parties_valid
+                    && candidates_valid
+                    && contests_valid
+    );
+
+    if (!success) {
+      logger.atWarning().log(
+              "Election failed validation check: is_valid: ",
+              "geopolitical_units_valid", geopolitical_units_valid,
+              "ballot_styles_valid", ballot_styles_valid,
+              "ballot_styles_have_valid_gp_unit_ids", ballot_styles_have_valid_gp_unit_ids,
+              "parties_valid", parties_valid,
+              "candidates_valid", candidates_valid,
+              "candidates_have_valid_length", candidates_have_valid_length,
+              "candidates_have_valid_party_ids", candidates_have_valid_party_ids,
+              "contests_valid", contests_valid,
+              "contests_have_valid_object_ids", contests_have_valid_object_ids,
+              "contests_have_valid_sequence_ids", contests_have_valid_sequence_ids,
+              "contests_validate_their_properties", contests_validate_their_properties,
+              "contests_have_valid_electoral_district_id", contests_have_valid_electoral_district_id,
+              "candidate_contests_have_valid_party_ids", candidate_contests_have_valid_party_ids);
+    }
+    return success;
+  }
 
   /**
    * The type of election.
@@ -868,229 +1087,6 @@ public class Election {
                                         @Nullable InternationalizedText ballot_subtitle) {
       super(object_id, electoral_district_id, sequence_order, vote_variation, number_elected, votes_allowed,
               name, ballot_selections, ballot_title, ballot_subtitle);
-    }
-
-  }
-
-  /**
-   * The election metadata that describes the structure and type of the election.
-   * An election has a list of contests, and each contests has a list of candidates.
-   * @see <a href="https://developers.google.com/elections-data/reference/election">Civics Common Standard Data Specification</a>
-   */
-  @Immutable
-  public static class ElectionDescription implements Hash.CryptoHashable {
-    public final String election_scope_id;
-    public final ElectionType type;
-    public final OffsetDateTime start_date;
-    public final OffsetDateTime end_date;
-    public final ImmutableList<GeopoliticalUnit> geopolitical_units;
-    public final ImmutableList<Party> parties;
-    public final ImmutableList<Candidate> candidates;
-    public final ImmutableList<ContestDescription> contests;
-    public final ImmutableList<BallotStyle> ballot_styles;
-    public final Optional<InternationalizedText> name;
-    public final Optional<ContactInformation> contact_information;
-    public final ElementModQ crypto_hash;
-
-    public ElectionDescription(String election_scope_id,
-                               ElectionType type,
-                               OffsetDateTime start_date,
-                               OffsetDateTime end_date,
-                               List<GeopoliticalUnit> geopolitical_units,
-                               List<Party> parties,
-                               List<Candidate> candidates,
-                               List<ContestDescription> contests,
-                               List<BallotStyle> ballot_styles,
-                               @Nullable InternationalizedText name,
-                               @Nullable ContactInformation contact_information) {
-
-      Preconditions.checkArgument(!Strings.isNullOrEmpty(election_scope_id));
-      this.election_scope_id = election_scope_id;
-      this.type = Preconditions.checkNotNull(type);
-      this.start_date = Preconditions.checkNotNull(start_date);
-      this.end_date = Preconditions.checkNotNull(end_date);
-      this.geopolitical_units = toImmutableListEmpty(geopolitical_units);
-      this.parties = toImmutableListEmpty(parties);
-      this.candidates = toImmutableListEmpty(candidates);
-      this.contests = toImmutableListEmpty(contests);
-      this.ballot_styles = toImmutableListEmpty(ballot_styles);
-      this.name = Optional.ofNullable(name);
-      this.contact_information = Optional.ofNullable(contact_information);
-
-      this.crypto_hash = Hash.hash_elems(
-              this.election_scope_id,
-              this.type.name(),
-              this.start_date.toEpochSecond(), // to_ticks(self.start_date), number of seconds since the unix epoch
-              this.end_date.toEpochSecond(),
-              this.name,
-              this.contact_information,
-              this.geopolitical_units,
-              this.parties,
-              this.contests,
-              this.ballot_styles);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) return true;
-      if (o == null || getClass() != o.getClass()) return false;
-      ElectionDescription that = (ElectionDescription) o;
-      return election_scope_id.equals(that.election_scope_id) &&
-              type == that.type &&
-              start_date.equals(that.start_date) &&
-              end_date.equals(that.end_date) &&
-              geopolitical_units.equals(that.geopolitical_units) &&
-              parties.equals(that.parties) &&
-              candidates.equals(that.candidates) &&
-              contests.equals(that.contests) &&
-              ballot_styles.equals(that.ballot_styles) &&
-              name.equals(that.name) &&
-              contact_information.equals(that.contact_information);
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(election_scope_id, type, start_date, end_date, geopolitical_units, parties, candidates, contests, ballot_styles, name, contact_information);
-    }
-
-    @Override
-    public String toString() {
-      return "ElectionDescription{" +
-              "election_scope_id='" + election_scope_id + '\'' +
-              ", type=" + type +
-              ", start_date=" + start_date +
-              ", end_date=" + end_date +
-              ", geopolitical_units=" + geopolitical_units +
-              ", parties=" + parties +
-              ", candidates=" + candidates +
-              ", contests=" + contests +
-              ", ballot_styles=" + ballot_styles +
-              ", name=" + name +
-              ", contact_information=" + contact_information +
-              '}';
-    }
-
-    @Override
-    public Group.ElementModQ crypto_hash() {
-      return this.crypto_hash;
-    }
-
-    /** Verifies the dataset to ensure it is well-formed. */
-    boolean is_valid() {
-      HashSet<String> gp_unit_ids = new HashSet<>();
-      HashSet<String> ballot_style_ids = new HashSet<>();
-      HashSet<String> party_ids = new HashSet<>();
-      HashSet<String> candidate_ids = new HashSet<>();
-      HashSet<String> contest_ids = new HashSet<>();
-
-      // Validate GP Units
-      for (GeopoliticalUnit gp_unit : this.geopolitical_units) {
-        gp_unit_ids.add(gp_unit.object_id);
-      }
-      // fail if there are duplicates
-      boolean geopolitical_units_valid = gp_unit_ids.size() == this.geopolitical_units.size();
-
-      // Validate Ballot Styles
-      boolean ballot_styles_have_valid_gp_unit_ids = true;
-      for (BallotStyle style : this.ballot_styles) {
-        ballot_style_ids.add(style.object_id);
-
-        if (style.geopolitical_unit_ids.isEmpty()) {
-          ballot_styles_have_valid_gp_unit_ids = false;
-          break;
-        }
-        // validate associated gp unit ids
-        for (String gp_unit_id : style.geopolitical_unit_ids) {
-          ballot_styles_have_valid_gp_unit_ids &= gp_unit_ids.contains(gp_unit_id);
-        }
-      }
-
-      boolean ballot_styles_valid = (ballot_style_ids.size() == this.ballot_styles.size() &&
-              ballot_styles_have_valid_gp_unit_ids);
-
-      // Validate Parties
-      for (Party party : this.parties) {
-        party_ids.add(party.object_id);
-      }
-      boolean parties_valid = party_ids.size() == this.parties.size();
-
-      // Validate Candidates
-      boolean candidates_have_valid_party_ids = true;
-      for (Candidate candidate : this.candidates) {
-        candidate_ids.add(candidate.object_id);
-        // validate the associated party id
-        candidates_have_valid_party_ids &=
-                candidate.party_id.isEmpty() || party_ids.contains(candidate.party_id.get());
-      }
-
-      boolean candidates_have_valid_length = candidate_ids.size() == this.candidates.size();
-      boolean candidates_valid = (candidates_have_valid_length && candidates_have_valid_party_ids);
-
-      // Validate Contests
-      boolean contests_validate_their_properties = true;
-      boolean contests_have_valid_electoral_district_id = true;
-      boolean candidate_contests_have_valid_party_ids = true;
-
-      HashSet<Integer> contest_sequence_ids = new HashSet<>();
-
-      for (ContestDescription contest : this.contests) {
-
-        contests_validate_their_properties &= contest.is_valid();
-
-        contest_ids.add(contest.object_id);
-        contest_sequence_ids.add(contest.sequence_order);
-
-        // validate the associated gp unit id
-        contests_have_valid_electoral_district_id &= gp_unit_ids.contains(contest.electoral_district_id);
-
-        if (contest instanceof CandidateContestDescription) {
-          CandidateContestDescription candidate_contest = (CandidateContestDescription) contest;
-          if (candidate_contest.primary_party_ids != null) {
-            for (String primary_party_id : candidate_contest.primary_party_ids) {
-              // validate the party ids
-              candidate_contests_have_valid_party_ids &= party_ids.contains(primary_party_id);
-            }
-          }
-        }
-      }
-
-      // TODO: ISSUE //55: verify that the contest sequence order set is in the proper order
-      boolean contests_have_valid_object_ids = contest_ids.size() == this.contests.size();
-      boolean contests_have_valid_sequence_ids = contest_sequence_ids.size() == this.contests.size();
-      boolean contests_valid = (
-              contests_have_valid_object_ids
-                      && contests_have_valid_sequence_ids
-                      && contests_validate_their_properties
-                      && contests_have_valid_electoral_district_id
-                      && candidate_contests_have_valid_party_ids
-      );
-
-      boolean success = (
-              geopolitical_units_valid
-                      && ballot_styles_valid
-                      && parties_valid
-                      && candidates_valid
-                      && contests_valid
-      );
-
-      if (!success) {
-                  logger.atWarning().log(
-                          "Election failed validation check: is_valid: ",
-                          "geopolitical_units_valid", geopolitical_units_valid,
-                          "ballot_styles_valid", ballot_styles_valid,
-                          "ballot_styles_have_valid_gp_unit_ids", ballot_styles_have_valid_gp_unit_ids,
-                          "parties_valid", parties_valid,
-                          "candidates_valid", candidates_valid,
-                          "candidates_have_valid_length", candidates_have_valid_length,
-                          "candidates_have_valid_party_ids", candidates_have_valid_party_ids,
-                          "contests_valid", contests_valid,
-                          "contests_have_valid_object_ids", contests_have_valid_object_ids,
-                          "contests_have_valid_sequence_ids", contests_have_valid_sequence_ids,
-                          "contests_validate_their_properties", contests_validate_their_properties,
-                          "contests_have_valid_electoral_district_id", contests_have_valid_electoral_district_id,
-                          "candidate_contests_have_valid_party_ids", candidate_contests_have_valid_party_ids);
-      }
-      return success;
     }
   }
 

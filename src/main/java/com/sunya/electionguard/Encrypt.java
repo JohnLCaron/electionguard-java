@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import static com.sunya.electionguard.Election.*;
 import static com.sunya.electionguard.Group.*;
 import static com.sunya.electionguard.ElectionWithPlaceholders.ContestWithPlaceholders;
 
@@ -99,7 +98,7 @@ public class Encrypt {
    * @param is_affirmative: Mark this selection as `yes`
    */
   // selection_from( description: SelectionDescription, is_placeholder: bool = False, is_affirmative: bool = False,
-  static PlaintextBallot.Selection selection_from(SelectionDescription description, boolean is_placeholder, boolean is_affirmative) {
+  static PlaintextBallot.Selection selection_from(Election.SelectionDescription description, boolean is_placeholder, boolean is_affirmative) {
     return new PlaintextBallot.Selection(description.object_id, is_affirmative ? 1 : 0, is_placeholder, null);
   }
 
@@ -109,10 +108,10 @@ public class Encrypt {
    *
    * @param description: The `ContestDescription` used to derive the well-formed `BallotContest`
    */
-  static PlaintextBallot.Contest contest_from(ContestDescription description) {
+  static PlaintextBallot.Contest contest_from(Election.ContestDescription description) {
     List<PlaintextBallot.Selection> selections = new ArrayList<>();
 
-    for (SelectionDescription selection_description : description.ballot_selections) {
+    for (Election.SelectionDescription selection_description : description.ballot_selections) {
       selections.add(selection_from(selection_description, false, false));
     }
     return new PlaintextBallot.Contest(description.object_id, selections);
@@ -132,7 +131,7 @@ public class Encrypt {
    */
   static Optional<CiphertextBallot.Selection> encrypt_selection(
           PlaintextBallot.Selection selection,
-          SelectionDescription selection_description,
+          Election.SelectionDescription selection_description,
           ElementModP elgamal_public_key,
           ElementModQ crypto_extended_base_hash,
           ElementModQ nonce_seed,
@@ -251,7 +250,7 @@ public class Encrypt {
 
     //  Generate the encrypted selections
     if (show) System.out.printf(" Contest %s.%n", contest.contest_id);
-    for (SelectionDescription description : contest_description.ballot_selections) {
+    for (Election.SelectionDescription description : contest_description.ballot_selections) {
         boolean has_selection = false;
         Optional<CiphertextBallot.Selection> encrypted_selection = Optional.empty();
 
@@ -299,7 +298,7 @@ public class Encrypt {
     // we loop through each placeholder value and determine if it should be filled in
 
     // Add a placeholder selection for each possible seat in the contest
-    for (SelectionDescription placeholder : contest_description.placeholder_selections) {
+    for (Election.SelectionDescription placeholder : contest_description.placeholder_selections) {
       // for undervotes, select the placeholder value as true for each available seat
       // note this pattern is used since DisjunctiveChaumPedersen expects a 0 or 1
       // so each seat can only have a maximum value of 1 in the current implementation
@@ -386,7 +385,7 @@ public class Encrypt {
           boolean should_verify_proofs)  {
 
     // Determine the relevant range of contests for this ballot style
-    Optional<BallotStyle> style = metadata.get_ballot_style(ballot.ballot_style);
+    Optional<Election.BallotStyle> style = metadata.get_ballot_style(ballot.ballot_style);
 
     // Validate Input
     if (style.isEmpty() || !ballot.is_valid(style.get().object_id)) {

@@ -5,8 +5,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.sunya.electionguard.CiphertextAcceptedBallot;
 import com.sunya.electionguard.CiphertextElectionContext;
-import com.sunya.electionguard.Election;
 import com.sunya.electionguard.ElectionConstants;
+import com.sunya.electionguard.Election;
 import com.sunya.electionguard.Encrypt;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.KeyCeremony;
@@ -30,7 +30,7 @@ import java.util.Objects;
 public class ElectionRecord {
   public final ElectionConstants constants;
   public final CiphertextElectionContext context;
-  public final Election.ElectionDescription election;
+  public final Election election;
   public final ImmutableList<KeyCeremony.CoefficientValidationSet> guardianCoefficients;
   public final ImmutableList<Encrypt.EncryptionDevice> devices;
   public final CloseableIterable<CiphertextAcceptedBallot> acceptedBallots; // LOOK all ballots, not just cast!
@@ -43,7 +43,7 @@ public class ElectionRecord {
 
   public ElectionRecord(ElectionConstants constants,
                         CiphertextElectionContext context,
-                        Election.ElectionDescription election,
+                        Election election,
                         List<KeyCeremony.CoefficientValidationSet> guardianCoefficients,
                         @Nullable List<Encrypt.EncryptionDevice> devices,
                         @Nullable CiphertextTally ciphertextTally,

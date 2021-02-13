@@ -35,7 +35,7 @@ public class TestReadPythonJson {
 
   @Example
   public void testElectionPythonJson() throws IOException {
-    Election.ElectionDescription fromPython = ConvertFromJson.readElection(publisher.electionPath().toString());
+    Election fromPython = ConvertFromJson.readElection(publisher.electionPath().toString());
     assertThat(fromPython).isNotNull();
     System.out.printf("ElectionDescription %s%n", fromPython.election_scope_id);
   }

@@ -16,9 +16,9 @@ import java.util.Random;
 public class FakeBallotProvider implements BallotProvider {
   private static final Random random = new Random(System.currentTimeMillis());
   private final int nballots;
-  private final Election.ElectionDescription election;
+  private final Election election;
 
-  public FakeBallotProvider(Election.ElectionDescription election, Integer nballots) {
+  public FakeBallotProvider(Election election, Integer nballots) {
     this.election = election;
     this.nballots = nballots != null && nballots > 0 ? nballots : 11;
   }

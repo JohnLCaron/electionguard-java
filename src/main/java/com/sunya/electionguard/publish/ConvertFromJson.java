@@ -6,7 +6,6 @@ import com.sunya.electionguard.*;
 
 import java.io.*;
 
-import static com.sunya.electionguard.Election.*;
 import static com.sunya.electionguard.KeyCeremony.CoefficientValidationSet;
 
 /** Static helper methods for reading serialized classes from json files. */
@@ -45,10 +44,10 @@ public class ConvertFromJson {
     }
   }
 
-  public static ElectionDescription readElection(String pathname) throws IOException {
+  public static Election readElection(String pathname) throws IOException {
     try (InputStream is = new FileInputStream(pathname)) {
       Reader reader = new InputStreamReader(is);
-      return enhancedGson.fromJson(reader, ElectionDescription.class);
+      return enhancedGson.fromJson(reader, Election.class);
     } catch (Exception ioe) {
       logger.atSevere().log("Failed reading file '%s'", pathname);
       throw ioe;

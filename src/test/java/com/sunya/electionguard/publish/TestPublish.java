@@ -6,6 +6,7 @@ import com.sunya.electionguard.CiphertextBallot;
 import com.sunya.electionguard.CiphertextElectionContext;
 import com.sunya.electionguard.CiphertextTallyBuilder;
 import com.sunya.electionguard.ElectionConstants;
+import com.sunya.electionguard.Election;
 import com.sunya.electionguard.ElectionWithPlaceholders;
 import com.sunya.electionguard.Guardian;
 import com.sunya.electionguard.GuardianBuilder;
@@ -26,7 +27,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.sunya.electionguard.Election.*;
 import static com.sunya.electionguard.Group.*;
 
 public class TestPublish {
@@ -44,8 +44,8 @@ public class TestPublish {
   @Example
   public void test_publish() throws IOException {
     OffsetDateTime now = OffsetDateTime.now();
-    ElectionDescription election = new ElectionDescription(
-            "scope", ElectionType.unknown, now, now, ImmutableList.of(), ImmutableList.of(),
+    Election election = new Election(
+            "scope", Election.ElectionType.unknown, now, now, ImmutableList.of(), ImmutableList.of(),
             ImmutableList.of(), ImmutableList.of(), ImmutableList.of(), null, null);
     ElectionWithPlaceholders metadata = new ElectionWithPlaceholders(election);
 

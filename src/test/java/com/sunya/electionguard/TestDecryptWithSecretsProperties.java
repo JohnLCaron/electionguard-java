@@ -355,7 +355,7 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
 
     // TODO: Hypothesis test instead
 
-    Election.ElectionDescription election = ElectionFactory.get_simple_election_from_file();
+    Election election = ElectionFactory.get_simple_election_from_file();
     ElectionBuilder.DescriptionAndContext celection = ElectionFactory.get_fake_ciphertext_election(election, keypair.public_key).orElseThrow();
     ElectionWithPlaceholders metadata = celection.metadata;
     CiphertextElectionContext context = celection.context;
@@ -480,7 +480,7 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
   public void test_decrypt_ballot_valid_input_missing_nonce_fails(
           @ForAll("elgamal_keypairs") ElGamal.KeyPair keypair) throws IOException {
 
-    Election.ElectionDescription election = ElectionFactory.get_simple_election_from_file();
+    Election election = ElectionFactory.get_simple_election_from_file();
     ElectionBuilder.DescriptionAndContext celection = ElectionFactory.get_fake_ciphertext_election(election, keypair.public_key).orElseThrow();
     ElectionWithPlaceholders metadata = celection.metadata;
     CiphertextElectionContext context = celection.context;

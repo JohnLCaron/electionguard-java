@@ -122,7 +122,7 @@ public class DecryptBallots {
   ///////////////////////////////////////////////////////////////////////////
   final Consumer consumer;
   final ElectionRecord electionRecord;
-  final Election.ElectionDescription election;
+  final Election election;
 
   Iterable<Guardian> guardians;
   CiphertextTally publishedTally;

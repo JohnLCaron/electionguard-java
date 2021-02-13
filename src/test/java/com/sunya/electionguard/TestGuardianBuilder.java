@@ -114,7 +114,7 @@ public class TestGuardianBuilder {
     KeyCeremony.ElectionPublicKey public_key = guardian.share_election_public_key();
 
     assertThat(public_key).isNotNull();
-    assertThat(public_key.key()).isNotNull();
+    assertThat(public_key.publicKey()).isNotNull();
     assertThat(public_key.owner_id()).isEqualTo(SENDER_GUARDIAN_ID);
     assertThat(public_key.proof().is_valid()).isTrue();
   }
@@ -351,7 +351,7 @@ public class TestGuardianBuilder {
     guardian.save_election_partial_key_verification(verification.get());
     joint_key = guardian.publish_joint_key();
     assertThat(joint_key).isPresent();
-    assertThat(joint_key).isNotEqualTo(guardian.share_election_public_key().key());
+    assertThat(joint_key).isNotEqualTo(guardian.share_election_public_key().publicKey());
   }
 
 }

@@ -28,11 +28,14 @@ public class KeyCeremony {
     }
   }
 
-  /** Pair of keys (public and secret) used to encrypt/decrypt election. */
+  /** Pair of keys (public and secret) used to encrypt/decrypt election. One for each Guardian. */
   @AutoValue
   public abstract static class ElectionKeyPair {
-    public abstract ElGamal.KeyPair key_pair(); // Ki = (si, g^si)
-    public abstract SchnorrProof proof(); // proof of knowledge of possession of the associated private key
+    /** Ki = (si, g^si), for the ith Guardian */
+    public abstract ElGamal.KeyPair key_pair();
+    /** The proof of knowledge of possession of the associated private key. */
+    public abstract SchnorrProof proof();
+    /** The Guardian's polynomial. */
     public abstract ElectionPolynomial polynomial();
 
     public static ElectionKeyPair create(ElGamal.KeyPair key_pair, SchnorrProof proof, ElectionPolynomial polynomial) {
@@ -43,10 +46,14 @@ public class KeyCeremony {
   /** A Guardian's public key and proof. */
   @AutoValue
   public abstract static class ElectionPublicKey {
-    public abstract String owner_id(); // guardian object_id
+    /** The guardian object_id. */
+    public abstract String owner_id();
+    /** The guardian sequence. */
     public abstract int sequence_order();
+    /** The proof of knowledge of the guardian's private key. */
     public abstract SchnorrProof proof();
-    public abstract ElementModP key();
+    /** The guardian's ElGamal.KeyPair public key. */
+    public abstract ElementModP publicKey();
 
     public static ElectionPublicKey create(String owner_id, int sequence_order, SchnorrProof proof, ElementModP key) {
       return new AutoValue_KeyCeremony_ElectionPublicKey(owner_id, sequence_order, proof, key);
@@ -114,8 +121,11 @@ public class KeyCeremony {
   /** The public validation pieces for election key coefficients for one Guardian. */
   @AutoValue
   public abstract static class CoefficientValidationSet {
-    public abstract String owner_id(); // Guardian.object_id
-    public abstract ImmutableList<ElementModP> coefficient_commitments(); // the Kij of the specification
+    /** Guardian.object_id. */
+    public abstract String owner_id();
+    /** The Kij of the specification. */
+    public abstract ImmutableList<ElementModP> coefficient_commitments();
+    /** The proof of knowledge for the coefficient commitments. */
     public abstract ImmutableList<SchnorrProof> coefficient_proofs();
 
     /**
@@ -137,9 +147,12 @@ public class KeyCeremony {
   /** The secret polynomial coefficients for one Guardian. */
   @AutoValue
   public abstract static class CoefficientSet {
-    public abstract String guardianId(); // Guardian.object_id
-    public abstract int guardianSequence(); // i: a unique number in [1, 256) that is the polynomial x value for this guardian
-    public abstract ImmutableList<ElementModQ> coefficients(); // the secret polynomial coefficients
+    /** Guardian.object_id. */
+    public abstract String guardianId();
+    /** i: a unique number in [1, 256) that is the polynomial x value for this guardian. */
+    public abstract int guardianSequence();
+    /** The secret polynomial coefficients. */
+    public abstract ImmutableList<ElementModQ> coefficients();
 
     /**
      * Create a CoefficientSet for the ith guardian, i &gt; 0
@@ -166,7 +179,7 @@ public class KeyCeremony {
 
   /** Verification of election partial key used in key sharing. */
   @AutoValue
-  public abstract static class ElectionPartialKeyVerification {
+  abstract static class ElectionPartialKeyVerification {
     public abstract String owner_id();
     public abstract String designated_id();
     public abstract String verifier_id();
@@ -326,7 +339,7 @@ public class KeyCeremony {
    */
   static ElementModP combine_election_public_keys(Map<String, ElectionPublicKey> election_public_keys) {
     List<ElementModP> public_keys = election_public_keys.values().stream()
-            .map(pk -> pk.key()).collect(Collectors.toList());
+            .map(ElectionPublicKey::publicKey).collect(Collectors.toList());
 
     return ElGamal.elgamal_combine_public_keys(public_keys);
   }

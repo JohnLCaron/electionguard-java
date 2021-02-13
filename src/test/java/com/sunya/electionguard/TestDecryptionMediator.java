@@ -16,7 +16,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 
 import static com.sunya.electionguard.Decryptions.*;
-import static com.sunya.electionguard.Election.*;
 import static com.sunya.electionguard.Group.*;
 import static com.sunya.electionguard.KeyCeremony.*;
 
@@ -33,7 +32,7 @@ public class TestDecryptionMediator extends TestProperties {
   KeyCeremonyMediator key_ceremony;
   List<Guardian> guardians = new ArrayList<>();
   Group.ElementModP joint_public_key;
-  ElectionDescription election;
+  Election election;
   ElectionWithPlaceholders metadata;
 
   CiphertextElectionContext context;
@@ -64,7 +63,7 @@ public class TestDecryptionMediator extends TestProperties {
     this.joint_public_key = joinKeyO.get();
 
     // setup the election
-    ElectionDescription election = ElectionFactory.get_fake_election();
+    Election election = ElectionFactory.get_fake_election();
     ElectionBuilder builder = new ElectionBuilder(NUMBER_OF_GUARDIANS, QUORUM, election);
     assertThat(builder.build()).isEmpty();  // Can't build without the public key
     builder.set_public_key(this.joint_public_key);
@@ -296,13 +295,13 @@ public class TestDecryptionMediator extends TestProperties {
             first_selection,
             ImmutableMap.of(
                     this.guardians.get(0).object_id,
-                    new DecryptionShare.KeyAndSelection(this.guardians.get(0).share_election_public_key().key(), share_0.get()),
+                    new DecryptionShare.KeyAndSelection(this.guardians.get(0).share_election_public_key().publicKey(), share_0.get()),
 
                     this.guardians.get(1).object_id,
-                    new DecryptionShare.KeyAndSelection(this.guardians.get(1).share_election_public_key().key(), share_1.get()),
+                    new DecryptionShare.KeyAndSelection(this.guardians.get(1).share_election_public_key().publicKey(), share_1.get()),
 
                     this.guardians.get(2).object_id,
-                    new DecryptionShare.KeyAndSelection(this.guardians.get(2).share_election_public_key().key(), share_2)),
+                    new DecryptionShare.KeyAndSelection(this.guardians.get(2).share_election_public_key().publicKey(), share_2)),
             this.context.crypto_extended_base_hash,
             false);
 
@@ -335,15 +334,15 @@ public class TestDecryptionMediator extends TestProperties {
     Map<String, DecryptionShare.KeyAndSelection> shares = new HashMap<>();
 
     shares.put(this.guardians.get(0).object_id, new DecryptionShare.KeyAndSelection(
-            this.guardians.get(0).share_election_public_key().key(),
+            this.guardians.get(0).share_election_public_key().publicKey(),
             first_share.contests().get(first_contest.object_id).selections().get(first_selection.object_id)));
 
     shares.put(this.guardians.get(1).object_id, new DecryptionShare.KeyAndSelection(
-            this.guardians.get(1).share_election_public_key().key(),
+            this.guardians.get(1).share_election_public_key().publicKey(),
             second_share.contests().get(first_contest.object_id).selections().get(first_selection.object_id)));
 
     shares.put(this.guardians.get(2).object_id, new DecryptionShare.KeyAndSelection(
-            this.guardians.get(2).share_election_public_key().key(),
+            this.guardians.get(2).share_election_public_key().publicKey(),
             third_share.contests().get(first_contest.object_id).selections().get(first_selection.object_id)));
 
     Optional<PlaintextTally.Selection> result = DecryptWithShares.decrypt_selection_with_decryption_shares(
@@ -521,7 +520,7 @@ public class TestDecryptionMediator extends TestProperties {
 
   @Property(tries = 8, shrinking = ShrinkingMode.OFF)
   public void test_get_plaintext_tally_all_guardians_present(
-          @ForAll("election_description") Election.ElectionDescription description) {
+          @ForAll("election_description") Election description) {
 
     ElectionBuilder builder = new ElectionBuilder(NUMBER_OF_GUARDIANS, QUORUM, description);
     builder.set_public_key(this.joint_public_key).build().orElseThrow();

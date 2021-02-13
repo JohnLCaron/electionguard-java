@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
-import static com.sunya.electionguard.Election.*;
 import static com.sunya.electionguard.Group.*;
 import static com.sunya.electionguard.ElectionWithPlaceholders.ContestWithPlaceholders;
 import static com.sunya.electionguard.TestUtils.elgamal_keypairs;
@@ -141,21 +140,21 @@ public class ElectionTestHelper {
     return String.format("%s-%d", root, random.nextInt());
   }
 
-  ElectionType election_types() {
-    ElectionType[] values = ElectionType.values();
+  Election.ElectionType election_types() {
+    Election.ElectionType[] values = Election.ElectionType.values();
     int choose = random.nextInt(values.length);
     return values[choose];
   }
 
-  ReportingUnitType reporting_unit_types() {
-    ReportingUnitType[] values = ReportingUnitType.values();
+  Election.ReportingUnitType reporting_unit_types() {
+    Election.ReportingUnitType[] values = Election.ReportingUnitType.values();
     int choose = random.nextInt(values.length);
     return values[choose];
   }
 
-  ContactInformation contact_infos() {
+  Election.ContactInformation contact_infos() {
     // empty lists for email and phone, for now
-    return new ContactInformation(null, ImmutableList.of(annotated_strings()), null, human_names());
+    return new Election.ContactInformation(null, ImmutableList.of(annotated_strings()), null, human_names());
   }
 
   String two_letter_codes() {
@@ -170,30 +169,30 @@ public class ElectionTestHelper {
 
   //     Generates a `Language` object with an arbitrary two-letter string as the code and something messier for
   //     the text ostensibly written in that language.
-  Language languages() {
-    return new Language(randomString("text"), two_letter_codes());
+  Election.Language languages() {
+    return new Election.Language(randomString("text"), two_letter_codes());
   }
 
   //     Generates a `Language` object with an arbitrary two-letter string as the code and a human name for the
   //     text ostensibly written in that language.
-  Language language_human_names() {
-    return new Language(human_names(), two_letter_codes());
+  Election.Language language_human_names() {
+    return new Election.Language(human_names(), two_letter_codes());
   }
 
   //     Generates an `InternationalizedText` object with a list of `Language` objects within (representing a multilingual string).
-  InternationalizedText internationalized_texts() {
-    return new InternationalizedText(ImmutableList.of(languages()));
+  Election.InternationalizedText internationalized_texts() {
+    return new Election.InternationalizedText(ImmutableList.of(languages()));
   }
 
   //     Generates an `InternationalizedText` object with a list of `Language` objects within (representing a multilingual human name).
-  InternationalizedText internationalized_human_names() {
-    return new InternationalizedText(ImmutableList.of(language_human_names()));
+  Election.InternationalizedText internationalized_human_names() {
+    return new Election.InternationalizedText(ImmutableList.of(language_human_names()));
   }
 
   //     Generates an `AnnotatedString` object with one `Language` and an associated `value` string.
-  AnnotatedString annotated_strings() {
-    Language s = languages();
-    return new AnnotatedString(s.language, s.value);
+  Election.AnnotatedString annotated_strings() {
+    Election.Language s = languages();
+    return new Election.AnnotatedString(s.language, s.value);
   }
 
   /**
@@ -201,20 +200,20 @@ public class ElectionTestHelper {
    * @param parties: a list of `Party` objects to be used in this ballot style
    * @param geo_units: a list of `GeopoliticalUnit` objects to be used in this ballot style
    */
-  BallotStyle ballot_styles(List<Party> parties, List<GeopoliticalUnit> geo_units) {
+  Election.BallotStyle ballot_styles(List<Election.Party> parties, List<Election.GeopoliticalUnit> geo_units) {
     List<String> geopolitical_unit_ids = geo_units.stream().map(g -> g.object_id).collect(Collectors.toList());
     List<String> party_ids = parties.stream().map(p -> p.get_party_id()).collect(Collectors.toList());
-    return new BallotStyle(randomString("BallotStyle"), geopolitical_unit_ids, party_ids, urls());
+    return new Election.BallotStyle(randomString("BallotStyle"), geopolitical_unit_ids, party_ids, urls());
   }
 
-  List<Party> party_lists(int num_parties) {
-    List<Party> result = new ArrayList<>();
+  List<Election.Party> party_lists(int num_parties) {
+    List<Election.Party> result = new ArrayList<>();
     for (int i = 0; i < num_parties; i++) {
       String partyName = String.format("Party%d", i);
       String partyAbbrv = String.format("P%d", i);
-      result.add(new Party(
+      result.add(new Election.Party(
               randomString("Party"),
-              new InternationalizedText(ImmutableList.of(new Language(partyName, "en"))),
+              new Election.InternationalizedText(ImmutableList.of(new Election.Language(partyName, "en"))),
               partyAbbrv,
               null,
               String.format("Logo%d", i)));
@@ -222,8 +221,8 @@ public class ElectionTestHelper {
     return result;
   }
 
-  GeopoliticalUnit geopolitical_units() {
-    return new GeopoliticalUnit(
+  Election.GeopoliticalUnit geopolitical_units() {
+    return new Election.GeopoliticalUnit(
             randomString("GeopoliticalUnit"),
             randomString("name"),
             reporting_unit_types(),
@@ -236,11 +235,11 @@ public class ElectionTestHelper {
    * @param party_listO: A list of `Party` objects. If None, then the resulting `Candidate`
    * will have no party.
    */
-  Candidate candidates(Optional<List<Party>> party_listO) {
+  Election.Candidate candidates(Optional<List<Election.Party>> party_listO) {
     String party_id;
     if (party_listO.isPresent()) {
-      List<Party> party_list = party_listO.get();
-      Party party = party_list.get(random.nextInt(party_list.size()));
+      List<Election.Party> party_list = party_listO.get();
+      Election.Party party = party_list.get(random.nextInt(party_list.size()));
       party_id = party.get_party_id();
     } else {
       party_id = null;
@@ -253,7 +252,7 @@ public class ElectionTestHelper {
                      @Nullable String image_uri,
                      @Nullable Boolean is_write_in
      */
-    return new Candidate(
+    return new Election.Candidate(
             randomString("Candidate"),
             internationalized_human_names(),
             party_id,
@@ -267,16 +266,16 @@ public class ElectionTestHelper {
    * `object_id` within, but will have a "c-" prefix attached, so you'll be able to
    * tell that they're related.
    */
-  private SelectionDescription candidate_to_selection_description(Candidate candidate, int sequence_order) {
-    return new SelectionDescription(
+  private Election.SelectionDescription candidate_to_selection_description(Election.Candidate candidate, int sequence_order) {
+    return new Election.SelectionDescription(
             String.format("c-%s", candidate.object_id), candidate.get_candidate_id(), sequence_order);
   }
 
   public static class CandidateTuple {
-    final List<Candidate> candidates;
-    final ContestDescription contest; // CandidateContestDescription or ReferendumContestDescription
+    final List<Election.Candidate> candidates;
+    final Election.ContestDescription contest; // CandidateContestDescription or ReferendumContestDescription
 
-    public CandidateTuple(List<Candidate> candidates, ContestDescription contest) {
+    public CandidateTuple(List<Election.Candidate> candidates, Election.ContestDescription contest) {
       this.candidates = candidates;
       this.contest = contest;
     }
@@ -296,8 +295,8 @@ public class ElectionTestHelper {
    */
   CandidateTuple candidate_contest_descriptions(
           int sequence_order,
-          List<Party> party_list,
-          List<GeopoliticalUnit> geo_units,
+          List<Election.Party> party_list,
+          List<Election.GeopoliticalUnit> geo_units,
           Optional<Integer> no,
           Optional<Integer> mo) {
 
@@ -308,22 +307,22 @@ public class ElectionTestHelper {
     List<String> party_ids = party_list.stream().map(p -> p.get_party_id()).collect(Collectors.toList());
 
     // contest_candidates = draw(lists(candidates(party_list), min_size=m, max_size=m))
-    List<Candidate> contest_candidates = new ArrayList<>();
+    List<Election.Candidate> contest_candidates = new ArrayList<>();
     for (int i = 0; i < m; i++) {
       contest_candidates.add(candidates(Optional.of(party_list)));
     }
 
     // selection_descriptions = [ _candidate_to_selection_description(contest_candidates[i], i) for i in range(m) ]
-    List<SelectionDescription> selection_descriptions = new ArrayList<>();
+    List<Election.SelectionDescription> selection_descriptions = new ArrayList<>();
     for (int i = 0; i < m; i++) {
       selection_descriptions.add(candidate_to_selection_description(contest_candidates.get(i), i));
     }
 
-    VoteVariationType vote_variation = (n == 1) ? VoteVariationType.one_of_m : VoteVariationType.n_of_m;
+    Election.VoteVariationType vote_variation = (n == 1) ? Election.VoteVariationType.one_of_m : Election.VoteVariationType.n_of_m;
 
     return new CandidateTuple(
             contest_candidates,
-            new CandidateContestDescription(
+            new Election.CandidateContestDescription(
                     randomString("CandidateContestDescription"),
                     drawList(geo_units).object_id,
                     sequence_order,
@@ -349,8 +348,8 @@ public class ElectionTestHelper {
    */
   CandidateTuple contest_descriptions_room_for_overvoting(
           int sequence_order,
-          List<Party> party_list,
-          List<GeopoliticalUnit> geo_units) {
+          List<Election.Party> party_list,
+          List<Election.GeopoliticalUnit> geo_units) {
 
     int n = 1 + random.nextInt(2);
     int m = n + 1 + random.nextInt(2);
@@ -369,28 +368,28 @@ public class ElectionTestHelper {
    * generating many contests.
    * @param geo_units: A list of `GeopoliticalUnit`; one of these goes into the `electoral_district_id`
    */
-  CandidateTuple referendum_contest_descriptions(int sequence_order, List<GeopoliticalUnit> geo_units) {
+  CandidateTuple referendum_contest_descriptions(int sequence_order, List<Election.GeopoliticalUnit> geo_units) {
     int n = 1 + random.nextInt(2);
 
     // contest_candidates = draw(lists(candidates(None), min_size = n, max_size = n))
-    List<Candidate> contest_candidates = new ArrayList<>();
+    List<Election.Candidate> contest_candidates = new ArrayList<>();
     for (int i = 0; i < n; i++) {
       contest_candidates.add(candidates(Optional.empty()));
     }
 
     // selection_descriptions = [_candidate_to_selection_description(contest_candidates[i], i) for i in range(n)]
-    List<SelectionDescription> selection_descriptions = new ArrayList<>();
+    List<Election.SelectionDescription> selection_descriptions = new ArrayList<>();
     for (int i = 0; i < n; i++) {
       selection_descriptions.add(candidate_to_selection_description(contest_candidates.get(i), i));
     }
 
     return new CandidateTuple(
             contest_candidates,
-            new ReferendumContestDescription(
+            new Election.ReferendumContestDescription(
                     randomString("CandidateContestDescription"),
                     drawList(geo_units).object_id,
                     sequence_order,
-                    VoteVariationType.one_of_m,
+                    Election.VoteVariationType.one_of_m,
                     1,
                     1,  // should this be None or n?
                     randomString("Name"),
@@ -407,7 +406,7 @@ public class ElectionTestHelper {
    * See `candidates` for details on this assignment.
    * @param geo_units: A list of `GeopoliticalUnit`; one of these goes into the `electoral_district_id`
    */
-  CandidateTuple contest_descriptions(int sequence_order, List<Party> party_list, List<GeopoliticalUnit> geo_units) {
+  CandidateTuple contest_descriptions(int sequence_order, List<Election.Party> party_list, List<Election.GeopoliticalUnit> geo_units) {
     return (random.nextBoolean()) ?
             referendum_contest_descriptions(sequence_order, geo_units) :
             candidate_contest_descriptions(sequence_order, party_list, geo_units, Optional.empty(), Optional.empty());
@@ -418,12 +417,12 @@ public class ElectionTestHelper {
    * @param num_parties: The number of parties that will be generated.
    * @param num_contests: The  number of contests that will be generated.
    */
-  ElectionDescription election_descriptions(int num_parties, int num_contests) {
+  Election election_descriptions(int num_parties, int num_contests) {
     Preconditions.checkArgument(num_parties > 0, "need at least one party");
     Preconditions.checkArgument(num_contests > 0, "need at least one contest");
 
-    List<GeopoliticalUnit> geo_units = ImmutableList.of(geopolitical_units());
-    List<Party> parties = party_lists(num_parties);
+    List<Election.GeopoliticalUnit> geo_units = ImmutableList.of(geopolitical_units());
+    List<Election.Party> parties = party_lists(num_parties);
 
     // generate a collection candidates mapped to contest descriptions
     //  candidate_contests: List[Tuple[List[Candidate], ContestDescription]] = [
@@ -434,21 +433,21 @@ public class ElectionTestHelper {
     }
 
     // candidates_ = reduce(lambda a, b:a + b,[candidate_contest[0] for candidate_contest in candidate_contests],)
-    List<Candidate> candidates_ = candidate_contests.stream().map(t -> t.candidates).flatMap(List::stream)
+    List<Election.Candidate> candidates_ = candidate_contests.stream().map(t -> t.candidates).flatMap(List::stream)
             .collect(Collectors.toList());
 
     // contests = [candidate_contest[1] for candidate_contest in candidate_contests]
-    List<ContestDescription> contests = candidate_contests.stream().map(t -> t.contest).collect(Collectors.toList());
+    List<Election.ContestDescription> contests = candidate_contests.stream().map(t -> t.contest).collect(Collectors.toList());
 
-    BallotStyle styles = ballot_styles(parties, geo_units);
+    Election.BallotStyle styles = ballot_styles(parties, geo_units);
 
     // maybe later on we'll do something more complicated with dates
     OffsetDateTime start_date = OffsetDateTime.now();
     OffsetDateTime end_date = start_date;
 
-    return new ElectionDescription(
+    return new Election(
             randomString("election_scope_id"),
-            ElectionType.general,  // good enough for now
+            Election.ElectionType.general,  // good enough for now
             start_date,
             end_date,
             geo_units,
@@ -475,7 +474,7 @@ public class ElectionTestHelper {
     assertWithMessage("invalid election with no ballot styles").that(num_ballot_styles > 0).isTrue();
 
           // pick a ballot style at random
-    BallotStyle ballot_style = drawList(metadata.election.ballot_styles);
+    Election.BallotStyle ballot_style = drawList(metadata.election.ballot_styles);
 
     List<ContestWithPlaceholders> contests = metadata.get_contests_for(ballot_style.object_id);
     assertWithMessage("invalid ballot style with no contests in it").that(contests.size() > 0).isTrue();
@@ -485,14 +484,14 @@ public class ElectionTestHelper {
       assertWithMessage("every contest needs to be valid").that(contest.is_valid()).isTrue();
       // LOOK dont understand "we need exactly this many 1 's, and the rest 0' s"
       int n = contest.number_elected ; // we need exactly this many 1 's, and the rest 0' s
-      ArrayList<SelectionDescription> ballot_selections = new ArrayList<>(contest.ballot_selections);
+      ArrayList<Election.SelectionDescription> ballot_selections = new ArrayList<>(contest.ballot_selections);
       assertThat(ballot_selections.size() >= n).isTrue();
       // LOOK shuffle leave this out for now.
       // Collections.shuffle(ballot_selections);
 
       int cut_point = random.nextInt(n + 1); // a number between 0 and n, inclusive
-      List<SelectionDescription> yes_votes = ballot_selections.subList(0, cut_point);
-      List<SelectionDescription> no_votes = ballot_selections.subList(cut_point, ballot_selections.size());
+      List<Election.SelectionDescription> yes_votes = ballot_selections.subList(0, cut_point);
+      List<Election.SelectionDescription> no_votes = ballot_selections.subList(cut_point, ballot_selections.size());
 
       List<PlaintextBallot.Selection> voted_selections = new ArrayList<>();
       yes_votes.stream().map(d -> Encrypt.selection_from(d, false, true))
@@ -521,7 +520,7 @@ public class ElectionTestHelper {
    * a random number foe the commitments_hash.
    * In a real election, the key ceremony would be used to generate a shared public key.
    */
-  CIPHERTEXT_ELECTIONS_TUPLE_TYPE ciphertext_elections(ElectionDescription election_description) {
+  CIPHERTEXT_ELECTIONS_TUPLE_TYPE ciphertext_elections(Election election_description) {
     ElGamal.KeyPair keypair = elgamal_keypairs();
     return new CIPHERTEXT_ELECTIONS_TUPLE_TYPE(
             keypair.secret_key,
@@ -534,14 +533,14 @@ public class ElectionTestHelper {
   }
 
   public static class EverythingTuple {
-    ElectionDescription election_description;
+    Election election_description;
     ElectionWithPlaceholders metadata;
     List<PlaintextBallot> ballots;
     ElementModQ secret_key;
     CiphertextElectionContext context;
 
     public EverythingTuple(
-                 ElectionDescription election_description,
+                 Election election_description,
                  ElectionWithPlaceholders metadata,
                  List<PlaintextBallot> ballots,
                  ElementModQ secret_key,
@@ -561,12 +560,11 @@ public class ElectionTestHelper {
    * <p>
    *
    * @param num_ballots: The number of ballots to generate (default: 3).
-   * @return a tuple of an `ElectionDescription`, a list of plaintext ballots, an ElGamal secret key,
-   * and a `CiphertextElectionContext`.
+   * @return a tuple of an Election objects.
    */
   EverythingTuple elections_and_ballots(int num_ballots) {
     Preconditions.checkArgument(num_ballots >= 0, "You're asking for a negative number of ballots?");
-    ElectionDescription election_description = election_descriptions(3, 3);
+    Election election_description = election_descriptions(3, 3);
     ElectionWithPlaceholders metadata = new ElectionWithPlaceholders(election_description);
 
     // ballots = [draw(plaintext_voted_ballots(internal_election_description)) for _ in range(num_ballots)]

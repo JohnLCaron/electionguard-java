@@ -30,7 +30,7 @@ public class Consumer {
     publisher = new Publisher(topDir, false, false);
   }
 
-  public Election.ElectionDescription election() throws IOException {
+  public Election election() throws IOException {
     ElectionDescriptionFromJson builder = new ElectionDescriptionFromJson(
             publisher.electionPath().toString());
     return builder.build();

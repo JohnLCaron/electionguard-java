@@ -66,7 +66,7 @@ public class KeyCeremonyToProto {
     builder.setOwnerId(org.owner_id());
     builder.setSequenceOrder(org.sequence_order());
     builder.setProof(convertSchnorrProof(org.proof()));
-    builder.setKey(convertElementModP(org.key()));
+    builder.setKey(convertElementModP(org.publicKey()));
     return builder.build();
   }
 
