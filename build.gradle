@@ -20,6 +20,7 @@ group 'com.sunya.electionguard'
 version '0.9'
 
 repositories {
+    mavenLocal()
     jcenter() // jcommander not on maven central
     mavenCentral()
 }
@@ -44,6 +45,8 @@ dependencies {
     runtimeOnly 'com.google.flogger:flogger-system-backend:0.5.1'
 
     annotationProcessor "com.google.auto.value:auto-value:1.7.4"
+
+    implementation 'edu.ucar:uibase:6.1.0-SNAPSHOT'
 
     testImplementation 'com.google.truth:truth:1.1'
     testImplementation 'com.google.truth.extensions:truth-java8-extension:1.1'
