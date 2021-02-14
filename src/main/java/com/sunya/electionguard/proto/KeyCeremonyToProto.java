@@ -7,9 +7,8 @@ import com.sunya.electionguard.ElectionPolynomial;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.Guardian;
 import com.sunya.electionguard.KeyCeremony;
+import com.sunya.electionguard.Rsa;
 
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
 import java.util.List;
 
 import static com.sunya.electionguard.proto.CommonConvert.convertElementModP;
@@ -98,18 +97,19 @@ public class KeyCeremonyToProto {
 
   // LOOK there may be something better to do when serializing. Find out before use in production.
   private static KeyCeremonyProto.RSAPublicKey convertJavaPublicKey(java.security.PublicKey key) {
-    RSAPublicKey publicKey = (RSAPublicKey) key;
+    Rsa.KeyPieces pieces = Rsa.convertJavaPublicKey(key);
     KeyCeremonyProto.RSAPublicKey.Builder builder = KeyCeremonyProto.RSAPublicKey.newBuilder();
-    builder.setModulus(ByteString.copyFrom(publicKey.getModulus().toByteArray()));
-    builder.setPublicExponent(ByteString.copyFrom(publicKey.getPublicExponent().toByteArray()));
+    builder.setModulus(ByteString.copyFrom(pieces.modulus.toByteArray()));
+    builder.setPublicExponent(ByteString.copyFrom(pieces.exponent.toByteArray()));
     return builder.build();
   }
 
+  // LOOK there may be something better to do when serializing. Find out before use in production.
   private static KeyCeremonyProto.RSAPrivateKey convertJavaPrivateKey(java.security.PrivateKey key) {
-    RSAPrivateKey privateKey = (RSAPrivateKey) key;
+    Rsa.KeyPieces pieces = Rsa.convertJavaPrivateKey(key);
     KeyCeremonyProto.RSAPrivateKey.Builder builder = KeyCeremonyProto.RSAPrivateKey.newBuilder();
-    builder.setModulus(ByteString.copyFrom(privateKey.getModulus().toByteArray()));
-    builder.setPrivateExponent(ByteString.copyFrom(privateKey.getPrivateExponent().toByteArray()));
+    builder.setModulus(ByteString.copyFrom(pieces.modulus.toByteArray()));
+    builder.setPrivateExponent(ByteString.copyFrom(pieces.exponent.toByteArray()));
     return builder.build();
   }
 

@@ -128,7 +128,7 @@ public class ElectionRecord {
   }
 
   public Group.ElementModP elgamal_key() {
-    return this.context.elgamal_public_key;
+    return this.context.joint_public_key;
   }
 
   /** return map of guardian_id, public_key. */

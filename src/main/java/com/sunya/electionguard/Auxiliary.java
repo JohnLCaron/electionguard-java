@@ -7,10 +7,23 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
 
-/** Wrapper around java.security.PrivateKey. */
+/** Wrapper around java.security.PrivateKey and java.security.PublicKey. */
 public class Auxiliary {
+  // To share secret values amongst each other, it is assumed that each guardian T i has previously
+  //shared an auxiliary public encryption function E i with the group.(3) Each guardian T i then
+  //publishes the encryption E l (R i,l , P i (l)) for every other guardian T l – where R i,l is a random
+  //nonce.
+  // (3) A “traditional” ElGamal public key is fine for this purpose. But the baseline ElectionGuard parameters p and q
+  //are tuned for homomorphic purposes and are not well-suited for encrypting large values. The ElectionGuard
+  //guardian keys can be used by breaking a message into small pieces (e.g. individual bytes) and encrypting a large
+  //value as a sequence of small values. However, traditional public-key encryption methods are more efficient. Since
+  //this key is only used internally, its form is not specified herein.
 
-  /** Pair of keys (public and secret) used to encrypt/decrypt information sent between guardians. */
+  /**
+   * Pair of keys (public and secret) used to encrypt/decrypt information sent between guardians.
+   * @see <a href="https://www.electionguard.vote/spec/0.95.0/4_Key_generation/#details-of-key-generation">Key Generation</a>
+   * footnote 3.
+   */
   @Immutable
   public static class KeyPair {
     public final java.security.PrivateKey secret_key;
@@ -36,7 +49,7 @@ public class Auxiliary {
     }
   }
 
-  /** A tuple of auxiliary public key and owner information. */
+  /** A tuple of the auxiliary public key and owner information. */
   @Immutable
   public static class PublicKey {
     /** The unique identifier of the guardian. */
@@ -101,7 +114,7 @@ public class Auxiliary {
   }
 
   /** A callable type that represents the auxiliary encryption scheme. */
-   public interface Encryptor {
+  public interface Encryptor {
       Optional<ByteString> encrypt(String message, java.security.PublicKey public_key);
   }
 

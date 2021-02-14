@@ -8,7 +8,6 @@ import com.google.common.flogger.FluentLogger;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import java.math.BigInteger;
-import java.security.interfaces.RSAPrivateKey;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -264,17 +263,9 @@ public class Guardian extends ElectionObjectBase {
   }
 
   private boolean equalAuxilaryKeys(Auxiliary.KeyPair o1, Auxiliary.KeyPair o2) {
-      boolean ok1 = comparePrivateKeys(o1.secret_key, o2.secret_key);
+      boolean ok1 = Rsa.comparePrivateKeys(o1.secret_key, o2.secret_key);
       boolean ok2 = o1.public_key.equals(o2.public_key);
     return ok1 && ok2;
-  }
-
-  private static boolean comparePrivateKeys(java.security.PrivateKey key1, java.security.PrivateKey key2) {
-    RSAPrivateKey rsa1 = (RSAPrivateKey) key1;
-    RSAPrivateKey rsa2 = (RSAPrivateKey) key2;
-    boolean modOk = rsa1.getModulus().equals(rsa2.getModulus());
-    boolean expOk = rsa1.getPrivateExponent().equals(rsa2.getPrivateExponent());
-    return modOk && expOk;
   }
 
   private boolean equalElectionKeys(KeyCeremony.ElectionKeyPair o1, KeyCeremony.ElectionKeyPair o2) {

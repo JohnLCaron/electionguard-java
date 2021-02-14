@@ -45,13 +45,13 @@ message CoefficientSets {
 message CoefficientSet {
   string guardian_id = 1;
   uint32 guardian_sequence = 2; // i=1,number of guardians
-  repeated ElementModQ coefficients = 3; // Kij, j=0...quorum-1
+  repeated ElementModQ coefficients = 3;
 }
 
 // Set of coefficient validation pieces, one for each available guardian
 message CoefficientValidationSet {
   string owner_id = 1; // guardian id
-  repeated ElementModP coefficient_commitments = 2;
+  repeated ElementModP coefficient_commitments = 2;  // Kij, j=0...quorum-1
   repeated SchnorrProof coefficient_proofs = 3;
 }
 

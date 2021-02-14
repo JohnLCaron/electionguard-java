@@ -121,6 +121,7 @@ public class KeyCeremony {
   /** The public validation pieces for election key coefficients for one Guardian. */
   @AutoValue
   public abstract static class CoefficientValidationSet {
+
     /** Guardian.object_id. */
     public abstract String owner_id();
     /** The Kij of the specification. */

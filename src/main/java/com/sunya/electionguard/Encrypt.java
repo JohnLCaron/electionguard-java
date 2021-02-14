@@ -420,7 +420,7 @@ public class Encrypt {
       Optional<CiphertextBallot.Contest> encrypted_contest = encrypt_contest(
               use_contest,
               contestDescription,
-              context.elgamal_public_key,
+              context.joint_public_key,
               context.crypto_extended_base_hash,
               nonce_seed, true);
 
@@ -444,7 +444,7 @@ public class Encrypt {
     }
 
     // Verify the proofs
-    if (encrypted_ballot.is_valid_encryption(metadata.election.crypto_hash, context.elgamal_public_key, context.crypto_extended_base_hash)) {
+    if (encrypted_ballot.is_valid_encryption(metadata.election.crypto_hash, context.joint_public_key, context.crypto_extended_base_hash)) {
       return Optional.of(encrypted_ballot);
     } else {
       return Optional.empty(); // log error will have happened earlier

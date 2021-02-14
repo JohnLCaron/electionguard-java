@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
  * </pre>
  * </strong>
  *
- * @see <a href="https://www.electionguard.vote/spec/0.95.0/1_Overview/#key-generation">Key Generation</a>
+ * @see <a href="https://www.electionguard.vote/spec/0.95.0/4_Key_generation/#details-of-key-generation">Key Generation</a>
  */
 public class PerformKeyCeremony {
 

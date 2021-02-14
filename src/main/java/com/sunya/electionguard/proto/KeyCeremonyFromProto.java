@@ -8,15 +8,11 @@ import com.sunya.electionguard.Group;
 import com.sunya.electionguard.Guardian;
 import com.sunya.electionguard.GuardianBuilder;
 import com.sunya.electionguard.KeyCeremony;
+import com.sunya.electionguard.Rsa;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.RSAPrivateKeySpec;
-import java.security.spec.RSAPublicKeySpec;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -114,23 +110,14 @@ public class KeyCeremonyFromProto {
   private static java.security.PublicKey convertJavaPublicKey(KeyCeremonyProto.RSAPublicKey proto) {
     BigInteger publicExponent = new BigInteger(proto.getPublicExponent().toByteArray());
     BigInteger modulus = new BigInteger(proto.getModulus().toByteArray());
-    RSAPublicKeySpec Spec = new RSAPublicKeySpec(modulus, publicExponent);
-    try {
-      return KeyFactory.getInstance("RSA").generatePublic(Spec);
-    } catch (InvalidKeySpecException | NoSuchAlgorithmException e ) {
-      throw new RuntimeException(e);
-    }
+    return Rsa.convertJavaPublicKey(modulus, publicExponent);
   }
 
+  // LOOK there may be something better to do when serializing. Find out before use in production.
   private static java.security.PrivateKey convertJavaPrivateKey(KeyCeremonyProto.RSAPrivateKey proto) {
     BigInteger privateExponent = new BigInteger(proto.getPrivateExponent().toByteArray());
     BigInteger modulus = new BigInteger(proto.getModulus().toByteArray());
-    RSAPrivateKeySpec spec = new RSAPrivateKeySpec(modulus, privateExponent); // or RSAPrivateCrtKeySpec ?
-    try {
-      return KeyFactory.getInstance("RSA").generatePrivate(spec);
-    } catch (InvalidKeySpecException | NoSuchAlgorithmException e ) {
-      throw new RuntimeException(e);
-    }
+    return Rsa.convertJavaPrivateKey(modulus, privateExponent);
   }
 
   /////////////////////////////////////////////////////////////////////////////////////////////////////////
