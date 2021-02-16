@@ -1,6 +1,8 @@
 # 🗳 ElectionGuard Java
 
 This is a port of https://github.com/microsoft/electionguard-python/ to Java.
+It  closely follows the classes, naming and file structure of the original, to facilitate 
+line-by-line comparison.
 
 It is offered under the same license to be freely used, modified, developed, etc. 
 Im also happy to donate it to another organization for hosting, etc.
@@ -19,7 +21,7 @@ Im also happy to donate it to another organization for hosting, etc.
  * Most classes are immutable, anticipating need for multithreading. 
  * Uses Java's BigInteger for cryptographic computations.
  * Uses Gson for JSON serialization. 
- * Can also serialize using protobuf.
+ * Can also serialize to protobuf.
  * Using AutoValue for (some) immutable value classes.
  * Uses Flogger for logging.
  * Uses JUnit5 / jqwik library for property based testing.
