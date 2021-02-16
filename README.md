@@ -7,9 +7,9 @@ Im also happy to donate it to another organization for hosting, etc.
 
 ## Docs
 
-   [Test](https://github.com/microsoft/electionguard-python/)
-   [Readme](https://github.com/JohnLCaron/electionguard-java/blob/master/README.md)
-   [Readme](https://github.com/JohnLCaron/electionguard-java/blob/master/docs/README.md)
+.   [Test](https://github.com/microsoft/electionguard-python/)
+.   [Readme](https://github.com/JohnLCaron/electionguard-java/blob/master/README.md)
+.   [Readme](https://github.com/JohnLCaron/electionguard-java/blob/testdocs/docs/README.md)
   
 
 ## Notes
