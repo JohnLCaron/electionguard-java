@@ -5,8 +5,7 @@
 
 package com.sunya.electionguard.viz;
 
-import com.sunya.electionguard.CiphertextAcceptedBallot;
-import com.sunya.electionguard.CiphertextBallot;
+import com.sunya.electionguard.PlaintextBallot;
 import com.sunya.electionguard.publish.CloseableIterable;
 import com.sunya.electionguard.publish.CloseableIterator;
 import ucar.ui.prefs.BeanTable;
@@ -18,29 +17,24 @@ import ucar.util.prefs.PreferencesExt;
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
-import java.time.Instant;
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.Formatter;
 
-public class AcceptedBallotsTable extends JPanel {
+public class PlaintextBallotsTable extends JPanel {
   private final PreferencesExt prefs;
 
-  private final BeanTable<CiphertextAcceptedBallotBean> ballotTable;
+  private final BeanTable<BallotBean> ballotTable;
   private final BeanTable<ContestBean> contestTable;
   private final BeanTable<SelectionBean> selectionTable;
 
   private final JSplitPane split1, split2;
   private final IndependentWindow infoWindow;
 
-  public AcceptedBallotsTable(PreferencesExt prefs) {
+  public PlaintextBallotsTable(PreferencesExt prefs) {
     this.prefs = prefs;
 
-    ballotTable = new BeanTable<>(CiphertextAcceptedBallotBean.class, (PreferencesExt) prefs.node("BallotTable"), false);
+    ballotTable = new BeanTable<>(BallotBean.class, (PreferencesExt) prefs.node("BallotTable"), false);
     ballotTable.addListSelectionListener(e -> {
-      CiphertextAcceptedBallotBean ballot = ballotTable.getSelectedBean();
+      BallotBean ballot = ballotTable.getSelectedBean();
       if (ballot != null) {
         setBallot(ballot);
       }
@@ -72,12 +66,13 @@ public class AcceptedBallotsTable extends JPanel {
     add(split2, BorderLayout.CENTER);
   }
 
-  void setAcceptedBallots(CloseableIterable<CiphertextAcceptedBallot> acceptedBallots) {
-    try (CloseableIterator<CiphertextAcceptedBallot> iter = acceptedBallots.iterator())  {
-      java.util.List<CiphertextAcceptedBallotBean> beanList = new ArrayList<>();
+  void setBallots(CloseableIterable<PlaintextBallot> ballots) {
+
+    try (CloseableIterator<PlaintextBallot> iter = ballots.iterator())  {
+      java.util.List<BallotBean> beanList = new ArrayList<>();
       while (iter.hasNext()) {
-        CiphertextAcceptedBallot ballot = iter.next();
-        beanList.add(new CiphertextAcceptedBallotBean(ballot));
+        PlaintextBallot ballot = iter.next();
+        beanList.add(new BallotBean(ballot));
       }
       ballotTable.setBeans(beanList);
       if (beanList.size() > 0) {
@@ -91,9 +86,9 @@ public class AcceptedBallotsTable extends JPanel {
     }
   }
 
-  void setBallot(CiphertextAcceptedBallotBean ballotBean) {
+  void setBallot(BallotBean ballotBean) {
     java.util.List<ContestBean> beanList = new ArrayList<>();
-    for (CiphertextBallot.Contest c : ballotBean.ballot.contests) {
+    for (PlaintextBallot.Contest c : ballotBean.ballot.contests) {
       beanList.add(new ContestBean(c));
     }
     contestTable.setBeans(beanList);
@@ -106,7 +101,7 @@ public class AcceptedBallotsTable extends JPanel {
 
   void setContest(ContestBean contestBean) {
     java.util.List<SelectionBean> beanList = new ArrayList<>();
-    for (CiphertextBallot.Selection s : contestBean.contest.ballot_selections) {
+    for (PlaintextBallot.Selection s : contestBean.contest.ballot_selections) {
       beanList.add(new SelectionBean(s));
     }
     selectionTable.setBeans(beanList);
@@ -121,12 +116,12 @@ public class AcceptedBallotsTable extends JPanel {
     prefs.putInt("splitPos2", split2.getDividerLocation());
   }
 
-  public static class CiphertextAcceptedBallotBean {
-    CiphertextAcceptedBallot ballot;
+  public static class BallotBean {
+    PlaintextBallot ballot;
 
-    public CiphertextAcceptedBallotBean(){}
+    public BallotBean(){}
 
-    CiphertextAcceptedBallotBean(CiphertextAcceptedBallot ballot) {
+    BallotBean(PlaintextBallot ballot) {
       this.ballot = ballot;
     }
 
@@ -134,82 +129,52 @@ public class AcceptedBallotsTable extends JPanel {
       return ballot.object_id;
     }
 
-    public String getTracking() {
-      return ballot.tracking_hash.toString();
-    }
-
-    public String getPrevTracking() {
-      return ballot.previous_tracking_hash.toString();
-    }
-
-    public String getState() {
-      return ballot.state.toString();
-    }
-
     public String getStyle() {
       return ballot.ballot_style;
     }
-
-    public String getTimeStamp() {
-      return OffsetDateTime.ofInstant(Instant.ofEpochSecond(ballot.timestamp), ZoneId.of("UTC")).toString();
-    }
-
-    public boolean isNonce() {
-      return ballot.nonce.isPresent();
-    }
-
   }
 
   public static class ContestBean {
-    CiphertextBallot.Contest contest;
+    PlaintextBallot.Contest contest;
 
     public ContestBean(){}
 
-    ContestBean(CiphertextBallot.Contest contest) {
+    ContestBean(PlaintextBallot.Contest contest) {
       this.contest = contest;
     }
 
     public String getContestId() {
-      return contest.object_id;
+      return contest.contest_id;
     }
-
-    public boolean isNonce() {
-      return contest.nonce.isPresent();
-    }
-
-    public boolean isProof() {
-      return contest.proof.isPresent();
-    }
-
   }
 
   public static class SelectionBean {
-    CiphertextBallot.Selection selection;
+    PlaintextBallot.Selection selection;
 
     public SelectionBean(){}
 
-    SelectionBean(CiphertextBallot.Selection selection) {
+    SelectionBean(PlaintextBallot.Selection selection) {
       this.selection = selection;
     }
 
     public String getSelectionId() {
-      return selection.object_id;
-    }
-
-    public String getCryptoHash() {
-      return selection.crypto_hash.toString();
+      return selection.selection_id;
     }
 
     public boolean isPlaceHolder() {
       return selection.is_placeholder_selection;
     }
 
-    public boolean isNonce() {
-      return selection.nonce.isPresent();
+    public int getVote() {
+      return selection.vote;
     }
 
-    public boolean isProof() {
-      return selection.proof.isPresent();
+    public String getExtendedData() {
+      if (selection.extended_data.isPresent()) {
+        return selection.extended_data.get().value;
+      } else {
+        return "";
+      }
     }
 
   }

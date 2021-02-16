@@ -30,7 +30,7 @@ public class CiphertextAcceptedBallotPojo {
   public List<CiphertextBallotContestPojo> contests;
   public long timestamp;
   public ElementModQ crypto_hash;
-  public ElementModQ nonce;
+  // public ElementModQ nonce; LOOK temporary kludge until Optional serialization gets fixed
   public BallotBox.State state;
 
   public static class CiphertextBallotContestPojo {
@@ -107,7 +107,7 @@ public class CiphertextAcceptedBallotPojo {
             pojo.tracking_hash,
             pojo.timestamp,
             pojo.crypto_hash,
-            Optional.ofNullable(pojo.nonce),
+            Optional.empty(), // Optional.ofNullable(pojo.nonce),
             pojo.state);
   }
 
@@ -194,7 +194,7 @@ public class CiphertextAcceptedBallotPojo {
     pojo.tracking_hash = org.tracking_hash;
     pojo.timestamp = org.timestamp;
     pojo.crypto_hash = org.crypto_hash;
-    pojo.nonce = org.nonce.orElse(null);
+    // pojo.nonce = org.nonce.orElse(null);
     pojo.state = org.state;
     return pojo;
   }

@@ -33,7 +33,7 @@ public class ElectionRecord {
   public final Election election;
   public final ImmutableList<KeyCeremony.CoefficientValidationSet> guardianCoefficients;
   public final ImmutableList<Encrypt.EncryptionDevice> devices;
-  public final CloseableIterable<CiphertextAcceptedBallot> acceptedBallots; // LOOK all ballots, not just cast!
+  public final CloseableIterable<CiphertextAcceptedBallot> acceptedBallots; // All ballots, not just cast!
   @Nullable public final CiphertextTally ciphertextTally;
   @Nullable public final PlaintextTally decryptedTally;
   public final CloseableIterable<PlaintextBallot> spoiledBallots;
@@ -48,7 +48,7 @@ public class ElectionRecord {
                         @Nullable List<Encrypt.EncryptionDevice> devices,
                         @Nullable CiphertextTally ciphertextTally,
                         @Nullable PlaintextTally decryptedTally,
-                        @Nullable CloseableIterable<CiphertextAcceptedBallot> castBallots,
+                        @Nullable CloseableIterable<CiphertextAcceptedBallot> acceptedBallots,
                         @Nullable CloseableIterable<PlaintextBallot> spoiledBallots,
                         @Nullable CloseableIterable<PlaintextTally> spoiledTallies) {
     this.constants = constants;
@@ -56,7 +56,7 @@ public class ElectionRecord {
     this.election = election;
     this.guardianCoefficients = ImmutableList.copyOf(guardianCoefficients);
     this.devices = devices == null ? ImmutableList.of() : ImmutableList.copyOf(devices);
-    this.acceptedBallots = castBallots == null ? CloseableIterableAdapter.empty() : castBallots;
+    this.acceptedBallots = acceptedBallots == null ? CloseableIterableAdapter.empty() : acceptedBallots;
     this.ciphertextTally = ciphertextTally;
     this.decryptedTally = decryptedTally;
     this.spoiledBallots = spoiledBallots == null ? CloseableIterableAdapter.empty() : spoiledBallots;

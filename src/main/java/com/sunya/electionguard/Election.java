@@ -493,6 +493,14 @@ public class Election implements Hash.CryptoHashable {
     public int hashCode() {
       return Objects.hash(annotation, value);
     }
+
+    @Override
+    public String toString() {
+      return "{" +
+              "annotation='" + annotation + '\'' +
+              ", value='" + value + '\'' +
+              '}';
+    }
   }
 
   /**
@@ -527,6 +535,11 @@ public class Election implements Hash.CryptoHashable {
     public int hashCode() {
       return Objects.hash(value, language);
     }
+
+    @Override
+    public String toString() {
+      return value + " (" + language + ")";
+    }
   }
 
   /**
@@ -557,6 +570,11 @@ public class Election implements Hash.CryptoHashable {
     @Override
     public int hashCode() {
       return Objects.hash(text);
+    }
+
+    @Override
+    public String toString() {
+      return text.toString();
     }
   }
 
@@ -600,6 +618,16 @@ public class Election implements Hash.CryptoHashable {
     @Override
     public int hashCode() {
       return Objects.hash(address_line, email, phone, name);
+    }
+
+    @Override
+    public String toString() {
+      return "{" +
+              "address_line=" + address_line +
+              ", email=" + email +
+              ", phone=" + phone +
+              ", name=" + name +
+              '}';
     }
   }
 
