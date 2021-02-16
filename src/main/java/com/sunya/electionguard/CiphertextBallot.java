@@ -41,7 +41,7 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
    * @param previous_tracking_hash:  Previous tracking hash (or seed hash) in the ballot chain
    * @param contests:                List of contests for this ballot
    * @param nonce:                   optional nonce used as part of the encryption process
-   * @param timestamp:               Timestamp at which the ballot encryption is generated in tick
+   * @param timestamp:               Timestamp at which the ballot encryption is generated in seconds since the epoch.
    */
   public static CiphertextBallot create(
           String object_id,
@@ -60,7 +60,7 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
     List<Group.ElementModQ> contest_hashes = contests.stream().map(c -> c.crypto_hash).collect(Collectors.toList());
     Group.ElementModQ crypto_hash = Hash.hash_elems(object_id, description_hash, contest_hashes);
 
-    long time = timestamp.orElse(System.currentTimeMillis());
+    long time = timestamp.orElse(System.currentTimeMillis() / 1000);
     Group.ElementModQ tracking_hash = tracking_hashO.orElse(Tracker.get_rotating_tracker_hash(previous_tracking_hash, time, crypto_hash));
 
     return new CiphertextBallot(
