@@ -1,22 +1,40 @@
 # 🗳 ElectionGuard Java
 
 This is a port of https://github.com/microsoft/electionguard-python/ to Java.
+It  closely follows the classes, naming and file structure of the original, to facilitate 
+line-by-line comparison.
 
-It is offered under the same license to be freely used, modified, developed, etc. 
-Im also happy to donate it to another organization for hosting, etc.
+### Workflow
 
-## Docs
+The following Command Line Programs simulate the pieces of the workflow needed to run an election:
 
-.   [Test](https://github.com/microsoft/electionguard-python/)
-.   [Readme](https://github.com/JohnLCaron/electionguard-java/blob/master/README.md)
-.   [Readme](https://github.com/JohnLCaron/electionguard-java/blob/testdocs/docs/README.md)
-  
+1.   [PerformKeyCeremony](https://github.com/JohnLCaron/electionguard-java/blob/testdocs/docs/PerformKeyCeremony.md)
+
+2.   [EncryptBallots](https://github.com/JohnLCaron/electionguard-java/blob/testdocs/docs/EncryptBallots.md)
+
+3.   [DecryptBallots](https://github.com/JohnLCaron/electionguard-java/blob/testdocs/docs/DecryptBallots.md)
+
+The entire workflow, consisting of the above three steps plus validation can be run from a single command:
+
+4.   [RunElectionWorkflow](https://github.com/JohnLCaron/electionguard-java/blob/testdocs/docs/RunElectionWorkflow.md)
+
+### Public API Javadoc 
+
+### Library repositories
+
+### Building from source
+
+````
+git clone https://github.com/JohnLCaron/electionguard-java.git
+cd electionguard-java
+./gradlew clean assemble
+````
 
 ## Notes
 
- * Full validation spec is implemented.
+ * The full [validation spec](https://www.electionguard.vote/spec/0.95.0/1_Overview/) is implemented.
  * Assumes Java 11.
- * Most classes are immutable, anticipating need for multithreading. 
+ * Most classes are immutable, anticipating the need for multithreading. 
  * Uses Java's BigInteger for cryptographic computations.
  * Uses Gson for JSON serialization. 
  * Can also serialize using protobuf.
@@ -28,12 +46,8 @@ Im also happy to donate it to another organization for hosting, etc.
 ## TODO
 
   * Not yet compatible with Python library JSON serialization, due to different ways to serialize Optional.
+    It incorporates a workaround which should work for now, however.
   * Measure computational performance.
-  * Look at BigInteger performance, consider if using GMP is justified.
   * Investigate parallelization strategies.
-
-## License
-
-This repository is licensed under the [MIT License]
 
 

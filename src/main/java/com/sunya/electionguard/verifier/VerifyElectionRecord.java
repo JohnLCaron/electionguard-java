@@ -27,22 +27,22 @@ import java.io.IOException;
 public class VerifyElectionRecord {
 
   private static class CommandLine {
-    @Parameter(names = {"-in"},
+    @Parameter(names = {"-in"}, order = 0,
             description = "Directory containing input election record", required = true)
     String inputDir;
 
-    @Parameter(names = {"--proto"}, description = "Input election record is in proto format")
+    @Parameter(names = {"--proto"}, order = 1, description = "Input election record is in protobuf format")
     boolean isProto = false;
 
-    @Parameter(names = {"-h", "--help"}, description = "Display this help and exit", help = true)
+    @Parameter(names = {"-h", "--help"}, order = 2, description = "Display this help and exit", help = true)
     boolean help = false;
 
     private final JCommander jc;
 
-    public CommandLine(String progName, String[] args) throws ParameterException {
+    public CommandLine(String[] args) throws ParameterException {
       this.jc = new JCommander(this);
       this.jc.parse(args);
-      jc.setProgramName(progName); // Displayed in the usage information.
+      jc.setProgramName("java -jar electionguard-java-all.jar"); // Displayed in the usage information.
     }
 
     public void printUsage() {
@@ -51,18 +51,17 @@ public class VerifyElectionRecord {
   }
 
   public static void main(String[] args) throws IOException {
-    String progName = EncryptBallots.class.getName();
     CommandLine cmdLine = null;
 
     try {
-      cmdLine = new CommandLine(progName, args);
+      cmdLine = new CommandLine(args);
       if (cmdLine.help) {
         cmdLine.printUsage();
         return;
       }
     } catch (ParameterException e) {
       System.err.println(e.getMessage());
-      System.err.printf("Try '%s --help' for more information.%n", progName);
+      System.err.printf("Try --help for more information.%n");
       System.exit(1);
     }
 
@@ -75,10 +74,11 @@ public class VerifyElectionRecord {
     }
 
     System.out.printf(" VerifyElectionRecord read from %s isProto = %s%n", cmdLine.inputDir, cmdLine.isProto);
-    verifyElectionRecord(consumer, electionRecord);
+    boolean ok = verifyElectionRecord(electionRecord);
+    System.exit(ok ? 0 : 1);
   }
 
-  static void verifyElectionRecord(Consumer consumer, ElectionRecord electionRecord) throws IOException {
+  static boolean verifyElectionRecord(ElectionRecord electionRecord) throws IOException {
     System.out.println("============ Ballot Verification =========================");
     System.out.println("------------ [box 1] Parameter Validation ------------");
     ParameterVerifier blv = new ParameterVerifier(electionRecord);
@@ -104,7 +104,7 @@ public class VerifyElectionRecord {
     BallotChainingVerifier bcv = new BallotChainingVerifier(electionRecord);
     boolean bcvOk = bcv.verify_all_ballots();
 
-    System.out.println("============ Decryption Verification =========================");
+    System.out.println("\n============ Decryption Verification =========================");
     System.out.println("------------ [box 7] Ballot Aggregation Validation ------------");
     BallotAggregationVerifier bav = new BallotAggregationVerifier(electionRecord);
     boolean bavOk = bav.verify_ballot_aggregation();
@@ -126,10 +126,13 @@ public class VerifyElectionRecord {
     PlaintextBallotVerifier pbv = new PlaintextBallotVerifier(electionRecord);
     boolean pbvOk = pbv.verify_plaintext_ballot();
 
-    if (blvOk && gpkvOk && epkvOk && sevOk && cvlvOk && bcvOk && bavOk && dvOk && pdvOk && bavt && dvsOk && pbvOk) {
+    boolean allOk = (blvOk && gpkvOk && epkvOk && sevOk && cvlvOk && bcvOk && bavOk && dvOk && pdvOk && bavt && dvsOk && pbvOk);
+    if (allOk) {
       System.out.printf("%n===== ALL OK! ===== %n");
     } else {
       System.out.printf("%n!!!!!! NOT OK !!!!!! %n");
     }
+
+    return allOk;
   }
 }

@@ -40,28 +40,28 @@ import java.util.stream.Collectors;
 public class PerformKeyCeremony {
 
   private static class CommandLine {
-    @Parameter(names = {"-in"},
+    @Parameter(names = {"-in"}, order = 0,
             description = "Directory containing input election description", required = true)
     String inputDir;
 
-    @Parameter(names = {"--proto"}, description = "Input election record is in proto format")
+    @Parameter(names = {"--proto"}, order = 1, description = "Input election record is in proto format")
     boolean isProto = false;
 
-    @Parameter(names = {"-out"},
+    @Parameter(names = {"-out"}, order = 2,
             description = "Directory where Guardians and election context is written", required = true)
     String outputDir;
 
-    @Parameter(names = {"-coefficients"},
+    @Parameter(names = {"-coefficients"}, order = 3,
             description = "CoefficientsProvider classname")
     String coefficientsProviderClass;
 
-    @Parameter(names = {"-nguardians"}, description = "Number of quardians to create (required if no coefficients)")
+    @Parameter(names = {"-nguardians"}, order = 4, description = "Number of quardians to create (required if no coefficients)")
     int nguardians;
 
-    @Parameter(names = {"-quorum"}, description = "Number of quardians that make a quorum (required if no coefficients)")
+    @Parameter(names = {"-quorum"}, order = 5, description = "Number of quardians that make a quorum (required if no coefficients)")
     int quorum;
 
-    @Parameter(names = {"-h", "--help"}, description = "Display this help and exit", help = true)
+    @Parameter(names = {"-h", "--help"}, order = 6, description = "Display this help and exit", help = true)
     boolean help = false;
 
     private final JCommander jc;
@@ -69,7 +69,7 @@ public class PerformKeyCeremony {
     public CommandLine(String progName, String[] args) throws ParameterException {
       this.jc = new JCommander(this);
       this.jc.parse(args);
-      jc.setProgramName(progName); // Displayed in the usage information.
+      jc.setProgramName(String.format("java -classpath electionguard-java-all.jar %s", progName));
     }
 
     public void printUsage() {
