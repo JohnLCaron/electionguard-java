@@ -30,38 +30,39 @@ import java.util.Random;
  *  java -classpath electionguard-java-all.jar com.sunya.electionguard.workflow.EncryptBallots --help
  * </pre>
  * </strong>
+ *
  * @see <a href="https://www.electionguard.vote/spec/0.95.0/5_Ballot_encryption/">Ballot Encryption</a>
  */
 public class EncryptBallots {
 
   private static class CommandLine {
-    @Parameter(names = {"-in"},
+    @Parameter(names = {"-in"}, order=0,
             description = "Directory containing input election record", required = true)
     String inputDir;
 
-    @Parameter(names = {"-out"},
+    @Parameter(names = {"--proto"}, order=1, description = "Input election record is in proto format")
+    boolean isProto = false;
+
+    @Parameter(names = {"-out"}, order=2,
             description = "Directory to write output election record", required = true)
     String encryptDir;
 
-    @Parameter(names = {"-ballots"},
-            description = "BallotProvider classname", required = true)
+    @Parameter(names = {"-ballots"}, order=3,
+            description = "BallotProvider classname")
     String ballotProviderClass;
 
-    @Parameter(names = {"-nballots"},
-            description = "number of ballots to generate (if supported by BallotProvider)")
+    @Parameter(names = {"-nballots"}, order=4,
+            description = "number of ballots to generate")
     int nballots;
 
-    @Parameter(names = {"-device"},
+    @Parameter(names = {"-device"}, order=5,
             description = "Name of this device", required = true)
     String deviceName;
 
-    @Parameter(names = {"--proto"}, description = "Input election record is in proto format")
-    boolean isProto = false;
-
-    @Parameter(names = {"--save"}, description = "Save the original ballots for debugging", help = true)
+    @Parameter(names = {"--save"}, order=6, description = "Save the original ballots for debugging", help = true)
     boolean save = false;
 
-    @Parameter(names = {"-h", "--help"}, description = "Display this help and exit", help = true)
+    @Parameter(names = {"-h", "--help"}, order=7, description = "Display this help and exit", help = true)
     boolean help = false;
 
     private final JCommander jc;
@@ -69,7 +70,7 @@ public class EncryptBallots {
     public CommandLine(String progName, String[] args) throws ParameterException {
       this.jc = new JCommander(this);
       this.jc.parse(args);
-      jc.setProgramName(progName); // Displayed in the usage information.
+      jc.setProgramName(String.format("java -classpath electionguard-java-all.jar %s", progName));
     }
 
     public void printUsage() {
@@ -102,11 +103,15 @@ public class EncryptBallots {
     }
 
     BallotProvider ballotProvider = null;
-    try {
-      ballotProvider = makeBallotProvider(cmdLine.ballotProviderClass, electionRecord.election, cmdLine.nballots);
-    } catch (Throwable t) {
-      t.printStackTrace();
-      System.exit(3);
+    if (cmdLine.ballotProviderClass != null) {
+      try {
+        ballotProvider = makeBallotProvider(cmdLine.ballotProviderClass, electionRecord.election, cmdLine.nballots);
+      } catch (Throwable t) {
+        t.printStackTrace();
+        System.exit(3);
+      }
+    } else {
+      ballotProvider = new FakeBallotProvider(electionRecord.election, cmdLine.nballots);
     }
 
     System.out.printf(" BallotEncryptor read context from %s%n Ballots from %s%n Write to %s%n",
@@ -132,16 +137,18 @@ public class EncryptBallots {
       System.exit(4);
     }
 
-    if (cmdLine.save) {
-      encryptor.saveOriginalBallots(cmdLine.encryptDir, originalBallots);
-    }
-
     try {
+      if (cmdLine.save) {
+        encryptor.saveOriginalBallots(cmdLine.encryptDir, originalBallots);
+      }
+
       // publish
-      encryptor.publish(cmdLine.encryptDir);
-      System.exit(0);
+      boolean ok = encryptor.publish(cmdLine.encryptDir);
+      System.out.printf("*** EncryptBallots %s%n", ok ? "SUCCESS" : "FAILURE");
+      System.exit(ok ? 0 : 1);
 
     } catch (Throwable t) {
+      System.out.printf("*** EncryptBallots FAILURE%n");
       t.printStackTrace();
       System.exit(5);
     }
@@ -197,7 +204,7 @@ public class EncryptBallots {
     }
   }
 
-  void publish(String publishDir) throws IOException {
+  boolean publish(String publishDir) throws IOException {
     int ncast = Iterables.size(this.ballotBox.getCastBallots());
     int nspoiled = Iterables.size(this.ballotBox.getSpoiledBallots());
     int failed = originalBallotsCount - ncast - nspoiled;
@@ -212,7 +219,8 @@ public class EncryptBallots {
             electionRecord.guardianCoefficients,
             ImmutableList.of(this.device), // add the device
             this.ballotBox.getAllBallots() // add the encrypted ballots
-            );
+    );
+    return true;
   }
 
   void saveOriginalBallots(String publishDir, List<PlaintextBallot> ballots) throws IOException {

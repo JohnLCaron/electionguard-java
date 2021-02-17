@@ -23,47 +23,35 @@ import java.util.concurrent.TimeUnit;
  *
  */
 public class RunElectionWorkflow {
-  private static final String classpath = "build/libs/electionguard-java-0.9-SNAPSHOT-all.jar";
+  private static final String classpath = "build/libs/electionguard-java-0.9-all.jar";
 
   private static class CommandLine {
-    @Parameter(names = {"-in"},
+    @Parameter(names = {"-in"}, order = 0,
             description = "Directory containing input election description", required = true)
     String inputDir;
 
-    @Parameter(names = {"--proto"}, description = "Input election record is in proto format")
+    @Parameter(names = {"--proto"}, order = 2, description = "Input election record is in proto format")
     boolean isProto = false;
 
-    @Parameter(names = {"-coefficients"},
-            description = "CoefficientsProvider classname")
-    String coefficientsProviderClass;
-
-    @Parameter(names = {"-nguardians"}, description = "Number of quardians to create (required if no coefficients)")
+    @Parameter(names = {"-nguardians"}, order = 2, description = "Number of quardians to create", required = true)
     int nguardians = 6;
 
-    @Parameter(names = {"-quorum"}, description = "Number of quardians that make a quorum (required if no coefficients)")
+    @Parameter(names = {"-quorum"}, order = 3, description = "Number of quardians that make a quorum", required = true)
     int quorum = 5;
 
-    @Parameter(names = {"-guardians"},
-            description = "GuardianProvider classname", required = true)
-    String guardianProviderClass;
-
-    @Parameter(names = {"-encryptDir"},
+    @Parameter(names = {"-encryptDir"}, order = 4,
             description = "Directory containing ballot encryption", required = true)
     String encryptDir;
 
-    @Parameter(names = {"-out"},
+    @Parameter(names = {"-nballots"}, order = 5,
+            description = "number of ballots to generate", required = true)
+    int nballots;
+
+    @Parameter(names = {"-out"}, order = 6,
             description = "Directory where complete election record is published", required = true)
     String outputDir;
 
-    @Parameter(names = {"-ballots"},
-            description = "BallotProvider classname")
-    String ballotProviderClass;
-
-    @Parameter(names = {"-nballots"},
-            description = "number of ballots to generate (if supported by BallotProvider)")
-    int nballots;
-
-    @Parameter(names = {"-h", "--help"}, description = "Display this help and exit", help = true)
+    @Parameter(names = {"-h", "--help"}, order = 7, description = "Display this help and exit", help = true)
     boolean help = false;
 
     private final JCommander jc;
@@ -71,7 +59,7 @@ public class RunElectionWorkflow {
     public CommandLine(String progName, String[] args) throws ParameterException {
       this.jc = new JCommander(this);
       this.jc.parse(args);
-      jc.setProgramName(progName); // Displayed in the usage information.
+      jc.setProgramName(String.format("java -classpath electionguard-java-all.jar %s", progName));
     }
 
     public void printUsage() {
@@ -125,7 +113,6 @@ public class RunElectionWorkflow {
             "com.sunya.electionguard.workflow.EncryptBallots",
             "-in", cmdLine.encryptDir,
             "--proto",
-            "-ballots", cmdLine.ballotProviderClass,
             "-nballots", Integer.toString(cmdLine.nballots),
             "-out", cmdLine.encryptDir,
             "-device", "deviceName"
@@ -144,7 +131,7 @@ public class RunElectionWorkflow {
     command2.run(out, "java", "-classpath", classpath,
             "com.sunya.electionguard.workflow.DecryptBallots",
             "-in", cmdLine.encryptDir,
-            "-guardians", cmdLine.guardianProviderClass,
+            "-guardiansLocation", cmdLine.encryptDir + "/private/guardians.proto",
             "-out", cmdLine.outputDir
     );
     System.out.printf("%s", out);

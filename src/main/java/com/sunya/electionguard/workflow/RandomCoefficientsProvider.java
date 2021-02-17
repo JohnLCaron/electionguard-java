@@ -20,6 +20,9 @@ public class RandomCoefficientsProvider implements CoefficientsProvider {
 
   private Iterable<CoefficientSet> guardianCoefficients;
 
+  // Must have a public no-arg constructor.
+  public RandomCoefficientsProvider() {}
+
   @Override
   public int quorum() {
     return QUORUM;

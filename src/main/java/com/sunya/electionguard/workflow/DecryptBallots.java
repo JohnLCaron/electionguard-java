@@ -37,19 +37,23 @@ import java.util.stream.Collectors;
 public class DecryptBallots {
 
   private static class CommandLine {
-    @Parameter(names = {"-in"},
+    @Parameter(names = {"-in"}, order = 0,
             description = "Directory containing input election record and ballot encryptions", required = true)
     String encryptDir;
 
-    @Parameter(names = {"-guardians"},
-            description = "GuardianProvider classname", required = true)
+    @Parameter(names = {"-guardiansLocation"}, order = 1,
+            description = "location of serialized guardian files")
+    String guardiansProviderLocation;
+
+    @Parameter(names = {"-guardians"}, order = 2,
+            description = "GuardianProvider classname")
     String guardiansProviderClass;
 
-    @Parameter(names = {"-out"},
+    @Parameter(names = {"-out"}, order = 3,
             description = "Directory where augmented election record is published", required = true)
     String outputDir;
 
-    @Parameter(names = {"-h", "--help"}, description = "Display this help and exit", help = true)
+    @Parameter(names = {"-h", "--help"},  order = 4, description = "Display this help and exit", help = true)
     boolean help = false;
 
     private final JCommander jc;
@@ -57,7 +61,7 @@ public class DecryptBallots {
     public CommandLine(String progName, String[] args) throws ParameterException {
       this.jc = new JCommander(this);
       this.jc.parse(args);
-      jc.setProgramName(progName); // Displayed in the usage information.
+      jc.setProgramName(String.format("java -classpath electionguard-java-all.jar %s", progName));
     }
 
     public void printUsage() {
@@ -84,10 +88,20 @@ public class DecryptBallots {
 
     GuardiansProvider guardiansProvider = null;
     try {
-      guardiansProvider = makeGuardiansProvider(cmdLine.guardiansProviderClass);
+      if (cmdLine.guardiansProviderClass != null) {
+        try {
+          guardiansProvider = makeGuardiansProvider(cmdLine.guardiansProviderClass);
+        } catch (Throwable t) {
+          t.printStackTrace();
+          System.exit(2);
+        }
+      } else {
+        guardiansProvider = new SecretGuardiansProvider(cmdLine.guardiansProviderLocation);
+      }
     } catch (Throwable t) {
+      System.out.printf("*** Must specify -guardians or valid -guardiansLocation: FAILURE%n");
       t.printStackTrace();
-      System.exit(2);
+      System.exit(3);
     }
 
     try {
@@ -98,12 +112,14 @@ public class DecryptBallots {
       decryptor = new DecryptBallots(consumer, electionRecord, guardiansProvider);
       decryptor.accumulateTally();
       decryptor.decryptTally();
-      decryptor.publish(cmdLine.encryptDir, cmdLine.outputDir);
-      System.exit(0);
+      boolean ok = decryptor.publish(cmdLine.encryptDir, cmdLine.outputDir);
+      System.out.printf("*** DecryptBallots %s%n", ok ? "SUCCESS" : "FAILURE");
+      System.exit(ok ? 0 : 1);
 
     } catch (Throwable t) {
+      System.out.printf("*** DecryptBallots FAILURE%n");
       t.printStackTrace();
-      System.exit(3);
+      System.exit(4);
 
     } finally {
       Scheduler.shutdown();
@@ -180,7 +196,7 @@ public class DecryptBallots {
     System.out.printf("Done decrypting tally%n%n%s%n", this.decryptedTally);
   }
 
-  void publish(String inputDir, String publishDir) throws IOException {
+  boolean publish(String inputDir, String publishDir) throws IOException {
     Publisher publisher = new Publisher(publishDir, true, false);
     publisher.writeDecryptionResultsProto(
             this.electionRecord.election,
@@ -194,5 +210,6 @@ public class DecryptBallots {
             this.spoiledDecryptedTallies);
 
     publisher.copyAcceptedBallots(inputDir);
+    return true;
   }
 }
