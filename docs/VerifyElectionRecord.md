@@ -4,7 +4,6 @@
 
 The ElectionGuard output (aka __Election Record__) can be validated using the
 _com.sunya.electionguard.verifier.VerifyElectionRecord_ command line utility.
-This can be run directly from the _fatJar_ with this syntax:
 
 ````
 Usage: java -jar electionguard-java-all.jar [options]
@@ -18,8 +17,8 @@ Usage: java -jar electionguard-java-all.jar [options]
       Display this help and exit
 ````
 
-The fatJar contains all dependencies, and will have a version number in its name, and end in _-all.jar_.
 The input directory name is required. It is in Json (default) or protobuf format. 
+
 Example:
 
 ````

@@ -4,7 +4,6 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.sunya.electionguard.publish.Consumer;
-import com.sunya.electionguard.workflow.EncryptBallots;
 
 import java.io.IOException;
 
@@ -50,7 +49,7 @@ public class VerifyElectionRecord {
     }
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) {
     CommandLine cmdLine = null;
 
     try {
@@ -65,17 +64,22 @@ public class VerifyElectionRecord {
       System.exit(1);
     }
 
-    ElectionRecord electionRecord;
-    Consumer consumer = new Consumer(cmdLine.inputDir);
-    if (cmdLine.isProto) {
-      electionRecord = consumer.readElectionRecordProto();
-    } else {
-      electionRecord = consumer.readElectionRecordJson();
-    }
+    try {
+      ElectionRecord electionRecord;
+      Consumer consumer = new Consumer(cmdLine.inputDir);
+      if (cmdLine.isProto) {
+        electionRecord = consumer.readElectionRecordProto();
+      } else {
+        electionRecord = consumer.readElectionRecordJson();
+      }
 
-    System.out.printf(" VerifyElectionRecord read from %s isProto = %s%n", cmdLine.inputDir, cmdLine.isProto);
-    boolean ok = verifyElectionRecord(electionRecord);
-    System.exit(ok ? 0 : 1);
+      System.out.printf(" VerifyElectionRecord read from %s isProto = %s%n", cmdLine.inputDir, cmdLine.isProto);
+      boolean ok = verifyElectionRecord(electionRecord);
+      System.exit(ok ? 0 : 1);
+    } catch (Throwable t) {
+      t.printStackTrace();
+      System.exit(2);
+    }
   }
 
   static boolean verifyElectionRecord(ElectionRecord electionRecord) throws IOException {

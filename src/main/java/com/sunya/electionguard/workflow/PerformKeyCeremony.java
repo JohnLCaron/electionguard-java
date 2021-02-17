@@ -48,11 +48,10 @@ public class PerformKeyCeremony {
     boolean isProto = false;
 
     @Parameter(names = {"-out"}, order = 2,
-            description = "Directory where Guardians and election context is written", required = true)
+            description = "Directory where Guardians and election context are written", required = true)
     String outputDir;
 
-    @Parameter(names = {"-coefficients"}, order = 3,
-            description = "CoefficientsProvider classname")
+    @Parameter(names = {"-coefficients"}, order = 3, description = "CoefficientsProvider classname")
     String coefficientsProviderClass;
 
     @Parameter(names = {"-nguardians"}, order = 4, description = "Number of quardians to create (required if no coefficients)")
@@ -77,7 +76,7 @@ public class PerformKeyCeremony {
     }
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) {
     String progName = PerformKeyCeremony.class.getName();
     CommandLine cmdLine = null;
 
@@ -93,45 +92,47 @@ public class PerformKeyCeremony {
       System.exit(1);
     }
 
-    // all we need from election record is the ElectionDescription.
-    Consumer consumer = new Consumer(cmdLine.inputDir);
-    Election election;
-    if (cmdLine.isProto) {
-      election = consumer.readElectionRecordProto().election;
-    } else {
-      election = consumer.election();
-    }
-
-    CoefficientsProvider coefficientsProvider = null;
-    if (cmdLine.coefficientsProviderClass != null) {
-      try {
-        coefficientsProvider = makeCoefficientsProvider(cmdLine.coefficientsProviderClass);
-      } catch (Throwable t) {
-        t.printStackTrace();
-        System.exit(2);
-      }
-    }
-
-    System.out.printf("KeyCeremony read election description from directory %s%n", cmdLine.inputDir);
-    System.out.printf("  write Guardians to directory %s%n", cmdLine.outputDir);
-    if (coefficientsProvider == null) {
-      System.out.printf("  generate random Guardian coefficients%n");
-    } else {
-      System.out.printf("  Guardian coefficients provided by %s%n", coefficientsProvider);
-    }
-    if (coefficientsProvider == null) {
-      coefficientsProvider = new RandomCoefficientsProvider(cmdLine.nguardians, cmdLine.quorum);
-    }
-    PerformKeyCeremony keyCeremony = new PerformKeyCeremony(election, coefficientsProvider);
-
     try {
+      // all we need from election record is the ElectionDescription.
+      Consumer consumer = new Consumer(cmdLine.inputDir);
+      Election election;
+      if (cmdLine.isProto) {
+        election = consumer.readElectionRecordProto().election;
+      } else {
+        election = consumer.election();
+      }
+
+      CoefficientsProvider coefficientsProvider = null;
+      if (cmdLine.coefficientsProviderClass != null) {
+        try {
+          coefficientsProvider = makeCoefficientsProvider(cmdLine.coefficientsProviderClass);
+        } catch (Throwable t) {
+          t.printStackTrace();
+          System.exit(2);
+        }
+      }
+
+      System.out.printf("KeyCeremony read election description from directory %s%n", cmdLine.inputDir);
+      System.out.printf("  write Guardians to directory %s%n", cmdLine.outputDir);
+      if (coefficientsProvider == null) {
+        System.out.printf("  generate random Guardian coefficients%n");
+      } else {
+        System.out.printf("  Guardian coefficients provided by %s%n", coefficientsProvider);
+      }
+      if (coefficientsProvider == null) {
+        coefficientsProvider = new RandomCoefficientsProvider(cmdLine.nguardians, cmdLine.quorum);
+      }
+      PerformKeyCeremony keyCeremony = new PerformKeyCeremony(election, coefficientsProvider);
+
       // publish
-      keyCeremony.publish(cmdLine.outputDir);
-      System.exit(0);
+      boolean ok = keyCeremony.publish(cmdLine.outputDir);
+      System.out.printf("*** KeyCeremony %s%n", ok ? "SUCCESS" : "FAILURE");
+      System.exit(ok ? 0 : 1);
 
     } catch (Throwable t) {
+      System.out.printf("*** KeyCeremony FAILURE%n");
       t.printStackTrace();
-      System.exit(5);
+      System.exit(2);
     }
   }
 
@@ -213,7 +214,7 @@ public class PerformKeyCeremony {
   boolean keyCeremony() {
     // Setup Mediator
     com.sunya.electionguard.KeyCeremony.CeremonyDetails details =
-            com.sunya.electionguard.KeyCeremony.CeremonyDetails.create(this.numberOfGuardians,  this.quorum);
+            com.sunya.electionguard.KeyCeremony.CeremonyDetails.create(this.numberOfGuardians, this.quorum);
     KeyCeremonyMediator keyCeremony = new KeyCeremonyMediator(details);
 
     // Attendance (Public Key Share)
@@ -282,7 +283,7 @@ public class PerformKeyCeremony {
     return true;
   }
 
-  void publish(String publishDir) throws IOException {
+  boolean publish(String publishDir) throws IOException {
     // the election record
     Publisher publisher = new Publisher(publishDir, false, false);
     publisher.writeKeyCeremonyProto(
@@ -296,5 +297,6 @@ public class PerformKeyCeremony {
     KeyCeremonyProto.Guardians guardianProto = KeyCeremonyToProto.convertGuardians(guardians, this.quorum);
 
     publisher.writeGuardiansProto(guardianProto);
+    return true;
   }
 }

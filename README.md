@@ -4,6 +4,12 @@ This is a port of https://github.com/microsoft/electionguard-python/ to Java.
 It  closely follows the classes, naming and file structure of the original, to facilitate 
 line-by-line comparison.
 
+### Election Verification
+
+To verify an __Election Record__:
+
+*   [VerifyElectionRecord](https://github.com/JohnLCaron/electionguard-java/blob/testdocs/docs/VerifyElectionRecord.md)
+
 ### Workflow
 
 The following Command Line Programs simulate the pieces of the workflow needed to run an election:
@@ -14,9 +20,9 @@ The following Command Line Programs simulate the pieces of the workflow needed t
 
 3.   [DecryptBallots](https://github.com/JohnLCaron/electionguard-java/blob/testdocs/docs/DecryptBallots.md)
 
-The entire workflow, consisting of the above three steps plus validation can be run from a single command:
+The entire workflow, consisting of the above three steps plus verification can be run from a single command:
 
-4.   [RunElectionWorkflow](https://github.com/JohnLCaron/electionguard-java/blob/testdocs/docs/RunElectionWorkflow.md)
+*   [RunElectionWorkflow](https://github.com/JohnLCaron/electionguard-java/blob/testdocs/docs/RunElectionWorkflow.md)
 
 ### Public API Javadoc 
 
@@ -32,7 +38,7 @@ cd electionguard-java
 
 ## Notes
 
- * The full [validation spec](https://www.electionguard.vote/spec/0.95.0/1_Overview/) is implemented.
+ * The full [Verification Specification](https://www.electionguard.vote/spec/0.95.0/9_Verifier_construction/) is implemented.
  * Assumes Java 11.
  * Most classes are immutable, anticipating the need for multithreading. 
  * Uses Java's BigInteger for cryptographic computations.

@@ -8,23 +8,26 @@ import java.io.IOException;
 
 /**
  * A GuardiansProvider using serialized Guardian objects from a "secret" place on disk.
- * Naive implementation for testing. Do not use in production.
  */
-public class FakeGuardiansProvider implements GuardiansProvider {
-  private static final String WHERE = "/home/snake/tmp/electionguard/publishWorkflowEncryptor/private/guardians.proto";
+public class SecretGuardiansProvider implements GuardiansProvider {
+  private final String location;
   private Iterable<Guardian> guardians;
+
+  public SecretGuardiansProvider(String location) {
+    this.location = location;
+  }
 
   @Override
   public Iterable<Guardian> guardians() {
     if (guardians == null) {
-      guardians = read();
+      guardians = read(location);
     }
     return guardians;
   }
 
-  static ImmutableList<Guardian> read() {
+  static ImmutableList<Guardian> read(String location) {
     try {
-      return KeyCeremonyFromProto.readGuardians(WHERE);
+      return KeyCeremonyFromProto.readGuardians(location);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
