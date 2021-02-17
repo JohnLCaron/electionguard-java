@@ -23,7 +23,7 @@ class BallotValidations {
 
     if (!ballot.is_valid_encryption(
             metadata.election.crypto_hash,
-            context.elgamal_public_key,
+            context.joint_public_key,
             context.crypto_extended_base_hash)) {
       logger.atInfo().log("ballot_is_valid_for_election: mismatching ballot encryption %s", ballot.object_id);
       return false;
