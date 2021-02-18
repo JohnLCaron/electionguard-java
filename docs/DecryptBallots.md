@@ -3,7 +3,7 @@
 ##DecryptBallots
 
 The _com.sunya.electionguard.workflow.DecryptBallots_ command line utility simulates
-[ballot decryption]("https://www.electionguard.vote/spec/0.95.0/7_Verifiable_decryption/")
+[ballot decryption](https://www.electionguard.vote/spec/0.95.0/7_Verifiable_decryption/)
 on a single __encrypted ballot chain__ in an Election Record. 
 
 The input Election Record comes from the output of an _EncryptBallots_ program.

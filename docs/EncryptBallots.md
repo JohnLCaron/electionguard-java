@@ -3,7 +3,7 @@
 ## EncryptBallots
 
 The _com.sunya.electionguard.workflow.EncryptBallots_ command line utility simulates batch
-[ballot encryption]("https://www.electionguard.vote/spec/0.95.0/5_Ballot_encryption/")
+[ballot encryption](https://www.electionguard.vote/spec/0.95.0/5_Ballot_encryption/)
 on a single _encryption device_, for example a voting machine. 
 
 The input ballots come from a BallotProvider that you supply, or from randomly generated ballots

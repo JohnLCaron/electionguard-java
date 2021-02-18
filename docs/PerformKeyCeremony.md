@@ -4,7 +4,7 @@
 
 The _com.sunya.electionguard.workflow.PerformKeyCeremony_ command line utility simulates
 the creation of the election Guardians by performing a 
-[key ceremony]("https://www.electionguard.vote/spec/0.95.0/4_Key_generation/"). 
+[key ceremony](https://www.electionguard.vote/spec/0.95.0/4_Key_generation/). 
 
 The output is a set of serialized Guardians that are used in the _DecryptBallots_ workflow, along with the first
 pieces of the Election Record: the election description, election context, and Guardians' coefficient validations.
