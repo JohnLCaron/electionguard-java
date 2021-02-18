@@ -1,8 +1,6 @@
 # 🗳 ElectionGuard Java
 
 This is a port of https://github.com/microsoft/electionguard-python/ to Java.
-It  closely follows the classes, naming and file structure of the original, to facilitate 
-line-by-line comparison.
 
 ### Election Verification
 
