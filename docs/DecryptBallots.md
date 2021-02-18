@@ -1,6 +1,6 @@
 # 🗳 ElectionGuard Java 
 
-##DecryptBallots
+## DecryptBallots
 
 The _com.sunya.electionguard.workflow.DecryptBallots_ command line utility simulates
 [ballot decryption](https://www.electionguard.vote/spec/0.95.0/7_Verifiable_decryption/)
