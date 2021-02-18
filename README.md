@@ -2,7 +2,9 @@
 
 This is a port of https://github.com/microsoft/electionguard-python/ to Java.
 
-See [ElectionGuard Overview](https://www.electionguard.vote/spec/0.95.0/1_Overview/) for complete context.
+See [ElectionGuard](https://www.electionguard.vote/) and 
+[ElectionGuard Specification](https://www.electionguard.vote/spec/0.95.0/1_Overview/)
+for context.
 
 ### Election Verification
 
@@ -12,9 +14,9 @@ To verify an __Election Record__:
 
 The full [Verification Specification](https://www.electionguard.vote/spec/0.95.0/9_Verifier_construction/) is implemented.
 
-### Workflow
+### Workflow Simulation
 
-The following Command Line Programs simulate the pieces of the workflow needed to run an election:
+The following command line programs simulate the pieces of the workflow needed to run an election:
 
 1.   [PerformKeyCeremony](https://github.com/JohnLCaron/electionguard-java/blob/master/docs/PerformKeyCeremony.md)
 
@@ -26,11 +28,24 @@ The entire workflow, consisting of the above three steps plus verification can b
 
 *   [RunElectionWorkflow](https://github.com/JohnLCaron/electionguard-java/blob/master/docs/RunElectionWorkflow.md)
 
-### Public API Javadoc 
+### Election Record Visualization
 
-### Library repositories
+A simple Swing-based visualization of the Election Record is available. This is a debugging tool for developers, 
+not a polished tool for end-users (eg election officials). No documentation, no warentees, 
+void where taxed or prohibited by law.
 
-### Building from source
+*   [Visualization](https://github.com/JohnLCaron/electionguard-java/blob/master/docs/Visualization.md)
+
+### Library Use
+
+ElectionGuard-Java is a full port of the ElectionGuard python library, and can be used in your own projects.
+[Contributions](https://opensource.guide/how-to-contribute/) here and to the python library are welcome!
+
+#### Public API Javadoc 
+
+#### Library repositories
+
+#### Building from source
 
 ````
 git clone https://github.com/JohnLCaron/electionguard-java.git
@@ -45,18 +60,18 @@ The jars will be in build/libs.
 ## Notes
 
  * Assumes Java 11.
- * Most classes are immutable, anticipating the need for multithreading. 
+ * Most classes are immutable. Builders are used where needed to separate mutable and immutable uses. 
  * Uses Java's BigInteger for cryptographic computations.
  * Uses Gson for JSON serialization. 
- * Can also serialize using protobuf.
- * Using AutoValue for (some) immutable value classes.
+ * Also serializes using protobuf.
+ * Uses AutoValue for (some) immutable value classes.
  * Uses Flogger for logging.
  * Uses JUnit5 / jqwik library for property based testing.
  * Uses gradle for building.
  
 ## TODO
 
-  * Not yet compatible with Python library JSON serialization, due to different ways to serialize Optional.
+  * Not yet compatible with python library JSON serialization, due to different ways to serialize Optional.
     It incorporates a workaround which should work for now, however.
   * Review reading input files, give good error messages.
   * Review error logging.
