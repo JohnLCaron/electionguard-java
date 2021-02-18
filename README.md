@@ -35,8 +35,12 @@ The entire workflow, consisting of the above three steps plus verification can b
 ````
 git clone https://github.com/JohnLCaron/electionguard-java.git
 cd electionguard-java
-./gradlew clean assemble
+./gradlew clean assemble fatJar myJavadocs
 ````
+
+The javadocs will be in build/docs/javadoc/index.html
+The jars will be in build/libs. 
+[Good luck, Jim](https://en.wikiquote.org/wiki/Mission:_Impossible).
 
 ## Notes
 
