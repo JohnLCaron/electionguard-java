@@ -25,6 +25,7 @@ public class PlaintextTallyPojo {
   public Map<String, PlaintextTallyContestPojo> contests;
   public Map<String, Group.ElementModQ> lagrange_coefficients;
   public List<GuardianStatePojo> guardian_states;
+  public Map<String, Map<String, PlaintextTallyContestPojo>> spoiled_ballots; // LOOK should go away when PR #305 is done?
 
   public static class PlaintextTallyContestPojo {
     public String object_id;
@@ -250,6 +251,22 @@ public class PlaintextTallyPojo {
     pojo.sequence = state.sequence();
     pojo.is_missing = state.is_missing();
     return pojo;
+  }
+
+
+  /////////////////////////////////
+  // temporary kludge - abandon for now
+
+  public static PlaintextTally deserializeSpoiledTalliesOld(JsonElement jsonElem) {
+    Gson gson = GsonTypeAdapters.enhancedGson();
+    PlaintextTallyPojo pojo = gson.fromJson(jsonElem, PlaintextTallyPojo.class);
+
+    for (Map.Entry<String, Map<String, PlaintextTallyContestPojo>> entry1 : pojo.spoiled_ballots.entrySet()) {
+      for (Map.Entry<String, PlaintextTallyContestPojo> contest : entry1.getValue().entrySet()) {
+
+      }
+    }
+    return null;
   }
 
 }

@@ -14,9 +14,11 @@ import com.sunya.electionguard.verifier.ElectionRecord;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /** Helper class for consumers of published election records in Json or protobuf. */
 public class Consumer {
@@ -80,7 +82,19 @@ public class Consumer {
     return result;
   }
 
+  // Input ballot files for debugging. Not part of the election record.
+  public List<PlaintextBallot> inputBallots(String ballotFile) throws IOException {
+    File ballotDirFile = new File(ballotFile);
+    if (!Files.exists(ballotDirFile.toPath())) {
+      return new ArrayList<>();
+    }
+    return PlaintextBallotPojo.get_ballots_from_file(ballotFile);
+  }
+
   // Decrypted, spoiled tallies
+  // LOOK python has not yet committed PR#305, which removes spoiled_ballots from PlaintextTally.
+  //   we have already done so, and publish as json in "spoiled_tallies" directory, which they may not.
+  //   for now, we will wait to see what they do, at the cost of not getting spoiledTallies from python.
   public List<PlaintextTally> spoiledTallies() throws IOException {
     List<PlaintextTally> result = new ArrayList<>();
     for (File file : publisher.spoiledTallyFiles()) {
@@ -88,6 +102,12 @@ public class Consumer {
       result.add(fromPython);
     }
     return result;
+    // return result.size() > 0 ? result : spoiledTalliesOld();
+  }
+
+  private List<PlaintextTally> spoiledTalliesOld() throws IOException {
+    // PlaintextTallyPojo.deserializeSpoiledTalliesOld(null);
+    return null;
   }
 
   public List<KeyCeremony.CoefficientValidationSet> guardianCoefficients() throws IOException {

@@ -87,7 +87,7 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
   /** The rotated Tracker hash for this ballot. */
   public final Group.ElementModQ tracking_hash; // not optional
   /** Timestamp when the ballot was encrypted. */
-  public final long timestamp; // LOOK Timestamp at which the ballot encryption is generated, in seconds since the epoch UTC.
+  public final long timestamp; // Timestamp at which the ballot encryption is generated, in seconds since the epoch UTC.
   /** This object's crypto_hash. */
   public final Group.ElementModQ crypto_hash;
   /** Optional nonce used in hashed_ballot_nonce(). */

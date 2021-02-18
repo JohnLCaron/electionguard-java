@@ -6,6 +6,7 @@ import net.jqwik.api.lifecycle.BeforeContainer;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -82,7 +83,7 @@ public class TestReadPythonJson {
   }
 
   @Example
-  public void testSpoiledPythonJson() throws IOException {
+  public void testSpoiledBallotsPythonJson() throws IOException {
     for (File file : publisher.spoiledBallotFiles()) {
       PlaintextBallot fromPython = ConvertFromJson.readPlaintextBallot(file.getAbsolutePath());
       assertThat(fromPython).isNotNull();
@@ -97,6 +98,13 @@ public class TestReadPythonJson {
     CiphertextAcceptedBallot fromPython = ConvertFromJson.readCiphertextBallot(filename);
     assertThat(fromPython).isNotNull();
     System.out.printf("%s%n", fromPython);
+  }
+
+  @Example
+  public void testSpoiledTalliesPythonJson() throws IOException {
+    Consumer consumer = new Consumer(pythonModified);
+    List<PlaintextTally> spoiledTallies = consumer.spoiledTallies();
+    assertThat(spoiledTallies).hasSize(4);
   }
 
 }

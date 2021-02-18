@@ -17,9 +17,10 @@ plugins {
 }
 
 group 'com.sunya.electionguard'
-version '0.9'
+version '0.9-SNAPSHOT'
 
 repositories {
+    mavenLocal()
     jcenter() // jcommander not on maven central
     mavenCentral()
 }
@@ -44,6 +45,14 @@ dependencies {
     runtimeOnly 'com.google.flogger:flogger-system-backend:0.5.1'
 
     annotationProcessor "com.google.auto.value:auto-value:1.7.4"
+
+    // temporary until i get uibase hosted on a maven repo
+    // implementation 'edu.ucar:uibase:6.1.0-SNAPSHOT'
+    implementation files('libs/uibase-6.1.0.jar')
+    implementation 'org.jdom:jdom2:2.0.6'
+    implementation 'org.slf4j:slf4j-api:1.7.28'
+    implementation 'com.jgoodies:jgoodies-forms:1.6.0'
+    runtime "org.slf4j:slf4j-jdk14:1.7.28" // slf4j-jdk14.jar.
 
     testImplementation 'com.google.truth:truth:1.1'
     testImplementation 'com.google.truth.extensions:truth-java8-extension:1.1'
@@ -98,6 +107,8 @@ task fatJar(type: Jar) {
 
 task myJavadocs(type: Javadoc) {
     source = sourceSets.main.allJava
+    exclude 'com/sunya/electionguard/viz/*.java'
+
     classpath = sourceSets.main.runtimeClasspath
     title ='test'
     options.showFromPublic()
