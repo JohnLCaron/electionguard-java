@@ -148,10 +148,19 @@ publishing {
 
     repositories {
         maven {
-            name = 'myRepo'
+            name = 'localRepo'
             url = "file://${buildDir}/repo"
         }
+        maven {
+            name = "GitHubPackages"
+            url = "https://maven.pkg.github.com/JohnLCaron/electionguard-java"
+            credentials {
+                username = System.getenv("GITHUB_ACTOR")
+                password = System.getenv("GITHUB_TOKEN")
+            }
+        }
         /* maven {
+            name = "OSSRH"
             def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
             def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
             url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl

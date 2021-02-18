@@ -2,9 +2,10 @@
 
 This is a port of https://github.com/microsoft/electionguard-python/ to Java.
 
-See [ElectionGuard](https://www.electionguard.vote/) and 
-[ElectionGuard Specification](https://www.electionguard.vote/spec/0.95.0/1_Overview/)
-for context.
+See:
+ * [ElectionGuard](https://www.electionguard.vote/) 
+ * [ElectionGuard Python](https://github.com/microsoft/electionguard-python/)
+ * [ElectionGuard Specification](https://www.electionguard.vote/spec/0.95.0/1_Overview/)
 
 ### Election Verification
 
@@ -41,9 +42,9 @@ void where taxed or prohibited by law.
 ElectionGuard-Java is a full port of the ElectionGuard python library, and can be used in your own projects.
 [Contributions](https://opensource.guide/how-to-contribute/) here and to the python library are welcome!
 
-#### Public API Javadoc 
+#### Protobuf definitions
 
-#### Library repositories
+*   [Protobuf](https://github.com/JohnLCaron/electionguard-java/tree/master/src/main/proto/com/sunya/electionguard/proto)
 
 #### Building from source
 
