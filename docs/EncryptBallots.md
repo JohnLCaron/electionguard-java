@@ -45,7 +45,7 @@ of the _PerformKeyCeremony_ is used (but not the private Guardians).
 
 Either a _BallotProvider_ is provided (see below), or _nballots_ fake ballots are generated against the election description.
 
-The output directory where the Guardians are written is required. The file private/guardians.proto is written there. 
+The output directory where the Guardians are written is required. The file _private/guardians.proto_ is written there. 
 For safety in case of failure, the output directory should be different from the input directory.
 
 The name of the device is required. It can be any unique name.
@@ -99,7 +99,7 @@ you can use as an example to write your own.
 
 ## Security Issues
 
-This input uses only the published __election joint key__ and the output is part of the published Election Record,
+This input uses only the published __election joint key__, and the output is part of the published Election Record,
 so there are no security problems in the encryption. 
 
 The input ballots must be kept private, which is the job of the BallotProvider. So the _save_ flag should only

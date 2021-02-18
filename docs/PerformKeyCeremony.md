@@ -6,8 +6,8 @@ The _com.sunya.electionguard.workflow.PerformKeyCeremony_ command line utility s
 the creation of the election Guardians by performing a 
 [key ceremony]("https://www.electionguard.vote/spec/0.95.0/4_Key_generation/"). 
 
-The output is a set of serialized Guardians that are used in the DecryptBallots stage, along with the first
-pieces of the Election Record: the election description, election context, and Guardian's coefficient validations.
+The output is a set of serialized Guardians that are used in the _DecryptBallots_ workflow, along with the first
+pieces of the Election Record: the election description, election context, and Guardians' coefficient validations.
 
 ````
 Usage: java -classpath electionguard-java-all.jar 
@@ -37,10 +37,10 @@ If Json, it must contain the file _description.json_. If Protobuf, it must conta
 which only the election description is read.
 
 Either a _CoefficientsProvider_ is provided (see below), or the number of guardians and quorum is provided. 
-In the latter case, the Guardian's polynomial coefficients are generated at random.
+In the latter case, the Guardians' polynomial coefficients are generated at random.
 
 The output directory where the Election Record is written is required. The first pieces of the record are
-written: the election description, election context, and Guardian's coefficient validations.
+written: the election description, election context, and Guardians' coefficient validations.
 The Guardians are written to that directory into the file _private/guardians.proto_.
 
 Example:
@@ -90,6 +90,6 @@ you can use as an example to write your own.
 
 ## Security Issues
 
-The output contains the Guardians' secret keys in plaintext, and so the entire key ceremony must be done in
+The output contains the Guardians' secret keys in plaintext, and so the entire key ceremony must be run in
 a secure way that is unspecified here. For that reason, this program is just used for testing the workflow.
 

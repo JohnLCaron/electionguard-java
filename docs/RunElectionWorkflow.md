@@ -1,13 +1,13 @@
 # 🗳 ElectionGuard Java 
 
-##RunElectionWorkflow
+## RunElectionWorkflow
 
 The _com.sunya.electionguard.workflow.RunElectionWorkflow_ command line utility simulates an
 entire ElectionGuard workflow, calling each of the workflow programs in turn. It is used for testing,
 it cannot be used in an actual election.
 
-It generates random Guardians, and random ballots, encrypts them, then decrypts the elction record and 
-published the final record.
+It generates random Guardians, and random ballots, encrypts them, then decrypts the election record and 
+publishes the final record.
 
 See [ElectionGuard Overview]("https://www.electionguard.vote/spec/0.95.0/1_Overview/") for complete context.
 
@@ -43,12 +43,12 @@ which only the election description is read.
 
 You must specify the number of guardians and quorum, and the Guardian's polynomial coefficients are generated at random.
 
-The encryptDir is the output directory of PerformKeyCeremony and the input directory of EncryptBallots.
-You should make this seperate from the input directory.
+The _encryptDir_ is the output directory of _PerformKeyCeremony_ and the input directory of _EncryptBallots_.
+You should make this separate from the input directory.
 
-The out directory is the output directory of EncryptBallots and the input directory of DecryptBallots 
-and VerifyElectionrecord.
-You should make this seperate from the input and the encryptDir directory.
+The _out_ directory is the output directory of _EncryptBallots_ and the input directory of _DecryptBallots _
+and _VerifyElectionRecord_.
+You should make this separate from the input and the encryptDir directory.
 
 Example:
 

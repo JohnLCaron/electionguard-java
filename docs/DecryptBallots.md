@@ -6,9 +6,9 @@ The _com.sunya.electionguard.workflow.DecryptBallots_ command line utility simul
 [ballot decryption]("https://www.electionguard.vote/spec/0.95.0/7_Verifiable_decryption/")
 on a single __encrypted ballot chain__ in an Election Record. 
 
-The input election record comes from the output of an _EncryptBallots_ program.
+The input Election Record comes from the output of an _EncryptBallots_ program.
 
-The input election record is complete, and can be given to an __ElectionGuard verifier__.
+The output Election Record is complete, and can be input to an __ElectionGuard verifier__.
 
 ````
 Usage: java -classpath electionguard-java-all.jar 
@@ -30,7 +30,7 @@ The input directory containing the election record is required. In the workflow 
 of the _EncryptBallots_ is used.
 
 You must specifiy a _GuardianProvider_ (see below), or a location of the serialized guardian file, for example 
-from the output of the PerformKeyCeremony. Note that only the Protobuf form is currently supported, and that
+from the output of the _PerformKeyCeremony_. Note that only the Protobuf form is currently supported, and that
 you specify the filename, not the directory name.
 
 The output directory where the results of the decryption are written is required.
@@ -94,13 +94,13 @@ java -classpath electionguard-java-all.jar,my.jar com.sunya.electionguard.workfl
 ````
 
 The class _com.sunya.electionguard.workflow.SecretGuardiansProvider_ is an implementation of GuardiansProvider
-you can use as an example to write your own. It reads serialized guardians, for example from the PerformKeyCeremony
+you can use as an example to write your own. It reads serialized Guardians, for example from the _PerformKeyCeremony_
 stage of the workflow. 
 
 ## Security Issues
 
-The input snd output are published (non-secret) Election Records.
+The input and output are published (non-secret) Election Records.
 
-The issue with decryption is keeping the Guardian secret keys safe. So DecryptBallots must be done in
+The issue with decryption is keeping the Guardian secret keys safe. So DecryptBallots must be run in
 a secure way that is unspecified here. For that reason, this program is just used for testing the workflow.
 
