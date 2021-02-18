@@ -2,12 +2,12 @@
 
 This is a port of https://github.com/microsoft/electionguard-python/ to Java.
 
-See:
- * [ElectionGuard](https://www.electionguard.vote/) 
- * [ElectionGuard Python](https://github.com/microsoft/electionguard-python/)
+Also see:
+ * [ElectionGuard official site](https://www.electionguard.vote/) 
+ * [ElectionGuard Discussions](https://github.com/microsoft/electionguard/)
  * [ElectionGuard Specification](https://www.electionguard.vote/spec/0.95.0/1_Overview/)
 
-### Election Verification
+## Election Verification
 
 To verify an __Election Record__:
 
@@ -15,7 +15,7 @@ To verify an __Election Record__:
 
 The full [Verification Specification](https://www.electionguard.vote/spec/0.95.0/9_Verifier_construction/) is implemented.
 
-### Workflow Simulation
+## Workflow Simulation
 
 The following command line programs simulate the pieces of the workflow needed to run an election:
 
@@ -29,7 +29,7 @@ The entire workflow, consisting of the above three steps plus verification can b
 
 *   [RunElectionWorkflow](https://github.com/JohnLCaron/electionguard-java/blob/master/docs/RunElectionWorkflow.md)
 
-### Election Record Visualization
+## Election Record Visualization
 
 A simple Swing-based visualization of the Election Record is available. This is a debugging tool for developers, 
 not a polished tool for end-users (eg election officials). No documentation, no warentees, 
@@ -37,16 +37,12 @@ void where taxed or prohibited by law.
 
 *   [Visualization](https://github.com/JohnLCaron/electionguard-java/blob/master/docs/Visualization.md)
 
-### Library Use
+## Library Use
 
 ElectionGuard-Java is a full port of the ElectionGuard python library, and can be used in your own projects.
 [Contributions](https://opensource.guide/how-to-contribute/) here and to the python library are welcome!
 
-#### Protobuf definitions
-
-*   [Protobuf](https://github.com/JohnLCaron/electionguard-java/tree/master/src/main/proto/com/sunya/electionguard/proto)
-
-#### Building from source
+### Building from source
 
 ````
 git clone https://github.com/JohnLCaron/electionguard-java.git
@@ -54,9 +50,15 @@ cd electionguard-java
 ./gradlew clean assemble fatJar myJavadocs
 ````
 
-The javadocs will be in build/docs/javadoc/index.html
-The jars will be in build/libs. 
+The javadocs will be in _build/docs/javadoc/index.html_.
+The jars will be in _build/libs_. 
 [Good luck, Jim](https://en.wikiquote.org/wiki/Mission:_Impossible).
+
+### Protobuf definitions
+
+These may be interesting to implement in other libraries:
+
+*   [Protobuf definitions](https://github.com/JohnLCaron/electionguard-java/tree/master/src/main/proto/com/sunya/electionguard/proto)
 
 ## Notes
 
