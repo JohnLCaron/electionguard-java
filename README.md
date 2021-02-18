@@ -2,11 +2,15 @@
 
 This is a port of https://github.com/microsoft/electionguard-python/ to Java.
 
+See [ElectionGuard Overview](https://www.electionguard.vote/spec/0.95.0/1_Overview/) for complete context.
+
 ### Election Verification
 
 To verify an __Election Record__:
 
 *   [VerifyElectionRecord](https://github.com/JohnLCaron/electionguard-java/blob/master/docs/VerifyElectionRecord.md)
+
+The full [Verification Specification](https://www.electionguard.vote/spec/0.95.0/9_Verifier_construction/) is implemented.
 
 ### Workflow
 
@@ -31,12 +35,15 @@ The entire workflow, consisting of the above three steps plus verification can b
 ````
 git clone https://github.com/JohnLCaron/electionguard-java.git
 cd electionguard-java
-./gradlew clean assemble
+./gradlew clean assemble fatJar myJavadocs
 ````
+
+The javadocs will be in build/docs/javadoc/index.html
+The jars will be in build/libs. 
+[Good luck, Jim](https://en.wikiquote.org/wiki/Mission:_Impossible).
 
 ## Notes
 
- * The full [Verification Specification](https://www.electionguard.vote/spec/0.95.0/9_Verifier_construction/) is implemented.
  * Assumes Java 11.
  * Most classes are immutable, anticipating the need for multithreading. 
  * Uses Java's BigInteger for cryptographic computations.

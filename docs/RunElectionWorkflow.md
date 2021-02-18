@@ -9,8 +9,6 @@ it cannot be used in an actual election.
 It generates random Guardians, and random ballots, encrypts them, then decrypts the election record and 
 publishes the final record.
 
-See [ElectionGuard Overview]("https://www.electionguard.vote/spec/0.95.0/1_Overview/") for complete context.
-
 ````
 Usage: java -classpath electionguard-java-all.jar 
       com.sunya.electionguard.workflow.RunElectionWorkflow [options]

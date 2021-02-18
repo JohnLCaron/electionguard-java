@@ -5,6 +5,8 @@
 The ElectionGuard output (aka __Election Record__) can be validated using the
 _com.sunya.electionguard.verifier.VerifyElectionRecord_ command line utility.
 
+The full [Verification Specification](https://www.electionguard.vote/spec/0.95.0/9_Verifier_construction/) is implemented.
+
 ````
 Usage: java -jar electionguard-java-all.jar [options]
   Options:
