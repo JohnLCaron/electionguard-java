@@ -30,16 +30,16 @@ class GsonTypeAdapters {
             .registerTypeAdapter(Group.ElementModP.class, new ModPSerializer())
             .registerTypeAdapter(Election.class, new ElectionDescriptionSerializer())
             .registerTypeAdapter(Election.class, new ElectionDescriptionDeserializer())
-            .registerTypeAdapter(KeyCeremony.CoefficientValidationSet.class, new CoefficientsSerializer())
-            .registerTypeAdapter(KeyCeremony.CoefficientValidationSet.class, new CoefficientsDeserializer())
+            .registerTypeAdapter(KeyCeremony.CoefficientValidationSet.class, new CoefficientValidationSerializer())
+            .registerTypeAdapter(KeyCeremony.CoefficientValidationSet.class, new CoefficientValidationDeserializer())
             .registerTypeAdapter(CiphertextAcceptedBallot.class, new CiphertextBallotSerializer())
             .registerTypeAdapter(CiphertextAcceptedBallot.class, new CiphertextBallotDeserializer())
             .registerTypeAdapter(PlaintextBallot.class, new PlaintextBallotSerializer())
             .registerTypeAdapter(PlaintextBallot.class, new PlaintextBallotDeserializer())
             .registerTypeAdapter(PlaintextTally.class, new PlaintextTallySerializer())
             .registerTypeAdapter(PlaintextTally.class, new PlaintextTallyDeserializer())
-            .registerTypeAdapter(CiphertextTally.class, new PublishedCiphertextTallySerializer())
-            .registerTypeAdapter(CiphertextTally.class, new PublishedCiphertextTallyDeserializer())
+            .registerTypeAdapter(CiphertextTally.class, new CiphertextTallySerializer())
+            .registerTypeAdapter(CiphertextTally.class, new CiphertextTallyDeserializer())
             .create();
   }
 
@@ -78,7 +78,7 @@ class GsonTypeAdapters {
   private static class ElectionDescriptionSerializer implements JsonSerializer<Election> {
     @Override
     public JsonElement serialize(Election src, Type typeOfSrc, JsonSerializationContext context) {
-      return ElectionDescriptionToJson.serialize(src);
+      return ElectionDescriptionPojo.serialize(src);
     }
   }
 
@@ -86,22 +86,22 @@ class GsonTypeAdapters {
     @Override
     public Election deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
             throws JsonParseException {
-      return ElectionDescriptionFromJson.deserialize(json);
+      return ElectionDescriptionPojo.deserialize(json);
     }
   }
 
-  private static class CoefficientsSerializer implements JsonSerializer<KeyCeremony.CoefficientValidationSet> {
+  private static class CoefficientValidationSerializer implements JsonSerializer<KeyCeremony.CoefficientValidationSet> {
     @Override
     public JsonElement serialize(KeyCeremony.CoefficientValidationSet src, Type typeOfSrc, JsonSerializationContext context) {
-      return CoefficientsPojo.serialize(src);
+      return CoefficientValidationPojo.serialize(src);
     }
   }
 
-  private static class CoefficientsDeserializer implements JsonDeserializer<KeyCeremony.CoefficientValidationSet> {
+  private static class CoefficientValidationDeserializer implements JsonDeserializer<KeyCeremony.CoefficientValidationSet> {
     @Override
     public KeyCeremony.CoefficientValidationSet deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
             throws JsonParseException {
-      return CoefficientsPojo.deserialize(json);
+      return CoefficientValidationPojo.deserialize(json);
     }
   }
 
@@ -150,14 +150,14 @@ class GsonTypeAdapters {
     }
   }
 
-  private static class PublishedCiphertextTallySerializer implements JsonSerializer<CiphertextTally> {
+  private static class CiphertextTallySerializer implements JsonSerializer<CiphertextTally> {
     @Override
     public JsonElement serialize(CiphertextTally src, Type typeOfSrc, JsonSerializationContext context) {
       return CiphertextTallyPojo.serialize(src);
     }
   }
 
-  private static class PublishedCiphertextTallyDeserializer implements JsonDeserializer<CiphertextTally> {
+  private static class CiphertextTallyDeserializer implements JsonDeserializer<CiphertextTally> {
     @Override
     public CiphertextTally deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
             throws JsonParseException {

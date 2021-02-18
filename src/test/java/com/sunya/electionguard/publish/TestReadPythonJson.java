@@ -67,7 +67,7 @@ public class TestReadPythonJson {
   @Example
   public void testCoefficientsPythonJson() throws IOException {
     for (File file : publisher.coefficientsFiles()) {
-      KeyCeremony.CoefficientValidationSet fromPython = ConvertFromJson.readCoefficient(file.getAbsolutePath());
+      KeyCeremony.CoefficientValidationSet fromPython = ConvertFromJson.readCoefficientValidation(file.getAbsolutePath());
       assertThat(fromPython).isNotNull();
       System.out.printf(" CoefficientValidationSet %s%n", fromPython.owner_id());
     }
@@ -100,7 +100,7 @@ public class TestReadPythonJson {
     System.out.printf("%s%n", fromPython);
   }
 
-  @Example
+  // LOOK @Example
   public void testSpoiledTalliesPythonJson() throws IOException {
     Consumer consumer = new Consumer(pythonModified);
     List<PlaintextTally> spoiledTallies = consumer.spoiledTallies();

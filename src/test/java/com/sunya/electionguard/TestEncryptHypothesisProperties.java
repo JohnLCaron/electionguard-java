@@ -54,7 +54,7 @@ public class TestEncryptHypothesisProperties extends TestProperties {
     assertThat(everything.metadata.contests.size() > 0).isTrue();
 
     // Generate a valid encryption of zero
-    Optional<ElGamal.Ciphertext> encrypted_zero = ElGamal.elgamal_encrypt(0, zero_nonce, context.joint_public_key);
+    Optional<ElGamal.Ciphertext> encrypted_zero = ElGamal.elgamal_encrypt(0, zero_nonce, context.elgamal_public_key);
     assertThat(encrypted_zero).isPresent();
 
     List<CiphertextBallot> encrypted_ballots = new ArrayList<>();
@@ -75,7 +75,7 @@ public class TestEncryptHypothesisProperties extends TestProperties {
               encrypted_ballot,
               everything.metadata,
               context.crypto_extended_base_hash,
-              context.joint_public_key,
+              context.elgamal_public_key,
                secret_key,
               false, true);
       assertThat(decrypted_ballot).isPresent();

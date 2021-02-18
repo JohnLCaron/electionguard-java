@@ -78,9 +78,6 @@ public class TestPublish {
   public void test_publish_private_data() throws IOException {
     List<PlaintextBallot> plaintext_ballots = ImmutableList.of(
             new PlaintextBallot("PlaintextBallotId", "ballot_style", ImmutableList.of()));
-    List<CiphertextBallot> encrypted_ballots = ImmutableList.of(
-            CiphertextBallot.create("CipherTextBallotId", "ballot_style", int_to_q_unchecked(BigInteger.ZERO),
-                    int_to_q_unchecked(BigInteger.ZERO), ImmutableList.of(), Optional.empty(),Optional.empty(), Optional.empty()));
 
     List<Guardian> guardians = ImmutableList.of(
             GuardianBuilder.createForTesting("GuardianId", 1, 1, 1, null).build());
@@ -88,7 +85,6 @@ public class TestPublish {
     Publisher publisher = new Publisher(outputDir, false, false);
     publisher.publish_private_data(
             plaintext_ballots,
-            encrypted_ballots,
             guardians);
 
     File testFile = new File(outputDir, Publisher.PRIVATE_DIR);

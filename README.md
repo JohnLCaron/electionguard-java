@@ -6,21 +6,21 @@ This is a port of https://github.com/microsoft/electionguard-python/ to Java.
 
 To verify an __Election Record__:
 
-*   [VerifyElectionRecord](https://github.com/JohnLCaron/electionguard-java/blob/testdocs/docs/VerifyElectionRecord.md)
+*   [VerifyElectionRecord](https://github.com/JohnLCaron/electionguard-java/blob/master/docs/VerifyElectionRecord.md)
 
 ### Workflow
 
 The following Command Line Programs simulate the pieces of the workflow needed to run an election:
 
-1.   [PerformKeyCeremony](https://github.com/JohnLCaron/electionguard-java/blob/testdocs/docs/PerformKeyCeremony.md)
+1.   [PerformKeyCeremony](https://github.com/JohnLCaron/electionguard-java/blob/master/docs/PerformKeyCeremony.md)
 
-2.   [EncryptBallots](https://github.com/JohnLCaron/electionguard-java/blob/testdocs/docs/EncryptBallots.md)
+2.   [EncryptBallots](https://github.com/JohnLCaron/electionguard-java/blob/master/docs/EncryptBallots.md)
 
-3.   [DecryptBallots](https://github.com/JohnLCaron/electionguard-java/blob/testdocs/docs/DecryptBallots.md)
+3.   [DecryptBallots](https://github.com/JohnLCaron/electionguard-java/blob/master/docs/DecryptBallots.md)
 
 The entire workflow, consisting of the above three steps plus verification can be run from a single command:
 
-*   [RunElectionWorkflow](https://github.com/JohnLCaron/electionguard-java/blob/testdocs/docs/RunElectionWorkflow.md)
+*   [RunElectionWorkflow](https://github.com/JohnLCaron/electionguard-java/blob/master/docs/RunElectionWorkflow.md)
 
 ### Public API Javadoc 
 
@@ -51,6 +51,8 @@ cd electionguard-java
 
   * Not yet compatible with Python library JSON serialization, due to different ways to serialize Optional.
     It incorporates a workaround which should work for now, however.
+  * Review reading input files, give good error messages.
+  * Review error logging.
   * Measure computational performance.
   * Investigate parallelization strategies.
 

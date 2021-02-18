@@ -178,6 +178,9 @@ class DecryptWithShares {
       HashMap<String, PlaintextTally.Selection> selections = new HashMap<>();
 
       for (CiphertextBallot.Selection selection : contest.ballot_selections) {
+        if (selection.is_placeholder_selection) {
+          continue;
+        }
         Map<String, KeyAndSelection> selection_shares = DecryptionShare.get_ballot_shares_for_selection(selection.object_id, shares);
         Optional<PlaintextTally.Selection> plaintext_selectionO = decrypt_selection_with_decryption_shares(
                 selection, selection_shares, extended_base_hash, false);
@@ -223,8 +226,6 @@ class DecryptWithShares {
           return Optional.empty();
         } else {
           PlaintextTally.Selection plaintext_selection = plaintext_selectionO.get();
-          // String selection_id, String vote, boolean is_placeholder_selection,
-          //                                    @Nullable ExtendedData extended_data
           PlaintextBallot.Selection decryptedBallot = new PlaintextBallot.Selection(
                   plaintext_selection.object_id(),
                   plaintext_selection.tally(),

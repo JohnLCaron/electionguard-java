@@ -12,17 +12,12 @@ import java.io.IOException;
 import static com.google.common.truth.Truth.assertThat;
 
 public class TestKeyCeremonyProtoRoundtrip {
-  private static Consumer consumer;
-
-  @BeforeContainer
-  public static void setUp() throws IOException {
-    consumer = new Consumer(TestElectionDescriptionToProtoRoundtrip.testElectionRecord);
-  }
+  private static final String WHERE = "/home/snake/tmp/electionguard/publishWorkflowEncryptor/private/guardians.proto";
 
   @Example
-  public void testGuardiansProvider() throws IOException {
+  public void testGuardiansProvider() {
     // just a sanity check that it doesnt barf
-    SecretGuardiansProvider provider = new SecretGuardiansProvider();
+    SecretGuardiansProvider provider = new SecretGuardiansProvider(WHERE);
     Iterable<Guardian> guardians = provider.guardians();
     assertThat(Iterables.size(guardians)).isGreaterThan(0);
   }
