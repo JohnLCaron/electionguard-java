@@ -14,4 +14,5 @@ Usage: java -classpath electionguard-java-all.jar
 
 ### Notes
 
-This will migrate to a seperate module or project later.
+*   Functionality will continue to be added.
+*   This will migrate to a separate module or project later.
