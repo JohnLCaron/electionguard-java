@@ -65,7 +65,7 @@ class ConvertToJson {
     }
   }
 
-  static void writeDevice(Guardian guardian, Path where) throws IOException {
+  static void writeGuardian(Guardian guardian, Path where) throws IOException {
     Type type = new TypeToken<Guardian>(){}.getType();
     try (FileWriter writer = new FileWriter(where.toFile())) {
       enhancedGson.toJson(guardian, type, writer);

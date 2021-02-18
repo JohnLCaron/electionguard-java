@@ -24,11 +24,9 @@ public class TestJsonRoundtrip {
     // read json
     Election description = ElectionFactory.get_hamilton_election_from_file();
     // write json
-    ElectionDescriptionToJson writer = new ElectionDescriptionToJson(outputFile);
-    writer.write(description);
+    ConvertToJson.writeElection(description, file.toPath());
     // read it back
-    ElectionDescriptionFromJson builder = new ElectionDescriptionFromJson(outputFile);
-    Election roundtrip = builder.build();
+    Election roundtrip = ConvertFromJson.readElection(outputFile);
     assertThat(roundtrip).isEqualTo(description);
   }
 
@@ -108,6 +106,9 @@ public class TestJsonRoundtrip {
     ConvertToJson.writeCiphertextBallot(org, file.toPath());
     // read it back
     CiphertextAcceptedBallot fromFile = ConvertFromJson.readCiphertextBallot(outputFile);
+
+    // LOOK this is failing because we took out the nonce in CiphertextAcceptedBallotPojo, as a workaround
+    //   for python encoding Optional.empty as None.
     assertThat(fromFile).isEqualTo(org);
   }
 

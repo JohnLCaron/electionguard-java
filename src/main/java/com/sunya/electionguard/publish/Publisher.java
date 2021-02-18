@@ -277,7 +277,7 @@ public class Publisher {
     if (guardians != null) {
       for (Guardian guardian : guardians) {
         String guardian_name = GUARDIAN_PREFIX + guardian.object_id;
-        ConvertToJson.writeDevice(guardian, privateDirPath.resolve(guardian_name));
+        ConvertToJson.writeGuardian(guardian, privateDirPath.resolve(guardian_name));
       }
     }
 

@@ -32,9 +32,7 @@ public class Consumer {
   }
 
   public Election election() throws IOException {
-    ElectionDescriptionFromJson builder = new ElectionDescriptionFromJson(
-            publisher.electionPath().toString());
-    return builder.build();
+    return ConvertFromJson.readElection(publisher.electionPath().toString());
   }
 
   public CiphertextElectionContext context() throws IOException {

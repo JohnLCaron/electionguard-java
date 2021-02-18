@@ -1,7 +1,7 @@
 package com.sunya.electionguard;
 
 import com.google.common.collect.ImmutableList;
-import com.sunya.electionguard.publish.ElectionDescriptionFromJson;
+import com.sunya.electionguard.publish.ConvertFromJson;
 
 import javax.annotation.Nullable;
 import java.io.*;
@@ -19,11 +19,11 @@ public class ElectionFactory {
   private static final String hamilton_election_manifest_filename = "hamilton_election_manifest.json";
 
   public static Election get_simple_election_from_file() throws IOException {
-    return _get_election_from_file(simple_election_manifest_filename);
+    return get_election_from_file(simple_election_manifest_filename);
   }
 
   public static Election get_hamilton_election_from_file() throws IOException {
-    return _get_election_from_file(hamilton_election_manifest_filename);
+    return get_election_from_file(hamilton_election_manifest_filename);
   }
 
   /** Get a single Fake Election object that is manually constructed with default values. */
@@ -110,11 +110,10 @@ public class ElectionFactory {
     );
   }
 
-  private static Election _get_election_from_file(String filename) throws IOException {
+  private static Election get_election_from_file(String filename) throws IOException {
     String current = new java.io.File("./src/test/resources/").getCanonicalPath();
     String absFilename = current + "/" + filename;
-    ElectionDescriptionFromJson builder = new ElectionDescriptionFromJson(absFilename);
-    return builder.build();
+    return ConvertFromJson.readElection(absFilename);
   }
 
   ///////////////////////////////////////////////////////////////////////////////////////
