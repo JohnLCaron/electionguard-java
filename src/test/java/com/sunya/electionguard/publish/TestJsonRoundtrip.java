@@ -41,9 +41,9 @@ public class TestJsonRoundtrip {
     // original
     CoefficientValidationSet org = KeyCeremony.CoefficientValidationSet.create("test", new ArrayList<>(), new ArrayList<>());
     // write json
-    ConvertToJson.write(org, file.toPath());
+    ConvertToJson.writeCoefficientValidation(org, file.toPath());
     // read it back
-    CoefficientValidationSet fromFile = ConvertFromJson.readCoefficient(outputFile);
+    CoefficientValidationSet fromFile = ConvertFromJson.readCoefficientValidation(outputFile);
     assertThat(fromFile).isEqualTo(org);
   }
 
@@ -55,7 +55,7 @@ public class TestJsonRoundtrip {
     // original
     PlaintextTally org = new PlaintextTally("testTally", new HashMap<>(), new HashMap<>(), new ArrayList<>());
     // write json
-    ConvertToJson.write(org, file.toPath());
+    ConvertToJson.writePlaintextTally(org, file.toPath());
     // read it back
     PlaintextTally fromFile = ConvertFromJson.readPlaintextTally(outputFile);
     assertThat(fromFile).isEqualTo(org);
@@ -71,7 +71,7 @@ public class TestJsonRoundtrip {
     // String object_id, ElementModQ description_hash, Map<String, CiphertextTallySelection> tally_selections
     CiphertextTally org = new CiphertextTally("testTally", new HashMap<>());
     // write json
-    ConvertToJson.write(org, file.toPath());
+    ConvertToJson.writeCiphertextTally(org, file.toPath());
     // read it back
     CiphertextTally fromFile = ConvertFromJson.readCiphertextTally(outputFile);
     assertThat(fromFile).isEqualTo(org);
@@ -105,7 +105,7 @@ public class TestJsonRoundtrip {
             BallotBox.State.CAST);
 
     // write json
-    ConvertToJson.write(org, file.toPath());
+    ConvertToJson.writeCiphertextBallot(org, file.toPath());
     // read it back
     CiphertextAcceptedBallot fromFile = ConvertFromJson.readCiphertextBallot(outputFile);
     assertThat(fromFile).isEqualTo(org);

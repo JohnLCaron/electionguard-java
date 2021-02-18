@@ -30,8 +30,8 @@ class GsonTypeAdapters {
             .registerTypeAdapter(Group.ElementModP.class, new ModPSerializer())
             .registerTypeAdapter(Election.class, new ElectionDescriptionSerializer())
             .registerTypeAdapter(Election.class, new ElectionDescriptionDeserializer())
-            .registerTypeAdapter(KeyCeremony.CoefficientValidationSet.class, new CoefficientsSerializer())
-            .registerTypeAdapter(KeyCeremony.CoefficientValidationSet.class, new CoefficientsDeserializer())
+            .registerTypeAdapter(KeyCeremony.CoefficientValidationSet.class, new CoefficientValidationSerializer())
+            .registerTypeAdapter(KeyCeremony.CoefficientValidationSet.class, new CoefficientValidationDeserializer())
             .registerTypeAdapter(CiphertextAcceptedBallot.class, new CiphertextBallotSerializer())
             .registerTypeAdapter(CiphertextAcceptedBallot.class, new CiphertextBallotDeserializer())
             .registerTypeAdapter(PlaintextBallot.class, new PlaintextBallotSerializer())
@@ -90,18 +90,18 @@ class GsonTypeAdapters {
     }
   }
 
-  private static class CoefficientsSerializer implements JsonSerializer<KeyCeremony.CoefficientValidationSet> {
+  private static class CoefficientValidationSerializer implements JsonSerializer<KeyCeremony.CoefficientValidationSet> {
     @Override
     public JsonElement serialize(KeyCeremony.CoefficientValidationSet src, Type typeOfSrc, JsonSerializationContext context) {
-      return CoefficientsPojo.serialize(src);
+      return CoefficientValidationPojo.serialize(src);
     }
   }
 
-  private static class CoefficientsDeserializer implements JsonDeserializer<KeyCeremony.CoefficientValidationSet> {
+  private static class CoefficientValidationDeserializer implements JsonDeserializer<KeyCeremony.CoefficientValidationSet> {
     @Override
     public KeyCeremony.CoefficientValidationSet deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
             throws JsonParseException {
-      return CoefficientsPojo.deserialize(json);
+      return CoefficientValidationPojo.deserialize(json);
     }
   }
 

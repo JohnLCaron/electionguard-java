@@ -73,7 +73,7 @@ public class CiphertextElectionContext {
   /** The quorum of guardians necessary to decrypt an election.  Must be less than number_of_guardians. */
   public final int quorum;
   /** The joint public key (K) in the ElectionGuard Spec. */
-  public final Group.ElementModP joint_public_key; // python: elgamal_public_key
+  public final Group.ElementModP elgamal_public_key; // python: elgamal_public_key
   /** The Election.crypto_hash. */
   public final Group.ElementModQ description_hash;
   /** The base hash code (𝑄) in the ElectionGuard Spec. */
@@ -87,7 +87,7 @@ public class CiphertextElectionContext {
                                    Group.ElementModQ crypto_extended_base_hash) {
     this.number_of_guardians = number_of_guardians;
     this.quorum = quorum;
-    this.joint_public_key = Preconditions.checkNotNull(jointPublicKey);
+    this.elgamal_public_key = Preconditions.checkNotNull(jointPublicKey);
     this.description_hash = Preconditions.checkNotNull(description_hash);
     this.crypto_base_hash = Preconditions.checkNotNull(crypto_base_hash);
     this.crypto_extended_base_hash = Preconditions.checkNotNull(crypto_extended_base_hash);
@@ -100,7 +100,7 @@ public class CiphertextElectionContext {
     CiphertextElectionContext that = (CiphertextElectionContext) o;
     return number_of_guardians == that.number_of_guardians &&
             quorum == that.quorum &&
-            joint_public_key.equals(that.joint_public_key) &&
+            elgamal_public_key.equals(that.elgamal_public_key) &&
             description_hash.equals(that.description_hash) &&
             crypto_base_hash.equals(that.crypto_base_hash) &&
             crypto_extended_base_hash.equals(that.crypto_extended_base_hash);
@@ -108,7 +108,7 @@ public class CiphertextElectionContext {
 
   @Override
   public int hashCode() {
-    return Objects.hash(number_of_guardians, quorum, joint_public_key, description_hash, crypto_base_hash, crypto_extended_base_hash);
+    return Objects.hash(number_of_guardians, quorum, elgamal_public_key, description_hash, crypto_base_hash, crypto_extended_base_hash);
   }
 
   @Override

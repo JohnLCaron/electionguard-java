@@ -229,36 +229,36 @@ public class Publisher {
           @Nullable Iterable<PlaintextBallot> spoiledBallots,
           @Nullable Iterable<PlaintextTally> spoiledTallies) throws IOException {
 
-    ConvertToJson.write(description, this.electionPath());
-    ConvertToJson.write(context, this.contextPath());
-    ConvertToJson.write(constants, this.constantsPath());
+    ConvertToJson.writeElection(description, this.electionPath());
+    ConvertToJson.writeContext(context, this.contextPath());
+    ConvertToJson.writeConstants(constants, this.constantsPath());
 
     for (Encrypt.EncryptionDevice device : devices) {
-      ConvertToJson.write(device, this.devicePath(device.uuid));
+      ConvertToJson.writeDevice(device, this.devicePath(device.uuid));
     }
 
     for (CiphertextAcceptedBallot ballot : ciphertext_ballots) {
-      ConvertToJson.write(ballot, this.ballotPath(ballot.object_id));
+      ConvertToJson.writeCiphertextBallot(ballot, this.ballotPath(ballot.object_id));
     }
 
-    ConvertToJson.write(ciphertext_tally, encryptedTallyPath());
-    ConvertToJson.write(decryptedTally, tallyPath());
+    ConvertToJson.writeCiphertextTally(ciphertext_tally, encryptedTallyPath());
+    ConvertToJson.writePlaintextTally(decryptedTally, tallyPath());
 
     if (coefficient_validation_sets != null) {
       for (KeyCeremony.CoefficientValidationSet coefficient_validation_set : coefficient_validation_sets) {
-        ConvertToJson.write(coefficient_validation_set, this.coefficientsPath(coefficient_validation_set.owner_id()));
+        ConvertToJson.writeCoefficientValidation(coefficient_validation_set, this.coefficientsPath(coefficient_validation_set.owner_id()));
       }
     }
 
     if (spoiledBallots != null) {
       for (PlaintextBallot ballot : spoiledBallots) {
-        ConvertToJson.write(ballot, this.spoiledBallotPath(ballot.object_id));
+        ConvertToJson.writePlaintextBallot(ballot, this.spoiledBallotPath(ballot.object_id));
       }
     }
 
     if (spoiledTallies != null) {
       for (PlaintextTally tally : spoiledTallies) {
-        ConvertToJson.write(tally, this.spoiledTallyPath(tally.object_id));
+        ConvertToJson.writePlaintextTally(tally, this.spoiledTallyPath(tally.object_id));
       }
     }
   }
@@ -270,7 +270,6 @@ public class Publisher {
    */
   public void publish_private_data(
           @Nullable Iterable<PlaintextBallot> plaintext_ballots,
-          @Nullable Iterable<CiphertextBallot> ciphertext_ballots,
           @Nullable Iterable<Guardian> guardians) throws IOException {
 
     Files.createDirectories(privateDirPath);
@@ -278,7 +277,7 @@ public class Publisher {
     if (guardians != null) {
       for (Guardian guardian : guardians) {
         String guardian_name = GUARDIAN_PREFIX + guardian.object_id;
-        ConvertToJson.write(guardian, privateDirPath.resolve(guardian_name));
+        ConvertToJson.writeDevice(guardian, privateDirPath.resolve(guardian_name));
       }
     }
 
@@ -287,18 +286,10 @@ public class Publisher {
       Files.createDirectories(ballotsDirPath);
       for (PlaintextBallot plaintext_ballot : plaintext_ballots) {
         String ballot_name = PLAINTEXT_BALLOT_PREFIX + plaintext_ballot.object_id + SUFFIX;
-        ConvertToJson.write(plaintext_ballot, ballotsDirPath.resolve(ballot_name));
+        ConvertToJson.writePlaintextBallot(plaintext_ballot, ballotsDirPath.resolve(ballot_name));
       }
     }
 
-    if (ciphertext_ballots != null) {
-      Path encryptedDirPath = privateDirPath.resolve(PRIVATE_ENCRYPTED_BALLOTS_DIR);
-      Files.createDirectories(encryptedDirPath);
-      for (CiphertextBallot ciphertext_ballot : ciphertext_ballots) {
-        String ballot_name = BALLOT_PREFIX + ciphertext_ballot.object_id + SUFFIX;
-        ConvertToJson.write(ciphertext_ballot, encryptedDirPath.resolve(ballot_name));
-      }
-    }
   }
 
   //////////////////////////////////////////////////////////////////
@@ -408,7 +399,7 @@ public class Publisher {
           CiphertextTally ciphertext_tally,
           PlaintextTally decryptedTally,
           @Nullable Iterable<PlaintextBallot> spoiledBallots,
-          @Nullable Iterable<PlaintextTally> spoiledDecryptedTallies) throws IOException {
+          @Nullable Iterable<PlaintextTally> spoiledTallies) throws IOException {
 
 
     // the accepted ballots are written into their own file
@@ -429,10 +420,10 @@ public class Publisher {
       }
     }
 
-    if (spoiledDecryptedTallies != null) {
-      // the spoiledDecryptedTallies are written into their own file
+    if (spoiledTallies != null) {
+      // the spoiledTallies are written into their own file
       try (FileOutputStream out = new FileOutputStream(spoiledTallyProtoPath().toFile())) {
-        for (PlaintextTally tally : spoiledDecryptedTallies) {
+        for (PlaintextTally tally : spoiledTallies) {
           PlaintextTallyProto.PlaintextTally tallyProto = PlaintextTallyToProto.translateToProto(tally);
           tallyProto.writeDelimitedTo(out);
         }

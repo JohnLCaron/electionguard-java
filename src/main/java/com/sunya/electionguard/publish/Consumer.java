@@ -18,7 +18,6 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 /** Helper class for consumers of published election records in Json or protobuf. */
 public class Consumer {
@@ -73,6 +72,7 @@ public class Consumer {
   }
 
   // Decrypted, spoiled ballots
+  // LOOK python is not writing these
   public List<PlaintextBallot> spoiledBallots() throws IOException {
     List<PlaintextBallot> result = new ArrayList<>();
     for (File file : publisher.spoiledBallotFiles()) {
@@ -113,7 +113,7 @@ public class Consumer {
   public List<KeyCeremony.CoefficientValidationSet> guardianCoefficients() throws IOException {
     List<KeyCeremony.CoefficientValidationSet> result = new ArrayList<>();
     for (File file : publisher.coefficientsFiles()) {
-      KeyCeremony.CoefficientValidationSet fromPython = ConvertFromJson.readCoefficient(file.getAbsolutePath());
+      KeyCeremony.CoefficientValidationSet fromPython = ConvertFromJson.readCoefficientValidation(file.getAbsolutePath());
       result.add(fromPython);
     }
     return result;

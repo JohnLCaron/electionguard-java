@@ -15,80 +15,74 @@ import java.nio.file.Path;
 class ConvertToJson {
   private static final Gson enhancedGson = GsonTypeAdapters.enhancedGson();
 
-  static void write(Election object, Path where) throws IOException {
-    Type type = new TypeToken<Election>(){}.getType();
-    try (FileWriter writer = new FileWriter(where.toFile())) {
-      enhancedGson.toJson(object, type, writer);
-    }
-  }
 
-  static void write(CiphertextElectionContext object, Path where) throws IOException {
-    Type type = new TypeToken<CiphertextElectionContext>(){}.getType();
-    try (FileWriter writer = new FileWriter(where.toFile())) {
-      enhancedGson.toJson(object, type, writer);
-    }
-  }
-
-  static void write(ElectionConstants object, Path where) throws IOException {
-    Type type = new TypeToken<ElectionConstants>(){}.getType();
-    try (FileWriter writer = new FileWriter(where.toFile())) {
-      enhancedGson.toJson(object, type, writer);
-    }
-  }
-
-  static void write(Encrypt.EncryptionDevice object, Path where) throws IOException {
-    Type type = new TypeToken<Encrypt.EncryptionDevice>(){}.getType();
-    try (FileWriter writer = new FileWriter(where.toFile())) {
-      enhancedGson.toJson(object, type, writer);
-    }
-  }
-
-  static void write(KeyCeremony.CoefficientValidationSet object, Path where) throws IOException {
-    Type type = new TypeToken<KeyCeremony.CoefficientValidationSet>(){}.getType();
-    try (FileWriter writer = new FileWriter(where.toFile())) {
-      enhancedGson.toJson(object, type, writer);
-    }
-  }
-
-  static void write(CiphertextAcceptedBallot object, Path where) throws IOException {
+  static void writeCiphertextBallot(CiphertextAcceptedBallot object, Path where) throws IOException {
     Type type = new TypeToken<CiphertextAcceptedBallot>(){}.getType();
     try (FileWriter writer = new FileWriter(where.toFile())) {
       enhancedGson.toJson(object, type, writer);
     }
   }
 
-  static void write(CiphertextTally object, Path where) throws IOException {
+  static void writeContext(CiphertextElectionContext object, Path where) throws IOException {
+    Type type = new TypeToken<CiphertextElectionContext>(){}.getType();
+    try (FileWriter writer = new FileWriter(where.toFile())) {
+      enhancedGson.toJson(object, type, writer);
+    }
+  }
+
+  static void writeCiphertextTally(CiphertextTally object, Path where) throws IOException {
     Type type = new TypeToken<CiphertextTally>(){}.getType();
     try (FileWriter writer = new FileWriter(where.toFile())) {
       enhancedGson.toJson(object, type, writer);
     }
   }
 
-  static void write(PlaintextTally object, Path where) throws IOException {
-    Type type = new TypeToken<PlaintextTally>(){}.getType();
+  static void writeCoefficientValidation(KeyCeremony.CoefficientValidationSet object, Path where) throws IOException {
+    Type type = new TypeToken<KeyCeremony.CoefficientValidationSet>(){}.getType();
     try (FileWriter writer = new FileWriter(where.toFile())) {
       enhancedGson.toJson(object, type, writer);
     }
   }
 
-  static void write(Guardian guardian, Path where) throws IOException {
+  static void writeElection(Election object, Path where) throws IOException {
+    Type type = new TypeToken<Election>(){}.getType();
+    try (FileWriter writer = new FileWriter(where.toFile())) {
+      enhancedGson.toJson(object, type, writer);
+    }
+  }
+
+  static void writeConstants(ElectionConstants object, Path where) throws IOException {
+    Type type = new TypeToken<ElectionConstants>(){}.getType();
+    try (FileWriter writer = new FileWriter(where.toFile())) {
+      enhancedGson.toJson(object, type, writer);
+    }
+  }
+
+  static void writeDevice(Encrypt.EncryptionDevice object, Path where) throws IOException {
+    Type type = new TypeToken<Encrypt.EncryptionDevice>(){}.getType();
+    try (FileWriter writer = new FileWriter(where.toFile())) {
+      enhancedGson.toJson(object, type, writer);
+    }
+  }
+
+  static void writeDevice(Guardian guardian, Path where) throws IOException {
     Type type = new TypeToken<Guardian>(){}.getType();
     try (FileWriter writer = new FileWriter(where.toFile())) {
       enhancedGson.toJson(guardian, type, writer);
     }
   }
 
-  static void write(PlaintextBallot ballot, Path where) throws IOException {
+  static void writePlaintextBallot(PlaintextBallot ballot, Path where) throws IOException {
     Type type = new TypeToken<PlaintextBallot>(){}.getType();
     try (FileWriter writer = new FileWriter(where.toFile())) {
       enhancedGson.toJson(ballot, type, writer);
     }
   }
 
-  public static void write(CiphertextBallot ballot, Path where) throws IOException {
-    Type type = new TypeToken<CiphertextBallot>(){}.getType();
+  static void writePlaintextTally(PlaintextTally object, Path where) throws IOException {
+    Type type = new TypeToken<PlaintextTally>(){}.getType();
     try (FileWriter writer = new FileWriter(where.toFile())) {
-      enhancedGson.toJson(ballot, type, writer);
+      enhancedGson.toJson(object, type, writer);
     }
   }
 

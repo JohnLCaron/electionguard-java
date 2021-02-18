@@ -11,11 +11,14 @@
 
 2. Spoiled plaintext tallies
 
-    * Python: Each spoiled ballot tally is stored inside the election plaintext tally.
+    * Python: Each spoiled ballot tally is stored inside the election plaintext tally. 
+      Java library does not currently have access to those, anticipate PR #305 will fix.
     * Java: Each spoiled ballot tally stored in a separate file in *spoiled_tallies/ballot_<ballot_id>*
+      Placeholder selections are removed.
 
 3. Spoiled plaintext ballots
 
     * Python: These are not currently serialized to the election record. 
-      The spoiled ciphertext ballots are mistakenly stored inside the election plaintext tally (tally.json).
+      Spoiled ciphertext ballots are mistakenly being written instead, anticipate PR #305 will fix.
     * Java: Each spoiled ballot stored in a separate file in *spoiled_ballots/ballot_<ballot_id>*
+      Placeholder selections are removed.

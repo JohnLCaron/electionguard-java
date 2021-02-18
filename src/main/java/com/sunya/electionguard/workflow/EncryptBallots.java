@@ -225,7 +225,7 @@ public class EncryptBallots {
 
   void saveOriginalBallots(String publishDir, List<PlaintextBallot> ballots) throws IOException {
     Publisher publisher = new Publisher(publishDir, false, false);
-    publisher.publish_private_data(ballots, null, null);
+    publisher.publish_private_data(ballots, null);
     System.out.printf("Save private ballot in %s%n", publisher.privateDirPath());
   }
 }

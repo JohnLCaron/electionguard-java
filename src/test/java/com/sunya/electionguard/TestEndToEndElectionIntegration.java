@@ -138,8 +138,7 @@ public class TestEndToEndElectionIntegration {
     System.out.printf("Confirms all guardians have shared their public keys%n");
     assertThat(this.mediator.all_guardians_in_attendance()).isTrue();
 
-    // Run the Key Ceremony process,
-    // Which shares the keys among the guardians
+    // Run the Key Ceremony process, sharing the keys among the guardians
     Optional<List<GuardianBuilder>> orchestrated = this.mediator.orchestrate(null);
     System.out.printf("Executes the key exchange between guardians%n");
     assertThat(orchestrated).isPresent();

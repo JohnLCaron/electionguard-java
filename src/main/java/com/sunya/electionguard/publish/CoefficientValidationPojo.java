@@ -14,7 +14,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /** Conversion between KeyCeremony.CoefficientValidationSet and Json, using python's object model. */
-public class CoefficientsPojo {
+public class CoefficientValidationPojo {
   public String owner_id;
   public List<Group.ElementModP> coefficient_commitments;
   public List<SchnorrProofPojo> coefficient_proofs;
@@ -36,15 +36,15 @@ public class CoefficientsPojo {
 
   public static KeyCeremony.CoefficientValidationSet deserialize(JsonElement jsonElem) {
     Gson gson = GsonTypeAdapters.enhancedGson();
-    CoefficientsPojo pojo = gson.fromJson(jsonElem, CoefficientsPojo.class);
+    CoefficientValidationPojo pojo = gson.fromJson(jsonElem, CoefficientValidationPojo.class);
     return translateCoefficients(pojo);
   }
 
-  private static KeyCeremony.CoefficientValidationSet translateCoefficients(CoefficientsPojo pojo) {
+  private static KeyCeremony.CoefficientValidationSet translateCoefficients(CoefficientValidationPojo pojo) {
     return KeyCeremony.CoefficientValidationSet.create(
             pojo.owner_id,
             pojo.coefficient_commitments,
-            convertList(pojo.coefficient_proofs, CoefficientsPojo::translateProof));
+            convertList(pojo.coefficient_proofs, CoefficientValidationPojo::translateProof));
   }
 
   private static SchnorrProof translateProof(SchnorrProofPojo pojo) {
@@ -60,16 +60,16 @@ public class CoefficientsPojo {
 
   public static JsonElement serialize(KeyCeremony.CoefficientValidationSet src) {
     Gson gson = GsonTypeAdapters.enhancedGson();
-    CoefficientsPojo pojo = convertCoefficients(src);
-    Type typeOfSrc = new TypeToken<CoefficientsPojo>() {}.getType();
+    CoefficientValidationPojo pojo = convertCoefficients(src);
+    Type typeOfSrc = new TypeToken<CoefficientValidationPojo>() {}.getType();
     return gson.toJsonTree(pojo, typeOfSrc);
   }
 
-  private static CoefficientsPojo convertCoefficients(KeyCeremony.CoefficientValidationSet org) {
-    CoefficientsPojo pojo = new CoefficientsPojo();
+  private static CoefficientValidationPojo convertCoefficients(KeyCeremony.CoefficientValidationSet org) {
+    CoefficientValidationPojo pojo = new CoefficientValidationPojo();
     pojo.owner_id = org.owner_id();
     pojo.coefficient_commitments = org.coefficient_commitments();
-    pojo.coefficient_proofs = convertList(org.coefficient_proofs(), CoefficientsPojo::convertProof);
+    pojo.coefficient_proofs = convertList(org.coefficient_proofs(), CoefficientValidationPojo::convertProof);
     return pojo;
   }
 
