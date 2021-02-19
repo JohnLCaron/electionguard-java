@@ -58,7 +58,8 @@ public class PlaintextTally {
   @Override
   public String toString() {
     Formatter out = new Formatter();
-    contests.values().forEach(contest -> out.format("%s", contest.toString()));
+    out.format("PlaintextTally{%n  object_id='%s'", object_id);
+    guardianStates.forEach(g -> out.format("\n    %s", g.toString()));
     return out.toString();
   }
 
@@ -82,7 +83,6 @@ public class PlaintextTally {
       Formatter out = new Formatter();
       out.format("Contest %s%n", object_id());
       int sum = selections().values().stream().mapToInt(s -> s.tally()).sum();
-      selections().values().forEach(selection -> out.format("%s%n", selection.toString()));
       out.format("   %-40s = %d%n", "Total votes", sum);
       return out.toString();
     }
@@ -115,8 +115,16 @@ public class PlaintextTally {
 
     @Override
     public String toString() {
-      return String.format("   %-40s = %d", object_id(), tally());
+      return "Selection{" +
+              "\n object_id='" + object_id() + '\'' +
+              "\n tally    =" + tally() +
+              "\n value    =" + value().toShortString() +
+              "\n message  =" + message() +
+              // LOOK shares
+              '}';
     }
+
+
   }
 
 }

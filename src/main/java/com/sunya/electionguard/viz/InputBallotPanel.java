@@ -32,7 +32,7 @@ class InputBallotPanel extends JPanel {
   InputBallotPanel(PreferencesExt prefs, JFrame frame) {
     this.prefs = prefs;
 
-    ////// Choose the electionRecordDir
+    ////// Choose the inputBallotDir
     this.fileChooser = new FileManager(frame, null, null, (PreferencesExt) prefs.node("FileManager"));
     this.inputBallotDirCB = new ComboBox<>((PreferencesExt) prefs.node("inputBallotDirCB"));
     this.inputBallotDirCB.addChangeListener(e -> {
@@ -49,7 +49,7 @@ class InputBallotPanel extends JPanel {
     AbstractAction fileAction = new AbstractAction() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        String dirName = fileChooser.chooseFilename("/home/snake/dev/github/electionguard-java/test/resources/");
+        String dirName = fileChooser.chooseDirectory("");
         if (dirName != null) {
           inputBallotDirCB.setSelectedItem(dirName);
         }

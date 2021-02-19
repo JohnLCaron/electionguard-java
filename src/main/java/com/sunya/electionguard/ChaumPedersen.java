@@ -214,6 +214,19 @@ public class ChaumPedersen {
       this.constant = constant;
     }
 
+    @Override
+    public String toString() {
+      return "ConstantChaumPedersenProof{" +
+              "\n   pad      =" + pad.toShortString() +
+              "\n   data     =" + data.toShortString() +
+              "\n   challenge=" + challenge +
+              "\n   response =" + response +
+              "\n   constant =" + constant +
+              "\n   name     ='" + name + '\'' +
+              "\n   usage    =" + usage +
+              '}';
+    }
+
     /**
      * Validates a "constant" Chaum-Pedersen proof.
      * e.g. that the equations 𝑔𝑉 = 𝑎𝐴𝐶 mod 𝑝 and 𝑔𝐿𝐾𝑣 = 𝑏𝐵𝐶 mod 𝑝 are satisfied.

@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.sunya.electionguard.CiphertextElectionContext;
 import com.sunya.electionguard.ElectionConstants;
 import com.sunya.electionguard.Election;
+import com.sunya.electionguard.ElectionFactory;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.Guardian;
 import com.sunya.electionguard.GuardianBuilder;
@@ -13,11 +14,12 @@ import com.sunya.electionguard.KeyCeremonyMediator;
 import com.sunya.electionguard.proto.KeyCeremonyFromProto;
 import com.sunya.electionguard.proto.KeyCeremonyProto;
 import com.sunya.electionguard.proto.KeyCeremonyToProto;
-import com.sunya.electionguard.publish.Consumer;
 import com.sunya.electionguard.publish.Publisher;
 import net.jqwik.api.Example;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -61,8 +63,7 @@ public class TestKeyCeremonySerializing {
   final int numberOfGuardians = 4;
   final int quorum = 4;
   final Election election;
-  final String inputDir = "/home/snake/tmp/electionguard/publishEndToEnd";
-  final String outputDir = "/home/snake/tmp/electionguard/publishTest";
+  final String outputDir;
   final Publisher publisher;
 
   Group.ElementModP jointKey;
@@ -71,10 +72,13 @@ public class TestKeyCeremonySerializing {
   List<Guardian> guardians;
 
   public TestKeyCeremonySerializing() throws IOException {
-    Consumer consumer = new Consumer(inputDir);
-    this.election = consumer.election();
+    this.election = ElectionFactory.get_hamilton_election_from_file();
     CoefficientsProvider coefficientsProvider = new RandomCoefficientsProvider(numberOfGuardians, quorum);
     System.out.printf("  Create %d Guardians, quorum = %d%n", this.numberOfGuardians, this.quorum);
+
+    Path tmp = Files.createTempDirectory(null);
+    tmp.toFile().deleteOnExit();
+    this.outputDir = tmp.toAbsolutePath().toString();
 
     this.guardianBuilders = new ArrayList<>();
     List<Group.ElementModP> commitments = new ArrayList<>();

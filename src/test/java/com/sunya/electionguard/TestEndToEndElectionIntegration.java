@@ -33,10 +33,9 @@ public class TestEndToEndElectionIntegration {
 
   @BeforeProperty
   public void setUp() throws IOException {
-    Path tmp = Files.createTempDirectory(null);
+    Path tmp = Files.createTempDirectory("publish_");
     tmp.toFile().deleteOnExit();
-    outputDir = "/home/snake/tmp/electionguard/publishEndToEnd";
-    // outputDir = tmp.toAbsolutePath().toString();
+    outputDir = tmp.toAbsolutePath().toString();
     System.out.printf("=========== outputDir = %s%n", outputDir);
   }
 

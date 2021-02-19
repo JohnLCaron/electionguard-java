@@ -78,7 +78,7 @@ public class GuardianPublicKeyVerifier {
    * @return True if both sides of the equations are equal, False otherwise
    */
   boolean verify_individual_key_computation(ElementModQ response, ElementModP commitment, ElementModP public_key, ElementModQ challenge) {
-    ElementModP left = Group.pow_p(Group.int_to_p_unchecked(this.electionRecord.generator()), response);
+    ElementModP left = Group.pow_p(this.electionRecord.generatorP(), response);
     ElementModP right = Group.mult_p(commitment, Group.pow_p(public_key, challenge));
     return left.equals(right);
   }

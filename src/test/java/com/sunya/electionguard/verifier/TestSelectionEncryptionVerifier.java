@@ -99,7 +99,7 @@ public class TestSelectionEncryptionVerifier {
       ElementModP b = proof.data;
       ElementModQ this_contest_challenge = proof.challenge;
       ElementModQ challenge_computed =
-              Hash.hash_elems(electionRecord.extended_hash(),
+              Hash.hash_elems(electionRecord.extendedHash(),
                       selection_alpha_product,
                       selection_beta_product, a, b);
 
@@ -145,7 +145,7 @@ public class TestSelectionEncryptionVerifier {
       }
 
       // point 2: conduct hash computation, c = H(Q-bar, (alpha, beta), (a0, b0), (a1, b1))
-      ElementModQ challenge = Hash.hash_elems(electionRecord.extended_hash(), this_pad, this_data,
+      ElementModQ challenge = Hash.hash_elems(electionRecord.extendedHash(), this_pad, this_data,
               zero_pad, zero_data, one_pad, one_data);
 
       // point 4:  c = c0 + c1 mod q is satisfied
@@ -217,7 +217,7 @@ public class TestSelectionEncryptionVerifier {
       boolean eq1ok = equ1_left.equals(equ1_right);
 
       // K ^ v0 = b0 * beta ^ c0 mod p
-      ElementModP equ2_left = Group.pow_p(electionRecord.elgamal_key(), zero_res);
+      ElementModP equ2_left = Group.pow_p(electionRecord.electionPublicKey(), zero_res);
       ElementModP equ2_right = Group.mult_p(zero_data, Group.pow_p(data, zero_chal));
       boolean eq2ok = equ2_left.equals(equ2_right);
 
@@ -254,7 +254,7 @@ public class TestSelectionEncryptionVerifier {
 
       // g ^ c1 * K ^ v1 = b1 * beta ^ c1 mod p
       ElementModP equ2_left = Group.mult_p(Group.pow_p(electionRecord.generatorP(), one_chal),
-              Group.pow_p(electionRecord.elgamal_key(), one_res));
+              Group.pow_p(electionRecord.electionPublicKey(), one_res));
       ElementModP equ2_right = Group.mult_p(one_data, Group.pow_p(data, one_chal));
       boolean eq2ok = equ2_left.equals(equ2_right);
 
@@ -344,7 +344,7 @@ public class TestSelectionEncryptionVerifier {
       ChaumPedersen.ConstantChaumPedersenProof proof = contest.proof.orElseThrow(IllegalStateException::new);
 
       ElementModP leftTerm1 = Group.pow_p(electionRecord.generatorP(), Group.mult_q(votes_allowed, proof.challenge));
-      ElementModP leftTerm2 = Group.pow_p(electionRecord.elgamal_key(), proof.response);
+      ElementModP leftTerm2 = Group.pow_p(electionRecord.electionPublicKey(), proof.response);
       ElementModP left = Group.mult_p(leftTerm1, leftTerm2);
 
       ElementModP right = Group.mult_p(proof.data, Group.pow_p(beta_product, proof.challenge));

@@ -80,7 +80,7 @@ public class SelectionEncyrptionVerifier {
       }
 
       // 4.B: conduct hash computation, c = H(Q-bar, (alpha, beta), (a0, b0), (a1, b1))
-      ElementModQ expected_challenge = Hash.hash_elems(electionRecord.extended_hash(),
+      ElementModQ expected_challenge = Hash.hash_elems(electionRecord.extendedHash(),
               this.alpha, this.beta, a0, b0, a1, b1);
       if (!challenge.equals(expected_challenge)) {
         System.out.printf("4.B selection challenge failed for %s.%n", selection);
@@ -111,7 +111,7 @@ public class SelectionEncyrptionVerifier {
       }
 
       // 4.G (G) K ^ v0 = b0 * beta ^ c0 mod p
-      ElementModP K = electionRecord.elgamal_key();
+      ElementModP K = electionRecord.electionPublicKey();
       ElementModP equG_left = Group.pow_p(K, v0);
       ElementModP equG_right = Group.mult_p(b0, Group.pow_p(beta, c0));
       if (!equG_left.equals(equG_right)) {
@@ -121,7 +121,7 @@ public class SelectionEncyrptionVerifier {
 
       // 4.H (H) g ^ c1 * K ^ v1 = b1 * beta ^ c1 mod p
       ElementModP equH_left = Group.mult_p(Group.pow_p(electionRecord.generatorP(), c1),
-              Group.pow_p(electionRecord.elgamal_key(), v1));
+              Group.pow_p(electionRecord.electionPublicKey(), v1));
       ElementModP equH_right = Group.mult_p(b1, Group.pow_p(beta, c1));
       if (!equH_left.equals(equH_right)) {
         System.out.printf("4.H check chaum-pedersen one proof failed for %s.%n", selection);

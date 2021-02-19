@@ -23,7 +23,6 @@ public class CiphertextTally extends ElectionObjectBase {
   public String toString() {
     return "CiphertextTally{" +
             "object_id='" + object_id + '\'' +
-            ", contests=" + contests.keySet() +
             "} ";
   }
 
@@ -59,6 +58,14 @@ public class CiphertextTally extends ElectionObjectBase {
     public int hashCode() {
       return Objects.hash(super.hashCode(), contestDescriptionHash, tally_selections);
     }
+
+    @Override
+    public String toString() {
+      return "Contest{" +
+              "\n object_id='" + object_id + '\'' +
+              "\n contestDescriptionHash=" + contestDescriptionHash +
+              '}';
+    }
   } // CiphertextTallyContest
 
   /**
@@ -70,6 +77,17 @@ public class CiphertextTally extends ElectionObjectBase {
     public Selection(String selectionDescriptionId, ElementModQ description_hash, @Nullable ElGamal.Ciphertext ciphertext) {
       super(selectionDescriptionId, description_hash, ciphertext);
     }
+
+    @Override
+    public String toString() {
+      return "Selection{" +
+              "\n object_id       ='" + object_id + '\'' +
+              "\n description_hash=" + description_hash +
+              "\n ciphertext()    =" + ciphertext() +
+              '}';
+    }
+
+
   }
 
 

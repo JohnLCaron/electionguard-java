@@ -136,7 +136,7 @@ public class ContestVoteLimitsVerifier {
       ElementModP a = proof.pad;
       ElementModP b = proof.data;
       ElementModQ challenge_computed =
-              Hash.hash_elems(electionRecord.extended_hash(),
+              Hash.hash_elems(electionRecord.extendedHash(),
                       selection_alpha_product,
                       selection_beta_product, a, b);
       if (!challenge_computed.equals(this.contest_challenge)) {
@@ -182,7 +182,7 @@ public class ContestVoteLimitsVerifier {
     private boolean check_cp_proof_beta(ElementModP beta_product, Integer votes_allowed) {
       ElementModQ votes_big = Group.int_to_q_unchecked(BigInteger.valueOf(votes_allowed));
       ElementModP leftTerm1 = Group.pow_p(electionRecord.generatorP(), Group.mult_q(votes_big, this.contest_challenge));
-      ElementModP leftTerm2 = Group.pow_p(electionRecord.elgamal_key(), this.contest_response);
+      ElementModP leftTerm2 = Group.pow_p(electionRecord.electionPublicKey(), this.contest_response);
       ElementModP left = Group.mult_p(leftTerm1, leftTerm2);
 
       ElementModP right = Group.mult_p(this.proof.data, Group.pow_p(beta_product, this.contest_challenge));

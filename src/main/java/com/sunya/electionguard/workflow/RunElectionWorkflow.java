@@ -30,9 +30,6 @@ public class RunElectionWorkflow {
             description = "Directory containing input election description", required = true)
     String inputDir;
 
-    @Parameter(names = {"--proto"}, order = 2, description = "Input election record is in proto format")
-    boolean isProto = false;
-
     @Parameter(names = {"-nguardians"}, order = 2, description = "Number of quardians to create", required = true)
     int nguardians = 6;
 
