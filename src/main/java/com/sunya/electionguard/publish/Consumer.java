@@ -1,6 +1,7 @@
 package com.sunya.electionguard.publish;
 
 import com.google.common.collect.AbstractIterator;
+import com.google.common.collect.ImmutableList;
 import com.sunya.electionguard.*;
 import com.sunya.electionguard.proto.CiphertextBallotFromProto;
 import com.sunya.electionguard.proto.CiphertextBallotProto;
@@ -30,6 +31,24 @@ public class Consumer {
   public Consumer(String topDir) throws IOException {
     publisher = new Publisher(topDir, false, false);
   }
+
+  public ElectionRecord readElectionRecord() throws IOException {
+    if (Files.exists(publisher.electionRecordProtoPath())) {
+      return readElectionRecordProto();
+    } else {
+      return readElectionRecordJson();
+    }
+  }
+
+  public Election readElectionDescription() throws IOException {
+    if (Files.exists(publisher.electionRecordProtoPath())) {
+      return readElectionRecordProto().election;
+    } else {
+      return election();
+    }
+  }
+
+  //////////////////// Json
 
   public Election election() throws IOException {
     return ConvertFromJson.readElection(publisher.electionPath().toString());
@@ -81,12 +100,18 @@ public class Consumer {
   }
 
   // Input ballot files for debugging. Not part of the election record.
-  public List<PlaintextBallot> inputBallots(String ballotFile) throws IOException {
-    File ballotDirFile = new File(ballotFile);
-    if (!Files.exists(ballotDirFile.toPath())) {
+  public List<PlaintextBallot> inputBallots(String ballotDir) throws IOException {
+    File ballotDirFile = new File(ballotDir);
+    if (Files.exists(ballotDirFile.toPath()) && ballotDirFile.listFiles() != null) {
+      List<PlaintextBallot> result = new ArrayList<>();
+      for (File file : ballotDirFile.listFiles()) {
+        PlaintextBallot fromJson = ConvertFromJson.readPlaintextBallot(file.getAbsolutePath());
+        result.add(fromJson);
+      }
+      return result;
+    } else {
       return new ArrayList<>();
     }
-    return PlaintextBallotPojo.get_ballots_from_file(ballotFile);
   }
 
   // Decrypted, spoiled tallies
@@ -103,7 +128,7 @@ public class Consumer {
     // return result.size() > 0 ? result : spoiledTalliesOld();
   }
 
-  private List<PlaintextTally> spoiledTalliesOld() throws IOException {
+  private List<PlaintextTally> spoiledTalliesOld() {
     // PlaintextTallyPojo.deserializeSpoiledTalliesOld(null);
     return null;
   }
@@ -119,10 +144,10 @@ public class Consumer {
 
   public ElectionRecord readElectionRecordJson() throws IOException {
     return new ElectionRecord(
-            this.constants(),
-            this.context(),
-            this.election(),
-            this.guardianCoefficients(),
+            this.constants(), // required
+            this.context(), // required
+            this.election(), // required
+            this.guardianCoefficients(), // required
             this.devices(),
             this.ciphertextTally(),
             this.decryptedTally(),
@@ -131,7 +156,7 @@ public class Consumer {
             CloseableIterableAdapter.wrap(this.spoiledTallies()));
   }
 
-  /////////////////////////////////////////////////////////////////////
+  ///////////////////////////////////////////// Proto
 
   public ElectionRecord readElectionRecordProto() throws IOException {
     ElectionRecord fromProto = ElectionRecordFromProto.read(publisher.electionRecordProtoPath().toString());
@@ -139,23 +164,39 @@ public class Consumer {
   }
 
   public CloseableIterable<CiphertextAcceptedBallot> acceptedBallotsProto() {
-    return () -> new CiphertextAcceptedBallotIterator(publisher.ciphertextBallotProtoPath().toString(), b -> true);
+    if (Files.exists(publisher.ciphertextBallotProtoPath())) {
+      return () -> new CiphertextAcceptedBallotIterator(publisher.ciphertextBallotProtoPath().toString(), b -> true);
+    } else {
+      return CloseableIterableAdapter.empty();
+    }
   }
 
   public CloseableIterable<CiphertextAcceptedBallot> spoiledBallotsProto() {
-    return () -> new CiphertextAcceptedBallotIterator(publisher.ciphertextBallotProtoPath().toString(),
-            b -> b.getState() == CiphertextBallotProto.CiphertextAcceptedBallot.BallotBoxState.SPOILED);
+    if (Files.exists(publisher.ciphertextBallotProtoPath())) {
+      return () -> new CiphertextAcceptedBallotIterator(publisher.ciphertextBallotProtoPath().toString(),
+              b -> b.getState() == CiphertextBallotProto.CiphertextAcceptedBallot.BallotBoxState.SPOILED);
+    } else {
+      return CloseableIterableAdapter.empty();
+    }
   }
 
   public CloseableIterable<PlaintextBallot> decryptedSpoiledBallotsProto() {
-    return () -> new PlaintextBallotIterator(publisher.spoiledBallotProtoPath().toString());
+    if (Files.exists(publisher.spoiledBallotProtoPath())) {
+      return () -> new PlaintextBallotIterator(publisher.spoiledBallotProtoPath().toString());
+    } else {
+      return CloseableIterableAdapter.empty();
+    }
   }
 
   public CloseableIterable<PlaintextTally> decryptedSpoiledTalliesProto() {
-    return () -> new PlaintextTallyIterator(publisher.spoiledTallyProtoPath().toString());
+    if (Files.exists(publisher.spoiledTallyProtoPath())) {
+      return () -> new PlaintextTallyIterator(publisher.spoiledTallyProtoPath().toString());
+    } else {
+      return CloseableIterableAdapter.empty();
+    }
   }
 
-  // These create iterators, so we never have to read in all ballots at once.
+  // These create iterators, so that we never have to read in all ballots at once.
   // Making them Closeable makes sure that the FileInputStream gets closed.
 
   private static class CiphertextAcceptedBallotIterator extends AbstractIterator<CiphertextAcceptedBallot>

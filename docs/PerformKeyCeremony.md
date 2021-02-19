@@ -15,9 +15,6 @@ Usage: java -classpath electionguard-java-all.jar
   Options:
   * -in
       Directory containing input election description
-    --proto
-      Input election record is in proto format
-      Default: false
   * -out
       Directory where Guardians and election context are written
     -coefficients
@@ -32,7 +29,7 @@ Usage: java -classpath electionguard-java-all.jar
       Display this help and exit
 ````
 
-The input directory containing the election description is required. It is in Json (default) or Protobuf format. 
+The input directory containing the election description is required. It can be in Json or Protobuf format. 
 If Json, it must contain the file _description.json_. If Protobuf, it must contain the file _electionRecord.proto_, from
 which only the election description is read.
 

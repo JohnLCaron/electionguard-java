@@ -40,9 +40,6 @@ public class EncryptBallots {
             description = "Directory containing input election record", required = true)
     String inputDir;
 
-    @Parameter(names = {"--proto"}, order=1, description = "Input election record is in proto format")
-    boolean isProto = false;
-
     @Parameter(names = {"-out"}, order=2,
             description = "Directory to write output election record", required = true)
     String encryptDir;
@@ -95,12 +92,7 @@ public class EncryptBallots {
     }
 
     Consumer consumer = new Consumer(cmdLine.inputDir);
-    ElectionRecord electionRecord;
-    if (cmdLine.isProto) {
-      electionRecord = consumer.readElectionRecordProto();
-    } else {
-      electionRecord = consumer.readElectionRecordJson();
-    }
+    ElectionRecord electionRecord = consumer.readElectionRecord();
 
     BallotProvider ballotProvider = null;
     if (cmdLine.ballotProviderClass != null) {

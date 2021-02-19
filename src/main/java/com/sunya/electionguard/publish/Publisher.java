@@ -141,7 +141,7 @@ public class Publisher {
   }
 
   public File[] deviceFiles() {
-    if (!Files.exists(devicesDirPath)) {
+    if (!Files.exists(devicesDirPath) || !Files.isDirectory(devicesDirPath)) {
       return new File[0];
     }
     return devicesDirPath.toFile().listFiles();
@@ -153,7 +153,7 @@ public class Publisher {
   }
 
   public File[] coefficientsFiles() {
-    if (!Files.exists(coefficientsDirPath)) {
+    if (!Files.exists(coefficientsDirPath) || !Files.isDirectory(coefficientsDirPath)) {
       return new File[0];
     }
     return coefficientsDirPath.toFile().listFiles();
@@ -165,7 +165,7 @@ public class Publisher {
   }
 
   public File[] ballotFiles() {
-    if (!Files.exists(ballotsDirPath)) {
+    if (!Files.exists(ballotsDirPath) || !Files.isDirectory(ballotsDirPath)) {
       return new File[0];
     }
     return ballotsDirPath.toFile().listFiles();
@@ -177,7 +177,7 @@ public class Publisher {
   }
 
   public File[] spoiledBallotFiles() {
-    if (!Files.exists(spoiledBallotDirPath)) {
+    if (!Files.exists(spoiledBallotDirPath) || !Files.isDirectory(spoiledBallotDirPath)) {
       return new File[0];
     }
     return spoiledBallotDirPath.toFile().listFiles();
@@ -189,7 +189,7 @@ public class Publisher {
   }
 
   public File[] spoiledTallyFiles() {
-    if (!Files.exists(spoiledTallyDirPath)) {
+    if (!Files.exists(spoiledTallyDirPath) || !Files.isDirectory(spoiledTallyDirPath)) {
       return new File[0];
     }
     return spoiledTallyDirPath.toFile().listFiles();

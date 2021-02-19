@@ -444,6 +444,19 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
     public int hashCode() {
       return Objects.hash(super.hashCode(), crypto_hash, is_placeholder_selection, nonce, proof, extended_data);
     }
+
+    @Override
+    public String toString() {
+      return "Selection{" +
+              "\n object_id       ='" + object_id + '\'' +
+              "\n crypto_hash     =" + crypto_hash +
+              "\n is_placeholder  =" + is_placeholder_selection +
+              "\n nonce           =" + nonce +
+              "\n proof           =" + proof +
+              "\n extended_data   =" + extended_data +
+              "\n description_hash=" + description_hash +
+              '}';
+    }
   }
 
   /**
@@ -624,6 +637,18 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
     @Override
     public int hashCode() {
       return Objects.hash(super.hashCode(), contest_hash, ballot_selections, crypto_hash, nonce, proof);
+    }
+
+    @Override
+    public String toString() {
+      return "Contest{" +
+              "\n  object_id   ='" + object_id + '\'' +
+              "\n  contest_hash=" + contest_hash +
+              "\n  crypto_hash =" + crypto_hash +
+              "\n  encrypted_total=" + encrypted_total +
+              "\n  nonce       =" + nonce +
+              "\n  proof       =" + proof +
+              '}';
     }
   }
 }

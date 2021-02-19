@@ -40,6 +40,14 @@ public class ElGamal {
     public int hashCode() {
       return Objects.hash(secret_key, public_key);
     }
+
+    @Override
+    public String toString() {
+      return "KeyPair{" +
+              "  secret_key=" + secret_key +
+              ", public_key=" + public_key.toShortString() +
+              '}';
+    }
   }
 
   /**
@@ -71,6 +79,14 @@ public class ElGamal {
     @Override
     public int hashCode() {
       return Objects.hash(pad, data);
+    }
+
+    @Override
+    public String toString() {
+      return "Ciphertext{" +
+              "\n    pad =" + pad.toShortString() +
+              "\n    data=" + data.toShortString() +
+              '}';
     }
 
     /**

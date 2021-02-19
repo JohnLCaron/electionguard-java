@@ -31,8 +31,13 @@ public class CiphertextTallyTable extends JPanel {
 
   public CiphertextTallyTable(PreferencesExt prefs) {
     this.prefs = prefs;
+    TextHistoryPane infoTA = new TextHistoryPane();
+    infoWindow = new IndependentWindow("Extra Information", BAMutil.getImage("electionguard-logo.png"), infoTA);
+    infoWindow.setBounds((Rectangle) prefs.getBean("InfoWindowBounds", new Rectangle(300, 300, 800, 100)));
 
     tallyTable = new BeanTable<>(CiphertextTallyBean.class, (PreferencesExt) prefs.node("TallyTable"), false);
+    tallyTable.addPopupOption("Show Tally", tallyTable.makeShowAction(infoTA, infoWindow,
+            bean -> ((CiphertextTallyBean)bean).tally.toString()));
 
     contestTable = new BeanTable<>(ContestBean.class, (PreferencesExt) prefs.node("ContestTable"), false);
     contestTable.addListSelectionListener(e -> {
@@ -41,13 +46,12 @@ public class CiphertextTallyTable extends JPanel {
         setContest(contest);
       }
     });
+    contestTable.addPopupOption("Show Contest", contestTable.makeShowAction(infoTA, infoWindow,
+            bean -> ((ContestBean)bean).contest.toString()));
 
     selectionTable = new BeanTable<>(SelectionBean.class, (PreferencesExt) prefs.node("SelectionTable"), false);
-
-    // the info window
-    TextHistoryPane infoTA = new TextHistoryPane();
-    infoWindow = new IndependentWindow("Extra Information", BAMutil.getImage("electionguard-logo.png"), infoTA);
-    infoWindow.setBounds((Rectangle) prefs.getBean("InfoWindowBounds", new Rectangle(300, 300, 800, 100)));
+    selectionTable.addPopupOption("Show Selection", selectionTable.makeShowAction(infoTA, infoWindow,
+            bean -> ((SelectionBean)bean).selection.toString()));
 
     // layout
     split1 = new JSplitPane(JSplitPane.VERTICAL_SPLIT, false, tallyTable, contestTable);
@@ -159,11 +163,11 @@ public class CiphertextTallyTable extends JPanel {
     }
 
     public String getCiphertextPad() {
-      return selection.ciphertext().pad.toString();
+      return selection.ciphertext().pad.toShortString();
     }
 
     public String getCiphertextData() {
-      return selection.ciphertext().data.toString();
+      return selection.ciphertext().data.toShortString();
     }
 
   }

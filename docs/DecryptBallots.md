@@ -26,12 +26,12 @@ Usage: java -classpath electionguard-java-all.jar
       Display this help and exit
 ````
 
-The input directory containing the election record is required. In the workflow simulation, the output 
-of the _EncryptBallots_ is used.
+The input directory containing the election record is required. It can be in Json or protobuf format. 
+In the workflow simulation, the output of the _EncryptBallots_ is used.
 
-You must specifiy a _GuardianProvider_ (see below), or a location of the serialized guardian file, for example 
-from the output of the _PerformKeyCeremony_. Note that only the Protobuf form is currently supported, and that
-you specify the filename, not the directory name.
+You must specify a _GuardianProvider_ (see below), or a location of the serialized guardian file, for example 
+from the output of the _PerformKeyCeremony_. Note that only the Protobuf guardian file is currently supported, 
+and that you specify the filename, not the directory name.
 
 The output directory where the results of the decryption are written is required.
 For safety in case of failure, the output directory should be different from the input directory.

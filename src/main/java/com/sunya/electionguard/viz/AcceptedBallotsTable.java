@@ -37,6 +37,9 @@ public class AcceptedBallotsTable extends JPanel {
 
   public AcceptedBallotsTable(PreferencesExt prefs) {
     this.prefs = prefs;
+    TextHistoryPane infoTA = new TextHistoryPane();
+    infoWindow = new IndependentWindow("Extra Information", BAMutil.getImage("electionguard-logo.png"), infoTA);
+    infoWindow.setBounds((Rectangle) prefs.getBean("InfoWindowBounds", new Rectangle(300, 300, 800, 100)));
 
     ballotTable = new BeanTable<>(CiphertextAcceptedBallotBean.class, (PreferencesExt) prefs.node("BallotTable"), false);
     ballotTable.addListSelectionListener(e -> {
@@ -45,6 +48,8 @@ public class AcceptedBallotsTable extends JPanel {
         setBallot(ballot);
       }
     });
+    ballotTable.addPopupOption("Show Ballot", ballotTable.makeShowAction(infoTA, infoWindow,
+            bean -> ((CiphertextAcceptedBallotBean)bean).ballot.toString()));
 
     contestTable = new BeanTable<>(ContestBean.class, (PreferencesExt) prefs.node("ContestTable"), false);
     contestTable.addListSelectionListener(e -> {
@@ -53,13 +58,12 @@ public class AcceptedBallotsTable extends JPanel {
         setContest(contest);
       }
     });
+    contestTable.addPopupOption("Show Contest", contestTable.makeShowAction(infoTA, infoWindow,
+            bean -> ((ContestBean)bean).contest.toString()));
 
     selectionTable = new BeanTable<>(SelectionBean.class, (PreferencesExt) prefs.node("SelectionTable"), false);
-
-    // the info window
-    TextHistoryPane infoTA = new TextHistoryPane();
-    infoWindow = new IndependentWindow("Extra Information", BAMutil.getImage("electionguard-logo.png"), infoTA);
-    infoWindow.setBounds((Rectangle) prefs.getBean("InfoWindowBounds", new Rectangle(300, 300, 800, 100)));
+    selectionTable.addPopupOption("Show Selection", selectionTable.makeShowAction(infoTA, infoWindow,
+            bean -> ((SelectionBean)bean).selection.toString()));
 
     // layout
     split1 = new JSplitPane(JSplitPane.VERTICAL_SPLIT, false, ballotTable, contestTable);

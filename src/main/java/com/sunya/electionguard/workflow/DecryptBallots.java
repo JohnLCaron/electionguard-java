@@ -106,7 +106,7 @@ public class DecryptBallots {
 
     try {
       Consumer consumer = new Consumer(cmdLine.encryptDir);
-      ElectionRecord electionRecord = consumer.readElectionRecordProto();
+      ElectionRecord electionRecord = consumer.readElectionRecord();
 
       System.out.printf(" BallotDecryptor read from %s%n Write to %s%n", cmdLine.encryptDir, cmdLine.outputDir);
       decryptor = new DecryptBallots(consumer, electionRecord, guardiansProvider);

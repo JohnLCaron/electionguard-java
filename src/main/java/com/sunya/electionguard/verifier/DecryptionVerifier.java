@@ -207,7 +207,7 @@ public class DecryptionVerifier {
         }
 
         // 9.C Check if the given challenge ci = H(Q-bar, (A,B), (ai, bi), M_i,l)
-        ElementModQ challenge_computed = Hash.hash_elems(electionRecord.extended_hash(),
+        ElementModQ challenge_computed = Hash.hash_elems(electionRecord.extendedHash(),
                 this.selection_pad, this.selection_data, pad, data, partial_decryption);
         if (!challenge_computed.equals(challenge)) {
           System.out.printf("  9.C ci != H(Q-bar, (A,B), (ai, bi), M_i,l) for missing_guardian %s%n", missing_guardian_id);
@@ -267,7 +267,7 @@ public class DecryptionVerifier {
       }
 
       // 8.C Check if the given challenge ci = H(Q-bar, (A,B), (ai, bi), Mi)
-      ElementModQ challenge_computed = Hash.hash_elems(electionRecord.extended_hash(),
+      ElementModQ challenge_computed = Hash.hash_elems(electionRecord.extendedHash(),
               this.selection_pad, this.selection_data, pad, data, partial_decryption);
       if (!challenge_computed.equals(challenge)) {
         System.out.printf("  8.C ci != H(Q-bar, (A,B), (ai, bi), Mi) for missing_guardian %s%n", guardian_id);

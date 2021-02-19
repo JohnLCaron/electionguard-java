@@ -21,11 +21,11 @@ public class ParameterVerifier {
     boolean error = false;
 
     // check if p, q, g are the expected values
-    if (!electionRecord.large_prime().equals(Group.P)) {
+    if (!electionRecord.largePrime().equals(Group.P)) {
       System.out.printf(" Large prime value not equal to P. %n");
       error = true;
     }
-    if (!electionRecord.small_prime().equals(Group.Q)) {
+    if (!electionRecord.smallPrime().equals(Group.Q)) {
       error = true;
       System.out.printf(" Small prime value not equal to Q. %n");
     }
@@ -40,13 +40,13 @@ public class ParameterVerifier {
 
     // check equation p - 1 = q * r
     BigInteger cofactor = electionRecord.cofactor();
-    if (!(electionRecord.large_prime().subtract(BigInteger.ONE)).equals(electionRecord.small_prime().multiply(cofactor))) {
+    if (!(electionRecord.largePrime().subtract(BigInteger.ONE)).equals(electionRecord.smallPrime().multiply(cofactor))) {
       error = true;
       System.out.printf(" p - 1 is not equal to r * q.%n");
     }
 
     // check q is not a divisor of r
-    if (Group.is_divisor(electionRecord.small_prime(), cofactor)) {
+    if (Group.is_divisor(electionRecord.smallPrime(), cofactor)) {
       error = true;
       System.out.printf(" q is a divisor of r.%n");
     }

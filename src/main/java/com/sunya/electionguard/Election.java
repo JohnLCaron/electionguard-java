@@ -624,9 +624,9 @@ public class Election implements Hash.CryptoHashable {
     public String toString() {
       return "{" +
               "address_line=" + address_line +
-              ", email=" + email +
-              ", phone=" + phone +
-              ", name=" + name +
+              "\n email=" + email +
+              "\n phone=" + phone +
+              "\n name=" + name +
               '}';
     }
   }
@@ -672,6 +672,16 @@ public class Election implements Hash.CryptoHashable {
     @Override
     public int hashCode() {
       return Objects.hash(super.hashCode(), name, type, contact_information);
+    }
+
+    @Override
+    public String toString() {
+      return "GeopoliticalUnit{" +
+              "\n object_id='" + object_id + '\'' +
+              "\n name='" + name + '\'' +
+              "\n type=" + type +
+              "\n contact_information=" + contact_information +
+              '}';
     }
   }
 
@@ -723,7 +733,12 @@ public class Election implements Hash.CryptoHashable {
 
     @Override
     public String toString() {
-      return object_id;
+      return "BallotStyle{" +
+              "\n object_id='" + object_id + '\'' +
+              "\n geopolitical_unit_ids=" + geopolitical_unit_ids +
+              "\n party_ids=" + party_ids +
+              "\n image_uri=" + image_uri +
+              '}';
     }
   }
 
@@ -789,6 +804,17 @@ public class Election implements Hash.CryptoHashable {
     @Override
     public int hashCode() {
       return Objects.hash(super.hashCode(), name, abbreviation, color, logo_uri);
+    }
+
+    @Override
+    public String toString() {
+      return "Party{" +
+              "\n object_id='" + object_id + '\'' +
+              "\n name=" + name +
+              "\n abbreviation=" + abbreviation +
+              "\n color=" + color +
+              "\n logo_uri=" + logo_uri +
+              '}';
     }
   }
 
@@ -858,7 +884,13 @@ public class Election implements Hash.CryptoHashable {
 
     @Override
     public String toString() {
-      return object_id;
+      return "Candidate{" +
+              "\n object_id='" + object_id + '\'' +
+              "\n name=" + name +
+              "\n party_id=" + party_id +
+              "\n image_uri=" + image_uri +
+              "\n is_write_in=" + is_write_in +
+              '}';
     }
   }
 
@@ -907,11 +939,13 @@ public class Election implements Hash.CryptoHashable {
     @Override
     public String toString() {
       return "SelectionDescription{" +
-              "candidate_id='" + candidate_id + '\'' +
-              ", sequence_order=" + sequence_order +
-              ", object_id='" + object_id + '\'' +
+              "\n object_id='" + object_id + '\'' +
+              "\n candidate_id='" + candidate_id + '\'' +
+              "\n sequence_order=" + sequence_order +
               '}';
     }
+
+
   }
 
   /**
@@ -996,6 +1030,21 @@ public class Election implements Hash.CryptoHashable {
     @Override
     public int hashCode() {
       return Objects.hash(super.hashCode(), electoral_district_id, sequence_order, vote_variation, number_elected, votes_allowed, name, ballot_selections, ballot_title, ballot_subtitle);
+    }
+
+    @Override
+    public String toString() {
+      return "ContestDescription{" +
+              "\n object_id='" + object_id + '\'' +
+              "\n electoral_district_id='" + electoral_district_id + '\'' +
+              "\n sequence_order=" + sequence_order +
+              "\n vote_variation=" + vote_variation +
+              "\n number_elected=" + number_elected +
+              "\n votes_allowed=" + votes_allowed +
+              "\n name='" + name + '\'' +
+              "\n ballot_title=" + ballot_title +
+              "\n ballot_subtitle=" + ballot_subtitle +
+              '}';
     }
 
     @Override

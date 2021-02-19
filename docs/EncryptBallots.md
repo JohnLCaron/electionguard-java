@@ -22,9 +22,6 @@ Usage: java -classpath electionguard-java-all.jar
   Options:
   * -in
       Directory containing input election record
-    --proto
-      Input election record is in proto format
-      Default: false
   * -out
       Directory to write output election record
     -ballots
@@ -40,8 +37,8 @@ Usage: java -classpath electionguard-java-all.jar
       Display this help and exit
 ````
 
-The input election record containing the description and the context is required. In the workflow simulation, the output 
-of the _PerformKeyCeremony_ is used (but not the private Guardians).
+The input election record containing the description and the context is required. It can be in Json or protobuf format. 
+In the workflow simulation, the output of the _PerformKeyCeremony_ is used (but not the private Guardians).
 
 Either a _BallotProvider_ is provided (see below), or _nballots_ fake ballots are generated against the election description.
 

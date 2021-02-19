@@ -108,7 +108,15 @@ public class CiphertextAcceptedBallot extends CiphertextBallot {
   @Override
   public String toString() {
     return "CiphertextAcceptedBallot{" +
-            "state=" + state +
-            "} " + super.toString();
+            "\n object_id    ='" + object_id + '\'' +
+            "\n state        =" + state +
+            "\n ballot_style ='" + ballot_style + '\'' +
+            "\n description_hash=" + description_hash +
+            "\n previous_tracking_hash=" + previous_tracking_hash +
+            "\n tracking_hash=" + tracking_hash +
+            "\n timestamp    =" + timestamp +
+            "\n crypto_hash  =" + crypto_hash +
+            "\n nonce        =" + nonce +
+            '}';
   }
 }

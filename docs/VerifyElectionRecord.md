@@ -12,14 +12,11 @@ Usage: java -jar electionguard-java-all.jar [options]
   Options:
   * -in
       Directory containing input election record
-    --proto
-      Input election record is in protobuf format
-      Default: false
     -h, --help
       Display this help and exit
 ````
 
-The input directory name is required. It is in Json (default) or protobuf format. 
+The input directory name is required. It can be in Json or protobuf format. 
 
 Example:
 

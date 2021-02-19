@@ -3,11 +3,8 @@ package com.sunya.electionguard;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableList;
 import net.jqwik.api.Example;
-import net.jqwik.api.lifecycle.BeforeProperty;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,17 +25,6 @@ import static com.sunya.electionguard.ElectionWithPlaceholders.ContestWithPlaceh
 public class TestDecryptProblem {
   private static final int NUMBER_OF_GUARDIANS = 3;
   private static final int QUORUM = 3;
-
-  String outputDir;
-
-  @BeforeProperty
-  public void setUp() throws IOException {
-    Path tmp = Files.createTempDirectory(null);
-    tmp.toFile().deleteOnExit();
-    outputDir = "/home/snake/tmp/electionguard/publishEndToEnd";
-    // outputDir = tmp.toAbsolutePath().toString();
-    System.out.printf("=========== outputDir = %s%n", outputDir);
-  }
 
   // Step 0 - Configure Election
   Election election;

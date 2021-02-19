@@ -6,9 +6,6 @@
 package com.sunya.electionguard.viz;
 
 import com.sunya.electionguard.Election;
-import com.sunya.electionguard.PlaintextTally;
-import com.sunya.electionguard.publish.CloseableIterable;
-import com.sunya.electionguard.publish.CloseableIterator;
 import ucar.ui.prefs.BeanTable;
 import ucar.ui.widget.BAMutil;
 import ucar.ui.widget.IndependentWindow;
@@ -17,29 +14,27 @@ import ucar.util.prefs.PreferencesExt;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.Formatter;
 import java.util.stream.Collectors;
 
 public class ElectionDescriptionTable extends JPanel {
-  private PreferencesExt prefs;
+  private final PreferencesExt prefs;
 
-  private BeanTable<BallotStyleBean> styleTable;
-  private BeanTable<ContestBean> contestTable;
-  private BeanTable<SelectionBean> selectionTable;
-  private BeanTable<PartyBean> partyTable;
-  private BeanTable<CandidateBean> candidateTable;
-  private BeanTable<GpUnitBean> gpunitTable;
+  private final BeanTable<BallotStyleBean> styleTable;
+  private final BeanTable<ContestBean> contestTable;
+  private final BeanTable<SelectionBean> selectionTable;
+  private final BeanTable<PartyBean> partyTable;
+  private final BeanTable<CandidateBean> candidateTable;
+  private final BeanTable<GpUnitBean> gpunitTable;
 
-  private JSplitPane split1, split2, split3, split4, split5;
-
-  private TextHistoryPane infoTA;
-  private IndependentWindow infoWindow;
+  private final JSplitPane split1, split2, split3, split4, split5;
+  private final IndependentWindow infoWindow;
 
   public ElectionDescriptionTable(PreferencesExt prefs) {
     this.prefs = prefs;
+    TextHistoryPane infoTA = new TextHistoryPane();
+    infoWindow = new IndependentWindow("Extra Information", BAMutil.getImage("electionguard-logo.png"), infoTA);
+    infoWindow.setBounds((Rectangle) prefs.getBean("InfoWindowBounds", new Rectangle(300, 300, 800, 100)));
 
     contestTable = new BeanTable<>(ContestBean.class, (PreferencesExt) prefs.node("ContestTable"), false,
             "Contest", "Election.ContestDescription", null);
@@ -49,22 +44,33 @@ public class ElectionDescriptionTable extends JPanel {
         setContest(contest);
       }
     });
+    contestTable.addPopupOption("Show Contest", contestTable.makeShowAction(infoTA, infoWindow,
+            bean -> ((ContestBean)bean).contest.toString()));
 
     styleTable = new BeanTable<>(BallotStyleBean.class, (PreferencesExt) prefs.node("StyleTable"), false,
             "BallotStyle", "Election.BallotStyle", null);
+    styleTable.addPopupOption("Show BallotStyle", styleTable.makeShowAction(infoTA, infoWindow,
+            bean -> ((BallotStyleBean)bean).style.toString()));
+
     selectionTable = new BeanTable<>(SelectionBean.class, (PreferencesExt) prefs.node("SelectionTable"), false,
             "Selection", "Election.Selection", null);
+    selectionTable.addPopupOption("Show Selection", selectionTable.makeShowAction(infoTA, infoWindow,
+            bean -> ((SelectionBean)bean).selection.toString()));
+
     partyTable = new BeanTable<>(PartyBean.class, (PreferencesExt) prefs.node("PartyTable"), false,
             "Party", "Election.Party", null);
+    partyTable.addPopupOption("Show Party", partyTable.makeShowAction(infoTA, infoWindow,
+            bean -> ((PartyBean)bean).org.toString()));
+
     candidateTable = new BeanTable<>(CandidateBean.class, (PreferencesExt) prefs.node("CandidateTable"), false,
             "Candidate", "Election.Candidate", null);
+    candidateTable.addPopupOption("Show Candidate", candidateTable.makeShowAction(infoTA, infoWindow,
+            bean -> ((CandidateBean)bean).org.toString()));
+
     gpunitTable = new BeanTable<>(GpUnitBean.class, (PreferencesExt) prefs.node("GpUnitTable"), false,
             "GeopoliticalUnit", "Election.GeopoliticalUnit", null);
-
-    // the info window
-    infoTA = new TextHistoryPane();
-    infoWindow = new IndependentWindow("Extra Information", BAMutil.getImage("electionguard-logo.png"), infoTA);
-    infoWindow.setBounds((Rectangle) prefs.getBean("InfoWindowBounds", new Rectangle(300, 300, 800, 100)));
+    gpunitTable.addPopupOption("Show GeopoliticalUnit", gpunitTable.makeShowAction(infoTA, infoWindow,
+            bean -> ((GpUnitBean)bean).gpunit.toString()));
 
     // layout
     split1 = new JSplitPane(JSplitPane.VERTICAL_SPLIT, false, candidateTable, partyTable);
@@ -115,7 +121,7 @@ public class ElectionDescriptionTable extends JPanel {
     prefs.putInt("splitPos5", split5.getDividerLocation());
   }
 
-  public class PartyBean {
+  public static class PartyBean {
     Election.Party org;
 
     public PartyBean(){}
@@ -141,7 +147,7 @@ public class ElectionDescriptionTable extends JPanel {
     }
   }
 
-  public class CandidateBean {
+  public static class CandidateBean {
     Election.Candidate org;
 
     public CandidateBean(){}
@@ -167,7 +173,7 @@ public class ElectionDescriptionTable extends JPanel {
     }
   }
 
-  public class GpUnitBean {
+  public static class GpUnitBean {
     Election.GeopoliticalUnit gpunit;
 
     public GpUnitBean(){}
@@ -190,7 +196,7 @@ public class ElectionDescriptionTable extends JPanel {
     }
   }
 
-  public class BallotStyleBean {
+  public static class BallotStyleBean {
     Election.BallotStyle style;
 
     public BallotStyleBean(){}
@@ -214,7 +220,7 @@ public class ElectionDescriptionTable extends JPanel {
     }
   }
 
-  public class ContestBean {
+  public static class ContestBean {
     Election.ContestDescription contest;
 
     public ContestBean(){}
@@ -253,7 +259,7 @@ public class ElectionDescriptionTable extends JPanel {
     public int getVotesAllowed() { return contest.votes_allowed.orElse(-1); }
   }
 
-  public class SelectionBean {
+  public static class SelectionBean {
     Election.SelectionDescription selection;
 
     public SelectionBean(){}

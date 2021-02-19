@@ -25,7 +25,7 @@ public class ElectionPublicKeyVerifier {
   }
 
   boolean verify_public_keys() {
-    ElementModP public_key = this.electionRecord.elgamal_key();
+    ElementModP public_key = this.electionRecord.electionPublicKey();
     ElementModP expected_public_key = computePublicKey();
 
     // Equation 3.B
@@ -44,9 +44,9 @@ public class ElectionPublicKeyVerifier {
       commitments.addAll(coeff.coefficient_commitments());
     }
     ElementModQ commitment_hash = Hash.hash_elems(commitments);
-    ElementModQ expectedExtendedHash = Hash.hash_elems(this.electionRecord.base_hash(), commitment_hash);
+    ElementModQ expectedExtendedHash = Hash.hash_elems(this.electionRecord.baseHash(), commitment_hash);
 
-    if (!this.electionRecord.extended_hash().equals(expectedExtendedHash)) {
+    if (!this.electionRecord.extendedHash().equals(expectedExtendedHash)) {
       System.out.printf(" ***Expected extended hash does not match.%n");
       return false;
     }

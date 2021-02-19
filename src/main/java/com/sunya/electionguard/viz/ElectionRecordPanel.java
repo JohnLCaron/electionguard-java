@@ -1,7 +1,9 @@
 package com.sunya.electionguard.viz;
 
 import com.google.common.collect.ImmutableList;
+import com.sunya.electionguard.CiphertextElectionContext;
 import com.sunya.electionguard.Election;
+import com.sunya.electionguard.KeyCeremony;
 import com.sunya.electionguard.publish.CloseableIterableAdapter;
 import com.sunya.electionguard.publish.Consumer;
 import com.sunya.electionguard.verifier.ElectionRecord;
@@ -26,8 +28,6 @@ class ElectionRecordPanel extends JPanel {
   JPanel topPanel;
   JPanel buttPanel = new JPanel();
   FileManager fileChooser;
-  private final AbstractButton isProtoButt;
-  boolean isProto;
   boolean eventOk = true;
 
   String electionRecordDir = "none";
@@ -61,7 +61,7 @@ class ElectionRecordPanel extends JPanel {
     AbstractAction fileAction = new AbstractAction() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        String dirName = fileChooser.chooseDirectory("/home/snake/tmp/electionguard/");
+        String dirName = fileChooser.chooseDirectory("");
         if (dirName != null) {
           electionRecordDirCB.setSelectedItem(dirName);
         }
@@ -69,20 +69,6 @@ class ElectionRecordPanel extends JPanel {
     };
     BAMutil.setActionProperties(fileAction, "FileChooser", "open Local dataset...", false, 'L', -1);
     BAMutil.addActionToContainer(buttPanel, fileAction);
-
-    // LOOK get rid of this
-    AbstractAction coordAction = new AbstractAction() {
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        isProto = (Boolean) getValue(BAMutil.STATE);
-        isProtoButt.setToolTipText(isProto ? "use Proto is ON" : "use Proto is OFF");
-      }
-    };
-    this.isProto = prefs.getBoolean("coordState", false);
-    String tooltip = isProto ? "use Proto is ON" : "use Proto is OFF";
-    BAMutil.setActionProperties(coordAction, "V3", tooltip, true, 'C', -1);
-    coordAction.putValue(BAMutil.STATE, isProto);
-    this.isProtoButt = BAMutil.addActionToContainer(buttPanel, coordAction);
 
     // Popup info window
     this.ta = new TextHistoryPane(true);
@@ -130,17 +116,24 @@ class ElectionRecordPanel extends JPanel {
   boolean setElectionRecord(String electionRecord) {
     try {
       this.consumer = new Consumer(electionRecord);
-      this.record =  isProto ? consumer.readElectionRecordProto() : consumer.readElectionRecordJson();
+      this.record =  consumer.readElectionRecord();
       electionDescriptionTable.setElectionDescription(record.election);
-      acceptedBallotsTable.setAcceptedBallots(record.acceptedBallots);
+
+      if (record.acceptedBallots != null) {
+        acceptedBallotsTable.setAcceptedBallots(record.acceptedBallots);
+      }
       if (record.ciphertextTally != null) {
         ciphertextTallyTable.setCiphertextTally(record.ciphertextTally);
       }
       if (record.decryptedTally != null) {
         electionTallyTable.setPlaintextTallies(CloseableIterableAdapter.wrap(ImmutableList.of(record.decryptedTally)));
       }
-      spoiledTallyTable.setPlaintextTallies(record.spoiledTallies);
-      spoiledBallotsTable.setBallots(record.spoiledBallots);
+      if (record.spoiledTallies != null) {
+        spoiledTallyTable.setPlaintextTallies(record.spoiledTallies);
+      }
+      if (record.spoiledBallots != null) {
+        spoiledBallotsTable.setBallots(record.spoiledBallots);
+      }
     } catch (IOException e) {
       e.printStackTrace();
       return false;
@@ -161,7 +154,7 @@ class ElectionRecordPanel extends JPanel {
   //  public final Optional<ContactInformation> contact_information;
   //  public final Group.ElementModQ crypto_hash;
   void showInfo(Formatter f) {
-    f.format("%s%n", this.electionRecordDir);
+    f.format("Election %s%n", this.electionRecordDir);
     if (this.record != null) {
       Election election = record.election;
       f.format("  election_scope_id = %s%n", election.election_scope_id);
@@ -169,21 +162,20 @@ class ElectionRecordPanel extends JPanel {
       f.format("  name = %s%n", election.name);
       f.format("  start_date = %s%n", election.start_date);
       f.format("  end_date = %s%n", election.end_date);
+      f.format("  description crypto hash = %s%n", election.crypto_hash);
 
-      f.format("%n  BallotStyle    geopolitical     parties%n");
-      for (Election.BallotStyle style : election.ballot_styles) {
-        f.format("    %s %s %s%n", style.object_id, style.geopolitical_unit_ids, style.party_ids);
-      }
+      CiphertextElectionContext context = record.context;
+      f.format("%nContext%n");
+      f.format("  number_of_guardians = %s%n", context.number_of_guardians);
+      f.format("  quorum = %s%n", context.quorum);
+      f.format("  election public key = %s%n", context.elgamal_public_key.toShortString());
+      f.format("  description hash = %s%n", context.description_hash);
+      f.format("  election base hash = %s%n", context.crypto_base_hash);
+      f.format("  extended base hash = %s%n", context.crypto_extended_base_hash);
 
-      f.format("%n  GeopoliticalUnit    name     type  contact%n");
-      for (Election.GeopoliticalUnit gpunit : election.geopolitical_units) {
-        f.format("    %s %s %s%n      %s%n", gpunit.object_id, gpunit.name, gpunit.type,
-                gpunit.contact_information.map(Object::toString).orElse(""));
-      }
-
-      f.format("%n  Contests    title     subtitle%n");
-      for (Election.ContestDescription contest : election.contests) {
-        f.format("    %s %s %s%n", contest.object_id, contest.ballot_title, contest.ballot_subtitle);
+      f.format("%n  Guardian Coefficient Validation Sets%n");
+      for (KeyCeremony.CoefficientValidationSet coeff : record.guardianCoefficients) {
+        f.format("    %s%n", coeff.owner_id());
       }
     }
   }

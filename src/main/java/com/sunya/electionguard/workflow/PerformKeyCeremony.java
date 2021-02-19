@@ -44,10 +44,7 @@ public class PerformKeyCeremony {
             description = "Directory containing input election description", required = true)
     String inputDir;
 
-    @Parameter(names = {"--proto"}, order = 1, description = "Input election record is in proto format")
-    boolean isProto = false;
-
-    @Parameter(names = {"-out"}, order = 2,
+    @Parameter(names = {"-out"}, order = 1,
             description = "Directory where Guardians and election context are written", required = true)
     String outputDir;
 
@@ -95,12 +92,7 @@ public class PerformKeyCeremony {
     try {
       // all we need from election record is the ElectionDescription.
       Consumer consumer = new Consumer(cmdLine.inputDir);
-      Election election;
-      if (cmdLine.isProto) {
-        election = consumer.readElectionRecordProto().election;
-      } else {
-        election = consumer.election();
-      }
+      Election election = consumer.readElectionDescription();
 
       CoefficientsProvider coefficientsProvider = null;
       if (cmdLine.coefficientsProviderClass != null) {

@@ -123,6 +123,16 @@ public class Group {
     public String toString() {
       return "ElementModP{'" + elem + '}';
     }
+
+    private final int ndigitsShort = 8;
+    public String toShortString() {
+      String longString = toString();
+      int len = longString.length();
+      if (len > 13 + ndigitsShort) {
+        return longString.substring(0, 13 + ndigitsShort) + "..." + longString.substring(len - ndigitsShort - 1, len);
+      }
+      return toString();
+    }
   }
 
   /**

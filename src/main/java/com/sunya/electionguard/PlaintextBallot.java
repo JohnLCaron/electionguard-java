@@ -50,7 +50,6 @@ public class PlaintextBallot extends ElectionObjectBase {
     return "PlaintextBallot{" +
             "object_id='" + object_id + '\'' +
             ", ballot_style='" + ballot_style + '\'' +
-            ", contests=" + contests +
             '}';
   }
 
@@ -156,7 +155,6 @@ public class PlaintextBallot extends ElectionObjectBase {
     public String toString() {
       return "PlaintextBallotContest{" +
               "contest_id='" + contest_id + '\'' +
-              ", ballot_selections=" + ballot_selections +
               '}';
     }
   }
@@ -223,11 +221,11 @@ public class PlaintextBallot extends ElectionObjectBase {
 
     @Override
     public String toString() {
-      return "PlaintextBallotSelection{" +
-              "selection_id='" + selection_id + '\'' +
-              ", vote=" + vote +
-              ", is_placeholder_selection=" + is_placeholder_selection +
-              ", extended_data=" + extended_data +
+      return "Selection{" +
+              "\n selection_id='" + selection_id + '\'' +
+              "\n vote=" + vote +
+              "\n is_placeholder_selection=" + is_placeholder_selection +
+              "\n extended_data=" + extended_data +
               '}';
     }
   }
