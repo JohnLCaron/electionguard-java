@@ -14,6 +14,7 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
@@ -384,10 +385,12 @@ public class TimeIntegrationSteps {
 
     Map<String, PlaintextBallot> originalMap = this.originalPlaintextBallots.stream()
             .collect(Collectors.toMap(b->b.object_id, b -> b));
-    for (PlaintextBallot ballot : roundtrip.spoiledBallots) {
-      PlaintextBallot expected = originalMap.get(ballot.object_id);
-      assertThat(expected).isNotNull();
-      TimeIntegrationSteps.compare_spoiled_ballot(ballot, expected);
+    try (Stream<PlaintextBallot> ballots = roundtrip.spoiledBallots.iterator().stream()) {
+      ballots.forEach(ballot -> {
+        PlaintextBallot expected = originalMap.get(ballot.object_id);
+        assertThat(expected).isNotNull();
+        TimeIntegrationSteps.compare_spoiled_ballot(ballot, expected);
+      });
     }
   }
 
@@ -443,10 +446,12 @@ public class TimeIntegrationSteps {
 
     Map<String, PlaintextBallot> originalMap = this.originalPlaintextBallots.stream()
             .collect(Collectors.toMap(b->b.object_id, b -> b));
-    for (PlaintextBallot ballot : roundtrip.spoiledBallots) {
-      PlaintextBallot expected = originalMap.get(ballot.object_id);
-      assertThat(expected).isNotNull();
-      TimeIntegrationSteps.compare_spoiled_ballot(ballot, expected);
+    try (Stream<PlaintextBallot> ballots = roundtrip.spoiledBallots.iterator().stream()) {
+      ballots.forEach(ballot -> {
+        PlaintextBallot expected = originalMap.get(ballot.object_id);
+        assertThat(expected).isNotNull();
+        TimeIntegrationSteps.compare_spoiled_ballot(ballot, expected);
+      });
     }
   }
 

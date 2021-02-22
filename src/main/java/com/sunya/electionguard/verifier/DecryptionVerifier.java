@@ -8,11 +8,11 @@ import com.sunya.electionguard.Group;
 import com.sunya.electionguard.Hash;
 import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.publish.CloseableIterable;
-import com.sunya.electionguard.publish.CloseableIterator;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Stream;
 
 import static com.sunya.electionguard.DecryptionShare.CiphertextDecryptionSelection;
 import static com.sunya.electionguard.DecryptionShare.CiphertextCompensatedDecryptionSelection;
@@ -52,20 +52,20 @@ public class DecryptionVerifier {
    * 12. An election verifier should confirm the correct decryption of each spoiled ballot using the same
    * process that was used to confirm the election tallies.
    */
-  boolean verify_spoiled_tallies(CloseableIterable<PlaintextTally> tallies) throws IOException {
-    boolean error = false;
-    try (CloseableIterator<PlaintextTally> iter = tallies.iterator()) {
-      while (iter.hasNext()) {
-        PlaintextTally spoiled_tally = iter.next();
-        error |= !this.make_all_contest_verification(spoiled_tally.object_id, spoiled_tally.contests);
-      }
+  boolean verify_spoiled_tallies(CloseableIterable<PlaintextTally> talliesIterable) {
+    AtomicBoolean valid = new AtomicBoolean(true);
+    try (Stream<PlaintextTally> tallies = talliesIterable.iterator().stream()) {
+      tallies.forEach(spoiled_tally ->  {
+        boolean ok = this.make_all_contest_verification(spoiled_tally.object_id, spoiled_tally.contests);
+        valid.compareAndSet(true, ok); // AND
+      });
     }
-    if (error) {
+    if (!valid.get()) {
       System.out.printf(" *** 12.A Spoiled ballot decryption failure. %n");
     } else {
       System.out.printf(" 12.A Spoiled ballot decryption success. %n");
     }
-    return !error;
+    return valid.get();
   }
 
   private boolean make_all_contest_verification(String name, Map<String, PlaintextTally.Contest> contests) {

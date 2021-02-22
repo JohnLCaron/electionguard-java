@@ -16,7 +16,6 @@ import ucar.util.prefs.PreferencesExt;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Formatter;
@@ -88,8 +87,6 @@ public class PlaintextTallyTable extends JPanel {
         contestTable.setBeans(new ArrayList<>());
         selectionTable.setBeans(new ArrayList<>());
       }
-    } catch (IOException e) {
-      e.printStackTrace();
     }
   }
 

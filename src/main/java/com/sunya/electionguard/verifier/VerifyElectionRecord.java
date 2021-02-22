@@ -5,8 +5,6 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.sunya.electionguard.publish.Consumer;
 
-import java.io.IOException;
-
 /**
  * A command line program to verify a complete election record.
  * <p>
@@ -29,9 +27,6 @@ public class VerifyElectionRecord {
     @Parameter(names = {"-in"}, order = 0,
             description = "Directory containing input election record", required = true)
     String inputDir;
-
-    @Parameter(names = {"--proto"}, order = 1, description = "Input election record is in protobuf format")
-    boolean isProto = false;
 
     @Parameter(names = {"-h", "--help"}, order = 2, description = "Display this help and exit", help = true)
     boolean help = false;
@@ -68,7 +63,7 @@ public class VerifyElectionRecord {
       Consumer consumer = new Consumer(cmdLine.inputDir);
       ElectionRecord electionRecord = consumer.readElectionRecord();
 
-      System.out.printf(" VerifyElectionRecord read from %s isProto = %s%n", cmdLine.inputDir, cmdLine.isProto);
+      System.out.printf(" VerifyElectionRecord read from %s%n", cmdLine.inputDir);
       boolean ok = verifyElectionRecord(electionRecord);
       System.exit(ok ? 0 : 1);
     } catch (Throwable t) {
@@ -77,7 +72,7 @@ public class VerifyElectionRecord {
     }
   }
 
-  static boolean verifyElectionRecord(ElectionRecord electionRecord) throws IOException {
+  static boolean verifyElectionRecord(ElectionRecord electionRecord) {
     System.out.println("============ Ballot Verification =========================");
     System.out.println("------------ [box 1] Parameter Validation ------------");
     ParameterVerifier blv = new ParameterVerifier(electionRecord);

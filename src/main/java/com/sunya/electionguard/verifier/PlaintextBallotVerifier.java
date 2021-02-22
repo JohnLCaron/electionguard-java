@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Stream;
 
 /**
  * This verifies specification "12B Correct Decryption of Spoiled Ballots".
@@ -34,32 +36,35 @@ public class PlaintextBallotVerifier {
   }
 
   boolean verify_plaintext_ballot() {
-    boolean error = false;
-    for (PlaintextBallot ballot : electionRecord.spoiledBallots) {
-      for (PlaintextBallot.Contest contest : ballot.contests) {
-        Set<String> selectionNames = names.get(contest.contest_id);
-        if (selectionNames == null) {
-          System.out.printf(" ***Ballot Contest id (%s) not contained in ballot coding file.%n", contest.contest_id);
-          error = true;
-          continue;
-        }
-        for (PlaintextBallot.Selection selection : contest.ballot_selections) {
-          if (selection.is_placeholder_selection) {
+    AtomicBoolean valid = new AtomicBoolean(true);
+
+    try (Stream<PlaintextBallot> ballots = electionRecord.spoiledBallots.iterator().stream()) {
+      ballots.forEach(ballot -> {
+        for (PlaintextBallot.Contest contest : ballot.contests) {
+          Set<String> selectionNames = names.get(contest.contest_id);
+          if (selectionNames == null) {
+            System.out.printf(" ***Ballot Contest id (%s) not contained in ballot coding file.%n", contest.contest_id);
+            valid.set(false);
             continue;
           }
-          if (!selectionNames.contains(selection.selection_id)) {
+          for (PlaintextBallot.Selection selection : contest.ballot_selections) {
+            if (selection.is_placeholder_selection) {
+              continue;
+            }
+            if (!selectionNames.contains(selection.selection_id)) {
               System.out.printf(" ***Ballot Selection id (%s) not contained in contest (%s).%n", selection.selection_id, contest.contest_id);
-              error = true;
+              valid.set(false);
+            }
           }
         }
-      }
+      });
     }
 
-    if (error) {
+    if (!valid.get()) {
       System.out.printf(" ***12.B Spoiled PlaintextBallot Names Validation failed.%n");
     } else {
       System.out.printf(" 12.B Spoiled PlaintextBallot Names Validation success.%n");
     }
-    return !error;
+    return valid.get();
   }
 }

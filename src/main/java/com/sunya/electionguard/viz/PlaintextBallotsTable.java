@@ -85,8 +85,6 @@ public class PlaintextBallotsTable extends JPanel {
         contestTable.setBeans(new ArrayList<>());
         selectionTable.setBeans(new ArrayList<>());
       }
-    } catch (IOException e) {
-      e.printStackTrace();
     }
   }
 
