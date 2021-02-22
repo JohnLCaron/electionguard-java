@@ -5,11 +5,9 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.flogger.FluentLogger;
 import com.sunya.electionguard.publish.CloseableIterable;
-import com.sunya.electionguard.publish.CloseableIterator;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -18,7 +16,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.sunya.electionguard.BallotBox.State;
 
@@ -73,25 +73,16 @@ public class CiphertextTallyBuilder {
   }
 
   /** Append a collection of Ballots to the tally. Potentially parellizable over ballots. */
-  public int batch_append(CloseableIterable<CiphertextAcceptedBallot> ballots) {
+  public int batch_append(CloseableIterable<CiphertextAcceptedBallot> ballotsIterable) {
     // Map(SELECTION_ID, Map(BALLOT_ID, Ciphertext)
     Map<String, Map<String, ElGamal.Ciphertext>> cast_ballot_selections = new HashMap<>();
 
     // Find all the ballots for each selection.
-    int count = 0;
-    try (CloseableIterator<CiphertextAcceptedBallot> ballotsIter = ballots.iterator()) {
-      while (ballotsIter.hasNext()) {
-        CiphertextAcceptedBallot ballot = ballotsIter.next();
-        if (ballot.state != State.CAST) {
-          continue;
-        }
-        // make sure no double counting
-        if (cast_ballot_ids.contains(ballot.object_id)) {
-          continue;
-        }
-        if (!BallotValidations.ballot_is_valid_for_election(ballot, this.metadata, this.context)) {
-          continue;
-        }
+    AtomicInteger count = new AtomicInteger();
+    try (Stream<CiphertextAcceptedBallot> ballots = ballotsIterable.iterator().stream()) {
+      ballots.filter(b -> b.state == State.CAST && !cast_ballot_ids.contains(b.object_id) &&
+                    BallotValidations.ballot_is_valid_for_election(b, this.metadata, this.context))
+              .forEach(ballot -> {
         // collect the selections so they can be accumulated in parallel
         for (CiphertextBallot.Contest contest : ballot.contests) {
           for (CiphertextBallot.Selection selection : contest.ballot_selections) {
@@ -100,15 +91,13 @@ public class CiphertextTallyBuilder {
           }
         }
         this.cast_ballot_ids.add(ballot.object_id);
-        count++;
-      }
-    } catch (IOException e) {
-      throw new RuntimeException(e);
+        count.incrementAndGet();
+      });
     }
 
     // heres where the tallies are actually accumulated
     boolean ok = this.execute_accumulate(cast_ballot_selections);
-    return ok ? count : 0;
+    return ok ? count.get() : 0;
   }
 
   /** Append a ballot to the tally. Potentially parellizable over this ballot's selections. */

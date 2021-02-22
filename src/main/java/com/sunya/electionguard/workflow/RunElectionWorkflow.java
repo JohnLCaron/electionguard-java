@@ -109,7 +109,6 @@ public class RunElectionWorkflow {
             "-classpath", classpath,
             "com.sunya.electionguard.workflow.EncryptBallots",
             "-in", cmdLine.encryptDir,
-            "--proto",
             "-nballots", Integer.toString(cmdLine.nballots),
             "-out", cmdLine.encryptDir,
             "-device", "deviceName"
@@ -144,8 +143,7 @@ public class RunElectionWorkflow {
     out = new Formatter();
     command3.run(out, "java", "-classpath", classpath,
             "com.sunya.electionguard.verifier.VerifyElectionRecord",
-            "-in", cmdLine.outputDir,
-            "--proto"
+            "-in", cmdLine.outputDir
     );
     System.out.printf("%s", out);
     System.out.printf("*** elapsed = %d sec%n", stopwatch.elapsed(TimeUnit.SECONDS));

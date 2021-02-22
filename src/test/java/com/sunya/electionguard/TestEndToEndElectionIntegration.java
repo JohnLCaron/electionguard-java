@@ -13,6 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.google.common.truth.Truth.assertWithMessage;
 import static com.sunya.electionguard.ElectionWithPlaceholders.ContestWithPlaceholders;
@@ -373,10 +374,12 @@ public class TestEndToEndElectionIntegration {
 
     Map<String, PlaintextBallot> originalMap = this.originalPlaintextBallots.stream()
             .collect(Collectors.toMap(b->b.object_id, b -> b));
-    for (PlaintextBallot ballot : roundtrip.spoiledBallots) {
-      PlaintextBallot expected = originalMap.get(ballot.object_id);
-      assertThat(expected).isNotNull();
-      TimeIntegrationSteps.compare_spoiled_ballot(ballot, expected);
+    try (Stream<PlaintextBallot> ballots = roundtrip.spoiledBallots.iterator().stream()) {
+      ballots.forEach(ballot -> {
+        PlaintextBallot expected = originalMap.get(ballot.object_id);
+        assertThat(expected).isNotNull();
+        TimeIntegrationSteps.compare_spoiled_ballot(ballot, expected);
+      });
     }
   }
 

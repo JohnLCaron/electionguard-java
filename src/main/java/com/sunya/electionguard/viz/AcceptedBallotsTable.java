@@ -17,13 +17,10 @@ import ucar.util.prefs.PreferencesExt;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.IOException;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.Formatter;
 
 public class AcceptedBallotsTable extends JPanel {
   private final PreferencesExt prefs;
@@ -90,8 +87,6 @@ public class AcceptedBallotsTable extends JPanel {
         contestTable.setBeans(new ArrayList<>());
         selectionTable.setBeans(new ArrayList<>());
       }
-    } catch (IOException e) {
-      e.printStackTrace();
     }
   }
 

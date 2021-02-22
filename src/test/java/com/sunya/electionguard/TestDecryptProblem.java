@@ -171,7 +171,6 @@ public class TestDecryptProblem {
   }
 
   // Move on to encrypting ballots
-  // Using the `CiphertextElectionContext` encrypt ballots for the election
   void step_2_encrypt_votes() throws IOException {
     // Configure the Encryption Device
     this.device = new Encrypt.EncryptionDevice("polling-place-one");
@@ -180,7 +179,7 @@ public class TestDecryptProblem {
     System.out.printf("%n2. Ready to encrypt at location: %s%n", this.device.location);
 
     // Load some Ballots
-    String ballotFilename = "/home/snake/tmp/electionguard/publishBallotEncryptor/private/plaintext/plaintext_ballot_ballot-id-1522966651.json";
+    String ballotFilename = "src/test/data/electionRecordJson/spoiled_ballots/ballot_25a7111b-4334-425a-87c1-f7a49f42b3a2.json";
     this.originalPlaintextBallots = ImmutableList.of(BallotFactory.get_ballot_from_file(ballotFilename));
     System.out.printf("Loaded ballots: %d%n", this.originalPlaintextBallots.size());
     assertThat(this.originalPlaintextBallots).isNotEmpty();
@@ -195,7 +194,6 @@ public class TestDecryptProblem {
   }
 
   //  Accept each ballot by marking it as either cast or spoiled.
-  //  This example demonstrates one way to accept ballots using the `BallotBox` class
   void step_3_cast_and_spoil() {
     System.out.printf("%n3. cast_and_spoil%n");
 

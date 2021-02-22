@@ -1,7 +1,6 @@
 package com.sunya.electionguard.publish;
 
 import com.google.common.collect.AbstractIterator;
-import com.google.common.collect.ImmutableList;
 import com.sunya.electionguard.*;
 import com.sunya.electionguard.proto.CiphertextBallotFromProto;
 import com.sunya.electionguard.proto.CiphertextBallotProto;
@@ -230,10 +229,14 @@ public class Consumer {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
       if (input != null) {
-        input.close();
-        input = null;
+        try {
+          input.close();
+          input = null;
+        } catch (IOException e) {
+          throw new RuntimeException(e);
+        }
       }
     }
   }
@@ -242,6 +245,7 @@ public class Consumer {
           implements CloseableIterator<PlaintextBallot> {
     private final String filename;
     private FileInputStream input;
+
     PlaintextBallotIterator(String filename) {
       this.filename = filename;
     }
@@ -264,10 +268,14 @@ public class Consumer {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
       if (input != null) {
-        input.close();
-        input = null;
+        try {
+          input.close();
+          input = null;
+        } catch (IOException e) {
+          throw new RuntimeException(e);
+        }
       }
     }
   }
@@ -276,6 +284,7 @@ public class Consumer {
           implements CloseableIterator<PlaintextTally> {
     private final String filename;
     private FileInputStream input;
+
     PlaintextTallyIterator(String filename) {
       this.filename = filename;
     }
@@ -298,12 +307,15 @@ public class Consumer {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
       if (input != null) {
-        input.close();
-        input = null;
+        try {
+          input.close();
+          input = null;
+        } catch (IOException e) {
+          throw new RuntimeException(e);
+        }
       }
     }
   }
-
 }
