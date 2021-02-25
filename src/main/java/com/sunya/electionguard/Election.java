@@ -688,8 +688,8 @@ public class Election implements Hash.CryptoHashable {
   /** Classifies a set of contests by their set of parties and geopolitical units */
   @Immutable
   public static class BallotStyle extends ElectionObjectBase implements Hash.CryptoHashable {
-    public final ImmutableList<String> geopolitical_unit_ids; // matches Party.object_id; may be empty
-    public final ImmutableList<String> party_ids; // matches GeoPoliticalUnit.object_id; may be empty
+    public final ImmutableList<String> geopolitical_unit_ids; // matches GeoPoliticalUnit.object_id; may be empty
+    public final ImmutableList<String> party_ids; // matches Party.object_id; may be empty
     public final Optional<String> image_uri;
 
     /**

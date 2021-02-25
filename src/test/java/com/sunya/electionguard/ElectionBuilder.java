@@ -8,8 +8,8 @@ import static com.sunya.electionguard.Group.rand_q;
 public class ElectionBuilder {
 
   public static class DescriptionAndContext {
-    final ElectionWithPlaceholders metadata;
-    final CiphertextElectionContext context;
+    public final ElectionWithPlaceholders metadata;
+    public final CiphertextElectionContext context;
 
     public DescriptionAndContext(Election election, CiphertextElectionContext context) {
       this.metadata = new ElectionWithPlaceholders(election);

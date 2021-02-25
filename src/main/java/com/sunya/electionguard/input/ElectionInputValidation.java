@@ -1,0 +1,156 @@
+package com.sunya.electionguard.input;
+
+import com.google.common.flogger.FluentLogger;
+import com.sunya.electionguard.Election;
+
+import java.util.ArrayList;
+import java.util.Formatter;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+/** Validate an election manifest, give human readable error information. */
+public class ElectionInputValidation {
+  private static final FluentLogger logger = FluentLogger.forEnclosingClass();
+
+  private final Election election;
+  private final Set<String> gpUnits;
+  private final Set<String> candidates;
+  private final Set<String> parties;
+
+  public ElectionInputValidation(Election election) {
+    this.election = election;
+    this.gpUnits = election.geopolitical_units.stream().map(gp -> gp.object_id).collect(Collectors.toSet());
+    this.candidates = election.candidates.stream().map(c -> c.object_id).collect(Collectors.toSet());
+    this.parties = election.parties.stream().map(p -> p.object_id).collect(Collectors.toSet());
+  }
+
+  /** Determine if a ballot is valid and well-formed for the given election. */
+  public boolean validateElection(Formatter problems) {
+    Messes ballotMesses = new Messes(election.election_scope_id);
+
+    // Referential integrity of BallotStyle geopolitical_unit_ids
+    for (Election.BallotStyle ballotStyle : election.ballot_styles) {
+      for (String gpunit : ballotStyle.geopolitical_unit_ids) {
+        if (!gpUnits.contains(gpunit)) {
+          String msg = String.format("BallotStyle '%s' has geopolitical_unit_id '%s' that does not exist in election's geopolitical_units", ballotStyle.object_id, gpunit);
+          ballotMesses.add(msg);
+          logger.atWarning().log(msg);
+        }
+      }
+    }
+
+    // Referential integrity of Candidate party_id
+    for (Election.Candidate candidate : election.candidates) {
+      candidate.party_id.ifPresent(pid -> {
+        if (!parties.contains(pid)) {
+          String msg = String.format("Candidate '%s' party_id '%s' does not exist in election's Parties", candidate.object_id, pid);
+          ballotMesses.add(msg);
+          logger.atWarning().log(msg);
+        }
+      });
+    }
+
+    Set<String> contestIds = new HashSet<>();
+    for (Election.ContestDescription electionContest : election.contests) {
+      // No duplicate contests
+      if (contestIds.contains(electionContest.object_id)) {
+        String msg = String.format("Multiple Contests have same id '%s'", electionContest.object_id);
+        ballotMesses.add(msg);
+        logger.atWarning().log(msg);
+      } else {
+        contestIds.add(electionContest.object_id);
+      }
+
+      validateContest(electionContest, ballotMesses);
+    }
+
+    return ballotMesses.makeMesses(problems);
+  }
+
+  /** Determine if contest is valid for ballot style. */
+  void validateContest(Election.ContestDescription contest, Messes ballotMesses) {
+    Messes contestMesses = ballotMesses.nested(contest.object_id);
+
+    // Referential integrity of Contest electoral_district_id
+    if (!gpUnits.contains(contest.electoral_district_id)) {
+      String msg = String.format("Contest's electoral_district_id '%s' does not exist in election's geopolitical_units", contest.electoral_district_id);
+      contestMesses.add(msg);
+      logger.atWarning().log(msg);
+    }
+
+    Set<String> selectionIds = new HashSet<>();
+    Set<String> candidateIds = new HashSet<>();
+    for (Election.SelectionDescription electionSelection : contest.ballot_selections) {
+      // No duplicate selections
+      if (selectionIds.contains(electionSelection.object_id)) {
+        String msg = String.format("Multiple Selections have same id '%s'", electionSelection.object_id);
+        contestMesses.add(msg);
+        logger.atWarning().log(msg);
+      } else {
+        selectionIds.add(electionSelection.object_id);
+      }
+
+      // No duplicate selection candidates
+      if (candidateIds.contains(electionSelection.candidate_id)) {
+        String msg = String.format("Multiple Selections have same candidate id '%s'", electionSelection.candidate_id);
+        contestMesses.add(msg);
+        logger.atWarning().log(msg);
+      } else {
+        candidateIds.add(electionSelection.candidate_id);
+      }
+
+      // Referential integrity of Selection candidate ids
+      if (!candidates.contains(electionSelection.candidate_id)) {
+        String msg = String.format("Ballot Selection '%s' candidate_id '%s' does not exist in election's Candidates", electionSelection.object_id, electionSelection.candidate_id);
+        contestMesses.add(msg);
+        logger.atWarning().log(msg);
+      }
+    }
+  }
+
+  private static class Messes {
+    private final String id;
+    private final ArrayList<String> messages = new ArrayList<>();
+    private final ArrayList<Messes> nested = new ArrayList<>();
+
+    public Messes(String id) {
+      this.id = id;
+    }
+
+    void add(String mess) {
+      messages.add(mess);
+    }
+
+    Messes nested(String id) {
+      Messes mess = new Messes(id);
+      nested.add(mess);
+      return mess;
+    }
+
+    boolean makeMesses(Formatter problems) {
+      if (hasProblem()) {
+        problems.format("Election '%s' has problems%n", id);
+        for (String mess : messages) {
+          problems.format("  %s%n", mess);
+        }
+        for (Messes nest : nested) {
+          if (nest.hasProblem()) {
+            problems.format("  Contest '%s' has problems%n", nest.id);
+            for (String mess : nest.messages) {
+              problems.format("    %s%n", mess);
+            }
+          }
+        }
+        problems.format("==============================%n");
+        return false;
+      }
+      return true;
+    }
+
+    boolean hasProblem() {
+      return !messages.isEmpty() || nested.stream().map(Messes::hasProblem).findAny().orElse(false);
+    }
+  }
+
+}

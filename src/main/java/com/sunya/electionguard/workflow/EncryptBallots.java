@@ -4,6 +4,7 @@ import com.beust.jcommander.*;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.sunya.electionguard.BallotBox;
+import com.sunya.electionguard.input.BallotInputValidation;
 import com.sunya.electionguard.CiphertextAcceptedBallot;
 import com.sunya.electionguard.CiphertextBallot;
 import com.sunya.electionguard.Election;
@@ -17,6 +18,7 @@ import com.sunya.electionguard.verifier.ElectionRecord;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
+import java.util.Formatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -110,19 +112,26 @@ public class EncryptBallots {
             cmdLine.inputDir, cmdLine.ballotProviderClass, cmdLine.encryptDir);
     EncryptBallots encryptor = new EncryptBallots(electionRecord, cmdLine.deviceName);
 
+    BallotInputValidation ballotValidator = new BallotInputValidation(electionRecord.election);
     List<PlaintextBallot> originalBallots = new ArrayList<>();
     try {
       for (PlaintextBallot ballot : ballotProvider.ballots()) {
-        Optional<CiphertextBallot> encrypted_ballot = encryptor.encryptBallot(ballot);
-        if (encrypted_ballot.isPresent()) {
-          Optional<CiphertextAcceptedBallot> accepted = encryptor.castOrSpoil(encrypted_ballot.get(), random.nextBoolean());
-          if (accepted.isEmpty()) {
-            System.out.printf("***castOrSpoil failed%n");
+        Formatter problems = new Formatter();
+        if (ballotValidator.validateBallot(ballot, problems)) {
+          Optional<CiphertextBallot> encrypted_ballot = encryptor.encryptBallot(ballot);
+          if (encrypted_ballot.isPresent()) {
+            Optional<CiphertextAcceptedBallot> accepted = encryptor.castOrSpoil(encrypted_ballot.get(), random.nextBoolean());
+            if (accepted.isEmpty()) {
+              System.out.printf("***castOrSpoil failed%n");
+            }
+          } else {
+            System.out.printf("***Encryption failed%n");
           }
+          originalBallots.add(ballot);
         } else {
-          System.out.printf("***Encryption failed%n");
+          // put bad ballot somewhere
+          System.out.printf("%s", problems.toString());
         }
-        originalBallots.add(ballot);
       }
     } catch (Throwable t) {
       t.printStackTrace();

@@ -91,7 +91,7 @@ public class ChaumPedersen {
 
       if (!success) {
         Formatter f = new Formatter();
-        f.format("found an invalid Disjunctive Chaum-Pedersen proof:%n");
+        f.format("found an invalid disjunctive Chaum-Pedersen (zero or one) proof:%n");
         f.format(" in_bounds_alpha %s%n", in_bounds_alpha);
         f.format(" in_bounds_beta %s%n", in_bounds_beta);
         f.format(" in_bounds_a0 %s%n", in_bounds_a0);
@@ -107,8 +107,9 @@ public class ChaumPedersen {
         f.format(" consistent_gv1 %s%n", consistent_gv1);
         f.format(" consistent_kv0 %s%n", consistent_kv0);
         f.format(" consistent_gc1kv1 %s%n", consistent_gc1kv1);
-        f.format(" k %s%n", k);
-        f.format(" proof %s%n", this);
+        f.format("  k %s%n", k.toShortString());
+        f.format("  message %s%n", message);
+        f.format("  qbar %s%n", qbar);
         logger.atInfo().log(f.toString());
       }
       return success;
@@ -339,15 +340,14 @@ public class ChaumPedersen {
    * @param message: An ElGamal ciphertext
    * @param r: The nonce used creating the ElGamal ciphertext
    * @param k: The ElGamal public key for the election
-   * @param q: A value used when generating the challenge,
-   * usually the election extended base hash (𝑄')
+   * @param qbar: A value used when generating the challenge, usually the election extended base hash (𝑄')
    * @param seed: Used to generate other random values here
    */
   static DisjunctiveChaumPedersenProof make_disjunctive_chaum_pedersen_zero(
           ElGamal.Ciphertext message,
           ElementModQ r,
           ElementModP k,
-          ElementModQ q,
+          ElementModQ qbar,
           ElementModQ seed) {
 
     ElementModP alpha = message.pad;
@@ -365,7 +365,7 @@ public class ChaumPedersen {
     ElementModQ q_minus_c1 = negate_q(c1);
     ElementModP a1 = mult_p(g_pow_p(v1), pow_p(alpha, q_minus_c1));
     ElementModP b1 = mult_p(pow_p(k, v1), g_pow_p(c1), pow_p(beta, q_minus_c1));
-    ElementModQ c = Hash.hash_elems(q, alpha, beta, a0, b0, a1, b1);
+    ElementModQ c = Hash.hash_elems(qbar, alpha, beta, a0, b0, a1, b1);
     ElementModQ c0 = a_minus_b_q(c, c1);
     ElementModQ v0 = a_plus_bc_q(u0, c0, r);
 
@@ -379,15 +379,14 @@ public class ChaumPedersen {
    * @param message: An ElGamal ciphertext
    * @param r: The nonce used creating the ElGamal ciphertext
    * @param k: The ElGamal public key for the election
-   * @param q: A value used when generating the challenge,
-   * usually the election extended base hash (𝑄')
+   * @param qbar: A value used when generating the challenge, usually the election extended base hash (𝑄')
    * @param seed: Used to generate other random values here
    */
   static DisjunctiveChaumPedersenProof make_disjunctive_chaum_pedersen_one(
           ElGamal.Ciphertext message,
           ElementModQ r,
           ElementModP k,
-          ElementModQ q,
+          ElementModQ qbar,
           ElementModQ seed) {
 
     ElementModP alpha = message.pad;
@@ -405,7 +404,7 @@ public class ChaumPedersen {
     ElementModP b0 = mult_p(pow_p(k, v0), pow_p(beta, q_minus_c0));
     ElementModP a1 = g_pow_p(u1);
     ElementModP b1 = pow_p(k, u1);
-    ElementModQ c = Hash.hash_elems(q, alpha, beta, a0, b0, a1, b1);
+    ElementModQ c = Hash.hash_elems(qbar, alpha, beta, a0, b0, a1, b1);
     ElementModQ c1 = a_minus_b_q(c, c0);
     ElementModQ v1 = a_plus_bc_q(u1, c1, r);
 

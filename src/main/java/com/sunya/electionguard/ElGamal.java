@@ -142,7 +142,7 @@ public class ElGamal {
    * Given an ElGamal secret key (typically, a random number in [2,Q)), returns
    * an ElGamal keypair, consisting of the given secret key a and public key g^a.
    */
-  static Optional<KeyPair> elgamal_keypair_from_secret(ElementModQ a) {
+  public static Optional<KeyPair> elgamal_keypair_from_secret(ElementModQ a) {
     BigInteger secret_key_int = a.getBigInt();
     //     if secret_key_int < 2:
     if (Group.lessThan(secret_key_int, BigInteger.TWO)) {

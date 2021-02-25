@@ -220,7 +220,7 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
    * Specifically, the seed hash in this context is the hash of the Election Manifest,
    * or whatever `ElementModQ` was used to populate the `description_hash` field.
    */
-  boolean is_valid_encryption(
+  public boolean is_valid_encryption(
           Group.ElementModQ seed_hash,
           Group.ElementModP elgamal_public_key,
           Group.ElementModQ crypto_extended_base_hash) {
@@ -327,10 +327,10 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
       }
 
       if (proof.isEmpty() && nonce.isPresent()) { // LOOK python?
-        proof = nonce.map(n ->
+        proof = nonce.map(nons ->
                 ChaumPedersen.make_disjunctive_chaum_pedersen(
                         ciphertext,
-                        n,
+                        nons,
                         elgamal_public_key,
                         crypto_extended_base_hash,
                         proof_seed,
