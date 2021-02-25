@@ -94,7 +94,7 @@ public class Group {
 
     @Override
     public String toString() {
-      return "ElementModQ{'" + elem + '}';
+      return "ElementModQ{" + elem + '}';
     }
   }
 
@@ -121,7 +121,7 @@ public class Group {
 
     @Override
     public String toString() {
-      return "ElementModP{'" + elem + '}';
+      return "ElementModP{" + elem + '}';
     }
 
     private final int ndigitsShort = 8;

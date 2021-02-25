@@ -36,7 +36,7 @@ public class PlaintextBallot extends ElectionObjectBase {
    *
    * @param expected_ballot_style_id: Expected ballot style id
    */
-  boolean is_valid(String expected_ballot_style_id) {
+  public boolean is_valid(String expected_ballot_style_id) {
     if (!this.ballot_style.equals(expected_ballot_style_id)) {
       logger.atWarning().log("invalid ballot_style: for: %s expected(%s) actual(%s)",
               this.object_id, expected_ballot_style_id, this.ballot_style);
@@ -104,12 +104,12 @@ public class PlaintextBallot extends ElectionObjectBase {
             Optional<Integer> votes_allowed) {
 
       if (!this.contest_id.equals(expected_contest_id)) {
-        logger.atInfo().log("invalid contest_id: expected(%s) actual(%s)", expected_contest_id, this.contest_id);
+        logger.atWarning().log("invalid contest_id: expected(%s) actual(%s)", expected_contest_id, this.contest_id);
         return false;
       }
 
       if (this.ballot_selections.size() > expected_number_selections) {
-        logger.atInfo().log("invalid number_selections: expected(%s) actual(%s)", expected_number_selections, this.ballot_selections);
+        logger.atWarning().log("invalid number_selections: expected(%s) actual(%s)", expected_number_selections, this.ballot_selections);
         return false;
       }
 
@@ -126,12 +126,11 @@ public class PlaintextBallot extends ElectionObjectBase {
       }
 
       if (number_elected > expected_number_elected) {
-        logger.atInfo().log("invalid number_elected: expected(%s) actual(%s)", expected_number_elected, number_elected);
+        logger.atWarning().log("invalid number_elected: expected(%s) actual(%s)", expected_number_elected, number_elected);
         return false;
       }
-
       if (votes_allowed.isPresent() && votes > votes_allowed.get()) {
-        logger.atInfo().log("invalid votes: expected(%s) actual(%s)", votes_allowed, votes);
+        logger.atWarning().log("invalid number of votes: allowed(%s) actual(%s)", votes_allowed.get(), votes);
         return false;
       }
       return true;
@@ -192,12 +191,12 @@ public class PlaintextBallot extends ElectionObjectBase {
 
     boolean is_valid(String expected_selection_id) {
       if (!expected_selection_id.equals(selection_id)) {
-        logger.atInfo().log("invalid selection_id: expected %s actual %s",
+        logger.atWarning().log("invalid selection_id: expected %s actual %s",
                 expected_selection_id, this.selection_id);
         return false;
       }
       if (vote < 0 || vote > 1) {
-        logger.atInfo().log("Currently only supporting choices of 0 or 1: %s", this);
+        logger.atWarning().log("Vote must be a 0 or 1: %s", this);
         return false;
       }
       return true;

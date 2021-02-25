@@ -93,7 +93,7 @@ public class ElectionFactory {
   }
 
   /** Get a single Fake Ballot object that is manually constructed with default values. */
-  static PlaintextBallot get_fake_ballot(@Nullable Election election, @Nullable String ballot_id) {
+  public static PlaintextBallot get_fake_ballot(@Nullable Election election, @Nullable String ballot_id) {
     if (election == null) {
       election = get_fake_election();
     }

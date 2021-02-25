@@ -5,15 +5,16 @@ import com.google.common.flogger.FluentLogger;
 import javax.annotation.concurrent.Immutable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static com.sunya.electionguard.Group.*;
 import static com.sunya.electionguard.ElectionWithPlaceholders.ContestWithPlaceholders;
 
 public class Encrypt {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
-  private static final boolean show = false;
 
   private Encrypt() {}
 
@@ -33,7 +34,7 @@ public class Encrypt {
       this.location = location;
     }
 
-    ElementModQ get_hash() {
+    public ElementModQ get_hash() {
       return Hash.hash_elems(uuid, location);
     }
 
@@ -59,13 +60,13 @@ public class Encrypt {
    */
   public static class EncryptionMediator {
     private final ElectionWithPlaceholders metadata;
-    private final CiphertextElectionContext encryption;
+    private final CiphertextElectionContext context;
     private ElementModQ previous_tracking_hash;
 
-    public EncryptionMediator(ElectionWithPlaceholders metadata, CiphertextElectionContext encryption,
+    public EncryptionMediator(ElectionWithPlaceholders metadata, CiphertextElectionContext context,
                               EncryptionDevice encryption_device) {
       this.metadata = metadata;
-      this.encryption = encryption;
+      this.context = context;
       // LOOK does not follow validation spec 6.A, which calls for crypto_base_hash.
       //   Ok to use device hash see Issue #272. Spec should be updated.
       this.previous_tracking_hash = encryption_device.get_hash();
@@ -74,7 +75,7 @@ public class Encrypt {
     /** Encrypt the plaintext ballot using the joint public key K. */
     public Optional<CiphertextBallot> encrypt(PlaintextBallot ballot) {
       Optional<CiphertextBallot> encrypted_ballot =
-              encrypt_ballot(ballot, this.metadata, this.encryption, this.previous_tracking_hash, Optional.empty(), true);
+              encrypt_ballot(ballot, this.metadata, this.context, this.previous_tracking_hash, Optional.empty(), true);
       encrypted_ballot.ifPresent(ciphertextBallot -> this.previous_tracking_hash = ciphertextBallot.tracking_hash);
       return encrypted_ballot;
     }
@@ -140,7 +141,7 @@ public class Encrypt {
 
     // Validate Input
     if (!selection.is_valid(selection_description.object_id)) {
-      logger.atInfo().log("malformed input selection: %s", selection);
+      logger.atWarning().log("invalid input selection_id: %s", selection.selection_id);
       return Optional.empty();
     }
 
@@ -190,7 +191,7 @@ public class Encrypt {
     if (encrypted_selection.is_valid_encryption(selection_description_hash, elgamal_public_key, crypto_extended_base_hash)) {
       return Optional.of(encrypted_selection);
     } else {
-      logger.atInfo().log("mismatching selection proof for selection: %s", encrypted_selection.object_id);
+      logger.atWarning().log("Failed selection proof for selection: %s", encrypted_selection.object_id);
       return Optional.empty();
     }
   }
@@ -225,73 +226,63 @@ public class Encrypt {
           contest_description.ballot_selections.size(),
           contest_description.number_elected,
           contest_description.votes_allowed)) {
-      logger.atInfo().log("malformed input contest: %s", contest);
+      logger.atWarning().log("invalid input contest: %s", contest);
       return Optional.empty();
     }
 
     if (!contest_description.is_valid()) {
-      logger.atInfo().log("malformed input contest_description: %s", contest_description);
+      logger.atWarning().log("invalid input contest_description: %s", contest_description);
       return Optional.empty();
     }
 
-    // account for sequence id
+    // LOOK using sequence_order. Do we need to check for uniqueness?
     ElementModQ contest_description_hash = contest_description.crypto_hash();
     Nonces nonce_sequence = new Nonces(contest_description_hash, nonce_seed);
     ElementModQ contest_nonce = nonce_sequence.get(contest_description.sequence_order);
     ElementModQ chaum_pedersen_nonce = nonce_sequence.get(0);
 
-    List<CiphertextBallot.Selection> encrypted_selections = new ArrayList<>();
-
     int selection_count = 0;
+    List<CiphertextBallot.Selection> encrypted_selections = new ArrayList<>();
+    // LOOK this will fail if there are duplicate selection_id's
+    Map<String, PlaintextBallot.Selection> plaintext_selections = contest.ballot_selections.stream().collect(Collectors.toMap(s -> s.selection_id, s -> s));
 
-    // TODO: ISSUE #54 this code could be inefficient if we had a contest
-    //  with a lot of choices, although the O(n^2) iteration here is small
-    //  compared to the huge cost of doing the cryptography.
-
-    //  Generate the encrypted selections
-    if (show) System.out.printf(" Contest %s.%n", contest.contest_id);
+    // LOOK only iterate on selections that match the manifest. If there are selections contests on the ballot,
+    //   they are silently ignored.
     for (Election.SelectionDescription description : contest_description.ballot_selections) {
-        boolean has_selection = false;
-        Optional<CiphertextBallot.Selection> encrypted_selection = Optional.empty();
+        Optional<CiphertextBallot.Selection> encrypted_selection;
 
-        // iterate over the actual selections for each contest description
-        // and apply the selected value if it exists.  If it does not, an explicit
-        // false is entered instead and the selection_count is not incremented
-        // this allows consumers to only pass in the relevant selections made by a voter
-        for (PlaintextBallot.Selection selection : contest.ballot_selections) {
-          if (selection.selection_id.equals(description.object_id)) {
-            // track the selection count so we can append the
-            // appropriate number of true placeholder votes
-            has_selection = true;
-            selection_count += selection.vote;
-            encrypted_selection = encrypt_selection(
-                    selection,
-                    description,
-                    elgamal_public_key,
-                    crypto_extended_base_hash,
-                    contest_nonce,
-                    false,
-                    true);
-            break;
-          }
-        }
-
-        // LOOK what is this?
-        if (!has_selection) {
+        // Find the actual selection matching the contest description.
+        // If there is not one, an explicit false is entered instead and the selection_count is not incremented.
+        // This allows ballots to contain only the yes votes, if so desired.
+        PlaintextBallot.Selection plaintext_selection = plaintext_selections.get(description.object_id);
+        if (plaintext_selection != null) {
+          // track the selection count so we can append the
+          // appropriate number of true placeholder votes
+          selection_count += plaintext_selection.vote;
+          encrypted_selection = encrypt_selection(
+                  plaintext_selection,
+                  description,
+                  elgamal_public_key,
+                  crypto_extended_base_hash,
+                  contest_nonce,
+                  false,
+                  true);
+        } else {
           // No selection was made for this possible value so we explicitly set it to false
           encrypted_selection = encrypt_selection(
                   selection_from(description, false, false),
                   description,
                   elgamal_public_key,
                   crypto_extended_base_hash,
-                  contest_nonce, false, true);
+                  contest_nonce,
+                  false,
+                  true);
         }
 
         if (encrypted_selection.isEmpty()) {
           return Optional.empty(); // log will have happened earlier
         }
         encrypted_selections.add(encrypted_selection.get());
-        if (show) System.out.printf("  Selection %s.%n", encrypted_selection.get().object_id);
     }
 
     // Handle Placeholder selections. After we loop through all of the real selections on the ballot,
@@ -318,12 +309,11 @@ public class Encrypt {
         return Optional.empty(); // log will have happened earlier
       }
       encrypted_selections.add(encrypted_selection.get());
-      if (show) System.out.printf("  Selection %s.%n", encrypted_selection.get().object_id);
     }
 
     // TODO: ISSUE #33: support other cases such as cumulative voting (individual selections being an encryption of > 1)
     if (contest_description.votes_allowed.isPresent() && (selection_count < contest_description.votes_allowed.get())) {
-      logger.atInfo().log("mismatching selection count: only n-of-m style elections are currently supported");
+      logger.atWarning().log("mismatching selection count: only n-of-m style elections are currently supported");
     }
 
     CiphertextBallot.Contest encrypted_contest = CiphertextBallot.Contest.create(
@@ -349,7 +339,7 @@ public class Encrypt {
       return Optional.of(encrypted_contest);
     } else {
       encrypted_contest.is_valid_encryption(contest_description_hash, elgamal_public_key, crypto_extended_base_hash);
-      logger.atInfo().log("mismatching contest proof for contest %s", encrypted_contest.object_id);
+      logger.atWarning().log("mismatching contest proof for contest %s", encrypted_contest.object_id);
       return Optional.empty();
     }
   }
@@ -376,7 +366,7 @@ public class Encrypt {
    *                              if this value is not provided, a random nonce is used.
    * @param should_verify_proofs: specify if the proofs should be verified prior to returning (default True)
    */
-  static Optional<CiphertextBallot> encrypt_ballot(
+  public static Optional<CiphertextBallot> encrypt_ballot(
           PlaintextBallot ballot,
           ElectionWithPlaceholders metadata,
           CiphertextElectionContext context,
@@ -388,8 +378,13 @@ public class Encrypt {
     Optional<Election.BallotStyle> style = metadata.get_ballot_style(ballot.ballot_style);
 
     // Validate Input
-    if (style.isEmpty() || !ballot.is_valid(style.get().object_id)) {
-      logger.atInfo().log("malformed input ballot: %s", ballot);
+    if (style.isEmpty()) {
+      logger.atWarning().log("Ballot Style '%s' does not exist in election", ballot.ballot_style);
+      return Optional.empty();
+    }
+
+    // Validate Input LOOK could just call BallotInputValidation? Or rely on it being done externally.
+    if (!ballot.is_valid(style.get().object_id)) {
       return Optional.empty();
     }
 
@@ -401,18 +396,14 @@ public class Encrypt {
     ElementModQ nonce_seed = CiphertextBallot.nonce_seed(metadata.election.crypto_hash, ballot.object_id, random_master_nonce);
 
     List<CiphertextBallot.Contest> encrypted_contests = new ArrayList<>();
-
-    // only iterate on contests for this specific ballot style
-    if (show) System.out.printf("Ballot %s.%n", ballot.object_id);
+    // LOOK this will fail if there are duplicate contest_id's
+    Map<String, PlaintextBallot.Contest> plaintext_contests = ballot.contests.stream().collect(Collectors.toMap(c -> c.contest_id, c -> c));
+    // LOOK only iterate on contests that match the manifest. If there are miscoded contests on the ballot,
+    //   they are silently ignored.
     for (ContestWithPlaceholders contestDescription : metadata.get_contests_for(ballot.ballot_style)) {
-      PlaintextBallot.Contest use_contest = null;
-      for (PlaintextBallot.Contest contest : ballot.contests) {
-        if (contest.contest_id.equals(contestDescription.object_id)) {
-          use_contest = contest;
-          break;
-        }
-      }
+      PlaintextBallot.Contest use_contest = plaintext_contests.get(contestDescription.object_id);
       // no selections provided for the contest, so create a placeholder contest
+      // LOOK says "create a placeholder contest" but selections are not placeholders, but have all votes = 0.
       if (use_contest == null) {
         use_contest = contest_from(contestDescription);
       }

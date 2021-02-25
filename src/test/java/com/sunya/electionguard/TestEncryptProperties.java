@@ -38,7 +38,6 @@ public class TestEncryptProperties extends TestProperties {
     PlaintextBallot.Selection subject = selection_from(metadata, false, false);
     assertThat(subject.is_valid(metadata.object_id)).isTrue();
 
-    // Act
     Optional<CiphertextBallot.Selection> result = encrypt_selection(subject, metadata, keypair.public_key, ONE_MOD_Q, nonce, false, true);
 
     // Assert
