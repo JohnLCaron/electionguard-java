@@ -9,18 +9,12 @@ import com.sunya.electionguard.BallotBox;
 import com.sunya.electionguard.CiphertextAcceptedBallot;
 import com.sunya.electionguard.CiphertextBallot;
 import com.sunya.electionguard.ElGamal;
-import com.sunya.electionguard.Group;
 import com.sunya.electionguard.PlaintextTally;
 
-import java.math.BigInteger;
 import java.util.List;
-import java.util.stream.Collectors;
-
-import static com.sunya.electionguard.Group.ElementModP;
 
 /**
- * This verifies specification section "7 Correctness of Ballot Aggregation", and
- * section "11 Correct Decryption of Tallies".
+ * This verifies specification section "7 Correctness of Ballot Aggregation"
  * @see <a href="https://www.electionguard.vote/spec/0.95.0/9_Verifier_construction/#correctness-of-ballot-aggregation">Ballot aggregation validation</a>
  */
 public class BallotAggregationVerifier {
@@ -65,44 +59,6 @@ public class BallotAggregationVerifier {
       System.out.printf(" ***Ballot Aggregation Validation failed.%n");
     } else {
       System.out.printf(" Ballot Aggregation Validation success.%n");
-    }
-    return !error;
-  }
-
-  /**
-   * 11. An election verifier should confirm the following equations for each (non-placeholder) option in
-   * each contest in the ballot coding file.
-   * (A) B = (M ⋅ (∏ Mi )) mod p.
-   * (B) M = g^t mod p.
-   */
-  boolean verify_tally_decryption() {
-    boolean error = false;
-    Preconditions.checkNotNull(decryptedTally);
-
-    for (PlaintextTally.Contest contest : decryptedTally.contests.values()) {
-      for (PlaintextTally.Selection selection : contest.selections().values()) {
-        String key = contest.object_id() + "." + selection.object_id();
-        List<ElementModP> partialDecryptions = selection.shares().stream().map(s -> s.share()).collect(Collectors.toList());
-        ElementModP productMi = Group.mult_p(partialDecryptions);
-        ElementModP M = selection.value();
-        ElementModP B = selection.message().data;
-        if (!B.equals(Group.mult_p(M, productMi))) {
-          System.out.printf(" 11.A Tally Decryption failed for %s.%n", key);
-          error = true;
-        }
-
-        ElementModP t = Group.int_to_p_unchecked(BigInteger.valueOf(selection.tally()));
-        if (!M.equals(Group.g_pow_p(t))) {
-          System.out.printf(" 11.B Tally Decryption failed for %s.%n", key);
-          error = true;
-        }
-      }
-    }
-
-    if (error) {
-      System.out.printf(" ***Tally Decryption Validation failed.%n");
-    } else {
-      System.out.printf(" Tally Decryption Validation success.%n");
     }
     return !error;
   }

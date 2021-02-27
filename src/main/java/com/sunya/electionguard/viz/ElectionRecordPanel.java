@@ -122,8 +122,8 @@ class ElectionRecordPanel extends JPanel {
       if (record.acceptedBallots != null) {
         acceptedBallotsTable.setAcceptedBallots(record.acceptedBallots);
       }
-      if (record.ciphertextTally != null) {
-        ciphertextTallyTable.setCiphertextTally(record.ciphertextTally);
+      if (record.encryptedTally != null) {
+        ciphertextTallyTable.setCiphertextTally(record.encryptedTally);
       }
       if (record.decryptedTally != null) {
         electionTallyTable.setPlaintextTallies(CloseableIterableAdapter.wrap(ImmutableList.of(record.decryptedTally)));

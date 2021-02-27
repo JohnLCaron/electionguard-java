@@ -31,9 +31,9 @@ public class DecryptionVerifier {
   final ElectionRecord electionRecord;
   final PlaintextTally decryptedTally;
 
-  DecryptionVerifier(ElectionRecord electionRecord) {
+  DecryptionVerifier(ElectionRecord electionRecord, PlaintextTally decryptedTally) {
     this.electionRecord = electionRecord;
-    this.decryptedTally = Preconditions.checkNotNull(electionRecord.decryptedTally);
+    this.decryptedTally = decryptedTally;
   }
 
   /** Verify 8,9 for the election tally. */

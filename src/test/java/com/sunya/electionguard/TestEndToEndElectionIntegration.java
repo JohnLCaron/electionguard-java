@@ -278,7 +278,7 @@ public class TestEndToEndElectionIntegration {
     System.out.printf("%n4.5 Compare results%n");
     // Create a representation of each contest's tally
     Map<String, Integer> expected_plaintext_tally = new HashMap<>();
-    for (ContestWithPlaceholders contest : this.metadata.contests) {
+    for (ContestWithPlaceholders contest : this.metadata.contests.values()) {
       for (Election.SelectionDescription selection : contest.ballot_selections) {
         expected_plaintext_tally.put(selection.object_id, 0);
       }
@@ -356,7 +356,7 @@ public class TestEndToEndElectionIntegration {
     assertThat(roundtrip.constants).isEqualTo(this.constants);
     assertThat(roundtrip.devices.size()).isEqualTo(1);
     assertThat(roundtrip.devices.get(0)).isEqualTo(this.device);
-    assertThat(roundtrip.ciphertextTally).isEqualTo(this.publishedTally);
+    assertThat(roundtrip.encryptedTally).isEqualTo(this.publishedTally);
     assertThat(roundtrip.decryptedTally).isEqualTo(this.decryptedTally);
 
     Map<String, KeyCeremony.CoefficientValidationSet> coeffMap = this.coefficient_validation_sets.stream()

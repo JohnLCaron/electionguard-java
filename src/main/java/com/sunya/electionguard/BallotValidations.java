@@ -3,6 +3,8 @@ package com.sunya.electionguard;
 import com.google.common.flogger.FluentLogger;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.sunya.electionguard.ElectionWithPlaceholders.ContestWithPlaceholders;
 
@@ -10,19 +12,19 @@ import static com.sunya.electionguard.ElectionWithPlaceholders.ContestWithPlaceh
 class BallotValidations {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
-  /** Determine if a ballot is valid for a given election . */
+  /** Determine if a ballot is valid for this election . */
   // LOOK why ElectionDescriptionWithPlaceholders?
   static boolean ballot_is_valid_for_election(
           CiphertextBallot ballot,
-          ElectionWithPlaceholders metadata,
+          ElectionWithPlaceholders manifest,
           CiphertextElectionContext context) {
 
-    if (!ballot_is_valid_for_style(ballot, metadata)) {
+    if (!ballot_is_valid_for_style(ballot, manifest)) {
       return false;
     }
 
     if (!ballot.is_valid_encryption(
-            metadata.election.crypto_hash,
+            manifest.election.crypto_hash,
             context.elgamal_public_key,
             context.crypto_extended_base_hash)) {
       logger.atInfo().log("ballot_is_valid_for_election: mismatching ballot encryption %s", ballot.object_id);
@@ -66,31 +68,25 @@ class BallotValidations {
   }
 
   /** Determine if ballot is valid for ballot style. */
-  static boolean ballot_is_valid_for_style(CiphertextBallot ballot, ElectionWithPlaceholders metadata) {
-    List<ContestWithPlaceholders> descriptions = metadata.get_contests_for(ballot.ballot_style);
+  static boolean ballot_is_valid_for_style(CiphertextBallot ballot, ElectionWithPlaceholders manifest) {
+    Map<String, CiphertextBallot.Contest> contestMap = ballot.contests.stream().collect(Collectors.toMap(c -> c.object_id, c -> c));
 
-    // LOOK I dont understand this?
-    for (ContestWithPlaceholders description : descriptions) {
-      CiphertextBallot.Contest use_contest = null;
-      for (CiphertextBallot.Contest contest : ballot.contests) {
-        if (description.object_id.equals(contest.object_id)) {
-          use_contest = contest;
-          break;
-        }
-      }
+    List<ContestWithPlaceholders> contests = manifest.get_contests_for_style(ballot.ballot_style);
+    for (ContestWithPlaceholders contestManifest : contests) {
+      CiphertextBallot.Contest use_contest = contestMap.get(contestManifest.object_id);
 
-      // verify the contest exists on the ballot
+      // verify the contest exists on the ballot LOOK we reject ballots that dont have all contests on them.
       if (use_contest == null) {
-        logger.atInfo().log("ballot is not valid for style: mismatched contest %s", description.object_id);
+        logger.atInfo().log("ballot is not valid for style: mismatched contest %s", contestManifest.object_id);
         return false;
       }
 
-      if (!contest_is_valid_for_style(use_contest, description)) {
+      if (!contest_is_valid_for_style(use_contest, contestManifest)) {
         return false;
       }
 
       // verify the selection metadata
-      for (Election.SelectionDescription selection_description : description.ballot_selections) {
+      for (Election.SelectionDescription selection_description : contestManifest.ballot_selections) {
         CiphertextBallot.Selection use_selection = null;
         for (CiphertextBallot.Selection selection : use_contest.ballot_selections) {
           if (selection_description.object_id.equals(selection.object_id)) {

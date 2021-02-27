@@ -31,7 +31,7 @@ public class ElectionRecord {
   public final ImmutableList<KeyCeremony.CoefficientValidationSet> guardianCoefficients;
   public final ImmutableList<Encrypt.EncryptionDevice> devices; // may be empty
   public final CloseableIterable<CiphertextAcceptedBallot> acceptedBallots; // All ballots, not just cast! // may be empty
-  @Nullable public final CiphertextTally ciphertextTally;
+  @Nullable public final CiphertextTally encryptedTally;
   @Nullable public final PlaintextTally decryptedTally;
   public final CloseableIterable<PlaintextBallot> spoiledBallots; // may be empty
   public final CloseableIterable<PlaintextTally> spoiledTallies; // may be empty
@@ -43,7 +43,7 @@ public class ElectionRecord {
                         Election election,
                         List<KeyCeremony.CoefficientValidationSet> guardianCoefficients,
                         @Nullable List<Encrypt.EncryptionDevice> devices,
-                        @Nullable CiphertextTally ciphertextTally,
+                        @Nullable CiphertextTally encryptedTally,
                         @Nullable PlaintextTally decryptedTally,
                         @Nullable CloseableIterable<CiphertextAcceptedBallot> acceptedBallots,
                         @Nullable CloseableIterable<PlaintextBallot> spoiledBallots,
@@ -54,7 +54,7 @@ public class ElectionRecord {
     this.guardianCoefficients = ImmutableList.copyOf(guardianCoefficients);
     this.devices = devices == null ? ImmutableList.of() : ImmutableList.copyOf(devices);
     this.acceptedBallots = acceptedBallots == null ? CloseableIterableAdapter.empty() : acceptedBallots;
-    this.ciphertextTally = ciphertextTally;
+    this.encryptedTally = encryptedTally;
     this.decryptedTally = decryptedTally;
     this.spoiledBallots = spoiledBallots == null ? CloseableIterableAdapter.empty() : spoiledBallots;
     this.spoiledTallies = spoiledTallies == null ? CloseableIterableAdapter.empty() : spoiledTallies;
@@ -83,7 +83,7 @@ public class ElectionRecord {
             this.election,
             this.guardianCoefficients,
             this.devices,
-            this.ciphertextTally,
+            this.encryptedTally,
             this.decryptedTally,
             acceptedBallots,
             spoiledBallots,
@@ -168,14 +168,14 @@ public class ElectionRecord {
             devices.equals(that.devices) &&
             acceptedBallots.equals(that.acceptedBallots) &&
             guardianCoefficients.equals(that.guardianCoefficients) &&
-            Objects.equals(ciphertextTally, that.ciphertextTally) &&
+            Objects.equals(encryptedTally, that.encryptedTally) &&
             Objects.equals(decryptedTally, that.decryptedTally) &&
             contestVoteLimits.equals(that.contestVoteLimits);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(constants, context, election, devices, acceptedBallots, guardianCoefficients, ciphertextTally,
+    return Objects.hash(constants, context, election, devices, acceptedBallots, guardianCoefficients, encryptedTally,
             decryptedTally, contestVoteLimits);
   }
 }

@@ -31,9 +31,9 @@ public class PartialDecryptionVerifier {
   final PlaintextTally tally;
   final Map<String, GuardianState> guardianStateMap;
 
-  PartialDecryptionVerifier(ElectionRecord electionRecord) {
+  PartialDecryptionVerifier(ElectionRecord electionRecord, PlaintextTally decryptedTally) {
     this.electionRecord = electionRecord;
-    this.tally = Preconditions.checkNotNull(electionRecord.decryptedTally);
+    this.tally = Preconditions.checkNotNull(decryptedTally);
     this.guardianStateMap = new HashMap<>();
     tally.guardianStates.forEach(gs -> guardianStateMap.put(gs.guardian_id(), gs));
   }

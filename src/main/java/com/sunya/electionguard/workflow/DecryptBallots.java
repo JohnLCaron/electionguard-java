@@ -38,7 +38,7 @@ public class DecryptBallots {
 
   private static class CommandLine {
     @Parameter(names = {"-in"}, order = 0,
-            description = "Directory containing input election record and ballot encryptions", required = true)
+            description = "Directory containing input election record and encrypted ballots and tally", required = true)
     String encryptDir;
 
     @Parameter(names = {"-guardiansLocation"}, order = 1,
@@ -110,7 +110,9 @@ public class DecryptBallots {
 
       System.out.printf(" BallotDecryptor read from %s%n Write to %s%n", cmdLine.encryptDir, cmdLine.outputDir);
       decryptor = new DecryptBallots(consumer, electionRecord, guardiansProvider);
-      decryptor.accumulateTally();
+      if (electionRecord.encryptedTally == null) {
+        decryptor.accumulateTally();
+      }
       decryptor.decryptTally();
       boolean ok = decryptor.publish(cmdLine.encryptDir, cmdLine.outputDir);
       System.out.printf("*** DecryptBallots %s%n", ok ? "SUCCESS" : "FAILURE");
@@ -141,7 +143,7 @@ public class DecryptBallots {
   final Election election;
 
   Iterable<Guardian> guardians;
-  CiphertextTally publishedTally;
+  CiphertextTally encryptedTally;
   PlaintextTally decryptedTally;
   List<PlaintextBallot> spoiledDecryptedBallots;
   List<PlaintextTally> spoiledDecryptedTallies;
@@ -154,6 +156,8 @@ public class DecryptBallots {
     this.election = electionRecord.election;
     this.quorum = electionRecord.context.quorum;
     this.numberOfGuardians = electionRecord.context.number_of_guardians;
+    // LOOK We could do the accumulation if the encryptedTally doesnt exist
+    this.encryptedTally = electionRecord.encryptedTally;
 
     this.guardians = provider.guardians();
     for (Guardian guardian : provider.guardians()) {
@@ -167,13 +171,13 @@ public class DecryptBallots {
     ElectionWithPlaceholders metadata = new ElectionWithPlaceholders(this.election);
     CiphertextTallyBuilder ciphertextTally = new CiphertextTallyBuilder("DecryptBallots", metadata, electionRecord.context);
     int nballots = ciphertextTally.batch_append(electionRecord.acceptedBallots);
-    this.publishedTally = ciphertextTally.build();
+    this.encryptedTally = ciphertextTally.build();
     System.out.printf(" done accumulating %d ballots in the tally%n", nballots);
   }
 
   void decryptTally() {
     System.out.printf("%nDecrypt tally%n");
-    DecryptionMediator mediator = new DecryptionMediator(electionRecord.context, this.publishedTally, consumer.spoiledBallotsProto());
+    DecryptionMediator mediator = new DecryptionMediator(electionRecord.context, this.encryptedTally, consumer.spoiledBallotsProto());
 
     int count = 0;
     for (Guardian guardian : this.guardians) {
@@ -204,7 +208,7 @@ public class DecryptBallots {
             this.electionRecord.constants,
             this.electionRecord.guardianCoefficients,
             this.electionRecord.devices,
-            this.publishedTally,
+            this.encryptedTally,
             this.decryptedTally,
             this.spoiledDecryptedBallots,
             this.spoiledDecryptedTallies);

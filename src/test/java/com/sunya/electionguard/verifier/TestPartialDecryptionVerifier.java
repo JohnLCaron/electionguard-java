@@ -12,7 +12,8 @@ public class TestPartialDecryptionVerifier {
   public void testSelectionEncryptionValidationProto() throws IOException {
     String topdir = TestParameterVerifier.topdirProto;
     Consumer consumer = new Consumer(topdir);
-    PartialDecryptionVerifier validator = new PartialDecryptionVerifier(consumer.readElectionRecordProto());
+    ElectionRecord electionrecord = consumer.readElectionRecordProto();
+    PartialDecryptionVerifier validator = new PartialDecryptionVerifier(electionrecord, electionrecord.decryptedTally);
 
     boolean sevOk = validator.verify_lagrange_coefficients();
     assertThat(sevOk).isTrue();
@@ -22,7 +23,8 @@ public class TestPartialDecryptionVerifier {
   public void testSelectionEncryptionValidationJson() throws IOException {
     String topdir = TestParameterVerifier.topdirJson;
     Consumer consumer = new Consumer(topdir);
-    PartialDecryptionVerifier validator = new PartialDecryptionVerifier(consumer.readElectionRecordJson());
+    ElectionRecord electionrecord = consumer.readElectionRecordJson();
+    PartialDecryptionVerifier validator = new PartialDecryptionVerifier(electionrecord, electionrecord.decryptedTally);
 
     boolean sevOk = validator.verify_lagrange_coefficients();
     assertThat(sevOk).isTrue();

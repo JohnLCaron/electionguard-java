@@ -429,8 +429,7 @@ public class TestEncryptProperties extends TestProperties {
 
      for (CiphertextBallot.Contest contest : result.contests) {
        // Find the contest description
-       ContestWithPlaceholders contest_description =
-               tuple.metadata.contests.stream().filter(c -> c.object_id.equals(contest.object_id)).findFirst().orElseThrow();
+       ContestWithPlaceholders contest_description = tuple.metadata.getContestById(contest.object_id).orElseThrow();
 
        // Homomorpically accumulate the selection encryptions
        List<ElGamal.Ciphertext> ciphertexts = contest.ballot_selections.stream().map(s -> s.ciphertext()).collect(Collectors.toList());
