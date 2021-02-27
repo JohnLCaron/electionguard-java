@@ -16,9 +16,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
 
-/**
- * ElectionRecord Viewer
- */
+/** ElectionRecord Viewer main program. */
 public class ElectionGuardViewer extends JPanel {
   public static final String FRAME_SIZE = "FrameSize";
 
