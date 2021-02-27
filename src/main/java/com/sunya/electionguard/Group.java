@@ -203,7 +203,7 @@ public class Group {
   }
 
   /** Computes a/b mod p */
-  static ElementModP div_p(ElementMod a, ElementMod b) {
+  public static ElementModP div_p(ElementMod a, ElementMod b) {
     BigInteger inverse = b.elem.modInverse(P);
     BigInteger product = a.elem.multiply(inverse);
     return int_to_p_unchecked(product.mod(P));

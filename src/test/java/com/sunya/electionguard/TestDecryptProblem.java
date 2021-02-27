@@ -252,7 +252,7 @@ public class TestDecryptProblem {
     System.out.printf("%n4.5 Compare results%n");
     // Create a representation of each contest's tally
     Map<String, Integer> expected_plaintext_tally = new HashMap<>();
-    for (ContestWithPlaceholders contest : this.metadata.contests) {
+    for (ContestWithPlaceholders contest : this.metadata.contests.values()) {
       for (SelectionDescription selection : contest.ballot_selections) {
         expected_plaintext_tally.put(selection.object_id, 0);
       }

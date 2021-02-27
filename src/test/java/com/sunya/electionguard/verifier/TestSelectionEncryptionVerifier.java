@@ -20,7 +20,7 @@ public class TestSelectionEncryptionVerifier {
 
     Consumer consumer = new Consumer(topdir);
     ElectionRecord electionRecord = consumer.readElectionRecordProto();
-    SelectionEncyrptionVerifier sev = new SelectionEncyrptionVerifier(electionRecord);
+    SelectionEncryptionVerifier sev = new SelectionEncryptionVerifier(electionRecord);
 
     boolean sevOk = sev.verify_all_selections();
     assertThat(sevOk).isTrue();
@@ -39,7 +39,7 @@ public class TestSelectionEncryptionVerifier {
 
     Consumer consumer = new Consumer(topdir);
     ElectionRecord electionRecord = consumer.readElectionRecordJson();
-    SelectionEncyrptionVerifier sev = new SelectionEncyrptionVerifier(electionRecord);
+    SelectionEncryptionVerifier sev = new SelectionEncryptionVerifier(electionRecord);
 
     boolean sevOk = sev.verify_all_selections();
     assertThat(sevOk).isTrue();

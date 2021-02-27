@@ -87,7 +87,7 @@ public class VerifyElectionRecord {
     boolean epkvOk = epkv.verify_public_keys();
 
     System.out.println("------------ [box 4] Selection Encryption Validation ------------");
-    SelectionEncyrptionVerifier sev = new SelectionEncyrptionVerifier(electionRecord);
+    SelectionEncryptionVerifier sev = new SelectionEncryptionVerifier(electionRecord);
     boolean sevOk = sev.verify_all_selections();
 
     System.out.println("------------ [box 5] Contest Vote Limits Validation ------------");
@@ -104,15 +104,16 @@ public class VerifyElectionRecord {
     boolean bavOk = bav.verify_ballot_aggregation();
 
     System.out.println("------------ [box 8, 9] Correctness of Decryptions ------------");
-    DecryptionVerifier dv = new DecryptionVerifier(electionRecord);
+    DecryptionVerifier dv = new DecryptionVerifier(electionRecord, electionRecord.decryptedTally);
     boolean dvOk = dv.verify_election_tally();
 
     System.out.println("------------ [box 10] Correctness of Replacement Partial Decryptions ------------");
-    PartialDecryptionVerifier pdv = new PartialDecryptionVerifier(electionRecord);
+    PartialDecryptionVerifier pdv = new PartialDecryptionVerifier(electionRecord, electionRecord.decryptedTally);
     boolean pdvOk = pdv.verify_replacement_partial_decryptions();
 
     System.out.println("------------ [box 11] Correctness of Decryption of Tallies ------------");
-    boolean bavt = bav.verify_tally_decryption();
+    TallyDecryptionVerifier tdv = new TallyDecryptionVerifier(electionRecord.election, electionRecord.decryptedTally);
+    boolean tdvOk = tdv.verify_tally_decryption();
 
     System.out.println("------------ [box 12] Correct Decryption of Spoiled Ballots ------------");
     boolean dvsOk = dv.verify_spoiled_tallies(electionRecord.spoiledTallies);
@@ -120,7 +121,7 @@ public class VerifyElectionRecord {
     PlaintextBallotVerifier pbv = new PlaintextBallotVerifier(electionRecord);
     boolean pbvOk = pbv.verify_plaintext_ballot();
 
-    boolean allOk = (blvOk && gpkvOk && epkvOk && sevOk && cvlvOk && bcvOk && bavOk && dvOk && pdvOk && bavt && dvsOk && pbvOk);
+    boolean allOk = (blvOk && gpkvOk && epkvOk && sevOk && cvlvOk && bcvOk && bavOk && dvOk && pdvOk && tdvOk && dvsOk && pbvOk);
     if (allOk) {
       System.out.printf("%n===== ALL OK! ===== %n");
     } else {

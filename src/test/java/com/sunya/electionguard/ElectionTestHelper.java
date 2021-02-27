@@ -476,7 +476,7 @@ public class ElectionTestHelper {
           // pick a ballot style at random
     Election.BallotStyle ballot_style = drawList(metadata.election.ballot_styles);
 
-    List<ContestWithPlaceholders> contests = metadata.get_contests_for(ballot_style.object_id);
+    List<ContestWithPlaceholders> contests = metadata.get_contests_for_style(ballot_style.object_id);
     assertWithMessage("invalid ballot style with no contests in it").that(contests.size() > 0).isTrue();
 
     List<PlaintextBallot.Contest> voted_contests = new ArrayList<>();

@@ -15,9 +15,6 @@ public class TestBallotAggregationVerifier {
 
     boolean sevOk1 = validator.verify_ballot_aggregation();
     assertThat(sevOk1).isTrue();
-
-    boolean sevOk2 = validator.verify_tally_decryption();
-    assertThat(sevOk2).isTrue();
   }
 
   @Example
@@ -28,8 +25,5 @@ public class TestBallotAggregationVerifier {
 
     boolean sevOk1 = validator.verify_ballot_aggregation();
     assertThat(sevOk1).isTrue();
-
-    boolean sevOk2 = validator.verify_tally_decryption();
-    assertThat(sevOk2).isTrue();
   }
 }

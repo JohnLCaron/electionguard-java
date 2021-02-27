@@ -10,6 +10,7 @@ import com.sunya.electionguard.proto.PlaintextBallotProto;
 import com.sunya.electionguard.proto.PlaintextBallotToProto;
 import com.sunya.electionguard.proto.PlaintextTallyProto;
 import com.sunya.electionguard.proto.PlaintextTallyToProto;
+import com.sunya.electionguard.verifier.ElectionRecord;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -345,6 +346,37 @@ public class Publisher {
     }
   }
 
+  /** Adds the encryptedTally to the election record. */
+  public void writeEncryptedTallyProto(ElectionRecord electionRecord,
+                                       CiphertextTally encryptedTally) throws IOException {
+
+    ElectionRecordProto.ElectionRecord ElectionRecordProto = ElectionRecordToProto.buildElectionRecord(
+            electionRecord.election, electionRecord.context, electionRecord.constants,
+            electionRecord.guardianCoefficients,
+            electionRecord.devices,
+            encryptedTally,
+            null);
+
+    try (FileOutputStream out = new FileOutputStream(electionRecordProtoPath().toFile())) {
+      ElectionRecordProto.writeDelimitedTo(out);
+    }
+  }
+
+  public void writeDecryptedTallyProto(ElectionRecord electionRecord,
+                                       PlaintextTally decryptedTally) throws IOException {
+
+    ElectionRecordProto.ElectionRecord ElectionRecordProto = ElectionRecordToProto.buildElectionRecord(
+            electionRecord.election, electionRecord.context, electionRecord.constants,
+            electionRecord.guardianCoefficients,
+            electionRecord.devices,
+            electionRecord.encryptedTally,
+            decryptedTally);
+
+    try (FileOutputStream out = new FileOutputStream(electionRecordProtoPath().toFile())) {
+      ElectionRecordProto.writeDelimitedTo(out);
+    }
+  }
+
   /** Publishes the ballot and tally Decryptions part election record as proto. */
   public void writeDecryptionResultsProto(
           Election description,
@@ -352,7 +384,7 @@ public class Publisher {
           ElectionConstants constants,
           Iterable<KeyCeremony.CoefficientValidationSet> coefficient_validation_sets,
           Iterable<Encrypt.EncryptionDevice> devices,
-          CiphertextTally ciphertext_tally,
+          CiphertextTally encryptedTally,
           PlaintextTally decryptedTally,
           @Nullable Iterable<PlaintextBallot> spoiledBallots,
           @Nullable Iterable<PlaintextTally> spoiledDecryptedTallies) throws IOException {
@@ -380,7 +412,7 @@ public class Publisher {
     ElectionRecordProto.ElectionRecord ElectionRecordProto = ElectionRecordToProto.buildElectionRecord(
             description, context, constants, coefficient_validation_sets,
             devices,
-            ciphertext_tally,
+            encryptedTally,
             decryptedTally);
 
     try (FileOutputStream out = new FileOutputStream(electionRecordProtoPath().toFile())) {

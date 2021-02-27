@@ -135,7 +135,7 @@ class DecryptWithSecrets {
     List<PlaintextBallot.Selection> plaintext_selections = new ArrayList<>();
     for (CiphertextBallot.Selection selection : contest.ballot_selections) {
       Election.SelectionDescription selection_description =
-              description.selection_for(selection.object_id).orElseThrow(IllegalStateException::new);
+              description.getSelectionById(selection.object_id).orElseThrow(IllegalStateException::new);
       Optional<PlaintextBallot.Selection> plaintext_selection = decrypt_selection_with_secret(
               selection,
               selection_description,
@@ -212,7 +212,7 @@ class DecryptWithSecrets {
     List<PlaintextBallot.Selection> plaintext_selections = new ArrayList<>();
     for (CiphertextBallot.Selection selection : contest.ballot_selections) {
       Election.SelectionDescription selection_description =
-              description.selection_for(selection.object_id).orElseThrow(IllegalStateException::new);
+              description.getSelectionById(selection.object_id).orElseThrow(IllegalStateException::new);
       Optional<PlaintextBallot.Selection> plaintext_selection = decrypt_selection_with_nonce(
               selection,
               selection_description,
@@ -265,7 +265,7 @@ class DecryptWithSecrets {
 
     for (CiphertextBallot.Contest contest : ballot.contests) {
       ContestWithPlaceholders description =
-              metadata.contest_for(contest.object_id).orElseThrow(IllegalStateException::new);
+              metadata.getContestById(contest.object_id).orElseThrow(IllegalStateException::new);
       Optional<PlaintextBallot.Contest> plaintext_contest = decrypt_contest_with_secret(
               contest,
               description,
@@ -327,7 +327,7 @@ class DecryptWithSecrets {
 
     for (CiphertextBallot.Contest contest : ballot.contests) {
       ContestWithPlaceholders description =
-              metadata.contest_for(contest.object_id).orElseThrow(IllegalStateException::new);
+              metadata.getContestById(contest.object_id).orElseThrow(IllegalStateException::new);
       Optional<PlaintextBallot.Contest> plaintext_contest = decrypt_contest_with_nonce(
               contest,
               description,

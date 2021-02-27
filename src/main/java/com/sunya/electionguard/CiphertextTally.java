@@ -74,7 +74,7 @@ public class CiphertextTally extends ElectionObjectBase {
    */
   @Immutable
   public static class Selection extends CiphertextSelection {
-    public Selection(String selectionDescriptionId, ElementModQ description_hash, @Nullable ElGamal.Ciphertext ciphertext) {
+    public Selection(String selectionDescriptionId, ElementModQ description_hash, ElGamal.Ciphertext ciphertext) {
       super(selectionDescriptionId, description_hash, ciphertext);
     }
 

@@ -2,6 +2,7 @@ package com.sunya.electionguard;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.flogger.FluentLogger;
 
 import javax.annotation.Nullable;
@@ -13,20 +14,21 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /** An election with contests that have been filled out with selection placeholders. */
+@Immutable
 public class ElectionWithPlaceholders {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   public final Election election;
-  public ImmutableList<ContestWithPlaceholders> contests;
+  public final ImmutableMap<String, ContestWithPlaceholders> contests;
 
   public ElectionWithPlaceholders(Election election) {
     this.election = Preconditions.checkNotNull(election);
 
     // For each contest, append the `number_elected` number of placeholder selections to the end of the contest collection.
-    ImmutableList.Builder<ContestWithPlaceholders> builder = ImmutableList.builder();
+    ImmutableMap.Builder<String, ContestWithPlaceholders> builder = ImmutableMap.builder();
     for (Election.ContestDescription contest : election.contests) {
       List<Election.SelectionDescription> placeholders = generate_placeholder_selections_from(contest, contest.number_elected);
-      builder.add(contest_description_with_placeholders_from(contest, placeholders));
+      builder.put(contest.object_id, contest_description_with_placeholders_from(contest, placeholders));
     }
     this.contests = builder.build();
   }
@@ -98,10 +100,9 @@ public class ElectionWithPlaceholders {
             use_sequence_id));
   }
 
-  Optional<ContestWithPlaceholders> contest_for(String contest_id) {
-    return contests.stream().filter(c -> c.object_id.equals(contest_id)).findFirst();
+  public Optional<ContestWithPlaceholders> getContestById(String contest_id) {
+    return Optional.ofNullable(contests.get(contest_id));
   }
-
 
   /** Find the ballot style for a specified ballot_style_id */
   public Optional<Election.BallotStyle> get_ballot_style(String ballot_style_id) {
@@ -109,17 +110,17 @@ public class ElectionWithPlaceholders {
   }
 
   /** Get contests that have the given ballot style. */
-  public List<ContestWithPlaceholders> get_contests_for(String ballot_style_id) {
+  public List<ContestWithPlaceholders> get_contests_for_style(String ballot_style_id) {
     Optional<Election.BallotStyle> style = this.get_ballot_style(ballot_style_id);
     if (style.isEmpty() || style.get().geopolitical_unit_ids.isEmpty()) {
       return new ArrayList<>();
     }
     List<String> gp_unit_ids = new ArrayList<>(style.get().geopolitical_unit_ids);
-    return this.contests.stream().filter(c -> gp_unit_ids.contains(c.electoral_district_id)).collect(Collectors.toList());
+    return this.contests.values().stream().filter(c -> gp_unit_ids.contains(c.electoral_district_id)).collect(Collectors.toList());
   }
 
   /**
-   * A contest thats been filled with placeholder_selections.
+   * A contest that's been filled with placeholder_selections.
    * The ElectionGuard spec requires that n-of-m elections have *exactly* n counters that are one,
    * with the rest zero, so if a voter deliberately undervotes, one or more of the placeholder counters will
    * become one. This allows the `ConstantChaumPedersenProof` to verify correctly for undervoted contests.
@@ -164,19 +165,14 @@ public class ElectionWithPlaceholders {
       return Objects.hash(super.hashCode(), placeholder_selections);
     }
 
-    /**
-     * Gets the description for a particular id
-     * @param selection_id: Id of Selection
-     * @return description
-     */
-    Optional<Election.SelectionDescription> selection_for(String selection_id) {
-
+    /** Gets the SelectionDescription from a selection id */
+    public Optional<Election.SelectionDescription> getSelectionById(String selection_id) {
       Optional<Election.SelectionDescription> first_match = this.ballot_selections.stream()
               .filter(s -> s.object_id.equals(selection_id)).findFirst();
       if (first_match.isPresent()) {
         return first_match;
       }
-
+      // LOOK actually no way to have this succeed if above fails
       return this.placeholder_selections.stream()
               .filter(s -> s.object_id.equals(selection_id)).findFirst();
     }

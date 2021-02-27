@@ -92,7 +92,7 @@ public class TestEncryptHypothesisProperties extends TestProperties {
 
     // loop through the contest descriptions and verify
     // the decrypted tallies match the plaintext tallies
-    for (ContestWithPlaceholders contest : everything.metadata.contests) {
+    for (ContestWithPlaceholders contest : everything.metadata.contests.values()) {
       // Sanity check the generated data
       assertThat(contest.ballot_selections).isNotEmpty();
       assertThat(contest.placeholder_selections).isNotEmpty();

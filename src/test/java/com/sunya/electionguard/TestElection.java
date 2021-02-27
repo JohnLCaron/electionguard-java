@@ -30,13 +30,9 @@ public class TestElection {
     ElectionWithPlaceholders metadata = new ElectionWithPlaceholders(election);
 
     assertThat(election.contests.size()).isEqualTo(election.contests.size());
-
     for (Election.ContestDescription expected : election.contests) {
-      for (Election.ContestDescription actual : metadata.contests) {
-        if (expected.object_id.equals(actual.object_id)) {
-          assertThat(expected.crypto_hash()).isEqualTo(actual.crypto_hash());
-        }
-      }
+      Election.ContestDescription actual = metadata.getContestById(expected.object_id).orElseThrow();
+      assertThat(expected.crypto_hash()).isEqualTo(actual.crypto_hash());
     }
   }
 

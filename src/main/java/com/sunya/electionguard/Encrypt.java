@@ -400,7 +400,7 @@ public class Encrypt {
     Map<String, PlaintextBallot.Contest> plaintext_contests = ballot.contests.stream().collect(Collectors.toMap(c -> c.contest_id, c -> c));
     // LOOK only iterate on contests that match the manifest. If there are miscoded contests on the ballot,
     //   they are silently ignored.
-    for (ContestWithPlaceholders contestDescription : metadata.get_contests_for(ballot.ballot_style)) {
+    for (ContestWithPlaceholders contestDescription : metadata.get_contests_for_style(ballot.ballot_style)) {
       PlaintextBallot.Contest use_contest = plaintext_contests.get(contestDescription.object_id);
       // no selections provided for the contest, so create a placeholder contest
       // LOOK says "create a placeholder contest" but selections are not placeholders, but have all votes = 0.
