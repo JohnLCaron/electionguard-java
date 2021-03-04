@@ -76,7 +76,7 @@ class Decryptions {
 
       // [(guardian, selection, context) for (_, selection) in contest.tally_selections.items()],
       List<Callable<Optional<CiphertextDecryptionSelection>>> tasks =
-              tallyContest.tally_selections.values().stream().map(selection ->
+              tallyContest.selections.values().stream().map(selection ->
                       new RunComputeDecryptionShareForSelection(guardian, selection, context)).collect(Collectors.toList());
 
       Scheduler<Optional<CiphertextDecryptionSelection>> scheduler = new Scheduler<>();
@@ -289,7 +289,7 @@ class Decryptions {
       // [ (guardian, missing_guardian_id, selection, context, decrypt)
       //          for (_, selection) in contest.tally_selections.items() ],
       List<Callable<Optional<CiphertextCompensatedDecryptionSelection>>> tasks =
-              contest.tally_selections.values().stream()
+              contest.selections.values().stream()
                       .map(selection -> new RunComputeCompensatedDecryptionShareForSelection(
                               guardian, missing_guardian_id, selection, context, decryptor))
                       .collect(Collectors.toList());
@@ -589,7 +589,7 @@ class Decryptions {
       }
 
       Map<String, CiphertextDecryptionSelection> selections = new HashMap<>();
-      for (Map.Entry<String, CiphertextTally.Selection> entry3 : tally_contest.tally_selections.entrySet()) {
+      for (Map.Entry<String, CiphertextTally.Selection> entry3 : tally_contest.selections.entrySet()) {
         String selection_id = entry3.getKey();
         CiphertextTally.Selection tally_selection = entry3.getValue();
 

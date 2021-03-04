@@ -23,9 +23,11 @@ The following command line programs simulate the pieces of the workflow needed t
 
 2.   [EncryptBallots](https://github.com/JohnLCaron/electionguard-java/blob/master/docs/EncryptBallots.md)
 
-3.   [DecryptBallots](https://github.com/JohnLCaron/electionguard-java/blob/master/docs/DecryptBallots.md)
+2.   [AccumulateTally](https://github.com/JohnLCaron/electionguard-java/blob/master/docs/AccumulateTally.md)
 
-The entire workflow, consisting of the above three steps plus verification can be run from a single command:
+4.   [DecryptBallots](https://github.com/JohnLCaron/electionguard-java/blob/master/docs/DecryptBallots.md)
+
+The entire workflow, consisting of the above steps plus verification can be run from a single command:
 
 *   [RunElectionWorkflow](https://github.com/JohnLCaron/electionguard-java/blob/master/docs/RunElectionWorkflow.md)
 
@@ -34,6 +36,14 @@ The entire workflow, consisting of the above three steps plus verification can b
 A simple Swing-based visualization of the Election Record is available. This is a debugging tool for developers, 
 not a polished tool for end-users (eg election officials). No documentation, no warentees, 
 void where taxed or prohibited by law.
+
+*   [Visualization](https://github.com/JohnLCaron/electionguard-java/blob/master/docs/Visualization.md)
+
+## Input Validation
+
+Election Manifest and Input Ballot validation can be done by classes in the **com.sunya.electionguard.input package**.
+It is recommended that these are checked before starting encryption. 
+These classes are experimental and not part of the core library.
 
 *   [Visualization](https://github.com/JohnLCaron/electionguard-java/blob/master/docs/Visualization.md)
 
@@ -76,7 +86,6 @@ These may be interesting to implement in other libraries:
 
   * Not yet compatible with python library JSON serialization, due to different ways to serialize Optional.
     It incorporates a workaround which should work for now, however.
-  * Review reading input files, give good error messages.
   * Review error logging.
   * Measure computational performance.
   * Investigate parallelization strategies.

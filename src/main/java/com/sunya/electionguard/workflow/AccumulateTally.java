@@ -24,7 +24,7 @@ import java.io.IOException;
  * </pre>
  * </strong>
  *
- * @see <a href="https://www.electionguard.vote/spec/0.95.0/7_Verifiable_decryption/">Ballot Decryption</a>
+ * @see <a href="https://www.electionguard.vote/spec/0.95.0/6_Ballot_aggregation/">Ballot Aggregation</a>
  */
 public class AccumulateTally {
 

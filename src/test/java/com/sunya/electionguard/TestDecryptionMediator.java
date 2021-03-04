@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 
-import static com.sunya.electionguard.Decryptions.*;
 import static com.sunya.electionguard.Group.*;
 import static com.sunya.electionguard.KeyCeremony.*;
 
@@ -150,33 +149,26 @@ public class TestDecryptionMediator extends TestProperties {
 
   @Example
   public void test_announce() {
-    DecryptionMediator subject = new DecryptionMediator(this.context, this.publishedTally, this.ballot_box.getSpoiledBallots());
+    DecryptionMediator2 subject = new DecryptionMediator2(this.context, this.publishedTally, this.ballot_box.getSpoiledBallots());
 
     assertThat(subject.announce(this.guardians.get(0))).isTrue();
 
     // Can only announce once
     assertThat(subject.announce(this.guardians.get(0))).isFalse();
 
-    // Cannot submit another share internally
-    DecryptionShare.TallyDecryptionShare share = DecryptionShare.TallyDecryptionShare.create(
-            this.publishedTally.object_id,
-            this.guardians.get(0).object_id,
-            ZERO_MOD_P,
-            new HashMap<>(), new HashMap<>());
-    assertThat(subject.submit_decryption_share(share)).isFalse();
-
     // Cannot get plaintext tally without a quorum
-    assertThat(subject.decrypt_tally(true, null)).isEmpty();
+    assertThat(subject.get_plaintext_tally(null)).isEmpty();
+    assertThat(subject.get_plaintext_ballots(null)).isEmpty();
   }
 
   @Example
   public void test_compute_selection() {
     CiphertextTally.Selection first_selection =
-            this.publishedTally.contests.values().stream().flatMap(contest -> contest.tally_selections.values().stream())
+            this.publishedTally.contests.values().stream().flatMap(contest -> contest.selections.values().stream())
                     .findFirst().orElseThrow(RuntimeException::new);
 
     Optional<DecryptionShare.CiphertextDecryptionSelection> result =
-            compute_decryption_share_for_selection(this.guardians.get(0), first_selection, this.context);
+            Decryptions2.compute_decryption_share_for_selection(this.guardians.get(0), first_selection, this.context);
     assertThat(result).isPresent();
   }
 
@@ -210,7 +202,7 @@ public class TestDecryptionMediator extends TestProperties {
   @Example
   public void test_compute_compensated_selection() {
     CiphertextTally.Selection first_selection =
-            this.publishedTally.contests.values().stream().flatMap(contest -> contest.tally_selections.values().stream())
+            this.publishedTally.contests.values().stream().flatMap(contest -> contest.selections.values().stream())
                     .findFirst().orElseThrow(RuntimeException::new);
 
     // Compute lagrange coefficients for the guardians that are present
@@ -228,17 +220,17 @@ public class TestDecryptionMediator extends TestProperties {
 
     // compute their shares
     Optional<DecryptionShare.CiphertextDecryptionSelection> share_0 =
-            compute_decryption_share_for_selection(this.guardians.get(0), first_selection, this.context);
+            Decryptions2.compute_decryption_share_for_selection(this.guardians.get(0), first_selection, this.context);
 
     Optional<DecryptionShare.CiphertextDecryptionSelection> share_1 =
-            compute_decryption_share_for_selection(this.guardians.get(1), first_selection, this.context);
+            Decryptions2.compute_decryption_share_for_selection(this.guardians.get(1), first_selection, this.context);
 
     assertThat(share_0).isPresent();
     assertThat(share_1).isPresent();
 
     // compute compensations shares for the missing guardian
     Optional<DecryptionShare.CiphertextCompensatedDecryptionSelection> compensation_0 =
-            compute_compensated_decryption_share_for_selection(
+            Decryptions2.compute_compensated_decryption_share_for_selection(
                     this.guardians.get(0),
                     this.guardians.get(2).object_id,
                     first_selection,
@@ -246,7 +238,7 @@ public class TestDecryptionMediator extends TestProperties {
                     identity_auxiliary_decrypt);
 
     Optional<DecryptionShare.CiphertextCompensatedDecryptionSelection> compensation_1 =
-            compute_compensated_decryption_share_for_selection(
+            Decryptions2.compute_compensated_decryption_share_for_selection(
                     this.guardians.get(1),
                     this.guardians.get(2).object_id,
                     first_selection,
@@ -291,7 +283,7 @@ public class TestDecryptionMediator extends TestProperties {
     );
 
     // Decrypt the result
-    Optional<PlaintextTally.Selection> result = DecryptWithShares.decrypt_selection_with_decryption_shares(
+    Optional<PlaintextTally.Selection> result = DecryptWithShares2.decrypt_selection_with_decryption_shares(
             first_selection,
             ImmutableMap.of(
                     this.guardians.get(0).object_id,
@@ -320,32 +312,32 @@ public class TestDecryptionMediator extends TestProperties {
     CiphertextTally.Contest first_contest =
             this.publishedTally.contests.values().stream().findFirst().orElseThrow(IllegalStateException::new);
     CiphertextTally.Selection first_selection =
-            first_contest.tally_selections.values().stream().findFirst().orElseThrow(IllegalStateException::new);
+            first_contest.selections.values().stream().findFirst().orElseThrow(IllegalStateException::new);
 
     // precompute decryption shares for the guardians
-    DecryptionShare.TallyDecryptionShare first_share = compute_decryption_share(
-            this.guardians.get(0), this.publishedTally, this.context, this.ballot_box.getSpoiledBallots()).orElseThrow();
-    DecryptionShare.TallyDecryptionShare second_share = compute_decryption_share(
-            this.guardians.get(1), this.publishedTally, this.context, this.ballot_box.getSpoiledBallots()).orElseThrow();
-    DecryptionShare.TallyDecryptionShare third_share = compute_decryption_share(
-            this.guardians.get(2), this.publishedTally, this.context, this.ballot_box.getSpoiledBallots()).orElseThrow();
+    DecryptionShare first_share = Decryptions2.compute_decryption_share(
+            this.guardians.get(0), this.publishedTally, this.context).orElseThrow();
+    DecryptionShare second_share = Decryptions2.compute_decryption_share(
+            this.guardians.get(1), this.publishedTally, this.context).orElseThrow();
+    DecryptionShare third_share = Decryptions2.compute_decryption_share(
+            this.guardians.get(2), this.publishedTally, this.context).orElseThrow();
 
     // build type: Dict[GUARDIAN_ID, Tuple[ELECTION_PUBLIC_KEY, TallyDecryptionShare]]
     Map<String, DecryptionShare.KeyAndSelection> shares = new HashMap<>();
 
     shares.put(this.guardians.get(0).object_id, new DecryptionShare.KeyAndSelection(
             this.guardians.get(0).share_election_public_key().publicKey(),
-            first_share.contests().get(first_contest.object_id).selections().get(first_selection.object_id)));
+            first_share.contests.get(first_contest.object_id).selections().get(first_selection.object_id)));
 
     shares.put(this.guardians.get(1).object_id, new DecryptionShare.KeyAndSelection(
             this.guardians.get(1).share_election_public_key().publicKey(),
-            second_share.contests().get(first_contest.object_id).selections().get(first_selection.object_id)));
+            second_share.contests.get(first_contest.object_id).selections().get(first_selection.object_id)));
 
     shares.put(this.guardians.get(2).object_id, new DecryptionShare.KeyAndSelection(
             this.guardians.get(2).share_election_public_key().publicKey(),
-            third_share.contests().get(first_contest.object_id).selections().get(first_selection.object_id)));
+            third_share.contests.get(first_contest.object_id).selections().get(first_selection.object_id)));
 
-    Optional<PlaintextTally.Selection> result = DecryptWithShares.decrypt_selection_with_decryption_shares(
+    Optional<PlaintextTally.Selection> result = DecryptWithShares2.decrypt_selection_with_decryption_shares(
             first_selection, shares, this.context.crypto_extended_base_hash, false);
 
     assertThat(result).isPresent();
@@ -358,22 +350,20 @@ public class TestDecryptionMediator extends TestProperties {
     PlaintextBallot plaintext_ballot = this.fake_cast_ballot;
     CiphertextAcceptedBallot encrypted_ballot = this.encrypted_fake_cast_ballot;
 
-    Map<String, DecryptionShare.TallyDecryptionShare> shares = new HashMap<>();
+    Map<String, DecryptionShare> shares = new HashMap<>();
     for (int i = 0; i < 3; i++) {
       Guardian guardian = this.guardians.get(i);
       shares.put(guardian.object_id,
-              Decryptions.compute_decryption_share_for_ballot(guardian, encrypted_ballot, this.context).orElseThrow());
+              Decryptions2.compute_decryption_share_for_ballot(guardian, encrypted_ballot, this.context).orElseThrow());
     }
 
-    Optional<Map<String, PlaintextTally.Contest>> resultO = DecryptWithShares.decrypt_tally(
-            encrypted_ballot, shares, this.context.crypto_extended_base_hash);
-    assertThat(resultO).isPresent();
-    Map<String, PlaintextTally.Contest> result = resultO.get();
+    PlaintextTally tally = DecryptWithShares2.decrypt_ballot(
+            encrypted_ballot, shares, this.context.crypto_extended_base_hash).orElseThrow();
 
     for (PlaintextBallot.Contest contest : plaintext_ballot.contests) {
       for (PlaintextBallot.Selection selection : contest.ballot_selections) {
         int expected_tally = selection.vote;
-        Integer actual_tally = result.get(contest.contest_id).selections().get(selection.selection_id).tally();
+        Integer actual_tally =  tally.contests.get(contest.contest_id).selections().get(selection.selection_id).tally();
         assertThat(expected_tally).isEqualTo(actual_tally);
       }
     }
@@ -388,52 +378,51 @@ public class TestDecryptionMediator extends TestProperties {
     Guardian missing_guardian = this.guardians.get(2);
     String missing_guardian_id = missing_guardian.object_id;
 
-    Map<String, DecryptionShare.TallyDecryptionShare> shares = new HashMap<>();
+    Map<String, DecryptionShare> shares = new HashMap<>();
     for (Guardian guardian : available_guardians) {
       shares.put(guardian.object_id,
-              Decryptions.compute_decryption_share_for_ballot(guardian, encrypted_ballot, this.context).orElseThrow());
+              Decryptions2.compute_decryption_share_for_ballot(guardian, encrypted_ballot, this.context).orElseThrow());
     }
 
-    Map<String, DecryptionShare.CompensatedTallyDecryptionShare> compensated_shares = new HashMap<>();
+    Map<String, DecryptionShare.CompensatedDecryptionShare> compensated_shares = new HashMap<>();
     for (Guardian guardian : available_guardians) {
       compensated_shares.put(guardian.object_id,
-              Decryptions.compute_compensated_decryption_share_for_ballot(
+              Decryptions2.compute_compensated_decryption_share_for_ballot(
                       guardian, missing_guardian_id, encrypted_ballot, this.context, identity_auxiliary_decrypt).orElseThrow());
     }
 
     List<KeyCeremony.PublicKeySet> all_keys = available_guardians.stream().map(Guardian::share_public_keys)
             .collect(Collectors.toList());
-    Map<String, Group.ElementModQ> lagrange_coefficients = compute_lagrange_coefficients_for_guardians(all_keys);
+    Map<String, Group.ElementModQ> lagrange_coefficients = Decryptions2.compute_lagrange_coefficients_for_guardians(all_keys);
 
     ElectionPublicKey public_key = available_guardians.get(0).otherGuardianElectionKey(missing_guardian_id);
 
-    DecryptionShare.TallyDecryptionShare reconstructed_share = reconstruct_decryption_ballot(
+    DecryptionShare reconstructed_share = Decryptions2.reconstruct_decryption_share_for_ballot(
             missing_guardian_id,
             public_key,
             encrypted_ballot,
             compensated_shares,
             lagrange_coefficients);
 
-    //         all_shares = {**shares, missing_guardian_id: reconstructed_share}
-    Map<String, DecryptionShare.TallyDecryptionShare> all_shares = shares.entrySet().stream()
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    // all_shares = {**shares, missing_guardian_id: reconstructed_share}
+    Map<String, DecryptionShare> all_shares = shares.entrySet().stream()
+            .collect(Collectors.toMap(t -> t.getKey(), t -> t.getValue()));
     all_shares.put(missing_guardian_id, reconstructed_share);
 
-
-    // Ballot.CiphertextAcceptedBallot ballot,
+     // Ballot.CiphertextAcceptedBallot ballot,
     //          Map<String, TallyDecryptionShare> shares,
     //          ElementModQ extended_base_hash
-    Optional<Map<String, PlaintextTally.Contest>> resultO = DecryptWithShares.decrypt_tally(
+    Optional<PlaintextTally> resultO = DecryptWithShares2.decrypt_ballot(
             encrypted_ballot,
             all_shares,
             this.context.crypto_extended_base_hash);
     assertThat(resultO).isPresent();
-    Map<String, PlaintextTally.Contest> result = resultO.get();
+    PlaintextTally tally = resultO.get();
 
     for (PlaintextBallot.Contest contest : plaintext_ballot.contests) {
       for (PlaintextBallot.Selection selection : contest.ballot_selections) {
         int expected_tally = selection.vote;
-        Integer actual_tally = result.get(contest.contest_id).selections().get(selection.selection_id).tally();
+        Integer actual_tally = tally.contests.get(contest.contest_id).selections().get(selection.selection_id).tally();
         assertThat(expected_tally).isEqualTo(actual_tally);
       }
     }
@@ -442,24 +431,24 @@ public class TestDecryptionMediator extends TestProperties {
   @Example
   public void test_decrypt_spoiled_ballots_all_guardians_present() {
     // precompute decryption shares for the guardians
-    DecryptionShare.TallyDecryptionShare first_share = compute_decryption_share(
-            this.guardians.get(0), this.publishedTally, this.context, this.ballot_box.getSpoiledBallots()).orElseThrow();
-    DecryptionShare.TallyDecryptionShare second_share = compute_decryption_share(
-            this.guardians.get(1), this.publishedTally, this.context, this.ballot_box.getSpoiledBallots()).orElseThrow();
-    DecryptionShare.TallyDecryptionShare third_share = compute_decryption_share(
-            this.guardians.get(2), this.publishedTally, this.context, this.ballot_box.getSpoiledBallots()).orElseThrow();
+    Map<String, DecryptionShare> first_share = Decryptions2.compute_decryption_share_for_ballots(
+            this.guardians.get(0), this.ballot_box.getSpoiledBallots(), this.context).orElseThrow();
+    Map<String, DecryptionShare> second_share = Decryptions2.compute_decryption_share_for_ballots(
+            this.guardians.get(1), this.ballot_box.getSpoiledBallots(), this.context).orElseThrow();
+    Map<String, DecryptionShare> third_share = Decryptions2.compute_decryption_share_for_ballots(
+            this.guardians.get(2), this.ballot_box.getSpoiledBallots(), this.context).orElseThrow();
 
-    Map<String, DecryptionShare.TallyDecryptionShare> shares = new HashMap<>();
+    Map<String, Map<String, DecryptionShare>> shares = new HashMap<>();
     shares.put(this.guardians.get(0).object_id, first_share);
     shares.put(this.guardians.get(1).object_id, second_share);
     shares.put(this.guardians.get(2).object_id, third_share);
 
-    Optional<List<DecryptionMediator.SpoiledBallotAndTally>> resultO = DecryptWithShares.decrypt_spoiled_ballots(
+    Optional<List<DecryptionMediator2.SpoiledBallotAndTally>> resultO = DecryptWithShares2.decrypt_spoiled_ballots(
             this.ballot_box.getSpoiledBallots(),
             shares,
             this.context);
     assertThat(resultO).isPresent();
-    List<DecryptionMediator.SpoiledBallotAndTally> result = resultO.get();
+    List<DecryptionMediator2.SpoiledBallotAndTally> result = resultO.get();
     Map<String, PlaintextBallot> spoiledBallots = result.stream().collect(Collectors.toMap(r -> r.ballot.object_id, r -> r.ballot));
 
     assertThat(spoiledBallots.containsKey(this.fake_spoiled_ballot.object_id)).isTrue();
@@ -479,13 +468,13 @@ public class TestDecryptionMediator extends TestProperties {
 
   @Example
   public void test_get_plaintext_tally_all_guardians_present_simple() {
-    DecryptionMediator subject = new DecryptionMediator(this.context, this.publishedTally, this.ballot_box.getSpoiledBallots());
+    DecryptionMediator2 subject = new DecryptionMediator2(this.context, this.publishedTally, this.ballot_box.getSpoiledBallots());
 
     for (Guardian guardian : this.guardians) {
       assertThat(subject.announce(guardian)).isTrue();
     }
 
-    Optional<PlaintextTally> decrypted_tallies = subject.decrypt_tally(false, null);
+    Optional<PlaintextTally> decrypted_tallies = subject.get_plaintext_tally(null);
     assertThat(decrypted_tallies).isPresent();
     Map<String, Integer> result = this.convert_to_selections(decrypted_tallies.get());
 
@@ -493,7 +482,7 @@ public class TestDecryptionMediator extends TestProperties {
     assertThat(result).isEqualTo(this.expected_plaintext_tally);
 
     // Verify we get the same tally back if we call again
-    Optional<PlaintextTally> another_decrypted_tally = subject.decrypt_tally(false, null);
+    Optional<PlaintextTally> another_decrypted_tally = subject.get_plaintext_tally(null);
     assertThat(another_decrypted_tally).isPresent();
 
     assertThat(decrypted_tallies.get()).isEqualTo(another_decrypted_tally.get());
@@ -501,15 +490,15 @@ public class TestDecryptionMediator extends TestProperties {
 
   @Example
   public void test_get_plaintext_tally_compensate_missing_guardian_simple() {
-    DecryptionMediator subject = new DecryptionMediator(this.context, this.publishedTally, this.ballot_box.getSpoiledBallots());
+    DecryptionMediator2 subject = new DecryptionMediator2(this.context, this.publishedTally, this.ballot_box.getSpoiledBallots());
 
     assertThat(subject.announce(this.guardians.get(0))).isTrue();
     assertThat(subject.announce(this.guardians.get(1))).isTrue();
 
     // explicitly compensate to demonstrate that this is possible, but not required
-    assertThat(subject.compensate(this.guardians.get(2).object_id, identity_auxiliary_decrypt)).isPresent();
+    assertThat(subject.get_compensated_shares_for_tally(this.guardians.get(2).object_id, identity_auxiliary_decrypt)).isPresent();
 
-    Optional<PlaintextTally> decrypted_tallies = subject.decrypt_tally(false, null);
+    Optional<PlaintextTally> decrypted_tallies = subject.get_plaintext_tally(null);
     assertThat(decrypted_tallies).isPresent();
     Map<String, Integer> result = this.convert_to_selections(decrypted_tallies.get());
 
@@ -531,13 +520,13 @@ public class TestDecryptionMediator extends TestProperties {
 
     Map<String, Integer> plaintext_tallies = TallyTestHelper.accumulate_plaintext_ballots(plaintext_ballots);
     CiphertextTallyBuilder encrypted_tally = this.generate_encrypted_tally(tuple.metadata, tuple.context, plaintext_ballots);
-    DecryptionMediator subject = new DecryptionMediator(tuple.context, encrypted_tally.build(), this.ballot_box.getSpoiledBallots());
+    DecryptionMediator2 subject = new DecryptionMediator2(tuple.context, encrypted_tally.build(), this.ballot_box.getSpoiledBallots());
 
     for (Guardian guardian : this.guardians) {
       assertThat(subject.announce(guardian)).isTrue();
     }
 
-    Optional<PlaintextTally> decrypted_tallies = subject.decrypt_tally(false, null);
+    Optional<PlaintextTally> decrypted_tallies = subject.get_plaintext_tally(null);
     assertThat(decrypted_tallies).isPresent();
     Map<String, Integer> result = this.convert_to_selections(decrypted_tallies.get());
 

@@ -6,7 +6,7 @@ The _com.sunya.electionguard.workflow.DecryptBallots_ command line utility simul
 [ballot decryption](https://www.electionguard.vote/spec/0.95.0/7_Verifiable_decryption/)
 on a single __encrypted ballot chain__ in an Election Record. 
 
-The input Election Record comes from the output of an _EncryptBallots_ program.
+The input Election Record comes from the output of an _EncryptBallots_ or _AccumulateTally_ program.
 
 The output Election Record is complete, and can be input to an __ElectionGuard verifier__.
 
@@ -27,7 +27,8 @@ Usage: java -classpath electionguard-java-all.jar
 ````
 
 The input directory containing the election record is required. It can be in Json or protobuf format. 
-In the workflow simulation, the output of the _EncryptBallots_ is used.
+In the workflow simulation, the output of the _EncryptBallots_ is used. If it contains an encryptedTally,
+that step is skipped, otherwise it will also accumulate the accepted encrypted ballots into an encrypted tally.
 
 You must specify a _GuardianProvider_ (see below), or a location of the serialized guardian file, for example 
 from the output of the _PerformKeyCeremony_. Note that only the Protobuf guardian file is currently supported, 

@@ -137,7 +137,7 @@ public class TestTallyProperties extends TestProperties {
   private Map<String, Integer> decrypt_with_secret(CiphertextTallyBuilder tally, Group.ElementModQ secret_key) {
     Map<String, Integer> plaintext_selections = new HashMap<>();
     for (CiphertextTallyBuilder.Contest contest : tally.contests.values()) {
-      for (Map.Entry<String, CiphertextTallyBuilder.Selection> entry : contest.tally_selections.entrySet()) {
+      for (Map.Entry<String, CiphertextTallyBuilder.Selection> entry : contest.selections.entrySet()) {
         Integer plaintext_tally = entry.getValue().ciphertext().decrypt(secret_key);
         plaintext_selections.put(entry.getKey(), plaintext_tally);
       }

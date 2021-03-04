@@ -92,7 +92,7 @@ public class CiphertextTallyPojo {
 
   private static CiphertextTallyContestPojo convertContest(CiphertextTally.Contest org) {
     Map<String, CiphertextTallySelectionPojo> selections = new HashMap<>();
-    for (Map.Entry<String, CiphertextTally.Selection> entry : org.tally_selections.entrySet()) {
+    for (Map.Entry<String, CiphertextTally.Selection> entry : org.selections.entrySet()) {
       selections.put(entry.getKey(), convertSelection(entry.getValue()));
     }
     CiphertextTallyContestPojo pojo = new CiphertextTallyContestPojo();
