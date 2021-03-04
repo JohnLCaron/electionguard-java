@@ -7,6 +7,7 @@ import com.google.common.flogger.FluentLogger;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -261,5 +262,22 @@ public class PlaintextBallot extends ElectionObjectBase {
               ", length=" + length +
               '}';
     }
+  }
+
+  /** Create a PlaintextBallot from a CiphertextBallot and its decrypted tally. */
+  static PlaintextBallot from(CiphertextBallot cballot, PlaintextTally tally) {
+    List<Contest> contests = new ArrayList<>();
+    for (CiphertextBallot.Contest ccontest : cballot.contests) {
+      PlaintextTally.Contest tcontest = tally.contests.get(ccontest.object_id);
+      List<Selection> selections = new ArrayList<>();
+      for (CiphertextBallot.Selection cselection : ccontest.ballot_selections) {
+        if (!cselection.is_placeholder_selection) {
+          PlaintextTally.Selection tselection = tcontest.selections().get(cselection.object_id);
+          selections.add(new Selection(cselection.object_id, tselection.tally(), false, null));
+        }
+      }
+      contests.add(new Contest(ccontest.object_id, selections));
+    }
+    return new PlaintextBallot(cballot.object_id, cballot.ballot_style, contests);
   }
 }

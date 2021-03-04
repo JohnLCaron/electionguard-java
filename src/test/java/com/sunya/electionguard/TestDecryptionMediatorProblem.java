@@ -198,9 +198,9 @@ public class TestDecryptionMediatorProblem extends TestProperties {
     CiphertextTally ptally = ctally.build();
 
     // now decrypt it
-    DecryptionMediator decryptionMediator = new DecryptionMediator(this.context, ptally, this.ballot_box.getSpoiledBallots());
+    DecryptionMediator2 decryptionMediator = new DecryptionMediator2(this.context, ptally, this.ballot_box.getSpoiledBallots());
     this.guardians.forEach(decryptionMediator::announce);
-    Optional<PlaintextTally> decrypted_tallies = decryptionMediator.decrypt_tally(false, null);
+    Optional<PlaintextTally> decrypted_tallies = decryptionMediator.get_plaintext_tally(null);
     assertThat(decrypted_tallies).isNotNull();
 
     Map<String, Integer> result = this._convert_to_selections(decrypted_tallies.orElseThrow());
@@ -256,9 +256,9 @@ public class TestDecryptionMediatorProblem extends TestProperties {
     CiphertextTally ptally = ctally.build();
 
     // now decrypt it
-    DecryptionMediator decryptionMediator = new DecryptionMediator(this.context, ptally, this.ballot_box.getSpoiledBallots());
+    DecryptionMediator2 decryptionMediator = new DecryptionMediator2(this.context, ptally, this.ballot_box.getSpoiledBallots());
     this.guardians.forEach(decryptionMediator::announce);
-    Optional<PlaintextTally> decrypted_tallies = decryptionMediator.decrypt_tally(false, null);
+    Optional<PlaintextTally> decrypted_tallies = decryptionMediator.get_plaintext_tally(null);
     assertThat(decrypted_tallies).isNotNull();
 
     Map<String, Integer> result = this._convert_to_selections(decrypted_tallies.orElseThrow());
@@ -308,9 +308,9 @@ public class TestDecryptionMediatorProblem extends TestProperties {
     CiphertextTally ptally = ctally.build();
 
     // now decrypt it
-    DecryptionMediator decryptionMediator = new DecryptionMediator(this.context, ptally, this.ballot_box.getSpoiledBallots());
+    DecryptionMediator2 decryptionMediator = new DecryptionMediator2(this.context, ptally, this.ballot_box.getSpoiledBallots());
     this.guardians.forEach(decryptionMediator::announce);
-    Optional<PlaintextTally> decrypted_tallies = decryptionMediator.decrypt_tally(false, null);
+    Optional<PlaintextTally> decrypted_tallies = decryptionMediator.get_plaintext_tally(null);
     assertThat(decrypted_tallies).isNotNull();
 
     Map<String, Integer> result = this._convert_to_selections(decrypted_tallies.orElseThrow());
@@ -354,9 +354,9 @@ public class TestDecryptionMediatorProblem extends TestProperties {
     CiphertextTally ptally = ctally.build();
 
     // now decrypt it
-    DecryptionMediator decryptionMediator = new DecryptionMediator(this.context, ptally, this.ballot_box.getSpoiledBallots());
+    DecryptionMediator2 decryptionMediator = new DecryptionMediator2(this.context, ptally, this.ballot_box.getSpoiledBallots());
     this.guardians.forEach(decryptionMediator::announce);
-    Optional<PlaintextTally> decrypted_tallies = decryptionMediator.decrypt_tally(false, null);
+    Optional<PlaintextTally> decrypted_tallies = decryptionMediator.get_plaintext_tally(null);
     assertThat(decrypted_tallies).isNotNull();
 
     Map<String, Integer> result = this._convert_to_selections(decrypted_tallies.orElseThrow());

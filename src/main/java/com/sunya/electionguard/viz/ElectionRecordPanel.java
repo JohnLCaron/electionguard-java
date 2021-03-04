@@ -21,12 +21,14 @@ import java.io.IOException;
 import java.util.Formatter;
 
 class ElectionRecordPanel extends JPanel {
-  PreferencesExt prefs;
+  private final PreferencesExt prefs;
+  private final JPanel buttPanel = new JPanel();
+
   TextHistoryPane ta;
   IndependentWindow infoWindow;
   ComboBox<String> electionRecordDirCB;
   JPanel topPanel;
-  JPanel buttPanel = new JPanel();
+
   FileManager fileChooser;
   boolean eventOk = true;
 
@@ -87,7 +89,8 @@ class ElectionRecordPanel extends JPanel {
     BAMutil.addActionToContainer(buttPanel, infoAction);
 
     // components
-    this.electionDescriptionTable = new ElectionDescriptionTable((PreferencesExt) prefs.node("ElectionDescription"));
+    this.electionDescriptionTable = new ElectionDescriptionTable((PreferencesExt) prefs.node("ElectionDescription"))
+            .addActions(buttPanel);
     this.acceptedBallotsTable = new AcceptedBallotsTable((PreferencesExt) prefs.node("AcceptedBallots"));
     this.ciphertextTallyTable = new CiphertextTallyTable((PreferencesExt) prefs.node("CiphertextTally"));
     this.electionTallyTable = new PlaintextTallyTable((PreferencesExt) prefs.node("ElectionTally"));

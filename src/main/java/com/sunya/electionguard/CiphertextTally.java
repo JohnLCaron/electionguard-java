@@ -2,7 +2,6 @@ package com.sunya.electionguard;
 
 import com.google.common.collect.ImmutableMap;
 
-import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import java.util.Map;
 import java.util.Objects;
@@ -36,12 +35,12 @@ public class CiphertextTally extends ElectionObjectBase {
     public final ElementModQ contestDescriptionHash;
 
     /** The collection of selections in the contest, keyed by selection.object_id. */
-    public final ImmutableMap<String, Selection> tally_selections; // Map(SELECTION_ID, CiphertextTallySelection)
+    public final ImmutableMap<String, Selection> selections; // Map(SELECTION_ID, CiphertextTallySelection)
 
-    public Contest(String object_id, ElementModQ contestDescriptionHash, Map<String, Selection> tally_selections) {
+    public Contest(String object_id, ElementModQ contestDescriptionHash, Map<String, Selection> selections) {
       super(object_id);
       this.contestDescriptionHash = contestDescriptionHash;
-      this.tally_selections = ImmutableMap.copyOf(tally_selections);
+      this.selections = ImmutableMap.copyOf(selections);
     }
 
     @Override
@@ -51,12 +50,12 @@ public class CiphertextTally extends ElectionObjectBase {
       if (!super.equals(o)) return false;
       Contest that = (Contest) o;
       return contestDescriptionHash.equals(that.contestDescriptionHash) &&
-              tally_selections.equals(that.tally_selections);
+              selections.equals(that.selections);
     }
 
     @Override
     public int hashCode() {
-      return Objects.hash(super.hashCode(), contestDescriptionHash, tally_selections);
+      return Objects.hash(super.hashCode(), contestDescriptionHash, selections);
     }
 
     @Override

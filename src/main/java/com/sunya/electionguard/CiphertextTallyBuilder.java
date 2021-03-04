@@ -211,7 +211,7 @@ public class CiphertextTallyBuilder {
             .collect(Collectors.toMap(t -> t.selection_id, t -> t.ciphertext));
 
     for (Contest contest : this.contests.values()) {
-      for (Map.Entry<String, Selection> entry2 : contest.tally_selections.entrySet()) {
+      for (Map.Entry<String, Selection> entry2 : contest.selections.entrySet()) {
         String selection_id = entry2.getKey();
         Selection selection = entry2.getValue();
         if (result_dict.containsKey(selection_id)) {
@@ -241,12 +241,12 @@ public class CiphertextTallyBuilder {
     final ElementModQ description_hash;
 
     /** A collection of CiphertextTallySelection mapped by SelectionDescription.object_id. */
-    final Map<String, Selection> tally_selections; // Map(SELECTION_ID, CiphertextTallySelection)
+    final Map<String, Selection> selections; // Map(SELECTION_ID, CiphertextTallySelection)
 
-    public Contest(String object_id, ElementModQ description_hash, Map<String, Selection> tally_selections) {
+    public Contest(String object_id, ElementModQ description_hash, Map<String, Selection> selections) {
       super(object_id);
       this.description_hash = description_hash;
-      this.tally_selections = tally_selections;
+      this.selections = selections;
     }
 
     /** Accumulate the contest selections of an individual ballot into this tally. Potentially parellizable over selections.*/
@@ -266,14 +266,14 @@ public class CiphertextTallyBuilder {
       // if (any(set(this.tally_selections).difference(selection_ids))) {
       // Set<String> have = this.tally_selections.keySet();
       // if (!selection_ids.stream().anyMatch(id -> have.contains(id))) {
-      if (!selection_ids.equals(this.tally_selections.keySet())) {
+      if (!selection_ids.equals(this.selections.keySet())) {
         logger.atWarning().log("accumulate cannot add mismatched selections for contest %s", this.object_id);
         return false;
       }
 
       // Accumulate the tally selections in parallel tasks
       List<Callable<AccumSelectionsTuple>> tasks =
-              this.tally_selections.entrySet().stream()
+              this.selections.entrySet().stream()
                       .map(entry -> new RunAccumulateSelections(entry.getKey(), entry.getValue(), contest_selections))
                       .collect(Collectors.toList());
 
@@ -285,7 +285,7 @@ public class CiphertextTallyBuilder {
         if (tuple.ciphertext == null) {
           return false;
         } else {
-          Selection selection = this.tally_selections.get(tuple.selection_id);
+          Selection selection = this.selections.get(tuple.selection_id);
           selection.ciphertext_accumulate = tuple.ciphertext;
         }
       }
@@ -339,19 +339,19 @@ public class CiphertextTallyBuilder {
       if (!super.equals(o)) return false;
       Contest that = (Contest) o;
       return description_hash.equals(that.description_hash) &&
-              tally_selections.equals(that.tally_selections);
+              selections.equals(that.selections);
     }
 
     @Override
     public int hashCode() {
-      return Objects.hash(super.hashCode(), description_hash, tally_selections);
+      return Objects.hash(super.hashCode(), description_hash, selections);
     }
 
     CiphertextTally.Contest build() {
       // String object_id, ElementModQ description_hash, Map<String, CiphertextTallySelection> tally_selections
       return new CiphertextTally.Contest(
               this.object_id, this.description_hash,
-              this.tally_selections.entrySet().stream().collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue().build())));
+              this.selections.entrySet().stream().collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue().build())));
     }
   }
 

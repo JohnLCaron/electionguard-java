@@ -66,6 +66,17 @@ public class BallotBox {
     return Optional.of(ballot_box_ballot);
   }
 
+  /* LOOK python also returns state = None.
+  def get_ballots(
+    store: DataStore, state: Optional[BallotBoxState]
+) -> Dict[str, CiphertextAcceptedBallot]:
+    return {
+        ballot_id: ballot
+        for (ballot_id, ballot) in store.items()
+        if state is None or ballot.state == state
+    }
+   */
+
   /** Get all the ballots, cast or spoiled. */
   public Iterable<CiphertextAcceptedBallot> getAllBallots() {
     return store;

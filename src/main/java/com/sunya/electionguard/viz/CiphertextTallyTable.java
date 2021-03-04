@@ -77,7 +77,7 @@ public class CiphertextTallyTable extends JPanel {
 
   void setContest(ContestBean contestBean) {
     java.util.List<SelectionBean> beanList = new ArrayList<>();
-    for (CiphertextTally.Selection s : contestBean.contest.tally_selections.values()) {
+    for (CiphertextTally.Selection s : contestBean.contest.selections.values()) {
       beanList.add(new SelectionBean(s));
     }
     selectionTable.setBeans(beanList);

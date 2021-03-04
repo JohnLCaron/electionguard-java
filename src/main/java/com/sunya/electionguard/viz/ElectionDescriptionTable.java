@@ -6,6 +6,7 @@
 package com.sunya.electionguard.viz;
 
 import com.sunya.electionguard.Election;
+import com.sunya.electionguard.input.ElectionInputValidation;
 import ucar.ui.prefs.BeanTable;
 import ucar.ui.widget.BAMutil;
 import ucar.ui.widget.IndependentWindow;
@@ -14,7 +15,9 @@ import ucar.util.prefs.PreferencesExt;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.util.ArrayList;
+import java.util.Formatter;
 import java.util.stream.Collectors;
 
 public class ElectionDescriptionTable extends JPanel {
@@ -28,11 +31,13 @@ public class ElectionDescriptionTable extends JPanel {
   private final BeanTable<GpUnitBean> gpunitTable;
 
   private final JSplitPane split1, split2, split3, split4, split5;
+  private final  TextHistoryPane infoTA = new TextHistoryPane();
   private final IndependentWindow infoWindow;
+
+  private Election election;
 
   public ElectionDescriptionTable(PreferencesExt prefs) {
     this.prefs = prefs;
-    TextHistoryPane infoTA = new TextHistoryPane();
     infoWindow = new IndependentWindow("Extra Information", BAMutil.getImage("electionguard-logo.png"), infoTA);
     infoWindow.setBounds((Rectangle) prefs.getBean("InfoWindowBounds", new Rectangle(300, 300, 800, 100)));
 
@@ -92,7 +97,19 @@ public class ElectionDescriptionTable extends JPanel {
     add(split5, BorderLayout.CENTER);
   }
 
+  ElectionDescriptionTable addActions(JPanel buttPanel) {
+    AbstractAction valAction = new AbstractAction() {
+      public void actionPerformed(ActionEvent e) {
+        validateElection();
+      }
+    };
+    BAMutil.setActionProperties(valAction, "alien", "Validate Election", false, 'V', -1);
+    BAMutil.addActionToContainer(buttPanel, valAction);
+    return this;
+  }
+
   void setElectionDescription(Election election) {
+    this.election = election;
     candidateTable.setBeans(election.candidates.stream().map(CandidateBean::new).collect(Collectors.toList()));
     partyTable.setBeans(election.parties.stream().map(PartyBean::new).collect(Collectors.toList()));
     gpunitTable.setBeans(election.geopolitical_units.stream().map(GpUnitBean::new).collect(Collectors.toList()));
@@ -119,6 +136,20 @@ public class ElectionDescriptionTable extends JPanel {
     prefs.putInt("splitPos3", split3.getDividerLocation());
     prefs.putInt("splitPos4", split4.getDividerLocation());
     prefs.putInt("splitPos5", split5.getDividerLocation());
+  }
+
+  void validateElection() {
+    if (this.election == null) {
+      return;
+    }
+    ElectionInputValidation input = new ElectionInputValidation(this.election);
+    Formatter problems = new Formatter();
+    boolean ok = input.validateElection(problems);
+
+    infoTA.setText(problems.toString());
+    infoTA.appendLine(String.format("Election validates %s%n", ok));
+    infoTA.gotoTop();
+    infoWindow.show();
   }
 
   public static class PartyBean {
@@ -281,7 +312,6 @@ public class ElectionDescriptionTable extends JPanel {
     }
 
     public String getCryptoHash() { return selection.crypto_hash().toString(); }
-
   }
 
 }

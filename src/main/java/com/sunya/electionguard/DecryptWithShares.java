@@ -64,7 +64,7 @@ class DecryptWithShares {
     for (CiphertextTally.Contest contest : tally.values()) {
       HashMap<String, PlaintextTally.Selection> selections = new HashMap<>();
 
-      for (CiphertextTally.Selection selection : contest.tally_selections.values()) {
+      for (CiphertextTally.Selection selection : contest.selections.values()) {
         // Map(AVAILABLE_GUARDIAN_ID, KeyAndSelection)
         Map<String, KeyAndSelection> tally_shares = DecryptionShare.get_tally_shares_for_selection(selection.object_id, shares);
         Optional<PlaintextTally.Selection> plaintext_selectionO = decrypt_selection_with_decryption_shares(
