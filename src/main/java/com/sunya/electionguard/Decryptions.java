@@ -2,14 +2,23 @@ package com.sunya.electionguard;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Streams;
 import com.google.common.flogger.FluentLogger;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
-import static com.sunya.electionguard.DecryptionShare.*;
+import static com.sunya.electionguard.DecryptionShare.CiphertextCompensatedDecryptionContest;
+import static com.sunya.electionguard.DecryptionShare.CiphertextCompensatedDecryptionSelection;
+import static com.sunya.electionguard.DecryptionShare.CiphertextDecryptionContest;
+import static com.sunya.electionguard.DecryptionShare.CiphertextDecryptionSelection;
+import static com.sunya.electionguard.DecryptionShare.CompensatedDecryptionShare;
+import static com.sunya.electionguard.DecryptionShare.create_ciphertext_decryption_selection;
 
 /** Static methods for decryption. */
 class Decryptions {
@@ -24,39 +33,76 @@ class Decryptions {
    * @param guardian: The guardian who will partially decrypt the tally
    * @param tally: The election tally to decrypt
    * @param context: The public election encryption context
-   * @return a `TallyDecryptionShare` or `None` if there is an error
+   * @return a `DecryptionShare` or `None` if there is an error
    */
-  static Optional<TallyDecryptionShare> compute_decryption_share(
+  static Optional<DecryptionShare> compute_decryption_share(
           Guardian guardian,
           CiphertextTally tally,
-          CiphertextElectionContext context,
-          Iterable<CiphertextAcceptedBallot> spoiled_ballots) {
+          CiphertextElectionContext context) {
 
-    // Map(CONTEST_ID, CiphertextDecryptionContest)
-    // Parallizable over each of the tally's contests.
-    Optional<Map<String, CiphertextDecryptionContest>> contests =
-            compute_decryption_share_for_cast_contests(guardian, tally, context);
-    if (contests.isEmpty()) {
-      return Optional.empty();
+    Map<String, CiphertextDecryptionContest> contests = new HashMap<>();
+    for (CiphertextTally.Contest tallyContest : tally.contests.values()) {
+      Optional<CiphertextDecryptionContest> contest =
+              compute_decryption_share_for_contest(guardian, CiphertextContest.createFrom(tallyContest), context);
+      if (contest.isEmpty()) {
+        return Optional.empty();
+      }
+      contests.put(tallyContest.object_id, contest.get());
     }
 
-    // LOOK old way, spoiled ballots shares are computed here by compute_decryption_share_for_spoiled_ballots().
-    //   Would like to change to process spoiled ballots in seperate stream.
-    // Map(BALLOT_ID, TallyDecryptionShare)
-    // Parallizable over each of the tally's contests.
-    Optional<Map<String, TallyDecryptionShare>> spoiled_ballot_shares =
-            compute_decryption_share_for_spoiled_ballots(guardian, context, spoiled_ballots);
-
-    if (spoiled_ballot_shares.isEmpty()) {
-     return Optional.empty();
-    }
-
-    return Optional.of(TallyDecryptionShare.create(
+    return Optional.of(new DecryptionShare(
             tally.object_id,
             guardian.object_id,
             guardian.share_election_public_key().publicKey(),
-            contests.get(),
-            spoiled_ballot_shares.get()));
+            contests));
+  }
+
+  /** Compute the DecryptionShare for a list of ballots for a guardian. */
+  static Optional<Map<String, DecryptionShare>> compute_decryption_share_for_ballots(
+          Guardian guardian,
+          Iterable<CiphertextAcceptedBallot> ballots,
+          CiphertextElectionContext context) {
+
+  Map<String, DecryptionShare> shares = new HashMap<>();
+
+    for (CiphertextAcceptedBallot ballot : ballots) {
+      Optional<DecryptionShare> ballot_share = compute_decryption_share_for_ballot(
+              guardian, ballot, context);
+      if (ballot_share.isEmpty()) {
+        return Optional.empty();
+      }
+      shares.put(ballot.object_id, ballot_share.get());
+    }
+
+    return Optional.of(shares);
+  }
+
+  /** Compute the DecryptionShare for a single ballot for a guardian. */
+  static Optional<DecryptionShare> compute_decryption_share_for_ballot(
+          Guardian guardian,
+          CiphertextAcceptedBallot ballot,
+          CiphertextElectionContext context) {
+
+    // Map(CONTEST_ID, CiphertextDecryptionContest)
+    Map<String, CiphertextDecryptionContest> contests = new HashMap<>();
+
+    for (CiphertextBallot.Contest contest : ballot.contests) {
+      Optional<CiphertextDecryptionContest> contest_share = compute_decryption_share_for_contest(
+              guardian,
+              CiphertextContest.createFrom(contest),
+              context);
+        if (contest_share.isEmpty()) {
+          logger.atInfo().log("could not compute ballot share for guardian %s contest %s",
+                  guardian.object_id, contest.object_id);
+          return Optional.empty();
+        }
+        contests.put(contest.object_id, contest_share.get());
+    }
+    return Optional.of(new DecryptionShare(
+            ballot.object_id,
+            guardian.object_id,
+            guardian.share_election_public_key().publicKey(),
+            contests));
   }
 
   /**
@@ -64,110 +110,32 @@ class Decryptions {
    * Parallizable over each of the tally's contests.
    * @return Map(CONTEST_ID, CiphertextDecryptionContest)
    */
-  private static Optional<Map<String, CiphertextDecryptionContest>> compute_decryption_share_for_cast_contests(
+  private static Optional<CiphertextDecryptionContest> compute_decryption_share_for_contest(
           Guardian guardian,
-          CiphertextTally tally,
+          CiphertextContest ciphertextContest,
           CiphertextElectionContext context) {
 
-    Map<String, CiphertextDecryptionContest> contests = new HashMap<>();
+    Map<String, CiphertextDecryptionSelection> selections = new HashMap<>();
 
-    for (CiphertextTally.Contest tallyContest : tally.contests.values()) {
-      Map<String, CiphertextDecryptionSelection> selections = new HashMap<>();
+    List<Callable<Optional<CiphertextDecryptionSelection>>> tasks =
+            Streams.stream(ciphertextContest.selections).map(selection ->
+                    new RunComputeDecryptionShareForSelection(guardian, selection, context)).collect(Collectors.toList());
 
-      // [(guardian, selection, context) for (_, selection) in contest.tally_selections.items()],
-      List<Callable<Optional<CiphertextDecryptionSelection>>> tasks =
-              tallyContest.selections.values().stream().map(selection ->
-                      new RunComputeDecryptionShareForSelection(guardian, selection, context)).collect(Collectors.toList());
+    Scheduler<Optional<CiphertextDecryptionSelection>> scheduler = new Scheduler<>();
+    List<Optional<CiphertextDecryptionSelection>> selection_decryptions = scheduler.schedule(tasks, true);
 
-      Scheduler<Optional<CiphertextDecryptionSelection>> scheduler = new Scheduler<>();
-      List<Optional<CiphertextDecryptionSelection>> selection_decryptions = scheduler.schedule(tasks, true);
-
-      // verify the decryptions are received and add them to the collection
-      for (Optional<CiphertextDecryptionSelection> decryption : selection_decryptions) {
-        if (decryption.isEmpty()) {
-          logger.atInfo().log("could not compute share for guardian %s contest %s",
-                  guardian.object_id, tallyContest.object_id);
-          return Optional.empty();
-        }
-        selections.put(decryption.get().object_id(), decryption.get());
-      }
-
-      contests.put(tallyContest.object_id, CiphertextDecryptionContest.create(
-              tallyContest.object_id, guardian.object_id, tallyContest.contestDescriptionHash, selections));
-    }
-
-    return Optional.of(contests);
-  }
-
-  ///////////////////////////////////////////////////////////////////////////////
-  // this was split off from compute_decryption_share
-
-  /**
-   * Compute the decryption for all spoiled ballots in the Ciphertext Tally.
-   * Parallizable over each of the tally's contests.
-   * @return Map(BALLOT_ID, TallyDecryptionShare)
-   */
-  static Optional<Map<String, TallyDecryptionShare>> compute_decryption_share_for_spoiled_ballots(
-          Guardian guardian,
-          CiphertextElectionContext context,
-          Iterable<CiphertextAcceptedBallot> spoiled_ballots) {
-
-    Map<String, TallyDecryptionShare> spoiled_ballots_shares = new HashMap<>();
-    for (CiphertextAcceptedBallot spoiled_ballot : spoiled_ballots) {
-      Optional<TallyDecryptionShare> computed_share = compute_decryption_share_for_ballot(guardian, spoiled_ballot, context);
-
-      if (computed_share.isPresent()) {
-        spoiled_ballots_shares.put(spoiled_ballot.object_id, computed_share.get());
-      } else {
+    // verify the decryptions are received and add them to the collection
+    for (Optional<CiphertextDecryptionSelection> decryption : selection_decryptions) {
+      if (decryption.isEmpty()) {
+        logger.atWarning().log("could not compute share for guardian %s contest %s",
+                guardian.object_id, ciphertextContest.object_id);
         return Optional.empty();
       }
+      selections.put(decryption.get().object_id(), decryption.get());
     }
-    return Optional.of(spoiled_ballots_shares);
-  }
 
-  /**
-   * Compute the TallyDecryptionShare for a single ballot for a guardian.
-   * Parallizable over each of the ballot's selections. LOOK worth it?
-   */
-  static Optional<TallyDecryptionShare> compute_decryption_share_for_ballot(
-          Guardian guardian,
-          CiphertextAcceptedBallot ballot,
-          CiphertextElectionContext context) {
-
-    // Map(CONTEST_ID, CiphertextDecryptionContest)
-    Map<String, CiphertextDecryptionContest> contests = new HashMap<>();
-    for (CiphertextBallot.Contest contest : ballot.contests) {
-      Map<String, CiphertextDecryptionSelection> selections = new HashMap<>();
-
-      // [(guardian, selection, context)for selection in contest.ballot_selections]
-      List<Callable<Optional<CiphertextDecryptionSelection>>> tasks =
-              contest.ballot_selections.stream().map(selection ->
-                      new RunComputeDecryptionShareForSelection(guardian, selection, context)).collect(Collectors.toList());
-
-      Scheduler<Optional<CiphertextDecryptionSelection>> scheduler = new Scheduler<>();
-      List<Optional<CiphertextDecryptionSelection>> selection_decryptions = scheduler.schedule(tasks, true);
-
-      // verify the decryptions are received and add them to the collection
-      for (Optional<CiphertextDecryptionSelection> decryption : selection_decryptions) {
-        if (decryption.isEmpty()) {
-          logger.atInfo().log("could not compute spoiled ballot share for guardian %s contest %s",
-                  guardian.object_id, contest.object_id);
-          return Optional.empty();
-        }
-        selections.put(decryption.get().object_id(), decryption.get());
-      }
-
-      contests.put(contest.object_id, CiphertextDecryptionContest.create(
-              contest.object_id,
-              guardian.object_id,
-              contest.contest_hash,
-              selections));
-    }
-    return Optional.of(TallyDecryptionShare.create(
-            ballot.object_id,
-            guardian.object_id,
-            guardian.share_election_public_key().publicKey(),
-            contests, ImmutableMap.of()));
+    return Optional.of(CiphertextDecryptionContest.create(
+            ciphertextContest.object_id, guardian.object_id, ciphertextContest.description_hash, selections));
   }
 
   private static class RunComputeDecryptionShareForSelection implements Callable<Optional<CiphertextDecryptionSelection>> {
@@ -189,7 +157,7 @@ class Decryptions {
 
   /**
    * Compute a partial decryption for a specific selection and guardian.
-   * LOOK this is the work that the RunComputeDecryptionShareForSelection task does.
+   * LOOK this is the work that the RunComputeDecryptionShareForSelection task does. worth it?
    * @param guardian: The guardian who will partially decrypt the selection
    * @param selection: The specific selection to decrypt
    * @param context: The public election encryption context
@@ -213,7 +181,7 @@ class Decryptions {
                 Optional.of(tuple.proof),
                 Optional.empty()));
       } else {
-        logger.atInfo().log("compute decryption share proof failed for %s %s with invalid proof",
+        logger.atWarning().log("compute decryption share proof failed for %s %s with invalid proof",
                 guardian.object_id, selection.object_id);
         return Optional.empty();
       }
@@ -224,57 +192,18 @@ class Decryptions {
   }
 
   /////////////////////////////////////////////////////////////////////////////////////////////
-  // compensated decryptions share
+  // compensated decryption shares
 
   /**
-   * Compute a compensated decryptions share for a guardian. Parallizable over each of the tally's contests.
+   * Compute a compensated decryptions share for a guardian.
    * <p>
    * @param guardian: The guardian who will partially decrypt the tally
    * @param missing_guardian_id: the missing guardian id to compensate
    * @param tally: The election tally to decrypt
    * @param context: The public election encryption context
-   * @return a `TallyDecryptionShare` or `None` if there is an error
+   * @return a `DecryptionShare` or `None` if there is an error
    */
-  static Optional<CompensatedTallyDecryptionShare> compute_compensated_decryption_share(
-          Guardian guardian,
-          String missing_guardian_id,
-          CiphertextTally tally,
-          Iterable<CiphertextAcceptedBallot> spoiled_ballots,
-          CiphertextElectionContext context,
-          Auxiliary.Decryptor decryptor) {
-
-    // Parallizable over each of the tally's contests.
-    Optional<Map<String, CiphertextCompensatedDecryptionContest>> contests =
-            compute_compensated_decryption_share_for_cast_contests(
-                    guardian, missing_guardian_id, tally, context, decryptor);
-    if (contests.isEmpty()) {
-      return Optional.empty();
-    }
-
-    // LOOK old way, ballots shares are computed here by compute_compensated_decryption_share_for_spoiled_ballots()
-    //    Would like to change to process spoiled ballots in seperate stream.
-    // Parallizable over each of the tally's contests.
-    Optional<Map<String, DecryptionShare.CompensatedTallyDecryptionShare>> spoiled_ballots_shares =
-            compute_compensated_decryption_share_for_spoiled_ballots(
-                    guardian, missing_guardian_id, spoiled_ballots, context, decryptor);
-    if (spoiled_ballots_shares.isEmpty()) {
-       return Optional.empty();
-    }
-
-    return Optional.of(CompensatedTallyDecryptionShare.create(
-            tally.object_id,
-            guardian.object_id,
-            missing_guardian_id,
-            guardian.share_election_public_key().publicKey(),
-            contests.get(),
-            spoiled_ballots_shares.get()));
-  }
-
-  /**
-   * Compute the compensated decryption for all of the cast contests in the Ciphertext Tally.
-   * Parallizable over each of the tally's contests.
-   */
-  private static Optional<Map<String, CiphertextCompensatedDecryptionContest>> compute_compensated_decryption_share_for_cast_contests(
+  static Optional<CompensatedDecryptionShare> compute_compensated_decryption_share(
           Guardian guardian,
           String missing_guardian_id,
           CiphertextTally tally,
@@ -284,12 +213,37 @@ class Decryptions {
     Map<String, CiphertextCompensatedDecryptionContest> contests = new HashMap<>();
 
     for (CiphertextTally.Contest contest : tally.contests.values()) {
+      Optional<CiphertextCompensatedDecryptionContest> dcontest = compute_compensated_decryption_share_for_contest(
+              guardian, missing_guardian_id, CiphertextContest.createFrom(contest), context, decryptor);
+      if (dcontest.isEmpty()) {
+        return Optional.empty();
+      }
+      contests.put(contest.object_id, dcontest.get());
+    }
+
+    return Optional.of(new CompensatedDecryptionShare(
+            tally.object_id,
+            guardian.object_id,
+            missing_guardian_id,
+            guardian.share_election_public_key().publicKey(),
+            contests));
+  }
+
+  /**
+   * Compute the compensated decryption for all of the cast contests in the Ciphertext Tally.
+   * Parallizable over each of the tally's contests.
+   */
+  private static Optional<CiphertextCompensatedDecryptionContest> compute_compensated_decryption_share_for_contest(
+          Guardian guardian,
+          String missing_guardian_id,
+          CiphertextContest contest,
+          CiphertextElectionContext context,
+          Auxiliary.Decryptor decryptor) {
+
       Map<String, CiphertextCompensatedDecryptionSelection> selections = new HashMap<>();
 
-      // [ (guardian, missing_guardian_id, selection, context, decrypt)
-      //          for (_, selection) in contest.tally_selections.items() ],
       List<Callable<Optional<CiphertextCompensatedDecryptionSelection>>> tasks =
-              contest.selections.values().stream()
+              Streams.stream(contest.selections)
                       .map(selection -> new RunComputeCompensatedDecryptionShareForSelection(
                               guardian, missing_guardian_id, selection, context, decryptor))
                       .collect(Collectors.toList());
@@ -301,41 +255,36 @@ class Decryptions {
       // verify the decryptions are received and add them to the collection
       for (Optional<CiphertextCompensatedDecryptionSelection> decryption : selection_decryptions) {
         if (decryption.isEmpty()) {
-          logger.atInfo().log("could not compute share for guardian %s contest %s", guardian.object_id, contest.object_id);
+          logger.atWarning().log("could not compute share for guardian %s contest %s", guardian.object_id, contest.object_id);
           return Optional.empty();
         }
         selections.put(decryption.get().object_id(), decryption.get());
       }
 
-      contests.put(contest.object_id, CiphertextCompensatedDecryptionContest.create(
+      return Optional.of(CiphertextCompensatedDecryptionContest.create(
               contest.object_id,
               guardian.object_id,
               missing_guardian_id,
-              contest.contestDescriptionHash,
+              contest.description_hash,
               selections));
-    }
-    return Optional.of(contests);
   }
 
-  ////////////////////////////////////////////////////////////////////////////////////////////////////
-  // this was split off from compute_compensated_decryption_share
-
   /**
-   * Compute the compensated decryption for all spoiled ballots in the Ciphertext Tally, for a specific guardian.
+   * Compute the compensated decryption for the given ballots, for a specific guardian.
    * Parallizable over each of the ballot's selections.
-   * @return Map(BALLOT_ID, compensated decrypted spoiled ballot)
+   * @return Map(BALLOT_ID, CompensatedDecryptionShare)
    */
-  static Optional<Map<String, DecryptionShare.CompensatedTallyDecryptionShare>> compute_compensated_decryption_share_for_spoiled_ballots(
+  static Optional<Map<String, CompensatedDecryptionShare>> compute_compensated_decryption_share_for_ballots(
           Guardian guardian,
           String missing_guardian_id,
-          Iterable<CiphertextAcceptedBallot> spoiled_ballots,
+          Iterable<CiphertextAcceptedBallot> ballots,
           CiphertextElectionContext context,
           Auxiliary.Decryptor decrypt) {
 
-    Map<String, DecryptionShare.CompensatedTallyDecryptionShare> decrypted_ballots = new HashMap<>();
+    Map<String, CompensatedDecryptionShare> decrypted_ballots = new HashMap<>();
 
-    for (CiphertextAcceptedBallot spoiled_ballot : spoiled_ballots) {
-      Optional<CompensatedTallyDecryptionShare> compensated_ballot =
+    for (CiphertextAcceptedBallot spoiled_ballot : ballots) {
+      Optional<CompensatedDecryptionShare> compensated_ballot =
               compute_compensated_decryption_share_for_ballot(
                       guardian, missing_guardian_id, spoiled_ballot, context, decrypt);
 
@@ -354,7 +303,7 @@ class Decryptions {
    * Parallizable over each of the ballot's selections.
    */
   @VisibleForTesting
-  static Optional<CompensatedTallyDecryptionShare> compute_compensated_decryption_share_for_ballot(
+  static Optional<CompensatedDecryptionShare> compute_compensated_decryption_share_for_ballot(
           Guardian guardian,
           String missing_guardian_id,
           CiphertextAcceptedBallot ballot,
@@ -362,45 +311,29 @@ class Decryptions {
           Auxiliary.Decryptor decryptor) {
 
     Map<String, CiphertextCompensatedDecryptionContest> contests = new HashMap<>();
+
     for (CiphertextBallot.Contest contest : ballot.contests) {
-      Map<String, CiphertextCompensatedDecryptionSelection> selections = new HashMap<>();
-
-      //           [ (guardian, missing_guardian_id, selection, context, decrypt)
-      //          for selection in contest.ballot_selections ],
-      List<Callable<Optional<CiphertextCompensatedDecryptionSelection>>> tasks =
-              contest.ballot_selections.stream()
-                      .map(selection -> new RunComputeCompensatedDecryptionShareForSelection(
-                              guardian, missing_guardian_id, selection, context, decryptor))
-                      .collect(Collectors.toList());
-
-      Scheduler<Optional<CiphertextCompensatedDecryptionSelection>> scheduler = new Scheduler<>();
-      List<Optional<CiphertextCompensatedDecryptionSelection>>
-              selection_decryptions = scheduler.schedule(tasks, true);
-
-      // verify the decryptions are received and add them to the collection
-      for (Optional<CiphertextCompensatedDecryptionSelection> decryption : selection_decryptions) {
-        if (decryption.isEmpty()) {
-          logger.atInfo().log("could not compute compensated spoiled ballot share for guardian %s missing: %s contest %s",
+      Optional<CiphertextCompensatedDecryptionContest> contest_share =
+              compute_compensated_decryption_share_for_contest(
+              guardian,
+              missing_guardian_id,
+              CiphertextContest.createFrom(contest),
+              context,
+              decryptor);
+         if (contest_share.isEmpty()) {
+          logger.atWarning().log("could not compute compensated spoiled ballot share for guardian %s missing: %s contest %s",
                   guardian.object_id, missing_guardian_id, contest.object_id);
           return Optional.empty();
         }
-        selections.put(decryption.get().object_id(), decryption.get());
-      }
-
-      contests.put(contest.object_id, CiphertextCompensatedDecryptionContest.create(
-              contest.object_id,
-              guardian.object_id,
-              missing_guardian_id,
-              contest.contest_hash,
-              selections));
+      contests.put(contest.object_id, contest_share.get());
     }
-    return Optional.of(CompensatedTallyDecryptionShare.create(
+
+    return Optional.of(new CompensatedDecryptionShare(
             ballot.object_id,
             guardian.object_id,
             missing_guardian_id,
             guardian.share_election_public_key().publicKey(),
-            contests,
-            ImmutableMap.of()));
+            contests));
   }
 
   private static class RunComputeCompensatedDecryptionShareForSelection implements
@@ -455,7 +388,7 @@ class Decryptions {
             null,
             decryptor);
     if (compensated.isEmpty()) {
-      logger.atInfo().log("compute compensated decryption share failed for %s missing: %s %s",
+      logger.atWarning().log("compute compensated decryption share failed for %s missing: %s %s",
               available_guardian.object_id, missing_guardian_id, selection.object_id);
       return Optional.empty();
     }
@@ -463,7 +396,7 @@ class Decryptions {
 
     Optional<Group.ElementModP> recovery_public_key = available_guardian.recovery_public_key_for(missing_guardian_id);
     if (recovery_public_key.isEmpty()) {
-      logger.atInfo().log("compute compensated decryption share failed for %s missing recovery key: %s %s",
+      logger.atWarning().log("compute compensated decryption share failed for %s missing recovery key: %s %s",
               available_guardian.object_id, missing_guardian_id, selection.object_id);
       return Optional.empty();
     }
@@ -483,7 +416,7 @@ class Decryptions {
               tuple.proof);
       return Optional.of(share);
     } else {
-      logger.atInfo().log("compute compensated decryption share proof failed for %s missing: %s %s",
+      logger.atWarning().log("compute compensated decryption share proof failed for %s missing: %s %s",
               available_guardian.object_id, missing_guardian_id, selection.object_id);
       return Optional.empty();
     }
@@ -505,7 +438,8 @@ class Decryptions {
 
   /** Produce a Lagrange coefficient for a single Guardian, to be used when reconstructing a missing share. */
   private static Group.ElementModQ compute_lagrange_coefficients_for_guardian(
-          List<KeyCeremony.PublicKeySet> all_available_guardian_keys, KeyCeremony.PublicKeySet guardian_keys) {
+          List<KeyCeremony.PublicKeySet> all_available_guardian_keys,
+          KeyCeremony.PublicKeySet guardian_keys) {
 
     List<Integer> other_guardian_orders = all_available_guardian_keys.stream()
             .filter(g -> !g.owner_id().equals(guardian_keys.owner_id()))
@@ -516,48 +450,29 @@ class Decryptions {
 
   ///////////////////////////////////////////////////////////////////////////////////////////////
 
-  /** Use all available guardians to reconstruct the missing shares for all missing guardians. */
-  // Map(MISSING_GUARDIAN_ID, TallyDecryptionShare)
-  static Optional<Map<String, TallyDecryptionShare>> reconstruct_missing_tally_decryption_shares(
-          CiphertextTally ciphertext_tally,
-          Map<String, KeyCeremony.ElectionPublicKey> missing_guardians,
-          Map<String, Map<String, CompensatedTallyDecryptionShare>> compensated_shares,
-          Map<String, Group.ElementModQ> lagrange_coefficients,
-          Iterable<CiphertextAcceptedBallot> spoiled_ballots) {
+  /**
+   * Reconstruct the missing Decryption Share for a missing guardian
+   * from the collection of compensated decryption shares.
+   */
+  // Map(MISSING_GUARDIAN_ID, DecryptionShare)
+  static DecryptionShare reconstruct_decryption_share(
+          String missing_guardian_id,
+          KeyCeremony.ElectionPublicKey public_key,
+          CiphertextTally tally,
+          Map<String, CompensatedDecryptionShare> shares, // Map(GUARDIAN_ID, CompensatedDecryptionShare)
+          Map<String, Group.ElementModQ> lagrange_coefficients) {
 
-    Map<String, TallyDecryptionShare> reconstructed_shares = new HashMap<>();
-    for (Map.Entry<String, Map<String, CompensatedTallyDecryptionShare>> entry : compensated_shares.entrySet()) {
-      String missing_guardian_id = entry.getKey();
-      Map<String, CompensatedTallyDecryptionShare> shares = entry.getValue();
-
-      // Make sure there is a public key
-      KeyCeremony.ElectionPublicKey public_key = missing_guardians.get(missing_guardian_id);
-      if (public_key == null) {
-        logger.atInfo().log("Could not reconstruct tally for %s with no public key", missing_guardian_id);
-        return Optional.empty();
-      }
-
-      // iterate through the tallies and accumulate all of the shares for this guardian
-      Map<String, CiphertextDecryptionContest> contests = reconstruct_decryption_contests(
+    Map<String, CiphertextDecryptionContest> contests = new HashMap<>();
+    for (CiphertextTally.Contest contest : tally.contests.values()) {
+      CiphertextDecryptionContest dcontest = reconstruct_decryption_contest(
               missing_guardian_id,
-              ciphertext_tally.contests,
+              CiphertextContest.createFrom(contest),
               shares,
               lagrange_coefficients);
-
-      // LOOK could seperate out
-      // iterate through the spoiled ballots and accumulate all of the shares for this guardian
-      Map<String, TallyDecryptionShare> spoiled_ballots_shares = reconstruct_decryption_ballots(
-              missing_guardian_id,
-              public_key,
-              spoiled_ballots,
-              shares,
-              lagrange_coefficients);
-      reconstructed_shares.put(
-              missing_guardian_id,
-              TallyDecryptionShare.create(ciphertext_tally.object_id, missing_guardian_id, public_key.publicKey(), contests, spoiled_ballots_shares));
+      contests.put(contest.object_id, dcontest);
     }
 
-    return Optional.of(reconstructed_shares);
+    return new DecryptionShare(tally.object_id, missing_guardian_id, public_key.publicKey(), contests);
   }
 
   /**
@@ -565,40 +480,33 @@ class Decryptions {
    * from the collection of compensated decryption shares.
    * <p>
    * @param missing_guardian_id: The guardian id for the missing guardian
-   * @param cast_tally: The collection of `CiphertextTallyContest` that is cast
-   * @param shares: the collection of `CompensatedTallyDecryptionShare` for the missing guardian
+   * @param contest: The CiphertextContest to decrypt
+   * @param shares: the collection of `CompensatedDecryptionShare` for the missing guardian
    * @param lagrange_coefficients: the lagrange coefficients corresponding to the available guardians that provided shares
    */
-  private static Map<String, CiphertextDecryptionContest> reconstruct_decryption_contests(
+  private static CiphertextDecryptionContest reconstruct_decryption_contest(
           String missing_guardian_id,
-          Map<String, CiphertextTally.Contest> cast_tally,
-          Map<String, CompensatedTallyDecryptionShare> shares,
+          CiphertextContest contest,
+          Map<String, CompensatedDecryptionShare> shares,
           Map<String, Group.ElementModQ> lagrange_coefficients) {
 
-    // iterate through the tallies and accumulate all of the shares for this guardian
-    Map<String, CiphertextDecryptionContest> contests = new HashMap<>();
-    for (Map.Entry<String, CiphertextTally.Contest> entry : cast_tally.entrySet()) {
-      String contest_id = entry.getKey();
-      CiphertextTally.Contest tally_contest = entry.getValue();
-
       Map<String, CiphertextCompensatedDecryptionContest> contest_shares = new HashMap<>();
-      for (Map.Entry<String, CompensatedTallyDecryptionShare> entry2 : shares.entrySet()) {
+      for (Map.Entry<String, CompensatedDecryptionShare> entry2 : shares.entrySet()) {
         String available_guardian_id = entry2.getKey();
-        CompensatedTallyDecryptionShare compensated_share = entry2.getValue();
-        contest_shares.put(available_guardian_id, compensated_share.contests().get(tally_contest.object_id));
+        CompensatedDecryptionShare compensated_share = entry2.getValue();
+        Preconditions.checkArgument(compensated_share.contests.containsKey(contest.object_id));
+        contest_shares.put(available_guardian_id, compensated_share.contests.get(contest.object_id));
       }
 
       Map<String, CiphertextDecryptionSelection> selections = new HashMap<>();
-      for (Map.Entry<String, CiphertextTally.Selection> entry3 : tally_contest.selections.entrySet()) {
-        String selection_id = entry3.getKey();
-        CiphertextTally.Selection tally_selection = entry3.getValue();
-
+      for (CiphertextSelection selection : contest.selections) {
         // collect all of the shares generated for each selection
         Map<String, CiphertextCompensatedDecryptionSelection> compensated_selection_shares = new HashMap<>();
         for (Map.Entry<String, CiphertextCompensatedDecryptionContest> entry4 : contest_shares.entrySet()) {
           String available_guardian_id = entry4.getKey();
           CiphertextCompensatedDecryptionContest compensated_contest = entry4.getValue();
-          compensated_selection_shares.put(available_guardian_id, compensated_contest.selections().get(selection_id));
+          Preconditions.checkArgument(compensated_contest.selections().containsKey(selection.object_id));
+          compensated_selection_shares.put(available_guardian_id, compensated_contest.selections().get(selection.object_id));
         }
 
         List<Group.ElementModP> share_pow_p = new ArrayList<>();
@@ -611,68 +519,18 @@ class Decryptions {
         // product M_il^w_l
         Group.ElementModP reconstructed_share = Group.mult_p(share_pow_p);
 
-        selections.put(selection_id, create_ciphertext_decryption_selection(
-                selection_id,
+        selections.put(selection.object_id, create_ciphertext_decryption_selection(
+                selection.object_id,
                 missing_guardian_id,
                 reconstructed_share,
                 Optional.empty(),
                 Optional.of(compensated_selection_shares)));
       }
-      contests.put(contest_id, CiphertextDecryptionContest.create(
-              contest_id,
+      return CiphertextDecryptionContest.create(
+              contest.object_id,
               missing_guardian_id,
-              tally_contest.contestDescriptionHash,
-              selections));
-    }
-
-    return contests;
-  }
-
-  ///////////////////////////////////////////////////////////////////////////////////////////////////////
-  // seperated out from reconstruct_missing_tally_decryption_shares
-
-  /** Reconstruct the missing shares for each missing guardians for a ballot. */
-  // Map(MISSING_GUARDIAN_ID, TallyDecryptionShare)
-  static Optional<Map<String, TallyDecryptionShare>> reconstruct_missing_tally_decryption_shares_ballots(
-          Iterable<CiphertextAcceptedBallot> spoiled_ballots,
-          CiphertextTally ciphertext_tally,
-          Map<String, KeyCeremony.ElectionPublicKey> missing_guardians,
-          Map<String, Map<String, CompensatedTallyDecryptionShare>> compensated_shares,
-          Map<String, Group.ElementModQ> lagrange_coefficients) {
-
-    Map<String, TallyDecryptionShare> reconstructed_shares = new HashMap<>();
-    for (Map.Entry<String, Map<String, CompensatedTallyDecryptionShare>> entry : compensated_shares.entrySet()) {
-      String missing_guardian_id = entry.getKey();
-      Map<String, CompensatedTallyDecryptionShare> shares = entry.getValue();
-
-      // Make sure there is a public key
-      KeyCeremony.ElectionPublicKey public_key = missing_guardians.get(missing_guardian_id);
-      if (public_key == null) {
-        logger.atInfo().log("Could not reconstruct tally for %s with no public key", missing_guardian_id);
-        return Optional.empty();
-      }
-
-      // iterate through the tallies and accumulate all of the shares for this guardian
-      Map<String, CiphertextDecryptionContest> contests = reconstruct_decryption_contests(
-              missing_guardian_id,
-              ciphertext_tally.contests,
-              shares,
-              lagrange_coefficients);
-
-      // LOOK seperated out
-      // iterate through the spoiled ballots and accumulate all of the shares for this guardian
-      Map<String, TallyDecryptionShare> spoiled_ballots_shares = reconstruct_decryption_ballots (
-              missing_guardian_id,
-              public_key,
-              spoiled_ballots,
-              shares,
-              lagrange_coefficients);
-      reconstructed_shares.put(
-              missing_guardian_id,
-              TallyDecryptionShare.create(ciphertext_tally.object_id, missing_guardian_id, public_key.publicKey(), contests, spoiled_ballots_shares));
-    }
-
-    return Optional.of(reconstructed_shares);
+              contest.description_hash,
+              selections);
   }
 
   /**
@@ -680,47 +538,28 @@ class Decryptions {
    * <p>
    * @param missing_guardian_id: The id of the missing guardian
    * @param public_key: the public key for the missing guardian
-   * @param spoiled_ballots: The collection of `CiphertextAcceptedBallot` that are spoiled
-   * @param shares: the collection of `CompensatedTallyDecryptionShare` for the missing guardian
+   * @param ballots: The collection of `CiphertextAcceptedBallot` that are spoiled
+   * @param shares: the collection of CompensatedDecryptionShare's for each ballot, for each missing LOOK or available? guardian
    * @param lagrange_coefficients: the lagrange coefficients corresponding to the available guardians that provided shares
    */
-  // Map(BALLOT_ID, TallyDecryptionShare)
-  static Map<String, TallyDecryptionShare> reconstruct_decryption_ballots(
+  // Map(BALLOT_ID, DecryptionShare)
+  static Map<String, DecryptionShare> reconstruct_decryption_shares_for_ballots(
           String missing_guardian_id,
           KeyCeremony.ElectionPublicKey public_key,
-          Iterable<CiphertextAcceptedBallot> spoiled_ballots,
-          Map<String, CompensatedTallyDecryptionShare> shares, // Map(available_guardian, CompensatedTallyDecryptionShare)
-          // Map(ballot_id, Map(available_guardian, CompensatedTallyDecryptionShare))
-          // Map<String, Map<String, CompensatedTallyDecryptionShare>> spoiled_ballot_shares,
+          Iterable<CiphertextAcceptedBallot> ballots,
+          Map<String, Map<String, CompensatedDecryptionShare>> shares, // Map(BALLOT_ID, Map(available_guardian, CompensatedDecryptionShare))
           Map<String, Group.ElementModQ> lagrange_coefficients) { // Map(available_guardian, ElementModQ)
 
-    Map<String, TallyDecryptionShare> result = new HashMap<>();
-    for (CiphertextAcceptedBallot spoiled_ballot : spoiled_ballots) {
-      String ballot_id = spoiled_ballot.object_id;
-
-      // iterate through the tallies and accumulate all of the shares for this guardian
-      Map<String, CompensatedTallyDecryptionShare> shares_for_ballot = new HashMap<>(); // Map(GUARDIAN_ID, CompensatedBallotDecryptionShare)
-      for (Map.Entry<String, CompensatedTallyDecryptionShare> entry : shares.entrySet()) {
-        String available_guardian_id = entry.getKey();
-        CompensatedTallyDecryptionShare compensated_share = entry.getValue();
-
-        for (Map.Entry<String, CompensatedTallyDecryptionShare> entry2 : compensated_share.spoiled_ballots().entrySet()) {
-          String compensated_ballot_id = entry2.getKey();
-          CompensatedTallyDecryptionShare compensated_ballot = entry2.getValue();
-          if (compensated_ballot_id.equals(ballot_id)) {
-            shares_for_ballot.put(available_guardian_id, compensated_ballot);
-          }
-        }
-      }
-
-      TallyDecryptionShare ballot_share = reconstruct_decryption_ballot(
+    Map<String, DecryptionShare> result = new HashMap<>();
+    for (CiphertextAcceptedBallot ballot : ballots) {
+      Preconditions.checkArgument(shares.containsKey(ballot.object_id));
+      DecryptionShare ballot_share = reconstruct_decryption_share_for_ballot(
               missing_guardian_id,
               public_key,
-              spoiled_ballot,
-              shares_for_ballot,
+              ballot,
+              shares.get(ballot.object_id),
               lagrange_coefficients);
-
-      result.put(spoiled_ballot.object_id, ballot_share);
+      result.put(ballot.object_id, ballot_share);
     }
     return result;
   }
@@ -731,67 +570,32 @@ class Decryptions {
    * @param missing_guardian_id   The guardian id for the missing guardian
    * @param public_key            the public key for the missing guardian
    * @param ballot                The `CiphertextAcceptedBallot` to reconstruct
-   * @param shares                the collection of `CompensatedTallyDecryptionShare` for the missing guardian, each keyed by the ID of the guardian that produced it
-   * @param lagrange_coefficients the lagrange coefficients corresponding to the available guardians that provided shares
+   * @param shares                the collection of `CompensatedDecryptionShare` for the missing guardian, each keyed by the ID of the guardian that produced it
+   * @param lagrange_coefficients the lagrange coefficients for the available guardians that provided shares
    */
   @VisibleForTesting
-  static TallyDecryptionShare reconstruct_decryption_ballot(
+  static DecryptionShare reconstruct_decryption_share_for_ballot(
           String missing_guardian_id,
           KeyCeremony.ElectionPublicKey public_key,
           CiphertextAcceptedBallot ballot,
-          Map<String, CompensatedTallyDecryptionShare> shares, // Dict[AVAILABLE_GUARDIAN_ID, CompensatedBallotDecryptionShare]
+          Map<String, CompensatedDecryptionShare> shares, // Dict[AVAILABLE_GUARDIAN_ID, CompensatedBallotDecryptionShare]
           Map<String, Group.ElementModQ> lagrange_coefficients) { // Dict[AVAILABLE_GUARDIAN_ID, ElementModQ]
 
     Map<String, CiphertextDecryptionContest> contests = new HashMap<>();
     for (CiphertextBallot.Contest contest : ballot.contests) {
-
-      Map<String, CiphertextCompensatedDecryptionContest> contest_shares = new HashMap<>();
-      for (Map.Entry<String, CompensatedTallyDecryptionShare> entry : shares.entrySet()) {
-        String available_guardian_id = entry.getKey();
-        CompensatedTallyDecryptionShare compensated_ballot = entry.getValue();
-        contest_shares.put(available_guardian_id, compensated_ballot.contests().get(contest.object_id));
-      }
-
-      Map<String, CiphertextDecryptionSelection> selections = new HashMap<>();
-      for (CiphertextBallot.Selection selection : contest.ballot_selections) {
-
-        Map<String, CiphertextCompensatedDecryptionSelection> compensated_selection_shares = new HashMap<>();
-        for (Map.Entry<String, CiphertextCompensatedDecryptionContest> entry : contest_shares.entrySet()) {
-          String available_guardian_id = entry.getKey();
-          CiphertextCompensatedDecryptionContest compensated_contest = entry.getValue();
-          compensated_selection_shares.put(available_guardian_id, compensated_contest.selections().get(selection.object_id));
-        }
-
-        // compute the reconstructed share
-        List<Group.ElementModP> ps = new ArrayList<>();
-        for (Map.Entry<String, CiphertextCompensatedDecryptionSelection> entry : compensated_selection_shares.entrySet()) {
-          String available_guardian_id = entry.getKey();
-          CiphertextCompensatedDecryptionSelection share = entry.getValue();
-          ps.add(Group.pow_p(share.share(), lagrange_coefficients.get(available_guardian_id)));
-        }
-        Group.ElementModP reconstructed_share = Group.mult_p(ps);
-
-        selections.put(selection.object_id, DecryptionShare.create_ciphertext_decryption_selection(
-                selection.object_id,
-                missing_guardian_id,
-                reconstructed_share,
-                Optional.empty(),
-                Optional.of(compensated_selection_shares)));
-      }
-
-      contests.put(contest.object_id, CiphertextDecryptionContest.create(
-              contest.object_id,
+      CiphertextDecryptionContest dcontest = reconstruct_decryption_contest(
               missing_guardian_id,
-              contest.contest_hash,
-              selections));
+              CiphertextContest.createFrom(contest),
+              shares,
+              lagrange_coefficients);
+      contests.put(contest.object_id, dcontest);
     }
 
-    return TallyDecryptionShare.create(
+    return new DecryptionShare(
             ballot.object_id,
             missing_guardian_id,
             public_key.publicKey(),
-            contests,
-            ImmutableMap.of());
+            contests);
   }
 
 }

@@ -10,13 +10,13 @@ import static com.sunya.electionguard.Group.ElementModQ;
 /** The encrypted representation of the summed votes for a collection of ballots */
 @Immutable
 public class CiphertextTally extends ElectionObjectBase {
-    /** The collection of contests in the election, keyed by contest_id. */
-    public final ImmutableMap<String, Contest> contests; // Map(CONTEST_ID, CiphertextTallyContest)
+  /** The collection of contests in the election, keyed by contest_id. */
+  public final ImmutableMap<String, Contest> contests; // Map(CONTEST_ID, CiphertextTallyContest)
 
-    public CiphertextTally(String object_id, Map<String, Contest> contests) {
-      super(object_id);
-      this.contests = ImmutableMap.copyOf(contests);
-    }
+  public CiphertextTally(String object_id, Map<String, Contest> contests) {
+    super(object_id);
+    this.contests = ImmutableMap.copyOf(contests);
+  }
 
   @Override
   public String toString() {
@@ -65,7 +65,7 @@ public class CiphertextTally extends ElectionObjectBase {
               "\n contestDescriptionHash=" + contestDescriptionHash +
               '}';
     }
-  } // CiphertextTallyContest
+  }
 
   /**
    * The homomorphic accumulation of all of the CiphertextBallotSelection for a specific selection and contest.
@@ -85,9 +85,6 @@ public class CiphertextTally extends ElectionObjectBase {
               "\n ciphertext()    =" + ciphertext() +
               '}';
     }
-
-
   }
-
 
 }

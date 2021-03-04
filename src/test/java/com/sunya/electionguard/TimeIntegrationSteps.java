@@ -62,7 +62,7 @@ public class TimeIntegrationSteps {
   BallotBox ballot_box;
 
   // Step 4 - Decrypt Tally
-  DecryptionMediator2 decryptionMediator;
+  DecryptionMediator decryptionMediator;
   CiphertextTally publishedTally;
   PlaintextTally decryptedTally;
   List<PlaintextBallot> spoiledDecryptedBallots;
@@ -263,7 +263,7 @@ public class TimeIntegrationSteps {
     publishedTally = ciphertext_tally.build();
 
     // Configure the Decryption
-    this.decryptionMediator = new DecryptionMediator2(this.context, publishedTally, this.ballot_box.getSpoiledBallots());
+    this.decryptionMediator = new DecryptionMediator(this.context, publishedTally, this.ballot_box.getSpoiledBallots());
 
     // Announce each guardian as present
     for (Guardian guardian : this.guardians) {
@@ -273,7 +273,7 @@ public class TimeIntegrationSteps {
 
     // Here's where the ciphertext Tally is decrypted.
     this.decryptedTally = this.decryptionMediator.get_plaintext_tally(null).orElseThrow();
-    List<DecryptionMediator2.SpoiledBallotAndTally> spoiledTallyAndBallot =
+    List<DecryptionMediator.SpoiledBallotAndTally> spoiledTallyAndBallot =
             this.decryptionMediator.decrypt_spoiled_ballots().orElseThrow();
     this.spoiledDecryptedBallots = spoiledTallyAndBallot.stream().map(e -> e.ballot).collect(Collectors.toList());
     this.spoiledDecryptedTallies = spoiledTallyAndBallot.stream().map(e -> e.tally).collect(Collectors.toList());
