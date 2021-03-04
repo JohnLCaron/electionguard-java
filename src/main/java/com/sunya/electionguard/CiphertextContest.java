@@ -3,7 +3,7 @@ package com.sunya.electionguard;
 import java.util.ArrayList;
 
 /**
- * Base encrypted contest for both tally and ballot.
+ * Base encrypted contest for both CiphertextTally and CiphertextBallot.
  */
 class CiphertextContest {
   final String object_id;

@@ -123,8 +123,6 @@ public class PlaintextTally {
               // LOOK shares
               '}';
     }
-
-
   }
 
 }

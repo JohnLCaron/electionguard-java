@@ -5,7 +5,7 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.google.common.base.Preconditions;
 import com.sunya.electionguard.CiphertextTallyBuilder;
-import com.sunya.electionguard.DecryptionMediator2;
+import com.sunya.electionguard.DecryptionMediator;
 import com.sunya.electionguard.Election;
 import com.sunya.electionguard.ElectionWithPlaceholders;
 import com.sunya.electionguard.Guardian;
@@ -177,7 +177,7 @@ public class DecryptBallots {
 
   void decryptTally() {
     System.out.printf("%nDecrypt tally%n");
-    DecryptionMediator2 mediator = new DecryptionMediator2(electionRecord.context, this.encryptedTally, consumer.spoiledBallotsProto());
+    DecryptionMediator mediator = new DecryptionMediator(electionRecord.context, this.encryptedTally, consumer.spoiledBallotsProto());
 
     int count = 0;
     for (Guardian guardian : this.guardians) {
@@ -193,7 +193,7 @@ public class DecryptBallots {
 
     // Here's where the ciphertext Tally is decrypted.
     this.decryptedTally = mediator.get_plaintext_tally(null).orElseThrow();
-    List<DecryptionMediator2.SpoiledBallotAndTally> spoiledTallyAndBallot =
+    List<DecryptionMediator.SpoiledBallotAndTally> spoiledTallyAndBallot =
             mediator.decrypt_spoiled_ballots().orElseThrow();
     this.spoiledDecryptedBallots = spoiledTallyAndBallot.stream().map(e -> e.ballot).collect(Collectors.toList());
     this.spoiledDecryptedTallies = spoiledTallyAndBallot.stream().map(e -> e.tally).collect(Collectors.toList());

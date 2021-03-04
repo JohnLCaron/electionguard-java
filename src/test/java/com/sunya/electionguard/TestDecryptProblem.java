@@ -49,7 +49,7 @@ public class TestDecryptProblem {
   BallotBox ballot_box;
 
   // Step 4 - Decrypt Tally
-  DecryptionMediator2 decrypter;
+  DecryptionMediator decrypter;
   CiphertextTally publishedTally;
   PlaintextTally decryptedTally;
   List<PlaintextBallot> spoiledDecryptedBallots;
@@ -220,7 +220,7 @@ public class TestDecryptProblem {
     this.publishedTally = ciphertext_tally.build();
 
     // Configure the Decryption
-    this.decrypter = new DecryptionMediator2(this.context, this.publishedTally, this.ballot_box.getSpoiledBallots());
+    this.decrypter = new DecryptionMediator(this.context, this.publishedTally, this.ballot_box.getSpoiledBallots());
 
     // Announce each guardian as present
     int count = 0;
@@ -236,7 +236,7 @@ public class TestDecryptProblem {
 
     // Here's where the ciphertext Tally is decrypted.
     this.decryptedTally = this.decrypter.get_plaintext_tally(null).orElseThrow();
-    List<DecryptionMediator2.SpoiledBallotAndTally> spoiledTallyAndBallot =
+    List<DecryptionMediator.SpoiledBallotAndTally> spoiledTallyAndBallot =
             this.decrypter.decrypt_spoiled_ballots().orElseThrow();
     this.spoiledDecryptedBallots = spoiledTallyAndBallot.stream().map(e -> e.ballot).collect(Collectors.toList());
     this.spoiledDecryptedTallies = spoiledTallyAndBallot.stream().map(e -> e.tally).collect(Collectors.toList());
