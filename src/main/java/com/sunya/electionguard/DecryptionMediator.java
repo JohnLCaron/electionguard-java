@@ -21,7 +21,7 @@ public class DecryptionMediator {
 
   private final CiphertextElectionContext context;
   private final CiphertextTally ciphertext_tally;
-  private final Iterable<CiphertextAcceptedBallot> ciphertext_ballots; // spoiled ballots
+  private final Iterable<SubmittedBallot> ciphertext_ballots; // spoiled ballots
 
   // Map(AVAILABLE_GUARDIAN_ID, DecryptionShare)
   private final Map<String, DecryptionShare> tally_shares = new HashMap<>();
@@ -39,7 +39,7 @@ public class DecryptionMediator {
 
   public DecryptionMediator(CiphertextElectionContext context,
                             CiphertextTally encryptedTally,
-                            Iterable<CiphertextAcceptedBallot> spoiled_ballots) {
+                            Iterable<SubmittedBallot> spoiled_ballots) {
     this.context = context;
     this.ciphertext_tally = encryptedTally;
     this.ciphertext_ballots = spoiled_ballots;
@@ -269,7 +269,7 @@ public class DecryptionMediator {
     }
 
     // If guardians are missing, for each ballot compute compensated ballot_shares
-    for (CiphertextAcceptedBallot ballot : this.ciphertext_ballots) { // LOOK running through ballots twice
+    for (SubmittedBallot ballot : this.ciphertext_ballots) { // LOOK running through ballots twice
       this.compute_missing_shares_for_ballot(ballot, decryptor);
       if (this.count_ballot_shares(ballot.object_id) != this.context.number_of_guardians) {
         logger.atWarning().log("get plaintext ballot failed with share length mismatch");
@@ -278,7 +278,7 @@ public class DecryptionMediator {
     }
 
     // Optional<Map<String, PlaintextTally>> decrypt_ballots(
-    //          Iterable<CiphertextAcceptedBallot> ballots,
+    //          Iterable<SubmittedBallot> ballots,
     //          Map<String, Map<String, DecryptionShare>> shares,
     //          CiphertextElectionContext context)
     return DecryptWithShares.decrypt_ballots(
@@ -297,7 +297,7 @@ public class DecryptionMediator {
     return count;
   }
 
-  private void compute_missing_shares_for_ballot(CiphertextAcceptedBallot ballot, Auxiliary.Decryptor decrypt) {
+  private void compute_missing_shares_for_ballot(SubmittedBallot ballot, Auxiliary.Decryptor decrypt) {
     for (Map.Entry<String, KeyCeremony.ElectionPublicKey> entry : this.missing_guardians.entrySet()) {
       String missing_guardian_id = entry.getKey();
       KeyCeremony.ElectionPublicKey public_key = entry.getValue();
@@ -327,7 +327,7 @@ public class DecryptionMediator {
   }
 
   private Optional<Map<String, DecryptionShare.CompensatedDecryptionShare>> get_compensated_shares_for_ballot(
-          CiphertextAcceptedBallot ballot, String missing_guardian_id, @Nullable Auxiliary.Decryptor decryptor) {
+          SubmittedBallot ballot, String missing_guardian_id, @Nullable Auxiliary.Decryptor decryptor) {
 
     Map<String, DecryptionShare.CompensatedDecryptionShare> compensated_decryptions = new HashMap<>();
 

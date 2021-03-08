@@ -37,8 +37,8 @@ public class TestDecryptionMediator extends TestProperties {
   CiphertextElectionContext context;
   PlaintextBallot fake_cast_ballot;
   PlaintextBallot fake_spoiled_ballot;
-  CiphertextAcceptedBallot encrypted_fake_cast_ballot;
-  CiphertextAcceptedBallot encrypted_fake_spoiled_ballot;
+  SubmittedBallot encrypted_fake_cast_ballot;
+  SubmittedBallot encrypted_fake_spoiled_ballot;
   Map<String, Integer> expected_plaintext_tally;
   CiphertextTally publishedTally;
   BallotBox ballot_box;
@@ -348,7 +348,7 @@ public class TestDecryptionMediator extends TestProperties {
   public void test_decrypt_ballot_compensate_all_guardians_present() {
     // precompute decryption shares for the guardians
     PlaintextBallot plaintext_ballot = this.fake_cast_ballot;
-    CiphertextAcceptedBallot encrypted_ballot = this.encrypted_fake_cast_ballot;
+    SubmittedBallot encrypted_ballot = this.encrypted_fake_cast_ballot;
 
     Map<String, DecryptionShare> shares = new HashMap<>();
     for (int i = 0; i < 3; i++) {
@@ -373,7 +373,7 @@ public class TestDecryptionMediator extends TestProperties {
   public void test_decrypt_ballot_compensate_missing_guardians() {
     // precompute decryption shares for the guardians
     PlaintextBallot plaintext_ballot = this.fake_cast_ballot;
-    CiphertextAcceptedBallot encrypted_ballot = this.encrypted_fake_cast_ballot;
+    SubmittedBallot encrypted_ballot = this.encrypted_fake_cast_ballot;
     List<Guardian> available_guardians = this.guardians.subList(0, 2);
     Guardian missing_guardian = this.guardians.get(2);
     String missing_guardian_id = missing_guardian.object_id;
@@ -409,7 +409,7 @@ public class TestDecryptionMediator extends TestProperties {
             .collect(Collectors.toMap(t -> t.getKey(), t -> t.getValue()));
     all_shares.put(missing_guardian_id, reconstructed_share);
 
-     // Ballot.CiphertextAcceptedBallot ballot,
+     // Ballot.SubmittedBallot ballot,
     //          Map<String, TallyDecryptionShare> shares,
     //          ElementModQ extended_base_hash
     Optional<PlaintextTally> resultO = DecryptWithShares.decrypt_ballot(
@@ -498,7 +498,7 @@ public class TestDecryptionMediator extends TestProperties {
     // explicitly compensate to demonstrate that this is possible, but not required
     assertThat(subject.get_compensated_shares_for_tally(this.guardians.get(2).object_id, identity_auxiliary_decrypt)).isPresent();
 
-    Optional<PlaintextTally> decrypted_tallies = subject.get_plaintext_tally(null);
+    Optional<PlaintextTally> decrypted_tallies = subject.get_plaintext_tally(identity_auxiliary_decrypt);
     assertThat(decrypted_tallies).isPresent();
     Map<String, Integer> result = this.convert_to_selections(decrypted_tallies.get());
 

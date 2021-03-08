@@ -21,12 +21,12 @@ class DecryptWithShares {
 
   /** Decrypt a collection of ciphertext spoiled ballots into decrypted plaintext tallies and ballots. */
   static Optional<List<DecryptionMediator.SpoiledBallotAndTally>> decrypt_spoiled_ballots(
-          Iterable<CiphertextAcceptedBallot> ballots,
+          Iterable<SubmittedBallot> ballots,
           Map<String, Map<String, DecryptionShare>> shares, // MAP(AVAILABLE_GUARDIAN_ID, Map(BALLOT_ID, DecryptionShare))
           CiphertextElectionContext context) {
 
     List<DecryptionMediator.SpoiledBallotAndTally> result = new ArrayList<>();
-    for (CiphertextAcceptedBallot ballot : ballots) {
+    for (SubmittedBallot ballot : ballots) {
       HashMap<String, DecryptionShare> ballot_shares = new HashMap<>();
       for (Map.Entry<String, Map<String, DecryptionShare>> entry : shares.entrySet()) {
         Map<String, DecryptionShare> map2 = entry.getValue();
@@ -87,12 +87,12 @@ class DecryptWithShares {
 
   /** Decrypt a collection of ciphertext spoiled ballots into Map(BALLOT_ID, PlaintextTally). */
   static Optional<Map<String, PlaintextTally>> decrypt_ballots(
-          Iterable<CiphertextAcceptedBallot> ballots,
+          Iterable<SubmittedBallot> ballots,
           Map<String, Map<String, DecryptionShare>> shares, // MAP(AVAILABLE_GUARDIAN_ID, Map(BALLOT_ID, DecryptionShare))
           CiphertextElectionContext context) {
 
     Map<String, PlaintextTally> result = new HashMap<>();
-    for (CiphertextAcceptedBallot ballot : ballots) {
+    for (SubmittedBallot ballot : ballots) {
       HashMap<String, DecryptionShare> ballot_shares = new HashMap<>();
       for (Map.Entry<String, Map<String, DecryptionShare>> entry : shares.entrySet()) {
         Map<String, DecryptionShare> map2 = entry.getValue();
@@ -112,7 +112,7 @@ class DecryptWithShares {
 
   /** Decrypt a single ciphertext ballot into a decrypted plaintext ballot. */
   static Optional<PlaintextTally> decrypt_ballot(
-          CiphertextAcceptedBallot ballot,
+          SubmittedBallot ballot,
           Map<String, DecryptionShare> shares,
           ElementModQ extended_base_hash) {
 

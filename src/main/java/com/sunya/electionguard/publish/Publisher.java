@@ -52,7 +52,7 @@ public class Publisher {
   // proto
   static final String ELECTION_RECORD_FILE_NAME = "electionRecord.proto";
   static final String GUARDIANS_FILE = "guardians.proto";
-  static final String CIPHERTEXT_BALLOT_FILE = "ciphertextAcceptedBallot.proto";
+  static final String SUBMITTED_BALLOT_PROTO = "submittedBallot.proto";
   static final String SPOILED_BALLOT_FILE = "spoiledPlaintextBallot.proto";
   static final String SPOILED_TALLY_FILE = "spoiledPlaintextTally.proto";
 
@@ -203,7 +203,7 @@ public class Publisher {
   }
 
   public Path ciphertextBallotProtoPath() {
-    return publishDirectory.resolve(CIPHERTEXT_BALLOT_FILE).toAbsolutePath();
+    return publishDirectory.resolve(SUBMITTED_BALLOT_PROTO).toAbsolutePath();
   }
 
   public Path spoiledBallotProtoPath() {
@@ -223,7 +223,7 @@ public class Publisher {
           CiphertextElectionContext context,
           ElectionConstants constants,
           Iterable<Encrypt.EncryptionDevice> devices,
-          Iterable<CiphertextAcceptedBallot> ciphertext_ballots,
+          Iterable<SubmittedBallot> ciphertext_ballots,
           CiphertextTally ciphertext_tally,
           PlaintextTally decryptedTally,
           @Nullable Iterable<KeyCeremony.CoefficientValidationSet> coefficient_validation_sets,
@@ -238,8 +238,8 @@ public class Publisher {
       ConvertToJson.writeDevice(device, this.devicePath(device.uuid));
     }
 
-    for (CiphertextAcceptedBallot ballot : ciphertext_ballots) {
-      ConvertToJson.writeCiphertextBallot(ballot, this.ballotPath(ballot.object_id));
+    for (SubmittedBallot ballot : ciphertext_ballots) {
+      ConvertToJson.writeSubmittedBallot(ballot, this.ballotPath(ballot.object_id));
     }
 
     ConvertToJson.writeCiphertextTally(ciphertext_tally, encryptedTallyPath());
@@ -326,13 +326,13 @@ public class Publisher {
           ElectionConstants constants,
           Iterable<KeyCeremony.CoefficientValidationSet> coefficient_validation_sets,
           Iterable<Encrypt.EncryptionDevice> devices,
-          Iterable<CiphertextAcceptedBallot> accepted_ballots) throws IOException {
+          Iterable<SubmittedBallot> submittedBallots) throws IOException {
 
 
     // the accepted ballots are written into their own file
     try (FileOutputStream out = new FileOutputStream(ciphertextBallotProtoPath().toFile())) {
-      for (CiphertextAcceptedBallot ballot : accepted_ballots) {
-        CiphertextBallotProto.CiphertextAcceptedBallot ballotProto = CiphertextBallotToProto.translateToProto(ballot);
+      for (SubmittedBallot ballot : submittedBallots) {
+        CiphertextBallotProto.SubmittedBallot ballotProto = CiphertextBallotToProto.translateToProto(ballot);
         ballotProto.writeDelimitedTo(out);
       }
     }
@@ -427,7 +427,7 @@ public class Publisher {
           ElectionConstants constants,
           Iterable<KeyCeremony.CoefficientValidationSet> coefficient_validation_sets,
           Iterable<Encrypt.EncryptionDevice> devices,
-          Iterable<CiphertextAcceptedBallot> accepted_ballots,
+          Iterable<SubmittedBallot> accepted_ballots,
           CiphertextTally ciphertext_tally,
           PlaintextTally decryptedTally,
           @Nullable Iterable<PlaintextBallot> spoiledBallots,
@@ -436,8 +436,9 @@ public class Publisher {
 
     // the accepted ballots are written into their own file
     try (FileOutputStream out = new FileOutputStream(ciphertextBallotProtoPath().toFile())) {
-      for (CiphertextAcceptedBallot ballot : accepted_ballots) {
-        CiphertextBallotProto.CiphertextAcceptedBallot ballotProto = CiphertextBallotToProto.translateToProto(ballot);
+      for (SubmittedBallot ballot : accepted_ballots) {
+        CiphertextBallotProto.SubmittedBallot
+ ballotProto = CiphertextBallotToProto.translateToProto(ballot);
         ballotProto.writeDelimitedTo(out);
       }
     }

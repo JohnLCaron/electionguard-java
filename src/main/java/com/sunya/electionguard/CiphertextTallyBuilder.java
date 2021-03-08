@@ -78,13 +78,13 @@ public class CiphertextTallyBuilder {
   /**
    * Append a collection of Ballots to the tally, parallelized over these ballots, for each selection.
    */
-  public int batch_append(CloseableIterable<CiphertextAcceptedBallot> ballotsIterable) {
+  public int batch_append(CloseableIterable<SubmittedBallot> ballotsIterable) {
     // Map(SELECTION_ID, Map(BALLOT_ID, Ciphertext)
     Map<String, Map<String, ElGamal.Ciphertext>> cast_ballot_selections = new HashMap<>();
 
     // Find all the ballots for each selection.
     AtomicInteger count = new AtomicInteger();
-    try (Stream<CiphertextAcceptedBallot> ballots = ballotsIterable.iterator().stream()) {
+    try (Stream<SubmittedBallot> ballots = ballotsIterable.iterator().stream()) {
       ballots.filter(b -> b.state == State.CAST && !cast_ballot_ids.contains(b.object_id) &&
                     BallotValidations.ballot_is_valid_for_election(b, this.manifest, this.context))
               .forEach(ballot -> {
@@ -106,7 +106,7 @@ public class CiphertextTallyBuilder {
   }
 
   /** Append a ballot to the tally. Potentially parellizable over this ballot's selections. */
-  public boolean append(CiphertextAcceptedBallot ballot) {
+  public boolean append(SubmittedBallot ballot) {
     if (ballot.state == State.UNKNOWN) {
       logger.atWarning().log("append cannot add %s with invalid state", ballot.object_id);
       return false;
@@ -136,7 +136,7 @@ public class CiphertextTallyBuilder {
   }
 
   /** Add a single cast ballot to the tally. Potentially parellizable over this ballot's selections. */
-  private boolean add_cast(CiphertextAcceptedBallot ballot) {
+  private boolean add_cast(SubmittedBallot ballot) {
     // iterate through the contests and elgamal add
     for (CiphertextBallot.Contest contest : ballot.contests) {
       // This should never happen since the ballot is validated against the election metadata

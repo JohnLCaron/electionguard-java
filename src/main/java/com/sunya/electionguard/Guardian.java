@@ -14,7 +14,10 @@ import java.util.Optional;
 
 import static com.sunya.electionguard.Group.*;
 
-/** Guardian of election (aka Trustee), responsible for safeguarding information and decrypting results. */
+/**
+ * Guardian of election (aka Trustee), responsible for safeguarding information and decrypting results.
+ * LOOK document when we need the secret keys: this.auxiliary_keys.secret_key, this.election_keys.
+ */
 @Immutable
 public class Guardian extends ElectionObjectBase {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
@@ -173,7 +176,7 @@ public class Guardian extends ElectionObjectBase {
 
   /**
    * Compute a compensated partial decryption of an elgamal encryption on behalf of the missing guardian.
-   * LOOK this seems to be the only place we need the secret_key. Whats with ISSUE #47?
+   * LOOK this seems to be the only place we need this.auxiliary_keys.secret_key. Whats with ISSUE #47?
    * <p>
    * @param missing_guardian_id: the guardian
    * @param elgamal:             the `ElGamalCiphertext` that will be partially decrypted
@@ -188,10 +191,14 @@ public class Guardian extends ElectionObjectBase {
           ElGamal.Ciphertext elgamal,
           ElementModQ extended_base_hash,
           @Nullable ElementModQ nonce_seed,
-          Auxiliary.Decryptor decryptor) {
+          @Nullable Auxiliary.Decryptor decryptor) {
 
     if (nonce_seed == null) {
       nonce_seed = rand_q();
+    }
+
+    if (decryptor == null) {
+      decryptor = Rsa::decrypt;
     }
 
     KeyCeremony.ElectionPartialKeyBackup backup = this.otherGuardianPartialKeyBackups.get(missing_guardian_id);
@@ -204,6 +211,7 @@ public class Guardian extends ElectionObjectBase {
     // LOOK why string?
     Optional<String> decrypted_value = decryptor.decrypt(backup.encrypted_value(), this.auxiliary_keys.secret_key);
     if (decrypted_value.isEmpty()) {
+      decryptor.decrypt(backup.encrypted_value(), this.auxiliary_keys.secret_key);
       logger.atInfo().log("compensate decrypt guardian %s failed decryption for %s",
               this.object_id, missing_guardian_id);
       return Optional.empty();

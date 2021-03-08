@@ -26,7 +26,7 @@ public class TestSelectionEncryptionVerifier {
     assertThat(sevOk).isTrue();
 
     Tester tester = new Tester(electionRecord);
-    for (CiphertextAcceptedBallot ballot : electionRecord.acceptedBallots) {
+    for (SubmittedBallot ballot : electionRecord.acceptedBallots) {
       for (CiphertextBallot.Contest contest : ballot.contests) {
         tester.verify_a_contest(contest);
       }
@@ -45,7 +45,7 @@ public class TestSelectionEncryptionVerifier {
     assertThat(sevOk).isTrue();
 
     Tester tester = new Tester(electionRecord);
-    for (CiphertextAcceptedBallot ballot : electionRecord.acceptedBallots) {
+    for (SubmittedBallot ballot : electionRecord.acceptedBallots) {
       for (CiphertextBallot.Contest contest : ballot.contests) {
         tester.verify_a_contest(contest);
       }
@@ -358,7 +358,7 @@ public class TestSelectionEncryptionVerifier {
 
     @Example
     public void testTrackingHashes() {
-      for (CiphertextAcceptedBallot ballot : electionRecord.acceptedBallots) {
+      for (SubmittedBallot ballot : electionRecord.acceptedBallots) {
         ElementModQ crypto_hash = ballot.crypto_hash;
         ElementModQ prev_hash = ballot.previous_tracking_hash;
         ElementModQ curr_hash = ballot.tracking_hash;

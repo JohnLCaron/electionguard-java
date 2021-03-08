@@ -5,7 +5,7 @@
 
 package com.sunya.electionguard.viz;
 
-import com.sunya.electionguard.CiphertextAcceptedBallot;
+import com.sunya.electionguard.SubmittedBallot;
 import com.sunya.electionguard.CiphertextBallot;
 import com.sunya.electionguard.publish.CloseableIterable;
 import com.sunya.electionguard.publish.CloseableIterator;
@@ -25,7 +25,7 @@ import java.util.ArrayList;
 public class AcceptedBallotsTable extends JPanel {
   private final PreferencesExt prefs;
 
-  private final BeanTable<CiphertextAcceptedBallotBean> ballotTable;
+  private final BeanTable<SubmittedBallotBean> ballotTable;
   private final BeanTable<ContestBean> contestTable;
   private final BeanTable<SelectionBean> selectionTable;
 
@@ -38,15 +38,15 @@ public class AcceptedBallotsTable extends JPanel {
     infoWindow = new IndependentWindow("Extra Information", BAMutil.getImage("electionguard-logo.png"), infoTA);
     infoWindow.setBounds((Rectangle) prefs.getBean("InfoWindowBounds", new Rectangle(300, 300, 800, 100)));
 
-    ballotTable = new BeanTable<>(CiphertextAcceptedBallotBean.class, (PreferencesExt) prefs.node("BallotTable"), false);
+    ballotTable = new BeanTable<>(SubmittedBallotBean.class, (PreferencesExt) prefs.node("BallotTable"), false);
     ballotTable.addListSelectionListener(e -> {
-      CiphertextAcceptedBallotBean ballot = ballotTable.getSelectedBean();
+      SubmittedBallotBean ballot = ballotTable.getSelectedBean();
       if (ballot != null) {
         setBallot(ballot);
       }
     });
     ballotTable.addPopupOption("Show Ballot", ballotTable.makeShowAction(infoTA, infoWindow,
-            bean -> ((CiphertextAcceptedBallotBean)bean).ballot.toString()));
+            bean -> ((SubmittedBallotBean)bean).ballot.toString()));
 
     contestTable = new BeanTable<>(ContestBean.class, (PreferencesExt) prefs.node("ContestTable"), false);
     contestTable.addListSelectionListener(e -> {
@@ -73,12 +73,12 @@ public class AcceptedBallotsTable extends JPanel {
     add(split2, BorderLayout.CENTER);
   }
 
-  void setAcceptedBallots(CloseableIterable<CiphertextAcceptedBallot> acceptedBallots) {
-    try (CloseableIterator<CiphertextAcceptedBallot> iter = acceptedBallots.iterator())  {
-      java.util.List<CiphertextAcceptedBallotBean> beanList = new ArrayList<>();
+  void setAcceptedBallots(CloseableIterable<SubmittedBallot> acceptedBallots) {
+    try (CloseableIterator<SubmittedBallot> iter = acceptedBallots.iterator())  {
+      java.util.List<SubmittedBallotBean> beanList = new ArrayList<>();
       while (iter.hasNext()) {
-        CiphertextAcceptedBallot ballot = iter.next();
-        beanList.add(new CiphertextAcceptedBallotBean(ballot));
+        SubmittedBallot ballot = iter.next();
+        beanList.add(new SubmittedBallotBean(ballot));
       }
       ballotTable.setBeans(beanList);
       if (beanList.size() > 0) {
@@ -90,7 +90,7 @@ public class AcceptedBallotsTable extends JPanel {
     }
   }
 
-  void setBallot(CiphertextAcceptedBallotBean ballotBean) {
+  void setBallot(SubmittedBallotBean ballotBean) {
     java.util.List<ContestBean> beanList = new ArrayList<>();
     for (CiphertextBallot.Contest c : ballotBean.ballot.contests) {
       beanList.add(new ContestBean(c));
@@ -120,12 +120,12 @@ public class AcceptedBallotsTable extends JPanel {
     prefs.putInt("splitPos2", split2.getDividerLocation());
   }
 
-  public static class CiphertextAcceptedBallotBean {
-    CiphertextAcceptedBallot ballot;
+  public static class SubmittedBallotBean {
+    SubmittedBallot ballot;
 
-    public CiphertextAcceptedBallotBean(){}
+    public SubmittedBallotBean(){}
 
-    CiphertextAcceptedBallotBean(CiphertextAcceptedBallot ballot) {
+    SubmittedBallotBean(SubmittedBallot ballot) {
       this.ballot = ballot;
     }
 

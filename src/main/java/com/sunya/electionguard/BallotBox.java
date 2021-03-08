@@ -33,27 +33,27 @@ public class BallotBox {
   }
 
   /** Cast a specific encrypted CiphertextBallot. */
-  public Optional<CiphertextAcceptedBallot> cast(CiphertextBallot ballot) {
+  public Optional<SubmittedBallot> cast(CiphertextBallot ballot) {
     return accept_ballot(ballot, State.CAST);
   }
 
   /** Spoil a specific encrypted CiphertextBallot. */
-  public Optional<CiphertextAcceptedBallot> spoil(CiphertextBallot ballot) {
+  public Optional<SubmittedBallot> spoil(CiphertextBallot ballot) {
     return accept_ballot(ballot, State.SPOILED);
   }
 
   /**
    * Accept a ballot within the context of a specified election and against an existing data store.
    * Verify that the ballot is valid for the election and the ballot has not already been cast or spoiled.
-   * @return a `CiphertextAcceptedBallot` or `None` if there was an error
+   * @return a `SubmittedBallot` or `None` if there was an error
    */
-  Optional<CiphertextAcceptedBallot> accept_ballot(CiphertextBallot ballot, State state) {
+  Optional<SubmittedBallot> accept_ballot(CiphertextBallot ballot, State state) {
     if (!BallotValidations.ballot_is_valid_for_election(ballot, this.metadata, context)) {
       return Optional.empty();
     }
 
     if (store.containsKey(ballot.object_id)) {
-      CiphertextAcceptedBallot existingBallot = store.get(ballot.object_id).orElseThrow(IllegalStateException::new);
+      SubmittedBallot existingBallot = store.get(ballot.object_id).orElseThrow(IllegalStateException::new);
       logger.atWarning().log("error accepting ballot, %s already exists with state: %s",
           ballot.object_id, existingBallot.state);
       return Optional.empty();
@@ -61,7 +61,7 @@ public class BallotBox {
 
     // TODO: ISSUE #56: check if the ballot includes the nonce, and regenerate the proofs
     // TODO: ISSUE #56: check if the ballot includes the proofs, if it does not include the nonce
-    CiphertextAcceptedBallot ballot_box_ballot = ballot.acceptWithState(state);
+    SubmittedBallot ballot_box_ballot = ballot.acceptWithState(state);
     store.put(ballot_box_ballot.object_id, ballot_box_ballot);
     return Optional.of(ballot_box_ballot);
   }
@@ -69,7 +69,7 @@ public class BallotBox {
   /* LOOK python also returns state = None.
   def get_ballots(
     store: DataStore, state: Optional[BallotBoxState]
-) -> Dict[str, CiphertextAcceptedBallot]:
+) -> Dict[str, SubmittedBallot]:
     return {
         ballot_id: ballot
         for (ballot_id, ballot) in store.items()
@@ -78,27 +78,27 @@ public class BallotBox {
    */
 
   /** Get all the ballots, cast or spoiled. */
-  public Iterable<CiphertextAcceptedBallot> getAllBallots() {
+  public Iterable<SubmittedBallot> getAllBallots() {
     return store;
   }
 
   /** Get just the cast ballots. */
-  public Iterable<CiphertextAcceptedBallot> getCastBallots() {
+  public Iterable<SubmittedBallot> getCastBallots() {
     return Iterables.filter(store, b -> b.state == State.CAST);
   }
 
   /** Get just the spoiled ballots. */
-  public Iterable<CiphertextAcceptedBallot> getSpoiledBallots() {
+  public Iterable<SubmittedBallot> getSpoiledBallots() {
     return Iterables.filter(store, b -> b.state == State.SPOILED);
   }
 
-  /** Return the CiphertextAcceptedBallot with the given key, or empty if not exist. */
-  Optional<CiphertextAcceptedBallot> get(String key) {
+  /** Return the SubmittedBallot with the given key, or empty if not exist. */
+  Optional<SubmittedBallot> get(String key) {
     return store.get(key);
   }
 
   /** Get all the ballots as a CloseableIterable. */
-  CloseableIterable<CiphertextAcceptedBallot> getAcceptedBallots() {
+  CloseableIterable<SubmittedBallot> getAcceptedBallots() {
     return CloseableIterableAdapter.wrap(store);
   }
 }

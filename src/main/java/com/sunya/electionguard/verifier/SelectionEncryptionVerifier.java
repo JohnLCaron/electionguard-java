@@ -19,7 +19,7 @@ public class SelectionEncryptionVerifier {
   boolean verify_all_selections() {
     boolean error = false;
 
-    for (CiphertextAcceptedBallot ballot : electionRecord.acceptedBallots) {
+    for (SubmittedBallot ballot : electionRecord.acceptedBallots) {
       for (CiphertextBallot.Contest contest : ballot.contests) {
         for (CiphertextBallot.Selection selection : contest.ballot_selections) {
           SelectionVerifier sv = new SelectionVerifier(selection);

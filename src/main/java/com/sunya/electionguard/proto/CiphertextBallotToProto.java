@@ -2,7 +2,7 @@ package com.sunya.electionguard.proto;
 
 import com.sunya.electionguard.BallotBox;
 import com.sunya.electionguard.ChaumPedersen;
-import com.sunya.electionguard.CiphertextAcceptedBallot;
+import com.sunya.electionguard.SubmittedBallot;
 import com.sunya.electionguard.CiphertextBallot;
 
 import static com.sunya.electionguard.proto.CommonConvert.convertCiphertext;
@@ -13,15 +13,15 @@ import static com.sunya.electionguard.proto.CiphertextBallotProto.*;
 
 public class CiphertextBallotToProto {
 
-  public static CiphertextBallotProto.CiphertextAcceptedBallot translateToProto(CiphertextAcceptedBallot ballot) {
-    CiphertextBallotProto.CiphertextAcceptedBallot.Builder builder = CiphertextBallotProto.CiphertextAcceptedBallot.newBuilder();
+  public static CiphertextBallotProto.SubmittedBallot translateToProto(SubmittedBallot ballot) {
+    CiphertextBallotProto.SubmittedBallot.Builder builder = CiphertextBallotProto.SubmittedBallot.newBuilder();
     builder.setCiphertextBallot(convertCiphertextBallot(ballot));
     builder.setState(convertBallotBoxState(ballot.state));
     return builder.build();
   }
 
-  static CiphertextBallotProto.CiphertextAcceptedBallot.BallotBoxState convertBallotBoxState(BallotBox.State type) {
-    return CiphertextBallotProto.CiphertextAcceptedBallot.BallotBoxState.valueOf(type.name());
+  static CiphertextBallotProto.SubmittedBallot.BallotBoxState convertBallotBoxState(BallotBox.State type) {
+    return CiphertextBallotProto.SubmittedBallot.BallotBoxState.valueOf(type.name());
   }
 
   static CiphertextBallotProto.CiphertextBallot convertCiphertextBallot(CiphertextBallot ballot) {

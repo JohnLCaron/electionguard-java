@@ -76,7 +76,7 @@ public class TestReadPythonJson {
   @Example
   public void testBallotsPythonJson() throws IOException {
     for (File file : publisher.ballotFiles()) {
-      CiphertextAcceptedBallot fromPython = ConvertFromJson.readCiphertextBallot(file.getAbsolutePath());
+      SubmittedBallot fromPython = ConvertFromJson.readSubmittedBallot(file.getAbsolutePath());
       assertThat(fromPython).isNotNull();
       System.out.printf("ballotFiles %s%n", fromPython.object_id);
     }
@@ -95,7 +95,7 @@ public class TestReadPythonJson {
   public void testProblemPythonJson() throws IOException {
     // this is failing because Optional is encoded as "None".
     String filename = pythonPublish + "/encrypted_ballots/ballot_03a29d15-667c-4ac8-afd7-549f19b8e4eb.json";
-    CiphertextAcceptedBallot fromPython = ConvertFromJson.readCiphertextBallot(filename);
+    SubmittedBallot fromPython = ConvertFromJson.readSubmittedBallot(filename);
     assertThat(fromPython).isNotNull();
     System.out.printf("%s%n", fromPython);
   }

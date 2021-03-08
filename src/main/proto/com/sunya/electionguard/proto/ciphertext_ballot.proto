@@ -6,7 +6,7 @@ option java_package = "com.sunya.electionguard.proto";
 option java_outer_classname = "CiphertextBallotProto";
 
 // An encrypted ballot that has been cast or spoiled.
-message CiphertextAcceptedBallot {
+message SubmittedBallot {
   enum BallotBoxState {
     UNKNOWN = 0;
     CAST = 1;
