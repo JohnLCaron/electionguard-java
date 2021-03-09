@@ -274,7 +274,7 @@ public class TimeIntegrationSteps {
     // Here's where the ciphertext Tally is decrypted.
     this.decryptedTally = this.decryptionMediator.get_plaintext_tally(null).orElseThrow();
     List<DecryptionMediator.SpoiledBallotAndTally> spoiledTallyAndBallot =
-            this.decryptionMediator.decrypt_spoiled_ballots().orElseThrow();
+            this.decryptionMediator.decrypt_spoiled_ballots(null).orElseThrow();
     this.spoiledDecryptedBallots = spoiledTallyAndBallot.stream().map(e -> e.ballot).collect(Collectors.toList());
     this.spoiledDecryptedTallies = spoiledTallyAndBallot.stream().map(e -> e.tally).collect(Collectors.toList());
     System.out.printf("Tally Decrypted%n");

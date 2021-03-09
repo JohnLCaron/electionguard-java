@@ -1,6 +1,6 @@
 {
-  "object_id": "69aeacb4-64c6-4205-9bb2-5fb6b3b3ea58",
-  "style_id": "harrison-township-ballot-style",
+  "object_id": "1048ce32-f1b1-4b05-b7fb-8c615ac842ee",
+  "style_id": "jefferson-county-ballot-style",
   "contests": [
     {
       "object_id": "justice-supreme-court",
@@ -19,30 +19,13 @@
         },
         {
           "object_id": "john-hancock-selection",
-          "vote": 1,
+          "vote": 0,
           "is_placeholder_selection": false,
           "extra_data": null
         },
         {
           "object_id": "write-in-selection",
-          "vote": 0,
-          "is_placeholder_selection": false,
-          "extra_data": null
-        }
-      ]
-    },
-    {
-      "object_id": "referendum-pineapple",
-      "ballot_selections": [
-        {
-          "object_id": "referendum-pineapple-affirmative-selection",
-          "vote": 0,
-          "is_placeholder_selection": false,
-          "extra_data": null
-        },
-        {
-          "object_id": "referendum-pineapple-negative-selection",
-          "vote": 0,
+          "vote": 1,
           "is_placeholder_selection": false,
           "extra_data": null
         }
