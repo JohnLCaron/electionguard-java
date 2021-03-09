@@ -3,7 +3,7 @@ package com.sunya.electionguard.verifier;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.sunya.electionguard.CiphertextAcceptedBallot;
+import com.sunya.electionguard.SubmittedBallot;
 import com.sunya.electionguard.CiphertextElectionContext;
 import com.sunya.electionguard.ElectionConstants;
 import com.sunya.electionguard.Election;
@@ -30,7 +30,7 @@ public class ElectionRecord {
   public final Election election;
   public final ImmutableList<KeyCeremony.CoefficientValidationSet> guardianCoefficients;
   public final ImmutableList<Encrypt.EncryptionDevice> devices; // may be empty
-  public final CloseableIterable<CiphertextAcceptedBallot> acceptedBallots; // All ballots, not just cast! // may be empty
+  public final CloseableIterable<SubmittedBallot> acceptedBallots; // All ballots, not just cast! // may be empty
   @Nullable public final CiphertextTally encryptedTally;
   @Nullable public final PlaintextTally decryptedTally;
   public final CloseableIterable<PlaintextBallot> spoiledBallots; // may be empty
@@ -45,7 +45,7 @@ public class ElectionRecord {
                         @Nullable List<Encrypt.EncryptionDevice> devices,
                         @Nullable CiphertextTally encryptedTally,
                         @Nullable PlaintextTally decryptedTally,
-                        @Nullable CloseableIterable<CiphertextAcceptedBallot> acceptedBallots,
+                        @Nullable CloseableIterable<SubmittedBallot> acceptedBallots,
                         @Nullable CloseableIterable<PlaintextBallot> spoiledBallots,
                         @Nullable CloseableIterable<PlaintextTally> spoiledTallies) {
     this.constants = constants;
@@ -75,7 +75,7 @@ public class ElectionRecord {
     contestVoteLimits = builder.build();
   }
 
-  public ElectionRecord setBallots(CloseableIterable<CiphertextAcceptedBallot> acceptedBallots,
+  public ElectionRecord setBallots(CloseableIterable<SubmittedBallot> acceptedBallots,
                                    CloseableIterable<PlaintextBallot> spoiledBallots,
                                    CloseableIterable<PlaintextTally> spoiledBallotTallies) {
     return new ElectionRecord(this.constants,

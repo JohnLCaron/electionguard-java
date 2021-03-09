@@ -148,10 +148,10 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
   }
 
   /**
-   * Convert into a `CiphertextAcceptedBallot`, with the given state, and all nonces removed.
+   * Convert into a `SubmittedBallot`, with the given state, and all nonces removed.
    */
-  CiphertextAcceptedBallot acceptWithState(BallotBox.State state) {
-    return CiphertextAcceptedBallot.create(
+  SubmittedBallot acceptWithState(BallotBox.State state) {
+    return SubmittedBallot.create(
             this.object_id,
             this.ballot_style,
             this.description_hash,

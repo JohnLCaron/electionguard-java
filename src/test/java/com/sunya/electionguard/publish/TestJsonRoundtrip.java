@@ -90,7 +90,7 @@ public class TestJsonRoundtrip {
             Optional.of(Group.ONE_MOD_Q),
             Optional.empty());
 
-    CiphertextAcceptedBallot org = new CiphertextAcceptedBallot(
+    SubmittedBallot org = new SubmittedBallot(
             "testBallotRoundtrip",
             "ballotStyle",
             Group.ONE_MOD_Q,
@@ -103,11 +103,11 @@ public class TestJsonRoundtrip {
             BallotBox.State.CAST);
 
     // write json
-    ConvertToJson.writeCiphertextBallot(org, file.toPath());
+    ConvertToJson.writeSubmittedBallot(org, file.toPath());
     // read it back
-    CiphertextAcceptedBallot fromFile = ConvertFromJson.readCiphertextBallot(outputFile);
+    SubmittedBallot fromFile = ConvertFromJson.readSubmittedBallot(outputFile);
 
-    // LOOK this is failing because we took out the nonce in CiphertextAcceptedBallotPojo, as a workaround
+    // LOOK this is failing because we took out the nonce in SubmittedBallotPojo, as a workaround
     //   for python encoding Optional.empty as None.
     assertThat(fromFile).isEqualTo(org);
   }

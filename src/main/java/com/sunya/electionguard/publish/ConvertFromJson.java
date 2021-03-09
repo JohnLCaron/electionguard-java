@@ -13,10 +13,10 @@ public class ConvertFromJson {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
   private static final Gson enhancedGson = GsonTypeAdapters.enhancedGson();
 
-  public static CiphertextAcceptedBallot readCiphertextBallot(String pathname) throws IOException {
+  public static SubmittedBallot readSubmittedBallot(String pathname) throws IOException {
     try (InputStream is = new FileInputStream(pathname)) {
       Reader reader = new InputStreamReader(is);
-      return enhancedGson.fromJson(reader, CiphertextAcceptedBallot.class);
+      return enhancedGson.fromJson(reader, SubmittedBallot.class);
     } catch (Exception ioe) {
       logger.atSevere().log("Failed reading file '%s'", pathname);
       throw ioe;

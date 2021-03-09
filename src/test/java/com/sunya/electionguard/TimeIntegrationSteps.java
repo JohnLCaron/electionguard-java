@@ -237,7 +237,7 @@ public class TimeIntegrationSteps {
     System.out.printf("%n3. cast_and_spoil%n");
     // Randomly cast or spoil the ballots
     for (CiphertextBallot ballot : this.ciphertext_ballots) {
-      Optional<CiphertextAcceptedBallot> accepted_ballot;
+      Optional<SubmittedBallot> accepted_ballot;
       if (random.nextBoolean()) {
         accepted_ballot = this.ballot_box.cast(ballot);
         ncast++;
@@ -320,7 +320,7 @@ public class TimeIntegrationSteps {
   void compare_spoiled_tallies() {
     // the set of spoiled ballot ids.
     Set<String> spoiled = new HashSet<>();
-    for (CiphertextAcceptedBallot accepted_ballot : ballot_box.getSpoiledBallots()) {
+    for (SubmittedBallot accepted_ballot : ballot_box.getSpoiledBallots()) {
       if (accepted_ballot.state == BallotBox.State.SPOILED) {
         spoiled.add(accepted_ballot.object_id);
       }
@@ -378,8 +378,8 @@ public class TimeIntegrationSteps {
       assertWithMessage(coeff.owner_id()).that(coeff).isEqualTo(expected);
     }
 
-    for (CiphertextAcceptedBallot ballot : roundtrip.acceptedBallots) {
-      CiphertextAcceptedBallot expected = this.ballot_box.get(ballot.object_id).orElseThrow();
+    for (SubmittedBallot ballot : roundtrip.acceptedBallots) {
+      SubmittedBallot expected = this.ballot_box.get(ballot.object_id).orElseThrow();
       assertWithMessage(ballot.object_id).that(ballot).isEqualTo(expected);
     }
 
@@ -439,8 +439,8 @@ public class TimeIntegrationSteps {
       assertWithMessage(coeff.owner_id()).that(coeff).isEqualTo(expected);
     }
 
-    for (CiphertextAcceptedBallot ballot : roundtrip.acceptedBallots) {
-      CiphertextAcceptedBallot expected = this.ballot_box.get(ballot.object_id).orElseThrow();
+    for (SubmittedBallot ballot : roundtrip.acceptedBallots) {
+      SubmittedBallot expected = this.ballot_box.get(ballot.object_id).orElseThrow();
       assertWithMessage(ballot.object_id).that(ballot).isEqualTo(expected);
     }
 
@@ -456,8 +456,8 @@ public class TimeIntegrationSteps {
   }
 
   void step_7_read_json_ballots(Publisher publisher) throws IOException {
-    for (CiphertextAcceptedBallot ballot : this.ballot_box.getAllBallots()) {
-      CiphertextAcceptedBallot ballot_from_file = ConvertFromJson.readCiphertextBallot(
+    for (SubmittedBallot ballot : this.ballot_box.getAllBallots()) {
+      SubmittedBallot ballot_from_file = ConvertFromJson.readSubmittedBallot(
               publisher.ballotPath(ballot.object_id).toString());
       assertWithMessage(publisher.ballotPath(ballot.object_id).toString())
               .that(ballot_from_file).isEqualTo(ballot);
@@ -469,8 +469,8 @@ public class TimeIntegrationSteps {
     ElectionRecord roundtrip = consumer.readElectionRecordProto();
 
     int count = 0;
-    for (CiphertextAcceptedBallot ballot : roundtrip.acceptedBallots) {
-      Optional<CiphertextAcceptedBallot> have = this.ballot_box.get(ballot.object_id);
+    for (SubmittedBallot ballot : roundtrip.acceptedBallots) {
+      Optional<SubmittedBallot> have = this.ballot_box.get(ballot.object_id);
       assertThat(have).isPresent();
       assertWithMessage(ballot.object_id).that(have.get()).isEqualTo(ballot);
       count++;

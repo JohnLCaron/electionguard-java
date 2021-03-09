@@ -2,7 +2,7 @@ package com.sunya.electionguard.proto;
 
 import com.sunya.electionguard.BallotBox;
 import com.sunya.electionguard.ChaumPedersen;
-import com.sunya.electionguard.CiphertextAcceptedBallot;
+import com.sunya.electionguard.SubmittedBallot;
 import com.sunya.electionguard.CiphertextBallot;
 
 import javax.annotation.Nullable;
@@ -19,13 +19,13 @@ import static com.sunya.electionguard.proto.CommonConvert.convertList;
 
 public class CiphertextBallotFromProto {
 
-  public static CiphertextAcceptedBallot translateFromProto(CiphertextBallotProto.CiphertextAcceptedBallot ballot) {
-    return new CiphertextAcceptedBallot(
+  public static SubmittedBallot translateFromProto(CiphertextBallotProto.SubmittedBallot ballot) {
+    return new SubmittedBallot(
             convertCiphertextBallot(ballot.getCiphertextBallot()),
             convertBallotBoxState(ballot.getState()));
   }
 
-  static BallotBox.State convertBallotBoxState(CiphertextBallotProto.CiphertextAcceptedBallot.BallotBoxState type) {
+  static BallotBox.State convertBallotBoxState(CiphertextBallotProto.SubmittedBallot.BallotBoxState type) {
     return BallotBox.State.valueOf(type.name());
   }
 

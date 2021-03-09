@@ -200,7 +200,7 @@ public class TestDecryptProblem {
     this.ballot_box = new BallotBox(this.election, this.context);
     // cast the ballots
     for (CiphertextBallot ballot : this.ciphertext_ballots) {
-      Optional<CiphertextAcceptedBallot> accepted_ballot;
+      Optional<SubmittedBallot> accepted_ballot;
       accepted_ballot = this.ballot_box.cast(ballot);
       assertThat(accepted_ballot).isPresent();
       System.out.printf("Accepted Ballot Id: %s state = %s%n", ballot.object_id, accepted_ballot.get().state);
@@ -287,7 +287,7 @@ public class TestDecryptProblem {
   void compare_spoiled_tallies() {
     Map<String, PlaintextTally> plaintextTalliesMap = this.spoiledDecryptedTallies.stream().collect(Collectors.toMap(t -> t.object_id, t -> t));
 
-    for (CiphertextAcceptedBallot accepted_ballot : this.ballot_box.getSpoiledBallots()) {
+    for (SubmittedBallot accepted_ballot : this.ballot_box.getSpoiledBallots()) {
       String ballot_id = accepted_ballot.object_id;
       assertThat(accepted_ballot.state).isEqualTo(State.SPOILED);
       for (PlaintextBallot orgBallot : this.originalPlaintextBallots) {

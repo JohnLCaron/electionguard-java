@@ -31,8 +31,8 @@ public class TestDecryptionMediatorProblem extends TestProperties {
   BallotBox ballot_box;
   PlaintextBallot fake_cast_ballot;
   PlaintextBallot fake_spoiled_ballot;
-  CiphertextAcceptedBallot encrypted_fake_cast_ballot;
-  CiphertextAcceptedBallot encrypted_fake_spoiled_ballot;
+  SubmittedBallot encrypted_fake_cast_ballot;
+  SubmittedBallot encrypted_fake_spoiled_ballot;
   CiphertextTallyBuilder ciphertext_tally;
 
   public TestDecryptionMediatorProblem() {
@@ -345,7 +345,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
 
     // configure the ballot box
     BallotBox ballot_box = new BallotBox(this.election, this.context);
-    CiphertextAcceptedBallot acceptedCastBallot = ballot_box.cast(encryptedCastBallot).orElseThrow();
+    SubmittedBallot acceptedCastBallot = ballot_box.cast(encryptedCastBallot).orElseThrow();
     assertThat(acceptedCastBallot).isNotNull();
 
     // generate encrypted tally

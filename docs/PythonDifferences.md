@@ -42,9 +42,9 @@ Probably need to reconcile when python makes fix.
 ### Classes Reorganized
 
 1. __election.py__ -> (was broken out into) Election, ElectionConstants, CiphertextElectionContext, ElectionWithPlaceholders
-2. __ballot.py__ -> CiphertextAcceptedBallot, CiphertextBallot, PlaintextBallot
+2. __ballot.py__ -> SubmittedBallot, CiphertextBallot, PlaintextBallot
   * CiphertextBallot, CiphertextBallotContest, CiphertextBallotSelection(CiphertextSelection)
-  * CiphertextAcceptedBallot(CiphertextBallot)
+  * SubmittedBallot(CiphertextBallot)
   * PlaintextBallot, PlaintextBallotContest, PlaintextBallotSelection
 3. __tally.py__ -> CiphertextTally, CiphertextTallyBuilder, PlaintextTally
   * CiphertextTally, CiphertextTallyContest, CiphertextTallySelection(CiphertextSelection)
@@ -58,11 +58,15 @@ Probably need to reconcile when python makes fix.
 
 ### Classes Renamed
 
-1. __InternalElectionDescription__ -> ElectionDescriptionWithPlaceholders
-2. __PublishedCiphertextTally__ -> CiphertextTally
-3. __CiphertextTally__ -> CiphertextTallyBuilder
+1. __InternalElectionDescription__ -> __ElectionDescriptionWithPlaceholders__
+2. __PublishedCiphertextTally__ -> __CiphertextTally__
+3. __CiphertextTally__ -> __CiphertextTallyBuilder__
 4. __BallotDecryptionShare__ -> __DecryptionShare__
 5. __CompensatedBallotDecryptionShare__ -> __CompensatedBallotDecryptionShare__
+
+### Classes Renamed in Python
+
+1. __CiphertextAcceptedBallot__ -> __SubmittedBallot__
 
 ### Not in Java
 
@@ -116,5 +120,6 @@ Probably need to reconcile when python makes fix.
 * reconstruct_decryption_ballot -> reconstruct_decryption_share_for_ballot()
 
 ### DecryptionMediator
+* java added List<SpoiledBallotAndTally> decrypt_spoiled_ballots(), to get both spoiled decrypted tally and ballot
 
 

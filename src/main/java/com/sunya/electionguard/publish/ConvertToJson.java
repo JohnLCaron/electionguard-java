@@ -16,8 +16,8 @@ class ConvertToJson {
   private static final Gson enhancedGson = GsonTypeAdapters.enhancedGson();
 
 
-  static void writeCiphertextBallot(CiphertextAcceptedBallot object, Path where) throws IOException {
-    Type type = new TypeToken<CiphertextAcceptedBallot>(){}.getType();
+  static void writeSubmittedBallot(SubmittedBallot object, Path where) throws IOException {
+    Type type = new TypeToken<SubmittedBallot>(){}.getType();
     try (FileWriter writer = new FileWriter(where.toFile())) {
       enhancedGson.toJson(object, type, writer);
     }

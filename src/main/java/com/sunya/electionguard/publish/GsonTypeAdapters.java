@@ -9,7 +9,7 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
-import com.sunya.electionguard.CiphertextAcceptedBallot;
+import com.sunya.electionguard.SubmittedBallot;
 import com.sunya.electionguard.Election;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.KeyCeremony;
@@ -32,8 +32,8 @@ class GsonTypeAdapters {
             .registerTypeAdapter(Election.class, new ElectionDescriptionDeserializer())
             .registerTypeAdapter(KeyCeremony.CoefficientValidationSet.class, new CoefficientValidationSerializer())
             .registerTypeAdapter(KeyCeremony.CoefficientValidationSet.class, new CoefficientValidationDeserializer())
-            .registerTypeAdapter(CiphertextAcceptedBallot.class, new CiphertextBallotSerializer())
-            .registerTypeAdapter(CiphertextAcceptedBallot.class, new CiphertextBallotDeserializer())
+            .registerTypeAdapter(SubmittedBallot.class, new CiphertextBallotSerializer())
+            .registerTypeAdapter(SubmittedBallot.class, new CiphertextBallotDeserializer())
             .registerTypeAdapter(PlaintextBallot.class, new PlaintextBallotSerializer())
             .registerTypeAdapter(PlaintextBallot.class, new PlaintextBallotDeserializer())
             .registerTypeAdapter(PlaintextTally.class, new PlaintextTallySerializer())
@@ -105,18 +105,18 @@ class GsonTypeAdapters {
     }
   }
 
-  private static class CiphertextBallotSerializer implements JsonSerializer<CiphertextAcceptedBallot> {
+  private static class CiphertextBallotSerializer implements JsonSerializer<SubmittedBallot> {
     @Override
-    public JsonElement serialize(CiphertextAcceptedBallot src, Type typeOfSrc, JsonSerializationContext context) {
-      return CiphertextAcceptedBallotPojo.serialize(src);
+    public JsonElement serialize(SubmittedBallot src, Type typeOfSrc, JsonSerializationContext context) {
+      return SubmittedBallotPojo.serialize(src);
     }
   }
 
-  private static class CiphertextBallotDeserializer implements JsonDeserializer<CiphertextAcceptedBallot> {
+  private static class CiphertextBallotDeserializer implements JsonDeserializer<SubmittedBallot> {
     @Override
-    public CiphertextAcceptedBallot deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+    public SubmittedBallot deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
             throws JsonParseException {
-      return CiphertextAcceptedBallotPojo.deserialize(json);
+      return SubmittedBallotPojo.deserialize(json);
     }
   }
 

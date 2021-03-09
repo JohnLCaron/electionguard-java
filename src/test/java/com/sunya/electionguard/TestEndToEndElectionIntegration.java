@@ -222,7 +222,7 @@ public class TestEndToEndElectionIntegration {
     this.ballot_box = new BallotBox(this.election, this.context);
     // Randomly cast or spoil the ballots
     for (CiphertextBallot ballot : this.ciphertext_ballots) {
-      Optional<CiphertextAcceptedBallot> accepted_ballot;
+      Optional<SubmittedBallot> accepted_ballot;
       if (random.nextBoolean()) {
         accepted_ballot = this.ballot_box.cast(ballot);
       } else {
@@ -312,7 +312,7 @@ public class TestEndToEndElectionIntegration {
   void compare_spoiled_tallies() {
     Map<String, PlaintextTally> plaintextTalliesMap = this.spoiledDecryptedTallies.stream().collect(Collectors.toMap(t -> t.object_id, t -> t));
 
-    for (CiphertextAcceptedBallot accepted_ballot : this.ballot_box.getSpoiledBallots()) {
+    for (SubmittedBallot accepted_ballot : this.ballot_box.getSpoiledBallots()) {
       String ballot_id = accepted_ballot.object_id;
       assertThat(accepted_ballot.state).isEqualTo(BallotBox.State.SPOILED);
       for (PlaintextBallot orgBallot : this.originalPlaintextBallots) {
@@ -366,8 +366,8 @@ public class TestEndToEndElectionIntegration {
       assertWithMessage(coeff.owner_id()).that(coeff).isEqualTo(expected);
     }
 
-    for (CiphertextAcceptedBallot ballot : roundtrip.acceptedBallots) {
-      CiphertextAcceptedBallot expected = this.ballot_box.get(ballot.object_id).orElseThrow();
+    for (SubmittedBallot ballot : roundtrip.acceptedBallots) {
+      SubmittedBallot expected = this.ballot_box.get(ballot.object_id).orElseThrow();
       assertWithMessage(ballot.object_id).that(ballot).isEqualTo(expected);
     }
 

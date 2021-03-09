@@ -15,11 +15,11 @@ import java.util.stream.Collectors;
  * Note this ballot includes all proofs but no nonces.
  */
 @Immutable
-public class CiphertextAcceptedBallot extends CiphertextBallot {
+public class SubmittedBallot extends CiphertextBallot {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   /**
-   * Makes a `CiphertextAcceptedBallot`, ensuring that no nonces are part of the contests.
+   * Makes a `SubmittedBallot`, ensuring that no nonces are part of the contests.
    * <p>
    *
    * @param object_id:               the object_id of this specific ballot
@@ -31,7 +31,7 @@ public class CiphertextAcceptedBallot extends CiphertextBallot {
    * @param timestampO:              Timestamp at which the ballot encryption is generated in tick
    * @param state:                   ballot box state
    */
-  static CiphertextAcceptedBallot create(
+  static SubmittedBallot create(
           String object_id,
           String ballot_style,
           Group.ElementModQ description_hash,
@@ -54,7 +54,7 @@ public class CiphertextAcceptedBallot extends CiphertextBallot {
     // copy the contests and selections, removing all nonces
     List<Contest> new_contests = contests.stream().map(Contest::removeNonces).collect(Collectors.toList());
 
-    return new CiphertextAcceptedBallot(
+    return new SubmittedBallot(
             object_id,
             ballot_style,
             description_hash,
@@ -71,22 +71,22 @@ public class CiphertextAcceptedBallot extends CiphertextBallot {
   /** The accepted state: CAST or SPOILED. */
   public final BallotBox.State state;
 
-  public CiphertextAcceptedBallot(CiphertextBallot ballot, BallotBox.State state) {
+  public SubmittedBallot(CiphertextBallot ballot, BallotBox.State state) {
     super(ballot.object_id, ballot.ballot_style, ballot.description_hash, ballot.previous_tracking_hash, ballot.contests,
             ballot.tracking_hash, ballot.timestamp, ballot.crypto_hash, ballot.nonce);
     this.state = Preconditions.checkNotNull(state);
   }
 
-  public CiphertextAcceptedBallot(String object_id,
-                                  String ballot_style,
-                                  Group.ElementModQ description_hash,
-                                  Group.ElementModQ previous_tracking_hash,
-                                  List<Contest> contests,
-                                  Group.ElementModQ tracking_hash,
-                                  long timestamp,
-                                  Group.ElementModQ crypto_hash,
-                                  Optional<Group.ElementModQ> nonce,
-                                  BallotBox.State state) {
+  public SubmittedBallot(String object_id,
+                         String ballot_style,
+                         Group.ElementModQ description_hash,
+                         Group.ElementModQ previous_tracking_hash,
+                         List<Contest> contests,
+                         Group.ElementModQ tracking_hash,
+                         long timestamp,
+                         Group.ElementModQ crypto_hash,
+                         Optional<Group.ElementModQ> nonce,
+                         BallotBox.State state) {
     super(object_id, ballot_style, description_hash, previous_tracking_hash, contests, tracking_hash, timestamp, crypto_hash, nonce);
     this.state = state;
   }
@@ -96,7 +96,7 @@ public class CiphertextAcceptedBallot extends CiphertextBallot {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     if (!super.equals(o)) return false;
-    CiphertextAcceptedBallot that = (CiphertextAcceptedBallot) o;
+    SubmittedBallot that = (SubmittedBallot) o;
     return state == that.state;
   }
 
@@ -107,7 +107,7 @@ public class CiphertextAcceptedBallot extends CiphertextBallot {
 
   @Override
   public String toString() {
-    return "CiphertextAcceptedBallot{" +
+    return "SubmittedBallot{" +
             "\n object_id    ='" + object_id + '\'' +
             "\n state        =" + state +
             "\n ballot_style ='" + ballot_style + '\'' +

@@ -6,7 +6,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.ListMultimap;
 import com.google.common.flogger.FluentLogger;
 import com.sunya.electionguard.BallotBox;
-import com.sunya.electionguard.CiphertextAcceptedBallot;
+import com.sunya.electionguard.SubmittedBallot;
 import com.sunya.electionguard.CiphertextBallot;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.PlaintextTally;
@@ -66,8 +66,8 @@ public class BallotAggregationVerifier {
   private static class SelectionAggregator {
     ListMultimap<String, ElGamal.Ciphertext> selectionEncryptions = ArrayListMultimap.create();
 
-    SelectionAggregator(Iterable<CiphertextAcceptedBallot> ballots) {
-      for (CiphertextAcceptedBallot ballot : ballots) {
+    SelectionAggregator(Iterable<SubmittedBallot> ballots) {
+      for (SubmittedBallot ballot : ballots) {
         if (ballot.state == BallotBox.State.CAST) {
           for (CiphertextBallot.Contest contest : ballot.contests) {
             for (CiphertextBallot.Selection selection : contest.ballot_selections) {

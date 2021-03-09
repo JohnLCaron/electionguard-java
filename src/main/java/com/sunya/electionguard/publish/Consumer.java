@@ -78,10 +78,10 @@ public class Consumer {
     return result;
   }
 
-  public List<CiphertextAcceptedBallot> acceptedBallots() throws IOException {
-    List<CiphertextAcceptedBallot> result = new ArrayList<>();
+  public List<SubmittedBallot> acceptedBallots() throws IOException {
+    List<SubmittedBallot> result = new ArrayList<>();
     for (File file : publisher.ballotFiles()) {
-      CiphertextAcceptedBallot fromPython = ConvertFromJson.readCiphertextBallot(file.getAbsolutePath());
+      SubmittedBallot fromPython = ConvertFromJson.readSubmittedBallot(file.getAbsolutePath());
       result.add(fromPython);
     }
     return result;
@@ -162,18 +162,18 @@ public class Consumer {
     return fromProto.setBallots(acceptedBallotsProto(), decryptedSpoiledBallotsProto(), decryptedSpoiledTalliesProto());
   }
 
-  public CloseableIterable<CiphertextAcceptedBallot> acceptedBallotsProto() {
+  public CloseableIterable<SubmittedBallot> acceptedBallotsProto() {
     if (Files.exists(publisher.ciphertextBallotProtoPath())) {
-      return () -> new CiphertextAcceptedBallotIterator(publisher.ciphertextBallotProtoPath().toString(), b -> true);
+      return () -> new SubmittedBallotIterator(publisher.ciphertextBallotProtoPath().toString(), b -> true);
     } else {
       return CloseableIterableAdapter.empty();
     }
   }
 
-  public CloseableIterable<CiphertextAcceptedBallot> spoiledBallotsProto() {
+  public CloseableIterable<SubmittedBallot> spoiledBallotsProto() {
     if (Files.exists(publisher.ciphertextBallotProtoPath())) {
-      return () -> new CiphertextAcceptedBallotIterator(publisher.ciphertextBallotProtoPath().toString(),
-              b -> b.getState() == CiphertextBallotProto.CiphertextAcceptedBallot.BallotBoxState.SPOILED);
+      return () -> new SubmittedBallotIterator(publisher.ciphertextBallotProtoPath().toString(),
+              b -> b.getState() == CiphertextBallotProto.SubmittedBallot.BallotBoxState.SPOILED);
     } else {
       return CloseableIterableAdapter.empty();
     }
@@ -198,23 +198,27 @@ public class Consumer {
   // These create iterators, so that we never have to read in all ballots at once.
   // Making them Closeable makes sure that the FileInputStream gets closed.
 
-  private static class CiphertextAcceptedBallotIterator extends AbstractIterator<CiphertextAcceptedBallot>
-                                     implements CloseableIterator<CiphertextAcceptedBallot> {
+  private static class SubmittedBallotIterator extends AbstractIterator<SubmittedBallot>
+                                     implements CloseableIterator<SubmittedBallot> {
     private final String filename;
-    private final Predicate<CiphertextBallotProto.CiphertextAcceptedBallot> filter;
+    private final Predicate<CiphertextBallotProto.SubmittedBallot
+> filter;
     private FileInputStream input;
-    CiphertextAcceptedBallotIterator(String filename, Predicate<CiphertextBallotProto.CiphertextAcceptedBallot> filter) {
+    SubmittedBallotIterator(String filename, Predicate<CiphertextBallotProto.SubmittedBallot
+> filter) {
       this.filename = filename;
       this.filter = filter;
     }
 
     @Override
-    protected CiphertextAcceptedBallot computeNext() {
+    protected SubmittedBallot computeNext() {
       try {
         if (input == null) {
           this.input = new FileInputStream(filename);
         }
-        CiphertextBallotProto.CiphertextAcceptedBallot ballotProto = CiphertextBallotProto.CiphertextAcceptedBallot.parseDelimitedFrom(input);
+        CiphertextBallotProto.SubmittedBallot
+ ballotProto = CiphertextBallotProto.SubmittedBallot
+.parseDelimitedFrom(input);
         if (ballotProto == null) {
           input.close();
           return endOfData();

@@ -5,6 +5,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Streams;
 import com.google.common.flogger.FluentLogger;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -60,12 +61,12 @@ class Decryptions {
   /** Compute the DecryptionShare for a list of ballots for a guardian. */
   static Optional<Map<String, DecryptionShare>> compute_decryption_share_for_ballots(
           Guardian guardian,
-          Iterable<CiphertextAcceptedBallot> ballots,
+          Iterable<SubmittedBallot> ballots,
           CiphertextElectionContext context) {
 
   Map<String, DecryptionShare> shares = new HashMap<>();
 
-    for (CiphertextAcceptedBallot ballot : ballots) {
+    for (SubmittedBallot ballot : ballots) {
       Optional<DecryptionShare> ballot_share = compute_decryption_share_for_ballot(
               guardian, ballot, context);
       if (ballot_share.isEmpty()) {
@@ -80,7 +81,7 @@ class Decryptions {
   /** Compute the DecryptionShare for a single ballot for a guardian. */
   static Optional<DecryptionShare> compute_decryption_share_for_ballot(
           Guardian guardian,
-          CiphertextAcceptedBallot ballot,
+          SubmittedBallot ballot,
           CiphertextElectionContext context) {
 
     // Map(CONTEST_ID, CiphertextDecryptionContest)
@@ -208,7 +209,7 @@ class Decryptions {
           String missing_guardian_id,
           CiphertextTally tally,
           CiphertextElectionContext context,
-          Auxiliary.Decryptor decryptor) {
+          @Nullable Auxiliary.Decryptor decryptor) {
 
     Map<String, CiphertextCompensatedDecryptionContest> contests = new HashMap<>();
 
@@ -238,7 +239,7 @@ class Decryptions {
           String missing_guardian_id,
           CiphertextContest contest,
           CiphertextElectionContext context,
-          Auxiliary.Decryptor decryptor) {
+          @Nullable Auxiliary.Decryptor decryptor) {
 
       Map<String, CiphertextCompensatedDecryptionSelection> selections = new HashMap<>();
 
@@ -277,13 +278,13 @@ class Decryptions {
   static Optional<Map<String, CompensatedDecryptionShare>> compute_compensated_decryption_share_for_ballots(
           Guardian guardian,
           String missing_guardian_id,
-          Iterable<CiphertextAcceptedBallot> ballots,
+          Iterable<SubmittedBallot> ballots,
           CiphertextElectionContext context,
           Auxiliary.Decryptor decrypt) {
 
     Map<String, CompensatedDecryptionShare> decrypted_ballots = new HashMap<>();
 
-    for (CiphertextAcceptedBallot spoiled_ballot : ballots) {
+    for (SubmittedBallot spoiled_ballot : ballots) {
       Optional<CompensatedDecryptionShare> compensated_ballot =
               compute_compensated_decryption_share_for_ballot(
                       guardian, missing_guardian_id, spoiled_ballot, context, decrypt);
@@ -306,7 +307,7 @@ class Decryptions {
   static Optional<CompensatedDecryptionShare> compute_compensated_decryption_share_for_ballot(
           Guardian guardian,
           String missing_guardian_id,
-          CiphertextAcceptedBallot ballot,
+          SubmittedBallot ballot,
           CiphertextElectionContext context,
           Auxiliary.Decryptor decryptor) {
 
@@ -342,13 +343,13 @@ class Decryptions {
     final String missing_guardian_id;
     final CiphertextSelection selection;
     final CiphertextElectionContext context;
-    final Auxiliary.Decryptor decryptor;
+    @Nullable final Auxiliary.Decryptor decryptor;
 
     RunComputeCompensatedDecryptionShareForSelection(Guardian available_guardian,
                                                             String missing_guardian_id,
                                                             CiphertextSelection selection,
                                                             CiphertextElectionContext context,
-                                                            Auxiliary.Decryptor decryptor) {
+                                                            @Nullable Auxiliary.Decryptor decryptor) {
       this.available_guardian = available_guardian;
       this.missing_guardian_id = missing_guardian_id;
       this.selection = selection;
@@ -379,7 +380,7 @@ class Decryptions {
           String missing_guardian_id,
           CiphertextSelection selection,
           CiphertextElectionContext context,
-          Auxiliary.Decryptor decryptor) {
+          @Nullable Auxiliary.Decryptor decryptor) {
 
     Optional<Guardian.DecryptionProofTuple> compensated = available_guardian.compensate_decrypt(
             missing_guardian_id,
@@ -538,7 +539,7 @@ class Decryptions {
    * <p>
    * @param missing_guardian_id: The id of the missing guardian
    * @param public_key: the public key for the missing guardian
-   * @param ballots: The collection of `CiphertextAcceptedBallot` that are spoiled
+   * @param ballots: The collection of `SubmittedBallot` that are spoiled
    * @param shares: the collection of CompensatedDecryptionShare's for each ballot, for each missing LOOK or available? guardian
    * @param lagrange_coefficients: the lagrange coefficients corresponding to the available guardians that provided shares
    */
@@ -546,12 +547,12 @@ class Decryptions {
   static Map<String, DecryptionShare> reconstruct_decryption_shares_for_ballots(
           String missing_guardian_id,
           KeyCeremony.ElectionPublicKey public_key,
-          Iterable<CiphertextAcceptedBallot> ballots,
+          Iterable<SubmittedBallot> ballots,
           Map<String, Map<String, CompensatedDecryptionShare>> shares, // Map(BALLOT_ID, Map(available_guardian, CompensatedDecryptionShare))
           Map<String, Group.ElementModQ> lagrange_coefficients) { // Map(available_guardian, ElementModQ)
 
     Map<String, DecryptionShare> result = new HashMap<>();
-    for (CiphertextAcceptedBallot ballot : ballots) {
+    for (SubmittedBallot ballot : ballots) {
       Preconditions.checkArgument(shares.containsKey(ballot.object_id));
       DecryptionShare ballot_share = reconstruct_decryption_share_for_ballot(
               missing_guardian_id,
@@ -569,7 +570,7 @@ class Decryptions {
    *
    * @param missing_guardian_id   The guardian id for the missing guardian
    * @param public_key            the public key for the missing guardian
-   * @param ballot                The `CiphertextAcceptedBallot` to reconstruct
+   * @param ballot                The `SubmittedBallot` to reconstruct
    * @param shares                the collection of `CompensatedDecryptionShare` for the missing guardian, each keyed by the ID of the guardian that produced it
    * @param lagrange_coefficients the lagrange coefficients for the available guardians that provided shares
    */
@@ -577,7 +578,7 @@ class Decryptions {
   static DecryptionShare reconstruct_decryption_share_for_ballot(
           String missing_guardian_id,
           KeyCeremony.ElectionPublicKey public_key,
-          CiphertextAcceptedBallot ballot,
+          SubmittedBallot ballot,
           Map<String, CompensatedDecryptionShare> shares, // Dict[AVAILABLE_GUARDIAN_ID, CompensatedBallotDecryptionShare]
           Map<String, Group.ElementModQ> lagrange_coefficients) { // Dict[AVAILABLE_GUARDIAN_ID, ElementModQ]
 

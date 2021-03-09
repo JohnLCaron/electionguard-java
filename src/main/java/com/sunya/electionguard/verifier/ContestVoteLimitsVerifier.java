@@ -7,7 +7,7 @@ import com.sunya.electionguard.Hash;
 
 import java.math.BigInteger;
 
-import com.sunya.electionguard.CiphertextAcceptedBallot;
+import com.sunya.electionguard.SubmittedBallot;
 import static com.sunya.electionguard.CiphertextBallot.Contest;
 import static com.sunya.electionguard.CiphertextBallot.Selection;
 import static com.sunya.electionguard.Group.ElementModP;
@@ -29,7 +29,7 @@ public class ContestVoteLimitsVerifier {
   boolean verify_all_contests() {
     boolean error = false;
 
-    for (CiphertextAcceptedBallot ballot : electionRecord.acceptedBallots) {
+    for (SubmittedBallot ballot : electionRecord.acceptedBallots) {
       if (show) System.out.printf("Ballot %s.%n", ballot.object_id);
       for (Contest contest : ballot.contests) {
         if (show) System.out.printf(" Contest %s.%n", contest.object_id);

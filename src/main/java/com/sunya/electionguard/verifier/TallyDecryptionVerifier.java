@@ -1,14 +1,7 @@
 package com.sunya.electionguard.verifier;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.ListMultimap;
 import com.google.common.flogger.FluentLogger;
-import com.sunya.electionguard.BallotBox;
-import com.sunya.electionguard.CiphertextAcceptedBallot;
-import com.sunya.electionguard.CiphertextBallot;
-import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.Election;
 import com.sunya.electionguard.ElectionWithPlaceholders;
 import com.sunya.electionguard.Group;
