@@ -12,6 +12,7 @@ import com.sunya.electionguard.Guardian;
 import com.sunya.electionguard.PlaintextBallot;
 import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.CiphertextTally;
+import com.sunya.electionguard.Rsa;
 import com.sunya.electionguard.Scheduler;
 import com.sunya.electionguard.publish.Consumer;
 import com.sunya.electionguard.publish.Publisher;
@@ -194,7 +195,7 @@ public class DecryptBallots {
     // Here's where the ciphertext Tally is decrypted.
     this.decryptedTally = mediator.get_plaintext_tally(null).orElseThrow();
     List<DecryptionMediator.SpoiledBallotAndTally> spoiledTallyAndBallot =
-            mediator.decrypt_spoiled_ballots().orElseThrow();
+            mediator.decrypt_spoiled_ballots(null).orElseThrow();
     this.spoiledDecryptedBallots = spoiledTallyAndBallot.stream().map(e -> e.ballot).collect(Collectors.toList());
     this.spoiledDecryptedTallies = spoiledTallyAndBallot.stream().map(e -> e.tally).collect(Collectors.toList());
     System.out.printf("Done decrypting tally%n%n%s%n", this.decryptedTally);

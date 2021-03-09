@@ -2,6 +2,7 @@ package com.sunya.electionguard;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.sunya.electionguard.publish.Consumer;
 import com.sunya.electionguard.publish.Publisher;
 import com.sunya.electionguard.verifier.ElectionRecord;
@@ -27,7 +28,7 @@ import static com.google.common.truth.Truth8.assertThat;
  */
 public class TestEndToEndElectionIntegration {
   private static final int NUMBER_OF_GUARDIANS = 7;
-  private static final int QUORUM = 7;
+  private static final int QUORUM = 5;
   private static final Random random = new Random(System.currentTimeMillis());
 
   String outputDir;
@@ -261,8 +262,11 @@ public class TestEndToEndElectionIntegration {
     }
 
     // Here's where the ciphertext Tally is decrypted.
-    this.decryptedTally = this.decrypter.get_plaintext_tally(null).orElseThrow();
-    List<DecryptionMediator.SpoiledBallotAndTally> spoiledTallyAndBallot = this.decrypter.decrypt_spoiled_ballots().orElseThrow();
+    this.decryptedTally = this.decrypter.get_plaintext_tally(Rsa::decrypt).orElseThrow();
+    Map<String, PlaintextTally> check = this.decrypter.get_plaintext_ballots(Rsa::decrypt).orElseThrow();
+    assertThat(check.size()).isEqualTo(Iterables.size(this.ballot_box.getSpoiledBallots()));
+
+    List<DecryptionMediator.SpoiledBallotAndTally> spoiledTallyAndBallot = this.decrypter.decrypt_spoiled_ballots(Rsa::decrypt).orElseThrow();
     this.spoiledDecryptedBallots = spoiledTallyAndBallot.stream().map(e -> e.ballot).collect(Collectors.toList());
     this.spoiledDecryptedTallies = spoiledTallyAndBallot.stream().map(e -> e.tally).collect(Collectors.toList());
     System.out.printf("Tally Decrypted%n");

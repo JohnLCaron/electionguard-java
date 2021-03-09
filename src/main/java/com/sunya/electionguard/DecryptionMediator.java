@@ -26,7 +26,7 @@ public class DecryptionMediator {
   // Map(AVAILABLE_GUARDIAN_ID, DecryptionShare)
   private final Map<String, DecryptionShare> tally_shares = new HashMap<>();
 
-  // Map<AVAILABLE_GUARDIAN_ID, Map<BALLOT_ID, DecryptionShare>>
+  // Map<ALL_GUARDIAN_ID, Map<BALLOT_ID, DecryptionShare>>
   private final Map<String, Map<String, DecryptionShare>> ballot_shares = new HashMap<>();
 
   // Map(AVAILABLE_GUARDIAN_ID, Guardian)
@@ -241,8 +241,12 @@ public class DecryptionMediator {
   }
 
   /** You must call get_plaintext_tally() first. */
-  public Optional<List<SpoiledBallotAndTally>> decrypt_spoiled_ballots() {
-    // static Optional<List<DecryptionMediator2.SpoiledBallotAndTally>> decrypt_spoiled_ballots
+  public Optional<List<SpoiledBallotAndTally>> decrypt_spoiled_ballots(Auxiliary.Decryptor decryptor) {
+    if (!compute_ballot_shares(decryptor)){
+      return Optional.empty();
+    }
+
+    // LOOK must augment this.ballot_shares with missing guardians
     return DecryptWithShares.decrypt_spoiled_ballots(this.ciphertext_ballots, this.ballot_shares, this.context);
   }
 
@@ -254,37 +258,36 @@ public class DecryptionMediator {
   public Optional<Map<String, PlaintextTally>> get_plaintext_ballots(
           Auxiliary.Decryptor decryptor) {
 
-    // Make sure a Quorum of Guardians have announced
-    if (this.available_guardians.size() < this.context.quorum){
-      logger.atWarning().log("cannot decrypt with less than quorum available guardians");
+    if (!compute_ballot_shares(decryptor)){
       return Optional.empty();
     }
 
-    // If all Guardians are present, decrypt the ballots using standard shares
-    if (this.available_guardians.size() == this.context.number_of_guardians) {
-      return DecryptWithShares.decrypt_ballots(
-              this.ciphertext_ballots,
-              this.ballot_shares,
-              this.context);
-    }
-
-    // If guardians are missing, for each ballot compute compensated ballot_shares
-    for (SubmittedBallot ballot : this.ciphertext_ballots) { // LOOK running through ballots twice
-      this.compute_missing_shares_for_ballot(ballot, decryptor);
-      if (this.count_ballot_shares(ballot.object_id) != this.context.number_of_guardians) {
-        logger.atWarning().log("get plaintext ballot failed with share length mismatch");
-        return Optional.empty();
-      }
-    }
-
-    // Optional<Map<String, PlaintextTally>> decrypt_ballots(
-    //          Iterable<SubmittedBallot> ballots,
-    //          Map<String, Map<String, DecryptionShare>> shares,
-    //          CiphertextElectionContext context)
     return DecryptWithShares.decrypt_ballots(
             this.ciphertext_ballots, // LOOK running through ballots twice
             this.ballot_shares, // MAP(AVAILABLE_GUARDIAN_ID, Map(BALLOT_ID, DecryptionShare))
             this.context);
+  }
+
+  private boolean compute_ballot_shares(Auxiliary.Decryptor decryptor) {
+    // Make sure a Quorum of Guardians have announced
+    if (this.available_guardians.size() < this.context.quorum) {
+      logger.atWarning().log("cannot decrypt with less than quorum available guardians");
+      return false;
+    }
+
+    // If guardians are missing, for each ballot compute compensated ballot_shares, add to this.ballot_shares
+    if (this.available_guardians.size() < this.context.number_of_guardians) {
+      for (SubmittedBallot ballot : this.ciphertext_ballots) { // LOOK running through ballots
+        if (this.count_ballot_shares(ballot.object_id) < this.context.number_of_guardians) {
+          this.compute_missing_shares_for_ballot(ballot, decryptor);
+        }
+        if (this.count_ballot_shares(ballot.object_id) != this.context.number_of_guardians) {
+          logger.atWarning().log("decrypt_spoiled_ballots failed with share length mismatch");
+          return false;
+        }
+      }
+    }
+    return true;
   }
 
   private int count_ballot_shares(String ballot_id) {
@@ -316,11 +319,14 @@ public class DecryptionMediator {
               compensated_shares.get(),
               this.lagrange_coefficients);
 
-      /* LOOK what does this mean?
-      if (missing_decryption_share.isEmpty()) {
-        logger.atWarning().log("get plaintext ballot failed with computing missing decryption shares");
-        return;
-      } */
+      // LOOK ballot_shares now include missing_ballots
+      // LOOK use merge
+      Map<String, DecryptionShare> guardian_shares = this.ballot_shares.get(missing_guardian_id);
+      if (guardian_shares == null) {
+        guardian_shares = new HashMap<>();
+        this.ballot_shares.put(missing_guardian_id, guardian_shares);
+      }
+      guardian_shares.put(ballot.object_id, missing_decryption_share);
 
       this.ballot_shares.get(missing_guardian_id).put(ballot.object_id, missing_decryption_share);
     }

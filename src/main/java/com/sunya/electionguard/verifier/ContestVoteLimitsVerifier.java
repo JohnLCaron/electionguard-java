@@ -30,7 +30,7 @@ public class ContestVoteLimitsVerifier {
     boolean error = false;
 
     for (SubmittedBallot ballot : electionRecord.acceptedBallots) {
-      if (show) System.out.printf("Ballot %s.%n", ballot.object_id);
+      System.out.printf("Ballot %s.%n", ballot.object_id);
       for (Contest contest : ballot.contests) {
         if (show) System.out.printf(" Contest %s.%n", contest.object_id);
         ContestVerifier cv = new ContestVerifier(contest);
@@ -72,7 +72,7 @@ public class ContestVoteLimitsVerifier {
 
       // 5.C The given value V is in Z q
       if (!proof.response.is_in_bounds()) {
-        System.out.printf("5.C V not in Zq for contest %s.%n", contest);
+        System.out.printf(" 5.C V not in Zq for contest %s.%n", contest);
         limit_error = true;
       }
 
@@ -97,11 +97,11 @@ public class ContestVoteLimitsVerifier {
 
         // 5.D The given values a and b are each in Zr_p.
         if (!alpha.is_valid_residue()) {
-          System.out.printf("5.D alpha not in Zr_p for selection %s.%n", selection.object_id);
+          System.out.printf(" 5.D alpha not in Zr_p for selection %s.%n", selection.object_id);
           limit_error = true;
         }
         if (!beta.is_valid_residue()) {
-          System.out.printf("5.D beta not in Zr_p for selection %s.%n", selection.object_id);
+          System.out.printf(" 5.D beta not in Zr_p for selection %s.%n", selection.object_id);
           limit_error = true;
         }
 
@@ -115,7 +115,7 @@ public class ContestVoteLimitsVerifier {
       Integer vote_limit = electionRecord.getVoteLimitForContest(this.contest.object_id);
       Preconditions.checkNotNull(vote_limit);
       if (vote_limit != placeholder_count) {
-        System.out.printf("5.A Contest placeholder %d != %d vote limit for contest %s.%n", placeholder_count,
+        System.out.printf(" 5.A Contest placeholder %d != %d vote limit for contest %s.%n", placeholder_count,
                 vote_limit, contest.object_id);
         limit_error = true;
       }
@@ -123,11 +123,11 @@ public class ContestVoteLimitsVerifier {
       // 5.B The contest total (A, B) satisfies A = ∏ αi mod p and B = ∏ βi mod p where the (αi, βi)
       // represent all possible selections (including placeholder selections) for the contest.
       if (!this.contest_alpha.equals(selection_alpha_product)) {
-        System.out.printf("5.B Contest total A fails verification for contest %s.%n", contest.object_id);
+        System.out.printf(" 5.B Contest total A fails verification for contest %s.%n", contest.object_id);
         limit_error = true;
       }
       if (!this.contest_beta.equals(selection_beta_product)) {
-        System.out.printf("5.B Contest total B fails verification for contest %s.%n", contest.object_id);
+        System.out.printf(" 5.B Contest total B fails verification for contest %s.%n", contest.object_id);
         limit_error = true;
       }
 
@@ -140,7 +140,7 @@ public class ContestVoteLimitsVerifier {
                       selection_alpha_product,
                       selection_beta_product, a, b);
       if (!challenge_computed.equals(this.contest_challenge)) {
-        System.out.printf("5.E Challenge fails verification for contest %s.%n", contest.object_id);
+        System.out.printf(" 5.E Challenge fails verification for contest %s.%n", contest.object_id);
         limit_error = true;
       }
 
@@ -166,7 +166,7 @@ public class ContestVoteLimitsVerifier {
       ElementModP right = Group.mult_p(this.proof.pad, Group.pow_p(alpha_product, this.contest_challenge));
 
       if (!left.equals(right)) {
-        System.out.printf("5.F fails.%n");
+        System.out.printf(" 5.F fails.%n");
         return false;
       }
       return true;
@@ -188,7 +188,7 @@ public class ContestVoteLimitsVerifier {
       ElementModP right = Group.mult_p(this.proof.data, Group.pow_p(beta_product, this.contest_challenge));
 
       if (!left.equals(right)) {
-        System.out.printf("5.G fails.%n");
+        System.out.printf(" 5.G fails.%n");
         return false;
       }
       return true;

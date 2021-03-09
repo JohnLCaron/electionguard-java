@@ -10,6 +10,7 @@ public class TestContestVoteLimitsVerifier {
   @Example
   public void testContestVoteLimitsValidatorProto() throws IOException {
     String topdir = TestParameterVerifier.topdirProto;
+    System.out.printf("testContestVoteLimitsValidatorProto %s%n", topdir);
     Consumer consumer = new Consumer(topdir);
     ContestVoteLimitsVerifier validator = new ContestVoteLimitsVerifier(consumer.readElectionRecordProto());
 
@@ -20,6 +21,8 @@ public class TestContestVoteLimitsVerifier {
   @Example
   public void testContestVoteLimitsValidatorJson() throws IOException {
     String topdir = TestParameterVerifier.topdirJson;
+    System.out.printf("testContestVoteLimitsValidatorJson %s%n", topdir);
+
     Consumer consumer = new Consumer(topdir);
     ContestVoteLimitsVerifier validator = new ContestVoteLimitsVerifier(consumer.readElectionRecordJson());
 
