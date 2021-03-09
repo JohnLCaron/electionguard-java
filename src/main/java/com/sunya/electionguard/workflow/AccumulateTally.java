@@ -5,8 +5,8 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.sunya.electionguard.CiphertextTally;
 import com.sunya.electionguard.CiphertextTallyBuilder;
-import com.sunya.electionguard.Election;
-import com.sunya.electionguard.ElectionWithPlaceholders;
+import com.sunya.electionguard.InternalManifest;
+import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.Scheduler;
 import com.sunya.electionguard.publish.Consumer;
 import com.sunya.electionguard.publish.Publisher;
@@ -94,7 +94,7 @@ public class AccumulateTally {
   ///////////////////////////////////////////////////////////////////////////
   final Consumer consumer;
   final ElectionRecord electionRecord;
-  final Election election;
+  final Manifest election;
 
   CiphertextTally encryptedTally;
 
@@ -107,7 +107,7 @@ public class AccumulateTally {
 
   void accumulateTally() {
     System.out.printf("%nAccumulate tally%n");
-    ElectionWithPlaceholders manifest = new ElectionWithPlaceholders(electionRecord.election);
+    InternalManifest manifest = new InternalManifest(electionRecord.election);
     CiphertextTallyBuilder ciphertextTally = new CiphertextTallyBuilder("DecryptBallots", manifest, electionRecord.context);
     int nballots = ciphertextTally.batch_append(electionRecord.acceptedBallots);
     this.encryptedTally = ciphertextTally.build();

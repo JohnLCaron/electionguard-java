@@ -1,7 +1,7 @@
 package com.sunya.electionguard.input;
 
 import com.google.common.collect.ImmutableList;
-import com.sunya.electionguard.Election;
+import com.sunya.electionguard.Manifest;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -15,7 +15,7 @@ public class ElectionInputBuilder {
   private final String election_scope_id;
   private final ArrayList<ContestBuilder> contests = new ArrayList<>();
   private String style = styleDef;
-  private Election.BallotStyle ballotStyle;
+  private Manifest.BallotStyle ballotStyle;
   private String district = districtDef;
 
   ElectionInputBuilder(String election_scope_id) {
@@ -32,7 +32,7 @@ public class ElectionInputBuilder {
     return this;
   }
 
-  ElectionInputBuilder setBallotStyle(Election.BallotStyle ballotStyle) {
+  ElectionInputBuilder setBallotStyle(Manifest.BallotStyle ballotStyle) {
     this.ballotStyle = ballotStyle;
     return this;
   }
@@ -43,13 +43,13 @@ public class ElectionInputBuilder {
     return c;
   }
 
-  Election build() {
-    Election.GeopoliticalUnit gpUnit = new Election.GeopoliticalUnit(district, "name", Election.ReportingUnitType.congressional, null);
-    Election.BallotStyle ballotStyle = this.ballotStyle != null ? this.ballotStyle :
-            new Election.BallotStyle(style, ImmutableList.of(district), null, null);
+  Manifest build() {
+    Manifest.GeopoliticalUnit gpUnit = new Manifest.GeopoliticalUnit(district, "name", Manifest.ReportingUnitType.congressional, null);
+    Manifest.BallotStyle ballotStyle = this.ballotStyle != null ? this.ballotStyle :
+            new Manifest.BallotStyle(style, ImmutableList.of(district), null, null);
 
-    List<Election.Party> parties = ImmutableList.of(new Election.Party("dog"), new Election.Party("cat"));
-    List<Election.Candidate> candidates = ImmutableList.of(new Election.Candidate("candidate_1"), new Election.Candidate("candidate_2"));
+    List<Manifest.Party> parties = ImmutableList.of(new Manifest.Party("dog"), new Manifest.Party("cat"));
+    List<Manifest.Candidate> candidates = ImmutableList.of(new Manifest.Candidate("candidate_1"), new Manifest.Candidate("candidate_2"));
 
     // String election_scope_id,
     //                  ElectionType type,
@@ -62,7 +62,7 @@ public class ElectionInputBuilder {
     //                  List<BallotStyle> ballot_styles,
     //                  @Nullable InternationalizedText name,
     //                  @Nullable ContactInformation contact_information
-    return new Election(election_scope_id, Election.ElectionType.general, OffsetDateTime.now(), OffsetDateTime.now(),
+    return new Manifest(election_scope_id, Manifest.ElectionType.general, OffsetDateTime.now(), OffsetDateTime.now(),
             ImmutableList.of(gpUnit), parties, candidates,
             contests.stream().map(ContestBuilder::build).collect(Collectors.toList()),
             ImmutableList.of(ballotStyle), null, null);
@@ -101,7 +101,7 @@ public class ElectionInputBuilder {
       return ElectionInputBuilder.this;
     }
 
-    Election.ContestDescription build() {
+    Manifest.ContestDescription build() {
       // String object_id,
       //                              String electoral_district_id,
       //                              int sequence_order,
@@ -112,7 +112,7 @@ public class ElectionInputBuilder {
       //                              List<SelectionDescription> ballot_selections,
       //                              @Nullable InternationalizedText ballot_title,
       //                              @Nullable InternationalizedText ballot_subtitle
-      return new Election.ContestDescription(id, district, seq, Election.VoteVariationType.one_of_m,
+      return new Manifest.ContestDescription(id, district, seq, Manifest.VoteVariationType.one_of_m,
               allowed, allowed, "name",
               selections.stream().map(SelectionBuilder::build).collect(Collectors.toList()),
               null, null);
@@ -128,8 +128,8 @@ public class ElectionInputBuilder {
         this.candidate_id = candidate_id;
       }
 
-      Election.SelectionDescription build() {
-        return new Election.SelectionDescription(id, candidate_id, seq);
+      Manifest.SelectionDescription build() {
+        return new Manifest.SelectionDescription(id, candidate_id, seq);
       }
     }
   }

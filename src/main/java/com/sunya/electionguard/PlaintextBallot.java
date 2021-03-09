@@ -20,7 +20,7 @@ import java.util.Optional;
 @Immutable
 public class PlaintextBallot extends ElectionObjectBase {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
-  /** The object_id of the Election.BallotStyle. */
+  /** The object_id of the Manifest.BallotStyle. */
   public final String style_id;
   /** The list of contests for this ballot. */
   public final ImmutableList<Contest> contests;

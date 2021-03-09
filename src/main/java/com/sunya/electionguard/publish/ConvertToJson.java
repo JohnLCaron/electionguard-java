@@ -44,8 +44,8 @@ class ConvertToJson {
     }
   }
 
-  static void writeElection(Election object, Path where) throws IOException {
-    Type type = new TypeToken<Election>(){}.getType();
+  static void writeElection(Manifest object, Path where) throws IOException {
+    Type type = new TypeToken<Manifest>(){}.getType();
     try (FileWriter writer = new FileWriter(where.toFile())) {
       enhancedGson.toJson(object, type, writer);
     }

@@ -32,7 +32,7 @@ public class CiphertextElectionContext {
           int number_of_guardians,
           int quorum,
           Group.ElementModP joint_public_key,
-          Election description,
+          Manifest description,
           Group.ElementModQ commitment_hash) {
 
     // What's a crypto_base_hash?
@@ -63,7 +63,7 @@ public class CiphertextElectionContext {
             crypto_extended_base_hash);
   }
 
-  public static Group.ElementModQ make_crypto_base_hash(int number_of_guardians, int quorum, Election election) {
+  public static Group.ElementModQ make_crypto_base_hash(int number_of_guardians, int quorum, Manifest election) {
     return Hash.hash_elems(P, Q, G, number_of_guardians, quorum, election.crypto_hash());
   }
 
@@ -74,7 +74,7 @@ public class CiphertextElectionContext {
   public final int quorum;
   /** The joint public key (K) in the ElectionGuard Spec. */
   public final Group.ElementModP elgamal_public_key; // python: elgamal_public_key
-  /** The Election.crypto_hash. */
+  /** The Manifest.crypto_hash. */
   public final Group.ElementModQ description_hash;
   /** The base hash code (𝑄) in the ElectionGuard Spec. */
   public final Group.ElementModQ crypto_base_hash;

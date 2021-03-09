@@ -2,7 +2,7 @@ package com.sunya.electionguard.viz;
 
 import com.google.common.collect.ImmutableList;
 import com.sunya.electionguard.CiphertextElectionContext;
-import com.sunya.electionguard.Election;
+import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.KeyCeremony;
 import com.sunya.electionguard.publish.CloseableIterableAdapter;
 import com.sunya.electionguard.publish.Consumer;
@@ -85,13 +85,13 @@ class ElectionRecordPanel extends JPanel {
         infoWindow.show();
       }
     };
-    BAMutil.setActionProperties(infoAction, "Information", "info on current Election Record", false, 'I', -1);
+    BAMutil.setActionProperties(infoAction, "Information", "info on current Manifest Record", false, 'I', -1);
     BAMutil.addActionToContainer(buttPanel, infoAction);
 
     // components
-    this.electionDescriptionTable = new ElectionDescriptionTable((PreferencesExt) prefs.node("ElectionDescription"))
+    this.electionDescriptionTable = new ElectionDescriptionTable((PreferencesExt) prefs.node("Manifest"))
             .addActions(buttPanel);
-    this.acceptedBallotsTable = new AcceptedBallotsTable((PreferencesExt) prefs.node("AcceptedBallots"));
+    this.acceptedBallotsTable = new AcceptedBallotsTable((PreferencesExt) prefs.node("SubmittedBallots"));
     this.ciphertextTallyTable = new CiphertextTallyTable((PreferencesExt) prefs.node("CiphertextTally"));
     this.electionTallyTable = new PlaintextTallyTable((PreferencesExt) prefs.node("ElectionTally"));
     this.spoiledTallyTable = new PlaintextTallyTable((PreferencesExt) prefs.node("SpoiledTallies"));
@@ -145,9 +145,9 @@ class ElectionRecordPanel extends JPanel {
   }
 
   void showInfo(Formatter f) {
-    f.format("Election %s%n", this.electionRecordDir);
+    f.format("Manifest %s%n", this.electionRecordDir);
     if (this.record != null) {
-      Election election = record.election;
+      Manifest election = record.election;
       f.format("  election_scope_id = %s%n", election.election_scope_id);
       f.format("  type = %s%n", election.type);
       f.format("  name = %s%n", election.name);

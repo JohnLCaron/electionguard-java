@@ -23,7 +23,7 @@ import static com.sunya.electionguard.BallotBox.State;
 
 import static com.sunya.electionguard.Group.ElementModQ;
 import static com.sunya.electionguard.Group.ONE_MOD_P;
-import static com.sunya.electionguard.ElectionWithPlaceholders.ContestWithPlaceholders;
+import static com.sunya.electionguard.InternalManifest.ContestWithPlaceholders;
 
 
 /**
@@ -35,7 +35,7 @@ public class CiphertextTallyBuilder {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   private final String object_id;
-  private final ElectionWithPlaceholders manifest;
+  private final InternalManifest manifest;
   private final CiphertextElectionContext context;
 
   /** Local cache of ballots id's that have already been cast. */
@@ -51,7 +51,7 @@ public class CiphertextTallyBuilder {
    * @param manifest the election manifest
    * @param context the election context
    */
-  public CiphertextTallyBuilder(String object_id, ElectionWithPlaceholders manifest, CiphertextElectionContext context) {
+  public CiphertextTallyBuilder(String object_id, InternalManifest manifest, CiphertextElectionContext context) {
     this.object_id = object_id;
     this.manifest = manifest;
     this.context = context;
@@ -60,13 +60,13 @@ public class CiphertextTallyBuilder {
     this.contests = build_contests(this.manifest);
   }
 
-  /** Build the object graph for the tally from the ElectionWithPlaceholders. */
-  private Map<String, Contest> build_contests(ElectionWithPlaceholders manifest) {
+  /** Build the object graph for the tally from the InternalManifest. */
+  private Map<String, Contest> build_contests(InternalManifest manifest) {
     Map<String, Contest> cast_collection = new HashMap<>();
     for (ContestWithPlaceholders contest : manifest.contests.values()) {
       // build a collection of valid selections for the contest description, ignoring the Placeholder Selections.
       Map<String, Selection> contest_selections = new HashMap<>();
-      for (Election.SelectionDescription selection : contest.ballot_selections) {
+      for (Manifest.SelectionDescription selection : contest.ballot_selections) {
         contest_selections.put(selection.object_id,
                 new Selection(selection.object_id, selection.crypto_hash()));
       }
@@ -233,8 +233,8 @@ public class CiphertextTallyBuilder {
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   /**
-   * The Contest to be tallied for a specific Election.ContestDescription.
-   * The object_id is the Election.ContestDescription.object_id.
+   * The Contest to be tallied for a specific Manifest.ContestDescription.
+   * The object_id is the Manifest.ContestDescription.object_id.
    */
   static class Contest extends ElectionObjectBase {
     /** The ContestDescription hash. */
@@ -356,8 +356,8 @@ public class CiphertextTallyBuilder {
   }
 
   /**
-   * The Selection to be tallied for a specific Election.SelectionDescription.
-   * The object_id is the Election.SelectionDescription.object_id.
+   * The Selection to be tallied for a specific Manifest.SelectionDescription.
+   * The object_id is the Manifest.SelectionDescription.object_id.
    */
   static class Selection extends CiphertextSelection {
     private ElGamal.Ciphertext ciphertext_accumulate = new ElGamal.Ciphertext(ONE_MOD_P, ONE_MOD_P);

@@ -23,7 +23,7 @@ public class SubmittedBallot extends CiphertextBallot {
    * <p>
    *
    * @param object_id:               the object_id of this specific ballot
-   * @param style_id:            The `object_id` of the `BallotStyle` in the `Election` Manifest
+   * @param style_id:            The `object_id` of the `BallotStyle` in the `Manifest` Manifest
    * @param description_hash:        Hash of the election description
    * @param previous_tracking_hashO: Previous tracking hash or seed hash
    * @param contests:                List of contests for this ballot

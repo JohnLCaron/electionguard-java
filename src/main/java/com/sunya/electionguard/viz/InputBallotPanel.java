@@ -71,7 +71,7 @@ class InputBallotPanel extends JPanel {
         infoWindow.show();
       }
     };
-    BAMutil.setActionProperties(infoAction, "Information", "info on current Election Record", false, 'I', -1);
+    BAMutil.setActionProperties(infoAction, "Information", "info on current Manifest Record", false, 'I', -1);
     BAMutil.addActionToContainer(buttPanel, infoAction);
 
     // components

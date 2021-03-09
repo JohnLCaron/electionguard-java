@@ -19,7 +19,7 @@ import java.util.stream.Stream;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 import static com.google.common.truth.Truth8.assertThat;
-import static com.sunya.electionguard.ElectionWithPlaceholders.ContestWithPlaceholders;
+import static com.sunya.electionguard.InternalManifest.ContestWithPlaceholders;
 
 import static org.junit.Assert.fail;
 
@@ -39,12 +39,12 @@ public class TimeIntegrationSteps {
   String outputDir;
   int nballots;
 
-  // Step 0 - Configure Election
-  Election election;
+  // Step 0 - Configure Manifest
+  Manifest election;
   ElectionBuilder election_builder;
   CiphertextElectionContext context;
   ElectionConstants constants;
-  ElectionWithPlaceholders metadata;
+  InternalManifest metadata;
 
   // Step 1 - Key Ceremony;
   KeyCeremonyMediator mediator;
@@ -128,7 +128,7 @@ public class TimeIntegrationSteps {
     this.election = ElectionFactory.get_simple_election_from_file();
 
     System.out.printf("----------------------------------%n");
-    System.out.printf("Election Summary:%nScope: %s%n", this.election.election_scope_id);
+    System.out.printf("Manifest Summary:%nScope: %s%n", this.election.election_scope_id);
     System.out.printf("Geopolitical Units: %d%n", this.election.geopolitical_units.size());
     System.out.printf("Parties: %d%n", this.election.parties.size());
     System.out.printf("Candidates: %d%n", this.election.candidates.size());
@@ -138,7 +138,7 @@ public class TimeIntegrationSteps {
 
     assertThat(this.election.is_valid()).isTrue();
 
-    // Create an Election Builder
+    // Create an Manifest Builder
     this.election_builder = new ElectionBuilder(NUMBER_OF_GUARDIANS, QUORUM, this.election);
     System.out.printf("Created with number_of_guardians: %d quorum: %d%n", NUMBER_OF_GUARDIANS, QUORUM);
   }
@@ -189,7 +189,7 @@ public class TimeIntegrationSteps {
 
     // Joint Key
     Optional<Group.ElementModP> joint_key = this.mediator.publish_joint_key();
-    System.out.printf("Publishes the Joint Election Key%n");
+    System.out.printf("Publishes the Joint Manifest Key%n");
     assertThat(joint_key).isPresent();
 
     // Save Validation Keys
@@ -199,7 +199,7 @@ public class TimeIntegrationSteps {
       this.coefficient_validation_sets.add(guardian.share_coefficient_validation_set());
     }
 
-    // Build the Election
+    // Build the Manifest
     this.election_builder.set_public_key(joint_key.get());
     ElectionBuilder.DescriptionAndContext tuple = this.election_builder.build().orElseThrow();
     this.election = tuple.metadata.election;
@@ -290,7 +290,7 @@ public class TimeIntegrationSteps {
 
     Map<String, Integer> expected_plaintext_tally = new HashMap<>(); // Map of selection_id to votes counted
     for (ContestWithPlaceholders contest : this.metadata.contests.values()) {
-      for (Election.SelectionDescription selection : contest.ballot_selections) {
+      for (Manifest.SelectionDescription selection : contest.ballot_selections) {
         expected_plaintext_tally.put(selection.object_id, 0);
       }
     }

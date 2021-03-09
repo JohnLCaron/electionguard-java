@@ -99,12 +99,12 @@ public class Guardian extends ElectionObjectBase {
             this.election_keys.proof());
   }
 
-  /** Get a read-only view of the Guardian Election Public Keys shared with this Guardian. */
+  /** Get a read-only view of the Guardian Manifest Public Keys shared with this Guardian. */
   ImmutableMap<String, KeyCeremony.ElectionPublicKey> otherGuardianElectionKeys() {
     return otherGuardianElectionKeys;
   }
 
-  /** From the Guardian Election Public Keys shared with this Guardian, find the ElectionPublicKey by guardian_id. */
+  /** From the Guardian Manifest Public Keys shared with this Guardian, find the ElectionPublicKey by guardian_id. */
   @Nullable KeyCeremony.ElectionPublicKey otherGuardianElectionKey(String guardian_id) {
     return otherGuardianElectionKeys.get(guardian_id);
   }
@@ -116,7 +116,7 @@ public class Guardian extends ElectionObjectBase {
 
   /**
    * Share election public key with another guardian.
-   * @return Election public key
+   * @return Manifest public key
    */
   KeyCeremony.ElectionPublicKey share_election_public_key() {
     return KeyCeremony.ElectionPublicKey.create(

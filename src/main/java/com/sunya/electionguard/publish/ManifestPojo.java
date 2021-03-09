@@ -4,7 +4,7 @@ import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
-import com.sunya.electionguard.Election;
+import com.sunya.electionguard.Manifest;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Type;
@@ -13,8 +13,8 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-/** Helper class for conversion of Election description to/from Json, using python's object model. */
-public class ElectionDescriptionPojo {
+/** Helper class for conversion of Manifest description to/from Json, using python's object model. */
+public class ManifestPojo {
   public InternationalizedText name;
   public String election_scope_id;
   public String type;
@@ -104,129 +104,129 @@ public class ElectionDescriptionPojo {
   ////////////////////////////////////////////////////////////////////////////
   // deserialize
 
-  public static Election deserialize(JsonElement jsonElem) {
+  public static Manifest deserialize(JsonElement jsonElem) {
     Gson gson = GsonTypeAdapters.enhancedGson();
-    ElectionDescriptionPojo pojo = gson.fromJson(jsonElem, ElectionDescriptionPojo.class);
+    ManifestPojo pojo = gson.fromJson(jsonElem, ManifestPojo.class);
     return convert(pojo);
   }
 
-  private static Election convert(ElectionDescriptionPojo pojo) {
+  private static Manifest convert(ManifestPojo pojo) {
     // LOOK going to throw an Exception if these arent present or invalid format
     OffsetDateTime startLocalDate = OffsetDateTime.parse(pojo.start_date);
     OffsetDateTime endLocalDate = OffsetDateTime.parse(pojo.end_date);
 
-    return new Election(
+    return new Manifest(
             pojo.election_scope_id,
-            Election.ElectionType.valueOf(pojo.type),
+            Manifest.ElectionType.valueOf(pojo.type),
             startLocalDate,
             endLocalDate,
-            convertList(pojo.geopolitical_units, ElectionDescriptionPojo::convertGeopoliticalUnit),
-            convertList(pojo.parties, ElectionDescriptionPojo::convertParty),
-            convertList(pojo.candidates, ElectionDescriptionPojo::convertCandidate),
-            convertList(pojo.contests, ElectionDescriptionPojo::convertContestDescription),
-            convertList(pojo.ballot_styles, ElectionDescriptionPojo::convertBallotStyle),
+            convertList(pojo.geopolitical_units, ManifestPojo::convertGeopoliticalUnit),
+            convertList(pojo.parties, ManifestPojo::convertParty),
+            convertList(pojo.candidates, ManifestPojo::convertCandidate),
+            convertList(pojo.contests, ManifestPojo::convertContestDescription),
+            convertList(pojo.ballot_styles, ManifestPojo::convertBallotStyle),
             convertInternationalizedText(pojo.name),
             convertContactInformation(pojo.contact_information)
     );
   }
 
   @Nullable
-  private static Election.AnnotatedString convertAnnotatedString(@Nullable ElectionDescriptionPojo.AnnotatedString pojo) {
+  private static Manifest.AnnotatedString convertAnnotatedString(@Nullable ManifestPojo.AnnotatedString pojo) {
     if (pojo == null) {
       return null;
     }
-    return new Election.AnnotatedString(
+    return new Manifest.AnnotatedString(
             Strings.nullToEmpty(pojo.annotation),
             Strings.nullToEmpty(pojo.value));
   }
 
 
   @Nullable
-  private static Election.BallotStyle convertBallotStyle(@Nullable ElectionDescriptionPojo.BallotStyle pojo) {
+  private static Manifest.BallotStyle convertBallotStyle(@Nullable ManifestPojo.BallotStyle pojo) {
     if (pojo == null) {
       return null;
     }
-    return new Election.BallotStyle(pojo.object_id,
+    return new Manifest.BallotStyle(pojo.object_id,
             convertList(pojo.geopolitical_unit_ids, Strings::nullToEmpty),
             convertList(pojo.party_ids, Strings::nullToEmpty),
             Strings.emptyToNull(pojo.image_uri));
   }
 
   @Nullable
-  private static Election.Candidate convertCandidate(@Nullable ElectionDescriptionPojo.Candidate pojo) {
+  private static Manifest.Candidate convertCandidate(@Nullable ManifestPojo.Candidate pojo) {
     if (pojo == null) {
       return null;
     }
-    return new Election.Candidate(pojo.object_id, convertInternationalizedText(pojo.name),
+    return new Manifest.Candidate(pojo.object_id, convertInternationalizedText(pojo.name),
             pojo.party_id, pojo.image_uri, pojo.is_write_in);
   }
 
   @Nullable
-  private static Election.ContactInformation convertContactInformation(@Nullable ElectionDescriptionPojo.ContactInformation pojo) {
+  private static Manifest.ContactInformation convertContactInformation(@Nullable ManifestPojo.ContactInformation pojo) {
     if (pojo == null) {
       return null;
     }
-    return new Election.ContactInformation(
+    return new Manifest.ContactInformation(
             convertList(pojo.address_line, Strings::nullToEmpty),
-            convertList(pojo.email, ElectionDescriptionPojo::convertAnnotatedString),
-            convertList(pojo.phone, ElectionDescriptionPojo::convertAnnotatedString),
+            convertList(pojo.email, ManifestPojo::convertAnnotatedString),
+            convertList(pojo.phone, ManifestPojo::convertAnnotatedString),
             pojo.name);
   }
 
   @Nullable
-  private static Election.ContestDescription convertContestDescription(@Nullable ElectionDescriptionPojo.ContestDescription pojo) {
+  private static Manifest.ContestDescription convertContestDescription(@Nullable ManifestPojo.ContestDescription pojo) {
     if (pojo == null) {
       return null;
     }
-    return new Election.ContestDescription(
+    return new Manifest.ContestDescription(
             pojo.object_id,
             pojo.electoral_district_id,
             pojo.sequence_order,
-            Election.VoteVariationType.valueOf(pojo.vote_variation),
+            Manifest.VoteVariationType.valueOf(pojo.vote_variation),
             pojo.number_elected,
             pojo.votes_allowed,
             pojo.name,
-            convertList(pojo.ballot_selections, ElectionDescriptionPojo::convertSelectionDescription),
+            convertList(pojo.ballot_selections, ManifestPojo::convertSelectionDescription),
             convertInternationalizedText(pojo.ballot_title),
             convertInternationalizedText(pojo.ballot_subtitle));
   }
 
   @Nullable
-  private static Election.GeopoliticalUnit convertGeopoliticalUnit(@Nullable ElectionDescriptionPojo.GeopoliticalUnit pojo) {
+  private static Manifest.GeopoliticalUnit convertGeopoliticalUnit(@Nullable ManifestPojo.GeopoliticalUnit pojo) {
     if (pojo == null) {
       return null;
     }
-    return new Election.GeopoliticalUnit(
+    return new Manifest.GeopoliticalUnit(
             pojo.object_id,
             pojo.name,
-            Election.ReportingUnitType.valueOf(pojo.type),
+            Manifest.ReportingUnitType.valueOf(pojo.type),
             convertContactInformation(pojo.contact_information));
   }
 
   @Nullable
-  private static Election.InternationalizedText convertInternationalizedText(@Nullable ElectionDescriptionPojo.InternationalizedText pojo) {
+  private static Manifest.InternationalizedText convertInternationalizedText(@Nullable ManifestPojo.InternationalizedText pojo) {
     if (pojo == null) {
       return null;
     }
-    return new Election.InternationalizedText(convertList(pojo.text, ElectionDescriptionPojo::convertLanguage));
+    return new Manifest.InternationalizedText(convertList(pojo.text, ManifestPojo::convertLanguage));
   }
 
   @Nullable
-  private static Election.Language convertLanguage(@Nullable ElectionDescriptionPojo.Language pojo) {
+  private static Manifest.Language convertLanguage(@Nullable ManifestPojo.Language pojo) {
     if (pojo == null) {
       return null;
     }
-    return new Election.Language(
+    return new Manifest.Language(
             Strings.nullToEmpty(pojo.value),
             Strings.nullToEmpty(pojo.language));
   }
 
   @Nullable
-  private static Election.Party convertParty(@Nullable ElectionDescriptionPojo.Party pojo) {
+  private static Manifest.Party convertParty(@Nullable ManifestPojo.Party pojo) {
     if (pojo == null) {
       return null;
     }
-    return new Election.Party(
+    return new Manifest.Party(
             pojo.object_id,
             convertInternationalizedText(pojo.ballot_name),
             pojo.abbreviation,
@@ -235,11 +235,11 @@ public class ElectionDescriptionPojo {
   }
 
   @Nullable
-  private static Election.SelectionDescription convertSelectionDescription(@Nullable ElectionDescriptionPojo.SelectionDescription pojo) {
+  private static Manifest.SelectionDescription convertSelectionDescription(@Nullable ManifestPojo.SelectionDescription pojo) {
     if (pojo == null) {
       return null;
     }
-    return new Election.SelectionDescription(
+    return new Manifest.SelectionDescription(
             pojo.object_id,
             pojo.candidate_id,
             pojo.sequence_order);
@@ -248,24 +248,24 @@ public class ElectionDescriptionPojo {
   ////////////////////////////////////////////////////////////////////////////
   // serialize
 
-  public static JsonElement serialize(Election src) {
+  public static JsonElement serialize(Manifest src) {
     Gson gson = GsonTypeAdapters.enhancedGson();
-    ElectionDescriptionPojo pojo = convert(src);
-    Type typeOfSrc = new TypeToken<ElectionDescriptionPojo>() {}.getType();
+    ManifestPojo pojo = convert(src);
+    Type typeOfSrc = new TypeToken<ManifestPojo>() {}.getType();
     return gson.toJsonTree(pojo, typeOfSrc);
   }
 
-  private static ElectionDescriptionPojo convert(Election org) {
-    ElectionDescriptionPojo pojo = new ElectionDescriptionPojo();
+  private static ManifestPojo convert(Manifest org) {
+    ManifestPojo pojo = new ManifestPojo();
     pojo.election_scope_id = org.election_scope_id;
     pojo.type = org.type.name();
     pojo.start_date = org.start_date.toString();
     pojo.end_date = org.end_date.toString();
-    pojo.geopolitical_units = convertList(org.geopolitical_units, ElectionDescriptionPojo::convertGeopoliticalUnit);
-    pojo.parties = convertList(org.parties, ElectionDescriptionPojo::convertParty);
-    pojo.candidates = convertList(org.candidates, ElectionDescriptionPojo::convertCandidate);
-    pojo.contests = convertList(org.contests, ElectionDescriptionPojo::convertContestDescription);
-    pojo.ballot_styles = convertList(org.ballot_styles, ElectionDescriptionPojo::convertBallotStyle);
+    pojo.geopolitical_units = convertList(org.geopolitical_units, ManifestPojo::convertGeopoliticalUnit);
+    pojo.parties = convertList(org.parties, ManifestPojo::convertParty);
+    pojo.candidates = convertList(org.candidates, ManifestPojo::convertCandidate);
+    pojo.contests = convertList(org.contests, ManifestPojo::convertContestDescription);
+    pojo.ballot_styles = convertList(org.ballot_styles, ManifestPojo::convertBallotStyle);
     pojo.name = convertInternationalizedText(org.name.orElse(null));
     pojo.contact_information = convertContactInformation(org.contact_information.orElse(null));
 
@@ -273,22 +273,22 @@ public class ElectionDescriptionPojo {
   }
 
   @Nullable
-  private static ElectionDescriptionPojo.AnnotatedString convertAnnotatedString(@Nullable Election.AnnotatedString org) {
+  private static ManifestPojo.AnnotatedString convertAnnotatedString(@Nullable Manifest.AnnotatedString org) {
     if (org == null) {
       return null;
     }
-    ElectionDescriptionPojo.AnnotatedString pojo = new ElectionDescriptionPojo.AnnotatedString();
+    ManifestPojo.AnnotatedString pojo = new ManifestPojo.AnnotatedString();
     pojo.annotation = Strings.nullToEmpty(org.annotation);
     pojo.value = Strings.nullToEmpty(org.value);
     return pojo;
   }
 
   @Nullable
-  private static ElectionDescriptionPojo.BallotStyle convertBallotStyle(@Nullable Election.BallotStyle org) {
+  private static ManifestPojo.BallotStyle convertBallotStyle(@Nullable Manifest.BallotStyle org) {
     if (org == null) {
       return null;
     }
-    ElectionDescriptionPojo.BallotStyle pojo = new ElectionDescriptionPojo.BallotStyle();
+    ManifestPojo.BallotStyle pojo = new ManifestPojo.BallotStyle();
 
     pojo.object_id = org.object_id;
     pojo.geopolitical_unit_ids = convertList(org.geopolitical_unit_ids, Strings::nullToEmpty);
@@ -298,11 +298,11 @@ public class ElectionDescriptionPojo {
   }
 
   @Nullable
-  private static ElectionDescriptionPojo.Candidate convertCandidate(@Nullable Election.Candidate org) {
+  private static ManifestPojo.Candidate convertCandidate(@Nullable Manifest.Candidate org) {
     if (org == null) {
       return null;
     }
-    ElectionDescriptionPojo.Candidate pojo = new ElectionDescriptionPojo.Candidate();
+    ManifestPojo.Candidate pojo = new ManifestPojo.Candidate();
     pojo.object_id = org.object_id;
     pojo.name = convertInternationalizedText(org.name);
     pojo.party_id = org.party_id.orElse(null);
@@ -312,24 +312,24 @@ public class ElectionDescriptionPojo {
   }
 
   @Nullable
-  private static ElectionDescriptionPojo.ContactInformation convertContactInformation(@Nullable Election.ContactInformation org) {
+  private static ManifestPojo.ContactInformation convertContactInformation(@Nullable Manifest.ContactInformation org) {
     if (org == null) {
       return null;
     }
-    ElectionDescriptionPojo.ContactInformation pojo = new ElectionDescriptionPojo.ContactInformation();
+    ManifestPojo.ContactInformation pojo = new ManifestPojo.ContactInformation();
     pojo.address_line = convertList(org.address_line, Strings::nullToEmpty);
-    pojo.email = convertList(org.email, ElectionDescriptionPojo::convertAnnotatedString);
-    pojo.phone = convertList(org.phone, ElectionDescriptionPojo::convertAnnotatedString);
+    pojo.email = convertList(org.email, ManifestPojo::convertAnnotatedString);
+    pojo.phone = convertList(org.phone, ManifestPojo::convertAnnotatedString);
     pojo.name = org.name.orElse(null);
     return pojo;
   }
 
   @Nullable
-  private static ElectionDescriptionPojo.ContestDescription convertContestDescription(@Nullable Election.ContestDescription org) {
+  private static ManifestPojo.ContestDescription convertContestDescription(@Nullable Manifest.ContestDescription org) {
     if (org == null) {
       return null;
     }
-    ElectionDescriptionPojo.ContestDescription pojo = new ElectionDescriptionPojo.ContestDescription();
+    ManifestPojo.ContestDescription pojo = new ManifestPojo.ContestDescription();
     pojo.object_id = org.object_id;
     pojo.electoral_district_id = org.electoral_district_id;
     pojo.sequence_order = org.sequence_order;
@@ -337,18 +337,18 @@ public class ElectionDescriptionPojo {
     pojo.number_elected = org.number_elected;
     pojo.votes_allowed = org.votes_allowed.orElse(null);
     pojo.name = org.name;
-    pojo.ballot_selections = convertList(org.ballot_selections, ElectionDescriptionPojo::convertSelectionDescription);
+    pojo.ballot_selections = convertList(org.ballot_selections, ManifestPojo::convertSelectionDescription);
     pojo.ballot_title = convertInternationalizedText(org.ballot_title.orElse(null));
     pojo.ballot_subtitle = convertInternationalizedText(org.ballot_subtitle.orElse(null));
     return pojo;
   }
 
   @Nullable
-  private static ElectionDescriptionPojo.GeopoliticalUnit convertGeopoliticalUnit(@Nullable Election.GeopoliticalUnit org) {
+  private static ManifestPojo.GeopoliticalUnit convertGeopoliticalUnit(@Nullable Manifest.GeopoliticalUnit org) {
     if (org == null) {
       return null;
     }
-    ElectionDescriptionPojo.GeopoliticalUnit pojo = new ElectionDescriptionPojo.GeopoliticalUnit();
+    ManifestPojo.GeopoliticalUnit pojo = new ManifestPojo.GeopoliticalUnit();
     pojo.object_id = org.object_id;
     pojo.name = org.name;
     pojo.type = org.type.name();
@@ -357,32 +357,32 @@ public class ElectionDescriptionPojo {
   }
 
   @Nullable
-  private static ElectionDescriptionPojo.InternationalizedText convertInternationalizedText(@Nullable Election.InternationalizedText org) {
+  private static ManifestPojo.InternationalizedText convertInternationalizedText(@Nullable Manifest.InternationalizedText org) {
     if (org == null) {
       return null;
     }
-    ElectionDescriptionPojo.InternationalizedText pojo = new ElectionDescriptionPojo.InternationalizedText();
-    pojo.text = convertList(org.text, ElectionDescriptionPojo::convertLanguage);
+    ManifestPojo.InternationalizedText pojo = new ManifestPojo.InternationalizedText();
+    pojo.text = convertList(org.text, ManifestPojo::convertLanguage);
     return pojo;
   }
 
   @Nullable
-  private static ElectionDescriptionPojo.Language convertLanguage(@Nullable Election.Language org) {
+  private static ManifestPojo.Language convertLanguage(@Nullable Manifest.Language org) {
     if (org == null) {
       return null;
     }
-    ElectionDescriptionPojo.Language pojo = new ElectionDescriptionPojo.Language();
+    ManifestPojo.Language pojo = new ManifestPojo.Language();
     pojo.value = Strings.nullToEmpty(org.value);
     pojo.language = Strings.nullToEmpty(org.language);
     return pojo;
   }
 
   @Nullable
-  private static ElectionDescriptionPojo.Party convertParty(@Nullable Election.Party org) {
+  private static ManifestPojo.Party convertParty(@Nullable Manifest.Party org) {
     if (org == null) {
       return null;
     }
-    ElectionDescriptionPojo.Party pojo = new ElectionDescriptionPojo.Party();
+    ManifestPojo.Party pojo = new ManifestPojo.Party();
     pojo.object_id = org.object_id;
     pojo.ballot_name = convertInternationalizedText(org.name);
     pojo.abbreviation = org.abbreviation.orElse(null);
@@ -392,11 +392,11 @@ public class ElectionDescriptionPojo {
   }
 
   @Nullable
-  private static ElectionDescriptionPojo.SelectionDescription convertSelectionDescription(@Nullable Election.SelectionDescription org) {
+  private static ManifestPojo.SelectionDescription convertSelectionDescription(@Nullable Manifest.SelectionDescription org) {
     if (org == null) {
       return null;
     }
-    ElectionDescriptionPojo.SelectionDescription pojo = new ElectionDescriptionPojo.SelectionDescription();
+    ManifestPojo.SelectionDescription pojo = new ManifestPojo.SelectionDescription();
     pojo.object_id = org.object_id;
     pojo.candidate_id = org.candidate_id;
     pojo.sequence_order = org.sequence_order;

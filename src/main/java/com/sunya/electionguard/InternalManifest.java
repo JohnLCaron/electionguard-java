@@ -15,26 +15,26 @@ import java.util.stream.Collectors;
 
 /** An election with contests that have been filled out with selection placeholders. */
 @Immutable
-public class ElectionWithPlaceholders {
+public class InternalManifest {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
-  public final Election election;
+  public final Manifest election;
   public final ImmutableMap<String, ContestWithPlaceholders> contests;
 
-  public ElectionWithPlaceholders(Election election) {
+  public InternalManifest(Manifest election) {
     this.election = Preconditions.checkNotNull(election);
 
     // For each contest, append the `number_elected` number of placeholder selections to the end of the contest collection.
     ImmutableMap.Builder<String, ContestWithPlaceholders> builder = ImmutableMap.builder();
-    for (Election.ContestDescription contest : election.contests) {
-      List<Election.SelectionDescription> placeholders = generate_placeholder_selections_from(contest, contest.number_elected);
+    for (Manifest.ContestDescription contest : election.contests) {
+      List<Manifest.SelectionDescription> placeholders = generate_placeholder_selections_from(contest, contest.number_elected);
       builder.put(contest.object_id, contest_description_with_placeholders_from(contest, placeholders));
     }
     this.contests = builder.build();
   }
 
   static ContestWithPlaceholders contest_description_with_placeholders_from(
-          Election.ContestDescription contest, List<Election.SelectionDescription> placeholders) {
+          Manifest.ContestDescription contest, List<Manifest.SelectionDescription> placeholders) {
 
     return new ContestWithPlaceholders(
             contest.object_id,
@@ -57,13 +57,13 @@ public class ElectionWithPlaceholders {
    * @param count: optionally specify a number of placeholders to generate
    * @return a collection of `SelectionDescription` objects, which may be empty
    */
-  static List<Election.SelectionDescription> generate_placeholder_selections_from(Election.ContestDescription contest, int count) {
+  static List<Manifest.SelectionDescription> generate_placeholder_selections_from(Manifest.ContestDescription contest, int count) {
     //  max_sequence_order = max([selection.sequence_order for selection in contest.ballot_selections]);
     int max_sequence_order = contest.ballot_selections.stream().map(s -> s.sequence_order).max(Integer::compare).orElse(0);
-    List<Election.SelectionDescription> selections = new ArrayList<>();
+    List<Manifest.SelectionDescription> selections = new ArrayList<>();
     for (int i = 0; i < count; i++) {
       int sequence_order = max_sequence_order + 1 + i;
-      Optional<Election.SelectionDescription> sd = generate_placeholder_selection_from(contest, Optional.of(sequence_order));
+      Optional<Manifest.SelectionDescription> sd = generate_placeholder_selection_from(contest, Optional.of(sequence_order));
       selections.add(sd.orElseThrow(IllegalStateException::new));
     }
     return selections;
@@ -75,8 +75,8 @@ public class ElectionWithPlaceholders {
    * @param use_sequence_idO: an optional integer unique to the contest identifying this selection's place in the contest
    * @return a SelectionDescription or None
    */
-  static Optional<Election.SelectionDescription> generate_placeholder_selection_from(
-          Election.ContestDescription contest, Optional<Integer> use_sequence_idO) {
+  static Optional<Manifest.SelectionDescription> generate_placeholder_selection_from(
+          Manifest.ContestDescription contest, Optional<Integer> use_sequence_idO) {
 
     // sequence_ids = [selection.sequence_order for selection in contest.ballot_selections]
     List<Integer> sequence_ids = contest.ballot_selections.stream().map(s -> s.sequence_order).collect(Collectors.toList());
@@ -94,7 +94,7 @@ public class ElectionWithPlaceholders {
     }
 
     String placeholder_object_id = String.format("%s-%s", contest.object_id, use_sequence_id);
-    return Optional.of(new Election.SelectionDescription(
+    return Optional.of(new Manifest.SelectionDescription(
             String.format("%s-placeholder", placeholder_object_id),
             String.format("%s-candidate", placeholder_object_id),
             use_sequence_id));
@@ -105,13 +105,13 @@ public class ElectionWithPlaceholders {
   }
 
   /** Find the ballot style for a specified style_id */
-  public Optional<Election.BallotStyle> get_ballot_style(String style_id) {
+  public Optional<Manifest.BallotStyle> get_ballot_style(String style_id) {
     return election.ballot_styles.stream().filter(bs -> bs.object_id.equals(style_id)).findFirst();
   }
 
-  /** Get contests that have the given ballot style. */
-  public List<ContestWithPlaceholders> get_contests_for_style(String style_id) {
-    Optional<Election.BallotStyle> style = this.get_ballot_style(style_id);
+  /** Get contests whose electoral_district_id is in the given ballot style's geopolitical_unit_ids. */
+  public List<ContestWithPlaceholders> get_contests_for_style(String ballot_style_id) {
+    Optional<Manifest.BallotStyle> style = this.get_ballot_style(ballot_style_id);
     if (style.isEmpty() || style.get().geopolitical_unit_ids.isEmpty()) {
       return new ArrayList<>();
     }
@@ -126,20 +126,20 @@ public class ElectionWithPlaceholders {
    * become one. This allows the `ConstantChaumPedersenProof` to verify correctly for undervoted contests.
    */
   @Immutable
-  public static class ContestWithPlaceholders extends Election.ContestDescription {
-    final ImmutableList<Election.SelectionDescription> placeholder_selections;
+  public static class ContestWithPlaceholders extends Manifest.ContestDescription {
+    final ImmutableList<Manifest.SelectionDescription> placeholder_selections;
 
     public ContestWithPlaceholders(String object_id,
                                    String electoral_district_id,
                                    int sequence_order,
-                                   Election.VoteVariationType vote_variation,
+                                   Manifest.VoteVariationType vote_variation,
                                    int number_elected,
                                    int votes_allowed,
                                    String name,
-                                   List<Election.SelectionDescription> ballot_selections,
-                                   @Nullable Election.InternationalizedText ballot_title,
-                                   @Nullable Election.InternationalizedText ballot_subtitle,
-                                   List<Election.SelectionDescription> placeholder_selections) {
+                                   List<Manifest.SelectionDescription> ballot_selections,
+                                   @Nullable Manifest.InternationalizedText ballot_title,
+                                   @Nullable Manifest.InternationalizedText ballot_subtitle,
+                                   List<Manifest.SelectionDescription> placeholder_selections) {
 
       super(object_id, electoral_district_id, sequence_order, vote_variation, number_elected, votes_allowed, name,
               ballot_selections, ballot_title, ballot_subtitle);
@@ -166,8 +166,8 @@ public class ElectionWithPlaceholders {
     }
 
     /** Gets the SelectionDescription from a selection id */
-    public Optional<Election.SelectionDescription> getSelectionById(String selection_id) {
-      Optional<Election.SelectionDescription> first_match = this.ballot_selections.stream()
+    public Optional<Manifest.SelectionDescription> getSelectionById(String selection_id) {
+      Optional<Manifest.SelectionDescription> first_match = this.ballot_selections.stream()
               .filter(s -> s.object_id.equals(selection_id)).findFirst();
       if (first_match.isPresent()) {
         return first_match;

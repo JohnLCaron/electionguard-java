@@ -205,7 +205,7 @@ public class KeyCeremonyMediator {
 
   /**
    * Receive election partial key backup from guardian.
-   * @param backup: Election partial key backup
+   * @param backup: Manifest partial key backup
    * @return boolean indicating success or failure
    */
   boolean receive_election_partial_key_backup(ElectionPartialKeyBackup backup) {

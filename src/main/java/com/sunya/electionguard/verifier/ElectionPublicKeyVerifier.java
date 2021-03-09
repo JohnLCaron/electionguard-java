@@ -14,8 +14,8 @@ import static com.sunya.electionguard.Group.ElementModP;
 import static com.sunya.electionguard.Group.ElementModQ;
 
 /**
- * This verifies specification section "3 Election Public-Key Validation".
- * @see <a href="https://www.electionguard.vote/spec/0.95.0/9_Verifier_construction/#election-public-key-validation">Election public key validation</a>
+ * This verifies specification section "3 Manifest Public-Key Validation".
+ * @see <a href="https://www.electionguard.vote/spec/0.95.0/9_Verifier_construction/#election-public-key-validation">Manifest public key validation</a>
  */
 public class ElectionPublicKeyVerifier {
   private final ElectionRecord electionRecord;

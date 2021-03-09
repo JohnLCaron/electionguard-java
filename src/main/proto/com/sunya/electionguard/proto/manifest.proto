@@ -3,10 +3,10 @@ syntax = "proto3";
 import "com/sunya/electionguard/proto/common.proto";
 
 option java_package = "com.sunya.electionguard.proto";
-option java_outer_classname = "ElectionProto";
+option java_outer_classname = "ManifestProto";
 
 // The structure of the election. See: https://developers.google.com/elections-data/reference/election
-message ElectionDescription {
+message Manifest {
 
   enum ElectionType {
     unknown = 0;

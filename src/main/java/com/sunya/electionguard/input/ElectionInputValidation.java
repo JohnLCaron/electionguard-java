@@ -1,7 +1,7 @@
 package com.sunya.electionguard.input;
 
 import com.google.common.flogger.FluentLogger;
-import com.sunya.electionguard.Election;
+import com.sunya.electionguard.Manifest;
 
 import java.util.ArrayList;
 import java.util.Formatter;
@@ -13,12 +13,12 @@ import java.util.stream.Collectors;
 public class ElectionInputValidation {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
-  private final Election election;
+  private final Manifest election;
   private final Set<String> gpUnits;
   private final Set<String> candidates;
   private final Set<String> parties;
 
-  public ElectionInputValidation(Election election) {
+  public ElectionInputValidation(Manifest election) {
     this.election = election;
     this.gpUnits = election.geopolitical_units.stream().map(gp -> gp.object_id).collect(Collectors.toSet());
     this.candidates = election.candidates.stream().map(c -> c.object_id).collect(Collectors.toSet());
@@ -30,7 +30,7 @@ public class ElectionInputValidation {
     Messes ballotMesses = new Messes(election.election_scope_id);
 
     // Referential integrity of BallotStyle geopolitical_unit_ids
-    for (Election.BallotStyle ballotStyle : election.ballot_styles) {
+    for (Manifest.BallotStyle ballotStyle : election.ballot_styles) {
       for (String gpunit : ballotStyle.geopolitical_unit_ids) {
         if (!gpUnits.contains(gpunit)) {
           String msg = String.format("BallotStyle '%s' has geopolitical_unit_id '%s' that does not exist in election's geopolitical_units", ballotStyle.object_id, gpunit);
@@ -41,7 +41,7 @@ public class ElectionInputValidation {
     }
 
     // Referential integrity of Candidate party_id
-    for (Election.Candidate candidate : election.candidates) {
+    for (Manifest.Candidate candidate : election.candidates) {
       candidate.party_id.ifPresent(pid -> {
         if (!parties.contains(pid)) {
           String msg = String.format("Candidate '%s' party_id '%s' does not exist in election's Parties", candidate.object_id, pid);
@@ -52,7 +52,7 @@ public class ElectionInputValidation {
     }
 
     Set<String> contestIds = new HashSet<>();
-    for (Election.ContestDescription electionContest : election.contests) {
+    for (Manifest.ContestDescription electionContest : election.contests) {
       // No duplicate contests
       if (contestIds.contains(electionContest.object_id)) {
         String msg = String.format("Multiple Contests have same id '%s'", electionContest.object_id);
@@ -69,7 +69,7 @@ public class ElectionInputValidation {
   }
 
   /** Determine if contest is valid for ballot style. */
-  void validateContest(Election.ContestDescription contest, Messes ballotMesses) {
+  void validateContest(Manifest.ContestDescription contest, Messes ballotMesses) {
     Messes contestMesses = ballotMesses.nested(contest.object_id);
 
     // Referential integrity of Contest electoral_district_id
@@ -81,7 +81,7 @@ public class ElectionInputValidation {
 
     Set<String> selectionIds = new HashSet<>();
     Set<String> candidateIds = new HashSet<>();
-    for (Election.SelectionDescription electionSelection : contest.ballot_selections) {
+    for (Manifest.SelectionDescription electionSelection : contest.ballot_selections) {
       // No duplicate selections
       if (selectionIds.contains(electionSelection.object_id)) {
         String msg = String.format("Multiple Selections have same id '%s'", electionSelection.object_id);
@@ -130,7 +130,7 @@ public class ElectionInputValidation {
 
     boolean makeMesses(Formatter problems) {
       if (hasProblem()) {
-        problems.format("Election '%s' has problems%n", id);
+        problems.format("Manifest '%s' has problems%n", id);
         for (String mess : messages) {
           problems.format("  %s%n", mess);
         }

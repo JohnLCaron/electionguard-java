@@ -23,9 +23,9 @@ public class TestDecryptionMediatorProblem extends TestProperties {
   KeyCeremonyMediator key_ceremony;
   List<Guardian> guardians = new ArrayList<>();
   ElementModP joint_public_key;
-  Election election;
+  Manifest election;
   CiphertextElectionContext context;
-  ElectionWithPlaceholders metadata;
+  InternalManifest metadata;
   Map<String, Integer> expected_plaintext_tally;
 
   BallotBox ballot_box;
@@ -55,7 +55,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
     this.joint_public_key = joinKeyO.get();
 
     // setup the election
-    Election election = ElectionFactory.get_fake_election();
+    Manifest election = ElectionFactory.get_fake_election();
     ElectionBuilder builder = new ElectionBuilder(NUMBER_OF_GUARDIANS, QUORUM, election);
     assertThat(builder.build()).isEmpty();  // Can't build without the public key
     builder.set_public_key(this.joint_public_key);

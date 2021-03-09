@@ -3,10 +3,10 @@ package com.sunya.electionguard.input;
 import com.sunya.electionguard.CiphertextBallot;
 import com.sunya.electionguard.CiphertextElectionContext;
 import com.sunya.electionguard.ElGamal;
-import com.sunya.electionguard.Election;
+import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.ElectionBuilder;
 import com.sunya.electionguard.ElectionFactory;
-import com.sunya.electionguard.ElectionWithPlaceholders;
+import com.sunya.electionguard.InternalManifest;
 import com.sunya.electionguard.Encrypt;
 import com.sunya.electionguard.PlaintextBallot;
 import net.jqwik.api.Example;
@@ -25,28 +25,28 @@ public class TestBallotInputValidation {
   private static final int NFAKE_BALLOTS = 11;
 
   static class ElectionAndBallot {
-    final Election election;
+    final Manifest election;
     final PlaintextBallot ballot;
 
-    public ElectionAndBallot(Election election, PlaintextBallot ballot) {
+    public ElectionAndBallot(Manifest election, PlaintextBallot ballot) {
       this.election = election;
       this.ballot = ballot;
     }
   }
 
-  private boolean validate(Election election) {
+  private boolean validate(Manifest election) {
     ElectionInputValidation validator = new ElectionInputValidation(election);
     Formatter problems = new Formatter();
     boolean isValid = validator.validateElection(problems);
     if (!isValid) {
-      System.out.printf("Election Problems=%n%s", problems);
+      System.out.printf("Manifest Problems=%n%s", problems);
     }
     return isValid;
   }
 
   @Example
   public void testFakeInputOk() {
-    Election fakeElection = ElectionFactory.get_fake_election();
+    Manifest fakeElection = ElectionFactory.get_fake_election();
     assertThat(validate(fakeElection)).isTrue();
 
     for (int i=0; i<NFAKE_BALLOTS; i++) {
@@ -60,7 +60,7 @@ public class TestBallotInputValidation {
 
   ElectionAndBallot testDefaultOk() {
     ElectionInputBuilder ebuilder = new ElectionInputBuilder("ballot_id");
-    Election election = ebuilder.addContest("contest_id")
+    Manifest election = ebuilder.addContest("contest_id")
             .addSelection("selection_id", "candidate_1")
             .addSelection("selection_id2", "candidate_2")
             .done()
@@ -89,7 +89,7 @@ public class TestBallotInputValidation {
   ElectionAndBallot testStylingNotExist() {
     ElectionInputBuilder ebuilder = new ElectionInputBuilder("ballot_id")
             .setStyle("badHairDay");
-    Election election = ebuilder.addContest("contest_id")
+    Manifest election = ebuilder.addContest("contest_id")
             .addSelection("selection_id", "candidate_1")
             .addSelection("selection_id2", "candidate_2")
             .done()
@@ -117,7 +117,7 @@ public class TestBallotInputValidation {
 
   ElectionAndBallot testInvalidContest() {
     ElectionInputBuilder ebuilder = new ElectionInputBuilder("ballot_id");
-    Election election = ebuilder.addContest("contest_id")
+    Manifest election = ebuilder.addContest("contest_id")
             .addSelection("selection_id", "candidate_1")
             .addSelection("selection_id2", "candidate_2")
             .done()
@@ -146,7 +146,7 @@ public class TestBallotInputValidation {
 
   ElectionAndBallot testInvalidSelection() {
     ElectionInputBuilder ebuilder = new ElectionInputBuilder("ballot_id");
-    Election election = ebuilder.addContest("contest_id")
+    Manifest election = ebuilder.addContest("contest_id")
             .addSelection("selection_id", "candidate_1")
             .addSelection("selection_id2", "candidate_2")
             .done()
@@ -175,7 +175,7 @@ public class TestBallotInputValidation {
 
   ElectionAndBallot testZeroOrOne() {
     ElectionInputBuilder ebuilder = new ElectionInputBuilder("ballot_id");
-    Election election = ebuilder.addContest("contest_id")
+    Manifest election = ebuilder.addContest("contest_id")
             .setAllowedVotes(2)
             .addSelection("selection_id", "candidate_1")
             .addSelection("selection_id2", "candidate_2")
@@ -205,7 +205,7 @@ public class TestBallotInputValidation {
 
   ElectionAndBallot testOvervote() {
     ElectionInputBuilder ebuilder = new ElectionInputBuilder("ballot_id");
-    Election election = ebuilder.addContest("contest_id")
+    Manifest election = ebuilder.addContest("contest_id")
             .addSelection("selection_id", "candidate_1")
             .addSelection("selection_id2", "candidate_2")
             .done()
@@ -234,7 +234,7 @@ public class TestBallotInputValidation {
 
   private ElectionAndBallot testContestDeclaredTwice() {
     ElectionInputBuilder ebuilder = new ElectionInputBuilder("ballot_id");
-    Election election = ebuilder.addContest("contest_id")
+    Manifest election = ebuilder.addContest("contest_id")
             .addSelection("selection_id", "candidate_1")
             .addSelection("selection_id2", "candidate_2")
             .done()
@@ -265,7 +265,7 @@ public class TestBallotInputValidation {
 
   private ElectionAndBallot testSelectionDeclaredTwice() {
     ElectionInputBuilder ebuilder = new ElectionInputBuilder("ballot_id");
-    Election election = ebuilder.addContest("contest_id").setAllowedVotes(2)
+    Manifest election = ebuilder.addContest("contest_id").setAllowedVotes(2)
             .addSelection("selection_id", "candidate_1")
             .addSelection("selection_id2", "candidate_2")
             .done()
@@ -312,7 +312,7 @@ public class TestBallotInputValidation {
     ElectionBuilder.DescriptionAndContext tuple = ElectionFactory.get_fake_ciphertext_election(eandb.election, keypair.public_key).orElseThrow();
     CiphertextElectionContext context = tuple.context;
 
-    ElectionWithPlaceholders metadata = new ElectionWithPlaceholders(eandb.election);
+    InternalManifest metadata = new InternalManifest(eandb.election);
     Encrypt.EncryptionDevice device = new Encrypt.EncryptionDevice("device");
 
     Encrypt.EncryptionMediator encryptor = new Encrypt.EncryptionMediator(metadata, context, device);

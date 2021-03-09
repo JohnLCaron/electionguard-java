@@ -3,10 +3,10 @@ package com.sunya.electionguard.verifier;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.SubmittedBallot;
 import com.sunya.electionguard.CiphertextElectionContext;
 import com.sunya.electionguard.ElectionConstants;
-import com.sunya.electionguard.Election;
 import com.sunya.electionguard.Encrypt;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.KeyCeremony;
@@ -27,7 +27,7 @@ import java.util.Objects;
 public class ElectionRecord {
   public final ElectionConstants constants;
   public final CiphertextElectionContext context;
-  public final Election election;
+  public final Manifest election;
   public final ImmutableList<KeyCeremony.CoefficientValidationSet> guardianCoefficients;
   public final ImmutableList<Encrypt.EncryptionDevice> devices; // may be empty
   public final CloseableIterable<SubmittedBallot> acceptedBallots; // All ballots, not just cast! // may be empty
@@ -40,7 +40,7 @@ public class ElectionRecord {
 
   public ElectionRecord(ElectionConstants constants,
                         CiphertextElectionContext context,
-                        Election election,
+                        Manifest election,
                         List<KeyCeremony.CoefficientValidationSet> guardianCoefficients,
                         @Nullable List<Encrypt.EncryptionDevice> devices,
                         @Nullable CiphertextTally encryptedTally,
@@ -66,7 +66,7 @@ public class ElectionRecord {
     }
 
     ImmutableMap.Builder<String, Integer> builder = ImmutableMap.builder();
-    for (Election.ContestDescription contest : election.contests) {
+    for (Manifest.ContestDescription contest : election.contests) {
       builder.put(contest.object_id,
               // LOOK why optional? comment says "In n-of-m elections, this will be None."
               contest.votes_allowed.orElseThrow(() -> new IllegalStateException(
@@ -116,7 +116,7 @@ public class ElectionRecord {
     return this.constants.cofactor;
   }
 
-  /** Election description crypto hash */
+  /** Manifest description crypto hash */
   public Group.ElementModQ description_hash() {
     return this.context.description_hash;
   }

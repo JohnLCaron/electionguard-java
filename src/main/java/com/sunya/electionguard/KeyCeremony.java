@@ -232,10 +232,10 @@ public class KeyCeremony {
   /**
    * Generate election partial key backup for sharing.
    * @param owner_id: Owner of election key
-   * @param polynomial: The owner's Election polynomial
+   * @param polynomial: The owner's Manifest polynomial
    * @param auxiliary_public_key: The Auxiliary public key
    * @param encryptor Function to encrypt using auxiliary key
-   * @return Election partial key backup
+   * @return Manifest partial key backup
    */
   static Optional<ElectionPartialKeyBackup> generate_election_partial_key_backup(
           String owner_id,
@@ -271,7 +271,7 @@ public class KeyCeremony {
   /**
    * Verify election partial key backup contains point on owners polynomial.
    * @param verifier_id: Verifier of the partial key backup
-   * @param backup: Election partial key backup
+   * @param backup: Manifest partial key backup
    * @param auxiliary_key_pair: Auxiliary key pair
    * @param decryptor Decryption function using auxiliary key, or null for default.
    */
@@ -299,9 +299,9 @@ public class KeyCeremony {
 
   /**
    * Generate challenge to a previous verification of a partial key backup.
-   * @param backup: Election partial key backup in question
+   * @param backup: Manifest partial key backup in question
    * @param polynomial: Polynomial to regenerate point
-   * @return Election partial key verification
+   * @return Manifest partial key verification
    */
   static ElectionPartialKeyChallenge generate_election_partial_key_challenge(
           ElectionPartialKeyBackup backup,
@@ -319,8 +319,8 @@ public class KeyCeremony {
   /**
    * Verify a challenge to a previous verification of a partial key backup.
    * @param verifier_id: Verifier of the challenge
-   * @param challenge: Election partial key challenge
-   * @return Election partial key verification
+   * @param challenge: Manifest partial key challenge
+   * @return Manifest partial key verification
    */
   static ElectionPartialKeyVerification verify_election_partial_key_challenge(
           String verifier_id, ElectionPartialKeyChallenge challenge) {

@@ -18,20 +18,20 @@ import static com.sunya.electionguard.BallotBox.State;
 
 import static com.sunya.electionguard.PlaintextBallot.Selection;
 
-import static com.sunya.electionguard.Election.SelectionDescription;
-import static com.sunya.electionguard.ElectionWithPlaceholders.ContestWithPlaceholders;
+import static com.sunya.electionguard.Manifest.SelectionDescription;
+import static com.sunya.electionguard.InternalManifest.ContestWithPlaceholders;
 
 /** Test decrypting on specific ballots. */
 public class TestDecryptProblem {
-  private static final int NUMBER_OF_GUARDIANS = 3;
+  private static final int NUMBER_OF_GUARDIANS = 5;
   private static final int QUORUM = 3;
 
-  // Step 0 - Configure Election
-  Election election;
+  // Step 0 - Configure Manifest
+  Manifest election;
   ElectionBuilder election_builder;
   CiphertextElectionContext context;
   ElectionConstants constants;
-  ElectionWithPlaceholders metadata;
+  InternalManifest metadata;
 
   // Step 1 - Key Ceremony;
   KeyCeremonyMediator mediator;
@@ -89,7 +89,7 @@ public class TestDecryptProblem {
     this.election = ElectionFactory.get_simple_election_from_file();
 
     System.out.printf("----------------------------------%n");
-    System.out.printf("Election Summary:%nScope: %s%n", this.election.election_scope_id);
+    System.out.printf("Manifest Summary:%nScope: %s%n", this.election.election_scope_id);
     System.out.printf("Geopolitical Units: %d%n", this.election.geopolitical_units.size());
     System.out.printf("Parties: %d%n", this.election.parties.size());
     System.out.printf("Candidates: %d%n", this.election.candidates.size());
@@ -99,7 +99,7 @@ public class TestDecryptProblem {
 
     assertThat(this.election.is_valid()).isTrue();
 
-    // Create an Election Builder
+    // Create an Manifest Builder
     this.election_builder = new ElectionBuilder(NUMBER_OF_GUARDIANS, QUORUM, this.election);
     System.out.printf("Created with number_of_guardians: %d quorum: %d%n", NUMBER_OF_GUARDIANS, QUORUM);
   }
@@ -149,7 +149,7 @@ public class TestDecryptProblem {
 
     // Joint Key
     Optional<Group.ElementModP> joint_key = this.mediator.publish_joint_key();
-    System.out.printf("Publishes the Joint Election Key%n");
+    System.out.printf("Publishes the Joint Manifest Key%n");
     assertThat(joint_key).isPresent();
 
     // Save Validation Keys
@@ -159,7 +159,7 @@ public class TestDecryptProblem {
       this.coefficient_validation_sets.add(guardian.share_coefficient_validation_set());
     }
 
-    // Build the Election
+    // Build the Manifest
     this.election_builder.set_public_key(joint_key.get());
     ElectionBuilder.DescriptionAndContext tuple = this.election_builder.build().orElseThrow();
     this.election = tuple.metadata.election;
@@ -174,13 +174,17 @@ public class TestDecryptProblem {
   void step_2_encrypt_votes() throws IOException {
     // Configure the Encryption Device
     this.device = new Encrypt.EncryptionDevice("polling-place-one");
-    this.metadata = new ElectionWithPlaceholders(this.election);
+    this.metadata = new InternalManifest(this.election);
     this.encrypter = new Encrypt.EncryptionMediator(this.metadata, this.context, this.device);
     System.out.printf("%n2. Ready to encrypt at location: %s%n", this.device.location);
 
     // Load some Ballots
-    String ballotFilename = "src/test/data/electionRecordJson/spoiled_ballots/ballot_03a29d15-667c-4ac8-afd7-549f19b8e4eb.json";
-    this.originalPlaintextBallots = ImmutableList.of(BallotFactory.get_ballot_from_file(ballotFilename));
+    String ballotDir = "src/test/data/electionRecordJson/spoiled_ballots/";
+    String ballot1 = "ballot_03a29d15-667c-4ac8-afd7-549f19b8e4eb.json";
+    String ballot2 = "ballot_25a7111b-4334-425a-87c1-f7a49f42b3a2.json";
+    this.originalPlaintextBallots = ImmutableList.of(
+            BallotFactory.get_ballot_from_file(ballotDir + ballot1),
+            BallotFactory.get_ballot_from_file(ballotDir + ballot2));
     System.out.printf("Loaded ballots: %d%n", this.originalPlaintextBallots.size());
     assertThat(this.originalPlaintextBallots).isNotEmpty();
 
@@ -193,15 +197,16 @@ public class TestDecryptProblem {
     }
   }
 
-  //  Accept each ballot by marking it as either cast or spoiled.
+  //  Accept first ballot as cast, remaining are spoiled.
   void step_3_cast_and_spoil() {
     System.out.printf("%n3. cast_and_spoil%n");
 
     this.ballot_box = new BallotBox(this.election, this.context);
     // cast the ballots
+    boolean first = true;
     for (CiphertextBallot ballot : this.ciphertext_ballots) {
-      Optional<SubmittedBallot> accepted_ballot;
-      accepted_ballot = this.ballot_box.cast(ballot);
+      Optional<SubmittedBallot> accepted_ballot = first ? this.ballot_box.cast(ballot) : this.ballot_box.spoil(ballot);
+      first = false;
       assertThat(accepted_ballot).isPresent();
       System.out.printf("Accepted Ballot Id: %s state = %s%n", ballot.object_id, accepted_ballot.get().state);
     }

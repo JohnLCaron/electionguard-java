@@ -4,11 +4,11 @@ import com.google.common.collect.ImmutableList;
 import net.jqwik.api.Example;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.sunya.electionguard.ElectionWithPlaceholders.*;
-import static com.sunya.electionguard.Election.SelectionDescription;
-import static com.sunya.electionguard.Election.VoteVariationType;
+import static com.sunya.electionguard.InternalManifest.*;
+import static com.sunya.electionguard.Manifest.SelectionDescription;
+import static com.sunya.electionguard.Manifest.VoteVariationType;
 
-public class TestElectionWithPlaceholders {
+public class TestInternalManifest {
 
   @Example
   public void test_contest_description_valid_input_succeeds() {

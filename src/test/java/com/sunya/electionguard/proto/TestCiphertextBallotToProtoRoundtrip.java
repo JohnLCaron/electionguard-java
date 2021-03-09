@@ -16,11 +16,11 @@ public class TestCiphertextBallotToProtoRoundtrip {
 
   @BeforeContainer
   public static void setup() throws IOException {
-    publisher = new Publisher(TestElectionDescriptionToProtoRoundtrip.testElectionRecord, false, false);
+    publisher = new Publisher(TestManifestToProtoRoundtrip.testElectionRecord, false, false);
   }
 
   @Example
-  public void testBallotsRoundtrip() throws IOException {
+  public void testCiphertextBallotsRoundtrip() throws IOException {
     for (File file : publisher.ballotFiles()) {
       SubmittedBallot fromPython = ConvertFromJson.readSubmittedBallot(file.getAbsolutePath());
       assertThat(fromPython).isNotNull();

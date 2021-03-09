@@ -255,7 +255,7 @@ public class GuardianBuilder extends ElectionObjectBase {
   /**
    * Share election partial key backup with another guardian.
    * @param designated_id: Designated guardian
-   * @return Election partial key backup or None.
+   * @return Manifest partial key backup or None.
    */
   Optional<KeyCeremony.ElectionPartialKeyBackup> share_election_partial_key_backup(String designated_id) {
     return Optional.ofNullable(this.backups_to_share.get(designated_id));
@@ -263,7 +263,7 @@ public class GuardianBuilder extends ElectionObjectBase {
 
   /**
    * Save election partial key backup from another guardian.
-   * @param backup: Election partial key backup
+   * @param backup: Manifest partial key backup
    */
   public void save_election_partial_key_backup(KeyCeremony.ElectionPartialKeyBackup backup) {
     this.otherGuardianPartialKeyBackups.put(backup.owner_id(), backup);
@@ -278,7 +278,7 @@ public class GuardianBuilder extends ElectionObjectBase {
    * Verify election partial key backup value is in polynomial.
    * @param guardian_id: Owner of backup to verify
    * @param decryptor Use default if null.
-   * @return Election partial key verification or None
+   * @return Manifest partial key verification or None
    */
   Optional<KeyCeremony.ElectionPartialKeyVerification> verify_election_partial_key_backup(
           String guardian_id,
@@ -294,7 +294,7 @@ public class GuardianBuilder extends ElectionObjectBase {
   /**
    * Publish election backup challenge of election partial key verification.
    * @param guardian_id: Owner of election key
-   * @return Election partial key challenge or None
+   * @return Manifest partial key challenge or None
    */
   Optional<KeyCeremony.ElectionPartialKeyChallenge> publish_election_backup_challenge(String guardian_id) {
     KeyCeremony.ElectionPartialKeyBackup backup_in_question = this.backups_to_share.get(guardian_id);
@@ -306,8 +306,8 @@ public class GuardianBuilder extends ElectionObjectBase {
 
   /**
    * Verify challenge of previous verification of election partial key.
-   * @param challenge: Election partial key challenge
-   * @return Election partial key verification
+   * @param challenge: Manifest partial key challenge
+   * @return Manifest partial key verification
    */
   KeyCeremony.ElectionPartialKeyVerification verify_election_partial_key_challenge(KeyCeremony.ElectionPartialKeyChallenge challenge) {
     return KeyCeremony.verify_election_partial_key_challenge(this.object_id, challenge);
@@ -315,7 +315,7 @@ public class GuardianBuilder extends ElectionObjectBase {
 
   /**
    * Save election partial key verification from another guardian.
-   * @param verification: Election partial key verification
+   * @param verification: Manifest partial key verification
    * LOOK not called by the key ceremony, duplicated in KeyCeremonyMediator, so probably not needed
    */
   public void save_election_partial_key_verification(KeyCeremony.ElectionPartialKeyVerification verification) {

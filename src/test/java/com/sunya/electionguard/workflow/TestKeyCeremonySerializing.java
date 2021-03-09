@@ -3,7 +3,7 @@ package com.sunya.electionguard.workflow;
 import com.google.common.collect.ImmutableList;
 import com.sunya.electionguard.CiphertextElectionContext;
 import com.sunya.electionguard.ElectionConstants;
-import com.sunya.electionguard.Election;
+import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.ElectionFactory;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.Guardian;
@@ -62,7 +62,7 @@ public class TestKeyCeremonySerializing {
   ///////////////////////////////////////////////////////////////////////////
   final int numberOfGuardians = 4;
   final int quorum = 4;
-  final Election election;
+  final Manifest election;
   final String outputDir;
   final Publisher publisher;
 
@@ -164,7 +164,7 @@ public class TestKeyCeremonySerializing {
 
     // Joint Key
     Optional<Group.ElementModP> joint_key = keyCeremony.publish_joint_key();
-    System.out.printf(" Create the Joint Election Key%n");
+    System.out.printf(" Create the Joint Manifest Key%n");
     if (joint_key.isEmpty()) {
       System.out.printf(" *** FAILED%n");
       return false;

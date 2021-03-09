@@ -64,10 +64,10 @@ public class ConvertFromJson {
     }
   }
 
-  public static Election readElection(String pathname) throws IOException {
+  public static Manifest readElection(String pathname) throws IOException {
     try (InputStream is = new FileInputStream(pathname)) {
       Reader reader = new InputStreamReader(is);
-      return enhancedGson.fromJson(reader, Election.class);
+      return enhancedGson.fromJson(reader, Manifest.class);
     } catch (Exception ioe) {
       logger.atSevere().log("Failed reading file '%s'", pathname);
       throw ioe;

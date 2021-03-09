@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.google.common.truth.Truth.assertWithMessage;
-import static com.sunya.electionguard.ElectionWithPlaceholders.ContestWithPlaceholders;
+import static com.sunya.electionguard.InternalManifest.ContestWithPlaceholders;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
@@ -41,12 +41,12 @@ public class TestEndToEndElectionIntegration {
     System.out.printf("=========== outputDir = %s%n", outputDir);
   }
 
-  // Step 0 - Configure Election
-  Election election;
+  // Step 0 - Configure Manifest
+  Manifest election;
   ElectionBuilder election_builder;
   CiphertextElectionContext context;
   ElectionConstants constants;
-  ElectionWithPlaceholders metadata;
+  InternalManifest metadata;
 
   // Step 1 - Key Ceremony;
   KeyCeremonyMediator mediator;
@@ -104,7 +104,7 @@ public class TestEndToEndElectionIntegration {
     this.election = ElectionFactory.get_simple_election_from_file();
 
     System.out.printf("----------------------------------%n");
-    System.out.printf("Election Summary:%nScope: %s%n", this.election.election_scope_id);
+    System.out.printf("Manifest Summary:%nScope: %s%n", this.election.election_scope_id);
     System.out.printf("Geopolitical Units: %d%n", this.election.geopolitical_units.size());
     System.out.printf("Parties: %d%n", this.election.parties.size());
     System.out.printf("Candidates: %d%n", this.election.candidates.size());
@@ -160,7 +160,7 @@ public class TestEndToEndElectionIntegration {
 
     // Joint Key
     Group.ElementModP joint_key = this.mediator.publish_joint_key().orElseThrow();
-    System.out.printf("Publishes the Joint Election Key%n");
+    System.out.printf("Publishes the Joint Manifest Key%n");
 
     // Save Validation Keys
     List<Group.ElementModP> commitments = new ArrayList<>();
@@ -176,7 +176,7 @@ public class TestEndToEndElectionIntegration {
     }
     Group.ElementModQ commitmentHash = Hash.hash_elems(commitments);
 
-    // Build the Election
+    // Build the Manifest
     this.election_builder = new ElectionBuilder(NUMBER_OF_GUARDIANS, QUORUM, this.election);
     this.election_builder.set_public_key(joint_key);
     this.election_builder.set_commitment_hash(commitmentHash);
@@ -197,7 +197,7 @@ public class TestEndToEndElectionIntegration {
   // Using the `CiphertextElectionContext` encrypt ballots for the election
   void step_2_encrypt_votes() throws IOException {
     // Configure the Encryption Device
-    this.metadata = new ElectionWithPlaceholders(this.election);
+    this.metadata = new InternalManifest(this.election);
     this.device = new Encrypt.EncryptionDevice("polling-place-one");
     this.encrypter = new Encrypt.EncryptionMediator(this.metadata, this.context, this.device);
     System.out.printf("%n2. Ready to encrypt at location: %s%n", this.device.location);
@@ -282,7 +282,7 @@ public class TestEndToEndElectionIntegration {
     // Create a representation of each contest's tally
     Map<String, Integer> expected_plaintext_tally = new HashMap<>();
     for (ContestWithPlaceholders contest : this.metadata.contests.values()) {
-      for (Election.SelectionDescription selection : contest.ballot_selections) {
+      for (Manifest.SelectionDescription selection : contest.ballot_selections) {
         expected_plaintext_tally.put(selection.object_id, 0);
       }
     }

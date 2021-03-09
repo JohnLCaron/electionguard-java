@@ -1,7 +1,7 @@
 package com.sunya.electionguard.verifier;
 
 import com.google.common.flogger.FluentLogger;
-import com.sunya.electionguard.Election;
+import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.PlaintextBallot;
 
 import java.util.HashMap;
@@ -26,9 +26,9 @@ public class PlaintextBallotVerifier {
 
   PlaintextBallotVerifier(ElectionRecord electionRecord) {
     this.electionRecord = electionRecord;
-    for (Election.ContestDescription contest : electionRecord.election.contests) {
+    for (Manifest.ContestDescription contest : electionRecord.election.contests) {
       HashSet<String> selectionNames = new HashSet<>();
-      for (Election.SelectionDescription selection : contest.ballot_selections) {
+      for (Manifest.SelectionDescription selection : contest.ballot_selections) {
         selectionNames.add(selection.object_id);
       }
       names.put(contest.object_id, selectionNames);
