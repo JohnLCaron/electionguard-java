@@ -1,8 +1,7 @@
 package com.sunya.electionguard.input;
 
 import com.google.common.collect.ImmutableList;
-import com.sunya.electionguard.Election;
-import com.sunya.electionguard.PlaintextBallot;
+import com.sunya.electionguard.Manifest;
 import net.jqwik.api.Example;
 
 import java.util.Formatter;
@@ -15,7 +14,7 @@ public class TestElectionInputValidation {
   @Example
   public void testDefaults() {
     ElectionInputBuilder ebuilder = new ElectionInputBuilder("election_scope_id");
-    Election election = ebuilder.addContest("contest_id")
+    Manifest election = ebuilder.addContest("contest_id")
             .addSelection("selection_id", "candidate_1")
             .addSelection("selection_id2", "candidate_2")
             .done()
@@ -30,10 +29,10 @@ public class TestElectionInputValidation {
 
   @Example
   public void testBallotStyleBadGpUnit() {
-    Election.BallotStyle bs = new Election.BallotStyle("bad", ImmutableList.of("badGP"), null, null);
+    Manifest.BallotStyle bs = new Manifest.BallotStyle("bad", ImmutableList.of("badGP"), null, null);
     ElectionInputBuilder ebuilder = new ElectionInputBuilder("election_scope_id")
             .setBallotStyle(bs);
-    Election election = ebuilder.addContest("contest_id")
+    Manifest election = ebuilder.addContest("contest_id")
             .addSelection("selection_id", "candidate_1")
             .addSelection("selection_id2", "candidate_2")
             .done()
@@ -50,7 +49,7 @@ public class TestElectionInputValidation {
   @Example
   public void testDuplicateContestId() {
     ElectionInputBuilder ebuilder = new ElectionInputBuilder("election_scope_id");
-    Election election = ebuilder.addContest("contest_id")
+    Manifest election = ebuilder.addContest("contest_id")
             .addSelection("selection_id", "candidate_1")
             .addSelection("selection_id2", "candidate_2")
             .done()
@@ -72,7 +71,7 @@ public class TestElectionInputValidation {
   public void testContestGpunit() {
     ElectionInputBuilder ebuilder = new ElectionInputBuilder("election_scope_id")
             .setGpunit("district9");
-    Election election = ebuilder.addContest("contest_id")
+    Manifest election = ebuilder.addContest("contest_id")
             .setGpunit("district1")
             .addSelection("selection_id", "candidate_1")
             .addSelection("selection_id2", "candidate_2")
@@ -90,7 +89,7 @@ public class TestElectionInputValidation {
   @Example
   public void testDuplicateSelectionId() {
     ElectionInputBuilder ebuilder = new ElectionInputBuilder("election_scope_id");
-    Election election = ebuilder.addContest("contest_id")
+    Manifest election = ebuilder.addContest("contest_id")
             .addSelection("selection_id", "candidate_1")
             .addSelection("selection_id", "candidate_2")
             .done()
@@ -107,7 +106,7 @@ public class TestElectionInputValidation {
   @Example
   public void testDuplicateCandidateId() {
     ElectionInputBuilder ebuilder = new ElectionInputBuilder("election_scope_id");
-    Election election = ebuilder.addContest("contest_id")
+    Manifest election = ebuilder.addContest("contest_id")
             .addSelection("selection_id", "candidate_1")
             .addSelection("selection_id2", "candidate_1")
             .done()
@@ -124,7 +123,7 @@ public class TestElectionInputValidation {
   @Example
   public void testBadCandidateId() {
     ElectionInputBuilder ebuilder = new ElectionInputBuilder("election_scope_id");
-    Election election = ebuilder.addContest("contest_id")
+    Manifest election = ebuilder.addContest("contest_id")
             .addSelection("selection_id", "candidate_1")
             .addSelection("selection_id2", "manchurian")
             .done()

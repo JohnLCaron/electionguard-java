@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.sunya.electionguard.ElectionWithPlaceholders.ContestWithPlaceholders;
+import static com.sunya.electionguard.InternalManifest.ContestWithPlaceholders;
 
 /** Static helper methods for ballot validation. */
 class BallotValidations {
@@ -16,7 +16,7 @@ class BallotValidations {
   // LOOK why ElectionDescriptionWithPlaceholders?
   static boolean ballot_is_valid_for_election(
           CiphertextBallot ballot,
-          ElectionWithPlaceholders manifest,
+          InternalManifest manifest,
           CiphertextElectionContext context) {
 
     if (!ballot_is_valid_for_style(ballot, manifest)) {
@@ -35,7 +35,7 @@ class BallotValidations {
 
   /** Determine if selection is valid for ballot style. */
   static boolean selection_is_valid_for_style(
-          CiphertextBallot.Selection selection, Election.SelectionDescription description) {
+          CiphertextBallot.Selection selection, Manifest.SelectionDescription description) {
 
     if (!selection.description_hash.equals(description.crypto_hash())) {
       logger.atInfo().log("ballot is not valid for style: mismatched selection description hash %s for selection %s hash %s",
@@ -68,7 +68,7 @@ class BallotValidations {
   }
 
   /** Determine if ballot is valid for ballot style. */
-  static boolean ballot_is_valid_for_style(CiphertextBallot ballot, ElectionWithPlaceholders manifest) {
+  static boolean ballot_is_valid_for_style(CiphertextBallot ballot, InternalManifest manifest) {
     Map<String, CiphertextBallot.Contest> contestMap = ballot.contests.stream().collect(Collectors.toMap(c -> c.object_id, c -> c));
 
     List<ContestWithPlaceholders> contests = manifest.get_contests_for_style(ballot.style_id);
@@ -86,7 +86,7 @@ class BallotValidations {
       }
 
       // verify the selection metadata
-      for (Election.SelectionDescription selection_description : contestManifest.ballot_selections) {
+      for (Manifest.SelectionDescription selection_description : contestManifest.ballot_selections) {
         CiphertextBallot.Selection use_selection = null;
         for (CiphertextBallot.Selection selection : use_contest.ballot_selections) {
           if (selection_description.object_id.equals(selection.object_id)) {

@@ -39,7 +39,7 @@ public class Consumer {
     }
   }
 
-  public Election readElectionDescription() throws IOException {
+  public Manifest readManifest() throws IOException {
     if (Files.exists(publisher.electionRecordProtoPath())) {
       return readElectionRecordProto().election;
     } else {
@@ -49,8 +49,8 @@ public class Consumer {
 
   //////////////////// Json
 
-  public Election election() throws IOException {
-    return ConvertFromJson.readElection(publisher.electionPath().toString());
+  public Manifest election() throws IOException {
+    return ConvertFromJson.readElection(publisher.manifestPath().toString());
   }
 
   public CiphertextElectionContext context() throws IOException {

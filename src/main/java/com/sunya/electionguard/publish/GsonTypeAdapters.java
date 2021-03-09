@@ -9,8 +9,8 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
+import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.SubmittedBallot;
-import com.sunya.electionguard.Election;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.KeyCeremony;
 import com.sunya.electionguard.CiphertextTally;
@@ -28,8 +28,8 @@ class GsonTypeAdapters {
             .registerTypeAdapter(Group.ElementModQ.class, new ModQSerializer())
             .registerTypeAdapter(Group.ElementModP.class, new ModPDeserializer())
             .registerTypeAdapter(Group.ElementModP.class, new ModPSerializer())
-            .registerTypeAdapter(Election.class, new ElectionDescriptionSerializer())
-            .registerTypeAdapter(Election.class, new ElectionDescriptionDeserializer())
+            .registerTypeAdapter(Manifest.class, new ElectionDescriptionSerializer())
+            .registerTypeAdapter(Manifest.class, new ElectionDescriptionDeserializer())
             .registerTypeAdapter(KeyCeremony.CoefficientValidationSet.class, new CoefficientValidationSerializer())
             .registerTypeAdapter(KeyCeremony.CoefficientValidationSet.class, new CoefficientValidationDeserializer())
             .registerTypeAdapter(SubmittedBallot.class, new CiphertextBallotSerializer())
@@ -75,18 +75,18 @@ class GsonTypeAdapters {
     }
   }
 
-  private static class ElectionDescriptionSerializer implements JsonSerializer<Election> {
+  private static class ElectionDescriptionSerializer implements JsonSerializer<Manifest> {
     @Override
-    public JsonElement serialize(Election src, Type typeOfSrc, JsonSerializationContext context) {
-      return ElectionDescriptionPojo.serialize(src);
+    public JsonElement serialize(Manifest src, Type typeOfSrc, JsonSerializationContext context) {
+      return ManifestPojo.serialize(src);
     }
   }
 
-  private static class ElectionDescriptionDeserializer implements JsonDeserializer<Election> {
+  private static class ElectionDescriptionDeserializer implements JsonDeserializer<Manifest> {
     @Override
-    public Election deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+    public Manifest deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
             throws JsonParseException {
-      return ElectionDescriptionPojo.deserialize(json);
+      return ManifestPojo.deserialize(json);
     }
   }
 

@@ -21,7 +21,7 @@ import static com.sunya.electionguard.ChaumPedersen.*;
 import static com.sunya.electionguard.Encrypt.*;
 import static com.sunya.electionguard.ElGamal.*;
 import static com.sunya.electionguard.Group.*;
-import static com.sunya.electionguard.ElectionWithPlaceholders.ContestWithPlaceholders;
+import static com.sunya.electionguard.InternalManifest.ContestWithPlaceholders;
 
 public class TestEncryptProperties extends TestProperties {
   static final ElementModQ SEED_HASH = new EncryptionDevice("Location").get_hash();
@@ -32,7 +32,7 @@ public class TestEncryptProperties extends TestProperties {
     KeyPair keypair = elgamal_keypair_from_secret(int_to_q_unchecked(BigInteger.TWO)).orElseThrow();
     ElementModQ nonce = TestUtils.elements_mod_q();
 
-    Election.SelectionDescription metadata = new Election.SelectionDescription("some-selection-object-id", "some-candidate-id", 1);
+    Manifest.SelectionDescription metadata = new Manifest.SelectionDescription("some-selection-object-id", "some-candidate-id", 1);
     ElementModQ hash_context = metadata.crypto_hash();
 
     PlaintextBallot.Selection subject = selection_from(metadata, false, false);
@@ -50,7 +50,7 @@ public class TestEncryptProperties extends TestProperties {
   public void test_encrypt_simple_selection_malformed_data_fails() {
     KeyPair keypair = elgamal_keypair_from_secret(int_to_q_unchecked(BigInteger.TWO)).orElseThrow();
     ElementModQ nonce = TestUtils.elements_mod_q();
-    Election.SelectionDescription metadata = new Election.SelectionDescription("some-selection-object-id", "some-candidate-id", 1);
+    Manifest.SelectionDescription metadata = new Manifest.SelectionDescription("some-selection-object-id", "some-candidate-id", 1);
     ElementModQ hash_context = metadata.crypto_hash();
     PlaintextBallot.Selection subject = selection_from(metadata, false, false);
     assertThat(subject.is_valid(metadata.object_id)).isTrue();
@@ -79,7 +79,7 @@ public class TestEncryptProperties extends TestProperties {
 
   @Property(tries = 10, shrinking = ShrinkingMode.OFF)
   public void test_encrypt_selection_valid_input_succeeds(
-          @ForAll("selection_description") Election.SelectionDescription description,
+          @ForAll("selection_description") Manifest.SelectionDescription description,
           @ForAll("elgamal_keypairs") ElGamal.KeyPair keypair,
           @ForAll("elements_mod_q_no_zero") ElementModQ seed) {
     PlaintextBallot.Selection subject = BallotFactory.get_random_selection_from(description);
@@ -92,7 +92,7 @@ public class TestEncryptProperties extends TestProperties {
 
   @Property(tries = 10, shrinking = ShrinkingMode.OFF)
   public void test_encrypt_selection_valid_input_tampered_encryption_fails(
-          @ForAll("selection_description") Election.SelectionDescription description,
+          @ForAll("selection_description") Manifest.SelectionDescription description,
           @ForAll("elgamal_keypairs") ElGamal.KeyPair keypair,
           @ForAll("elements_mod_q_no_zero") ElementModQ seed,
           @ForAll @IntRange(min = 0, max = 100) int random_seed) {
@@ -139,15 +139,15 @@ public class TestEncryptProperties extends TestProperties {
     KeyPair keypair = elgamal_keypair_from_secret(int_to_q_unchecked(BigInteger.TWO)).orElseThrow();
     ElementModQ nonce = TestUtils.elements_mod_q();
 
-    Election.SelectionDescription desc1 = new Election.SelectionDescription("some-object-id-affirmative", "some-candidate-id-affirmative", 0);
-    Election.SelectionDescription desc2 = new Election.SelectionDescription("some-object-id-negative", "some-candidate-id-negative", 1);
-    Election.SelectionDescription descp = new Election.SelectionDescription("some-object-id-placeholder", "some-candidate-id-placeholder", 2);
+    Manifest.SelectionDescription desc1 = new Manifest.SelectionDescription("some-object-id-affirmative", "some-candidate-id-affirmative", 0);
+    Manifest.SelectionDescription desc2 = new Manifest.SelectionDescription("some-object-id-negative", "some-candidate-id-negative", 1);
+    Manifest.SelectionDescription descp = new Manifest.SelectionDescription("some-object-id-placeholder", "some-candidate-id-placeholder", 2);
 
     ContestWithPlaceholders metadata = new ContestWithPlaceholders(
             "some-contest-object-id",
             "some-electoral-district-id",
             0,
-            Election.VoteVariationType.one_of_m,
+            Manifest.VoteVariationType.one_of_m,
             1,
             1,
             "some-referendum-contest-name",
@@ -229,7 +229,7 @@ public class TestEncryptProperties extends TestProperties {
   /*  Fails - Dont know what the fix is.
   @Property(tries = 10, shrinking = ShrinkingMode.OFF)
   public void test_encrypt_contest_overvote_fails(
-          @ForAll("contest_description_well_formed") Election.ContestDescriptionWithPlaceholders description,
+          @ForAll("contest_description_well_formed") Manifest.ContestDescriptionWithPlaceholders description,
           @ForAll("elgamal_keypairs") ElGamal.KeyPair keypair,
           @ForAll("elements_mod_q_no_zero") ElementModQ seed,
           @ForAll @IntRange(min = 1, max = 6) int overvotes) {
@@ -242,7 +242,7 @@ public class TestEncryptProperties extends TestProperties {
     for (int i = 0; i < overvotes; i++) {
       // extra = ballot_factory.get_random_selection_from( description.ballot_selections[0], random )
       PlaintextBallotSelection extra = ballot_factory.get_random_selection_from(description.ballot_selections.get(0));
-      // PlaintextBallotSelection extraModified = new Election.SelectionDescription(extra.object_id, extra.vote, extra.is_placeholder_selection, extra.extended_data);
+      // PlaintextBallotSelection extraModified = new Manifest.SelectionDescription(extra.object_id, extra.vote, extra.is_placeholder_selection, extra.extended_data);
       // extra.sequence_order = highest_sequence + i + 1 // TODO there is no extra.sequence_order field
       extra_ballot_selections.add(extra);
     }
@@ -253,20 +253,20 @@ public class TestEncryptProperties extends TestProperties {
 
   @Example
   public void test_encrypt_contest_manually_formed_contest_description_valid_succeeds() {
-    Election.ContestDescription description = new Election.ContestDescription(
+    Manifest.ContestDescription description = new Manifest.ContestDescription(
             "0@A.com-contest",
             "0@A.com-gp-unit",
             1,
-            Election.VoteVariationType.n_of_m,
+            Manifest.VoteVariationType.n_of_m,
             1,
             1,
             "",
             ImmutableList.of(
-                    new Election.SelectionDescription(
+                    new Manifest.SelectionDescription(
                             "0@A.com-selection",
                             "0@A.com",
                             0),
-                    new Election.SelectionDescription(
+                    new Manifest.SelectionDescription(
                             "0@B.com-selection",
                             "0@B.com",
                             1)),
@@ -276,9 +276,9 @@ public class TestEncryptProperties extends TestProperties {
 
     PlaintextBallot.Contest data = ballot_factory.get_random_contest_from(description, false, false);
 
-    List<Election.SelectionDescription> placeholders = ElectionWithPlaceholders.generate_placeholder_selections_from(description, description.number_elected);
+    List<Manifest.SelectionDescription> placeholders = InternalManifest.generate_placeholder_selections_from(description, description.number_elected);
     ContestWithPlaceholders description_with_placeholders =
-            ElectionWithPlaceholders.contest_description_with_placeholders_from(description, placeholders);
+            InternalManifest.contest_description_with_placeholders_from(description, placeholders);
 
     Optional<CiphertextBallot.Contest> subject = encrypt_contest(
             data,
@@ -296,21 +296,21 @@ public class TestEncryptProperties extends TestProperties {
   @Example
   public void test_encrypt_contest_duplicate_selection_object_ids_fails() {
 
-    Election.ContestDescription description = new Election.ContestDescription(
+    Manifest.ContestDescription description = new Manifest.ContestDescription(
             "0@A.com-contest",
             "0@A.com-gp-unit",
             1,
-            Election.VoteVariationType.n_of_m,
+            Manifest.VoteVariationType.n_of_m,
             1,
             1,
             "",
             ImmutableList.of(
-                    new Election.SelectionDescription(
+                    new Manifest.SelectionDescription(
                             "0@A.com-selection",
                             "0@A.com",
                             0),
                     // Note the selection description is the same as the first sequence element
-                    new Election.SelectionDescription(
+                    new Manifest.SelectionDescription(
                             "0@A.com-selection",
                             "0@A.com",
                             1)),
@@ -321,9 +321,9 @@ public class TestEncryptProperties extends TestProperties {
     // Bypass checking the validity of the description
     PlaintextBallot.Contest data = ballot_factory.get_random_contest_from(description, true, false);
 
-    List<Election.SelectionDescription> placeholders = ElectionWithPlaceholders.generate_placeholder_selections_from(description, description.number_elected);
+    List<Manifest.SelectionDescription> placeholders = InternalManifest.generate_placeholder_selections_from(description, description.number_elected);
     ContestWithPlaceholders description_with_placeholders =
-            ElectionWithPlaceholders.contest_description_with_placeholders_from(description, placeholders);
+            InternalManifest.contest_description_with_placeholders_from(description, placeholders);
 
     Optional<CiphertextBallot.Contest> subject = encrypt_contest(
             data,
@@ -338,7 +338,7 @@ public class TestEncryptProperties extends TestProperties {
   @Example
   public void test_encrypt_ballot_simple_succeeds() {
     KeyPair keypair = elgamal_keypair_from_secret(int_to_q_unchecked(BigInteger.TWO)).orElseThrow();
-    Election election = ElectionFactory.get_fake_election();
+    Manifest election = ElectionFactory.get_fake_election();
     ElectionBuilder.DescriptionAndContext tuple = ElectionFactory.get_fake_ciphertext_election(election, keypair.public_key).orElseThrow();
     CiphertextElectionContext context = tuple.context;
 
@@ -371,7 +371,7 @@ public class TestEncryptProperties extends TestProperties {
   @Example
   public void test_encrypt_ballot_with_stateful_composer_succeeds() {
     KeyPair keypair = elgamal_keypair_from_secret(int_to_q_unchecked(BigInteger.TWO)).orElseThrow();
-    Election election = ElectionFactory.get_fake_election();
+    Manifest election = ElectionFactory.get_fake_election();
     ElectionBuilder.DescriptionAndContext tuple = ElectionFactory.get_fake_ciphertext_election(election, keypair.public_key).orElseThrow();
     CiphertextElectionContext context = tuple.context;
 
@@ -389,7 +389,7 @@ public class TestEncryptProperties extends TestProperties {
   @Example
   public void test_encrypt_simple_ballot_from_files_succeeds() throws IOException {
     KeyPair keypair = elgamal_keypair_from_secret(int_to_q_unchecked(BigInteger.TWO)).orElseThrow();
-    Election election = ElectionFactory.get_simple_election_from_file();
+    Manifest election = ElectionFactory.get_simple_election_from_file();
     ElectionBuilder.DescriptionAndContext tuple = ElectionFactory.get_fake_ciphertext_election(election, keypair.public_key).orElseThrow();
     CiphertextElectionContext context = tuple.context;
 
@@ -412,7 +412,7 @@ public class TestEncryptProperties extends TestProperties {
 
      // TODO: Hypothesis test instead
 
-     Election election = ElectionFactory.get_simple_election_from_file();
+     Manifest election = ElectionFactory.get_simple_election_from_file();
      ElectionBuilder.DescriptionAndContext tuple = ElectionFactory.get_fake_ciphertext_election(election, keypair.public_key).orElseThrow();
      CiphertextElectionContext context = tuple.context;
 

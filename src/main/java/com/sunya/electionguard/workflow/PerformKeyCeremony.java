@@ -6,7 +6,7 @@ import com.beust.jcommander.ParameterException;
 import com.google.common.collect.Iterables;
 import com.sunya.electionguard.CiphertextElectionContext;
 import com.sunya.electionguard.ElectionConstants;
-import com.sunya.electionguard.Election;
+import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.Guardian;
 import com.sunya.electionguard.GuardianBuilder;
@@ -92,7 +92,7 @@ public class PerformKeyCeremony {
     try {
       // all we need from election record is the ElectionDescription.
       Consumer consumer = new Consumer(cmdLine.inputDir);
-      Election election = consumer.readElectionDescription();
+      Manifest election = consumer.readManifest();
 
       CoefficientsProvider coefficientsProvider = null;
       if (cmdLine.coefficientsProviderClass != null) {
@@ -167,7 +167,7 @@ public class PerformKeyCeremony {
   }
 
   ///////////////////////////////////////////////////////////////////////////
-  final Election election;
+  final Manifest election;
   final int numberOfGuardians;
   final int quorum;
 
@@ -178,7 +178,7 @@ public class PerformKeyCeremony {
   List<GuardianBuilder> guardianBuilders;
   List<com.sunya.electionguard.KeyCeremony.CoefficientValidationSet> coefficientValidationSets = new ArrayList<>();
 
-  public PerformKeyCeremony(Election election, CoefficientsProvider coefficientsProvider) {
+  public PerformKeyCeremony(Manifest election, CoefficientsProvider coefficientsProvider) {
     this.election = election;
     this.quorum = coefficientsProvider.quorum();
     this.numberOfGuardians = Iterables.size(coefficientsProvider.guardianCoefficients());
@@ -256,7 +256,7 @@ public class PerformKeyCeremony {
 
     // Joint Key
     Optional<Group.ElementModP> joint_key = keyCeremony.publish_joint_key();
-    System.out.printf(" Create the Joint Election Key%n");
+    System.out.printf(" Create the Joint Manifest Key%n");
     if (joint_key.isEmpty()) {
       System.out.printf(" *** FAILED%n");
       return false;

@@ -1,13 +1,13 @@
 package com.sunya.electionguard.proto;
 
-import com.sunya.electionguard.Election;
+import com.sunya.electionguard.Manifest;
 
-import static com.sunya.electionguard.proto.ElectionProto.*;
+import static com.sunya.electionguard.proto.ManifestProto.*;
 
-public class ElectionDescriptionToProto {
+public class ManifestToProto {
 
-  public static ElectionProto.ElectionDescription translateToProto(Election election) {
-    ElectionProto.ElectionDescription.Builder builder = ElectionProto.ElectionDescription.newBuilder();
+  public static ManifestProto.Manifest translateToProto(Manifest election) {
+    ManifestProto.Manifest.Builder builder = ManifestProto.Manifest.newBuilder();
     builder.setElectionScopeId(election.election_scope_id);
     builder.setElectionType(convertElectionType(election.type));
     builder.setStartDate(election.start_date.toString());
@@ -25,7 +25,7 @@ public class ElectionDescriptionToProto {
     return builder.build();
   }
 
-  static AnnotatedString convertAnnotatedString(Election.AnnotatedString annotated) {
+  static AnnotatedString convertAnnotatedString(Manifest.AnnotatedString annotated) {
     if (annotated == null) {
       return null;
     }
@@ -35,7 +35,7 @@ public class ElectionDescriptionToProto {
     return builder.build();
   }
 
-  static BallotStyle convertBallotStyle(Election.BallotStyle style) {
+  static BallotStyle convertBallotStyle(Manifest.BallotStyle style) {
     BallotStyle.Builder builder = BallotStyle.newBuilder();
     builder.setObjectId(style.object_id);
     builder.addAllGeopoliticalUnitIds(style.geopolitical_unit_ids);
@@ -44,7 +44,7 @@ public class ElectionDescriptionToProto {
     return builder.build();
   }
 
-  static Candidate convertCandidate(Election.Candidate candidate) {
+  static Candidate convertCandidate(Manifest.Candidate candidate) {
     Candidate.Builder builder = Candidate.newBuilder();
     builder.setObjectId(candidate.object_id);
     builder.setName(convertInternationalizedText(candidate.name));
@@ -54,7 +54,7 @@ public class ElectionDescriptionToProto {
     return builder.build();
   }
 
-  static ContactInformation convertContactInformation(Election.ContactInformation contact) {
+  static ContactInformation convertContactInformation(Manifest.ContactInformation contact) {
     ContactInformation.Builder builder = ContactInformation.newBuilder();
     contact.name.ifPresent(builder::setName);
     builder.addAllAddressLine(contact.address_line);
@@ -63,7 +63,7 @@ public class ElectionDescriptionToProto {
     return builder.build();
   }
 
-  static ContestDescription convertContestDescription(Election.ContestDescription contest) {
+  static ContestDescription convertContestDescription(Manifest.ContestDescription contest) {
     // LOOK check for subtypes of ContestDescription. Argues for just adding subtype's fields
     ContestDescription.Builder builder = ContestDescription.newBuilder();
     builder.setObjectId(contest.object_id);
@@ -79,19 +79,19 @@ public class ElectionDescriptionToProto {
     return builder.build();
   }
 
-  static ContestDescription.VoteVariationType convertVoteVariationType(Election.VoteVariationType type) {
+  static ContestDescription.VoteVariationType convertVoteVariationType(Manifest.VoteVariationType type) {
     return ContestDescription.VoteVariationType.valueOf(type.name());
   }
 
-  static ElectionProto.ElectionDescription.ElectionType convertElectionType(Election.ElectionType type) {
-    return ElectionProto.ElectionDescription.ElectionType.valueOf(type.name());
+  static ManifestProto.Manifest.ElectionType convertElectionType(Manifest.ElectionType type) {
+    return ManifestProto.Manifest.ElectionType.valueOf(type.name());
   }
 
-  static GeopoliticalUnit.ReportingUnitType convertReportingUnitType(Election.ReportingUnitType type) {
+  static GeopoliticalUnit.ReportingUnitType convertReportingUnitType(Manifest.ReportingUnitType type) {
     return GeopoliticalUnit.ReportingUnitType.valueOf(type.name());
   }
 
-  static GeopoliticalUnit convertGeopoliticalUnit(Election.GeopoliticalUnit geoUnit) {
+  static GeopoliticalUnit convertGeopoliticalUnit(Manifest.GeopoliticalUnit geoUnit) {
     GeopoliticalUnit.Builder builder = GeopoliticalUnit.newBuilder();
     builder.setObjectId(geoUnit.object_id);
     builder.setName(geoUnit.name);
@@ -100,7 +100,7 @@ public class ElectionDescriptionToProto {
     return builder.build();
   }
 
-  static InternationalizedText convertInternationalizedText(Election.InternationalizedText text) {
+  static InternationalizedText convertInternationalizedText(Manifest.InternationalizedText text) {
     InternationalizedText.Builder builder = InternationalizedText.newBuilder();
     if (text.text != null) {
       text.text.forEach(value -> builder.addText(convertLanguage(value)));
@@ -108,14 +108,14 @@ public class ElectionDescriptionToProto {
     return builder.build();
   }
 
-  static Language convertLanguage(Election.Language text) {
+  static Language convertLanguage(Manifest.Language text) {
     Language.Builder builder = Language.newBuilder();
     builder.setValue(text.value);
     builder.setLanguage(text.language);
     return builder.build();
   }
 
-  static Party convertParty(Election.Party party) {
+  static Party convertParty(Manifest.Party party) {
     Party.Builder builder = Party.newBuilder();
     builder.setObjectId(party.object_id);
     if (party.name.text != null) {
@@ -127,7 +127,7 @@ public class ElectionDescriptionToProto {
     return builder.build();
   }
 
-  static SelectionDescription convertSelectionDescription(Election.SelectionDescription selection) {
+  static SelectionDescription convertSelectionDescription(Manifest.SelectionDescription selection) {
     SelectionDescription.Builder builder = SelectionDescription.newBuilder();
     builder.setObjectId(selection.object_id);
     builder.setCandidateId(selection.candidate_id);

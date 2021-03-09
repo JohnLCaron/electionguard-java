@@ -14,11 +14,11 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- * The Election Manifest: defines the candidates, contests, and associated information for a specific election.
+ * The Manifest Manifest: defines the candidates, contests, and associated information for a specific election.
  * @see <a href="https://developers.google.com/elections-data/reference/election">Civics Common Standard Data Specification</a>
  */
 @Immutable
-public class Election implements Hash.CryptoHashable {
+public class Manifest implements Hash.CryptoHashable {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   public final String election_scope_id;
@@ -34,7 +34,7 @@ public class Election implements Hash.CryptoHashable {
   public final Optional<ContactInformation> contact_information;
   public final Group.ElementModQ crypto_hash;
 
-  public Election(String election_scope_id,
+  public Manifest(String election_scope_id,
                   ElectionType type,
                   OffsetDateTime start_date,
                   OffsetDateTime end_date,
@@ -76,7 +76,7 @@ public class Election implements Hash.CryptoHashable {
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-    Election that = (Election) o;
+    Manifest that = (Manifest) o;
     return election_scope_id.equals(that.election_scope_id) &&
             type == that.type &&
             start_date.equals(that.start_date) &&
@@ -97,7 +97,7 @@ public class Election implements Hash.CryptoHashable {
 
   @Override
   public String toString() {
-    return "Election{" +
+    return "Manifest{" +
             "election_scope_id='" + election_scope_id + '\'' +
             ", type=" + type +
             ", start_date=" + start_date +
@@ -112,7 +112,7 @@ public class Election implements Hash.CryptoHashable {
             '}';
   }
 
-  /** The Election (aka ElectionDescription) hash. */
+  /** The Manifest (aka ElectionDescription) hash. */
   @Override
   public Group.ElementModQ crypto_hash() {
     return this.crypto_hash;
@@ -220,7 +220,7 @@ public class Election implements Hash.CryptoHashable {
 
     if (!success) {
       logger.atWarning().log(
-              "Election failed validation check: is_valid: ",
+              "Manifest failed validation check: is_valid: ",
               "geopolitical_units_valid", geopolitical_units_valid,
               "ballot_styles_valid", ballot_styles_valid,
               "ballot_styles_have_valid_gp_unit_ids", ballot_styles_have_valid_gp_unit_ids,

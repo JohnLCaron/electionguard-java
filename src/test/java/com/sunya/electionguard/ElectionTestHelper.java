@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 import static com.sunya.electionguard.Group.*;
-import static com.sunya.electionguard.ElectionWithPlaceholders.ContestWithPlaceholders;
+import static com.sunya.electionguard.InternalManifest.ContestWithPlaceholders;
 import static com.sunya.electionguard.TestUtils.elgamal_keypairs;
 
 // Helper methods for testing, esp for property based testing
@@ -140,21 +140,21 @@ public class ElectionTestHelper {
     return String.format("%s-%d", root, random.nextInt());
   }
 
-  Election.ElectionType election_types() {
-    Election.ElectionType[] values = Election.ElectionType.values();
+  Manifest.ElectionType election_types() {
+    Manifest.ElectionType[] values = Manifest.ElectionType.values();
     int choose = random.nextInt(values.length);
     return values[choose];
   }
 
-  Election.ReportingUnitType reporting_unit_types() {
-    Election.ReportingUnitType[] values = Election.ReportingUnitType.values();
+  Manifest.ReportingUnitType reporting_unit_types() {
+    Manifest.ReportingUnitType[] values = Manifest.ReportingUnitType.values();
     int choose = random.nextInt(values.length);
     return values[choose];
   }
 
-  Election.ContactInformation contact_infos() {
+  Manifest.ContactInformation contact_infos() {
     // empty lists for email and phone, for now
-    return new Election.ContactInformation(null, ImmutableList.of(annotated_strings()), null, human_names());
+    return new Manifest.ContactInformation(null, ImmutableList.of(annotated_strings()), null, human_names());
   }
 
   String two_letter_codes() {
@@ -169,30 +169,30 @@ public class ElectionTestHelper {
 
   //     Generates a `Language` object with an arbitrary two-letter string as the code and something messier for
   //     the text ostensibly written in that language.
-  Election.Language languages() {
-    return new Election.Language(randomString("text"), two_letter_codes());
+  Manifest.Language languages() {
+    return new Manifest.Language(randomString("text"), two_letter_codes());
   }
 
   //     Generates a `Language` object with an arbitrary two-letter string as the code and a human name for the
   //     text ostensibly written in that language.
-  Election.Language language_human_names() {
-    return new Election.Language(human_names(), two_letter_codes());
+  Manifest.Language language_human_names() {
+    return new Manifest.Language(human_names(), two_letter_codes());
   }
 
   //     Generates an `InternationalizedText` object with a list of `Language` objects within (representing a multilingual string).
-  Election.InternationalizedText internationalized_texts() {
-    return new Election.InternationalizedText(ImmutableList.of(languages()));
+  Manifest.InternationalizedText internationalized_texts() {
+    return new Manifest.InternationalizedText(ImmutableList.of(languages()));
   }
 
   //     Generates an `InternationalizedText` object with a list of `Language` objects within (representing a multilingual human name).
-  Election.InternationalizedText internationalized_human_names() {
-    return new Election.InternationalizedText(ImmutableList.of(language_human_names()));
+  Manifest.InternationalizedText internationalized_human_names() {
+    return new Manifest.InternationalizedText(ImmutableList.of(language_human_names()));
   }
 
   //     Generates an `AnnotatedString` object with one `Language` and an associated `value` string.
-  Election.AnnotatedString annotated_strings() {
-    Election.Language s = languages();
-    return new Election.AnnotatedString(s.language, s.value);
+  Manifest.AnnotatedString annotated_strings() {
+    Manifest.Language s = languages();
+    return new Manifest.AnnotatedString(s.language, s.value);
   }
 
   /**
@@ -200,20 +200,20 @@ public class ElectionTestHelper {
    * @param parties: a list of `Party` objects to be used in this ballot style
    * @param geo_units: a list of `GeopoliticalUnit` objects to be used in this ballot style
    */
-  Election.BallotStyle ballot_styles(List<Election.Party> parties, List<Election.GeopoliticalUnit> geo_units) {
+  Manifest.BallotStyle ballot_styles(List<Manifest.Party> parties, List<Manifest.GeopoliticalUnit> geo_units) {
     List<String> geopolitical_unit_ids = geo_units.stream().map(g -> g.object_id).collect(Collectors.toList());
     List<String> party_ids = parties.stream().map(p -> p.get_party_id()).collect(Collectors.toList());
-    return new Election.BallotStyle(randomString("BallotStyle"), geopolitical_unit_ids, party_ids, urls());
+    return new Manifest.BallotStyle(randomString("BallotStyle"), geopolitical_unit_ids, party_ids, urls());
   }
 
-  List<Election.Party> party_lists(int num_parties) {
-    List<Election.Party> result = new ArrayList<>();
+  List<Manifest.Party> party_lists(int num_parties) {
+    List<Manifest.Party> result = new ArrayList<>();
     for (int i = 0; i < num_parties; i++) {
       String partyName = String.format("Party%d", i);
       String partyAbbrv = String.format("P%d", i);
-      result.add(new Election.Party(
+      result.add(new Manifest.Party(
               randomString("Party"),
-              new Election.InternationalizedText(ImmutableList.of(new Election.Language(partyName, "en"))),
+              new Manifest.InternationalizedText(ImmutableList.of(new Manifest.Language(partyName, "en"))),
               partyAbbrv,
               null,
               String.format("Logo%d", i)));
@@ -221,8 +221,8 @@ public class ElectionTestHelper {
     return result;
   }
 
-  Election.GeopoliticalUnit geopolitical_units() {
-    return new Election.GeopoliticalUnit(
+  Manifest.GeopoliticalUnit geopolitical_units() {
+    return new Manifest.GeopoliticalUnit(
             randomString("GeopoliticalUnit"),
             randomString("name"),
             reporting_unit_types(),
@@ -235,11 +235,11 @@ public class ElectionTestHelper {
    * @param party_listO: A list of `Party` objects. If None, then the resulting `Candidate`
    * will have no party.
    */
-  Election.Candidate candidates(Optional<List<Election.Party>> party_listO) {
+  Manifest.Candidate candidates(Optional<List<Manifest.Party>> party_listO) {
     String party_id;
     if (party_listO.isPresent()) {
-      List<Election.Party> party_list = party_listO.get();
-      Election.Party party = party_list.get(random.nextInt(party_list.size()));
+      List<Manifest.Party> party_list = party_listO.get();
+      Manifest.Party party = party_list.get(random.nextInt(party_list.size()));
       party_id = party.get_party_id();
     } else {
       party_id = null;
@@ -252,7 +252,7 @@ public class ElectionTestHelper {
                      @Nullable String image_uri,
                      @Nullable Boolean is_write_in
      */
-    return new Election.Candidate(
+    return new Manifest.Candidate(
             randomString("Candidate"),
             internationalized_human_names(),
             party_id,
@@ -266,16 +266,16 @@ public class ElectionTestHelper {
    * `object_id` within, but will have a "c-" prefix attached, so you'll be able to
    * tell that they're related.
    */
-  private Election.SelectionDescription candidate_to_selection_description(Election.Candidate candidate, int sequence_order) {
-    return new Election.SelectionDescription(
+  private Manifest.SelectionDescription candidate_to_selection_description(Manifest.Candidate candidate, int sequence_order) {
+    return new Manifest.SelectionDescription(
             String.format("c-%s", candidate.object_id), candidate.get_candidate_id(), sequence_order);
   }
 
   public static class CandidateTuple {
-    final List<Election.Candidate> candidates;
-    final Election.ContestDescription contest; // CandidateContestDescription or ReferendumContestDescription
+    final List<Manifest.Candidate> candidates;
+    final Manifest.ContestDescription contest; // CandidateContestDescription or ReferendumContestDescription
 
-    public CandidateTuple(List<Election.Candidate> candidates, Election.ContestDescription contest) {
+    public CandidateTuple(List<Manifest.Candidate> candidates, Manifest.ContestDescription contest) {
       this.candidates = candidates;
       this.contest = contest;
     }
@@ -295,8 +295,8 @@ public class ElectionTestHelper {
    */
   CandidateTuple candidate_contest_descriptions(
           int sequence_order,
-          List<Election.Party> party_list,
-          List<Election.GeopoliticalUnit> geo_units,
+          List<Manifest.Party> party_list,
+          List<Manifest.GeopoliticalUnit> geo_units,
           Optional<Integer> no,
           Optional<Integer> mo) {
 
@@ -307,22 +307,22 @@ public class ElectionTestHelper {
     List<String> party_ids = party_list.stream().map(p -> p.get_party_id()).collect(Collectors.toList());
 
     // contest_candidates = draw(lists(candidates(party_list), min_size=m, max_size=m))
-    List<Election.Candidate> contest_candidates = new ArrayList<>();
+    List<Manifest.Candidate> contest_candidates = new ArrayList<>();
     for (int i = 0; i < m; i++) {
       contest_candidates.add(candidates(Optional.of(party_list)));
     }
 
     // selection_descriptions = [ _candidate_to_selection_description(contest_candidates[i], i) for i in range(m) ]
-    List<Election.SelectionDescription> selection_descriptions = new ArrayList<>();
+    List<Manifest.SelectionDescription> selection_descriptions = new ArrayList<>();
     for (int i = 0; i < m; i++) {
       selection_descriptions.add(candidate_to_selection_description(contest_candidates.get(i), i));
     }
 
-    Election.VoteVariationType vote_variation = (n == 1) ? Election.VoteVariationType.one_of_m : Election.VoteVariationType.n_of_m;
+    Manifest.VoteVariationType vote_variation = (n == 1) ? Manifest.VoteVariationType.one_of_m : Manifest.VoteVariationType.n_of_m;
 
     return new CandidateTuple(
             contest_candidates,
-            new Election.CandidateContestDescription(
+            new Manifest.CandidateContestDescription(
                     randomString("CandidateContestDescription"),
                     drawList(geo_units).object_id,
                     sequence_order,
@@ -348,8 +348,8 @@ public class ElectionTestHelper {
    */
   CandidateTuple contest_descriptions_room_for_overvoting(
           int sequence_order,
-          List<Election.Party> party_list,
-          List<Election.GeopoliticalUnit> geo_units) {
+          List<Manifest.Party> party_list,
+          List<Manifest.GeopoliticalUnit> geo_units) {
 
     int n = 1 + random.nextInt(2);
     int m = n + 1 + random.nextInt(2);
@@ -368,28 +368,28 @@ public class ElectionTestHelper {
    * generating many contests.
    * @param geo_units: A list of `GeopoliticalUnit`; one of these goes into the `electoral_district_id`
    */
-  CandidateTuple referendum_contest_descriptions(int sequence_order, List<Election.GeopoliticalUnit> geo_units) {
+  CandidateTuple referendum_contest_descriptions(int sequence_order, List<Manifest.GeopoliticalUnit> geo_units) {
     int n = 1 + random.nextInt(2);
 
     // contest_candidates = draw(lists(candidates(None), min_size = n, max_size = n))
-    List<Election.Candidate> contest_candidates = new ArrayList<>();
+    List<Manifest.Candidate> contest_candidates = new ArrayList<>();
     for (int i = 0; i < n; i++) {
       contest_candidates.add(candidates(Optional.empty()));
     }
 
     // selection_descriptions = [_candidate_to_selection_description(contest_candidates[i], i) for i in range(n)]
-    List<Election.SelectionDescription> selection_descriptions = new ArrayList<>();
+    List<Manifest.SelectionDescription> selection_descriptions = new ArrayList<>();
     for (int i = 0; i < n; i++) {
       selection_descriptions.add(candidate_to_selection_description(contest_candidates.get(i), i));
     }
 
     return new CandidateTuple(
             contest_candidates,
-            new Election.ReferendumContestDescription(
+            new Manifest.ReferendumContestDescription(
                     randomString("CandidateContestDescription"),
                     drawList(geo_units).object_id,
                     sequence_order,
-                    Election.VoteVariationType.one_of_m,
+                    Manifest.VoteVariationType.one_of_m,
                     1,
                     1,  // should this be None or n?
                     randomString("Name"),
@@ -406,7 +406,7 @@ public class ElectionTestHelper {
    * See `candidates` for details on this assignment.
    * @param geo_units: A list of `GeopoliticalUnit`; one of these goes into the `electoral_district_id`
    */
-  CandidateTuple contest_descriptions(int sequence_order, List<Election.Party> party_list, List<Election.GeopoliticalUnit> geo_units) {
+  CandidateTuple contest_descriptions(int sequence_order, List<Manifest.Party> party_list, List<Manifest.GeopoliticalUnit> geo_units) {
     return (random.nextBoolean()) ?
             referendum_contest_descriptions(sequence_order, geo_units) :
             candidate_contest_descriptions(sequence_order, party_list, geo_units, Optional.empty(), Optional.empty());
@@ -417,12 +417,12 @@ public class ElectionTestHelper {
    * @param num_parties: The number of parties that will be generated.
    * @param num_contests: The  number of contests that will be generated.
    */
-  Election election_descriptions(int num_parties, int num_contests) {
+  Manifest election_descriptions(int num_parties, int num_contests) {
     Preconditions.checkArgument(num_parties > 0, "need at least one party");
     Preconditions.checkArgument(num_contests > 0, "need at least one contest");
 
-    List<Election.GeopoliticalUnit> geo_units = ImmutableList.of(geopolitical_units());
-    List<Election.Party> parties = party_lists(num_parties);
+    List<Manifest.GeopoliticalUnit> geo_units = ImmutableList.of(geopolitical_units());
+    List<Manifest.Party> parties = party_lists(num_parties);
 
     // generate a collection candidates mapped to contest descriptions
     //  candidate_contests: List[Tuple[List[Candidate], ContestDescription]] = [
@@ -433,21 +433,21 @@ public class ElectionTestHelper {
     }
 
     // candidates_ = reduce(lambda a, b:a + b,[candidate_contest[0] for candidate_contest in candidate_contests],)
-    List<Election.Candidate> candidates_ = candidate_contests.stream().map(t -> t.candidates).flatMap(List::stream)
+    List<Manifest.Candidate> candidates_ = candidate_contests.stream().map(t -> t.candidates).flatMap(List::stream)
             .collect(Collectors.toList());
 
     // contests = [candidate_contest[1] for candidate_contest in candidate_contests]
-    List<Election.ContestDescription> contests = candidate_contests.stream().map(t -> t.contest).collect(Collectors.toList());
+    List<Manifest.ContestDescription> contests = candidate_contests.stream().map(t -> t.contest).collect(Collectors.toList());
 
-    Election.BallotStyle styles = ballot_styles(parties, geo_units);
+    Manifest.BallotStyle styles = ballot_styles(parties, geo_units);
 
     // maybe later on we'll do something more complicated with dates
     OffsetDateTime start_date = OffsetDateTime.now();
     OffsetDateTime end_date = start_date;
 
-    return new Election(
+    return new Manifest(
             randomString("election_scope_id"),
-            Election.ElectionType.general,  // good enough for now
+            Manifest.ElectionType.general,  // good enough for now
             start_date,
             end_date,
             geo_units,
@@ -459,7 +459,7 @@ public class ElectionTestHelper {
             contact_infos());
   }
 
-  List<PlaintextBallot> plaintext_voted_ballots(ElectionWithPlaceholders metadata, int count) {
+  List<PlaintextBallot> plaintext_voted_ballots(InternalManifest metadata, int count) {
     // ballots: List[PlaintextBallot] = [] for i in range(count):ballots.append(draw(plaintext_voted_ballot(metadata)))
     List<PlaintextBallot> ballots = new ArrayList<>();
     for (int i = 0; i < count; i++) {
@@ -469,12 +469,12 @@ public class ElectionTestHelper {
   }
 
   /** Generates an arbitrary `PlaintextBallot` with the choices made randomly. */
-  PlaintextBallot plaintext_voted_ballot(ElectionWithPlaceholders metadata) {
+  PlaintextBallot plaintext_voted_ballot(InternalManifest metadata) {
     int num_ballot_styles = metadata.election.ballot_styles.size();
     assertWithMessage("invalid election with no ballot styles").that(num_ballot_styles > 0).isTrue();
 
           // pick a ballot style at random
-    Election.BallotStyle ballot_style = drawList(metadata.election.ballot_styles);
+    Manifest.BallotStyle ballot_style = drawList(metadata.election.ballot_styles);
 
     List<ContestWithPlaceholders> contests = metadata.get_contests_for_style(ballot_style.object_id);
     assertWithMessage("invalid ballot style with no contests in it").that(contests.size() > 0).isTrue();
@@ -484,14 +484,14 @@ public class ElectionTestHelper {
       assertWithMessage("every contest needs to be valid").that(contest.is_valid()).isTrue();
       // LOOK dont understand "we need exactly this many 1 's, and the rest 0' s"
       int n = contest.number_elected ; // we need exactly this many 1 's, and the rest 0' s
-      ArrayList<Election.SelectionDescription> ballot_selections = new ArrayList<>(contest.ballot_selections);
+      ArrayList<Manifest.SelectionDescription> ballot_selections = new ArrayList<>(contest.ballot_selections);
       assertThat(ballot_selections.size() >= n).isTrue();
       // LOOK shuffle leave this out for now.
       // Collections.shuffle(ballot_selections);
 
       int cut_point = random.nextInt(n + 1); // a number between 0 and n, inclusive
-      List<Election.SelectionDescription> yes_votes = ballot_selections.subList(0, cut_point);
-      List<Election.SelectionDescription> no_votes = ballot_selections.subList(cut_point, ballot_selections.size());
+      List<Manifest.SelectionDescription> yes_votes = ballot_selections.subList(0, cut_point);
+      List<Manifest.SelectionDescription> no_votes = ballot_selections.subList(cut_point, ballot_selections.size());
 
       List<PlaintextBallot.Selection> voted_selections = new ArrayList<>();
       yes_votes.stream().map(d -> Encrypt.selection_from(d, false, true))
@@ -520,7 +520,7 @@ public class ElectionTestHelper {
    * a random number foe the commitments_hash.
    * In a real election, the key ceremony would be used to generate a shared public key.
    */
-  CIPHERTEXT_ELECTIONS_TUPLE_TYPE ciphertext_elections(Election election_description) {
+  CIPHERTEXT_ELECTIONS_TUPLE_TYPE ciphertext_elections(Manifest election_description) {
     ElGamal.KeyPair keypair = elgamal_keypairs();
     return new CIPHERTEXT_ELECTIONS_TUPLE_TYPE(
             keypair.secret_key,
@@ -533,15 +533,15 @@ public class ElectionTestHelper {
   }
 
   public static class EverythingTuple {
-    Election election_description;
-    ElectionWithPlaceholders metadata;
+    Manifest election_description;
+    InternalManifest metadata;
     List<PlaintextBallot> ballots;
     ElementModQ secret_key;
     CiphertextElectionContext context;
 
     public EverythingTuple(
-                 Election election_description,
-                 ElectionWithPlaceholders metadata,
+                 Manifest election_description,
+                 InternalManifest metadata,
                  List<PlaintextBallot> ballots,
                  ElementModQ secret_key,
                  CiphertextElectionContext context) {
@@ -560,12 +560,12 @@ public class ElectionTestHelper {
    * <p>
    *
    * @param num_ballots: The number of ballots to generate (default: 3).
-   * @return a tuple of an Election objects.
+   * @return a tuple of an Manifest objects.
    */
   EverythingTuple elections_and_ballots(int num_ballots) {
     Preconditions.checkArgument(num_ballots >= 0, "You're asking for a negative number of ballots?");
-    Election election_description = election_descriptions(3, 3);
-    ElectionWithPlaceholders metadata = new ElectionWithPlaceholders(election_description);
+    Manifest election_description = election_descriptions(3, 3);
+    InternalManifest metadata = new InternalManifest(election_description);
 
     // ballots = [draw(plaintext_voted_ballots(internal_election_description)) for _ in range(num_ballots)]
     List<PlaintextBallot> ballots = new ArrayList<>();

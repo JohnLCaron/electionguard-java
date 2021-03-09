@@ -2,12 +2,11 @@ package com.sunya.electionguard.publish;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.sunya.electionguard.CiphertextBallot;
 import com.sunya.electionguard.CiphertextElectionContext;
 import com.sunya.electionguard.CiphertextTallyBuilder;
 import com.sunya.electionguard.ElectionConstants;
-import com.sunya.electionguard.Election;
-import com.sunya.electionguard.ElectionWithPlaceholders;
+import com.sunya.electionguard.Manifest;
+import com.sunya.electionguard.InternalManifest;
 import com.sunya.electionguard.Guardian;
 import com.sunya.electionguard.GuardianBuilder;
 import com.sunya.electionguard.KeyCeremony;
@@ -19,12 +18,10 @@ import net.jqwik.api.lifecycle.BeforeProperty;
 
 import java.io.File;
 import java.io.IOException;
-import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.sunya.electionguard.Group.*;
@@ -44,10 +41,10 @@ public class TestPublish {
   @Example
   public void test_publish() throws IOException {
     OffsetDateTime now = OffsetDateTime.now();
-    Election election = new Election(
-            "scope", Election.ElectionType.unknown, now, now, ImmutableList.of(), ImmutableList.of(),
+    Manifest election = new Manifest(
+            "scope", Manifest.ElectionType.unknown, now, now, ImmutableList.of(), ImmutableList.of(),
             ImmutableList.of(), ImmutableList.of(), ImmutableList.of(), null, null);
-    ElectionWithPlaceholders metadata = new ElectionWithPlaceholders(election);
+    InternalManifest metadata = new InternalManifest(election);
 
     CiphertextElectionContext context = CiphertextElectionContext.create(1, 1, ONE_MOD_P, election, rand_q());
     List<KeyCeremony.CoefficientValidationSet> coefficients = ImmutableList.of(

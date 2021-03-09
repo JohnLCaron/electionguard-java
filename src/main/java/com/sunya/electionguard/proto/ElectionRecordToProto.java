@@ -3,7 +3,7 @@ package com.sunya.electionguard.proto;
 import com.google.protobuf.ByteString;
 import com.sunya.electionguard.CiphertextElectionContext;
 import com.sunya.electionguard.ElectionConstants;
-import com.sunya.electionguard.Election;
+import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.Encrypt;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.KeyCeremony;
@@ -20,7 +20,7 @@ import static com.sunya.electionguard.proto.CommonConvert.convertElementModQ;
 public class ElectionRecordToProto {
 
   public static ElectionRecord buildElectionRecord(
-          Election description,
+          Manifest description,
           CiphertextElectionContext context,
           ElectionConstants constants,
           Iterable<KeyCeremony.CoefficientValidationSet> guardianCoefficients,
@@ -30,7 +30,7 @@ public class ElectionRecordToProto {
 
     ElectionRecord.Builder builder = ElectionRecord.newBuilder();
     builder.setConstants( convertConstants(constants));
-    builder.setElection( ElectionDescriptionToProto.translateToProto(description));
+    builder.setManifest( ManifestToProto.translateToProto(description));
     builder.setContext( convertContext(context));
 
     for (KeyCeremony.CoefficientValidationSet coeff : guardianCoefficients) {

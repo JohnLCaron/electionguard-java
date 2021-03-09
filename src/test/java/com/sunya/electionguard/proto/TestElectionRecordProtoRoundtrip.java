@@ -17,7 +17,7 @@ public class TestElectionRecordProtoRoundtrip {
 
   @BeforeContainer
   public static void setUp() throws IOException {
-    consumer = new Consumer(TestElectionDescriptionToProtoRoundtrip.testElectionRecord);
+    consumer = new Consumer(TestManifestToProtoRoundtrip.testElectionRecord);
   }
 
   @Example

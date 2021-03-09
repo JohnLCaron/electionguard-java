@@ -5,7 +5,7 @@
 
 package com.sunya.electionguard.viz;
 
-import com.sunya.electionguard.Election;
+import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.input.ElectionInputValidation;
 import ucar.ui.prefs.BeanTable;
 import ucar.ui.widget.BAMutil;
@@ -34,7 +34,7 @@ public class ElectionDescriptionTable extends JPanel {
   private final  TextHistoryPane infoTA = new TextHistoryPane();
   private final IndependentWindow infoWindow;
 
-  private Election election;
+  private Manifest election;
 
   public ElectionDescriptionTable(PreferencesExt prefs) {
     this.prefs = prefs;
@@ -42,7 +42,7 @@ public class ElectionDescriptionTable extends JPanel {
     infoWindow.setBounds((Rectangle) prefs.getBean("InfoWindowBounds", new Rectangle(300, 300, 800, 100)));
 
     contestTable = new BeanTable<>(ContestBean.class, (PreferencesExt) prefs.node("ContestTable"), false,
-            "Contest", "Election.ContestDescription", null);
+            "Contest", "Manifest.ContestDescription", null);
     contestTable.addListSelectionListener(e -> {
       ContestBean contest = contestTable.getSelectedBean();
       if (contest != null) {
@@ -53,27 +53,27 @@ public class ElectionDescriptionTable extends JPanel {
             bean -> ((ContestBean)bean).contest.toString()));
 
     styleTable = new BeanTable<>(BallotStyleBean.class, (PreferencesExt) prefs.node("StyleTable"), false,
-            "BallotStyle", "Election.BallotStyle", null);
+            "BallotStyle", "Manifest.BallotStyle", null);
     styleTable.addPopupOption("Show BallotStyle", styleTable.makeShowAction(infoTA, infoWindow,
             bean -> ((BallotStyleBean)bean).style.toString()));
 
     selectionTable = new BeanTable<>(SelectionBean.class, (PreferencesExt) prefs.node("SelectionTable"), false,
-            "Selection", "Election.Selection", null);
+            "Selection", "Manifest.Selection", null);
     selectionTable.addPopupOption("Show Selection", selectionTable.makeShowAction(infoTA, infoWindow,
             bean -> ((SelectionBean)bean).selection.toString()));
 
     partyTable = new BeanTable<>(PartyBean.class, (PreferencesExt) prefs.node("PartyTable"), false,
-            "Party", "Election.Party", null);
+            "Party", "Manifest.Party", null);
     partyTable.addPopupOption("Show Party", partyTable.makeShowAction(infoTA, infoWindow,
             bean -> ((PartyBean)bean).org.toString()));
 
     candidateTable = new BeanTable<>(CandidateBean.class, (PreferencesExt) prefs.node("CandidateTable"), false,
-            "Candidate", "Election.Candidate", null);
+            "Candidate", "Manifest.Candidate", null);
     candidateTable.addPopupOption("Show Candidate", candidateTable.makeShowAction(infoTA, infoWindow,
             bean -> ((CandidateBean)bean).org.toString()));
 
     gpunitTable = new BeanTable<>(GpUnitBean.class, (PreferencesExt) prefs.node("GpUnitTable"), false,
-            "GeopoliticalUnit", "Election.GeopoliticalUnit", null);
+            "GeopoliticalUnit", "Manifest.GeopoliticalUnit", null);
     gpunitTable.addPopupOption("Show GeopoliticalUnit", gpunitTable.makeShowAction(infoTA, infoWindow,
             bean -> ((GpUnitBean)bean).gpunit.toString()));
 
@@ -103,12 +103,12 @@ public class ElectionDescriptionTable extends JPanel {
         validateElection();
       }
     };
-    BAMutil.setActionProperties(valAction, "alien", "Validate Election", false, 'V', -1);
+    BAMutil.setActionProperties(valAction, "alien", "Validate Manifest", false, 'V', -1);
     BAMutil.addActionToContainer(buttPanel, valAction);
     return this;
   }
 
-  void setElectionDescription(Election election) {
+  void setElectionDescription(Manifest election) {
     this.election = election;
     candidateTable.setBeans(election.candidates.stream().map(CandidateBean::new).collect(Collectors.toList()));
     partyTable.setBeans(election.parties.stream().map(PartyBean::new).collect(Collectors.toList()));
@@ -147,17 +147,17 @@ public class ElectionDescriptionTable extends JPanel {
     boolean ok = input.validateElection(problems);
 
     infoTA.setText(problems.toString());
-    infoTA.appendLine(String.format("Election validates %s%n", ok));
+    infoTA.appendLine(String.format("Manifest validates %s%n", ok));
     infoTA.gotoTop();
     infoWindow.show();
   }
 
   public static class PartyBean {
-    Election.Party org;
+    Manifest.Party org;
 
     public PartyBean(){}
 
-    PartyBean(Election.Party org) {
+    PartyBean(Manifest.Party org) {
       this.org = org;
     }
 
@@ -179,11 +179,11 @@ public class ElectionDescriptionTable extends JPanel {
   }
 
   public static class CandidateBean {
-    Election.Candidate org;
+    Manifest.Candidate org;
 
     public CandidateBean(){}
 
-    CandidateBean(Election.Candidate org) {
+    CandidateBean(Manifest.Candidate org) {
       this.org = org;
     }
 
@@ -205,11 +205,11 @@ public class ElectionDescriptionTable extends JPanel {
   }
 
   public static class GpUnitBean {
-    Election.GeopoliticalUnit gpunit;
+    Manifest.GeopoliticalUnit gpunit;
 
     public GpUnitBean(){}
 
-    GpUnitBean(Election.GeopoliticalUnit gpunit) {
+    GpUnitBean(Manifest.GeopoliticalUnit gpunit) {
       this.gpunit = gpunit;
     }
 
@@ -228,11 +228,11 @@ public class ElectionDescriptionTable extends JPanel {
   }
 
   public static class BallotStyleBean {
-    Election.BallotStyle style;
+    Manifest.BallotStyle style;
 
     public BallotStyleBean(){}
 
-    BallotStyleBean(Election.BallotStyle style) {
+    BallotStyleBean(Manifest.BallotStyle style) {
       this.style = style;
     }
 
@@ -252,11 +252,11 @@ public class ElectionDescriptionTable extends JPanel {
   }
 
   public static class ContestBean {
-    Election.ContestDescription contest;
+    Manifest.ContestDescription contest;
 
     public ContestBean(){}
 
-    ContestBean(Election.ContestDescription contest) {
+    ContestBean(Manifest.ContestDescription contest) {
       this.contest = contest;
     }
     public String getContestId() {
@@ -291,11 +291,11 @@ public class ElectionDescriptionTable extends JPanel {
   }
 
   public static class SelectionBean {
-    Election.SelectionDescription selection;
+    Manifest.SelectionDescription selection;
 
     public SelectionBean(){}
 
-    SelectionBean(Election.SelectionDescription selection) {
+    SelectionBean(Manifest.SelectionDescription selection) {
       this.selection = selection;
     }
 

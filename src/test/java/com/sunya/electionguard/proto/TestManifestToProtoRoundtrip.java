@@ -1,6 +1,6 @@
 package com.sunya.electionguard.proto;
 
-import com.sunya.electionguard.Election;
+import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.publish.ConvertFromJson;
 import com.sunya.electionguard.publish.Publisher;
 import net.jqwik.api.Example;
@@ -11,7 +11,7 @@ import java.io.IOException;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 
-public class TestElectionDescriptionToProtoRoundtrip {
+public class TestManifestToProtoRoundtrip {
   public static final String testElectionRecord = "src/test/data/electionRecordJson/";
   private static Publisher publisher;
 
@@ -22,10 +22,10 @@ public class TestElectionDescriptionToProtoRoundtrip {
 
   @Example
   public void testElectionRoundtrip() throws IOException {
-    Election fromPython = ConvertFromJson.readElection(publisher.electionPath().toString());
+    Manifest fromPython = ConvertFromJson.readElection(publisher.manifestPath().toString());
     assertThat(fromPython).isNotNull();
-    ElectionProto.ElectionDescription proto = ElectionDescriptionToProto.translateToProto(fromPython);
-    Election roundtrip = ElectionDescriptionFromProto.translateFromProto(proto);
+    ManifestProto.Manifest proto = ManifestToProto.translateToProto(fromPython);
+    Manifest roundtrip = ManifestFromProto.translateFromProto(proto);
 
     assertThat(roundtrip.election_scope_id).isEqualTo(fromPython.election_scope_id);
     assertThat(roundtrip.type).isEqualTo(fromPython.type);

@@ -106,7 +106,7 @@ public class DecryptionShare {
      * specific ElGamal key pair, public key, and election context.
      * <p>
      * @param message: the `ElGamalCiphertext` to compare
-     * @param election_public_key: the `ElementModP Election Public Key for the Guardian
+     * @param election_public_key: the `ElementModP Manifest Public Key for the Guardian
      * @param extended_base_hash: The `ElementModQ` election extended base hash.
      */
     boolean is_valid(ElGamal.Ciphertext message, ElementModP election_public_key, ElementModQ extended_base_hash) {

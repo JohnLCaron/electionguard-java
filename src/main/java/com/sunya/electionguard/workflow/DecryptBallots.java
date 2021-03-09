@@ -6,8 +6,8 @@ import com.beust.jcommander.ParameterException;
 import com.google.common.base.Preconditions;
 import com.sunya.electionguard.CiphertextTallyBuilder;
 import com.sunya.electionguard.DecryptionMediator;
-import com.sunya.electionguard.Election;
-import com.sunya.electionguard.ElectionWithPlaceholders;
+import com.sunya.electionguard.Manifest;
+import com.sunya.electionguard.InternalManifest;
 import com.sunya.electionguard.Guardian;
 import com.sunya.electionguard.PlaintextBallot;
 import com.sunya.electionguard.PlaintextTally;
@@ -141,7 +141,7 @@ public class DecryptBallots {
   ///////////////////////////////////////////////////////////////////////////
   final Consumer consumer;
   final ElectionRecord electionRecord;
-  final Election election;
+  final Manifest election;
 
   Iterable<Guardian> guardians;
   CiphertextTally encryptedTally;
@@ -169,7 +169,7 @@ public class DecryptBallots {
 
   void accumulateTally() {
     System.out.printf("%nAccumulate tally%n");
-    ElectionWithPlaceholders metadata = new ElectionWithPlaceholders(this.election);
+    InternalManifest metadata = new InternalManifest(this.election);
     CiphertextTallyBuilder ciphertextTally = new CiphertextTallyBuilder("DecryptBallots", metadata, electionRecord.context);
     int nballots = ciphertextTally.batch_append(electionRecord.acceptedBallots);
     this.encryptedTally = ciphertextTally.build();

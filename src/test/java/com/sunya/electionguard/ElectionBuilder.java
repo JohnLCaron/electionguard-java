@@ -8,22 +8,22 @@ import static com.sunya.electionguard.Group.rand_q;
 public class ElectionBuilder {
 
   public static class DescriptionAndContext {
-    public final ElectionWithPlaceholders metadata;
+    public final InternalManifest metadata;
     public final CiphertextElectionContext context;
 
-    public DescriptionAndContext(Election election, CiphertextElectionContext context) {
-      this.metadata = new ElectionWithPlaceholders(election);
+    public DescriptionAndContext(Manifest election, CiphertextElectionContext context) {
+      this.metadata = new InternalManifest(election);
       this.context = context;
     }
   }
 
   int number_of_guardians; // The number of guardians necessary to generate the public key
   int quorum; // The quorum of guardians necessary to decrypt an election.  Must be less than `number_of_guardians`
-  Election description;
+  Manifest description;
   Group.ElementModQ commitment_hash;
   Optional<Group.ElementModP> elgamal_public_key = Optional.empty();
 
-  public ElectionBuilder(int number_of_guardians, int quorum, Election description) {
+  public ElectionBuilder(int number_of_guardians, int quorum, Manifest description) {
     this.number_of_guardians = number_of_guardians;
     this.quorum = quorum;
     this.description = description;

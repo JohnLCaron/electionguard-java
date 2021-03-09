@@ -27,7 +27,7 @@ public class CiphertextTally extends ElectionObjectBase {
 
   /**
    * The encrypted selections for a specific contest.
-   * The object_id is the Election.ContestDescription.object_id.
+   * The object_id is the Manifest.ContestDescription.object_id.
    */
   @Immutable
   public static class Contest extends ElectionObjectBase {
@@ -69,7 +69,7 @@ public class CiphertextTally extends ElectionObjectBase {
 
   /**
    * The homomorphic accumulation of all of the CiphertextBallotSelection for a specific selection and contest.
-   * The object_id is the Election.SelectionDescription.object_id.
+   * The object_id is the Manifest.SelectionDescription.object_id.
    */
   @Immutable
   public static class Selection extends CiphertextSelection {

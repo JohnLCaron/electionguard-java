@@ -127,7 +127,7 @@ public class RunElectionWorkflow {
     command2.run(out, "java", "-classpath", classpath,
             "com.sunya.electionguard.workflow.DecryptBallots",
             "-in", cmdLine.encryptDir,
-            "-guardiansLocation", cmdLine.encryptDir + "/private/guardians.proto",
+            "-guardiansLocation", cmdLine.encryptDir + "/private/guardians.protobuf",
             "-out", cmdLine.outputDir
     );
     System.out.printf("%s", out);

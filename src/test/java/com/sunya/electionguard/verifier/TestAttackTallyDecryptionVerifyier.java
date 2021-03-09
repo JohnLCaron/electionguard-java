@@ -2,7 +2,7 @@ package com.sunya.electionguard.verifier;
 
 import com.google.common.collect.ImmutableMap;
 import com.sunya.electionguard.DecryptionShare;
-import com.sunya.electionguard.Election;
+import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.ElectionFactory;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.PlaintextTally;
@@ -30,7 +30,7 @@ public class TestAttackTallyDecryptionVerifyier {
     String topdir = TestParameterVerifier.topdirProto;
     Consumer consumer = new Consumer(topdir);
     ElectionRecord electionRecord = consumer.readElectionRecordProto();
-    Election fakeElection = ElectionFactory.get_fake_election();
+    Manifest fakeElection = ElectionFactory.get_fake_election();
 
     TallyDecryptionVerifier tdv = new TallyDecryptionVerifier(fakeElection, electionRecord.decryptedTally);
     boolean tdvOk = tdv.verify_tally_decryption();

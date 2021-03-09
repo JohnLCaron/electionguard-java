@@ -6,7 +6,7 @@ import net.jqwik.api.ShrinkingMode;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import static com.sunya.electionguard.ElectionWithPlaceholders.ContestWithPlaceholders;
+import static com.sunya.electionguard.InternalManifest.ContestWithPlaceholders;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
@@ -20,7 +20,7 @@ public class TestEncryptHypothesisProperties extends TestProperties {
    */
   @Property(tries = 10, shrinking = ShrinkingMode.OFF)
   public void test_generators_yield_valid_output(
-          @ForAll("election_description") Election ed) {
+          @ForAll("election_description") Manifest ed) {
 
     assertThat(ed.is_valid()).isTrue();
   }

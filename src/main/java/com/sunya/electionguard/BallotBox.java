@@ -21,13 +21,13 @@ public class BallotBox {
     UNKNOWN
   }
 
-  private final ElectionWithPlaceholders metadata;
+  private final InternalManifest metadata;
   private final CiphertextElectionContext context;
   private final DataStore store;
 
-  public BallotBox(Election election,
+  public BallotBox(Manifest election,
                    CiphertextElectionContext context) {
-    this.metadata = new ElectionWithPlaceholders(election);
+    this.metadata = new InternalManifest(election);
     this.context = context;
     this.store = new DataStore();
   }

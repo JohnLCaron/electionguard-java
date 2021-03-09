@@ -1,7 +1,7 @@
 package com.sunya.electionguard.input;
 
 import com.google.common.flogger.FluentLogger;
-import com.sunya.electionguard.Election;
+import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.PlaintextBallot;
 
 import java.util.ArrayList;
@@ -16,11 +16,11 @@ import java.util.stream.Collectors;
 public class BallotInputValidation {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
-  private final Election election;
+  private final Manifest election;
   private final Map<String, ElectionContest> contestMap;
-  private final Map<String, Election.BallotStyle> styles;
+  private final Map<String, Manifest.BallotStyle> styles;
 
-  public BallotInputValidation(Election election) {
+  public BallotInputValidation(Manifest election) {
     this.election = election;
     this.contestMap = election.contests.stream().collect(Collectors.toMap(c -> c.object_id, ElectionContest::new));
     this.styles = election.ballot_styles.stream().collect(Collectors.toMap(bs -> bs.object_id, bs -> bs));
@@ -29,7 +29,7 @@ public class BallotInputValidation {
   /** Determine if a ballot is valid and well-formed for the given election. */
   public boolean validateBallot(PlaintextBallot ballot, Formatter problems) {
     BallotMessenger ballotMesses = new BallotMessenger(ballot.object_id);
-    Election.BallotStyle ballotStyle = styles.get(ballot.style_id);
+    Manifest.BallotStyle ballotStyle = styles.get(ballot.style_id);
     // Referential integrity of ballot's BallotStyle id
     if (ballotStyle == null) {
       String msg = String.format("Ballot Style '%s' does not exist in election", ballot.style_id);
@@ -63,7 +63,7 @@ public class BallotInputValidation {
   }
 
   /** Determine if contest is valid for ballot style. */
-  void validateContest(PlaintextBallot.Contest ballotContest, Election.BallotStyle ballotStyle, ElectionContest electionContest, BallotMessenger ballotMesses) {
+  void validateContest(PlaintextBallot.Contest ballotContest, Manifest.BallotStyle ballotStyle, ElectionContest electionContest, BallotMessenger ballotMesses) {
     BallotMessenger contestMesses = ballotMesses.nested(ballotContest.contest_id);
 
     int total = 0;
@@ -78,7 +78,7 @@ public class BallotInputValidation {
         selectionIds.add(selection.selection_id);
       }
 
-      Election.SelectionDescription electionSelection = electionContest.selectionMap.get(selection.selection_id);
+      Manifest.SelectionDescription electionSelection = electionContest.selectionMap.get(selection.selection_id);
       // Referential integrity of ballotSelection id
       if (electionSelection == null) {
         String msg = String.format("Ballot Selection '%s' does not exist in contest", selection.selection_id);
@@ -107,15 +107,15 @@ public class BallotInputValidation {
   private static class ElectionContest {
     private final String contestId;
     private final int allowed;
-    private final Map<String, Election.SelectionDescription> selectionMap;
+    private final Map<String, Manifest.SelectionDescription> selectionMap;
 
-    ElectionContest(Election.ContestDescription electionContest) {
+    ElectionContest(Manifest.ContestDescription electionContest) {
       this.contestId = electionContest.object_id;
       this.allowed = electionContest.votes_allowed.orElse(0); // LOOK or else what?
       // this.selectionMap = electionContest.ballot_selections.stream().collect(Collectors.toMap(b -> b.object_id, b -> b));
       // allow same object id
       this.selectionMap = new HashMap<>();
-      for (Election.SelectionDescription sel : electionContest.ballot_selections) {
+      for (Manifest.SelectionDescription sel : electionContest.ballot_selections) {
         this.selectionMap.put(sel.object_id, sel);
       }
     }

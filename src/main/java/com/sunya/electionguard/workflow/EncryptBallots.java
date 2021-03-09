@@ -4,11 +4,11 @@ import com.beust.jcommander.*;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.sunya.electionguard.BallotBox;
+import com.sunya.electionguard.InternalManifest;
 import com.sunya.electionguard.SubmittedBallot;
 import com.sunya.electionguard.input.BallotInputValidation;
 import com.sunya.electionguard.CiphertextBallot;
-import com.sunya.electionguard.Election;
-import com.sunya.electionguard.ElectionWithPlaceholders;
+import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.Encrypt;
 import com.sunya.electionguard.PlaintextBallot;
 import com.sunya.electionguard.publish.Consumer;
@@ -155,13 +155,13 @@ public class EncryptBallots {
     }
   }
 
-  public static BallotProvider makeBallotProvider(String className, Election election, int nballots) throws Throwable {
+  public static BallotProvider makeBallotProvider(String className, Manifest election, int nballots) throws Throwable {
     Class<?> c = Class.forName(className);
     if (!(BallotProvider.class.isAssignableFrom(c))) {
       throw new IllegalArgumentException(String.format("%s must implement %s", c.getName(), BallotProvider.class));
     }
     java.lang.reflect.Constructor<BallotProvider> constructor =
-            (Constructor<BallotProvider>) c.getConstructor(Election.class, Integer.class);
+            (Constructor<BallotProvider>) c.getConstructor(Manifest.class, Integer.class);
     return constructor.newInstance(election, nballots);
   }
 
@@ -183,7 +183,7 @@ public class EncryptBallots {
     this.numberOfGuardians = electionRecord.context.number_of_guardians;
 
     // Configure the Encryption Device
-    ElectionWithPlaceholders metadata = new ElectionWithPlaceholders(electionRecord.election);
+    InternalManifest metadata = new InternalManifest(electionRecord.election);
     this.device = new Encrypt.EncryptionDevice(deviceName);
     this.encryptor = new Encrypt.EncryptionMediator(metadata, electionRecord.context, this.device);
 

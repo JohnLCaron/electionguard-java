@@ -20,7 +20,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
-/** Publishes the Election Record to Json or protobuf files. */
+/** Publishes the Manifest Record to Json or protobuf files. */
 public class Publisher {
   static final String PRIVATE_DIR = "private";
 
@@ -33,7 +33,7 @@ public class Publisher {
   static final String SPOILED_BALLOT_DIR = "spoiled_ballots";
   static final String SPOILED_TALLY_DIR = "spoiled_tallies";
 
-  static final String DESCRIPTION_FILE_NAME = "description" + SUFFIX;
+  static final String MANIFEST_FILE_NAME = "manifest" + SUFFIX;
   static final String CONTEXT_FILE_NAME = "context" + SUFFIX;
   static final String CONSTANTS_FILE_NAME = "constants" + SUFFIX;
   static final String ENCRYPTED_TALLY_FILE_NAME = "encrypted_tally" + SUFFIX;
@@ -50,13 +50,11 @@ public class Publisher {
   static final String GUARDIAN_PREFIX = "guardian_";
 
   // proto
-  static final String ELECTION_RECORD_FILE_NAME = "electionRecord.proto";
-  static final String GUARDIANS_FILE = "guardians.proto";
-  static final String SUBMITTED_BALLOT_PROTO = "submittedBallot.proto";
-  static final String SPOILED_BALLOT_FILE = "spoiledPlaintextBallot.proto";
-  static final String SPOILED_TALLY_FILE = "spoiledPlaintextTally.proto";
-
-  // TODO #148 Revert PlaintextTally to PublishedPlaintextTally after moving spoiled info
+  static final String ELECTION_RECORD_FILE_NAME = "electionRecord.protobuf";
+  static final String GUARDIANS_FILE = "guardians.protobuf";
+  static final String SUBMITTED_BALLOT_PROTO = "submittedBallot.protobuf";
+  static final String SPOILED_BALLOT_FILE = "spoiledPlaintextBallot.protobuf";
+  static final String SPOILED_TALLY_FILE = "spoiledPlaintextTally.protobuf";
 
   private final Path publishDirectory;
   private final Path devicesDirPath;
@@ -104,8 +102,8 @@ public class Publisher {
             .forEach( f-> f.delete());
   }
 
-  public Path electionPath() {
-    return publishDirectory.resolve(DESCRIPTION_FILE_NAME).toAbsolutePath();
+  public Path manifestPath() {
+    return publishDirectory.resolve(MANIFEST_FILE_NAME).toAbsolutePath();
   }
 
   public Path contextPath() {
@@ -219,7 +217,7 @@ public class Publisher {
 
   /** Publishes the election record as json. */
   public void writeElectionRecordJson(
-          Election description,
+          Manifest manifest,
           CiphertextElectionContext context,
           ElectionConstants constants,
           Iterable<Encrypt.EncryptionDevice> devices,
@@ -230,7 +228,7 @@ public class Publisher {
           @Nullable Iterable<PlaintextBallot> spoiledBallots,
           @Nullable Iterable<PlaintextTally> spoiledTallies) throws IOException {
 
-    ConvertToJson.writeElection(description, this.electionPath());
+    ConvertToJson.writeElection(manifest, this.manifestPath());
     ConvertToJson.writeContext(context, this.contextPath());
     ConvertToJson.writeConstants(constants, this.constantsPath());
 
@@ -306,7 +304,7 @@ public class Publisher {
 
   /** Publishes the KeyCeremony part of the election record as proto. */
   public void writeKeyCeremonyProto(
-          Election description,
+          Manifest description,
           CiphertextElectionContext context,
           ElectionConstants constants,
           Iterable<KeyCeremony.CoefficientValidationSet> coefficient_validation_sets) throws IOException {
@@ -321,7 +319,7 @@ public class Publisher {
 
   /** Publishes the ballot Encryptions part of election record as proto. */
   public void writeEncryptionResultsProto(
-          Election description,
+          Manifest description,
           CiphertextElectionContext context,
           ElectionConstants constants,
           Iterable<KeyCeremony.CoefficientValidationSet> coefficient_validation_sets,
@@ -379,7 +377,7 @@ public class Publisher {
 
   /** Publishes the ballot and tally Decryptions part election record as proto. */
   public void writeDecryptionResultsProto(
-          Election description,
+          Manifest description,
           CiphertextElectionContext context,
           ElectionConstants constants,
           Iterable<KeyCeremony.CoefficientValidationSet> coefficient_validation_sets,
@@ -422,7 +420,7 @@ public class Publisher {
 
   /** Publishes the entire election record as proto. */
   public void writeElectionRecordProto(
-          Election description,
+          Manifest description,
           CiphertextElectionContext context,
           ElectionConstants constants,
           Iterable<KeyCeremony.CoefficientValidationSet> coefficient_validation_sets,

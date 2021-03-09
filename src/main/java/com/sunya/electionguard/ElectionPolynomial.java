@@ -117,7 +117,7 @@ public class ElectionPolynomial {
    * Computes a single coordinate value of the election polynomial used for sharing.
    *
    * @param exponent_modifier: Unique modifier (usually sequence order) for exponent
-   * @param polynomial:        Election polynomial
+   * @param polynomial:        Manifest polynomial
    * @return Polynomial used to share election keys
    */
   static ElementModQ compute_polynomial_coordinate(BigInteger exponent_modifier, ElectionPolynomial polynomial) {

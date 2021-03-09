@@ -2,8 +2,8 @@ package com.sunya.electionguard.verifier;
 
 import com.google.common.base.Preconditions;
 import com.google.common.flogger.FluentLogger;
-import com.sunya.electionguard.Election;
-import com.sunya.electionguard.ElectionWithPlaceholders;
+import com.sunya.electionguard.InternalManifest;
+import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.PlaintextTally;
 
@@ -20,11 +20,11 @@ import static com.sunya.electionguard.Group.ElementModP;
 public class TallyDecryptionVerifier {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
-  final ElectionWithPlaceholders manifest;
+  final InternalManifest manifest;
   final PlaintextTally decryptedTally;
 
-  TallyDecryptionVerifier(Election election, PlaintextTally decryptedTally) {
-    this.manifest = new ElectionWithPlaceholders(election);
+  TallyDecryptionVerifier(Manifest election, PlaintextTally decryptedTally) {
+    this.manifest = new InternalManifest(election);
     this.decryptedTally = decryptedTally;
   }
 
@@ -44,7 +44,7 @@ public class TallyDecryptionVerifier {
     Preconditions.checkNotNull(decryptedTally);
 
     for (PlaintextTally.Contest contest : decryptedTally.contests.values()) {
-      ElectionWithPlaceholders.ContestWithPlaceholders manifestContest = manifest.getContestById(contest.object_id()).orElse(null);
+      InternalManifest.ContestWithPlaceholders manifestContest = manifest.getContestById(contest.object_id()).orElse(null);
       if (manifestContest == null) {
         System.out.printf(" 11.C Tally Decryption contains contest (%s) not in manifest%n", contest.object_id());
         error = true;

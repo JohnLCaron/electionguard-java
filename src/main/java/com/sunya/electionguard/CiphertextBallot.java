@@ -36,7 +36,7 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
    * <p>
    *
    * @param object_id:               The object_id of this specific ballot
-   * @param style_id:                The `object_id` of the `BallotStyle` in the `Election` Manifest
+   * @param style_id:                The `object_id` of the `BallotStyle` in the `Manifest` Manifest
    * @param description_hash:        Hash of the election description
    * @param previous_tracking_hash:  Previous tracking hash (or seed hash) in the ballot chain
    * @param contests:                List of contests for this ballot
@@ -76,7 +76,7 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
   }
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  /** The object_id of the Election.BallotStyle. */
+  /** The object_id of the Manifest.BallotStyle. */
   public final String style_id;
   /** The ElectionDescription hash. */
   public final Group.ElementModQ description_hash;
@@ -217,7 +217,7 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
    * Calling this function expects that the object is in a well-formed encrypted state
    * with the `contests` populated with valid encrypted ballot selections,
    * and the ElementModQ `description_hash` also populated.
-   * Specifically, the seed hash in this context is the hash of the Election Manifest,
+   * Specifically, the seed hash in this context is the hash of the Manifest Manifest,
    * or whatever `ElementModQ` was used to populate the `description_hash` field.
    */
   public boolean is_valid_encryption(
@@ -518,7 +518,7 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    /** The Election.ContestDescription.crypto_hash(). */
+    /** The Manifest.ContestDescription.crypto_hash(). */
     public final Group.ElementModQ contest_hash;
     /** The collection of ballot selections. */
     public final ImmutableList<Selection> ballot_selections;

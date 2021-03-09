@@ -13,7 +13,7 @@ import static com.google.common.truth.Truth8.assertThat;
 public class TestBallotBox {
   private static final ElementModQ SEED_HASH = new Encrypt.EncryptionDevice("Location").get_hash();
 
-  ElectionWithPlaceholders metadata;
+  InternalManifest metadata;
   CiphertextElectionContext context;
   PlaintextBallot source;
   CiphertextBallot data;
@@ -23,7 +23,7 @@ public class TestBallotBox {
     ElGamal.KeyPair keypair = ElGamal.elgamal_keypair_from_secret(int_to_q_unchecked(BigInteger.TWO))
             .orElseThrow(RuntimeException::new);
 
-    Election election = ElectionFactory.get_fake_election();
+    Manifest election = ElectionFactory.get_fake_election();
     ElectionBuilder.DescriptionAndContext tuple = ElectionFactory.get_fake_ciphertext_election(election, keypair.public_key).orElseThrow();
     this.metadata = tuple.metadata;
     context = tuple.context;

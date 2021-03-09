@@ -31,8 +31,8 @@ public class TestDecryptionMediator extends TestProperties {
   KeyCeremonyMediator key_ceremony;
   List<Guardian> guardians = new ArrayList<>();
   Group.ElementModP joint_public_key;
-  Election election;
-  ElectionWithPlaceholders metadata;
+  Manifest election;
+  InternalManifest metadata;
 
   CiphertextElectionContext context;
   PlaintextBallot fake_cast_ballot;
@@ -62,7 +62,7 @@ public class TestDecryptionMediator extends TestProperties {
     this.joint_public_key = joinKeyO.get();
 
     // setup the election
-    Election election = ElectionFactory.get_fake_election();
+    Manifest election = ElectionFactory.get_fake_election();
     ElectionBuilder builder = new ElectionBuilder(NUMBER_OF_GUARDIANS, QUORUM, election);
     assertThat(builder.build()).isEmpty();  // Can't build without the public key
     builder.set_public_key(this.joint_public_key);
@@ -509,7 +509,7 @@ public class TestDecryptionMediator extends TestProperties {
 
   @Property(tries = 8, shrinking = ShrinkingMode.OFF)
   public void test_get_plaintext_tally_all_guardians_present(
-          @ForAll("election_description") Election description) {
+          @ForAll("election_description") Manifest description) {
 
     ElectionBuilder builder = new ElectionBuilder(NUMBER_OF_GUARDIANS, QUORUM, description);
     builder.set_public_key(this.joint_public_key).build().orElseThrow();
@@ -536,7 +536,7 @@ public class TestDecryptionMediator extends TestProperties {
   }
 
   CiphertextTallyBuilder generate_encrypted_tally(
-          ElectionWithPlaceholders metadata,
+          InternalManifest metadata,
           CiphertextElectionContext context,
           List<PlaintextBallot> ballots) {
 

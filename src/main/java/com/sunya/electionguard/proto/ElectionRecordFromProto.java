@@ -4,7 +4,7 @@ import com.google.protobuf.ByteString;
 import com.sunya.electionguard.CiphertextElectionContext;
 import com.sunya.electionguard.ElectionConstants;
 import com.sunya.electionguard.CiphertextTally;
-import com.sunya.electionguard.Election;
+import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.verifier.ElectionRecord;
 import com.sunya.electionguard.Encrypt;
@@ -36,7 +36,7 @@ public class ElectionRecordFromProto {
   public static ElectionRecord translateFromProto(ElectionRecordProto.ElectionRecord proto) {
     ElectionConstants constants = convertConstants(proto.getConstants());
     CiphertextElectionContext context = convertContext(proto.getContext());
-    Election description = ElectionDescriptionFromProto.translateFromProto(proto.getElection());
+    Manifest description = ManifestFromProto.translateFromProto(proto.getManifest());
     List<KeyCeremony.CoefficientValidationSet> guardianCoefficients =
             proto.getGuardianCoefficientsList().stream().map(ElectionRecordFromProto::convertValidationCoefficients).collect(Collectors.toList());
     List<Encrypt.EncryptionDevice> devices =

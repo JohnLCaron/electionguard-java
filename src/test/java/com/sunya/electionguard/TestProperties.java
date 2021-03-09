@@ -16,7 +16,7 @@ public abstract class TestProperties {
   }
 
   @Provide
-  Arbitrary<Election> election_description() {
+  Arbitrary<Manifest> election_description() {
     ElectionTestHelper helper = new ElectionTestHelper(random);
     return Arbitraries.of(helper.election_descriptions(
             1 + random.nextInt(2), 1 + random.nextInt(2)));
@@ -33,12 +33,12 @@ public abstract class TestProperties {
   }
 
   @Provide
-  Arbitrary<Election.SelectionDescription> selection_description() {
+  Arbitrary<Manifest.SelectionDescription> selection_description() {
     return Arbitraries.of(ElectionFactory.get_selection_description_well_formed().selection_description);
   }
 
   @Provide
-  Arbitrary<ElectionWithPlaceholders.ContestWithPlaceholders> contest_description_well_formed() {
+  Arbitrary<InternalManifest.ContestWithPlaceholders> contest_description_well_formed() {
     return Arbitraries.of(ElectionFactory.get_contest_description_well_formed());
   }
 

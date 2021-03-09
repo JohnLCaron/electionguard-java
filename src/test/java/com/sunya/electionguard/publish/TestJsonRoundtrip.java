@@ -22,11 +22,11 @@ public class TestJsonRoundtrip {
     String outputFile = file.getAbsolutePath();
 
     // read json
-    Election description = ElectionFactory.get_hamilton_election_from_file();
+    Manifest description = ElectionFactory.get_hamilton_election_from_file();
     // write json
     ConvertToJson.writeElection(description, file.toPath());
     // read it back
-    Election roundtrip = ConvertFromJson.readElection(outputFile);
+    Manifest roundtrip = ConvertFromJson.readElection(outputFile);
     assertThat(roundtrip).isEqualTo(description);
   }
 

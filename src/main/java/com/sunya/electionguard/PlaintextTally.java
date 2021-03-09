@@ -65,7 +65,7 @@ public class PlaintextTally {
 
   /**
    * The plaintext representation of the counts of one contest in the election.
-   * The object_id is the same as the Election.ContestDescription.object_id or PlaintextBallotContest object_id.
+   * The object_id is the same as the Manifest.ContestDescription.object_id or PlaintextBallotContest object_id.
    */
   @AutoValue
   public static abstract class Contest implements ElectionObjectBaseIF {

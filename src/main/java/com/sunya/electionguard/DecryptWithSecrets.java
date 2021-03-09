@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.sunya.electionguard.Group.*;
-import static com.sunya.electionguard.ElectionWithPlaceholders.ContestWithPlaceholders;
+import static com.sunya.electionguard.InternalManifest.ContestWithPlaceholders;
 
 
 /** Static methods for decryption when you know the secret keys. */
@@ -26,7 +26,7 @@ class DecryptWithSecrets {
    */
   static Optional<PlaintextBallot.Selection> decrypt_selection_with_secret(
           CiphertextBallot.Selection selection,
-          Election.SelectionDescription description,
+          Manifest.SelectionDescription description,
           ElementModP public_key,
           ElementModQ secret_key,
           ElementModQ crypto_extended_base_hash,
@@ -62,7 +62,7 @@ class DecryptWithSecrets {
    */
   static Optional<PlaintextBallot.Selection> decrypt_selection_with_nonce(
           CiphertextBallot.Selection selection,
-          Election.SelectionDescription description,
+          Manifest.SelectionDescription description,
           ElementModP public_key,
           ElementModQ crypto_extended_base_hash,
           Optional<ElementModQ> nonce_seed,
@@ -134,7 +134,7 @@ class DecryptWithSecrets {
     }
     List<PlaintextBallot.Selection> plaintext_selections = new ArrayList<>();
     for (CiphertextBallot.Selection selection : contest.ballot_selections) {
-      Election.SelectionDescription selection_description =
+      Manifest.SelectionDescription selection_description =
               description.getSelectionById(selection.object_id).orElseThrow(IllegalStateException::new);
       Optional<PlaintextBallot.Selection> plaintext_selection = decrypt_selection_with_secret(
               selection,
@@ -211,7 +211,7 @@ class DecryptWithSecrets {
 
     List<PlaintextBallot.Selection> plaintext_selections = new ArrayList<>();
     for (CiphertextBallot.Selection selection : contest.ballot_selections) {
-      Election.SelectionDescription selection_description =
+      Manifest.SelectionDescription selection_description =
               description.getSelectionById(selection.object_id).orElseThrow(IllegalStateException::new);
       Optional<PlaintextBallot.Selection> plaintext_selection = decrypt_selection_with_nonce(
               selection,
@@ -248,7 +248,7 @@ class DecryptWithSecrets {
    */
   static Optional<PlaintextBallot> decrypt_ballot_with_secret(
           CiphertextBallot ballot,
-          ElectionWithPlaceholders metadata,
+          InternalManifest metadata,
           ElementModQ crypto_extended_base_hash,
           ElementModP public_key,
           ElementModQ secret_key,
@@ -300,7 +300,7 @@ class DecryptWithSecrets {
    */
   static Optional<PlaintextBallot> decrypt_ballot_with_nonce(
           CiphertextBallot ballot,
-          ElectionWithPlaceholders metadata,
+          InternalManifest metadata,
           ElementModQ crypto_extended_base_hash,
           ElementModP public_key,
           Optional<ElementModQ> nonce,

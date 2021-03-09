@@ -11,7 +11,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.sunya.electionguard.Group.*;
-import static com.sunya.electionguard.ElectionWithPlaceholders.ContestWithPlaceholders;
+import static com.sunya.electionguard.InternalManifest.ContestWithPlaceholders;
 
 public class Encrypt {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
@@ -59,11 +59,11 @@ public class Encrypt {
    * See discussion on Issue #272 about "ballot chaining".
    */
   public static class EncryptionMediator {
-    private final ElectionWithPlaceholders metadata;
+    private final InternalManifest metadata;
     private final CiphertextElectionContext context;
     private ElementModQ previous_tracking_hash;
 
-    public EncryptionMediator(ElectionWithPlaceholders metadata, CiphertextElectionContext context,
+    public EncryptionMediator(InternalManifest metadata, CiphertextElectionContext context,
                               EncryptionDevice encryption_device) {
       this.metadata = metadata;
       this.context = context;
@@ -99,7 +99,7 @@ public class Encrypt {
    * @param is_affirmative: Mark this selection as `yes`
    */
   // selection_from( description: SelectionDescription, is_placeholder: bool = False, is_affirmative: bool = False,
-  static PlaintextBallot.Selection selection_from(Election.SelectionDescription description, boolean is_placeholder, boolean is_affirmative) {
+  static PlaintextBallot.Selection selection_from(Manifest.SelectionDescription description, boolean is_placeholder, boolean is_affirmative) {
     return new PlaintextBallot.Selection(description.object_id, is_affirmative ? 1 : 0, is_placeholder, null);
   }
 
@@ -109,10 +109,10 @@ public class Encrypt {
    *
    * @param description: The `ContestDescription` used to derive the well-formed `BallotContest`
    */
-  static PlaintextBallot.Contest contest_from(Election.ContestDescription description) {
+  static PlaintextBallot.Contest contest_from(Manifest.ContestDescription description) {
     List<PlaintextBallot.Selection> selections = new ArrayList<>();
 
-    for (Election.SelectionDescription selection_description : description.ballot_selections) {
+    for (Manifest.SelectionDescription selection_description : description.ballot_selections) {
       selections.add(selection_from(selection_description, false, false));
     }
     return new PlaintextBallot.Contest(description.object_id, selections);
@@ -132,7 +132,7 @@ public class Encrypt {
    */
   static Optional<CiphertextBallot.Selection> encrypt_selection(
           PlaintextBallot.Selection selection,
-          Election.SelectionDescription selection_description,
+          Manifest.SelectionDescription selection_description,
           ElementModP elgamal_public_key,
           ElementModQ crypto_extended_base_hash,
           ElementModQ nonce_seed,
@@ -197,7 +197,7 @@ public class Encrypt {
   }
 
   /**
-   * Encrypt a PlaintextBallotContest in the context of a specific Election.ContestDescription.
+   * Encrypt a PlaintextBallotContest in the context of a specific Manifest.ContestDescription.
    * <p>
    * This method accepts a contest representation that only includes `True` selections.
    * It will fill missing selections for a contest with `False` values, and generate `placeholder`
@@ -248,7 +248,7 @@ public class Encrypt {
 
     // LOOK only iterate on selections that match the manifest. If there are selections contests on the ballot,
     //   they are silently ignored.
-    for (Election.SelectionDescription description : contest_description.ballot_selections) {
+    for (Manifest.SelectionDescription description : contest_description.ballot_selections) {
         Optional<CiphertextBallot.Selection> encrypted_selection;
 
         // Find the actual selection matching the contest description.
@@ -289,7 +289,7 @@ public class Encrypt {
     // we loop through each placeholder value and determine if it should be filled in
 
     // Add a placeholder selection for each possible seat in the contest
-    for (Election.SelectionDescription placeholder : contest_description.placeholder_selections) {
+    for (Manifest.SelectionDescription placeholder : contest_description.placeholder_selections) {
       // for undervotes, select the placeholder value as true for each available seat
       // note this pattern is used since DisjunctiveChaumPedersen expects a 0 or 1
       // so each seat can only have a maximum value of 1 in the current implementation
@@ -349,7 +349,7 @@ public class Encrypt {
   //  by traversing the collection of ballots encrypted by a specific device
 
   /**
-   * Encrypt a PlaintextBallot in the context of a specific ElectionWithPlaceholders.
+   * Encrypt a PlaintextBallot in the context of a specific InternalManifest.
    * <p>
    * This method accepts a ballot representation that only includes `True` selections.
    * It will fill missing selections for a contest with `False` values, and generate `placeholder`
@@ -359,7 +359,7 @@ public class Encrypt {
    * It will fill missing contests with `False` selections and generate `placeholder` selections that are marked `True`.
    *
    * @param ballot:               the ballot in the valid input form
-   * @param metadata:             the ElectionWithPlaceholders which defines this ballot's structure
+   * @param metadata:             the InternalManifest which defines this ballot's structure
    * @param context:              all the cryptographic context for the election
    * @param previous_tracking_hash Hash from previous ballot or starting hash from device. python: seed_hash
    * @param nonce:                an optional nonce used to encrypt this contest
@@ -368,14 +368,14 @@ public class Encrypt {
    */
   public static Optional<CiphertextBallot> encrypt_ballot(
           PlaintextBallot ballot,
-          ElectionWithPlaceholders metadata,
+          InternalManifest metadata,
           CiphertextElectionContext context,
           ElementModQ previous_tracking_hash,
           Optional<ElementModQ> nonce,
           boolean should_verify_proofs)  {
 
     // Determine the relevant range of contests for this ballot style
-    Optional<Election.BallotStyle> style = metadata.get_ballot_style(ballot.style_id);
+    Optional<Manifest.BallotStyle> style = metadata.get_ballot_style(ballot.style_id);
 
     // Validate Input
     if (style.isEmpty()) {
