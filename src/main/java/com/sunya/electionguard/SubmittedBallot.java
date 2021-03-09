@@ -23,7 +23,7 @@ public class SubmittedBallot extends CiphertextBallot {
    * <p>
    *
    * @param object_id:               the object_id of this specific ballot
-   * @param ballot_style:            The `object_id` of the `BallotStyle` in the `Election` Manifest
+   * @param style_id:            The `object_id` of the `BallotStyle` in the `Election` Manifest
    * @param description_hash:        Hash of the election description
    * @param previous_tracking_hashO: Previous tracking hash or seed hash
    * @param contests:                List of contests for this ballot
@@ -33,7 +33,7 @@ public class SubmittedBallot extends CiphertextBallot {
    */
   static SubmittedBallot create(
           String object_id,
-          String ballot_style,
+          String style_id,
           Group.ElementModQ description_hash,
           Optional<Group.ElementModQ> previous_tracking_hashO,
           List<Contest> contests,
@@ -56,7 +56,7 @@ public class SubmittedBallot extends CiphertextBallot {
 
     return new SubmittedBallot(
             object_id,
-            ballot_style,
+            style_id,
             description_hash,
             previous_tracking_hash,
             new_contests,
@@ -72,13 +72,13 @@ public class SubmittedBallot extends CiphertextBallot {
   public final BallotBox.State state;
 
   public SubmittedBallot(CiphertextBallot ballot, BallotBox.State state) {
-    super(ballot.object_id, ballot.ballot_style, ballot.description_hash, ballot.previous_tracking_hash, ballot.contests,
+    super(ballot.object_id, ballot.style_id, ballot.description_hash, ballot.previous_tracking_hash, ballot.contests,
             ballot.tracking_hash, ballot.timestamp, ballot.crypto_hash, ballot.nonce);
     this.state = Preconditions.checkNotNull(state);
   }
 
   public SubmittedBallot(String object_id,
-                         String ballot_style,
+                         String style_id,
                          Group.ElementModQ description_hash,
                          Group.ElementModQ previous_tracking_hash,
                          List<Contest> contests,
@@ -87,7 +87,7 @@ public class SubmittedBallot extends CiphertextBallot {
                          Group.ElementModQ crypto_hash,
                          Optional<Group.ElementModQ> nonce,
                          BallotBox.State state) {
-    super(object_id, ballot_style, description_hash, previous_tracking_hash, contests, tracking_hash, timestamp, crypto_hash, nonce);
+    super(object_id, style_id, description_hash, previous_tracking_hash, contests, tracking_hash, timestamp, crypto_hash, nonce);
     this.state = state;
   }
 
@@ -110,7 +110,7 @@ public class SubmittedBallot extends CiphertextBallot {
     return "SubmittedBallot{" +
             "\n object_id    ='" + object_id + '\'' +
             "\n state        =" + state +
-            "\n ballot_style ='" + ballot_style + '\'' +
+            "\n style_id ='" + style_id + '\'' +
             "\n description_hash=" + description_hash +
             "\n previous_tracking_hash=" + previous_tracking_hash +
             "\n tracking_hash=" + tracking_hash +

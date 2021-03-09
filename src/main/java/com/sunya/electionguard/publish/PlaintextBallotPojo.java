@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 /** Conversion between PlaintextBallot and Json, using python's object model. */
 public class PlaintextBallotPojo {
   public String object_id;
-  public String ballot_style;
+  public String style_id;
   public List<PlaintextBallotContest> contests;
 
   public static class PlaintextBallotContest {
@@ -73,7 +73,7 @@ public class PlaintextBallotPojo {
   private static PlaintextBallot convertPlaintextBallot(PlaintextBallotPojo pojo) {
     return new PlaintextBallot(
             pojo.object_id,
-            pojo.ballot_style,
+            pojo.style_id,
             convertList(pojo.contests, PlaintextBallotPojo::convertPlaintextBallotContest));
   }
 
@@ -106,7 +106,7 @@ public class PlaintextBallotPojo {
   private static PlaintextBallotPojo convertPlaintextBallot(PlaintextBallot src) {
      PlaintextBallotPojo pojo = new PlaintextBallotPojo();
     pojo.object_id = src.object_id;
-    pojo.ballot_style = src.ballot_style;
+    pojo.style_id = src.style_id;
     pojo.contests = convertList(src.contests, PlaintextBallotPojo::convertPlaintextBallotContest);
     return pojo;
   }

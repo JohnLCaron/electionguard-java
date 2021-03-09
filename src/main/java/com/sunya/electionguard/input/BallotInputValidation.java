@@ -29,10 +29,10 @@ public class BallotInputValidation {
   /** Determine if a ballot is valid and well-formed for the given election. */
   public boolean validateBallot(PlaintextBallot ballot, Formatter problems) {
     BallotMessenger ballotMesses = new BallotMessenger(ballot.object_id);
-    Election.BallotStyle ballotStyle = styles.get(ballot.ballot_style);
+    Election.BallotStyle ballotStyle = styles.get(ballot.style_id);
     // Referential integrity of ballot's BallotStyle id
     if (ballotStyle == null) {
-      String msg = String.format("Ballot Style '%s' does not exist in election", ballot.ballot_style);
+      String msg = String.format("Ballot Style '%s' does not exist in election", ballot.style_id);
       ballotMesses.add(msg);
       logger.atWarning().log(msg);
     }

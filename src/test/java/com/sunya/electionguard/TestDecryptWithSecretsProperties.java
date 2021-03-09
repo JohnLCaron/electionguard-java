@@ -400,7 +400,7 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
     assertThat(data.object_id).isEqualTo(result_from_nonce.get().object_id);
     assertThat(data.object_id).isEqualTo(result_from_nonce_seed.get().object_id);
 
-    for (ContestWithPlaceholders description : metadata.get_contests_for_style(data.ballot_style)) {
+    for (ContestWithPlaceholders description : metadata.get_contests_for_style(data.style_id)) {
       int expected_entries = description.ballot_selections.size() + description.number_elected;
 
       PlaintextBallot.Contest key_contest = result_from_key.get().contests.stream()
@@ -496,7 +496,7 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
 
     // munge
     CiphertextBallot bad_subject = new CiphertextBallot(
-            subject.object_id, subject.ballot_style, subject.description_hash,
+            subject.object_id, subject.style_id, subject.description_hash,
             subject.previous_tracking_hash, subject.contests,
             subject.tracking_hash, subject.timestamp, subject.crypto_hash,
             Optional.empty());

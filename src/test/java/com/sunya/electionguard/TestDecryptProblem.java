@@ -179,7 +179,7 @@ public class TestDecryptProblem {
     System.out.printf("%n2. Ready to encrypt at location: %s%n", this.device.location);
 
     // Load some Ballots
-    String ballotFilename = "src/test/data/electionRecordJson/spoiled_ballots/ballot_25a7111b-4334-425a-87c1-f7a49f42b3a2.json";
+    String ballotFilename = "src/test/data/electionRecordJson/spoiled_ballots/ballot_03a29d15-667c-4ac8-afd7-549f19b8e4eb.json";
     this.originalPlaintextBallots = ImmutableList.of(BallotFactory.get_ballot_from_file(ballotFilename));
     System.out.printf("Loaded ballots: %d%n", this.originalPlaintextBallots.size());
     assertThat(this.originalPlaintextBallots).isNotEmpty();

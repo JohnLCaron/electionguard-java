@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 /** Conversion between SubmittedBallot and Json, using python's object model. */
 public class SubmittedBallotPojo {
   public String object_id;
-  public String ballot_style;
+  public String style_id;
   public ElementModQ description_hash;
   public ElementModQ tracking_hash;
   public ElementModQ previous_tracking_hash;
@@ -93,14 +93,10 @@ public class SubmittedBallotPojo {
     return translateBallot(pojo);
   }
 
-  // String object_id, String ballot_style, ElementModQ description_hash,
-  //                            ElementModQ previous_tracking_hash, List<CiphertextBallotContest> contests,
-  //                            Optional<ElementModQ> tracking_hash, long timestamp, ElementModQ crypto_hash,
-  //                            Optional<ElementModQ> nonce
   private static SubmittedBallot translateBallot(SubmittedBallotPojo pojo) {
     return new SubmittedBallot(
             pojo.object_id,
-            pojo.ballot_style,
+            pojo.style_id,
             pojo.description_hash,
             pojo.previous_tracking_hash,
             convertList(pojo.contests, SubmittedBallotPojo::translateContest),
@@ -187,7 +183,7 @@ public class SubmittedBallotPojo {
   private static SubmittedBallotPojo convertAcceptedBallot(SubmittedBallot org) {
     SubmittedBallotPojo pojo = new SubmittedBallotPojo();
     pojo.object_id = org.object_id;
-    pojo.ballot_style = org.ballot_style;
+    pojo.style_id = org.style_id;
     pojo.description_hash = org.description_hash;
     pojo.previous_tracking_hash = org.previous_tracking_hash;
     pojo.contests = convertList(org.contests, SubmittedBallotPojo::convertContest);

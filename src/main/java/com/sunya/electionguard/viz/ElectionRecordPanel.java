@@ -144,18 +144,6 @@ class ElectionRecordPanel extends JPanel {
     return true;
   }
 
-  //   public final String election_scope_id;
-  //  public final ElectionType type;
-  //  public final OffsetDateTime start_date;
-  //  public final OffsetDateTime end_date;
-  //  public final ImmutableList<GeopoliticalUnit> geopolitical_units;
-  //  public final ImmutableList<Party> parties;
-  //  public final ImmutableList<Candidate> candidates;
-  //  public final ImmutableList<ContestDescription> contests;
-  //  public final ImmutableList<BallotStyle> ballot_styles;
-  //  public final Optional<InternationalizedText> name;
-  //  public final Optional<ContactInformation> contact_information;
-  //  public final Group.ElementModQ crypto_hash;
   void showInfo(Formatter f) {
     f.format("Election %s%n", this.electionRecordDir);
     if (this.record != null) {
