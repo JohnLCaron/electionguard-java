@@ -129,7 +129,6 @@ class DecryptWithShares {
       plaintext_contests.put(ballotContest.object_id, plaintext_contest.get());
     }
 
-    // String object_id, String ballot_style, List<PlaintextBallotContest> contests
     return Optional.of(new PlaintextTally(ballot.object_id, plaintext_contests, null, null));
   }
 

@@ -35,8 +35,8 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
    * Makes a `CiphertextBallot`, initially in the state where it's neither been cast nor spoiled.
    * <p>
    *
-   * @param object_id:               the object_id of this specific ballot
-   * @param ballot_style:            The `object_id` of the `BallotStyle` in the `Election` Manifest
+   * @param object_id:               The object_id of this specific ballot
+   * @param style_id:                The `object_id` of the `BallotStyle` in the `Election` Manifest
    * @param description_hash:        Hash of the election description
    * @param previous_tracking_hash:  Previous tracking hash (or seed hash) in the ballot chain
    * @param contests:                List of contests for this ballot
@@ -45,7 +45,7 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
    */
   public static CiphertextBallot create(
           String object_id,
-          String ballot_style,
+          String style_id,
           Group.ElementModQ description_hash,
           Group.ElementModQ previous_tracking_hash,
           List<Contest> contests,
@@ -65,7 +65,7 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
 
     return new CiphertextBallot(
             object_id,
-            ballot_style,
+            style_id,
             description_hash,
             previous_tracking_hash,
             contests,
@@ -77,7 +77,7 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////
   /** The object_id of the Election.BallotStyle. */
-  public final String ballot_style;
+  public final String style_id;
   /** The ElectionDescription hash. */
   public final Group.ElementModQ description_hash;
   /** The previous Tracker hash in the ballot chain. */
@@ -93,13 +93,13 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
   /** Optional nonce used in hashed_ballot_nonce(). */
   public final Optional<Group.ElementModQ> nonce;
 
-  public CiphertextBallot(String object_id, String ballot_style, Group.ElementModQ description_hash,
+  public CiphertextBallot(String object_id, String style_id, Group.ElementModQ description_hash,
                           Group.ElementModQ previous_tracking_hash, List<Contest> contests,
                           Group.ElementModQ tracking_hash, long timestamp, Group.ElementModQ crypto_hash,
                           Optional<Group.ElementModQ> nonce) {
     super(object_id);
-    Preconditions.checkArgument(!Strings.isNullOrEmpty(ballot_style));
-    this.ballot_style = ballot_style;
+    Preconditions.checkArgument(!Strings.isNullOrEmpty(style_id));
+    this.style_id = style_id;
     this.description_hash = Preconditions.checkNotNull(description_hash);
     this.previous_tracking_hash = Preconditions.checkNotNull(previous_tracking_hash);
     this.contests = ImmutableList.copyOf(Preconditions.checkNotNull(contests));
@@ -153,7 +153,7 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
   SubmittedBallot acceptWithState(BallotBox.State state) {
     return SubmittedBallot.create(
             this.object_id,
-            this.ballot_style,
+            this.style_id,
             this.description_hash,
             Optional.of(this.previous_tracking_hash),
             this.contests,
@@ -250,7 +250,7 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
   @Override
   public String toString() {
     return "CiphertextBallot{" +
-            "ballot_style='" + ballot_style + '\'' +
+            "style_id='" + style_id + '\'' +
             ", description_hash=" + description_hash +
             ", previous_tracking_hash=" + previous_tracking_hash +
             ", contests=" + contests +
@@ -269,7 +269,7 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
     if (!super.equals(o)) return false;
     CiphertextBallot that = (CiphertextBallot) o;
     return timestamp == that.timestamp &&
-            ballot_style.equals(that.ballot_style) &&
+            style_id.equals(that.style_id) &&
             description_hash.equals(that.description_hash) &&
             previous_tracking_hash.equals(that.previous_tracking_hash) &&
             contests.equals(that.contests) &&
@@ -280,7 +280,7 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
 
   @Override
   public int hashCode() {
-    return Objects.hash(super.hashCode(), ballot_style, description_hash, previous_tracking_hash, contests, tracking_hash, timestamp, crypto_hash, nonce);
+    return Objects.hash(super.hashCode(), style_id, description_hash, previous_tracking_hash, contests, tracking_hash, timestamp, crypto_hash, nonce);
   }
 
   /**

@@ -21,14 +21,14 @@ import java.util.Optional;
 public class PlaintextBallot extends ElectionObjectBase {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
   /** The object_id of the Election.BallotStyle. */
-  public final String ballot_style;
+  public final String style_id;
   /** The list of contests for this ballot. */
   public final ImmutableList<Contest> contests;
 
-  public PlaintextBallot(String object_id, String ballot_style, List<Contest> contests) {
+  public PlaintextBallot(String object_id, String style_id, List<Contest> contests) {
     super(object_id);
-    Preconditions.checkArgument(!Strings.isNullOrEmpty(ballot_style));
-    this.ballot_style = ballot_style;
+    Preconditions.checkArgument(!Strings.isNullOrEmpty(style_id));
+    this.style_id = style_id;
     this.contests = ImmutableList.copyOf(contests);
   }
 
@@ -38,9 +38,9 @@ public class PlaintextBallot extends ElectionObjectBase {
    * @param expected_ballot_style_id: Expected ballot style id
    */
   public boolean is_valid(String expected_ballot_style_id) {
-    if (!this.ballot_style.equals(expected_ballot_style_id)) {
-      logger.atWarning().log("invalid ballot_style: for: %s expected(%s) actual(%s)",
-              this.object_id, expected_ballot_style_id, this.ballot_style);
+    if (!this.style_id.equals(expected_ballot_style_id)) {
+      logger.atWarning().log("invalid ballot_style_id: for: %s expected(%s) actual(%s)",
+              this.object_id, expected_ballot_style_id, this.style_id);
       return false;
     }
     return true;
@@ -50,7 +50,7 @@ public class PlaintextBallot extends ElectionObjectBase {
   public String toString() {
     return "PlaintextBallot{" +
             "object_id='" + object_id + '\'' +
-            ", ballot_style='" + ballot_style + '\'' +
+            ", style_id='" + style_id + '\'' +
             '}';
   }
 
@@ -60,13 +60,13 @@ public class PlaintextBallot extends ElectionObjectBase {
     if (o == null || getClass() != o.getClass()) return false;
     if (!super.equals(o)) return false;
     PlaintextBallot that = (PlaintextBallot) o;
-    return ballot_style.equals(that.ballot_style) &&
+    return style_id.equals(that.style_id) &&
             contests.equals(that.contests);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(super.hashCode(), ballot_style, contests);
+    return Objects.hash(super.hashCode(), style_id, contests);
   }
 
   /**
@@ -278,6 +278,6 @@ public class PlaintextBallot extends ElectionObjectBase {
       }
       contests.add(new Contest(ccontest.object_id, selections));
     }
-    return new PlaintextBallot(cballot.object_id, cballot.ballot_style, contests);
+    return new PlaintextBallot(cballot.object_id, cballot.style_id, contests);
   }
 }

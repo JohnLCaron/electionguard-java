@@ -104,14 +104,14 @@ public class ElectionWithPlaceholders {
     return Optional.ofNullable(contests.get(contest_id));
   }
 
-  /** Find the ballot style for a specified ballot_style_id */
-  public Optional<Election.BallotStyle> get_ballot_style(String ballot_style_id) {
-    return election.ballot_styles.stream().filter(bs -> bs.object_id.equals(ballot_style_id)).findFirst();
+  /** Find the ballot style for a specified style_id */
+  public Optional<Election.BallotStyle> get_ballot_style(String style_id) {
+    return election.ballot_styles.stream().filter(bs -> bs.object_id.equals(style_id)).findFirst();
   }
 
   /** Get contests that have the given ballot style. */
-  public List<ContestWithPlaceholders> get_contests_for_style(String ballot_style_id) {
-    Optional<Election.BallotStyle> style = this.get_ballot_style(ballot_style_id);
+  public List<ContestWithPlaceholders> get_contests_for_style(String style_id) {
+    Optional<Election.BallotStyle> style = this.get_ballot_style(style_id);
     if (style.isEmpty() || style.get().geopolitical_unit_ids.isEmpty()) {
       return new ArrayList<>();
     }

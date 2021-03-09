@@ -12,7 +12,7 @@ public class PlaintextBallotFromProto {
   public static PlaintextBallot translateFromProto(PlaintextBallotProto.PlaintextBallot ballot) {
     return new PlaintextBallot(
             ballot.getObjectId(),
-            ballot.getBallotStyle(),
+            ballot.getStyleId(),
             convertList(ballot.getContestsList(), PlaintextBallotFromProto::convertContest));
   }
 

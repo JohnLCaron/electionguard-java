@@ -71,7 +71,7 @@ class BallotValidations {
   static boolean ballot_is_valid_for_style(CiphertextBallot ballot, ElectionWithPlaceholders manifest) {
     Map<String, CiphertextBallot.Contest> contestMap = ballot.contests.stream().collect(Collectors.toMap(c -> c.object_id, c -> c));
 
-    List<ContestWithPlaceholders> contests = manifest.get_contests_for_style(ballot.ballot_style);
+    List<ContestWithPlaceholders> contests = manifest.get_contests_for_style(ballot.style_id);
     for (ContestWithPlaceholders contestManifest : contests) {
       CiphertextBallot.Contest use_contest = contestMap.get(contestManifest.object_id);
 

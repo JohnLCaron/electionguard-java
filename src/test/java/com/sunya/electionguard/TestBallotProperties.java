@@ -33,7 +33,7 @@ public class TestBallotProperties extends TestProperties {
     List<PlaintextBallot> ballots = factory.get_simple_ballots_from_file();
     for (PlaintextBallot subject : ballots) {
       assertThat(subject.object_id).isNotNull();
-      assertThat(subject.ballot_style).isAnyOf("jefferson-county-ballot-style", "harrison-township-ballot-style");
+      assertThat(subject.style_id).isAnyOf("jefferson-county-ballot-style", "harrison-township-ballot-style");
 
       for (PlaintextBallot.Contest contest : subject.contests) {
         assertThat(contest.contest_id).isAnyOf("justice-supreme-court", "referendum-pineapple");

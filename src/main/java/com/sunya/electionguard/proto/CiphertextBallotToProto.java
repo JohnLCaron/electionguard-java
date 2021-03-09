@@ -27,7 +27,7 @@ public class CiphertextBallotToProto {
   static CiphertextBallotProto.CiphertextBallot convertCiphertextBallot(CiphertextBallot ballot) {
     CiphertextBallotProto.CiphertextBallot.Builder builder = CiphertextBallotProto.CiphertextBallot.newBuilder();
     builder.setObjectId(ballot.object_id);
-    builder.setBallotStyleId(ballot.ballot_style);
+    builder.setBallotStyleId(ballot.style_id);
     builder.setDescriptionHash(convertElementModQ(ballot.description_hash));
     builder.setTrackingHash(convertElementModQ(ballot.tracking_hash));
     builder.setPreviousTrackingHash(convertElementModQ(ballot.previous_tracking_hash));

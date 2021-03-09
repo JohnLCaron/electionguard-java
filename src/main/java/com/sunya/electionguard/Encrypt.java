@@ -375,11 +375,11 @@ public class Encrypt {
           boolean should_verify_proofs)  {
 
     // Determine the relevant range of contests for this ballot style
-    Optional<Election.BallotStyle> style = metadata.get_ballot_style(ballot.ballot_style);
+    Optional<Election.BallotStyle> style = metadata.get_ballot_style(ballot.style_id);
 
     // Validate Input
     if (style.isEmpty()) {
-      logger.atWarning().log("Ballot Style '%s' does not exist in election", ballot.ballot_style);
+      logger.atWarning().log("Ballot Style '%s' does not exist in election", ballot.style_id);
       return Optional.empty();
     }
 
@@ -400,7 +400,7 @@ public class Encrypt {
     Map<String, PlaintextBallot.Contest> plaintext_contests = ballot.contests.stream().collect(Collectors.toMap(c -> c.contest_id, c -> c));
     // LOOK only iterate on contests that match the manifest. If there are miscoded contests on the ballot,
     //   they are silently ignored.
-    for (ContestWithPlaceholders contestDescription : metadata.get_contests_for_style(ballot.ballot_style)) {
+    for (ContestWithPlaceholders contestDescription : metadata.get_contests_for_style(ballot.style_id)) {
       PlaintextBallot.Contest use_contest = plaintext_contests.get(contestDescription.object_id);
       // no selections provided for the contest, so create a placeholder contest
       // LOOK says "create a placeholder contest" but selections are not placeholders, but have all votes = 0.
@@ -424,7 +424,7 @@ public class Encrypt {
     // Create the return object
     CiphertextBallot encrypted_ballot = CiphertextBallot.create(
           ballot.object_id,
-          ballot.ballot_style,
+          ballot.style_id,
           metadata.election.crypto_hash,
           previous_tracking_hash, // python uses Optional
           encrypted_contests,

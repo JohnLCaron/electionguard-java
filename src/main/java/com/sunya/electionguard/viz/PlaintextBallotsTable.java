@@ -16,7 +16,6 @@ import ucar.util.prefs.PreferencesExt;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.IOException;
 import java.util.ArrayList;
 
 public class PlaintextBallotsTable extends JPanel {
@@ -132,7 +131,7 @@ public class PlaintextBallotsTable extends JPanel {
     }
 
     public String getStyle() {
-      return ballot.ballot_style;
+      return ballot.style_id;
     }
   }
 

@@ -146,7 +146,7 @@ public class AcceptedBallotsTable extends JPanel {
     }
 
     public String getStyle() {
-      return ballot.ballot_style;
+      return ballot.style_id;
     }
 
     public String getTimeStamp() {

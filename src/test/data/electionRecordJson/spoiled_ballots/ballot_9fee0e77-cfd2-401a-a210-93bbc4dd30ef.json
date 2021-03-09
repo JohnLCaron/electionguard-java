@@ -1,6 +1,6 @@
 {
-  "object_id": "25a7111b-4334-425a-87c1-f7a49f42b3a2",
-  "ballot_style": "jefferson-county-ballot-style",
+  "object_id": "9fee0e77-cfd2-401a-a210-93bbc4dd30ef",
+  "style_id": "harrison-township-ballot-style",
   "contests": [
     {
       "object_id": "justice-supreme-court",
@@ -13,7 +13,7 @@
         },
         {
           "object_id": "benjamin-franklin-selection",
-          "vote": 1,
+          "vote": 0,
           "is_placeholder_selection": false,
           "extra_data": null
         },
@@ -25,7 +25,24 @@
         },
         {
           "object_id": "write-in-selection",
+          "vote": 1,
+          "is_placeholder_selection": false,
+          "extra_data": null
+        }
+      ]
+    },
+    {
+      "object_id": "referendum-pineapple",
+      "ballot_selections": [
+        {
+          "object_id": "referendum-pineapple-affirmative-selection",
           "vote": 0,
+          "is_placeholder_selection": false,
+          "extra_data": null
+        },
+        {
+          "object_id": "referendum-pineapple-negative-selection",
+          "vote": 1,
           "is_placeholder_selection": false,
           "extra_data": null
         }
