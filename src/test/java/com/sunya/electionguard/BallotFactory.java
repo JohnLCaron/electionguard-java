@@ -65,7 +65,7 @@ public class BallotFactory {
           boolean with_trues) { // default true
 
     Preconditions.checkNotNull(ballot_id);
-    String ballotStyleId = metadata.election.ballot_styles.get(0).object_id;
+    String ballotStyleId = metadata.manifest.ballot_styles.get(0).object_id;
     List<PlaintextBallot.Contest> contests = new ArrayList<>();
     for (ContestWithPlaceholders contest : metadata.get_contests_for_style(ballotStyleId)) {
       contests.add(this.get_random_contest_from(contest, true, with_trues));

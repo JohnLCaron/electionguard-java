@@ -470,11 +470,11 @@ public class ElectionTestHelper {
 
   /** Generates an arbitrary `PlaintextBallot` with the choices made randomly. */
   PlaintextBallot plaintext_voted_ballot(InternalManifest metadata) {
-    int num_ballot_styles = metadata.election.ballot_styles.size();
+    int num_ballot_styles = metadata.manifest.ballot_styles.size();
     assertWithMessage("invalid election with no ballot styles").that(num_ballot_styles > 0).isTrue();
 
           // pick a ballot style at random
-    Manifest.BallotStyle ballot_style = drawList(metadata.election.ballot_styles);
+    Manifest.BallotStyle ballot_style = drawList(metadata.manifest.ballot_styles);
 
     List<ContestWithPlaceholders> contests = metadata.get_contests_for_style(ballot_style.object_id);
     assertWithMessage("invalid ballot style with no contests in it").that(contests.size() > 0).isTrue();

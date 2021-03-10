@@ -30,7 +30,7 @@ public class TestAttackTallyDecryptionVerifyier {
     String topdir = TestParameterVerifier.topdirProto;
     Consumer consumer = new Consumer(topdir);
     ElectionRecord electionRecord = consumer.readElectionRecordProto();
-    Manifest fakeElection = ElectionFactory.get_fake_election();
+    Manifest fakeElection = ElectionFactory.get_fake_manifest();
 
     TallyDecryptionVerifier tdv = new TallyDecryptionVerifier(fakeElection, electionRecord.decryptedTally);
     boolean tdvOk = tdv.verify_tally_decryption();

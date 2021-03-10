@@ -184,7 +184,7 @@ public class EncryptBallots {
 
     // Configure the Encryption Device
     InternalManifest metadata = new InternalManifest(electionRecord.election);
-    this.device = new Encrypt.EncryptionDevice(deviceName);
+    this.device = Encrypt.EncryptionDevice.createForTest(deviceName);
     this.encryptor = new Encrypt.EncryptionMediator(metadata, electionRecord.context, this.device);
 
     this.ballotBox = new BallotBox(electionRecord.election, electionRecord.context);

@@ -357,11 +357,11 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
 
     Manifest election = ElectionFactory.get_simple_election_from_file();
     ElectionBuilder.DescriptionAndContext celection = ElectionFactory.get_fake_ciphertext_election(election, keypair.public_key).orElseThrow();
-    InternalManifest metadata = celection.metadata;
+    InternalManifest metadata = celection.internalManifest;
     CiphertextElectionContext context = celection.context;
 
     PlaintextBallot data = new BallotFactory().get_simple_ballot_from_file();
-    Encrypt.EncryptionDevice device = new Encrypt.EncryptionDevice("Location");
+    Encrypt.EncryptionDevice device = Encrypt.EncryptionDevice.createForTest("Location");
     Encrypt.EncryptionMediator operator = new Encrypt.EncryptionMediator(metadata, context, device);
 
     // Act
@@ -482,11 +482,11 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
 
     Manifest election = ElectionFactory.get_simple_election_from_file();
     ElectionBuilder.DescriptionAndContext celection = ElectionFactory.get_fake_ciphertext_election(election, keypair.public_key).orElseThrow();
-    InternalManifest metadata = celection.metadata;
+    InternalManifest metadata = celection.internalManifest;
     CiphertextElectionContext context = celection.context;
 
     PlaintextBallot data = new BallotFactory().get_simple_ballot_from_file();
-    Encrypt.EncryptionDevice device = new Encrypt.EncryptionDevice("Location");
+    Encrypt.EncryptionDevice device = Encrypt.EncryptionDevice.createForTest("Location");
     Encrypt.EncryptionMediator operator = new Encrypt.EncryptionMediator(metadata, context, device);
 
     // Act

@@ -46,7 +46,7 @@ public class TestBallotInputValidation {
 
   @Example
   public void testFakeInputOk() {
-    Manifest fakeElection = ElectionFactory.get_fake_election();
+    Manifest fakeElection = ElectionFactory.get_fake_manifest();
     assertThat(validate(fakeElection)).isTrue();
 
     for (int i=0; i<NFAKE_BALLOTS; i++) {
@@ -313,7 +313,7 @@ public class TestBallotInputValidation {
     CiphertextElectionContext context = tuple.context;
 
     InternalManifest metadata = new InternalManifest(eandb.election);
-    Encrypt.EncryptionDevice device = new Encrypt.EncryptionDevice("device");
+    Encrypt.EncryptionDevice device = Encrypt.EncryptionDevice.createForTest("device");
 
     Encrypt.EncryptionMediator encryptor = new Encrypt.EncryptionMediator(metadata, context, device);
     Optional<CiphertextBallot> encrypted_ballot = encryptor.encrypt(eandb.ballot);

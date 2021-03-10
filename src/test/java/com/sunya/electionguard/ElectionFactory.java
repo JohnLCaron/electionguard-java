@@ -27,7 +27,7 @@ public class ElectionFactory {
   }
 
   /** Get a single Fake Manifest object that is manually constructed with default values. */
-  public static Manifest get_fake_election() {
+  public static Manifest get_fake_manifest() {
 
     Manifest.BallotStyle fake_ballot_style = new Manifest.BallotStyle("some-ballot-style-id",
             ImmutableList.of("some-geopoltical-unit-id"), null, null);
@@ -95,7 +95,7 @@ public class ElectionFactory {
   /** Get a single Fake Ballot object that is manually constructed with default values. */
   public static PlaintextBallot get_fake_ballot(@Nullable Manifest election, @Nullable String ballot_id) {
     if (election == null) {
-      election = get_fake_election();
+      election = get_fake_manifest();
     }
 
     if (ballot_id == null) {

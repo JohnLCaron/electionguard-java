@@ -8,11 +8,11 @@ import static com.sunya.electionguard.Group.rand_q;
 public class ElectionBuilder {
 
   public static class DescriptionAndContext {
-    public final InternalManifest metadata;
+    public final InternalManifest internalManifest;
     public final CiphertextElectionContext context;
 
     public DescriptionAndContext(Manifest election, CiphertextElectionContext context) {
-      this.metadata = new InternalManifest(election);
+      this.internalManifest = new InternalManifest(election);
       this.context = context;
     }
   }

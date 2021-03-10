@@ -182,7 +182,7 @@ public class TestEndToEndElectionIntegration {
     this.election_builder.set_commitment_hash(commitmentHash);
 
     ElectionBuilder.DescriptionAndContext tuple = this.election_builder.build().orElseThrow();
-    this.election = tuple.metadata.election;
+    this.election = tuple.internalManifest.manifest;
     this.context = tuple.context;
     this.constants = new ElectionConstants();
     Group.ElementModQ crypto_base_hash = CiphertextElectionContext.make_crypto_base_hash(NUMBER_OF_GUARDIANS, QUORUM, election);
@@ -198,7 +198,7 @@ public class TestEndToEndElectionIntegration {
   void step_2_encrypt_votes() throws IOException {
     // Configure the Encryption Device
     this.metadata = new InternalManifest(this.election);
-    this.device = new Encrypt.EncryptionDevice("polling-place-one");
+    this.device = Encrypt.EncryptionDevice.createForTest("polling-place-one");
     this.encrypter = new Encrypt.EncryptionMediator(this.metadata, this.context, this.device);
     System.out.printf("%n2. Ready to encrypt at location: %s%n", this.device.location);
 

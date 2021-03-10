@@ -257,7 +257,7 @@ class DecryptWithSecrets {
     ) {
 
     if (!suppress_validity_check && !ballot.is_valid_encryption(
-            metadata.election.crypto_hash, public_key, crypto_extended_base_hash)) {
+            metadata.manifest.crypto_hash, public_key, crypto_extended_base_hash)) {
       return Optional.empty();
     }
 
@@ -309,13 +309,13 @@ class DecryptWithSecrets {
     ) {
 
     if (!suppress_validity_check && !ballot.is_valid_encryption(
-            metadata.election.crypto_hash, public_key, crypto_extended_base_hash)) {
+            metadata.manifest.crypto_hash, public_key, crypto_extended_base_hash)) {
       return Optional.empty();
     }
 
     // Use the hashed representation included in the ballot or override with the provided values
     Optional<ElementModQ> nonce_seed = nonce.isEmpty() ? ballot.hashed_ballot_nonce() :
-            Optional.of(CiphertextBallot.nonce_seed(metadata.election.crypto_hash, ballot.object_id, nonce.get()));
+            Optional.of(CiphertextBallot.nonce_seed(metadata.manifest.crypto_hash, ballot.object_id, nonce.get()));
 
     if (nonce_seed.isEmpty()) {
       logger.atWarning().log(
