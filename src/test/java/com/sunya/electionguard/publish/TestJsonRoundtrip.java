@@ -99,16 +99,13 @@ public class TestJsonRoundtrip {
             Group.ONE_MOD_Q,
             1234L,
             Group.ONE_MOD_Q,
-            Optional.of(Group.ONE_MOD_Q),
+            Optional.empty(), // LOOK we took out the nonce in SubmittedBallotPojo, since we cant read None
             BallotBox.State.CAST);
 
     // write json
     ConvertToJson.writeSubmittedBallot(org, file.toPath());
     // read it back
     SubmittedBallot fromFile = ConvertFromJson.readSubmittedBallot(outputFile);
-
-    // LOOK this is failing because we took out the nonce in SubmittedBallotPojo, as a workaround
-    //   for python encoding Optional.empty as None.
     assertThat(fromFile).isEqualTo(org);
   }
 

@@ -24,9 +24,9 @@ import java.util.stream.Collectors;
 public class SubmittedBallotPojo {
   public String object_id;
   public String style_id;
-  public ElementModQ description_hash;
-  public ElementModQ tracking_hash;
-  public ElementModQ previous_tracking_hash;
+  public ElementModQ manifest_hash;
+  public ElementModQ code;
+  public ElementModQ previous_code;
   public List<CiphertextBallotContestPojo> contests;
   public long timestamp;
   public ElementModQ crypto_hash;
@@ -97,10 +97,10 @@ public class SubmittedBallotPojo {
     return new SubmittedBallot(
             pojo.object_id,
             pojo.style_id,
-            pojo.description_hash,
-            pojo.previous_tracking_hash,
+            pojo.manifest_hash,
+            pojo.previous_code,
             convertList(pojo.contests, SubmittedBallotPojo::translateContest),
-            pojo.tracking_hash,
+            pojo.code,
             pojo.timestamp,
             pojo.crypto_hash,
             Optional.empty(), // Optional.ofNullable(pojo.nonce),
@@ -184,10 +184,10 @@ public class SubmittedBallotPojo {
     SubmittedBallotPojo pojo = new SubmittedBallotPojo();
     pojo.object_id = org.object_id;
     pojo.style_id = org.style_id;
-    pojo.description_hash = org.description_hash;
-    pojo.previous_tracking_hash = org.previous_tracking_hash;
+    pojo.manifest_hash = org.manifest_hash;
+    pojo.previous_code = org.previous_code;
     pojo.contests = convertList(org.contests, SubmittedBallotPojo::convertContest);
-    pojo.tracking_hash = org.tracking_hash;
+    pojo.code = org.code;
     pojo.timestamp = org.timestamp;
     pojo.crypto_hash = org.crypto_hash;
     // pojo.nonce = org.nonce.orElse(null);

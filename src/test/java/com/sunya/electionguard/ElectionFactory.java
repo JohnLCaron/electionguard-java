@@ -116,6 +116,22 @@ public class ElectionFactory {
     return ConvertFromJson.readElection(absFilename);
   }
 
+  public static Encrypt.EncryptionDevice get_fake_encryption_device(String polling_place) {
+    return new Encrypt.EncryptionDevice(
+            generate_device_uuid(),
+            "Session",
+            12345,
+            String.format("polling-place-%s", polling_place));
+  }
+
+  /**
+   * Get unique identifier for device.
+   * LOOK is this sufficient? Is it actually tied to the device? Perhaps should be externally supplied?
+   */
+  private static long generate_device_uuid() {
+    return java.util.UUID.randomUUID().node();
+  }
+
   ///////////////////////////////////////////////////////////////////////////////////////
   // should all be in TestUtils ?
   private static final Random random = new Random(System.currentTimeMillis());

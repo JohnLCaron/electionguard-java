@@ -1,5 +1,6 @@
 package com.sunya.electionguard;
 
+import com.google.common.base.Preconditions;
 import com.google.common.flogger.FluentLogger;
 
 import javax.annotation.concurrent.Immutable;
@@ -21,21 +22,31 @@ public class Encrypt {
   /** The device that is doing the encryption. */
   @Immutable
   public static class EncryptionDevice {
-    public final String uuid;
+    /** Unique identifier for device. */
+    public final long uuid;
+    /** Used to identify session and protect the timestamp. */
+    public final String session_id;
+    /** Election initialization value. */
+    public final int launch_code;
+    /** Arbitrary string to designate the location of the device. */
     public final String location;
 
-    public EncryptionDevice(String location) {
-      this.location = location;
-      uuid = generate_device_uuid();
+    public EncryptionDevice(long uuid, String session_id, int launch_code, String location) {
+      this.uuid = uuid;
+      this.session_id = Preconditions.checkNotNull(session_id);
+      this.launch_code = launch_code;
+      this.location = Preconditions.checkNotNull(location);
     }
 
-    public EncryptionDevice(String uuid, String location) {
-      this.uuid = uuid;
-      this.location = location;
+    public EncryptionDevice(String location) {
+      this.uuid = location.hashCode();
+      this.session_id = Preconditions.checkNotNull(location);
+      this.launch_code = 1221;
+      this.location = Preconditions.checkNotNull(location);
     }
 
     public ElementModQ get_hash() {
-      return Hash.hash_elems(uuid, location);
+      return BallotCodes.get_hash_for_device(uuid, session_id, launch_code, location);
     }
 
     @Override
@@ -43,13 +54,15 @@ public class Encrypt {
       if (this == o) return true;
       if (o == null || getClass() != o.getClass()) return false;
       EncryptionDevice that = (EncryptionDevice) o;
-      return uuid.equals(that.uuid) &&
+      return uuid == that.uuid &&
+              launch_code == that.launch_code &&
+              session_id.equals(that.session_id) &&
               location.equals(that.location);
     }
 
     @Override
     public int hashCode() {
-      return Objects.hash(uuid, location);
+      return Objects.hash(uuid, session_id, launch_code, location);
     }
   }
 
@@ -76,17 +89,9 @@ public class Encrypt {
     public Optional<CiphertextBallot> encrypt(PlaintextBallot ballot) {
       Optional<CiphertextBallot> encrypted_ballot =
               encrypt_ballot(ballot, this.metadata, this.context, this.previous_tracking_hash, Optional.empty(), true);
-      encrypted_ballot.ifPresent(ciphertextBallot -> this.previous_tracking_hash = ciphertextBallot.tracking_hash);
+      encrypted_ballot.ifPresent(ciphertextBallot -> this.previous_tracking_hash = ciphertextBallot.code);
       return encrypted_ballot;
     }
-  }
-
-  /**
-   * Get unique identifier for device.
-   * LOOK is this sufficient? Is it actually tied to the device? Perhaps should be externally supplied?
-   */
-  private static String generate_device_uuid() {
-    return java.util.UUID.randomUUID().toString();
   }
 
   /**

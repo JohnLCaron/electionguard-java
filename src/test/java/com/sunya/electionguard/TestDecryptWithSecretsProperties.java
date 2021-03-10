@@ -496,9 +496,9 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
 
     // munge
     CiphertextBallot bad_subject = new CiphertextBallot(
-            subject.object_id, subject.style_id, subject.description_hash,
-            subject.previous_tracking_hash, subject.contests,
-            subject.tracking_hash, subject.timestamp, subject.crypto_hash,
+            subject.object_id, subject.style_id, subject.manifest_hash,
+            subject.previous_code, subject.contests,
+            subject.code, subject.timestamp, subject.crypto_hash,
             Optional.empty());
 
     Optional<ElementModQ> missing_nonce_value = Optional.empty();

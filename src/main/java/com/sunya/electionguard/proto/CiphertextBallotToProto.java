@@ -28,9 +28,9 @@ public class CiphertextBallotToProto {
     CiphertextBallotProto.CiphertextBallot.Builder builder = CiphertextBallotProto.CiphertextBallot.newBuilder();
     builder.setObjectId(ballot.object_id);
     builder.setBallotStyleId(ballot.style_id);
-    builder.setDescriptionHash(convertElementModQ(ballot.description_hash));
-    builder.setTrackingHash(convertElementModQ(ballot.tracking_hash));
-    builder.setPreviousTrackingHash(convertElementModQ(ballot.previous_tracking_hash));
+    builder.setDescriptionHash(convertElementModQ(ballot.manifest_hash));
+    builder.setTrackingHash(convertElementModQ(ballot.code));
+    builder.setPreviousTrackingHash(convertElementModQ(ballot.previous_code));
     ballot.contests.forEach(value -> builder.addContests(convertContest(value)));
     builder.setTimestamp(ballot.timestamp);
     builder.setCryptoHash(convertElementModQ(ballot.crypto_hash));

@@ -14,12 +14,12 @@ import java.util.Map;
 /** Conversion between CiphertextTally and Json, using python's object model. */
 public class CiphertextTallyPojo {
   public String object_id;
-  public Map<String, CiphertextTallyContestPojo> cast;
+  public Map<String, CiphertextTallyContestPojo> contests;
 
   public static class CiphertextTallyContestPojo {
     public String object_id;
     public Group.ElementModQ description_hash;
-    public Map<String, CiphertextTallySelectionPojo> tally_selections;
+    public Map<String, CiphertextTallySelectionPojo> selections;
   }
 
   public static class CiphertextTallySelectionPojo {
@@ -39,7 +39,7 @@ public class CiphertextTallyPojo {
 
   private static CiphertextTally translateTally(CiphertextTallyPojo pojo) {
     Map<String, CiphertextTally.Contest> contests = new HashMap<>();
-    for (Map.Entry<String, CiphertextTallyContestPojo> entry : pojo.cast.entrySet()) {
+    for (Map.Entry<String, CiphertextTallyContestPojo> entry : pojo.contests.entrySet()) {
       contests.put(entry.getKey(), translateContest(entry.getValue()));
     }
 
@@ -50,7 +50,7 @@ public class CiphertextTallyPojo {
 
   private static CiphertextTally.Contest translateContest(CiphertextTallyContestPojo pojo) {
     Map<String, CiphertextTally.Selection> selections = new HashMap<>();
-    for (Map.Entry<String, CiphertextTallySelectionPojo> entry : pojo.tally_selections.entrySet()) {
+    for (Map.Entry<String, CiphertextTallySelectionPojo> entry : pojo.selections.entrySet()) {
       selections.put(entry.getKey(), translateSelection(entry.getValue()));
     }
     return new CiphertextTally.Contest(
@@ -79,14 +79,14 @@ public class CiphertextTallyPojo {
   }
 
   private static CiphertextTallyPojo convertTally(CiphertextTally org) {
-    Map<String, CiphertextTallyContestPojo> cast = new HashMap<>();
+    Map<String, CiphertextTallyContestPojo> contests = new HashMap<>();
     for (Map.Entry<String, CiphertextTally.Contest> entry : org.contests.entrySet()) {
-      cast.put(entry.getKey(), convertContest(entry.getValue()));
+      contests.put(entry.getKey(), convertContest(entry.getValue()));
     }
 
     CiphertextTallyPojo pojo = new CiphertextTallyPojo();
     pojo.object_id = org.object_id;
-    pojo.cast = cast;
+    pojo.contests = contests;
     return pojo;
   }
 
@@ -98,7 +98,7 @@ public class CiphertextTallyPojo {
     CiphertextTallyContestPojo pojo = new CiphertextTallyContestPojo();
     pojo.object_id = org.object_id;
     pojo.description_hash = org.contestDescriptionHash;
-    pojo.tally_selections = selections;
+    pojo.selections = selections;
     return pojo;
   }
 

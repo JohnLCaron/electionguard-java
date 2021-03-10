@@ -134,11 +134,11 @@ public class AcceptedBallotsTable extends JPanel {
     }
 
     public String getTracking() {
-      return ballot.tracking_hash.toString();
+      return ballot.code.toString();
     }
 
     public String getPrevTracking() {
-      return ballot.previous_tracking_hash.toString();
+      return ballot.previous_code.toString();
     }
 
     public String getState() {

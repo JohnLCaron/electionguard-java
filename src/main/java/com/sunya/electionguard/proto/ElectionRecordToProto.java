@@ -74,6 +74,8 @@ public class ElectionRecordToProto {
   static ElectionRecordProto.EncryptionDevice convertDevice(Encrypt.EncryptionDevice device) {
     ElectionRecordProto.EncryptionDevice.Builder builder = ElectionRecordProto.EncryptionDevice.newBuilder();
     builder.setUuid(device.uuid);
+    builder.setSessionId(device.session_id);
+    builder.setLaunchCode(device.launch_code);
     builder.setLocation(device.location);
     return builder.build();
   }

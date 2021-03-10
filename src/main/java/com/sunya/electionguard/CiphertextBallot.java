@@ -24,7 +24,7 @@ import static com.sunya.electionguard.Group.add_q;
  * from which all other nonces can be derived to encrypt the ballot.  Along with the `nonce`
  * fields on `Ballotcontest` and `BallotSelection`, this value is sensitive.
  * <p>
- * Don't make this directly. Use `make_ciphertext_ballot` instead.
+ * Don't make this directly. Use `create` instead.
  * The field object_id is a unique Ballot ID that is relevant to the external system
  */
 @Immutable
@@ -33,12 +33,13 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
 
   /**
    * Makes a `CiphertextBallot`, initially in the state where it's neither been cast nor spoiled.
+   * python: make_ciphertext_ballot()
    * <p>
    *
    * @param object_id:               The object_id of this specific ballot
    * @param style_id:                The `object_id` of the `BallotStyle` in the `Manifest` Manifest
-   * @param description_hash:        Hash of the election description
-   * @param previous_tracking_hash:  Previous tracking hash (or seed hash) in the ballot chain
+   * @param manifest_hash:        Hash of the election description
+   * @param previous_code:           Previous tracking hash (or seed hash) in the ballot chain
    * @param contests:                List of contests for this ballot
    * @param nonce:                   optional nonce used as part of the encryption process
    * @param timestamp:               Timestamp at which the ballot encryption is generated in seconds since the epoch.
@@ -46,8 +47,8 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
   public static CiphertextBallot create(
           String object_id,
           String style_id,
-          Group.ElementModQ description_hash,
-          Group.ElementModQ previous_tracking_hash,
+          Group.ElementModQ manifest_hash,
+          Group.ElementModQ previous_code,
           List<Contest> contests,
           Optional<Group.ElementModQ> nonce,
           Optional<Long> timestamp,
@@ -58,18 +59,18 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
     }
 
     List<Group.ElementModQ> contest_hashes = contests.stream().map(c -> c.crypto_hash).collect(Collectors.toList());
-    Group.ElementModQ crypto_hash = Hash.hash_elems(object_id, description_hash, contest_hashes);
+    Group.ElementModQ crypto_hash = Hash.hash_elems(object_id, manifest_hash, contest_hashes);
 
     long time = timestamp.orElse(System.currentTimeMillis() / 1000);
-    Group.ElementModQ tracking_hash = tracking_hashO.orElse(Tracker.get_rotating_tracker_hash(previous_tracking_hash, time, crypto_hash));
+    Group.ElementModQ ballot_code = tracking_hashO.orElse(BallotCodes.get_rotating_ballot_code(previous_code, time, crypto_hash));
 
     return new CiphertextBallot(
             object_id,
             style_id,
-            description_hash,
-            previous_tracking_hash,
+            manifest_hash,
+            previous_code,
             contests,
-            tracking_hash,
+            ballot_code,
             time,
             crypto_hash,
             nonce);
@@ -79,13 +80,13 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
   /** The object_id of the Manifest.BallotStyle. */
   public final String style_id;
   /** The ElectionDescription hash. */
-  public final Group.ElementModQ description_hash;
-  /** The previous Tracker hash in the ballot chain. */
-  public final Group.ElementModQ previous_tracking_hash;
+  public final Group.ElementModQ manifest_hash;
+  /** The previous tracking code in the ballot chain. */
+  public final Group.ElementModQ previous_code;
   /** The list of contests for this ballot. */
   public final ImmutableList<Contest> contests;
-  /** The rotated Tracker hash for this ballot. */
-  public final Group.ElementModQ tracking_hash; // not optional
+  /** The rotated tracking code for this ballot. */
+  public final Group.ElementModQ code; // not optional
   /** Timestamp when the ballot was encrypted. */
   public final long timestamp; // Timestamp at which the ballot encryption is generated, in seconds since the epoch UTC.
   /** This object's crypto_hash. */
@@ -93,17 +94,17 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
   /** Optional nonce used in hashed_ballot_nonce(). */
   public final Optional<Group.ElementModQ> nonce;
 
-  public CiphertextBallot(String object_id, String style_id, Group.ElementModQ description_hash,
-                          Group.ElementModQ previous_tracking_hash, List<Contest> contests,
-                          Group.ElementModQ tracking_hash, long timestamp, Group.ElementModQ crypto_hash,
+  public CiphertextBallot(String object_id, String style_id, Group.ElementModQ manifest_hash,
+                          Group.ElementModQ previous_code, List<Contest> contests,
+                          Group.ElementModQ code, long timestamp, Group.ElementModQ crypto_hash,
                           Optional<Group.ElementModQ> nonce) {
     super(object_id);
     Preconditions.checkArgument(!Strings.isNullOrEmpty(style_id));
     this.style_id = style_id;
-    this.description_hash = Preconditions.checkNotNull(description_hash);
-    this.previous_tracking_hash = Preconditions.checkNotNull(previous_tracking_hash);
+    this.manifest_hash = Preconditions.checkNotNull(manifest_hash);
+    this.previous_code = Preconditions.checkNotNull(previous_code);
     this.contests = ImmutableList.copyOf(Preconditions.checkNotNull(contests));
-    this.tracking_hash = Preconditions.checkNotNull(tracking_hash);
+    this.code = Preconditions.checkNotNull(code);
     this.timestamp = timestamp;
     this.crypto_hash = Preconditions.checkNotNull(crypto_hash);
     this.nonce = Preconditions.checkNotNull(nonce);
@@ -154,10 +155,10 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
     return SubmittedBallot.create(
             this.object_id,
             this.style_id,
-            this.description_hash,
-            Optional.of(this.previous_tracking_hash),
+            this.manifest_hash,
+            Optional.of(this.previous_code),
             this.contests,
-            this.tracking_hash,
+            this.code,
             Optional.of(this.timestamp),
             state);
   }
@@ -166,8 +167,8 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
    * Make a hash of the election, the external object_id and nonce, used
    * to derive other nonce values on the ballot.
    */
-  static Group.ElementModQ nonce_seed(Group.ElementModQ description_hash, String object_id, Group.ElementModQ nonce) {
-    return Hash.hash_elems(description_hash, object_id, nonce);
+  static Group.ElementModQ nonce_seed(Group.ElementModQ manifest_hash, String object_id, Group.ElementModQ nonce) {
+    return Hash.hash_elems(manifest_hash, object_id, nonce);
   }
 
   /**
@@ -179,22 +180,13 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
       logger.atWarning().log("missing nonce for ballot %s could not derive from null nonce", this.object_id);
       return Optional.empty();
     }
-    return Optional.of(nonce_seed(this.description_hash, this.object_id, this.nonce.get()));
-  }
-
-  /**
-   * Get a tracker hash as a code in friendly readable words for sharing
-   *
-   * @return Tracker in words or None.
-   */
-  Optional<String> get_tracker_code() {
-    return Tracker.tracker_hash_to_words(this.tracking_hash, null);
+    return Optional.of(nonce_seed(this.manifest_hash, this.object_id, this.nonce.get()));
   }
 
   /**
    * Given an encrypted Ballot, generates a hash, suitable for rolling up
    * into a hash / tracking code for an entire ballot. Of note, this particular hash examines
-   * the `description_hash` and `ballot_selections`, but not the proof.
+   * the `manifest_hash` and `ballot_selections`, but not the proof.
    * This is deliberate, allowing for the possibility of ElectionGuard variants running on
    * much more limited hardware, wherein the Disjunctive Chaum-Pedersen proofs might be computed
    * later on.
@@ -216,17 +208,17 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
    * by verifying the states of this ballot's children (BallotContest's and BallotSelection's).
    * Calling this function expects that the object is in a well-formed encrypted state
    * with the `contests` populated with valid encrypted ballot selections,
-   * and the ElementModQ `description_hash` also populated.
+   * and the ElementModQ `manifest_hash` also populated.
    * Specifically, the seed hash in this context is the hash of the Manifest Manifest,
-   * or whatever `ElementModQ` was used to populate the `description_hash` field.
+   * or whatever `ElementModQ` was used to populate the `manifest_hash` field.
    */
   public boolean is_valid_encryption(
           Group.ElementModQ seed_hash,
           Group.ElementModP elgamal_public_key,
           Group.ElementModQ crypto_extended_base_hash) {
 
-    if (!seed_hash.equals(this.description_hash)) {
-      logger.atInfo().log("mismatching ballot hash: %s expected(%s) actual(%s)", this.object_id, seed_hash, this.description_hash);
+    if (!seed_hash.equals(this.manifest_hash)) {
+      logger.atInfo().log("mismatching ballot hash: %s expected(%s) actual(%s)", this.object_id, seed_hash, this.manifest_hash);
       return false;
     }
 
@@ -251,10 +243,11 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
   public String toString() {
     return "CiphertextBallot{" +
             "style_id='" + style_id + '\'' +
-            ", description_hash=" + description_hash +
-            ", previous_tracking_hash=" + previous_tracking_hash +
+            ", manifest_hash=" + manifest_hash +
+            ", code=" + code +
+            ", previous_code=" + previous_code +
             ", contests=" + contests +
-            ", tracking_hash=" + tracking_hash +
+            ", tracking_hash=" + code +
             ", timestamp=" + timestamp +
             ", crypto_hash=" + crypto_hash +
             ", nonce=" + nonce +
@@ -270,17 +263,17 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
     CiphertextBallot that = (CiphertextBallot) o;
     return timestamp == that.timestamp &&
             style_id.equals(that.style_id) &&
-            description_hash.equals(that.description_hash) &&
-            previous_tracking_hash.equals(that.previous_tracking_hash) &&
+            manifest_hash.equals(that.manifest_hash) &&
+            previous_code.equals(that.previous_code) &&
             contests.equals(that.contests) &&
-            tracking_hash.equals(that.tracking_hash) &&
+            code.equals(that.code) &&
             crypto_hash.equals(that.crypto_hash) &&
             nonce.equals(that.nonce);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(super.hashCode(), style_id, description_hash, previous_tracking_hash, contests, tracking_hash, timestamp, crypto_hash, nonce);
+    return Objects.hash(super.hashCode(), style_id, manifest_hash, previous_code, contests, code, timestamp, crypto_hash, nonce);
   }
 
   /**

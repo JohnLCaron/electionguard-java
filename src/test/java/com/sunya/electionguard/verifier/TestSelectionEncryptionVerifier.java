@@ -360,8 +360,8 @@ public class TestSelectionEncryptionVerifier {
     public void testTrackingHashes() {
       for (SubmittedBallot ballot : electionRecord.acceptedBallots) {
         ElementModQ crypto_hash = ballot.crypto_hash;
-        ElementModQ prev_hash = ballot.previous_tracking_hash;
-        ElementModQ curr_hash = ballot.tracking_hash;
+        ElementModQ prev_hash = ballot.previous_code;
+        ElementModQ curr_hash = ballot.code;
         ElementModQ curr_hash_computed = Hash.hash_elems(prev_hash, ballot.timestamp, crypto_hash);
         assertThat(curr_hash).isEqualTo(curr_hash_computed);
       }
