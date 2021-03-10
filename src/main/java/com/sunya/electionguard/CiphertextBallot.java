@@ -58,11 +58,10 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
       logger.atInfo().log("ciphertext ballot with no contests: %s", object_id);
     }
 
-    List<Group.ElementModQ> contest_hashes = contests.stream().map(c -> c.crypto_hash).collect(Collectors.toList());
-    Group.ElementModQ crypto_hash = Hash.hash_elems(object_id, manifest_hash, contest_hashes);
+    Group.ElementModQ contest_hash = create_ballot_hash(object_id, manifest_hash, contests);
 
     long time = timestamp.orElse(System.currentTimeMillis() / 1000);
-    Group.ElementModQ ballot_code = tracking_hashO.orElse(BallotCodes.get_rotating_ballot_code(previous_code, time, crypto_hash));
+    Group.ElementModQ ballot_code = tracking_hashO.orElse(BallotCodes.get_rotating_ballot_code(previous_code, time, contest_hash));
 
     return new CiphertextBallot(
             object_id,
@@ -72,8 +71,19 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
             contests,
             ballot_code,
             time,
-            crypto_hash,
+            contest_hash,
             nonce);
+  }
+
+  /** Create the hash of the ballot contests. */
+  static Group.ElementModQ create_ballot_hash(
+          String ballot_id,
+          Group.ElementModQ description_hash,
+          List<CiphertextBallot.Contest> contests) {
+
+    // contest_hashes = [contest.crypto_hash for contest in contests]
+    List<Group.ElementModQ> contest_hashes = contests.stream().map(c -> c.crypto_hash).collect(Collectors.toList());
+    return Hash.hash_elems(ballot_id, description_hash, contest_hashes);
   }
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -88,6 +98,7 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
   /** The rotated tracking code for this ballot. */
   public final Group.ElementModQ code; // not optional
   /** Timestamp when the ballot was encrypted. */
+  // LOOK maybe millisecs?
   public final long timestamp; // Timestamp at which the ballot encryption is generated, in seconds since the epoch UTC.
   /** This object's crypto_hash. */
   public final Group.ElementModQ crypto_hash;
@@ -150,6 +161,7 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
 
   /**
    * Convert into a `SubmittedBallot`, with the given state, and all nonces removed.
+   * python: from_ciphertext_ballot().
    */
   SubmittedBallot acceptWithState(BallotBox.State state) {
     return SubmittedBallot.create(

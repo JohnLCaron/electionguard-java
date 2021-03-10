@@ -55,17 +55,17 @@ public class TestDecryptionMediatorProblem extends TestProperties {
     this.joint_public_key = joinKeyO.get();
 
     // setup the election
-    Manifest election = ElectionFactory.get_fake_election();
+    Manifest election = ElectionFactory.get_fake_manifest();
     ElectionBuilder builder = new ElectionBuilder(NUMBER_OF_GUARDIANS, QUORUM, election);
     assertThat(builder.build()).isEmpty();  // Can't build without the public key
     builder.set_public_key(this.joint_public_key);
 
     ElectionBuilder.DescriptionAndContext tuple = builder.build().orElseThrow();
-    this.metadata = tuple.metadata;
-    this.election = tuple.metadata.election;
+    this.metadata = tuple.internalManifest;
+    this.election = tuple.internalManifest.manifest;
     this.context = tuple.context;
 
-    Encrypt.EncryptionDevice encryption_device = new Encrypt.EncryptionDevice("location");
+    Encrypt.EncryptionDevice encryption_device = Encrypt.EncryptionDevice.createForTest("location");
     Encrypt.EncryptionMediator ballot_marking_device = new Encrypt.EncryptionMediator(this.metadata, this.context, encryption_device);
 
     // get some fake ballots
@@ -168,7 +168,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
     }
 
     // encrypt ballots
-    Encrypt.EncryptionDevice encryption_device = new Encrypt.EncryptionDevice("location");
+    Encrypt.EncryptionDevice encryption_device = Encrypt.EncryptionDevice.createForTest("location");
     Encrypt.EncryptionMediator ballot_marking_device = new Encrypt.EncryptionMediator(this.metadata, this.context, encryption_device);
 
     List<CiphertextBallot> allECastBallots = new ArrayList<>();
@@ -226,7 +226,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
     }
 
     // encrypt ballots
-    Encrypt.EncryptionDevice encryption_device = new Encrypt.EncryptionDevice("location");
+    Encrypt.EncryptionDevice encryption_device = Encrypt.EncryptionDevice.createForTest("location");
     Encrypt.EncryptionMediator ballot_marking_device = new Encrypt.EncryptionMediator(this.metadata, this.context, encryption_device);
 
     List<CiphertextBallot> allECastBallots = new ArrayList<>();
@@ -285,7 +285,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
       expected_tally.put(id, 0);
     }
 
-    Encrypt.EncryptionDevice encryption_device = new Encrypt.EncryptionDevice("location");
+    Encrypt.EncryptionDevice encryption_device = Encrypt.EncryptionDevice.createForTest("location");
     Encrypt.EncryptionMediator ballot_marking_device = new Encrypt.EncryptionMediator(this.metadata, this.context, encryption_device);
 
     // encrypt ballots
@@ -339,7 +339,7 @@ public class TestDecryptionMediatorProblem extends TestProperties {
       expected_tally.put(id, 0);
     }
 
-    Encrypt.EncryptionDevice encryption_device = new Encrypt.EncryptionDevice("location");
+    Encrypt.EncryptionDevice encryption_device = Encrypt.EncryptionDevice.createForTest("location");
     Encrypt.EncryptionMediator ballot_marking_device = new Encrypt.EncryptionMediator(this.metadata, this.context, encryption_device);
     CiphertextBallot encryptedCastBallot = ballot_marking_device.encrypt(castBallot).orElseThrow();
 

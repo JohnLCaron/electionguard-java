@@ -11,7 +11,7 @@ public class TestBallotCodes {
 
   @Example
   public void test_rotate_ballot_code() {
-    Encrypt.EncryptionDevice device = new Encrypt.EncryptionDevice("Location");
+    Encrypt.EncryptionDevice device = Encrypt.EncryptionDevice.createForTest("Location");
     ElementModQ ballot_hash_1 = ONE_MOD_Q;
     ElementModQ ballot_hash_2 = TWO_MOD_Q;
     int timestamp_1 = 1000;

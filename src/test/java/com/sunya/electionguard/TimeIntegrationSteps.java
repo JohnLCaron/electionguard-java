@@ -202,8 +202,8 @@ public class TimeIntegrationSteps {
     // Build the Manifest
     this.election_builder.set_public_key(joint_key.get());
     ElectionBuilder.DescriptionAndContext tuple = this.election_builder.build().orElseThrow();
-    this.election = tuple.metadata.election;
-    this.metadata = tuple.metadata;
+    this.election = tuple.internalManifest.manifest;
+    this.metadata = tuple.internalManifest;
     this.context = tuple.context;
     this.constants = new ElectionConstants();
   }
@@ -212,7 +212,7 @@ public class TimeIntegrationSteps {
   // Using the `CiphertextElectionContext` encrypt ballots for the election
   void step_2_encrypt_votes(int nballots) {
     // Configure the Encryption Device
-    this.device = new Encrypt.EncryptionDevice("polling-place-one");
+    this.device = Encrypt.EncryptionDevice.createForTest("polling-place-one");
     this.encrypter = new Encrypt.EncryptionMediator(metadata, this.context, this.device);
     System.out.printf("%n2. Ready to encrypt at location: %s%n", this.device.location);
 

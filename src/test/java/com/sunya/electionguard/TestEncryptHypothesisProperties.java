@@ -12,7 +12,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 
 public class TestEncryptHypothesisProperties extends TestProperties {
-  private static final Group.ElementModQ SEED_HASH = new Encrypt.EncryptionDevice("Location").get_hash();
+  private static final Group.ElementModQ SEED_HASH = Encrypt.EncryptionDevice.createForTest("Location").get_hash();
 
   /**
    * Tests that our Hypothesis election strategies generate "valid" output, also exercises the full stack

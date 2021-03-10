@@ -18,15 +18,15 @@ import java.util.stream.Collectors;
 public class InternalManifest {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
-  public final Manifest election;
+  public final Manifest manifest;
   public final ImmutableMap<String, ContestWithPlaceholders> contests;
 
-  public InternalManifest(Manifest election) {
-    this.election = Preconditions.checkNotNull(election);
+  public InternalManifest(Manifest manifest) {
+    this.manifest = Preconditions.checkNotNull(manifest);
 
     // For each contest, append the `number_elected` number of placeholder selections to the end of the contest collection.
     ImmutableMap.Builder<String, ContestWithPlaceholders> builder = ImmutableMap.builder();
-    for (Manifest.ContestDescription contest : election.contests) {
+    for (Manifest.ContestDescription contest : manifest.contests) {
       List<Manifest.SelectionDescription> placeholders = generate_placeholder_selections_from(contest, contest.number_elected);
       builder.put(contest.object_id, contest_description_with_placeholders_from(contest, placeholders));
     }
@@ -106,7 +106,7 @@ public class InternalManifest {
 
   /** Find the ballot style for a specified style_id */
   public Optional<Manifest.BallotStyle> get_ballot_style(String style_id) {
-    return election.ballot_styles.stream().filter(bs -> bs.object_id.equals(style_id)).findFirst();
+    return manifest.ballot_styles.stream().filter(bs -> bs.object_id.equals(style_id)).findFirst();
   }
 
   /** Get contests whose electoral_district_id is in the given ballot style's geopolitical_unit_ids. */

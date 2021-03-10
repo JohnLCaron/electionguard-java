@@ -38,11 +38,13 @@ public class Encrypt {
       this.location = Preconditions.checkNotNull(location);
     }
 
-    public EncryptionDevice(String location) {
-      this.uuid = location.hashCode();
-      this.session_id = Preconditions.checkNotNull(location);
-      this.launch_code = 1221;
-      this.location = Preconditions.checkNotNull(location);
+    public static EncryptionDevice createForTest(String location) {
+      Preconditions.checkNotNull(location);
+      return new EncryptionDevice(
+        location.hashCode(),
+        location,
+        12345,
+        location);
     }
 
     public ElementModQ get_hash() {
@@ -202,7 +204,7 @@ public class Encrypt {
   }
 
   /**
-   * Encrypt a PlaintextBallotContest in the context of a specific Manifest.ContestDescription.
+   * Encrypt a PlaintextBallotContest into CiphertextBallot.Contest.
    * <p>
    * This method accepts a contest representation that only includes `True` selections.
    * It will fill missing selections for a contest with `False` values, and generate `placeholder`
@@ -354,7 +356,7 @@ public class Encrypt {
   //  by traversing the collection of ballots encrypted by a specific device
 
   /**
-   * Encrypt a PlaintextBallot in the context of a specific InternalManifest.
+   * Encrypt a PlaintextBallot into a CiphertextBallot.
    * <p>
    * This method accepts a ballot representation that only includes `True` selections.
    * It will fill missing selections for a contest with `False` values, and generate `placeholder`
@@ -364,7 +366,7 @@ public class Encrypt {
    * It will fill missing contests with `False` selections and generate `placeholder` selections that are marked `True`.
    *
    * @param ballot:               the ballot in the valid input form
-   * @param metadata:             the InternalManifest which defines this ballot's structure
+   * @param internal_manifest:    the InternalManifest which defines this ballot's structure
    * @param context:              all the cryptographic context for the election
    * @param previous_tracking_hash Hash from previous ballot or starting hash from device. python: seed_hash
    * @param nonce:                an optional nonce used to encrypt this contest
@@ -373,14 +375,14 @@ public class Encrypt {
    */
   public static Optional<CiphertextBallot> encrypt_ballot(
           PlaintextBallot ballot,
-          InternalManifest metadata,
+          InternalManifest internal_manifest,
           CiphertextElectionContext context,
           ElementModQ previous_tracking_hash,
           Optional<ElementModQ> nonce,
           boolean should_verify_proofs)  {
 
     // Determine the relevant range of contests for this ballot style
-    Optional<Manifest.BallotStyle> style = metadata.get_ballot_style(ballot.style_id);
+    Optional<Manifest.BallotStyle> style = internal_manifest.get_ballot_style(ballot.style_id);
 
     // Validate Input
     if (style.isEmpty()) {
@@ -398,15 +400,52 @@ public class Encrypt {
 
     // Include a representation of the election and the ballot Id in the nonce's used
     // to derive other nonce values on the ballot
-    ElementModQ nonce_seed = CiphertextBallot.nonce_seed(metadata.election.crypto_hash, ballot.object_id, random_master_nonce);
+    ElementModQ nonce_seed = CiphertextBallot.nonce_seed(internal_manifest.manifest.crypto_hash, ballot.object_id, random_master_nonce);
+
+    Optional<List<CiphertextBallot.Contest>> encrypted_contests = encrypt_ballot_contests(
+            ballot, internal_manifest, context, nonce_seed);
+    if (encrypted_contests.isEmpty()) {
+      return Optional.empty();
+    }
+
+    // Create the return object
+    CiphertextBallot encrypted_ballot = CiphertextBallot.create(
+          ballot.object_id,
+          ballot.style_id,
+          internal_manifest.manifest.crypto_hash,
+          previous_tracking_hash, // python uses Optional
+          encrypted_contests.get(),
+          Optional.of(random_master_nonce), Optional.empty(), Optional.empty());
+
+    if (!should_verify_proofs) {
+      return Optional.of(encrypted_ballot);
+    }
+
+    // Verify the proofs
+    if (encrypted_ballot.is_valid_encryption(internal_manifest.manifest.crypto_hash, context.elgamal_public_key, context.crypto_extended_base_hash)) {
+      return Optional.of(encrypted_ballot);
+    } else {
+      return Optional.empty(); // log error will have happened earlier
+    }
+  }
+
+  /** Encrypt contests from a plaintext ballot with a specific style. */
+  static Optional<List<CiphertextBallot.Contest>> encrypt_ballot_contests(
+          PlaintextBallot ballot,
+          InternalManifest description,
+          CiphertextElectionContext context,
+          ElementModQ nonce_seed) {
 
     List<CiphertextBallot.Contest> encrypted_contests = new ArrayList<>();
     // LOOK this will fail if there are duplicate contest_id's
-    Map<String, PlaintextBallot.Contest> plaintext_contests = ballot.contests.stream().collect(Collectors.toMap(c -> c.contest_id, c -> c));
+    Map<String, PlaintextBallot.Contest> plaintext_contests = ballot.contests.stream()
+            .collect(Collectors.toMap(c -> c.contest_id, c -> c));
+
     // LOOK only iterate on contests that match the manifest. If there are miscoded contests on the ballot,
     //   they are silently ignored.
-    for (ContestWithPlaceholders contestDescription : metadata.get_contests_for_style(ballot.style_id)) {
+    for (ContestWithPlaceholders contestDescription : description.get_contests_for_style(ballot.style_id)) {
       PlaintextBallot.Contest use_contest = plaintext_contests.get(contestDescription.object_id);
+
       // no selections provided for the contest, so create a placeholder contest
       // LOOK says "create a placeholder contest" but selections are not placeholders, but have all votes = 0.
       if (use_contest == null) {
@@ -425,26 +464,7 @@ public class Encrypt {
       }
       encrypted_contests.add(encrypted_contest.get());
     }
-
-    // Create the return object
-    CiphertextBallot encrypted_ballot = CiphertextBallot.create(
-          ballot.object_id,
-          ballot.style_id,
-          metadata.election.crypto_hash,
-          previous_tracking_hash, // python uses Optional
-          encrypted_contests,
-          Optional.of(random_master_nonce), Optional.empty(), Optional.empty());
-
-    if (!should_verify_proofs) {
-      return Optional.of(encrypted_ballot);
-    }
-
-    // Verify the proofs
-    if (encrypted_ballot.is_valid_encryption(metadata.election.crypto_hash, context.elgamal_public_key, context.crypto_extended_base_hash)) {
-      return Optional.of(encrypted_ballot);
-    } else {
-      return Optional.empty(); // log error will have happened earlier
-    }
+    return Optional.of(encrypted_contests);
   }
 
 }

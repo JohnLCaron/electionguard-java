@@ -62,17 +62,17 @@ public class TestDecryptionMediator extends TestProperties {
     this.joint_public_key = joinKeyO.get();
 
     // setup the election
-    Manifest election = ElectionFactory.get_fake_election();
+    Manifest election = ElectionFactory.get_fake_manifest();
     ElectionBuilder builder = new ElectionBuilder(NUMBER_OF_GUARDIANS, QUORUM, election);
     assertThat(builder.build()).isEmpty();  // Can't build without the public key
     builder.set_public_key(this.joint_public_key);
 
     ElectionBuilder.DescriptionAndContext tuple = builder.build().orElseThrow();
-    this.election = tuple.metadata.election;
+    this.election = tuple.internalManifest.manifest;
     this.context = tuple.context;
-    this.metadata = tuple.metadata;
+    this.metadata = tuple.internalManifest;
 
-    Encrypt.EncryptionDevice encryption_device = new Encrypt.EncryptionDevice("location");
+    Encrypt.EncryptionDevice encryption_device = Encrypt.EncryptionDevice.createForTest("location");
     Encrypt.EncryptionMediator ballot_marking_device = new Encrypt.EncryptionMediator(this.metadata, this.context, encryption_device);
 
     // get some fake ballots
@@ -516,10 +516,10 @@ public class TestDecryptionMediator extends TestProperties {
     ElectionBuilder.DescriptionAndContext tuple = builder.build().orElseThrow();
 
     ElectionTestHelper helper = new ElectionTestHelper(random);
-    List<PlaintextBallot> plaintext_ballots = helper.plaintext_voted_ballots(tuple.metadata, 3 + random.nextInt(3));
+    List<PlaintextBallot> plaintext_ballots = helper.plaintext_voted_ballots(tuple.internalManifest, 3 + random.nextInt(3));
 
     Map<String, Integer> plaintext_tallies = TallyTestHelper.accumulate_plaintext_ballots(plaintext_ballots);
-    CiphertextTallyBuilder encrypted_tally = this.generate_encrypted_tally(tuple.metadata, tuple.context, plaintext_ballots);
+    CiphertextTallyBuilder encrypted_tally = this.generate_encrypted_tally(tuple.internalManifest, tuple.context, plaintext_ballots);
     DecryptionMediator subject = new DecryptionMediator(tuple.context, encrypted_tally.build(), this.ballot_box.getSpoiledBallots());
 
     for (Guardian guardian : this.guardians) {
@@ -541,7 +541,7 @@ public class TestDecryptionMediator extends TestProperties {
           List<PlaintextBallot> ballots) {
 
     // encrypt each ballot
-    BallotBox ballot_box = new BallotBox(metadata.election, context);
+    BallotBox ballot_box = new BallotBox(metadata.manifest, context);
     for (PlaintextBallot ballot : ballots) {
       Optional<CiphertextBallot> encrypted_ballot = Encrypt.encrypt_ballot(
               ballot, metadata, context, int_to_q_unchecked(BigInteger.ONE), Optional.empty(), true);
