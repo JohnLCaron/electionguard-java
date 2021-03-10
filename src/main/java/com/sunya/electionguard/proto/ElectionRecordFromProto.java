@@ -74,7 +74,7 @@ public class ElectionRecordFromProto {
   }
 
   static Encrypt.EncryptionDevice convertDevice(ElectionRecordProto.EncryptionDevice device) {
-    return new Encrypt.EncryptionDevice(device.getUuid(), device.getLocation());
+    return new Encrypt.EncryptionDevice(device.getUuid(), device.getSessionId(), device.getLaunchCode(), device.getLocation());
   }
 
   static KeyCeremony.CoefficientValidationSet convertValidationCoefficients(KeyCeremonyProto.CoefficientValidationSet coeff) {

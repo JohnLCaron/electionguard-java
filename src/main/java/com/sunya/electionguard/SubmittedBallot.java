@@ -20,24 +20,25 @@ public class SubmittedBallot extends CiphertextBallot {
 
   /**
    * Makes a `SubmittedBallot`, ensuring that no nonces are part of the contests.
+   * python: make_ciphertext_submitted_ballot()
    * <p>
    *
    * @param object_id:               the object_id of this specific ballot
-   * @param style_id:            The `object_id` of the `BallotStyle` in the `Manifest` Manifest
-   * @param description_hash:        Hash of the election description
-   * @param previous_tracking_hashO: Previous tracking hash or seed hash
+   * @param style_id:                The `object_id` of the `BallotStyle` in the `Manifest` Manifest
+   * @param manifest_hash:           Hash of the election manifest
+   * @param previous_codeO:          Previous tracking hash or seed
    * @param contests:                List of contests for this ballot
-   * @param tracking_hash:           This ballot's tracking hash
+   * @param ballot_code:             This ballot's tracking hash, not Optional.
    * @param timestampO:              Timestamp at which the ballot encryption is generated in tick
    * @param state:                   ballot box state
    */
   static SubmittedBallot create(
           String object_id,
           String style_id,
-          Group.ElementModQ description_hash,
-          Optional<Group.ElementModQ> previous_tracking_hashO,
+          Group.ElementModQ manifest_hash,
+          Optional<Group.ElementModQ> previous_codeO,
           List<Contest> contests,
-          Group.ElementModQ tracking_hash,
+          Group.ElementModQ ballot_code,
           Optional<Long> timestampO,
           BallotBox.State state) { // default BallotBoxState.UNKNOWN,
 
@@ -46,10 +47,10 @@ public class SubmittedBallot extends CiphertextBallot {
     }
 
     List<Group.ElementModQ> contest_hashes = contests.stream().map(c -> c.crypto_hash).collect(Collectors.toList());
-    Group.ElementModQ contest_hash = Hash.hash_elems(object_id, description_hash, contest_hashes);
+    Group.ElementModQ contest_hash = Hash.hash_elems(object_id, manifest_hash, contest_hashes);
 
     long timestamp = timestampO.orElse(System.currentTimeMillis());
-    Group.ElementModQ previous_tracking_hash = previous_tracking_hashO.orElse(description_hash); // LOOK spec #6.A says H0 = H(Qbar)
+    Group.ElementModQ previous_ballot_code = previous_codeO.orElse(manifest_hash); // LOOK spec #6.A says H0 = H(Qbar)
 
     // copy the contests and selections, removing all nonces
     List<Contest> new_contests = contests.stream().map(Contest::removeNonces).collect(Collectors.toList());
@@ -57,10 +58,10 @@ public class SubmittedBallot extends CiphertextBallot {
     return new SubmittedBallot(
             object_id,
             style_id,
-            description_hash,
-            previous_tracking_hash,
+            manifest_hash,
+            previous_ballot_code,
             new_contests,
-            tracking_hash,
+            ballot_code,
             timestamp,
             contest_hash,
             Optional.empty(),
@@ -72,22 +73,22 @@ public class SubmittedBallot extends CiphertextBallot {
   public final BallotBox.State state;
 
   public SubmittedBallot(CiphertextBallot ballot, BallotBox.State state) {
-    super(ballot.object_id, ballot.style_id, ballot.description_hash, ballot.previous_tracking_hash, ballot.contests,
-            ballot.tracking_hash, ballot.timestamp, ballot.crypto_hash, ballot.nonce);
+    super(ballot.object_id, ballot.style_id, ballot.manifest_hash, ballot.previous_code, ballot.contests,
+            ballot.code, ballot.timestamp, ballot.crypto_hash, ballot.nonce);
     this.state = Preconditions.checkNotNull(state);
   }
 
   public SubmittedBallot(String object_id,
                          String style_id,
-                         Group.ElementModQ description_hash,
-                         Group.ElementModQ previous_tracking_hash,
+                         Group.ElementModQ manifest_hash,
+                         Group.ElementModQ previous_code,
                          List<Contest> contests,
-                         Group.ElementModQ tracking_hash,
+                         Group.ElementModQ code,
                          long timestamp,
                          Group.ElementModQ crypto_hash,
                          Optional<Group.ElementModQ> nonce,
                          BallotBox.State state) {
-    super(object_id, style_id, description_hash, previous_tracking_hash, contests, tracking_hash, timestamp, crypto_hash, nonce);
+    super(object_id, style_id, manifest_hash, previous_code, contests, code, timestamp, crypto_hash, nonce);
     this.state = state;
   }
 
@@ -110,10 +111,11 @@ public class SubmittedBallot extends CiphertextBallot {
     return "SubmittedBallot{" +
             "\n object_id    ='" + object_id + '\'' +
             "\n state        =" + state +
-            "\n style_id ='" + style_id + '\'' +
-            "\n description_hash=" + description_hash +
-            "\n previous_tracking_hash=" + previous_tracking_hash +
-            "\n tracking_hash=" + tracking_hash +
+            "\n style_id     ='" + style_id + '\'' +
+            "\n manifest_hash=" + manifest_hash +
+            "\n code         =" + code +
+            "\n previous_code=" + previous_code +
+            "\n tracking_hash=" + code +
             "\n timestamp    =" + timestamp +
             "\n crypto_hash  =" + crypto_hash +
             "\n nonce        =" + nonce +

@@ -24,7 +24,9 @@ message ElectionRecord {
 
 // The device that does the encryption.
 message EncryptionDevice {
-  string uuid = 1;
+  int64 uuid = 3;
+  string session_id = 4;
+  int32 launch_code = 5;
   string location = 2;
 }
 

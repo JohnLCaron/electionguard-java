@@ -349,11 +349,9 @@ public class TestEncryptProperties extends TestProperties {
     assertThat(resultO).isPresent();
     CiphertextBallot result = resultO.get();
 
-    Optional<String> tracker_code = result.get_tracker_code();
     Optional<CiphertextBallot> result_from_seed = encrypt_ballot(subject, tuple.metadata, context, SEED_HASH, Optional.of(TWO_MOD_Q), true);
 
-    assertThat(result.tracking_hash).isNotNull();
-    assertThat(tracker_code).isPresent();
+    assertThat(result.code).isNotNull();
     assertThat(result_from_seed).isPresent();
     assertThat(
             result.is_valid_encryption(
