@@ -67,7 +67,7 @@ public class ElectionRecordFromProto {
     return new CiphertextElectionContext(
             context.getNumberOfGuardians(),
             context.getQuorum(),
-            convertElementModP(context.getElgamalPublicKey()),
+            convertElementModP(context.getJointPublicKey()),
             convertElementModQ(context.getDescriptionHash()),
             convertElementModQ(context.getCryptoBaseHash()),
             convertElementModQ(context.getCryptoExtendedBaseHash()));
@@ -77,7 +77,7 @@ public class ElectionRecordFromProto {
     return new Encrypt.EncryptionDevice(device.getUuid(), device.getSessionId(), device.getLaunchCode(), device.getLocation());
   }
 
-  static KeyCeremony.CoefficientValidationSet convertValidationCoefficients(KeyCeremonyProto.CoefficientValidationSet coeff) {
+  static KeyCeremony.CoefficientValidationSet convertValidationCoefficients(ElectionRecordProto.CoefficientValidationSet coeff) {
    List<Group.ElementModP> coefficient_commitments = coeff.getCoefficientCommitmentsList().stream()
             .map(CommonConvert::convertElementModP)
             .collect(Collectors.toList());

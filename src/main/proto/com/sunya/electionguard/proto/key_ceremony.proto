@@ -48,13 +48,6 @@ message CoefficientSet {
   repeated ElementModQ coefficients = 3;
 }
 
-// Set of coefficient validation pieces, one for each available guardian
-message CoefficientValidationSet {
-  string owner_id = 1; // guardian id
-  repeated ElementModP coefficient_commitments = 2;  // Kij, j=0...quorum-1
-  repeated SchnorrProof coefficient_proofs = 3;
-}
-
 message ElectionKeyPair {
   ElGamalKeyPair key_pair = 1; // Ki = (si, g^si)
   SchnorrProof proof = 2; // proof of knowledge of possession of the associated private key

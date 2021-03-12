@@ -7,7 +7,10 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import java.math.BigInteger;
-import java.security.*;
+import java.security.InvalidKeyException;
+import java.security.KeyFactory;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
@@ -23,7 +26,7 @@ public class Rsa {
   private Rsa() {}
 
   // python: rsa_encrypt
-  static Optional<Auxiliary.ByteString> encrypt(String message, PublicKey public_key) {
+  public static Optional<Auxiliary.ByteString> encrypt(String message, java.security.PublicKey public_key) {
     try {
       return Optional.of(new Auxiliary.ByteString(rsa_encrypt(message, public_key)));
     } catch (Exception e) {
@@ -33,7 +36,7 @@ public class Rsa {
   }
 
   // rsa_decrypt
-  static Optional<String> decrypt(Auxiliary.ByteString encrypted_message, PrivateKey secret_key) {
+  public static Optional<String> decrypt(Auxiliary.ByteString encrypted_message, java.security.PrivateKey secret_key) {
     try {
       return Optional.of(rsa_decrypt(encrypted_message.getBytes(), secret_key));
     } catch (Exception e) {
@@ -43,7 +46,7 @@ public class Rsa {
   }
 
   /**  Create RSA keypair */
-  static KeyPair rsa_keypair() {
+  public static java.security.KeyPair rsa_keypair() {
     KeyPairGenerator keyGen;
     try {
       keyGen = KeyPairGenerator.getInstance("RSA");
@@ -54,13 +57,13 @@ public class Rsa {
     return keyGen.generateKeyPair();
   }
 
-  static byte[] rsa_encrypt(String data, PublicKey publicKey) throws NoSuchAlgorithmException, NoSuchPaddingException, BadPaddingException, IllegalBlockSizeException, InvalidKeyException {
+  static byte[] rsa_encrypt(String data, java.security.PublicKey publicKey) throws NoSuchAlgorithmException, NoSuchPaddingException, BadPaddingException, IllegalBlockSizeException, InvalidKeyException {
     Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
     cipher.init(Cipher.ENCRYPT_MODE, publicKey);
     return cipher.doFinal(data.getBytes());
   }
 
-  static String rsa_decrypt(byte[] data, PrivateKey privateKey) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
+  static String rsa_decrypt(byte[] data, java.security.PrivateKey privateKey) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
     Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
     cipher.init(Cipher.DECRYPT_MODE, privateKey);
     return new String(cipher.doFinal(data));

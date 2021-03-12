@@ -44,7 +44,7 @@ public class KeyCeremonyToProto {
     return builder.build();
   }
 
-  private static KeyCeremonyProto.AuxiliaryPublicKey convertAuxiliaryPublicKey( Auxiliary.PublicKey org) {
+  private static KeyCeremonyProto.AuxiliaryPublicKey convertAuxiliaryPublicKey(Auxiliary.PublicKey org) {
     KeyCeremonyProto.AuxiliaryPublicKey.Builder builder = KeyCeremonyProto.AuxiliaryPublicKey.newBuilder();
     builder.setOwnerId(org.owner_id);
     builder.setSequenceOrder(org.sequence_order);

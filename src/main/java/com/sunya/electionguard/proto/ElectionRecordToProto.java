@@ -64,7 +64,7 @@ public class ElectionRecordToProto {
     ElectionRecordProto.ElectionContext.Builder builder = ElectionRecordProto.ElectionContext.newBuilder();
     builder.setNumberOfGuardians(context.number_of_guardians);
     builder.setQuorum(context.quorum);
-    builder.setElgamalPublicKey(convertElementModP(context.elgamal_public_key));
+    builder.setJointPublicKey(convertElementModP(context.elgamal_public_key));
     builder.setDescriptionHash(convertElementModQ(context.description_hash));
     builder.setCryptoBaseHash(convertElementModQ(context.crypto_base_hash));
     builder.setCryptoExtendedBaseHash(convertElementModQ(context.crypto_extended_base_hash));
@@ -80,8 +80,8 @@ public class ElectionRecordToProto {
     return builder.build();
   }
 
-  static KeyCeremonyProto.CoefficientValidationSet convertValidationCoefficients(KeyCeremony.CoefficientValidationSet validationSet) {
-    KeyCeremonyProto.CoefficientValidationSet.Builder builder = KeyCeremonyProto.CoefficientValidationSet.newBuilder();
+  static ElectionRecordProto.CoefficientValidationSet convertValidationCoefficients(KeyCeremony.CoefficientValidationSet validationSet) {
+    ElectionRecordProto.CoefficientValidationSet.Builder builder = ElectionRecordProto.CoefficientValidationSet.newBuilder();
     builder.setOwnerId(validationSet.owner_id());
     for (Group.ElementModP commitment : validationSet.coefficient_commitments()) {
       builder.addCoefficientCommitments(convertElementModP(commitment));

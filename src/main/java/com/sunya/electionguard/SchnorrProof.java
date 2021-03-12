@@ -91,7 +91,7 @@ public class SchnorrProof extends Proof {
    * @param keypair An ElGamal keypair.
    * @param nonce   A random element in [0,Q).
    */
-  static SchnorrProof make_schnorr_proof(ElGamal.KeyPair keypair, ElementModQ nonce) {
+  public static SchnorrProof make_schnorr_proof(ElGamal.KeyPair keypair, ElementModQ nonce) {
     ElementModP k = keypair.public_key;
     ElementModP h = g_pow_p(nonce);
     // Changed validation spec 2.A. see issue #278
