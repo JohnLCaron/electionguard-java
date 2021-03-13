@@ -136,9 +136,9 @@ public class ChaumPedersen {
      * Validates a Chaum-Pedersen proof.
      * e.g.
      * - The given value 𝑣𝑖 is in the set Z𝑞
-     * - The given values 𝑎𝑖 && 𝑏𝑖 are both in the set Z𝑞^𝑟
+     * - The given values 𝑎𝑖 and 𝑏𝑖 are both in the set Z𝑞^𝑟
      * - The challenge value 𝑐 satisfies 𝑐 = 𝐻(𝑄, (𝐴, 𝐵), (𝑎 , 𝑏 ), 𝑀 ).
-     * - that the equations 𝑔^𝑣𝑖 = 𝑎𝑖𝐾^𝑐𝑖 mod 𝑝 && 𝐴^𝑣𝑖 = 𝑏𝑖𝑀𝑖^𝑐𝑖 mod 𝑝 are satisfied.
+     * - that the equations 𝑔^𝑣𝑖 = 𝑎𝑖𝐾^𝑐𝑖 mod 𝑝 and 𝐴^𝑣𝑖 = 𝑏𝑖𝑀𝑖^𝑐𝑖 mod 𝑝 are satisfied.
      * <p>
      * @param message: The ciphertext message
      * @param k: The public key corresponding to the private key used to encrypt

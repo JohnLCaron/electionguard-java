@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
  *
  * @see <a href="https://www.electionguard.vote/spec/0.95.0/7_Verifiable_decryption/">Ballot Decryption</a>
  */
-public class SimulateDecryptBallots {
+public class DecryptingSimulator {
 
   private static class CommandLine {
     @Parameter(names = {"-in"}, order = 0,
@@ -69,8 +69,8 @@ public class SimulateDecryptBallots {
   }
 
   public static void main(String[] args) {
-    String progName = SimulateDecryptBallots.class.getName();
-    SimulateDecryptBallots decryptor;
+    String progName = DecryptingSimulator.class.getName();
+    DecryptingSimulator decryptor;
     CommandLine cmdLine = null;
 
     try {
@@ -108,7 +108,7 @@ public class SimulateDecryptBallots {
       ElectionRecord electionRecord = consumer.readElectionRecord();
 
       System.out.printf(" BallotDecryptor read from %s%n Write to %s%n", cmdLine.encryptDir, cmdLine.outputDir);
-      decryptor = new SimulateDecryptBallots(consumer, electionRecord, guardiansProvider);
+      decryptor = new DecryptingSimulator(consumer, electionRecord, guardiansProvider);
       if (electionRecord.encryptedTally == null) {
         decryptor.accumulateTally();
       }
@@ -141,7 +141,7 @@ public class SimulateDecryptBallots {
   final ElectionRecord electionRecord;
   final Manifest election;
 
-  Iterable<RemoteTrustee.DecryptorProxy> guardians;
+  Iterable<DecryptingTrustee.Proxy> guardians;
   CiphertextTally encryptedTally;
   PlaintextTally decryptedTally;
   List<PlaintextBallot> spoiledDecryptedBallots;
@@ -149,7 +149,7 @@ public class SimulateDecryptBallots {
   int quorum;
   int numberOfGuardians;
 
-  public SimulateDecryptBallots(Consumer consumer, ElectionRecord electionRecord, ProxyGuardiansProvider provider) {
+  public DecryptingSimulator(Consumer consumer, ElectionRecord electionRecord, ProxyGuardiansProvider provider) {
     this.consumer = consumer;
     this.electionRecord = electionRecord;
     this.election = electionRecord.election;
@@ -159,7 +159,7 @@ public class SimulateDecryptBallots {
     this.encryptedTally = electionRecord.encryptedTally;
 
     this.guardians = provider.guardians();
-    for (RemoteTrustee.DecryptorProxy guardian : provider.guardians()) {
+    for (DecryptingTrustee.Proxy guardian : provider.guardians()) {
       // LOOK test Guardians against whats in the electionRecord.
     }
     System.out.printf("%nReady to decrypt%n");
@@ -179,7 +179,7 @@ public class SimulateDecryptBallots {
     TrusteeDecryptionMediator mediator = new TrusteeDecryptionMediator(electionRecord.context, this.encryptedTally, consumer.spoiledBallotsProto());
 
     int count = 0;
-    for (RemoteTrustee.DecryptorProxy guardian : this.guardians) {
+    for (DecryptingTrustee.Proxy guardian : this.guardians) {
       boolean ok = mediator.announce(guardian);
       Preconditions.checkArgument(ok);
       System.out.printf(" Guardian Present: %s%n", guardian.id());

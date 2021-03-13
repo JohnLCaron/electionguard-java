@@ -24,24 +24,25 @@ public class DecryptingTrustee {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   public final String id;
-  // a unique number in [1, 256) that is the polynomial x value for this guardian
   public final int sequence_order;
-  public final int number_of_guardians;
 
-  public final RemoteTrustee.GuardianSecrets guardianSecrets;
+  /** The auxiliary private key */
+  public final java.security.PrivateKey rsa_private_key;
 
-  // Other guardians' public keys that are shared with this guardian
-  public final Map<String, KeyCeremony.PublicKeySet> allGuardianPublicKeys; // map(GUARDIAN_ID, PublicKeySet)
+  /** The election (ElGamal) secret key */
+  public final ElGamal.KeyPair election_keypair;
 
-  // Other guardians' partial key backups of this guardian's keys. Needed for decryption.
+  /** Other guardians' partial key backups of this guardian's keys. */
   public final Map<String, KeyCeremony.ElectionPartialKeyBackup> otherGuardianPartialKeyBackups; // Map(GUARDIAN_ID, ElectionPartialKeyBackup)
 
-  public DecryptingTrustee(String id, int sequence_order, int number_of_guardians, RemoteTrustee.GuardianSecrets guardianSecrets, Map<String, KeyCeremony.PublicKeySet> allGuardianPublicKeys, Map<String, KeyCeremony.ElectionPartialKeyBackup> otherGuardianPartialKeyBackups) {
+  public DecryptingTrustee(String id, int sequence_order,
+                           java.security.PrivateKey rsa_private_key,
+                           ElGamal.KeyPair election_keypair,
+                           Map<String, KeyCeremony.ElectionPartialKeyBackup> otherGuardianPartialKeyBackups) {
     this.id = id;
     this.sequence_order = sequence_order;
-    this.number_of_guardians = number_of_guardians;
-    this.guardianSecrets = guardianSecrets;
-    this.allGuardianPublicKeys = allGuardianPublicKeys;
+    this.rsa_private_key = rsa_private_key;
+    this.election_keypair = election_keypair;
     this.otherGuardianPartialKeyBackups = otherGuardianPartialKeyBackups;
   }
 
@@ -77,9 +78,8 @@ public class DecryptingTrustee {
     }
 
     // LOOK why string?
-    Optional<String> decrypted_value = Rsa.decrypt(backup.encrypted_value(), this.guardianSecrets.rsa_keypair.getPrivate());
+    Optional<String> decrypted_value = Rsa.decrypt(backup.encrypted_value(), this.rsa_private_key);
     if (decrypted_value.isEmpty()) {
-      Rsa.decrypt(backup.encrypted_value(), this.guardianSecrets.rsa_keypair.getPrivate());
       logger.atInfo().log("compensate decrypt guardian %s failed decryption for %s",
               this.id, missing_guardian_id);
       return Optional.empty();
@@ -122,12 +122,12 @@ public class DecryptingTrustee {
     //TODO: ISSUE #47: Decrypt the election secret key
 
     // 𝑀_i = 𝐴^𝑠𝑖 mod 𝑝
-    Group.ElementModP partial_decryption = elgamal.partial_decrypt(guardianSecrets.election_key_pair.secret_key);
+    Group.ElementModP partial_decryption = elgamal.partial_decrypt(this.election_keypair.secret_key);
 
     // 𝑀_i = 𝐴^𝑠𝑖 mod 𝑝 and 𝐾𝑖 = 𝑔^𝑠𝑖 mod 𝑝
     ChaumPedersen.ChaumPedersenProof proof = ChaumPedersen.make_chaum_pedersen(
             elgamal,
-            guardianSecrets.election_key_pair.secret_key,
+            this.election_keypair.secret_key, // LOOK
             partial_decryption,
             nonce_seed,
             extended_base_hash);
@@ -158,7 +158,7 @@ public class DecryptingTrustee {
     return Optional.of(pub_key);
   }
 
-  public Proxy getDecryptorProxy() {
+  public Proxy getProxy() {
     return new Proxy();
   }
 
@@ -177,7 +177,7 @@ public class DecryptingTrustee {
     }
 
     Group.ElementModP election_public_key() {
-      return DecryptingTrustee.this.guardianSecrets.election_key_pair.public_key;
+      return DecryptingTrustee.this.election_keypair.public_key;
     }
 
     Optional<DecryptionProofTuple> compensate_decrypt(

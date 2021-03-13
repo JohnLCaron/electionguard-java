@@ -15,8 +15,7 @@ import java.util.Optional;
 import static com.sunya.electionguard.Group.*;
 
 /**
- * Guardian of election (aka RemoteTrustee), responsible for safeguarding information and decrypting results.
- * LOOK document when we need the secret keys: this.auxiliary_keys.secret_key, this.election_keys.
+ * Guardian of election responsible for safeguarding information and decrypting results.
  */
 @Immutable
 public class Guardian extends ElectionObjectBase {

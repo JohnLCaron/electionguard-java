@@ -10,23 +10,24 @@ import java.io.IOException;
  */
 public class RemoteGuardiansProvider implements ProxyGuardiansProvider {
   private final String location;
-  private Iterable<RemoteTrustee.DecryptorProxy> guardians;
+  private Iterable<DecryptingTrustee.Proxy> guardians;
 
   public RemoteGuardiansProvider(String location) {
     this.location = location;
   }
 
   @Override
-  public Iterable<RemoteTrustee.DecryptorProxy> guardians() {
+  public Iterable<DecryptingTrustee.Proxy> guardians() {
     if (guardians == null) {
       guardians = read(location);
     }
     return guardians;
   }
 
-  static ImmutableList<RemoteTrustee.DecryptorProxy> read(String location) {
+  static ImmutableList<DecryptingTrustee.Proxy> read(String location) {
     try {
-      return TrusteeFromProto.readTrustees(location);
+      ImmutableList<DecryptingTrustee> trustees = TrusteeFromProto.readTrustees(location);
+      return trustees.stream().map(DecryptingTrustee::getProxy).collect(ImmutableList.toImmutableList());
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

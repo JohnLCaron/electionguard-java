@@ -40,8 +40,8 @@ public class TrusteeDecryptionMediator {
   // Map<ALL_GUARDIAN_ID, Map<BALLOT_ID, DecryptionShare>>
   private final Map<String, Map<String, DecryptionShare>> ballot_shares = new HashMap<>();
 
-  // Map(AVAILABLE_GUARDIAN_ID, RemoteTrustee.DecryptorProxy)
-  private final Map<String, RemoteTrustee.DecryptorProxy> available_guardians = new HashMap<>();
+  // Map(AVAILABLE_GUARDIAN_ID, DecryptingTrustee.Proxy)
+  private final Map<String, DecryptingTrustee.Proxy> available_guardians = new HashMap<>();
   // Map(MISSING_GUARDIAN_ID, ElectionPublicKey)
   private final Map<String, KeyCeremony.ElectionPublicKey> missing_guardians = new HashMap<>();
   // Map(AVAILABLE_GUARDIAN_ID, ElementModQ)
@@ -63,7 +63,7 @@ public class TrusteeDecryptionMediator {
    * @param guardian: The guardian who will participate in the decryption.
    * @return true on "success".
    */
-  public boolean announce(RemoteTrustee.DecryptorProxy guardian) {
+  public boolean announce(DecryptingTrustee.Proxy guardian) {
     // Only allow a guardian to announce once
     if (available_guardians.containsKey(guardian.id())) {
       logger.atInfo().log("guardian %s already announced", guardian.id());
@@ -94,13 +94,13 @@ public class TrusteeDecryptionMediator {
   }
 
   /** This guardian removes itself from the missing list since it generated a valid share. */
-  private void mark_available(RemoteTrustee.DecryptorProxy guardian) {
+  private void mark_available(DecryptingTrustee.Proxy guardian) {
     this.available_guardians.put(guardian.id(), guardian);
     this.missing_guardians.remove(guardian.id());
   }
 
   /* Check the guardian's collections of keys and ensure the public keys match for the missing guardians.
-  private boolean validate_missing_guardian_keys(RemoteTrustee.DecryptorProxy guardian) {
+  private boolean validate_missing_guardian_keys(DecryptingTrustee.Proxy guardian) {
 
     // Check this guardian's collection of public keys for other guardians that have not announced
     Map<String, KeyCeremony.ElectionPublicKey> missing_guardians =
@@ -216,7 +216,7 @@ public class TrusteeDecryptionMediator {
 
     Map<String, DecryptionShare.CompensatedDecryptionShare> compensated_decryptions = new HashMap<>();
     // Loop through each of the available guardians and calculate decryption shares for the missing one
-    for (RemoteTrustee.DecryptorProxy available_guardian : this.available_guardians.values()) {
+    for (DecryptingTrustee.Proxy available_guardian : this.available_guardians.values()) {
       Optional<DecryptionShare.CompensatedDecryptionShare> tally_share = TrusteeDecryptions.compute_compensated_decryption_share(
               available_guardian,
               missing_guardian_id,
@@ -337,7 +337,7 @@ public class TrusteeDecryptionMediator {
     Map<String, DecryptionShare.CompensatedDecryptionShare> compensated_decryptions = new HashMap<>();
 
     // Loop through each of the available guardians and calculate decryption shares for the missing one
-    for (RemoteTrustee.DecryptorProxy available_guardian : this.available_guardians.values()) {
+    for (DecryptingTrustee.Proxy available_guardian : this.available_guardians.values()) {
       Optional<DecryptionShare.CompensatedDecryptionShare> ballot_share = TrusteeDecryptions.compute_compensated_decryption_share_for_ballot(
               available_guardian,
               missing_guardian_id,
@@ -366,7 +366,7 @@ public class TrusteeDecryptionMediator {
     }
     // Compute lagrange coefficients for each of the available guardians
     this.lagrange_coefficients = new HashMap<>();
-    for (RemoteTrustee.DecryptorProxy available_guardian : this.available_guardians.values()) {
+    for (DecryptingTrustee.Proxy available_guardian : this.available_guardians.values()) {
       List<Integer> seq_orders = this.available_guardians.values().stream()
               .filter(g -> !g.id().equals(available_guardian.id()))
               .map(g -> g.sequence_order()).collect(Collectors.toList());

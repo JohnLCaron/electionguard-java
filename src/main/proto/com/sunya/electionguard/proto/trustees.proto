@@ -6,42 +6,17 @@ import "com/sunya/electionguard/proto/key_ceremony.proto";
 option java_package = "com.sunya.electionguard.proto";
 option java_outer_classname = "TrusteeProto";
 
-// LOOK may replace key_ceremony.proto
+// LOOK may replace key_ceremony.proto ??
 
 message Trustees {
-  uint32 quorum = 2;
   repeated Trustee trustees = 1;
 }
 
 message Trustee {
   string guardian_id = 1;
   uint32 guardian_sequence = 2; // i=1,number of guardians
-  GuardianSecrets secrets = 3;
-  // Other guardians' election public key sets shared with this guardian
-  repeated PublicKeySet all_guardian_public_keys = 6;
+  ElGamalKeyPair election_key_pair = 3;
+  RSAPrivateKey rsa_private_key = 4; // auxiliary private key
   // Other guardians' partial key backups shared with this guardian
-  repeated ElectionPartialKeyBackup other_guardian_backups = 7;
-}
-
-message GuardianSecrets {
-  // The Guardian's polynomial.
-  ElectionPolynomial polynomial = 1;
-  // K = (s, g^s), for this Guardian */
-  ElGamalKeyPair key_pair = 2;
-  // The proof of knowledge of possession of the associated private key. */
-  SchnorrProof proof = 3;
-  RsaKeyPair rsa_keypair = 4;
-}
-
-message RsaKeyPair {
-  RSAPublicKey public_key = 1;
-  RSAPrivateKey private_key = 2;
-}
-
-message PublicKeySet {
-  string owner_id = 1; // guardian object_id
-  uint32 sequence_order = 2; // guardian sequence_order
-  RSAPublicKey rsa_public_key = 3;
-  ElementModP election_public_key = 5;
-  SchnorrProof election_public_key_proof = 4;
+  repeated ElectionPartialKeyBackup other_guardian_backups = 5;
 }
