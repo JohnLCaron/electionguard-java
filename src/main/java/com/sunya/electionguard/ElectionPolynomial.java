@@ -34,10 +34,10 @@ public class ElectionPolynomial {
   /** The secret coefficients `a_ij`. */
   public final ImmutableList<Group.ElementModQ> coefficients;
 
-  /** The public keys `K_ij`generated from secret coefficients. */
+  /** The public keys `K_ij` generated from secret coefficients. (not secret) */
   public final ImmutableList<Group.ElementModP> coefficient_commitments;
 
-  /** A proof of possession of the private key for each secret coefficient. */
+  /** A proof of possession of the private key for each secret coefficient. (not secret) */
   public final ImmutableList<SchnorrProof> coefficient_proofs;
 
   // LOOK test all sizes == quorum
@@ -87,11 +87,12 @@ public class ElectionPolynomial {
   /**
    * Generates a polynomial for sharing election keys.
    *
-   * @param number_of_coefficients: Number of coefficients of polynomial: the quorum, k.
-   * @param nonce:                  an optional nonce parameter that may be provided (only for testing)
-   * @return Polynomial used to share election keys
+   * @param number_of_coefficients Number of coefficients of polynomial = the quorum, k.
+   * @param nonce an optional nonce parameter that may be provided (only for testing), otherwise
+   *               a random one is chosen.
+   * @return ElectionPolynomial used to share election keys
    */
-  static ElectionPolynomial generate_polynomial(int number_of_coefficients, @Nullable Group.ElementModQ nonce) {
+  public static ElectionPolynomial generate_polynomial(int number_of_coefficients, @Nullable Group.ElementModQ nonce) {
     ArrayList<Group.ElementModQ> coefficients = new ArrayList<>();
     ArrayList<Group.ElementModP> commitments = new ArrayList<>();
     ArrayList<SchnorrProof> proofs = new ArrayList<>();
@@ -114,13 +115,13 @@ public class ElectionPolynomial {
   }
 
   /**
-   * Computes a single coordinate value of the election polynomial used for sharing.
+   * Computes the coordinate value of the election polynomial at exponent_modifier.
    *
    * @param exponent_modifier: Unique modifier (usually sequence order) for exponent
-   * @param polynomial:        Manifest polynomial
-   * @return Polynomial used to share election keys
+   * @param polynomial:        A Guardian's polynomial
    */
-  static ElementModQ compute_polynomial_coordinate(BigInteger exponent_modifier, ElectionPolynomial polynomial) {
+  public static ElementModQ compute_polynomial_coordinate(BigInteger exponent_modifier, ElectionPolynomial polynomial) {
+    // LOOK is it really allowed to be zero?
     Preconditions.checkArgument(Group.between(BigInteger.ZERO, exponent_modifier, Q), "exponent_modifier is out of range");
 
     ElementModQ computed_value = ZERO_MOD_Q;
@@ -158,7 +159,7 @@ public class ElectionPolynomial {
    * @param exponent_modifier       Unique modifier (usually sequence order) for exponent
    * @param coefficient_commitments Commitments for coefficients of polynomial
    */
-  static boolean verify_polynomial_coordinate(ElementModQ coordinate, BigInteger exponent_modifier, List<ElementModP> coefficient_commitments) {
+  public static boolean verify_polynomial_coordinate(ElementModQ coordinate, BigInteger exponent_modifier, List<ElementModP> coefficient_commitments) {
     ElementModP commitment_output = Group.ONE_MOD_P;
     int count = 0;
     for (ElementModP commitment : coefficient_commitments) {

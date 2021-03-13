@@ -241,7 +241,7 @@ public class TestDecryptProblem {
 
     // Here's where the ciphertext Tally is decrypted.
     this.decryptedTally = this.decrypter.get_plaintext_tally(null).orElseThrow();
-    List<DecryptionMediator.SpoiledBallotAndTally> spoiledTallyAndBallot =
+    List<SpoiledBallotAndTally> spoiledTallyAndBallot =
             this.decrypter.decrypt_spoiled_ballots(null).orElseThrow();
     this.spoiledDecryptedBallots = spoiledTallyAndBallot.stream().map(e -> e.ballot).collect(Collectors.toList());
     this.spoiledDecryptedTallies = spoiledTallyAndBallot.stream().map(e -> e.tally).collect(Collectors.toList());

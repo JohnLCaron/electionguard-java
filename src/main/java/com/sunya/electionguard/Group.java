@@ -45,7 +45,7 @@ public class Group {
      * Converts from the element to the hex String of the BigInteger bytes.
      * This is preferable to directly accessing `elem`, whose representation might change.
      */
-    String to_hex() {
+    public String to_hex() {
       String h = elem.toString(16);
       if (h.length() % 2 == 1) {
         h = "0" + h;
@@ -140,7 +140,7 @@ public class Group {
    * Returns `None` if the number is out of the allowed
    * [0,Q) range.
    */
-  static Optional<ElementModQ> hex_to_q(String input) {
+  public static Optional<ElementModQ> hex_to_q(String input) {
     BigInteger b = new BigInteger(input, 16);
     if (b.compareTo(Q) < 0) {
       return Optional.of(new ElementModQ(b));
@@ -250,7 +250,7 @@ public class Group {
   }
 
   /** Computes b^e mod q. */
-  static ElementModQ pow_q(BigInteger b, BigInteger e) {
+  public static ElementModQ pow_q(BigInteger b, BigInteger e) {
     return int_to_q_unchecked(b.modPow(e, Q));
   }
 

@@ -8,7 +8,7 @@ import javax.annotation.concurrent.Immutable;
  * Superclass for encrypted selections.
  */
 @Immutable
-class CiphertextSelection extends ElectionObjectBase {
+public class CiphertextSelection extends ElectionObjectBase {
   /** Manifest.SelectionDescription.crypto_hash(). */
   public final Group.ElementModQ description_hash;
   private final ElGamal.Ciphertext ciphertext; // only accessed through ciphertext(), so subclass can override

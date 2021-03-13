@@ -443,12 +443,12 @@ public class TestDecryptionMediator extends TestProperties {
     shares.put(this.guardians.get(1).object_id, second_share);
     shares.put(this.guardians.get(2).object_id, third_share);
 
-    Optional<List<DecryptionMediator.SpoiledBallotAndTally>> resultO = DecryptWithShares.decrypt_spoiled_ballots(
+    Optional<List<SpoiledBallotAndTally>> resultO = DecryptWithShares.decrypt_spoiled_ballots(
             this.ballot_box.getSpoiledBallots(),
             shares,
             this.context);
     assertThat(resultO).isPresent();
-    List<DecryptionMediator.SpoiledBallotAndTally> result = resultO.get();
+    List<SpoiledBallotAndTally> result = resultO.get();
     Map<String, PlaintextBallot> spoiledBallots = result.stream().collect(Collectors.toMap(r -> r.ballot.object_id, r -> r.ballot));
 
     assertThat(spoiledBallots.containsKey(this.fake_spoiled_ballot.object_id)).isTrue();

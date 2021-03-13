@@ -4,7 +4,6 @@ import "com/sunya/electionguard/proto/ciphertext_ballot.proto";
 import "com/sunya/electionguard/proto/ciphertext_tally.proto";
 import "com/sunya/electionguard/proto/common.proto";
 import "com/sunya/electionguard/proto/manifest.proto";
-import "com/sunya/electionguard/proto/key_ceremony.proto";
 import "com/sunya/electionguard/proto/plaintext_ballot.proto";
 import "com/sunya/electionguard/proto/plaintext_tally.proto";
 
@@ -17,17 +16,12 @@ message ElectionRecord {
   Manifest manifest = 2;
   ElectionContext context = 3;
   repeated EncryptionDevice device = 4;
+
+  // Set of coefficient validation pieces, one for each guardian
   repeated CoefficientValidationSet guardian_coefficients = 5;
+
   CiphertextTally ciphertext_tally = 6;
   PlaintextTally decrypted_tally = 7;
-}
-
-// The device that does the encryption.
-message EncryptionDevice {
-  int64 uuid = 3;
-  string session_id = 4;
-  int32 launch_code = 5;
-  string location = 2;
 }
 
 // The constants for mathematical functions during the election.
@@ -38,13 +32,27 @@ message Constants {
   bytes generator = 4;   // generator or g
 }
 
+message CoefficientValidationSet {
+  string owner_id = 1; // guardian id
+  repeated ElementModP coefficient_commitments = 2;  // Kij, j=0...quorum-1
+  repeated SchnorrProof coefficient_proofs = 3;
+}
+
+// The device that does the encryption.
+message EncryptionDevice {
+  int64 uuid = 3;
+  string session_id = 4;
+  int32 launch_code = 5;
+  string location = 2;
+}
+
 // ElectionGuard representation of a specific election.
 message ElectionContext {
   uint32 number_of_guardians = 1; // The number of guardians necessary to generate the public key
   uint32 quorum = 2; // The quorum of guardians necessary to decrypt an election.  Must be <= number_of_guardians.
 
   // The `joint public key (K)` in the [ElectionGuard Spec]
-  ElementModP elgamal_public_key = 3;
+  ElementModP joint_public_key = 3;
 
   // The hash of the election description
   ElementModQ description_hash = 4;

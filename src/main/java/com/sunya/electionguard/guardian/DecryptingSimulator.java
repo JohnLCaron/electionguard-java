@@ -1,17 +1,15 @@
-package com.sunya.electionguard.workflow;
+package com.sunya.electionguard.guardian;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.google.common.base.Preconditions;
+import com.sunya.electionguard.CiphertextTally;
 import com.sunya.electionguard.CiphertextTallyBuilder;
-import com.sunya.electionguard.DecryptionMediator;
-import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.InternalManifest;
-import com.sunya.electionguard.Guardian;
+import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.PlaintextBallot;
 import com.sunya.electionguard.PlaintextTally;
-import com.sunya.electionguard.CiphertextTally;
 import com.sunya.electionguard.Scheduler;
 import com.sunya.electionguard.SpoiledBallotAndTally;
 import com.sunya.electionguard.publish.Consumer;
@@ -35,7 +33,7 @@ import java.util.stream.Collectors;
  *
  * @see <a href="https://www.electionguard.vote/spec/0.95.0/7_Verifiable_decryption/">Ballot Decryption</a>
  */
-public class DecryptBallots {
+public class DecryptingSimulator {
 
   private static class CommandLine {
     @Parameter(names = {"-in"}, order = 0,
@@ -71,8 +69,8 @@ public class DecryptBallots {
   }
 
   public static void main(String[] args) {
-    String progName = DecryptBallots.class.getName();
-    DecryptBallots decryptor;
+    String progName = DecryptingSimulator.class.getName();
+    DecryptingSimulator decryptor;
     CommandLine cmdLine = null;
 
     try {
@@ -87,7 +85,7 @@ public class DecryptBallots {
       System.exit(1);
     }
 
-    GuardiansProvider guardiansProvider = null;
+    ProxyGuardiansProvider guardiansProvider = null;
     try {
       if (cmdLine.guardiansProviderClass != null) {
         try {
@@ -97,7 +95,7 @@ public class DecryptBallots {
           System.exit(2);
         }
       } else {
-        guardiansProvider = new SecretGuardiansProvider(cmdLine.guardiansProviderLocation);
+        guardiansProvider = new RemoteGuardiansProvider(cmdLine.guardiansProviderLocation);
       }
     } catch (Throwable t) {
       System.out.printf("*** Must specify -guardians or valid -guardiansLocation: FAILURE%n");
@@ -110,7 +108,7 @@ public class DecryptBallots {
       ElectionRecord electionRecord = consumer.readElectionRecord();
 
       System.out.printf(" BallotDecryptor read from %s%n Write to %s%n", cmdLine.encryptDir, cmdLine.outputDir);
-      decryptor = new DecryptBallots(consumer, electionRecord, guardiansProvider);
+      decryptor = new DecryptingSimulator(consumer, electionRecord, guardiansProvider);
       if (electionRecord.encryptedTally == null) {
         decryptor.accumulateTally();
       }
@@ -129,12 +127,12 @@ public class DecryptBallots {
     }
   }
 
-  public static GuardiansProvider makeGuardiansProvider(String className) throws Throwable {
+  public static ProxyGuardiansProvider makeGuardiansProvider(String className) throws Throwable {
     Class<?> c = Class.forName(className);
-    if (!(GuardiansProvider.class.isAssignableFrom(c))) {
-      throw new IllegalArgumentException(String.format("%s must implement %s", c.getName(), GuardiansProvider.class));
+    if (!(ProxyGuardiansProvider.class.isAssignableFrom(c))) {
+      throw new IllegalArgumentException(String.format("%s must implement %s", c.getName(), ProxyGuardiansProvider.class));
     }
-    java.lang.reflect.Constructor<GuardiansProvider> constructor = (Constructor<GuardiansProvider>) c.getConstructor();
+    Constructor<ProxyGuardiansProvider> constructor = (Constructor<ProxyGuardiansProvider>) c.getConstructor();
     return constructor.newInstance();
   }
 
@@ -143,7 +141,7 @@ public class DecryptBallots {
   final ElectionRecord electionRecord;
   final Manifest election;
 
-  Iterable<Guardian> guardians;
+  Iterable<DecryptingTrustee.Proxy> guardians;
   CiphertextTally encryptedTally;
   PlaintextTally decryptedTally;
   List<PlaintextBallot> spoiledDecryptedBallots;
@@ -151,7 +149,7 @@ public class DecryptBallots {
   int quorum;
   int numberOfGuardians;
 
-  public DecryptBallots(Consumer consumer, ElectionRecord electionRecord, GuardiansProvider provider) {
+  public DecryptingSimulator(Consumer consumer, ElectionRecord electionRecord, ProxyGuardiansProvider provider) {
     this.consumer = consumer;
     this.electionRecord = electionRecord;
     this.election = electionRecord.election;
@@ -161,7 +159,7 @@ public class DecryptBallots {
     this.encryptedTally = electionRecord.encryptedTally;
 
     this.guardians = provider.guardians();
-    for (Guardian guardian : provider.guardians()) {
+    for (DecryptingTrustee.Proxy guardian : provider.guardians()) {
       // LOOK test Guardians against whats in the electionRecord.
     }
     System.out.printf("%nReady to decrypt%n");
@@ -178,13 +176,13 @@ public class DecryptBallots {
 
   void decryptTally() {
     System.out.printf("%nDecrypt tally%n");
-    DecryptionMediator mediator = new DecryptionMediator(electionRecord.context, this.encryptedTally, consumer.spoiledBallotsProto());
+    TrusteeDecryptionMediator mediator = new TrusteeDecryptionMediator(electionRecord.context, this.encryptedTally, consumer.spoiledBallotsProto());
 
     int count = 0;
-    for (Guardian guardian : this.guardians) {
+    for (DecryptingTrustee.Proxy guardian : this.guardians) {
       boolean ok = mediator.announce(guardian);
       Preconditions.checkArgument(ok);
-      System.out.printf(" Guardian Present: %s%n", guardian.object_id);
+      System.out.printf(" Guardian Present: %s%n", guardian.id());
       count++;
       if (count == this.quorum) {
         System.out.printf("Quorum of %d reached%n", this.quorum);
@@ -195,7 +193,7 @@ public class DecryptBallots {
     // Here's where the ciphertext Tally is decrypted.
     this.decryptedTally = mediator.get_plaintext_tally(null).orElseThrow();
     List<SpoiledBallotAndTally> spoiledTallyAndBallot =
-            mediator.decrypt_spoiled_ballots(null).orElseThrow();
+            mediator.decrypt_spoiled_ballots().orElseThrow();
     this.spoiledDecryptedBallots = spoiledTallyAndBallot.stream().map(e -> e.ballot).collect(Collectors.toList());
     this.spoiledDecryptedTallies = spoiledTallyAndBallot.stream().map(e -> e.tally).collect(Collectors.toList());
     System.out.printf("Done decrypting tally%n%n%s%n", this.decryptedTally);

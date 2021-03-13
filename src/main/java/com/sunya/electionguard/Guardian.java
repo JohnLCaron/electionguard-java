@@ -15,8 +15,7 @@ import java.util.Optional;
 import static com.sunya.electionguard.Group.*;
 
 /**
- * Guardian of election (aka Trustee), responsible for safeguarding information and decrypting results.
- * LOOK document when we need the secret keys: this.auxiliary_keys.secret_key, this.election_keys.
+ * Guardian of election responsible for safeguarding information and decrypting results.
  */
 @Immutable
 public class Guardian extends ElectionObjectBase {
@@ -162,16 +161,6 @@ public class Guardian extends ElectionObjectBase {
             extended_base_hash);
 
     return new DecryptionProofTuple(partial_decryption, proof);
-  }
-
-  static class DecryptionProofTuple {
-    final ElementModP decryption;
-    final ChaumPedersen.ChaumPedersenProof proof;
-
-    DecryptionProofTuple(ElementModP partial_decryption, ChaumPedersen.ChaumPedersenProof proof) {
-      this.decryption = partial_decryption;
-      this.proof = proof;
-    }
   }
 
   /**

@@ -16,16 +16,16 @@ import static com.sunya.electionguard.Group.ElementModQ;
 import static com.sunya.electionguard.Group.div_p;
 
 /** Static methods for decryption with shares. */
-class DecryptWithShares {
+public class DecryptWithShares {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   /** Decrypt a collection of ciphertext spoiled ballots into decrypted plaintext tallies and ballots. */
-  static Optional<List<DecryptionMediator.SpoiledBallotAndTally>> decrypt_spoiled_ballots(
+  public static Optional<List<SpoiledBallotAndTally>> decrypt_spoiled_ballots(
           Iterable<SubmittedBallot> ballots,
           Map<String, Map<String, DecryptionShare>> shares, // MAP(AVAILABLE_GUARDIAN_ID, Map(BALLOT_ID, DecryptionShare))
           CiphertextElectionContext context) {
 
-    List<DecryptionMediator.SpoiledBallotAndTally> result = new ArrayList<>();
+    List<SpoiledBallotAndTally> result = new ArrayList<>();
     for (SubmittedBallot ballot : ballots) {
       HashMap<String, DecryptionShare> ballot_shares = new HashMap<>();
       for (Map.Entry<String, Map<String, DecryptionShare>> entry : shares.entrySet()) {
@@ -41,7 +41,7 @@ class DecryptWithShares {
       }
       PlaintextTally dtally = decrypted_tally.get();
       PlaintextBallot dballot = PlaintextBallot.from(ballot, dtally);
-      result.add(new DecryptionMediator.SpoiledBallotAndTally(dtally, dballot));
+      result.add(new SpoiledBallotAndTally(dtally, dballot));
     }
 
     return Optional.of(result);
@@ -57,7 +57,7 @@ class DecryptWithShares {
    * @param guardianStates: pass to PlaintextTally
    * @return A PlaintextTally or None if there is an error
    */
-  static Optional<PlaintextTally> decrypt_tally(
+  public static Optional<PlaintextTally> decrypt_tally(
           CiphertextTally tally,
           Map<String, DecryptionShare> shares, // Map(AVAILABLE_GUARDIAN_ID, DecryptionShare)
           CiphertextElectionContext context,
@@ -86,7 +86,7 @@ class DecryptWithShares {
   // spoiled ballots -> plaintext ballot
 
   /** Decrypt a collection of ciphertext spoiled ballots into Map(BALLOT_ID, PlaintextTally). */
-  static Optional<Map<String, PlaintextTally>> decrypt_ballots(
+  public static Optional<Map<String, PlaintextTally>> decrypt_ballots(
           Iterable<SubmittedBallot> ballots,
           Map<String, Map<String, DecryptionShare>> shares, // MAP(AVAILABLE_GUARDIAN_ID, Map(BALLOT_ID, DecryptionShare))
           CiphertextElectionContext context) {

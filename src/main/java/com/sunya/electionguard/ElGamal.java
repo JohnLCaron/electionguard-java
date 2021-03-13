@@ -128,7 +128,7 @@ public class ElGamal {
      * @param secretKey: The corresponding ElGamal secret key.
      * @return An exponentially encoded plaintext message.
      */
-    ElementModP partial_decrypt(ElementModQ secretKey) {
+    public ElementModP partial_decrypt(ElementModQ secretKey) {
       return Group.pow_p(this.pad, secretKey);
     }
 

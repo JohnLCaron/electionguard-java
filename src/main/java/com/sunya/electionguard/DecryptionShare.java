@@ -36,7 +36,7 @@ public class DecryptionShare {
 
   /** A Guardian's Partial Decryption of a contest. */
   @AutoValue
-  static abstract class CiphertextDecryptionContest implements ElectionObjectBaseIF {
+  public static abstract class CiphertextDecryptionContest implements ElectionObjectBaseIF {
     /** The Available Guardian that this share belongs to. */
     abstract String guardian_id();
 
@@ -134,7 +134,7 @@ public class DecryptionShare {
   }
 
   /** Create a ciphertext decryption selection */
-  static CiphertextDecryptionSelection create_ciphertext_decryption_selection(
+  public static CiphertextDecryptionSelection create_ciphertext_decryption_selection(
           String object_id,
           String guardian_id,
           ElementModP share,
@@ -147,21 +147,21 @@ public class DecryptionShare {
 
   //////////////////////////////////////////////////////////////////////////////////
 
-  static class CompensatedDecryptionShare {
+  public static class CompensatedDecryptionShare {
     /** owner object_id */
-    final String owner_id;
+    public final String owner_id;
 
     /** The Available Guardian that this share belongs to */
-    final String guardian_id;
+    public final String guardian_id;
 
     /** The Missing Guardian for whom this share is calculated on behalf of */
-    final String missing_guardian_id;
+    public final String missing_guardian_id;
 
     /** The election public key for the guardian. */
-    final ElementModP public_key;
+    public final ElementModP public_key;
 
     /** The collection of decryption shares for all contests in the election. */
-    final ImmutableMap<String, CiphertextCompensatedDecryptionContest> contests; // Map(CONTEST_ID, CiphertextCompensatedDecryptionContest)
+    public final ImmutableMap<String, CiphertextCompensatedDecryptionContest> contests; // Map(CONTEST_ID, CiphertextCompensatedDecryptionContest)
 
     public CompensatedDecryptionShare(String owner_id, String guardian_id, String missing_guardian_id, ElementModP public_key, Map<String, CiphertextCompensatedDecryptionContest> contests) {
       this.owner_id = owner_id;
@@ -174,18 +174,18 @@ public class DecryptionShare {
 
   /** A Guardian's Partial Decryption of a contest. */
   @AutoValue
-  static abstract class CiphertextCompensatedDecryptionContest implements ElectionObjectBaseIF {
+  public static abstract class CiphertextCompensatedDecryptionContest implements ElectionObjectBaseIF {
     /** The Available Guardian that this share belongs to */
-    abstract String guardian_id();
+    public abstract String guardian_id();
 
     /** The Missing Guardian for whom this share is calculated on behalf of. */
-    abstract String missing_guardian_id();
+    public abstract String missing_guardian_id();
 
     /** The ContestDescription Hash. */
-    abstract ElementModQ description_hash();
+    public abstract ElementModQ description_hash();
 
     /** the collection of decryption shares for this contest's selections. */
-    abstract ImmutableMap<String, CiphertextCompensatedDecryptionSelection> selections(); // Map(SELECTION_ID, CiphertextCompensatedDecryptionSelection)
+    public abstract ImmutableMap<String, CiphertextCompensatedDecryptionSelection> selections(); // Map(SELECTION_ID, CiphertextCompensatedDecryptionSelection)
 
     public static CiphertextCompensatedDecryptionContest create(
             String object_id,
