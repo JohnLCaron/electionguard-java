@@ -164,16 +164,6 @@ public class Guardian extends ElectionObjectBase {
     return new DecryptionProofTuple(partial_decryption, proof);
   }
 
-  static class DecryptionProofTuple {
-    final ElementModP decryption;
-    final ChaumPedersen.ChaumPedersenProof proof;
-
-    DecryptionProofTuple(ElementModP partial_decryption, ChaumPedersen.ChaumPedersenProof proof) {
-      this.decryption = partial_decryption;
-      this.proof = proof;
-    }
-  }
-
   /**
    * Compute a compensated partial decryption of an elgamal encryption on behalf of the missing guardian.
    * LOOK this seems to be the only place we need this.auxiliary_keys.secret_key. Whats with ISSUE #47?

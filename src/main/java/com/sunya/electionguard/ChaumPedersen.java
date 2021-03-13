@@ -146,7 +146,7 @@ public class ChaumPedersen {
      * @param m: The value being checked for validity
      * @param q: The extended base hash of the election
      */
-    boolean is_valid(ElGamal.Ciphertext message, ElementModP k, ElementModP m, ElementModQ q) {
+    public boolean is_valid(ElGamal.Ciphertext message, ElementModP k, ElementModP m, ElementModQ q) {
       ElementModP alpha = message.pad;
       ElementModP beta = message.data;
       ElementModP a = this.pad;
@@ -422,7 +422,7 @@ public class ChaumPedersen {
    *     @param hash_header: A value used when generating the challenge,
    *                         usually the election extended base hash (𝑄')
    */
-  static ChaumPedersenProof make_chaum_pedersen(
+  public static ChaumPedersenProof make_chaum_pedersen(
           ElGamal.Ciphertext message,
           ElementModQ s,
           ElementModP m,

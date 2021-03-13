@@ -8,6 +8,8 @@ import com.sunya.electionguard.ElectionConstants;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.KeyCeremony;
 import com.sunya.electionguard.Manifest;
+import com.sunya.electionguard.proto.TrusteeProto;
+import com.sunya.electionguard.proto.TrusteeToProto;
 import com.sunya.electionguard.publish.Consumer;
 import com.sunya.electionguard.publish.Publisher;
 
@@ -82,11 +84,12 @@ public class SimulateKeyCeremony {
       // all we need from election record is the ElectionDescription.
       Consumer consumer = new Consumer(cmdLine.inputDir);
       Manifest election = consumer.readManifest();
-      SimulateKeyCeremony keyCeremony = new SimulateKeyCeremony(election, cmdLine.nguardians, cmdLine.quorum);
+      Publisher publisher = new Publisher(cmdLine.outputDir, false, false);
+      SimulateKeyCeremony keyCeremony = new SimulateKeyCeremony(election, cmdLine.nguardians, cmdLine.quorum, publisher);
 
       // publish
       if (cmdLine.outputDir != null) {
-        boolean ok = keyCeremony.publish(cmdLine.outputDir);
+        boolean ok = keyCeremony.publishElectionRecord(publisher);
         System.out.printf("*** KeyCeremony %s%n", ok ? "SUCCESS" : "FAILURE");
         System.exit(ok ? 0 : 1);
       }
@@ -108,20 +111,25 @@ public class SimulateKeyCeremony {
   Group.ElementModQ commitmentsHash;
   CiphertextElectionContext context;
 
-  List<RemoteTrustee.Proxy> trustees;
+  List<RemoteTrustee.KeyCeremonyProxy> trusteeProxies;
   List<KeyCeremony.CoefficientValidationSet> coefficientValidationSets = new ArrayList<>();
 
-  public SimulateKeyCeremony(Manifest election, int nguardians, int quorum) {
+  public SimulateKeyCeremony(Manifest election, int nguardians, int quorum, Publisher publisher) throws IOException {
     this.election = election;
     this.quorum = quorum;
     this.numberOfGuardians = nguardians;
     System.out.printf("  Create %d Guardians, quorum = %d%n", this.numberOfGuardians, this.quorum);
 
-    this.trustees = new ArrayList<>();
+    this.trusteeProxies = new ArrayList<>();
+    List<RemoteTrustee> trustees = new ArrayList<>();
     for (int i = 0; i < nguardians; i++) {
       int seq = i + 1;
       RemoteTrustee trustee = new RemoteTrustee("trustee" + seq, seq, numberOfGuardians, quorum, null);
-      this.trustees.add(trustee.getProxy());
+      trustees.add(trustee);
+      this.trusteeProxies.add(trustee.getKeyCeremonyProxy());
+    }
+    if (!publishTrustees(publisher, trustees)) {
+      throw new RuntimeException("*** publishTrustees failed");
     }
 
     System.out.printf("%nKey Ceremony Round1%n");
@@ -162,12 +170,16 @@ public class SimulateKeyCeremony {
    * Round 1. Guardian broadcast/share their public keys and key share commitments.
    * Each guardian shares public keys with all the other guardians.
    * This is announce() of the current KeyCeremonyMediator.
+   * LOOK: What is the "key share commitments"? election_public_key_proof? coefficient validation set?
+   *     public abstract java.security.PublicKey auxiliary_public_key();
+   *     public abstract ElementModP election_public_key();
+   *     public abstract SchnorrProof election_public_key_proof();
    */
   boolean round1() {
     // Share public keys
-    for (RemoteTrustee.Proxy sender : trustees) {
+    for (RemoteTrustee.KeyCeremonyProxy sender : trusteeProxies) {
       KeyCeremony.PublicKeySet publicKeys = sender.sendPublicKeys();
-      for (RemoteTrustee.Proxy recipient : trustees) {
+      for (RemoteTrustee.KeyCeremonyProxy recipient : trusteeProxies) {
         if (sender.id().equals(recipient.id())) {
           continue;
         }
@@ -175,7 +187,7 @@ public class SimulateKeyCeremony {
       }
     }
 
-    for (RemoteTrustee.Proxy proxy : trustees) {
+    for (RemoteTrustee.KeyCeremonyProxy proxy : trusteeProxies) {
       if (!proxy.allPublicKeysReceived()) {
         return false;
       }
@@ -184,13 +196,13 @@ public class SimulateKeyCeremony {
   }
 
   /**
-   * Round 2. Each guardian uses each others’ auxiliary key to share private key shares and their own views of each other’s keys
+   * Round 2. Each guardian uses each others’ auxiliary key to share private key shares and their own views of each other’s keys.
    * Each guardian shares partial key backups with all the other guardians (orchestrate()).
    */
    boolean round2() {
      // Share Partial Key Backup
-     for (RemoteTrustee.Proxy sender : trustees) {
-       for (RemoteTrustee.Proxy recipient : trustees) {
+     for (RemoteTrustee.KeyCeremonyProxy sender : trusteeProxies) {
+       for (RemoteTrustee.KeyCeremonyProxy recipient : trusteeProxies) {
          if (sender.id().equals(recipient.id())) {
            continue;
          }
@@ -201,7 +213,7 @@ public class SimulateKeyCeremony {
        }
      }
 
-     for (RemoteTrustee.Proxy proxy : trustees) {
+     for (RemoteTrustee.KeyCeremonyProxy proxy : trusteeProxies) {
        if (!proxy.allBackupsReceived()) {
          return false;
        }
@@ -217,8 +229,8 @@ public class SimulateKeyCeremony {
    */
   boolean round3() {
     // Each Guardian verifies all other Guardians' partial key backup
-    for (RemoteTrustee.Proxy sender : trustees) {
-      for (RemoteTrustee.Proxy recipient : trustees) {
+    for (RemoteTrustee.KeyCeremonyProxy sender : trusteeProxies) {
+      for (RemoteTrustee.KeyCeremonyProxy recipient : trusteeProxies) {
         if (sender.id().equals(recipient.id())) {
           continue;
         }
@@ -261,7 +273,7 @@ public class SimulateKeyCeremony {
     boolean allMatch = true;
 
     SortedMap<String, Group.ElementModP> jointKeys = new TreeMap<>();
-    for (RemoteTrustee.Proxy sender : trustees) {
+    for (RemoteTrustee.KeyCeremonyProxy sender : trusteeProxies) {
       Group.ElementModP jointKey = sender.sendJointPublicKey();
       jointKeys.put(sender.id(), jointKey);
       if (this.jointKey == null) {
@@ -284,26 +296,28 @@ public class SimulateKeyCeremony {
 
   boolean getCoefficientValidationSets() {
     SortedMap<String, Group.ElementModP> jointKeys = new TreeMap<>();
-    for (RemoteTrustee.Proxy sender : trustees) {
+    for (RemoteTrustee.KeyCeremonyProxy sender : trusteeProxies) {
       KeyCeremony.CoefficientValidationSet coeffSet = sender.sendCoefficientValidationSet();
       this.coefficientValidationSets.add(coeffSet);
     }
     return true;
   }
 
-  boolean publish(String publishDir) throws IOException {
+  boolean publishElectionRecord(Publisher publisher) throws IOException {
     // the election record
-    Publisher publisher = new Publisher(publishDir, false, false);
     publisher.writeKeyCeremonyProto(
             this.election,
             this.context,
             new ElectionConstants(),
             this.coefficientValidationSets);
 
-    // SimulateKeyCeremony cannot publish remote trustees.
-    /* TrusteeProto.Trustees trusteesProto = TrusteeToProto.convertTrustees(trustees, this.quorum);
-    publisher.writeTrusteesProto(trusteesProto); */
+    return true;
+  }
 
+  boolean publishTrustees(Publisher publisher, List<RemoteTrustee> trustees) throws IOException {
+    // SimulateKeyCeremony cannot publish remote trustees.
+    TrusteeProto.Trustees trusteesProto = TrusteeToProto.convertTrustees(trustees, this.quorum);
+    publisher.writeTrusteesProto(trusteesProto);
     return true;
   }
 

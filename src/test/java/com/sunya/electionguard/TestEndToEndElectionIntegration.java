@@ -266,7 +266,7 @@ public class TestEndToEndElectionIntegration {
     Map<String, PlaintextTally> check = this.decrypter.get_plaintext_ballots(Rsa::decrypt).orElseThrow();
     assertThat(check.size()).isEqualTo(Iterables.size(this.ballot_box.getSpoiledBallots()));
 
-    List<DecryptionMediator.SpoiledBallotAndTally> spoiledTallyAndBallot = this.decrypter.decrypt_spoiled_ballots(Rsa::decrypt).orElseThrow();
+    List<SpoiledBallotAndTally> spoiledTallyAndBallot = this.decrypter.decrypt_spoiled_ballots(Rsa::decrypt).orElseThrow();
     this.spoiledDecryptedBallots = spoiledTallyAndBallot.stream().map(e -> e.ballot).collect(Collectors.toList());
     this.spoiledDecryptedTallies = spoiledTallyAndBallot.stream().map(e -> e.tally).collect(Collectors.toList());
     System.out.printf("Tally Decrypted%n");

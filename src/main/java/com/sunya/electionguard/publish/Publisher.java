@@ -10,6 +10,7 @@ import com.sunya.electionguard.proto.PlaintextBallotProto;
 import com.sunya.electionguard.proto.PlaintextBallotToProto;
 import com.sunya.electionguard.proto.PlaintextTallyProto;
 import com.sunya.electionguard.proto.PlaintextTallyToProto;
+import com.sunya.electionguard.proto.TrusteeProto;
 import com.sunya.electionguard.verifier.ElectionRecord;
 
 import javax.annotation.Nullable;
@@ -55,6 +56,7 @@ public class Publisher {
   static final String SUBMITTED_BALLOT_PROTO = "submittedBallot.protobuf";
   static final String SPOILED_BALLOT_FILE = "spoiledPlaintextBallot.protobuf";
   static final String SPOILED_TALLY_FILE = "spoiledPlaintextTally.protobuf";
+  static final String TRUSTEES_FILE = "trustees.protobuf";
 
   private final Path publishDirectory;
   private final Path devicesDirPath;
@@ -137,6 +139,10 @@ public class Publisher {
 
   public Path guardiansPath() {
     return privateDirPath.resolve(GUARDIANS_FILE);
+  }
+
+  public Path trusteesPath() {
+    return privateDirPath.resolve(TRUSTEES_FILE);
   }
 
   public File[] deviceFiles() {
@@ -478,6 +484,14 @@ public class Publisher {
     Path source = new Publisher(inputDir, false, false).ciphertextBallotProtoPath();
     Path dest = ciphertextBallotProtoPath();
     Files.copy(source, dest, StandardCopyOption.COPY_ATTRIBUTES);
+  }
+
+  public void writeTrusteesProto(TrusteeProto.Trustees trusteesProto) throws IOException {
+    Files.createDirectories(privateDirPath);
+
+    try (FileOutputStream out = new FileOutputStream(trusteesPath().toFile())) {
+      trusteesProto.writeDelimitedTo(out);
+    }
   }
 
 }

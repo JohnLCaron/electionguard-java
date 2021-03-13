@@ -250,7 +250,7 @@ public class Group {
   }
 
   /** Computes b^e mod q. */
-  static ElementModQ pow_q(BigInteger b, BigInteger e) {
+  public static ElementModQ pow_q(BigInteger b, BigInteger e) {
     return int_to_q_unchecked(b.modPow(e, Q));
   }
 
