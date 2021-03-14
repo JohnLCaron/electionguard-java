@@ -47,9 +47,7 @@ public class TestAttackTallyDecryptionVerifyier {
     assertThat(tally).isNotNull();
 
     PlaintextTally attack = new PlaintextTally( tally.object_id,
-            messContests(tally.contests, this::messTally),
-            tally.lagrange_coefficients,
-            tally.guardianStates);
+            messContests(tally.contests, this::messTally));
 
     TallyDecryptionVerifier tdv = new TallyDecryptionVerifier(electionRecord.election, attack);
     boolean tdvOk = tdv.verify_tally_decryption();
@@ -66,16 +64,14 @@ public class TestAttackTallyDecryptionVerifyier {
     assertThat(tally).isNotNull();
 
     PlaintextTally attack = new PlaintextTally( tally.object_id,
-            messContests(tally.contests, this::messTallyAndValue),
-            tally.lagrange_coefficients,
-            tally.guardianStates);
+            messContests(tally.contests, this::messTallyAndValue));
 
     TallyDecryptionVerifier tdv = new TallyDecryptionVerifier(electionRecord.election, attack);
     boolean tdvOk = tdv.verify_tally_decryption();
     assertThat(tdvOk).isFalse();
   }
 
-  // Change the tally and the value and the particla decryptions. Naive.
+  // Change the tally and the value and the partial decryptions. Naive.
   @Example
   public void attackTallyDecryption() throws IOException {
     String topdir = TestParameterVerifier.topdirProto;
@@ -85,9 +81,7 @@ public class TestAttackTallyDecryptionVerifyier {
     assertThat(tally).isNotNull();
 
     PlaintextTally attack = new PlaintextTally( tally.object_id,
-            messContests(tally.contests, this::messTallyMessage),
-            tally.lagrange_coefficients,
-            tally.guardianStates);
+            messContests(tally.contests, this::messTallyMessage));
 
     System.out.println("------------ [box 11] Correctness of Decryption of Tallies ------------");
     TallyDecryptionVerifier tdv = new TallyDecryptionVerifier(electionRecord.election, attack);

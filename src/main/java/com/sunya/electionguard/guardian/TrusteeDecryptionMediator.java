@@ -3,13 +3,13 @@ package com.sunya.electionguard.guardian;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.flogger.FluentLogger;
 import com.sunya.electionguard.Auxiliary;
+import com.sunya.electionguard.AvailableGuardian;
 import com.sunya.electionguard.CiphertextElectionContext;
 import com.sunya.electionguard.CiphertextTally;
 import com.sunya.electionguard.DecryptWithShares;
 import com.sunya.electionguard.DecryptionShare;
 import com.sunya.electionguard.ElectionPolynomial;
 import com.sunya.electionguard.Group;
-import com.sunya.electionguard.GuardianState;
 import com.sunya.electionguard.KeyCeremony;
 import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.SpoiledBallotAndTally;
@@ -46,7 +46,7 @@ public class TrusteeDecryptionMediator {
   private final Map<String, KeyCeremony.ElectionPublicKey> missing_guardians = new HashMap<>();
   // Map(AVAILABLE_GUARDIAN_ID, ElementModQ)
   private Map<String, Group.ElementModQ> lagrange_coefficients;
-  private List<GuardianState> guardianStates;
+  private List<AvailableGuardian> guardianStates;
 
   public TrusteeDecryptionMediator(CiphertextElectionContext context,
                                    CiphertextTally encryptedTally,
@@ -145,9 +145,7 @@ public class TrusteeDecryptionMediator {
       return DecryptWithShares.decrypt_tally(
               this.ciphertext_tally,
               this.tally_shares,
-              this.context,
-              this.lagrange_coefficients,
-              this.guardianStates);
+              this.context);
     }
 
     // If guardians are missing, compensate
@@ -161,9 +159,7 @@ public class TrusteeDecryptionMediator {
     return DecryptWithShares.decrypt_tally(
             this.ciphertext_tally,
             this.tally_shares,
-            this.context,
-            this.lagrange_coefficients,
-            this.guardianStates);
+            this.context);
   }
 
   private void compute_missing_shares_for_tally(Auxiliary.Decryptor decrypt) {
@@ -360,26 +356,25 @@ public class TrusteeDecryptionMediator {
     }
   }
 
+  public List<AvailableGuardian> getAvailableGuardians() {
+    return this.guardianStates;
+  }
+
   private void compute_lagrange_coefficients() {
     if (this.lagrange_coefficients != null) {
       return;
     }
     // Compute lagrange coefficients for each of the available guardians
-    this.lagrange_coefficients = new HashMap<>();
-    for (DecryptingTrustee.Proxy available_guardian : this.available_guardians.values()) {
-      List<Integer> seq_orders = this.available_guardians.values().stream()
-              .filter(g -> !g.id().equals(available_guardian.id()))
-              .map(g -> g.sequence_order()).collect(Collectors.toList());
-      this.lagrange_coefficients.put(
-              available_guardian.id(),
-              ElectionPolynomial.compute_lagrange_coefficient(available_guardian.sequence_order(), seq_orders));
-    }
-
-    // Compute GuardianState's for all of the guardians
     this.guardianStates = new ArrayList<>();
-    this.available_guardians.values().forEach(g -> this.guardianStates.add(GuardianState.create(
-            g.id(), g.sequence_order(), false)));
-    this.missing_guardians.values().forEach(k -> this.guardianStates.add(GuardianState.create(
-            k.owner_id(), k.sequence_order(), true)));
+    this.lagrange_coefficients = new HashMap<>();
+    for (DecryptingTrustee.Proxy guardian : this.available_guardians.values()) {
+      List<Integer> seq_orders = this.available_guardians.values().stream()
+              .filter(g -> !g.id().equals(guardian.id()))
+              .map(g -> g.sequence_order()).collect(Collectors.toList());
+      Group.ElementModQ coeff = ElectionPolynomial.compute_lagrange_coefficient(guardian.sequence_order(), seq_orders);
+      this.lagrange_coefficients.put(guardian.id(), coeff);
+      this.guardianStates.add(AvailableGuardian.create(guardian.id(), guardian.sequence_order(), coeff));
+    }
   }
+
 }

@@ -2,8 +2,6 @@ package com.sunya.electionguard.proto;
 
 import com.sunya.electionguard.ChaumPedersen;
 import com.sunya.electionguard.DecryptionShare;
-import com.sunya.electionguard.Group;
-import com.sunya.electionguard.GuardianState;
 import com.sunya.electionguard.PlaintextTally;
 
 import java.util.HashMap;
@@ -13,7 +11,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.sunya.electionguard.proto.CommonConvert.convertElementModP;
-import static com.sunya.electionguard.proto.CommonConvert.convertList;
 import static com.sunya.electionguard.proto.PlaintextTallyProto.CiphertextDecryptionSelection;
 import static com.sunya.electionguard.proto.PlaintextTallyProto.CiphertextCompensatedDecryptionSelection;
 import static com.sunya.electionguard.proto.PlaintextTallyProto.ChaumPedersenProof;
@@ -26,14 +23,9 @@ public class PlaintextTallyFromProto {
     Map<String, PlaintextTally.Contest> contests = tally.getContestsMap().entrySet().stream()
             .collect(Collectors.toMap(Map.Entry::getKey, e -> convertContest(e.getValue())));
 
-    Map<String, Group.ElementModQ> lagrange_coefficients = tally.getLagrangeCoefficientsMap().entrySet().stream()
-            .collect(Collectors.toMap(Map.Entry::getKey, e -> convertElementModQ(e.getValue())));
-
     return new PlaintextTally(
             tally.getObjectId(),
-            contests,
-            lagrange_coefficients,
-            convertList(tally.getGuardianStatesList(), PlaintextTallyFromProto::convertState));
+            contests);
   }
 
   static PlaintextTally.Contest convertContest(PlaintextTallyProto.PlaintextTallyContest proto) {
@@ -91,13 +83,6 @@ public class PlaintextTallyFromProto {
             convertElementModP(proof.getData()),
             convertElementModQ(proof.getChallenge()),
             convertElementModQ(proof.getResponse()));
-  }
-
-  private static GuardianState convertState(PlaintextTallyProto.GuardianState proto) {
-    return GuardianState.create(
-            proto.getGuardianId(),
-            proto.getSequence(),
-            proto.getMissing());
   }
 
 }

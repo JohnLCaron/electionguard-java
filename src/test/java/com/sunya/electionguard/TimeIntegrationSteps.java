@@ -411,7 +411,8 @@ public class TimeIntegrationSteps {
             this.publishedTally,
             this.decryptedTally,
             this.spoiledDecryptedBallots,
-            this.spoiledDecryptedTallies);
+            this.spoiledDecryptedTallies,
+            this.decryptionMediator.getAvailableGuardians());
 
     System.out.printf("%n6.5. verify%n");
     this.verify_results_proto(publisher);

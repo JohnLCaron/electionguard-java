@@ -4,6 +4,7 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.google.common.base.Preconditions;
+import com.sunya.electionguard.AvailableGuardian;
 import com.sunya.electionguard.CiphertextTallyBuilder;
 import com.sunya.electionguard.DecryptionMediator;
 import com.sunya.electionguard.Manifest;
@@ -148,6 +149,7 @@ public class DecryptBallots {
   PlaintextTally decryptedTally;
   List<PlaintextBallot> spoiledDecryptedBallots;
   List<PlaintextTally> spoiledDecryptedTallies;
+  List<AvailableGuardian> availableGuardians;
   int quorum;
   int numberOfGuardians;
 
@@ -198,21 +200,20 @@ public class DecryptBallots {
             mediator.decrypt_spoiled_ballots(null).orElseThrow();
     this.spoiledDecryptedBallots = spoiledTallyAndBallot.stream().map(e -> e.ballot).collect(Collectors.toList());
     this.spoiledDecryptedTallies = spoiledTallyAndBallot.stream().map(e -> e.tally).collect(Collectors.toList());
+    this.availableGuardians = mediator.getAvailableGuardians();
+
     System.out.printf("Done decrypting tally%n%n%s%n", this.decryptedTally);
   }
 
   boolean publish(String inputDir, String publishDir) throws IOException {
-    Publisher publisher = new Publisher(publishDir, true, false);
+    Publisher publisher = new Publisher(publishDir, false, false);
     publisher.writeDecryptionResultsProto(
-            this.electionRecord.election,
-            this.electionRecord.context,
-            this.electionRecord.constants,
-            this.electionRecord.guardianCoefficients,
-            this.electionRecord.devices,
+            this.electionRecord,
             this.encryptedTally,
             this.decryptedTally,
             this.spoiledDecryptedBallots,
-            this.spoiledDecryptedTallies);
+            this.spoiledDecryptedTallies,
+            this.availableGuardians);
 
     publisher.copyAcceptedBallots(inputDir);
     return true;

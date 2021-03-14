@@ -308,6 +308,14 @@ public class Publisher {
     }
   }
 
+  public void writeTrusteesProto(TrusteeProto.Trustees trusteesProto) throws IOException {
+    Files.createDirectories(privateDirPath);
+
+    try (FileOutputStream out = new FileOutputStream(trusteesPath().toFile())) {
+      trusteesProto.writeDelimitedTo(out);
+    }
+  }
+
   /** Publishes the KeyCeremony part of the election record as proto. */
   public void writeKeyCeremonyProto(
           Manifest description,
@@ -317,7 +325,7 @@ public class Publisher {
 
     ElectionRecordProto.ElectionRecord ElectionRecordProto = ElectionRecordToProto.buildElectionRecord(
             description, context, constants, coefficient_validation_sets,
-            null, null, null);
+            null, null, null, null);
     try (FileOutputStream out = new FileOutputStream(electionRecordProtoPath().toFile())) {
       ElectionRecordProto.writeDelimitedTo(out);
     }
@@ -325,10 +333,7 @@ public class Publisher {
 
   /** Publishes the ballot Encryptions part of election record as proto. */
   public void writeEncryptionResultsProto(
-          Manifest description,
-          CiphertextElectionContext context,
-          ElectionConstants constants,
-          Iterable<KeyCeremony.CoefficientValidationSet> coefficient_validation_sets,
+          ElectionRecord electionRecord,
           Iterable<Encrypt.EncryptionDevice> devices,
           Iterable<SubmittedBallot> submittedBallots) throws IOException {
 
@@ -342,8 +347,11 @@ public class Publisher {
     }
 
     ElectionRecordProto.ElectionRecord electionRecordProto = ElectionRecordToProto.buildElectionRecord(
-            description, context, constants, coefficient_validation_sets,
-            devices, null, null);
+            electionRecord.election,
+            electionRecord.context,
+            electionRecord.constants,
+            electionRecord.guardianCoefficients,
+            devices, null, null, null);
 
     try (FileOutputStream out = new FileOutputStream(electionRecordProtoPath().toFile())) {
       electionRecordProto.writeDelimitedTo(out);
@@ -359,7 +367,7 @@ public class Publisher {
             electionRecord.guardianCoefficients,
             electionRecord.devices,
             encryptedTally,
-            null);
+            null, null);
 
     try (FileOutputStream out = new FileOutputStream(electionRecordProtoPath().toFile())) {
       ElectionRecordProto.writeDelimitedTo(out);
@@ -371,10 +379,10 @@ public class Publisher {
 
     ElectionRecordProto.ElectionRecord ElectionRecordProto = ElectionRecordToProto.buildElectionRecord(
             electionRecord.election, electionRecord.context, electionRecord.constants,
-            electionRecord.guardianCoefficients,
-            electionRecord.devices,
+            electionRecord.guardianCoefficients, electionRecord.devices,
             electionRecord.encryptedTally,
-            decryptedTally);
+            decryptedTally,
+            null);
 
     try (FileOutputStream out = new FileOutputStream(electionRecordProtoPath().toFile())) {
       ElectionRecordProto.writeDelimitedTo(out);
@@ -383,15 +391,12 @@ public class Publisher {
 
   /** Publishes the ballot and tally Decryptions part election record as proto. */
   public void writeDecryptionResultsProto(
-          Manifest description,
-          CiphertextElectionContext context,
-          ElectionConstants constants,
-          Iterable<KeyCeremony.CoefficientValidationSet> coefficient_validation_sets,
-          Iterable<Encrypt.EncryptionDevice> devices,
+          ElectionRecord electionRecord,
           CiphertextTally encryptedTally,
           PlaintextTally decryptedTally,
-          @Nullable Iterable<PlaintextBallot> spoiledBallots,
-          @Nullable Iterable<PlaintextTally> spoiledDecryptedTallies) throws IOException {
+          Iterable<PlaintextBallot> spoiledBallots,
+          Iterable<PlaintextTally> spoiledDecryptedTallies,
+          Iterable<AvailableGuardian> availableGuardians) throws IOException {
 
     if (spoiledBallots != null) {
       // the spoiledBallots are written into their own file
@@ -414,10 +419,11 @@ public class Publisher {
     }
 
     ElectionRecordProto.ElectionRecord ElectionRecordProto = ElectionRecordToProto.buildElectionRecord(
-            description, context, constants, coefficient_validation_sets,
-            devices,
+            electionRecord.election, electionRecord.context, electionRecord.constants,
+            electionRecord.guardianCoefficients, electionRecord.devices,
             encryptedTally,
-            decryptedTally);
+            decryptedTally,
+            availableGuardians);
 
     try (FileOutputStream out = new FileOutputStream(electionRecordProtoPath().toFile())) {
       ElectionRecordProto.writeDelimitedTo(out);
@@ -435,7 +441,8 @@ public class Publisher {
           CiphertextTally ciphertext_tally,
           PlaintextTally decryptedTally,
           @Nullable Iterable<PlaintextBallot> spoiledBallots,
-          @Nullable Iterable<PlaintextTally> spoiledTallies) throws IOException {
+          @Nullable Iterable<PlaintextTally> spoiledTallies,
+          Iterable<AvailableGuardian> availableGuardians) throws IOException {
 
 
     // the accepted ballots are written into their own file
@@ -471,7 +478,8 @@ public class Publisher {
             description, context, constants, coefficient_validation_sets,
             devices,
             ciphertext_tally,
-            decryptedTally);
+            decryptedTally,
+            availableGuardians);
 
     try (FileOutputStream out = new FileOutputStream(electionRecordProtoPath().toFile())) {
       ElectionRecordProto.writeDelimitedTo(out);
@@ -484,14 +492,6 @@ public class Publisher {
     Path source = new Publisher(inputDir, false, false).ciphertextBallotProtoPath();
     Path dest = ciphertextBallotProtoPath();
     Files.copy(source, dest, StandardCopyOption.COPY_ATTRIBUTES);
-  }
-
-  public void writeTrusteesProto(TrusteeProto.Trustees trusteesProto) throws IOException {
-    Files.createDirectories(privateDirPath);
-
-    try (FileOutputStream out = new FileOutputStream(trusteesPath().toFile())) {
-      trusteesProto.writeDelimitedTo(out);
-    }
   }
 
 }

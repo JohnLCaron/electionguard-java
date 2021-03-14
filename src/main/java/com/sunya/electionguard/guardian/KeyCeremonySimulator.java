@@ -161,7 +161,7 @@ public class KeyCeremonySimulator {
             this.jointKey, this.election, this.commitmentsHash);
 
     System.out.printf("%nKey Ceremony publish Guardian serialization%n");
-    if (!getCoefficientValidationSets()) {
+    if (!publishElectionRecord(publisher)) {
       throw new RuntimeException("*** CoefficientValidationSets failed");
     }
   }

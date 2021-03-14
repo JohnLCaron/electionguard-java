@@ -137,14 +137,6 @@ public class PlaintextTallyTable extends JPanel {
       return tally.object_id;
     }
 
-    public String getGuardianStates() {
-      Formatter out = new Formatter();
-      out.format("Missing: ");
-      tally.guardianStates.stream().filter(s -> s.is_missing()).forEach(s -> out.format("%s(%d) ", s.guardian_id(), s.sequence()));
-      out.format(" Present: ");
-      tally.guardianStates.stream().filter(s -> !s.is_missing()).forEach(s -> out.format("%s(%d) ", s.guardian_id(), s.sequence()));
-      return out.toString();
-    }
   }
 
   public class ContestBean {

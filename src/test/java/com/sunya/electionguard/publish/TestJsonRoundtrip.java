@@ -51,7 +51,7 @@ public class TestJsonRoundtrip {
     String outputFile = file.getAbsolutePath();
 
     // original
-    PlaintextTally org = new PlaintextTally("testTally", new HashMap<>(), new HashMap<>(), new ArrayList<>());
+    PlaintextTally org = new PlaintextTally("testTally", new HashMap<>());
     // write json
     ConvertToJson.writePlaintextTally(org, file.toPath());
     // read it back

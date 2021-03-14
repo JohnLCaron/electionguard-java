@@ -313,7 +313,6 @@ public class KeyCeremonyTrustee {
       return KeyCeremonyTrustee.verifyPartialKeyChallenge(id, challenge);
     }
 
-
     KeyCeremony.CoefficientValidationSet sendCoefficientValidationSet() {
       return KeyCeremonyTrustee.this.shareCoefficientValidationSet();
     }

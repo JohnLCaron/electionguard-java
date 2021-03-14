@@ -4,12 +4,11 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.flogger.FluentLogger;
 import com.sunya.electionguard.Group;
-import com.sunya.electionguard.GuardianState;
+import com.sunya.electionguard.AvailableGuardian;
 import com.sunya.electionguard.PlaintextTally;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -29,13 +28,15 @@ public class PartialDecryptionVerifier {
 
   final ElectionRecord electionRecord;
   final PlaintextTally tally;
-  final Map<String, GuardianState> guardianStateMap;
+
+  // Map(AVAILABLE_GUARDIAN_ID, ElementModQ)
+  final Map<String, Group.ElementModQ> lagrange_coefficients;
 
   PartialDecryptionVerifier(ElectionRecord electionRecord, PlaintextTally decryptedTally) {
     this.electionRecord = electionRecord;
     this.tally = Preconditions.checkNotNull(decryptedTally);
-    this.guardianStateMap = new HashMap<>();
-    tally.guardianStates.forEach(gs -> guardianStateMap.put(gs.guardian_id(), gs));
+    this.lagrange_coefficients = electionRecord.availableGuardians.stream().collect(Collectors.toMap(
+            AvailableGuardian::guardian_id, AvailableGuardian::lagrangeCoordinate));
   }
 
   /** Verify 10.A for available guardians, if there are missing guardians. */
@@ -57,25 +58,21 @@ public class PartialDecryptionVerifier {
   /** Verify 10.A for available guardians lagrange coefficients, if there are missing guardians. */
   boolean verify_lagrange_coefficients() {
     boolean error = false;
+    List<AvailableGuardian> guardians = electionRecord.availableGuardians;
 
-    for (Map.Entry<String, Group.ElementModQ> entry : tally.lagrange_coefficients.entrySet()) {
-      GuardianState available_state = guardianStateMap.get(entry.getKey());
-      if (available_state == null || available_state.is_missing()) {
-        System.out.printf(" ***Inconsistent Guardian missing state. %n");
-        return false;
+    for (AvailableGuardian guardian : guardians) {
+      List<Integer> seq_others = new ArrayList<>();
+      for (AvailableGuardian other : guardians) {
+        if (!other.guardian_id().equals(guardian.guardian_id())) {
+          seq_others.add(other.sequence());
+        }
       }
-
-      List<Integer> seq_others = tally.guardianStates.stream()
-              .filter(gs -> !gs.is_missing() && !gs.guardian_id().equals(available_state.guardian_id()))
-              .map(gs -> gs.sequence()).collect(Collectors.toList());
-
-      error |= !this.verify_lagrange_coefficient(available_state.sequence(), seq_others, entry.getValue());
+      error |= !this.verify_lagrange_coefficient(guardian.sequence(), seq_others, guardian.lagrangeCoordinate());
     }
 
     if (error) {
       System.out.printf(" *** 10.A Lagrange coefficients failure. %n");
     }
-
     return !error;
   }
 
@@ -190,7 +187,7 @@ public class PartialDecryptionVerifier {
       List<ElementModP> partial = new ArrayList<>();
       for (CiphertextCompensatedDecryptionSelection compShare : share.recovered_parts().get().values()) {
         ElementModP M_il = compShare.share(); // M_i,l in the spec
-        ElementModQ lagrange = tally.lagrange_coefficients.get(compShare.guardian_id());
+        ElementModQ lagrange = lagrange_coefficients.get(compShare.guardian_id());
         partial.add(Group.int_to_p_unchecked(Group.pow_pi(M_il.getBigInt(), lagrange.getBigInt())));
       }
       ElementModP product = Group.mult_p(partial);

@@ -1,6 +1,7 @@
 package com.sunya.electionguard.proto;
 
 import com.google.protobuf.ByteString;
+import com.sunya.electionguard.AvailableGuardian;
 import com.sunya.electionguard.CiphertextElectionContext;
 import com.sunya.electionguard.ElectionConstants;
 import com.sunya.electionguard.CiphertextTally;
@@ -47,8 +48,19 @@ public class ElectionRecordFromProto {
     PlaintextTally decryptedTally = proto.hasDecryptedTally() ?
             PlaintextTallyFromProto.translateFromProto(proto.getDecryptedTally()) : null;
 
+    List<AvailableGuardian> guardians =
+            proto.getAvailableGuardiansList().stream().map(ElectionRecordFromProto::convertAvailableGuardian).collect(Collectors.toList());
+
+
     return new ElectionRecord(constants, context, description, guardianCoefficients,
-            devices, ciphertextTally, decryptedTally, null, null, null);
+            devices, ciphertextTally, decryptedTally, null, null, null, guardians);
+  }
+
+  static AvailableGuardian convertAvailableGuardian(ElectionRecordProto.AvailableGuardian proto) {
+    return AvailableGuardian.create(
+            proto.getGuardianId(),
+            proto.getSequence(),
+            convertElementModQ(proto.getLagrangeCoordinate()));
   }
 
   static ElectionConstants convertConstants(ElectionRecordProto.Constants constants) {

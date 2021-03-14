@@ -1,6 +1,7 @@
 package com.sunya.electionguard.viz;
 
 import com.google.common.collect.ImmutableList;
+import com.sunya.electionguard.AvailableGuardian;
 import com.sunya.electionguard.CiphertextElectionContext;
 import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.KeyCeremony;
@@ -167,6 +168,11 @@ class ElectionRecordPanel extends JPanel {
       f.format("%n  Guardian Coefficient Validation Sets%n");
       for (KeyCeremony.CoefficientValidationSet coeff : record.guardianCoefficients) {
         f.format("    %s%n", coeff.owner_id());
+      }
+
+      f.format("%n  Available Guardians%n");
+      for (AvailableGuardian guardian : record.availableGuardians) {
+        f.format("    %20s %d %s%n", guardian.guardian_id(), guardian.sequence(), guardian.lagrangeCoordinate());
       }
     }
   }
