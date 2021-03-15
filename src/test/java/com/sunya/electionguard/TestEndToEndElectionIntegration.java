@@ -69,6 +69,7 @@ public class TestEndToEndElectionIntegration {
   PlaintextTally decryptedTally;
   List<PlaintextBallot> spoiledDecryptedBallots;
   Collection<PlaintextTally> spoiledDecryptedTallies;
+  List<AvailableGuardian> availableGuardians;
 
   // Execute the simplified end-to-end test demonstrating each component of the system.
   @Example
@@ -269,6 +270,7 @@ public class TestEndToEndElectionIntegration {
     List<SpoiledBallotAndTally> spoiledTallyAndBallot = this.decrypter.decrypt_spoiled_ballots(Rsa::decrypt).orElseThrow();
     this.spoiledDecryptedBallots = spoiledTallyAndBallot.stream().map(e -> e.ballot).collect(Collectors.toList());
     this.spoiledDecryptedTallies = spoiledTallyAndBallot.stream().map(e -> e.tally).collect(Collectors.toList());
+    this.availableGuardians = decrypter.getAvailableGuardians();
     System.out.printf("Tally Decrypted%n");
 
     // Now, compare the results
@@ -343,7 +345,8 @@ public class TestEndToEndElectionIntegration {
             this.decryptedTally,
             this.coefficient_validation_sets,
             this.spoiledDecryptedBallots,
-            this.spoiledDecryptedTallies);
+            this.spoiledDecryptedTallies,
+            availableGuardians);
 
     System.out.printf("%n6. verify%n");
     this.verify_results(publisher);

@@ -34,6 +34,7 @@ public class Publisher {
   static final String BALLOTS_DIR = "encrypted_ballots";
   static final String SPOILED_BALLOT_DIR = "spoiled_ballots";
   static final String SPOILED_TALLY_DIR = "spoiled_tallies";
+  static final String GUARDIANS_DIR = "guardians";
 
   static final String MANIFEST_FILE_NAME = "manifest" + SUFFIX;
   static final String CONTEXT_FILE_NAME = "context" + SUFFIX;
@@ -44,12 +45,12 @@ public class Publisher {
   static final String DEVICE_PREFIX = "device_";
   static final String COEFFICIENT_PREFIX = "coefficient_validation_set_";
   static final String BALLOT_PREFIX = "ballot_";
+  static final String GUARDIAN_PREFIX = "guardian_";
 
   // json private
   static final String PRIVATE_PLAINTEXT_BALLOTS_DIR = "plaintext";
   static final String PRIVATE_ENCRYPTED_BALLOTS_DIR = "encrypted";
   static final String PLAINTEXT_BALLOT_PREFIX = "plaintext_ballot_";
-  static final String GUARDIAN_PREFIX = "guardian_";
 
   // proto
   static final String ELECTION_RECORD_FILE_NAME = "electionRecord.protobuf";
@@ -66,6 +67,7 @@ public class Publisher {
   private final Path spoiledBallotDirPath;
   private final Path spoiledTallyDirPath;
   private final Path privateDirPath;
+  private final Path guardianDirPath;
 
   public Publisher(String where, boolean removeAllFiles, boolean createDirs) throws IOException {
     this.publishDirectory = Path.of(where);
@@ -75,6 +77,7 @@ public class Publisher {
     this.spoiledBallotDirPath = publishDirectory.resolve(SPOILED_BALLOT_DIR);
     this.spoiledTallyDirPath = publishDirectory.resolve(SPOILED_TALLY_DIR);
     this.privateDirPath = publishDirectory.resolve(PRIVATE_DIR);
+    this.guardianDirPath = publishDirectory.resolve(GUARDIANS_DIR);
 
     if (removeAllFiles) {
       removeAllFiles();
@@ -90,6 +93,7 @@ public class Publisher {
     Files.createDirectories(ballotsDirPath);
     Files.createDirectories(coefficientsDirPath);
     Files.createDirectories(devicesDirPath);
+    Files.createDirectories(guardianDirPath);
   }
 
   /** Delete everything in the output directory, but leave that directory. */
@@ -201,7 +205,19 @@ public class Publisher {
     return spoiledTallyDirPath.toFile().listFiles();
   }
 
-  ///
+  public Path availableGuardianPath(String id) {
+    String fileName = GUARDIAN_PREFIX + id + SUFFIX;
+    return guardianDirPath.resolve(fileName);
+  }
+
+  public File[] availableGuardianFiles() {
+    if (!Files.exists(guardianDirPath) || !Files.isDirectory(guardianDirPath)) {
+      return new File[0];
+    }
+    return guardianDirPath.toFile().listFiles();
+  }
+
+  ////////////////////
 
   public Path electionRecordProtoPath() {
     return publishDirectory.resolve(ELECTION_RECORD_FILE_NAME).toAbsolutePath();
@@ -233,7 +249,8 @@ public class Publisher {
           PlaintextTally decryptedTally,
           @Nullable Iterable<KeyCeremony.CoefficientValidationSet> coefficient_validation_sets,
           @Nullable Iterable<PlaintextBallot> spoiledBallots,
-          @Nullable Iterable<PlaintextTally> spoiledTallies) throws IOException {
+          @Nullable Iterable<PlaintextTally> spoiledTallies,
+          @Nullable Iterable<AvailableGuardian> availableGuardians) throws IOException {
 
     ConvertToJson.writeElection(manifest, this.manifestPath());
     ConvertToJson.writeContext(context, this.contextPath());
@@ -265,6 +282,12 @@ public class Publisher {
     if (spoiledTallies != null) {
       for (PlaintextTally tally : spoiledTallies) {
         ConvertToJson.writePlaintextTally(tally, this.spoiledTallyPath(tally.object_id));
+      }
+    }
+
+    if (availableGuardians != null) {
+      for (AvailableGuardian guardian : availableGuardians) {
+        ConvertToJson.writeAvailableGuardian(guardian, this.availableGuardianPath(guardian.guardian_id));
       }
     }
   }
@@ -454,8 +477,7 @@ public class Publisher {
     // the accepted ballots are written into their own file
     try (FileOutputStream out = new FileOutputStream(ciphertextBallotProtoPath().toFile())) {
       for (SubmittedBallot ballot : accepted_ballots) {
-        CiphertextBallotProto.SubmittedBallot
- ballotProto = CiphertextBallotToProto.translateToProto(ballot);
+        CiphertextBallotProto.SubmittedBallot ballotProto = CiphertextBallotToProto.translateToProto(ballot);
         ballotProto.writeDelimitedTo(out);
       }
     }

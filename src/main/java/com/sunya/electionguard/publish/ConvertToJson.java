@@ -15,6 +15,12 @@ import java.nio.file.Path;
 class ConvertToJson {
   private static final Gson enhancedGson = GsonTypeAdapters.enhancedGson();
 
+  static void writeAvailableGuardian(AvailableGuardian object, Path where) throws IOException {
+    Type type = new TypeToken<AvailableGuardian>(){}.getType();
+    try (FileWriter writer = new FileWriter(where.toFile())) {
+      enhancedGson.toJson(object, type, writer);
+    }
+  }
 
   static void writeSubmittedBallot(SubmittedBallot object, Path where) throws IOException {
     Type type = new TypeToken<SubmittedBallot>(){}.getType();

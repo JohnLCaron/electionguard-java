@@ -383,7 +383,7 @@ public class TrusteeDecryptionMediator {
               .map(g -> g.sequence_order()).collect(Collectors.toList());
       Group.ElementModQ coeff = ElectionPolynomial.compute_lagrange_coefficient(guardian.sequence_order(), seq_orders);
       this.lagrange_coefficients.put(guardian.id(), coeff);
-      this.guardianStates.add(AvailableGuardian.create(guardian.id(), guardian.sequence_order(), coeff));
+      this.guardianStates.add(new AvailableGuardian(guardian.id(), guardian.sequence_order(), coeff));
     }
   }
 

@@ -182,7 +182,7 @@ class ElectionRecordPanel extends JPanel {
 
       f.format("%n  Available Guardians%n");
       for (AvailableGuardian guardian : record.availableGuardians) {
-        f.format("    %20s %d %s%n", guardian.guardian_id(), guardian.sequence(), guardian.lagrangeCoordinate());
+        f.format("    %20s %d %s%n", guardian.guardian_id, guardian.sequence, guardian.lagrangeCoordinate);
       }
     }
   }

@@ -67,6 +67,7 @@ public class TimeIntegrationSteps {
   PlaintextTally decryptedTally;
   List<PlaintextBallot> spoiledDecryptedBallots;
   List<PlaintextTally> spoiledDecryptedTallies;
+  List<AvailableGuardian> availableGuardians;
 
   public TimeIntegrationSteps(int nballots) throws IOException {
     Path tmp = Files.createTempDirectory("publish");
@@ -277,6 +278,7 @@ public class TimeIntegrationSteps {
             this.decryptionMediator.decrypt_spoiled_ballots(null).orElseThrow();
     this.spoiledDecryptedBallots = spoiledTallyAndBallot.stream().map(e -> e.ballot).collect(Collectors.toList());
     this.spoiledDecryptedTallies = spoiledTallyAndBallot.stream().map(e -> e.tally).collect(Collectors.toList());
+    this.availableGuardians = decryptionMediator.getAvailableGuardians();
     System.out.printf("Tally Decrypted%n");
 
     // Now, compare the results
@@ -350,7 +352,8 @@ public class TimeIntegrationSteps {
             this.decryptedTally,
             this.coefficient_validation_sets,
             this.spoiledDecryptedBallots,
-            this.spoiledDecryptedTallies);
+            this.spoiledDecryptedTallies,
+            this.availableGuardians);
 
     System.out.printf("%n5.5. verify%n");
     this.verify_results_json(publisher);

@@ -60,9 +60,9 @@ public class ElectionRecordToProto {
 
   static ElectionRecordProto.AvailableGuardian convertAvailableGuardian(AvailableGuardian guardian) {
     ElectionRecordProto.AvailableGuardian.Builder builder = ElectionRecordProto.AvailableGuardian.newBuilder();
-    builder.setGuardianId(guardian.guardian_id());
-    builder.setSequence(guardian.sequence());
-    builder.setLagrangeCoordinate(convertElementModQ(guardian.lagrangeCoordinate()));
+    builder.setGuardianId(guardian.guardian_id);
+    builder.setSequence(guardian.sequence);
+    builder.setLagrangeCoordinate(convertElementModQ(guardian.lagrangeCoordinate));
     return builder.build();
   }
 
