@@ -152,7 +152,8 @@ public class Consumer {
             this.decryptedTally(),
             CloseableIterableAdapter.wrap(this.acceptedBallots()),
             CloseableIterableAdapter.wrap(this.spoiledBallots()),
-            CloseableIterableAdapter.wrap(this.spoiledTallies()));
+            CloseableIterableAdapter.wrap(this.spoiledTallies()),
+            null);
   }
 
   ///////////////////////////////////////////// Proto

@@ -115,21 +115,21 @@ public class KeyCeremonyTrustee {
             this.guardianSecrets.polynomial.coefficient_proofs);
   }
 
-  /** Share public keys for this guardian. */
+  /** Share this guardians backup for otherGuardian. */
   @Nullable
-  private KeyCeremony.ElectionPartialKeyBackup sharePartialKeyBackup(String guardianId) {
-    if (id.equals(guardianId)) {
+  private KeyCeremony.ElectionPartialKeyBackup shareMyPartialKeyBackup(String otherGuardian) {
+    if (id.equals(otherGuardian)) {
       return null;
     }
-    if (this.allGuardianPublicKeys.get(guardianId) == null) {
+    if (this.allGuardianPublicKeys.get(otherGuardian) == null) {
       return null;
     }
 
-    return myPartialKeyBackups.getUnchecked(guardianId);
+    return myPartialKeyBackups.getUnchecked(otherGuardian);
   }
 
-  private KeyCeremony.ElectionPartialKeyBackup generatePartialKeyBackup(String guardianId) {
-    KeyCeremony.PublicKeySet otherKeys = this.allGuardianPublicKeys.get(guardianId);
+  private KeyCeremony.ElectionPartialKeyBackup generatePartialKeyBackup(String otherGuardian) {
+    KeyCeremony.PublicKeySet otherKeys = this.allGuardianPublicKeys.get(otherGuardian);
     Preconditions.checkNotNull(otherKeys);
 
     // Compute my polynomial's y coordinate at the other's x coordinate.
@@ -142,21 +142,20 @@ public class KeyCeremonyTrustee {
 
     return KeyCeremony.ElectionPartialKeyBackup.create(
             this.id,
-            guardianId,
+            otherGuardian,
             otherKeys.sequence_order(),
             encrypted_value.get(),
             this.guardianSecrets.polynomial.coefficient_commitments,
             this.guardianSecrets.polynomial.coefficient_proofs);
   }
 
-  /** Receive PartialKeyBackup from another guardian. */
+  /** Receive another guardian's PartialKeyBackup for this guardian. */
   @Nullable
-  private KeyCeremony.ElectionPartialKeyVerification receivePartialKeyBackup(KeyCeremony.ElectionPartialKeyBackup backup) {
-    if (backup != null) {
-      this.otherGuardianPartialKeyBackups.put(backup.owner_id(), backup);
-      return this.verifyPartialKeyBackup(backup);
+  private KeyCeremony.ElectionPartialKeyVerification receivePartialKeyBackup(KeyCeremony.ElectionPartialKeyBackup otherBackup) {
+    if (otherBackup != null) {
+      this.otherGuardianPartialKeyBackups.put(otherBackup.owner_id(), otherBackup);
+      return this.verifyPartialKeyBackup(otherBackup);
     }
-    // LOOK could return ElectionPartialKeyVerification, save a trip.
     return null;
   }
 
@@ -288,7 +287,7 @@ public class KeyCeremonyTrustee {
 
     @Nullable
     KeyCeremony.ElectionPartialKeyBackup sendPartialKeyBackup(String otherId) {
-      return KeyCeremonyTrustee.this.sharePartialKeyBackup(otherId);
+      return KeyCeremonyTrustee.this.shareMyPartialKeyBackup(otherId);
     }
 
     void receivePartialKeyBackup(KeyCeremony.ElectionPartialKeyBackup backup) {
@@ -312,7 +311,6 @@ public class KeyCeremonyTrustee {
     KeyCeremony.ElectionPartialKeyVerification verifyPartialKeyChallenge(KeyCeremony.ElectionPartialKeyChallenge challenge) {
       return KeyCeremonyTrustee.verifyPartialKeyChallenge(id, challenge);
     }
-
 
     KeyCeremony.CoefficientValidationSet sendCoefficientValidationSet() {
       return KeyCeremonyTrustee.this.shareCoefficientValidationSet();

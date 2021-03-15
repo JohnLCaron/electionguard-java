@@ -4,8 +4,10 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.google.common.base.Preconditions;
+import com.sunya.electionguard.AvailableGuardian;
 import com.sunya.electionguard.CiphertextTally;
 import com.sunya.electionguard.CiphertextTallyBuilder;
+import com.sunya.electionguard.Group;
 import com.sunya.electionguard.InternalManifest;
 import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.PlaintextBallot;
@@ -19,6 +21,7 @@ import com.sunya.electionguard.verifier.ElectionRecord;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -109,9 +112,12 @@ public class DecryptingSimulator {
 
       System.out.printf(" BallotDecryptor read from %s%n Write to %s%n", cmdLine.encryptDir, cmdLine.outputDir);
       decryptor = new DecryptingSimulator(consumer, electionRecord, guardiansProvider);
+
+      // Do the accumulation if the encryptedTally doesnt exist
       if (electionRecord.encryptedTally == null) {
         decryptor.accumulateTally();
       }
+
       decryptor.decryptTally();
       boolean ok = decryptor.publish(cmdLine.encryptDir, cmdLine.outputDir);
       System.out.printf("*** DecryptBallots %s%n", ok ? "SUCCESS" : "FAILURE");
@@ -146,6 +152,7 @@ public class DecryptingSimulator {
   PlaintextTally decryptedTally;
   List<PlaintextBallot> spoiledDecryptedBallots;
   List<PlaintextTally> spoiledDecryptedTallies;
+  List<AvailableGuardian> availableGuardians;
   int quorum;
   int numberOfGuardians;
 
@@ -155,7 +162,6 @@ public class DecryptingSimulator {
     this.election = electionRecord.election;
     this.quorum = electionRecord.context.quorum;
     this.numberOfGuardians = electionRecord.context.number_of_guardians;
-    // LOOK We could do the accumulation if the encryptedTally doesnt exist
     this.encryptedTally = electionRecord.encryptedTally;
 
     this.guardians = provider.guardians();
@@ -176,7 +182,15 @@ public class DecryptingSimulator {
 
   void decryptTally() {
     System.out.printf("%nDecrypt tally%n");
-    TrusteeDecryptionMediator mediator = new TrusteeDecryptionMediator(electionRecord.context, this.encryptedTally, consumer.spoiledBallotsProto());
+
+    // The guardians' election public key is in the electionRecord.guardianCoefficients.
+    Map<String, Group.ElementModP> guardianPublicKeys = electionRecord.guardianCoefficients.stream().collect(
+            Collectors.toMap(coeff -> coeff.owner_id(), coeff -> coeff.coefficient_commitments().get(0)));
+
+    TrusteeDecryptionMediator mediator = new TrusteeDecryptionMediator(electionRecord.context,
+            this.encryptedTally,
+            consumer.spoiledBallotsProto(),
+            guardianPublicKeys);
 
     int count = 0;
     for (DecryptingTrustee.Proxy guardian : this.guardians) {
@@ -191,26 +205,24 @@ public class DecryptingSimulator {
     }
 
     // Here's where the ciphertext Tally is decrypted.
-    this.decryptedTally = mediator.get_plaintext_tally(null).orElseThrow();
+    this.decryptedTally = mediator.get_plaintext_tally().orElseThrow();
     List<SpoiledBallotAndTally> spoiledTallyAndBallot =
             mediator.decrypt_spoiled_ballots().orElseThrow();
     this.spoiledDecryptedBallots = spoiledTallyAndBallot.stream().map(e -> e.ballot).collect(Collectors.toList());
     this.spoiledDecryptedTallies = spoiledTallyAndBallot.stream().map(e -> e.tally).collect(Collectors.toList());
+    this.availableGuardians = mediator.getAvailableGuardians();
     System.out.printf("Done decrypting tally%n%n%s%n", this.decryptedTally);
   }
 
   boolean publish(String inputDir, String publishDir) throws IOException {
     Publisher publisher = new Publisher(publishDir, true, false);
     publisher.writeDecryptionResultsProto(
-            this.electionRecord.election,
-            this.electionRecord.context,
-            this.electionRecord.constants,
-            this.electionRecord.guardianCoefficients,
-            this.electionRecord.devices,
+            this.electionRecord,
             this.encryptedTally,
             this.decryptedTally,
             this.spoiledDecryptedBallots,
-            this.spoiledDecryptedTallies);
+            this.spoiledDecryptedTallies,
+            availableGuardians);
 
     publisher.copyAcceptedBallots(inputDir);
     return true;

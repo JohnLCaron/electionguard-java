@@ -1,6 +1,7 @@
 package com.sunya.electionguard.proto;
 
 import com.google.protobuf.ByteString;
+import com.sunya.electionguard.AvailableGuardian;
 import com.sunya.electionguard.CiphertextElectionContext;
 import com.sunya.electionguard.ElectionConstants;
 import com.sunya.electionguard.Manifest;
@@ -26,7 +27,8 @@ public class ElectionRecordToProto {
           Iterable<KeyCeremony.CoefficientValidationSet> guardianCoefficients,
           @Nullable Iterable<Encrypt.EncryptionDevice> devices,
           @Nullable CiphertextTally ciphertext_tally,
-          @Nullable PlaintextTally decryptedTally) {
+          @Nullable PlaintextTally decryptedTally,
+          @Nullable Iterable<AvailableGuardian> availableGuardians) {
 
     ElectionRecord.Builder builder = ElectionRecord.newBuilder();
     builder.setConstants( convertConstants(constants));
@@ -48,6 +50,19 @@ public class ElectionRecordToProto {
     if (decryptedTally != null) {
       builder.setDecryptedTally(PlaintextTallyToProto.translateToProto(decryptedTally));
     }
+    if (availableGuardians != null) {
+      for (AvailableGuardian guardian : availableGuardians) {
+        builder.addAvailableGuardians(convertAvailableGuardian(guardian));
+      }
+    }
+    return builder.build();
+  }
+
+  static ElectionRecordProto.AvailableGuardian convertAvailableGuardian(AvailableGuardian guardian) {
+    ElectionRecordProto.AvailableGuardian.Builder builder = ElectionRecordProto.AvailableGuardian.newBuilder();
+    builder.setGuardianId(guardian.guardian_id());
+    builder.setSequence(guardian.sequence());
+    builder.setLagrangeCoordinate(convertElementModQ(guardian.lagrangeCoordinate()));
     return builder.build();
   }
 

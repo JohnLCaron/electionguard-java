@@ -5,7 +5,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
-import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import java.util.Formatter;
 import java.util.List;
@@ -23,20 +22,10 @@ public class PlaintextTally {
   /** The list of contests for this tally, keyed by contest_id. */
   public final ImmutableMap<String, Contest> contests;
 
-  /** The lagrange coefficients w_ij for verification of section 10. */
-  public final ImmutableMap<String, Group.ElementModQ> lagrange_coefficients;
-
-  /** The state of the Guardian when decrypting: missing or available. */
-  public final ImmutableList<GuardianState> guardianStates;
-
   public PlaintextTally(String object_id,
-                        Map<String, Contest> contests,
-                        @Nullable Map<String, Group.ElementModQ> lagrange_coefficients,
-                        @Nullable List<GuardianState> guardianState) {
+                        Map<String, Contest> contests) {
     this.object_id = Preconditions.checkNotNull(object_id);
     this.contests =  ImmutableMap.copyOf(Preconditions.checkNotNull(contests));
-    this.lagrange_coefficients = (lagrange_coefficients != null) ? ImmutableMap.copyOf(lagrange_coefficients) : ImmutableMap.of();
-    this.guardianStates = (guardianState != null) ? ImmutableList.copyOf(guardianState) : ImmutableList.of();
   }
 
   @Override
@@ -45,22 +34,12 @@ public class PlaintextTally {
     if (o == null || getClass() != o.getClass()) return false;
     PlaintextTally that = (PlaintextTally) o;
     return object_id.equals(that.object_id) &&
-            contests.equals(that.contests) &&
-            Objects.equals(lagrange_coefficients, that.lagrange_coefficients) &&
-            Objects.equals(guardianStates, that.guardianStates);
+            contests.equals(that.contests);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(object_id, contests, lagrange_coefficients, guardianStates);
-  }
-
-  @Override
-  public String toString() {
-    Formatter out = new Formatter();
-    out.format("PlaintextTally{%n  object_id='%s'", object_id);
-    guardianStates.forEach(g -> out.format("\n    %s", g.toString()));
-    return out.toString();
+    return Objects.hash(object_id, contests);
   }
 
   /**

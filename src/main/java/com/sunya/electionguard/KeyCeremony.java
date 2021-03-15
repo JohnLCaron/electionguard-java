@@ -96,7 +96,7 @@ public class KeyCeremony {
     public abstract String owner_id();
     /** The Id of the guardian to receive this backup. */
     public abstract String designated_id();
-    /** // The sequence order of the designated guardian. */
+    /** The sequence order of the designated guardian. */
     public abstract int designated_sequence_order();
     /** The encrypted coordinate corresponding to a secret election polynomial. */
     public abstract Auxiliary.ByteString encrypted_value();

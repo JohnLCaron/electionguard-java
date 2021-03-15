@@ -214,10 +214,7 @@ public class EncryptBallots {
 
     Publisher publisher = new Publisher(publishDir, false, false);
     publisher.writeEncryptionResultsProto(
-            electionRecord.election,
-            electionRecord.context,
-            electionRecord.constants,
-            electionRecord.guardianCoefficients,
+            electionRecord,
             ImmutableList.of(this.device), // add the device
             this.ballotBox.getAllBallots() // add the encrypted ballots
     );

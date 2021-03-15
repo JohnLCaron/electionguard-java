@@ -29,7 +29,8 @@ public class TestElectionRecordProtoRoundtrip {
             consumer.guardianCoefficients(),
             consumer.devices(),
             consumer.ciphertextTally(),
-            consumer.decryptedTally());
+            consumer.decryptedTally(),
+            null);
 
     ElectionRecord roundtrip = ElectionRecordFromProto.translateFromProto(protoFromJson);
     assertThat(roundtrip.election).isEqualTo(consumer.election());
@@ -48,15 +49,12 @@ public class TestElectionRecordProtoRoundtrip {
     String protoDir = tmp.toAbsolutePath().toString();
     Publisher publisher = new Publisher(protoDir, true, false);
     publisher.writeDecryptionResultsProto(
-            consumer.election(),
-            consumer.context(),
-            consumer.constants(),
-            consumer.guardianCoefficients(),
-            consumer.devices(),
+            consumer.readElectionRecord(),
             consumer.ciphertextTally(),
             consumer.decryptedTally(),
             consumer.spoiledBallots(),
-            consumer.spoiledTallies());
+            consumer.spoiledTallies(),
+            null);
 
     Consumer consumer2 = new Consumer(publisher);
     ElectionRecord roundtrip = consumer2.readElectionRecordProto();

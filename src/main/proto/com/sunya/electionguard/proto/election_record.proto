@@ -22,6 +22,15 @@ message ElectionRecord {
 
   CiphertextTally ciphertext_tally = 6;
   PlaintextTally decrypted_tally = 7;
+
+  // The guardians present for decryption
+  repeated AvailableGuardian available_guardians = 8;
+}
+
+message AvailableGuardian {
+  string guardian_id = 1;
+  uint32 sequence = 2;
+  ElementModQ lagrange_coordinate = 3;
 }
 
 // The constants for mathematical functions during the election.

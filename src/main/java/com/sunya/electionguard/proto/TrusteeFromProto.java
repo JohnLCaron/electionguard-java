@@ -40,10 +40,11 @@ public class TrusteeFromProto {
 
     Map<String, KeyCeremony.ElectionPartialKeyBackup> otherGuardianPartialKeyBackups =
             proto.getOtherGuardianBackupsList().stream()
-                    .collect(Collectors.toMap(p -> p.getDesignatedId(), p -> convertElectionPartialKeyBackup(p)));
+                    .collect(Collectors.toMap(p -> p.getOwnerId(), p -> convertElectionPartialKeyBackup(p)));
 
     return new DecryptingTrustee(guardian_id, sequence_order, rsa_private_key, election_keypair, otherGuardianPartialKeyBackups);
   }
+
   private static KeyCeremony.ElectionPartialKeyBackup convertElectionPartialKeyBackup(KeyCeremonyProto.ElectionPartialKeyBackup proto) {
     return KeyCeremony.ElectionPartialKeyBackup.create(
             proto.getOwnerId(),

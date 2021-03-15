@@ -3,6 +3,7 @@ package com.sunya.electionguard.verifier;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.sunya.electionguard.AvailableGuardian;
 import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.SubmittedBallot;
 import com.sunya.electionguard.CiphertextElectionContext;
@@ -35,6 +36,7 @@ public class ElectionRecord {
   @Nullable public final PlaintextTally decryptedTally;
   public final CloseableIterable<PlaintextBallot> spoiledBallots; // may be empty
   public final CloseableIterable<PlaintextTally> spoiledTallies; // may be empty
+  public final ImmutableList<AvailableGuardian> availableGuardians; // may be empty
 
   private final ImmutableMap<String, Integer> contestVoteLimits;
 
@@ -47,7 +49,8 @@ public class ElectionRecord {
                         @Nullable PlaintextTally decryptedTally,
                         @Nullable CloseableIterable<SubmittedBallot> acceptedBallots,
                         @Nullable CloseableIterable<PlaintextBallot> spoiledBallots,
-                        @Nullable CloseableIterable<PlaintextTally> spoiledTallies) {
+                        @Nullable CloseableIterable<PlaintextTally> spoiledTallies,
+                        @Nullable List<AvailableGuardian> availableGuardians) {
     this.constants = constants;
     this.context = context;
     this.election = election;
@@ -58,6 +61,7 @@ public class ElectionRecord {
     this.decryptedTally = decryptedTally;
     this.spoiledBallots = spoiledBallots == null ? CloseableIterableAdapter.empty() : spoiledBallots;
     this.spoiledTallies = spoiledTallies == null ? CloseableIterableAdapter.empty() : spoiledTallies;
+    this.availableGuardians = availableGuardians == null ? ImmutableList.of() : ImmutableList.copyOf(availableGuardians);
 
     int num_guardians = context.number_of_guardians;
     if (num_guardians != this.guardianCoefficients.size()) {
@@ -87,8 +91,8 @@ public class ElectionRecord {
             this.decryptedTally,
             acceptedBallots,
             spoiledBallots,
-            spoiledBallotTallies
-            );
+            spoiledBallotTallies,
+            this.availableGuardians);
   }
 
   /** The generator g in the spec. */
@@ -165,17 +169,18 @@ public class ElectionRecord {
     return constants.equals(that.constants) &&
             context.equals(that.context) &&
             election.equals(that.election) &&
-            devices.equals(that.devices) &&
-            acceptedBallots.equals(that.acceptedBallots) &&
-            guardianCoefficients.equals(that.guardianCoefficients) &&
+            Objects.equals(devices, that.devices) &&
+            Objects.equals(acceptedBallots, that.acceptedBallots) &&
             Objects.equals(encryptedTally, that.encryptedTally) &&
             Objects.equals(decryptedTally, that.decryptedTally) &&
-            contestVoteLimits.equals(that.contestVoteLimits);
+            Objects.equals(guardianCoefficients, that.guardianCoefficients) &&
+            Objects.equals(spoiledBallots, that.spoiledBallots) &&
+            Objects.equals(spoiledTallies, that.spoiledTallies) &&
+            Objects.equals(contestVoteLimits, that.contestVoteLimits);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(constants, context, election, devices, acceptedBallots, guardianCoefficients, encryptedTally,
-            decryptedTally, contestVoteLimits);
+    return Objects.hash(constants, context, election, devices, acceptedBallots, encryptedTally, decryptedTally, guardianCoefficients, spoiledBallots, spoiledTallies, contestVoteLimits);
   }
 }

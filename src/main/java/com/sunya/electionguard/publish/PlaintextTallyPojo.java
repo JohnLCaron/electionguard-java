@@ -7,7 +7,6 @@ import com.sunya.electionguard.ChaumPedersen;
 import com.sunya.electionguard.DecryptionShare;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.Group;
-import com.sunya.electionguard.GuardianState;
 import com.sunya.electionguard.PlaintextTally;
 
 import javax.annotation.Nullable;
@@ -23,9 +22,6 @@ import java.util.stream.Collectors;
 public class PlaintextTallyPojo {
   public String object_id;
   public Map<String, PlaintextTallyContestPojo> contests;
-  public Map<String, Group.ElementModQ> lagrange_coefficients;
-  public List<GuardianStatePojo> guardian_states;
-  public Map<String, Map<String, PlaintextTallyContestPojo>> spoiled_ballots; // LOOK should go away when PR #305 is done?
 
   public static class PlaintextTallyContestPojo {
     public String object_id;
@@ -64,12 +60,6 @@ public class PlaintextTallyPojo {
     public Group.ElementModQ response;
   }
 
-  public static class GuardianStatePojo {
-    public String guardian_id;
-    public int sequence;
-    public boolean is_missing;
-  }
-
   @Nullable
   private static <T, U> List<U> convertList(@Nullable List<T> from, Function<T, U> converter) {
     return from == null ? null : from.stream().map(converter).collect(Collectors.toList());
@@ -91,9 +81,7 @@ public class PlaintextTallyPojo {
 
     return new PlaintextTally(
             pojo.object_id,
-            contests,
-            pojo.lagrange_coefficients,
-            convertList(pojo.guardian_states, PlaintextTallyPojo::translateGuardianState));
+            contests);
   }
 
   private static PlaintextTally.Contest translateContest(PlaintextTallyContestPojo pojo) {
@@ -156,13 +144,6 @@ public class PlaintextTallyPojo {
       proof.response);
   }
 
-  private static GuardianState translateGuardianState(GuardianStatePojo pojo) {
-    return GuardianState.create(
-            pojo.guardian_id,
-            pojo.sequence,
-            pojo.is_missing);
-  }
-
   ////////////////////////////////////////////////////////////////////////////
   // serialize
 
@@ -180,9 +161,6 @@ public class PlaintextTallyPojo {
     pojo.contests = org.contests.entrySet().stream().collect(Collectors.toMap(
             Map.Entry::getKey,
             e2 -> convertContest(e2.getValue())));
-
-    pojo.lagrange_coefficients = org.lagrange_coefficients;
-    pojo.guardian_states = convertList(org.guardianStates, PlaintextTallyPojo::convertGuardianState);
 
     return pojo;
   }
@@ -243,30 +221,6 @@ public class PlaintextTallyPojo {
     pojo.challenge = proof.challenge;
     pojo.response = proof.response;
     return pojo;
-  }
-
-  private static GuardianStatePojo convertGuardianState(GuardianState state) {
-    GuardianStatePojo pojo = new GuardianStatePojo();
-    pojo.guardian_id = state.guardian_id();
-    pojo.sequence = state.sequence();
-    pojo.is_missing = state.is_missing();
-    return pojo;
-  }
-
-
-  /////////////////////////////////
-  // temporary kludge - abandon for now
-
-  public static PlaintextTally deserializeSpoiledTalliesOld(JsonElement jsonElem) {
-    Gson gson = GsonTypeAdapters.enhancedGson();
-    PlaintextTallyPojo pojo = gson.fromJson(jsonElem, PlaintextTallyPojo.class);
-
-    for (Map.Entry<String, Map<String, PlaintextTallyContestPojo>> entry1 : pojo.spoiled_ballots.entrySet()) {
-      for (Map.Entry<String, PlaintextTallyContestPojo> contest : entry1.getValue().entrySet()) {
-
-      }
-    }
-    return null;
   }
 
 }

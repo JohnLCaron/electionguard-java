@@ -277,7 +277,7 @@ public class PerformKeyCeremony {
 
   boolean publish(String publishDir) throws IOException {
     // the election record
-    Publisher publisher = new Publisher(publishDir, false, false);
+    Publisher publisher = new Publisher(publishDir, true, false);
     publisher.writeKeyCeremonyProto(
             this.election,
             this.context,

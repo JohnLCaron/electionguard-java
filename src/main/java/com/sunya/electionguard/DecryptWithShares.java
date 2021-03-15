@@ -53,16 +53,12 @@ public class DecryptWithShares {
    * @param tally:   The CiphertextTally to decrypt
    * @param shares:  The guardian Decryption Shares for all guardians
    * @param context: the CiphertextElectionContext
-   * @param lagrange_coefficients: pass to PlaintextTally
-   * @param guardianStates: pass to PlaintextTally
    * @return A PlaintextTally or None if there is an error
    */
   public static Optional<PlaintextTally> decrypt_tally(
           CiphertextTally tally,
           Map<String, DecryptionShare> shares, // Map(AVAILABLE_GUARDIAN_ID, DecryptionShare)
-          CiphertextElectionContext context,
-          Map<String, ElementModQ> lagrange_coefficients,
-          List<GuardianState> guardianStates) {
+          CiphertextElectionContext context) {
 
     Map<String, PlaintextTally.Contest> contests = new HashMap<>();
     for (CiphertextTally.Contest tallyContest : tally.contests.values()) {
@@ -77,7 +73,7 @@ public class DecryptWithShares {
     if (contests.isEmpty()) {
       return Optional.empty();
     } else {
-      return Optional.of(new PlaintextTally(tally.object_id, contests, lagrange_coefficients, guardianStates));
+      return Optional.of(new PlaintextTally(tally.object_id, contests));
     }
   }
 
@@ -129,7 +125,7 @@ public class DecryptWithShares {
       plaintext_contests.put(ballotContest.object_id, plaintext_contest.get());
     }
 
-    return Optional.of(new PlaintextTally(ballot.object_id, plaintext_contests, null, null));
+    return Optional.of(new PlaintextTally(ballot.object_id, plaintext_contests));
   }
 
   /**
