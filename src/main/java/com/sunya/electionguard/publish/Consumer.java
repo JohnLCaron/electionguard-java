@@ -16,6 +16,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Formatter;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -31,7 +32,19 @@ public class Consumer {
     publisher = new Publisher(topDir, false, false);
   }
 
-  public ElectionRecord readElectionRecord() throws IOException {
+  public boolean isValidElectionRecord(Formatter error) throws IOException {
+    if (!Files.exists(publisher.publishPath())) {
+      error.format("%s does not exist", publisher.publishPath());
+      return false;
+    }
+    if (!Files.exists(publisher.electionRecordProtoPath()) && !Files.exists(publisher.constantsPath())) {
+      error.format("%s does not contain proto or json files", publisher.publishPath());
+      return false;
+    }
+    return true;
+  }
+
+    public ElectionRecord readElectionRecord() throws IOException {
     if (Files.exists(publisher.electionRecordProtoPath())) {
       return readElectionRecordProto();
     } else {

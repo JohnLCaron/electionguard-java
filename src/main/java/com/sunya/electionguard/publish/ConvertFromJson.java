@@ -90,7 +90,7 @@ public class ConvertFromJson {
       return enhancedGson.fromJson(reader, PlaintextBallot.class);
     } catch (Exception ioe) {
       logger.atSevere().log("Failed reading file '%s'", pathname);
-      throw ioe;
+      throw new IOException(String.format("Failed readPlaintextBallot %s", pathname), ioe);
     }
   }
 
