@@ -11,7 +11,6 @@ import static com.google.common.truth.Truth.assertThat;
 
 public class TestReadPythonJson {
   private static final String pythonPublish = "src/test/data/python-publish/";
-  // private static final String pythonModified = "src/test/data/python-modified/";
   private static Publisher publisher;
 
   @BeforeContainer
@@ -81,12 +80,22 @@ public class TestReadPythonJson {
     }
   }
 
-  // LOOK @Example
-  public void testSpoiledBallotsPythonJson() throws IOException {
+  @Example
+  public void testSpoiledBallotsPythonJson() {
+    // LOOK exclude PlaintextBallotSelection.extra_data to allow to read
+    boolean first = true;
     for (File file : publisher.spoiledBallotFiles()) {
-      PlaintextBallot fromPython = ConvertFromJson.readPlaintextBallot(file.getAbsolutePath());
-      assertThat(fromPython).isNotNull();
-      System.out.printf("spoiledBallotFiles %s%n", fromPython.object_id);
+      try {
+        PlaintextBallot fromPython = ConvertFromJson.readPlaintextBallot(file.getAbsolutePath());
+        assertThat(fromPython).isNotNull();
+        System.out.printf("spoiledBallotFiles %s%n", fromPython.object_id);
+      } catch (Exception e) {
+        System.out.printf("FAILED spoiledBallotFiles %s%n", file.getAbsolutePath());
+        if (first) {
+          e.printStackTrace();
+          first = false;
+        }
+      }
     }
   }
 

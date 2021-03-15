@@ -122,6 +122,11 @@ class ElectionRecordPanel extends JPanel {
   boolean setElectionRecord(String electionRecord) {
     try {
       this.consumer = new Consumer(electionRecord);
+      Formatter error = new Formatter();
+      if (!this.consumer.isValidElectionRecord(error)) {
+        JOptionPane.showMessageDialog(null, error.toString());
+        return false;
+      }
       this.record =  consumer.readElectionRecord();
       electionDescriptionTable.setElectionDescription(record.election);
 
@@ -140,9 +145,9 @@ class ElectionRecordPanel extends JPanel {
       if (record.spoiledBallots != null) {
         spoiledBallotsTable.setBallots(record.spoiledBallots);
       }
-    } catch (IOException e) {
+    } catch (Exception e) {
       e.printStackTrace();
-      return false;
+      JOptionPane.showMessageDialog(null, e.getMessage());
     }
     return true;
   }

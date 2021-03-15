@@ -32,7 +32,7 @@ public class PlaintextBallotPojo {
     public String object_id;
     public int vote;
     public boolean is_placeholder_selection;
-    public String extra_data; // optional
+    // public String extra_data; // optional
   }
 
   /////////////////////////////////////
@@ -84,14 +84,14 @@ public class PlaintextBallotPojo {
   }
 
   private static PlaintextBallot.Selection convertPlaintextBallotSelection(PlaintextBallotPojo.PlaintextBallotSelection pojo) {
-    PlaintextBallot.ExtendedData extra = (pojo.extra_data == null) ? null :
-            new PlaintextBallot.ExtendedData(pojo.extra_data, pojo.extra_data.length());
+    //PlaintextBallot.ExtendedData extra = (pojo.extra_data == null) ? null :
+    //        new PlaintextBallot.ExtendedData(pojo.extra_data, pojo.extra_data.length());
 
     return new PlaintextBallot.Selection(
             pojo.object_id,
             pojo.vote,
             pojo.is_placeholder_selection,
-            extra);
+            null);
   }
 
   ////////////////////////////////////////////////////////////////////////////////////////
@@ -123,7 +123,7 @@ public class PlaintextBallotPojo {
     pojo.object_id = src.selection_id;
     pojo.vote = src.vote;
     pojo.is_placeholder_selection = src.is_placeholder_selection;
-    src.extended_data.ifPresent( data -> pojo.extra_data = data.value);
+    // src.extended_data.ifPresent( data -> pojo.extra_data = data.value);
     return pojo;
   }
 

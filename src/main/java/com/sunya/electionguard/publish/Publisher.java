@@ -32,8 +32,8 @@ public class Publisher {
   static final String DEVICES_DIR = "devices";
   static final String COEFFICIENTS_DIR = "coefficients";
   static final String BALLOTS_DIR = "encrypted_ballots";
-  static final String SPOILED_BALLOT_DIR = "spoiled_ballots";
-  static final String SPOILED_TALLY_DIR = "spoiled_tallies";
+  static final String SPOILED_BALLOT_DIR = "plaintext_ballots";
+  static final String SPOILED_TALLY_DIR = "spoiled_ballots";
   static final String GUARDIANS_DIR = "guardians";
 
   static final String MANIFEST_FILE_NAME = "manifest" + SUFFIX;

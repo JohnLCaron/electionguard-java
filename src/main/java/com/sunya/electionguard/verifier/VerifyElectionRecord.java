@@ -72,7 +72,7 @@ public class VerifyElectionRecord {
     }
   }
 
-  static boolean verifyElectionRecord(ElectionRecord electionRecord) {
+  public static boolean verifyElectionRecord(ElectionRecord electionRecord) {
     System.out.println("============ Ballot Verification =========================");
     System.out.println("------------ [box 1] Parameter Validation ------------");
     ParameterVerifier blv = new ParameterVerifier(electionRecord);
