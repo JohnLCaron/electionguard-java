@@ -36,7 +36,7 @@ public class PartialDecryptionVerifier {
     this.electionRecord = electionRecord;
     this.tally = Preconditions.checkNotNull(decryptedTally);
     this.lagrange_coefficients = electionRecord.availableGuardians.stream().collect(Collectors.toMap(
-            AvailableGuardian::guardian_id, AvailableGuardian::lagrangeCoordinate));
+            g -> g.guardian_id, g -> g.lagrangeCoordinate));
   }
 
   /** Verify 10.A for available guardians, if there are missing guardians. */
@@ -63,11 +63,11 @@ public class PartialDecryptionVerifier {
     for (AvailableGuardian guardian : guardians) {
       List<Integer> seq_others = new ArrayList<>();
       for (AvailableGuardian other : guardians) {
-        if (!other.guardian_id().equals(guardian.guardian_id())) {
-          seq_others.add(other.sequence());
+        if (!other.guardian_id.equals(guardian.guardian_id)) {
+          seq_others.add(other.sequence);
         }
       }
-      error |= !this.verify_lagrange_coefficient(guardian.sequence(), seq_others, guardian.lagrangeCoordinate());
+      error |= !this.verify_lagrange_coefficient(guardian.sequence, seq_others, guardian.lagrangeCoordinate);
     }
 
     if (error) {

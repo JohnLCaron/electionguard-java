@@ -64,7 +64,7 @@ public class TestPublish {
             ciphertext_tally,
             plaintext_tally,
             coefficients,
-            null, null);
+            null, null, null);
 
     File testFile = new File(outputDir, Publisher.DEVICES_DIR);
     assertThat(testFile.exists()).isTrue();

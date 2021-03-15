@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
 
 import static com.sunya.electionguard.KeyCeremony.CoefficientValidationSet;
@@ -28,6 +29,36 @@ public class TestJsonRoundtrip {
     // read it back
     Manifest roundtrip = ConvertFromJson.readElection(outputFile);
     assertThat(roundtrip).isEqualTo(description);
+  }
+
+  @Example
+  public void testAvailableGuardianRoundtrip() throws IOException {
+    File file = File.createTempFile("temp", null);
+    file.deleteOnExit();
+    String outputFile = file.getAbsolutePath();
+
+    // original
+    AvailableGuardian org = new AvailableGuardian("test", 42, Group.TWO_MOD_Q);
+    // write json
+    ConvertToJson.writeAvailableGuardian(org, file.toPath());
+    // read it back
+    AvailableGuardian fromFile = ConvertFromJson.readAvailableGuardian(outputFile);
+    assertThat(fromFile).isEqualTo(org);
+  }
+
+  @Example
+  public void testDeviceRoundtrip() throws IOException {
+    File file = File.createTempFile("temp", null);
+    file.deleteOnExit();
+    String outputFile = file.getAbsolutePath();
+
+    // original
+    Encrypt.EncryptionDevice org = Encrypt.EncryptionDevice.createForTest("deviceTest");
+    // write json
+    ConvertToJson.writeDevice(org, file.toPath());
+    // read it back
+    Encrypt.EncryptionDevice fromFile = ConvertFromJson.readDevice(outputFile);
+    assertThat(fromFile).isEqualTo(org);
   }
 
   @Example

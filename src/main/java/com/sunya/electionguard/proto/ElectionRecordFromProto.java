@@ -57,7 +57,7 @@ public class ElectionRecordFromProto {
   }
 
   static AvailableGuardian convertAvailableGuardian(ElectionRecordProto.AvailableGuardian proto) {
-    return AvailableGuardian.create(
+    return new AvailableGuardian(
             proto.getGuardianId(),
             proto.getSequence(),
             convertElementModQ(proto.getLagrangeCoordinate()));

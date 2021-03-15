@@ -87,6 +87,15 @@ public class Consumer {
     return result;
   }
 
+  public List<AvailableGuardian> availableGuardians() throws IOException {
+    List<AvailableGuardian> result = new ArrayList<>();
+    for (File file : publisher.availableGuardianFiles()) {
+      AvailableGuardian fromPython = ConvertFromJson.readAvailableGuardian(file.getAbsolutePath());
+      result.add(fromPython);
+    }
+    return result;
+  }
+
   // Decrypted, spoiled ballots
   // LOOK python is not writing these
   public List<PlaintextBallot> spoiledBallots() throws IOException {
@@ -124,12 +133,6 @@ public class Consumer {
       result.add(fromPython);
     }
     return result;
-    // return result.size() > 0 ? result : spoiledTalliesOld();
-  }
-
-  private List<PlaintextTally> spoiledTalliesOld() {
-    // PlaintextTallyPojo.deserializeSpoiledTalliesOld(null);
-    return null;
   }
 
   public List<KeyCeremony.CoefficientValidationSet> guardianCoefficients() throws IOException {
@@ -153,7 +156,7 @@ public class Consumer {
             CloseableIterableAdapter.wrap(this.acceptedBallots()),
             CloseableIterableAdapter.wrap(this.spoiledBallots()),
             CloseableIterableAdapter.wrap(this.spoiledTallies()),
-            null);
+            this.availableGuardians());
   }
 
   ///////////////////////////////////////////// Proto
