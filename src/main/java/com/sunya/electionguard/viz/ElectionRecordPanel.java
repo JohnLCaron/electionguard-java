@@ -3,6 +3,8 @@ package com.sunya.electionguard.viz;
 import com.google.common.collect.ImmutableList;
 import com.sunya.electionguard.AvailableGuardian;
 import com.sunya.electionguard.CiphertextElectionContext;
+import com.sunya.electionguard.ElectionConstants;
+import com.sunya.electionguard.Group;
 import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.KeyCeremony;
 import com.sunya.electionguard.publish.CloseableIterableAdapter;
@@ -107,7 +109,7 @@ class ElectionRecordPanel extends JPanel {
     add(topPanel, BorderLayout.NORTH);
 
     JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
-    tabbedPane.addTab("ElectionDescription", this.electionDescriptionTable);
+    tabbedPane.addTab("Manifest", this.electionDescriptionTable);
     tabbedPane.addTab("AcceptedBallots", this.acceptedBallotsTable);
     tabbedPane.addTab("CiphertextTally", this.ciphertextTallyTable);
     tabbedPane.addTab("ElectionTally", this.electionTallyTable);
@@ -146,15 +148,16 @@ class ElectionRecordPanel extends JPanel {
   }
 
   void showInfo(Formatter f) {
-    f.format("Manifest %s%n", this.electionRecordDir);
+    f.format("Election Record %s%n", this.electionRecordDir);
     if (this.record != null) {
-      Manifest election = record.election;
-      f.format("  election_scope_id = %s%n", election.election_scope_id);
-      f.format("  type = %s%n", election.type);
-      f.format("  name = %s%n", election.name);
-      f.format("  start_date = %s%n", election.start_date);
-      f.format("  end_date = %s%n", election.end_date);
-      f.format("  description crypto hash = %s%n", election.crypto_hash);
+      Manifest manifest = record.election;
+      f.format("%nManifest%n");
+      f.format("  election_scope_id = %s%n", manifest.election_scope_id);
+      f.format("  type = %s%n", manifest.type);
+      f.format("  name = %s%n", manifest.name);
+      f.format("  start_date = %s%n", manifest.start_date);
+      f.format("  end_date = %s%n", manifest.end_date);
+      f.format("  manifest crypto hash = %s%n", manifest.crypto_hash);
 
       CiphertextElectionContext context = record.context;
       f.format("%nContext%n");
@@ -169,6 +172,13 @@ class ElectionRecordPanel extends JPanel {
       for (KeyCeremony.CoefficientValidationSet coeff : record.guardianCoefficients) {
         f.format("    %s%n", coeff.owner_id());
       }
+
+      ElectionConstants constants = record.constants;
+      f.format("%nConstants%n");
+      f.format("  large_prime = %s%n", Group.int_to_p_unchecked(constants.large_prime).toShortString());
+      f.format("  small_prime = %s%n", Group.int_to_q_unchecked(constants.small_prime));
+      f.format("  cofactor    = %s%n", Group.int_to_p_unchecked(constants.cofactor).toShortString());
+      f.format("  generator   = %s%n", Group.int_to_p_unchecked(constants.generator).toShortString());
 
       f.format("%n  Available Guardians%n");
       for (AvailableGuardian guardian : record.availableGuardians) {

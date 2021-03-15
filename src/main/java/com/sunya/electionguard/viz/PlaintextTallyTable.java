@@ -136,7 +136,6 @@ public class PlaintextTallyTable extends JPanel {
     public String getId() {
       return tally.object_id;
     }
-
   }
 
   public class ContestBean {

@@ -72,7 +72,7 @@ public class DecryptingTrustee {
 
     KeyCeremony.ElectionPartialKeyBackup backup = this.otherGuardianPartialKeyBackups.get(missing_guardian_id);
     if (backup == null) {
-      logger.atInfo().log("compensate decrypt guardian %s missing backup for %s",
+      logger.atInfo().log("compensate_decrypt guardian %s missing backup for %s",
               this.id, missing_guardian_id);
       return Optional.empty();
     }
@@ -141,7 +141,7 @@ public class DecryptingTrustee {
   private Optional<Group.ElementModP> recovery_public_key_for(String missing_guardian_id) {
     KeyCeremony.ElectionPartialKeyBackup backup = this.otherGuardianPartialKeyBackups.get(missing_guardian_id);
     if (backup == null) {
-      logger.atInfo().log("compensate decrypt guardian %s missing backup for %s", this.id, missing_guardian_id);
+      logger.atInfo().log("recovery_public_key_for guardian %s missing backup for %s", this.id, missing_guardian_id);
       return Optional.empty();
     }
 

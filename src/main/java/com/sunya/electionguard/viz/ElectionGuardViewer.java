@@ -28,15 +28,18 @@ public class ElectionGuardViewer extends JPanel {
 
   private final ElectionRecordPanel electionRecordPanel;
   private final InputBallotPanel inputBallotPanel;
+  private final TrusteesPanel trusteesPanel;
 
   public ElectionGuardViewer(PreferencesExt prefs) {
     // the top UI
     JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
     electionRecordPanel = new ElectionRecordPanel((PreferencesExt) prefs.node("ElectionRecordPanel"), frame);
     inputBallotPanel = new InputBallotPanel((PreferencesExt) prefs.node("InputBallotPanel"), frame);
+    trusteesPanel = new TrusteesPanel((PreferencesExt) prefs.node("TrusteesPanel"), frame);
 
     tabbedPane.addTab("ElectionRecord", electionRecordPanel);
     tabbedPane.addTab("InputBallots", inputBallotPanel);
+    tabbedPane.addTab("Trustees", trusteesPanel);
     tabbedPane.setSelectedIndex(0);
 
     setLayout(new BorderLayout());
@@ -46,6 +49,7 @@ public class ElectionGuardViewer extends JPanel {
   public void exit() {
     electionRecordPanel.save();
     inputBallotPanel.save();
+    trusteesPanel.save();
 
     Rectangle bounds = frame.getBounds();
     prefs.putBeanObject(FRAME_SIZE, bounds);

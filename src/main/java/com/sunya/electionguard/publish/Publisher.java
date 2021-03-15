@@ -1,5 +1,6 @@
 package com.sunya.electionguard.publish;
 
+import com.google.common.collect.Iterables;
 import com.sunya.electionguard.*;
 import com.sunya.electionguard.proto.CiphertextBallotProto;
 import com.sunya.electionguard.proto.CiphertextBallotToProto;
@@ -94,7 +95,7 @@ public class Publisher {
   /** Delete everything in the output directory, but leave that directory. */
   private void removeAllFiles() throws IOException {
     String filename = publishDirectory.getFileName().toString();
-    if (!filename.startsWith("publish")) {
+    if (!(filename.startsWith("publish") || filename.startsWith("encryptor") || filename.startsWith("decryptor"))) {
       throw new RuntimeException(String.format("Publish directory '%s' should start with 'publish'", filename));
     }
     Files.walk(publishDirectory)
@@ -321,10 +322,15 @@ public class Publisher {
           Manifest description,
           CiphertextElectionContext context,
           ElectionConstants constants,
-          Iterable<KeyCeremony.CoefficientValidationSet> coefficient_validation_sets) throws IOException {
+          Iterable<KeyCeremony.CoefficientValidationSet> guardianCoefficients) throws IOException {
+
+    if (context.number_of_guardians != Iterables.size(guardianCoefficients)) {
+      throw new IllegalStateException(String.format("Number of guardians (%d) does not match number of coefficients (%d)",
+              context.number_of_guardians, Iterables.size(guardianCoefficients)));
+    }
 
     ElectionRecordProto.ElectionRecord ElectionRecordProto = ElectionRecordToProto.buildElectionRecord(
-            description, context, constants, coefficient_validation_sets,
+            description, context, constants, guardianCoefficients,
             null, null, null, null);
     try (FileOutputStream out = new FileOutputStream(electionRecordProtoPath().toFile())) {
       ElectionRecordProto.writeDelimitedTo(out);

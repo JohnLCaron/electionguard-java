@@ -206,7 +206,7 @@ public class DecryptBallots {
   }
 
   boolean publish(String inputDir, String publishDir) throws IOException {
-    Publisher publisher = new Publisher(publishDir, false, false);
+    Publisher publisher = new Publisher(publishDir, true, false);
     publisher.writeDecryptionResultsProto(
             this.electionRecord,
             this.encryptedTally,

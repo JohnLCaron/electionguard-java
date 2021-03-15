@@ -220,8 +220,7 @@ class TrusteeDecryptions {
           DecryptingTrustee.Proxy guardian,
           String missing_guardian_id,
           CiphertextTally tally,
-          CiphertextElectionContext context,
-          @Nullable Auxiliary.Decryptor decryptor) {
+          CiphertextElectionContext context) {
 
     Map<String, CiphertextCompensatedDecryptionContest> contests = new HashMap<>();
 
@@ -461,7 +460,7 @@ class TrusteeDecryptions {
   // Map(MISSING_GUARDIAN_ID, DecryptionShare)
   static DecryptionShare reconstruct_decryption_share(
           String missing_guardian_id,
-          KeyCeremony.ElectionPublicKey public_key,
+          Group.ElementModP missing_public_key,
           CiphertextTally tally,
           Map<String, CompensatedDecryptionShare> shares, // Map(GUARDIAN_ID, CompensatedDecryptionShare)
           Map<String, Group.ElementModQ> lagrange_coefficients) {
@@ -476,7 +475,7 @@ class TrusteeDecryptions {
       contests.put(contest.object_id, dcontest);
     }
 
-    return new DecryptionShare(tally.object_id, missing_guardian_id, public_key.publicKey(), contests);
+    return new DecryptionShare(tally.object_id, missing_guardian_id, missing_public_key, contests);
   }
 
   /**
@@ -543,7 +542,7 @@ class TrusteeDecryptions {
    * Reconstruct the missing Decryption shares for a missing guardian from the collection of compensated decryption shares.
    * <p>
    * @param missing_guardian_id: The id of the missing guardian
-   * @param public_key: the public key for the missing guardian
+   * @param missing_public_key: the public key for the missing guardian
    * @param ballots: The collection of `SubmittedBallot` that are spoiled
    * @param shares: the collection of CompensatedDecryptionShare's for each ballot, for each missing LOOK or available? guardian
    * @param lagrange_coefficients: the lagrange coefficients corresponding to the available guardians that provided shares
@@ -551,7 +550,7 @@ class TrusteeDecryptions {
   // Map(BALLOT_ID, DecryptionShare)
   static Map<String, DecryptionShare> reconstruct_decryption_shares_for_ballots(
           String missing_guardian_id,
-          KeyCeremony.ElectionPublicKey public_key,
+          Group.ElementModP missing_public_key,
           Iterable<SubmittedBallot> ballots,
           Map<String, Map<String, CompensatedDecryptionShare>> shares, // Map(BALLOT_ID, Map(available_guardian, CompensatedDecryptionShare))
           Map<String, Group.ElementModQ> lagrange_coefficients) { // Map(available_guardian, ElementModQ)
@@ -561,7 +560,7 @@ class TrusteeDecryptions {
       Preconditions.checkArgument(shares.containsKey(ballot.object_id));
       DecryptionShare ballot_share = reconstruct_decryption_share_for_ballot(
               missing_guardian_id,
-              public_key,
+              missing_public_key,
               ballot,
               shares.get(ballot.object_id),
               lagrange_coefficients);
@@ -574,7 +573,7 @@ class TrusteeDecryptions {
    * Reconstruct a missing ballot Decryption share for a missing guardian from the collection of compensated decryption shares.
    *
    * @param missing_guardian_id   The guardian id for the missing guardian
-   * @param public_key            the public key for the missing guardian
+   * @param missing_public_key    the public key for the missing guardian
    * @param ballot                The `SubmittedBallot` to reconstruct
    * @param shares                the collection of `CompensatedDecryptionShare` for the missing guardian, each keyed by the ID of the guardian that produced it
    * @param lagrange_coefficients the lagrange coefficients for the available guardians that provided shares
@@ -582,7 +581,7 @@ class TrusteeDecryptions {
   @VisibleForTesting
   static DecryptionShare reconstruct_decryption_share_for_ballot(
           String missing_guardian_id,
-          KeyCeremony.ElectionPublicKey public_key,
+          Group.ElementModP missing_public_key,
           SubmittedBallot ballot,
           Map<String, CompensatedDecryptionShare> shares, // Dict[AVAILABLE_GUARDIAN_ID, CompensatedBallotDecryptionShare]
           Map<String, Group.ElementModQ> lagrange_coefficients) { // Dict[AVAILABLE_GUARDIAN_ID, ElementModQ]
@@ -600,7 +599,7 @@ class TrusteeDecryptions {
     return new DecryptionShare(
             ballot.object_id,
             missing_guardian_id,
-            public_key.publicKey(),
+            missing_public_key,
             contests);
   }
 
