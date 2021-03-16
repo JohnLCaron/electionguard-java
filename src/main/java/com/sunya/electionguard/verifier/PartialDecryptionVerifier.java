@@ -141,7 +141,7 @@ public class PartialDecryptionVerifier {
       ShareVerifier sv = new ShareVerifier(this.id, shares, this.pad, this.data);
       boolean res = sv.verify_all_shares();
       if (!res) {
-        System.out.printf(" %s tally verification error.%n", this.selection_id );
+        System.out.printf(" '%s' tally verification error.%n", this.selection_id);
       }
       return res;
     }
@@ -165,7 +165,7 @@ public class PartialDecryptionVerifier {
     /** Verify all shares of a tally decryption, when there are missing guardians */
     boolean verify_all_shares() {
       boolean error = false;
-      for (CiphertextDecryptionSelection share : this.shares){
+      for (CiphertextDecryptionSelection share : this.shares) {
         if (share.recovered_parts().isPresent()) {
           if (!this.verify_share_replacement_lagrange(share)) {
             error = true;

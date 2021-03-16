@@ -1,7 +1,7 @@
 package com.sunya.electionguard;
 
 import com.google.common.base.Stopwatch;
-import com.google.common.collect.ImmutableList;
+import com.sunya.electionguard.publish.Consumer;
 import net.jqwik.api.Example;
 
 import java.io.IOException;
@@ -178,15 +178,13 @@ public class TestDecryptProblem {
     this.encrypter = new Encrypt.EncryptionMediator(this.metadata, this.context, this.device);
     System.out.printf("%n2. Ready to encrypt at location: %s%n", this.device.location);
 
-    // Load some Ballots
-    String ballotDir = "src/test/data/electionRecordJson/spoiled_ballots/";
-    String ballot1 = "ballot_03a29d15-667c-4ac8-afd7-549f19b8e4eb.json";
-    String ballot2 = "ballot_25a7111b-4334-425a-87c1-f7a49f42b3a2.json";
-    this.originalPlaintextBallots = ImmutableList.of(
-            BallotFactory.get_ballot_from_file(ballotDir + ballot1),
-            BallotFactory.get_ballot_from_file(ballotDir + ballot2));
-    System.out.printf("Loaded ballots: %d%n", this.originalPlaintextBallots.size());
-    assertThat(this.originalPlaintextBallots).isNotEmpty();
+    // Load some random Ballots
+    Consumer consumer = new Consumer("src/test/data/electionRecordJson/");
+    this.originalPlaintextBallots = new ArrayList<>(consumer.spoiledBallots());
+    consumer = new Consumer("src/test/data/electionRecordProto/");
+    this.originalPlaintextBallots.addAll(consumer.spoiledBallots());
+
+    System.out.printf("Loaded %d ballots%n", this.originalPlaintextBallots.size());
 
     // Encrypt the Ballots
     for (PlaintextBallot plaintext_ballot : this.originalPlaintextBallots) {
@@ -203,12 +201,12 @@ public class TestDecryptProblem {
 
     this.ballot_box = new BallotBox(this.election, this.context);
     // cast the ballots
-    boolean first = true;
+    int count = 0;
     for (CiphertextBallot ballot : this.ciphertext_ballots) {
-      Optional<SubmittedBallot> accepted_ballot = first ? this.ballot_box.cast(ballot) : this.ballot_box.spoil(ballot);
-      first = false;
+      Optional<SubmittedBallot> accepted_ballot = (count % 2 == 0) ? this.ballot_box.cast(ballot) : this.ballot_box.spoil(ballot);
       assertThat(accepted_ballot).isPresent();
       System.out.printf("Accepted Ballot Id: %s state = %s%n", ballot.object_id, accepted_ballot.get().state);
+      count++;
     }
   }
 

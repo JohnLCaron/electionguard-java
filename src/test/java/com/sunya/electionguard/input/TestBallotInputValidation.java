@@ -19,6 +19,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 import static com.sunya.electionguard.ElGamal.elgamal_keypair_from_secret;
 import static com.sunya.electionguard.Group.int_to_q_unchecked;
+import static org.junit.Assert.fail;
 
 /** Tester for {@link BallotInputValidation */
 public class TestBallotInputValidation {
@@ -275,7 +276,7 @@ public class TestBallotInputValidation {
     BallotInputBuilder builder = new BallotInputBuilder("ballot_id");
     PlaintextBallot ballot = builder.addContest("contest_id")
             .addSelection("selection_id", 1)
-            .addSelection("selection_id", 1)
+            .addSelection("selection_id", 1) // voting for same candidate twice
             .done()
             .build();
 
@@ -316,11 +317,16 @@ public class TestBallotInputValidation {
     Encrypt.EncryptionDevice device = Encrypt.EncryptionDevice.createForTest("device");
 
     Encrypt.EncryptionMediator encryptor = new Encrypt.EncryptionMediator(metadata, context, device);
-    Optional<CiphertextBallot> encrypted_ballot = encryptor.encrypt(eandb.ballot);
-    if (expectValid) {
+    try {
+      Optional<CiphertextBallot> encrypted_ballot = encryptor.encrypt(eandb.ballot);
       assertThat(encrypted_ballot).isPresent();
-    } else {
-      assertThat(encrypted_ballot).isEmpty();
+      if (!expectValid) {
+        fail();
+      }
+    } catch (Throwable t) {
+      if (expectValid) {
+        fail();
+      }
     }
   }
 }
