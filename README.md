@@ -35,7 +35,7 @@ The entire workflow, consisting of the above steps plus verification can be run 
 
 An experimental refactoring that simulates remote Guardians:
 
-*   [Remote Guardian](https://github.com/JohnLCaron/electionguard-java/tree/master/src/main/proto/com/sunya/electionguard/guardian)
+*   [Remote Guardian](https://github.com/JohnLCaron/electionguard-java/tree/master/src/main/java/com/sunya/electionguard/guardian)
 
 ## Election Record Visualization
 
