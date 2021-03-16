@@ -94,13 +94,28 @@ public class PlaintextTally {
 
     @Override
     public String toString() {
-      return "Selection{" +
-              "\n object_id='" + object_id() + '\'' +
-              "\n tally    =" + tally() +
-              "\n value    =" + value().toShortString() +
-              "\n message  =" + message() +
-              // LOOK shares
-              '}';
+      Formatter f = new Formatter();
+      f.format("Selection{%n object_id= '%s'%n tally    = %d%n value    = %s%n message  = %s%n shares=%n",
+              object_id(), tally(), value().toShortString(), message());
+      for (DecryptionShare.CiphertextDecryptionSelection sel : shares()) {
+        f.format("   %s share = %s", sel.guardian_id(), sel.share().toShortString());
+        if (sel.proof().isPresent()) {
+          f.format(" %s", sel.proof().get().name);
+        }
+        if (sel.recovered_parts().isPresent()) {
+          f.format(" recovered_parts=%n");
+          f.format("     %30s %12s %12s %20s %s%n", "object_id", "guardian", "missing", "proof", "share");
+          Map<String, DecryptionShare.CiphertextCompensatedDecryptionSelection> m = sel.recovered_parts().get();
+          for (DecryptionShare.CiphertextCompensatedDecryptionSelection r : m.values()) {
+            f.format("     %30s %12s %12s %20s %s%n", r.object_id(), r.guardian_id(), r.missing_guardian_id(),
+                    r.proof().name, r.share().toShortString());
+          }
+        } else {
+          f.format("%n");
+        }
+      }
+      f.format("%n}");
+      return f.toString();
     }
   }
 
