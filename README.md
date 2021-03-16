@@ -31,6 +31,12 @@ The entire workflow, consisting of the above steps plus verification can be run 
 
 *   [RunElectionWorkflow](https://github.com/JohnLCaron/electionguard-java/blob/master/docs/RunElectionWorkflow.md)
 
+### Simulated Remote Guardians 
+
+An experimental refactoring that simulates remote Guardians:
+
+*   [Remote Guardian](https://github.com/JohnLCaron/electionguard-java/tree/master/src/main/proto/com/sunya/electionguard/guardian)
+
 ## Election Record Visualization
 
 A simple Swing-based visualization of the Election Record is available. This is a debugging tool for developers, 
@@ -42,10 +48,9 @@ void where taxed or prohibited by law.
 ## Input Validation
 
 Election Manifest and Input Ballot validation can be done by classes in the **com.sunya.electionguard.input package**.
-It is recommended that these are checked before starting encryption. 
-These classes are experimental and not part of the core library.
+These must be checked before starting encryption. 
 
-*   [Visualization](https://github.com/JohnLCaron/electionguard-java/blob/master/docs/Visualization.md)
+*   [InputValidation](https://github.com/JohnLCaron/electionguard-java/blob/master/docs/InputValidation.md)
 
 ## Library Use
 

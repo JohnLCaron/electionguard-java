@@ -37,21 +37,21 @@ A specific validation is referenced as, eg, Manifest.B.5 and Ballot.A.2.1
 
 ### A. Referential integrity
 
-1. A ballot's style_id must match a BallotStyle object_id in Manifest.ballot_styles.
+1. A PlaintextBallot's style_id must match a BallotStyle object_id in Manifest.ballot_styles.
 
-2. For each PlaintextBallot.Contest on the ballot, the contest_id must match a ContestDescription.object_id in Manifest.contests.
+2. For each PlaintextBallotContest on the ballot, the contest_id must match a ContestDescription.object_id in Manifest.contests.
    
-   2.1 Within the Contest and matching ContestDescription, each PlaintextBallot.Selection.selection_id must match a SelectionDescription.object_id.
+   2.1 Within the PlaintextBallotContest and matching ContestDescription, each PlaintextBallotSelection.selection_id must match a SelectionDescription.object_id.
    
 ### B. Duplication
 
-1. All PlaintextBallot.Contest have a unique contest_id.   
+1. All PlaintextBallotContest have a unique contest_id.   
 
-2. Within a Contest, all PlaintextBallot.Selection have a unique selection_id.
+2. Within a PlaintextBallotContest, all PlaintextBallotSelection have a unique selection_id.
 
 ### C. Voting limits
 
-1. All PlaintextBallot.Selection must have a vote whose value is 0 or 1.
+1. All PlaintextBallotSelection must have a vote whose value is 0 or 1.
 
-2. Within a Contest, the sum of the PlaintextBallot.Selection votes must be <= ContestDescription.votes_allowed.
+2. Within a PlaintextBallotContest, the sum of the PlaintextBallotSelection votes must be <= ContestDescription.votes_allowed.
 
