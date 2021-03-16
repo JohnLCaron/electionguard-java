@@ -298,7 +298,7 @@ public class Publisher {
    * Do not use this in a production application.
    */
   public void publish_private_data(
-          @Nullable Iterable<PlaintextBallot> plaintext_ballots,
+          @Nullable Iterable<PlaintextBallot> original_ballots,
           @Nullable Iterable<Guardian> guardians) throws IOException {
 
     Files.createDirectories(privateDirPath);
@@ -310,13 +310,23 @@ public class Publisher {
       }
     }
 
-    if (plaintext_ballots != null) {
+    if (original_ballots != null) {
       Path ballotsDirPath = privateDirPath.resolve(PRIVATE_PLAINTEXT_BALLOTS_DIR);
       Files.createDirectories(ballotsDirPath);
-      for (PlaintextBallot plaintext_ballot : plaintext_ballots) {
+      for (PlaintextBallot plaintext_ballot : original_ballots) {
         String ballot_name = PLAINTEXT_BALLOT_PREFIX + plaintext_ballot.object_id + SUFFIX;
         ConvertToJson.writePlaintextBallot(plaintext_ballot, ballotsDirPath.resolve(ballot_name));
       }
+    }
+  }
+
+  public void publish_invalid_ballots(String directory, Iterable<PlaintextBallot> invalid_ballots) throws IOException {
+    Path invalidBallotsPath = publishDirectory.resolve(directory);
+    Files.createDirectories(invalidBallotsPath);
+
+    for (PlaintextBallot plaintext_ballot : invalid_ballots) {
+      String ballot_name = PLAINTEXT_BALLOT_PREFIX + plaintext_ballot.object_id + SUFFIX;
+      ConvertToJson.writePlaintextBallot(plaintext_ballot, invalidBallotsPath.resolve(ballot_name));
     }
 
   }

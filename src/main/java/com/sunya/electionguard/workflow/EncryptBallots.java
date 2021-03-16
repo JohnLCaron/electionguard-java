@@ -11,6 +11,7 @@ import com.sunya.electionguard.CiphertextBallot;
 import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.Encrypt;
 import com.sunya.electionguard.PlaintextBallot;
+import com.sunya.electionguard.input.ElectionInputValidation;
 import com.sunya.electionguard.publish.Consumer;
 import com.sunya.electionguard.publish.Publisher;
 import com.sunya.electionguard.verifier.ElectionRecord;
@@ -95,6 +96,12 @@ public class EncryptBallots {
 
     Consumer consumer = new Consumer(cmdLine.inputDir);
     ElectionRecord electionRecord = consumer.readElectionRecord();
+    ElectionInputValidation validator = new ElectionInputValidation(electionRecord.election);
+    Formatter errors = new Formatter();
+    if (!validator.validateElection(errors)) {
+      System.out.printf("*** ElectionInputValidation FAILED on %s%n%s", cmdLine.inputDir, errors);
+      System.exit(1);
+    }
 
     BallotProvider ballotProvider = null;
     if (cmdLine.ballotProviderClass != null) {
@@ -114,6 +121,7 @@ public class EncryptBallots {
 
     BallotInputValidation ballotValidator = new BallotInputValidation(electionRecord.election);
     List<PlaintextBallot> originalBallots = new ArrayList<>();
+    List<PlaintextBallot> invalidBallots = new ArrayList<>();
     try {
       for (PlaintextBallot ballot : ballotProvider.ballots()) {
         Formatter problems = new Formatter();
@@ -129,8 +137,8 @@ public class EncryptBallots {
           }
           originalBallots.add(ballot);
         } else {
-          // put bad ballot somewhere
-          System.out.printf("%s", problems.toString());
+          System.out.printf("Ballot %s failed validation%n   %s%n", ballot.object_id, problems.toString());
+          invalidBallots.add(ballot);
         }
       }
     } catch (Throwable t) {
@@ -139,12 +147,14 @@ public class EncryptBallots {
     }
 
     try {
-      if (cmdLine.save) {
-        encryptor.saveOriginalBallots(cmdLine.encryptDir, originalBallots);
-      }
-
       // publish
-      boolean ok = encryptor.publish(cmdLine.encryptDir);
+      Publisher publish = encryptor.publish(cmdLine.encryptDir);
+      encryptor.saveInvalidBallots(publish, invalidBallots);
+      if (cmdLine.save) {
+        encryptor.saveOriginalBallots(publish, originalBallots);
+      }
+      boolean ok = true;
+
       System.out.printf("*** EncryptBallots %s%n", ok ? "SUCCESS" : "FAILURE");
       System.exit(ok ? 0 : 1);
 
@@ -205,7 +215,7 @@ public class EncryptBallots {
     }
   }
 
-  boolean publish(String publishDir) throws IOException {
+  Publisher publish(String publishDir) throws IOException {
     int ncast = Iterables.size(this.ballotBox.getCastBallots());
     int nspoiled = Iterables.size(this.ballotBox.getSpoiledBallots());
     int failed = originalBallotsCount - ncast - nspoiled;
@@ -218,12 +228,16 @@ public class EncryptBallots {
             ImmutableList.of(this.device), // add the device
             this.ballotBox.getAllBallots() // add the encrypted ballots
     );
-    return true;
+    return publisher;
   }
 
-  void saveOriginalBallots(String publishDir, List<PlaintextBallot> ballots) throws IOException {
-    Publisher publisher = new Publisher(publishDir, false, false);
+  void saveOriginalBallots(Publisher publisher, List<PlaintextBallot> ballots) throws IOException {
     publisher.publish_private_data(ballots, null);
-    System.out.printf("Save private ballot in %s%n", publisher.privateDirPath());
+    System.out.printf("Save original ballot in %s%n", publisher.privateDirPath());
+  }
+
+  void saveInvalidBallots(Publisher publisher, List<PlaintextBallot> ballots) throws IOException {
+    publisher.publish_invalid_ballots("invalid_ballots", ballots);
+    System.out.printf("Save invalid ballot in %s/invalid_ballots%n", publisher.publishPath());
   }
 }

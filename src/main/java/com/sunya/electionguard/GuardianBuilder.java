@@ -149,6 +149,10 @@ public class GuardianBuilder extends ElectionObjectBase {
     this.save_election_public_key(this.share_election_public_key());
   }
 
+  public String getGuardianId() {
+    return this.object_id;
+  }
+
   /**
    * Share public election and auxiliary keys for guardian.
    * @return Public set of election and auxiliary keys

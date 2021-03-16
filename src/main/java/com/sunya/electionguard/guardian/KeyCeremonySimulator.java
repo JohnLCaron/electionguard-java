@@ -6,10 +6,10 @@ import com.beust.jcommander.ParameterException;
 import com.sunya.electionguard.CiphertextElectionContext;
 import com.sunya.electionguard.ElectionConstants;
 import com.sunya.electionguard.Group;
-import com.sunya.electionguard.GuardianBuilder;
 import com.sunya.electionguard.Hash;
 import com.sunya.electionguard.KeyCeremony;
 import com.sunya.electionguard.Manifest;
+import com.sunya.electionguard.input.ElectionInputValidation;
 import com.sunya.electionguard.proto.TrusteeProto;
 import com.sunya.electionguard.proto.TrusteeToProto;
 import com.sunya.electionguard.publish.Consumer;
@@ -17,9 +17,12 @@ import com.sunya.electionguard.publish.Publisher;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Formatter;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 /**
  * A command line program that performs the key ceremony to create the Guardians.
@@ -86,6 +89,13 @@ public class KeyCeremonySimulator {
       // all we need from election record is the ElectionDescription.
       Consumer consumer = new Consumer(cmdLine.inputDir);
       Manifest election = consumer.readManifest();
+      ElectionInputValidation validator = new ElectionInputValidation(election);
+      Formatter errors = new Formatter();
+      if (!validator.validateElection(errors)) {
+        System.out.printf("*** ElectionInputValidation FAILED on %s%n%s", cmdLine.inputDir, errors);
+        System.exit(1);
+      }
+
       Publisher publisher = new Publisher(cmdLine.outputDir, false, false);
       KeyCeremonySimulator keyCeremony = new KeyCeremonySimulator(election, cmdLine.nguardians, cmdLine.quorum, publisher);
 
@@ -93,14 +103,14 @@ public class KeyCeremonySimulator {
       if (cmdLine.outputDir != null) {
         boolean ok = keyCeremony.publishElectionRecord(publisher);
         System.out.printf("*** KeyCeremony %s%n", ok ? "SUCCESS" : "FAILURE");
-        System.exit(ok ? 0 : 1);
+        System.exit(ok ? 0 : 2);
       }
       System.exit(0);
 
     } catch (Throwable t) {
       System.out.printf("*** KeyCeremony FAILURE%n");
       t.printStackTrace();
-      System.exit(2);
+      System.exit(3);
     }
   }
 
@@ -299,13 +309,18 @@ public class KeyCeremonySimulator {
   }
 
   boolean makeCoefficientValidationSets() {
+    // The hashing is order dependent.
+    List<KeyCeremonyTrustee.KeyCeremonyProxy> sorted = this.trusteeProxies.stream()
+            .sorted(Comparator.comparing(KeyCeremonyTrustee.KeyCeremonyProxy::id))
+            .collect(Collectors.toList());
+
     List<Group.ElementModP> commitments = new ArrayList<>();
-    for (KeyCeremonyTrustee.KeyCeremonyProxy sender : trusteeProxies) {
+    for (KeyCeremonyTrustee.KeyCeremonyProxy sender : sorted) {
       KeyCeremony.CoefficientValidationSet coeffSet = sender.sendCoefficientValidationSet();
       this.coefficientValidationSets.add(coeffSet);
       commitments.addAll(coeffSet.coefficient_commitments());
     }
-    this.commitmentsHash =Hash.hash_elems(commitments);
+    this.commitmentsHash = Hash.hash_elems(commitments);
     return true;
   }
 
