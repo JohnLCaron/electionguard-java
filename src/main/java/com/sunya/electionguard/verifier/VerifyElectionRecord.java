@@ -3,7 +3,10 @@ package com.sunya.electionguard.verifier;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
+import com.sunya.electionguard.input.ElectionInputValidation;
 import com.sunya.electionguard.publish.Consumer;
+
+import java.util.Formatter;
 
 /**
  * A command line program to verify a complete election record.
@@ -62,6 +65,12 @@ public class VerifyElectionRecord {
     try {
       Consumer consumer = new Consumer(cmdLine.inputDir);
       ElectionRecord electionRecord = consumer.readElectionRecord();
+      ElectionInputValidation validator = new ElectionInputValidation(electionRecord.election);
+      Formatter errors = new Formatter();
+      if (!validator.validateElection(errors)) {
+        System.out.printf("*** ElectionInputValidation FAILED on %s%n%s", cmdLine.inputDir, errors);
+        System.exit(1);
+      }
 
       System.out.printf(" VerifyElectionRecord read from %s%n", cmdLine.inputDir);
       boolean ok = verifyElectionRecord(electionRecord);

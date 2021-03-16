@@ -8,11 +8,13 @@ import com.sunya.electionguard.CiphertextTallyBuilder;
 import com.sunya.electionguard.InternalManifest;
 import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.Scheduler;
+import com.sunya.electionguard.input.ElectionInputValidation;
 import com.sunya.electionguard.publish.Consumer;
 import com.sunya.electionguard.publish.Publisher;
 import com.sunya.electionguard.verifier.ElectionRecord;
 
 import java.io.IOException;
+import java.util.Formatter;
 
 /**
  * A command line program to accumulate encrypted ballots.
@@ -73,6 +75,12 @@ public class AccumulateTally {
     try {
       Consumer consumer = new Consumer(cmdLine.encryptDir);
       ElectionRecord electionRecord = consumer.readElectionRecord();
+      ElectionInputValidation validator = new ElectionInputValidation(electionRecord.election);
+      Formatter errors = new Formatter();
+      if (!validator.validateElection(errors)) {
+        System.out.printf("*** ElectionInputValidation FAILED on %s%n%s", cmdLine.encryptDir, errors);
+        System.exit(1);
+      }
 
       System.out.printf(" AccumulateTally read from %s%n Write to %s%n", cmdLine.encryptDir, cmdLine.outputDir);
       decryptor = new AccumulateTally(consumer, electionRecord);

@@ -13,6 +13,7 @@ import com.sunya.electionguard.GuardianBuilder;
 import com.sunya.electionguard.Hash;
 import com.sunya.electionguard.KeyCeremony;
 import com.sunya.electionguard.KeyCeremonyMediator;
+import com.sunya.electionguard.input.ElectionInputValidation;
 import com.sunya.electionguard.proto.KeyCeremonyProto;
 import com.sunya.electionguard.proto.KeyCeremonyToProto;
 import com.sunya.electionguard.publish.Consumer;
@@ -21,6 +22,8 @@ import com.sunya.electionguard.publish.Publisher;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Formatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -93,6 +96,12 @@ public class PerformKeyCeremony {
       // all we need from election record is the ElectionDescription.
       Consumer consumer = new Consumer(cmdLine.inputDir);
       Manifest election = consumer.readManifest();
+      ElectionInputValidation validator = new ElectionInputValidation(election);
+      Formatter errors = new Formatter();
+      if (!validator.validateElection(errors)) {
+        System.out.printf("*** ElectionInputValidation FAILED on %s%n%s", cmdLine.inputDir, errors);
+        System.exit(3);
+      }
 
       CoefficientsProvider coefficientsProvider = null;
       if (cmdLine.coefficientsProviderClass != null) {
@@ -100,7 +109,7 @@ public class PerformKeyCeremony {
           coefficientsProvider = makeCoefficientsProvider(cmdLine.coefficientsProviderClass);
         } catch (Throwable t) {
           t.printStackTrace();
-          System.exit(2);
+          System.exit(4);
         }
       }
 
@@ -264,8 +273,13 @@ public class PerformKeyCeremony {
     this.jointKey = joint_key.get();
 
     // Save CoefficientValidations, calculate commitment hash
+
+    List<GuardianBuilder> sorted = this.guardianBuilders.stream()
+            .sorted(Comparator.comparing(GuardianBuilder::getGuardianId))
+            .collect(Collectors.toList());
+
     List<Group.ElementModP> commitments = new ArrayList<>();
-    for (GuardianBuilder guardian : this.guardianBuilders) {
+    for (GuardianBuilder guardian : sorted) {
       KeyCeremony.CoefficientValidationSet coeffSet = guardian.share_coefficient_validation_set();
       this.coefficientValidationSets.add(coeffSet);
       commitments.addAll(coeffSet.coefficient_commitments());

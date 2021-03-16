@@ -32,17 +32,16 @@ public class BallotInputValidation {
     Manifest.BallotStyle ballotStyle = styles.get(ballot.style_id);
     // Referential integrity of ballot's BallotStyle id
     if (ballotStyle == null) {
-      String msg = String.format("Ballot Style '%s' does not exist in election", ballot.style_id);
+      String msg = String.format("Ballot.A.1 Ballot Style '%s' does not exist in election", ballot.style_id);
       ballotMesses.add(msg);
       logger.atWarning().log(msg);
     }
 
     Set<String> contestIds = new HashSet<>();
     for (PlaintextBallot.Contest ballotContest : ballot.contests) {
-
       // No duplicate contests
       if (contestIds.contains(ballotContest.contest_id)) {
-        String msg = String.format("Multiple Ballot contests have same id '%s'", ballotContest.contest_id);
+        String msg = String.format("Ballot.B.1 Multiple Ballot contests have same id '%s'", ballotContest.contest_id);
         ballotMesses.add(msg);
         logger.atWarning().log(msg);
       } else {
@@ -52,7 +51,7 @@ public class BallotInputValidation {
       ElectionContest contest = contestMap.get(ballotContest.contest_id);
       // Referential integrity of ballotContest id
       if (contest == null) {
-        String msg = String.format("Ballot Contest '%s' does not exist in election", ballotContest.contest_id);
+        String msg = String.format("Ballot.A.2 Ballot Contest '%s' does not exist in election", ballotContest.contest_id);
         ballotMesses.add(msg);
         logger.atWarning().log(msg);
       } else {
@@ -71,7 +70,7 @@ public class BallotInputValidation {
     for (PlaintextBallot.Selection selection : ballotContest.ballot_selections) {
       // No duplicate selections
       if (selectionIds.contains(selection.selection_id)) {
-        String msg = String.format("Multiple Ballot selections have same id '%s'", selection.selection_id);
+        String msg = String.format("Ballot.B.2 Multiple Ballot selections have same id '%s'", selection.selection_id);
         contestMesses.add(msg);
         logger.atWarning().log(msg);
       } else {
@@ -81,13 +80,13 @@ public class BallotInputValidation {
       Manifest.SelectionDescription electionSelection = electionContest.selectionMap.get(selection.selection_id);
       // Referential integrity of ballotSelection id
       if (electionSelection == null) {
-        String msg = String.format("Ballot Selection '%s' does not exist in contest", selection.selection_id);
+        String msg = String.format("Ballot.A.3 Ballot Selection '%s' does not exist in contest", selection.selection_id);
         contestMesses.add(msg);
         logger.atWarning().log(msg);
       } else {
         // Vote can only be a 0 or 1
         if (selection.vote < 0 || selection.vote > 1) {
-          String msg = String.format("Ballot Selection '%s' vote (%d) must be 0 or 1", selection.selection_id, selection.vote);
+          String msg = String.format("Ballot.C.1 Ballot Selection '%s' vote (%d) must be 0 or 1", selection.selection_id, selection.vote);
           contestMesses.add(msg);
           logger.atWarning().log(msg);
         } else {
@@ -98,7 +97,7 @@ public class BallotInputValidation {
 
     // Total votes for contest exceeds allowed limit
     if (total > electionContest.allowed) {
-      String msg = String.format("OVERVOTE: Ballot Selection votes (%d) exceeds limit (%d)", total, electionContest.allowed);
+      String msg = String.format("Ballot.C.2 Ballot Selection votes (%d) exceeds limit (%d)", total, electionContest.allowed);
       contestMesses.add(msg);
       logger.atWarning().log(msg);
     }
