@@ -67,14 +67,16 @@ public class KeyCeremony {
   public abstract static class PublicKeySet {
     public abstract String owner_id(); // guardian object_id
     public abstract int sequence_order(); // guardian sequence_order
-    public abstract java.security.PublicKey auxiliary_public_key();
     public abstract ElementModP election_public_key();
     public abstract SchnorrProof election_public_key_proof();
+    public abstract java.security.PublicKey auxiliary_public_key();
 
-    public static PublicKeySet create(String owner_id, int sequence_order, java.security.PublicKey auxiliary_public_key,
-                                      ElementModP election_public_key, SchnorrProof election_public_key_proof) {
+    public static PublicKeySet create(String owner_id, int sequence_order,
+                                      ElementModP election_public_key,
+                                      SchnorrProof election_public_key_proof,
+                                      java.security.PublicKey auxiliary_public_key) {
       return new AutoValue_KeyCeremony_PublicKeySet(
-              owner_id, sequence_order, auxiliary_public_key, election_public_key, election_public_key_proof);
+              owner_id, sequence_order, election_public_key, election_public_key_proof, auxiliary_public_key);
     }
   }
 

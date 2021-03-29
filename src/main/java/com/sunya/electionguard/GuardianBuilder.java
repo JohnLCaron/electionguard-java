@@ -161,9 +161,9 @@ public class GuardianBuilder extends ElectionObjectBase {
     return KeyCeremony.PublicKeySet.create(
             this.object_id,
             this.sequence_order,
-            this.auxiliary_keypair.public_key,
             this.election_keys.key_pair().public_key,
-            this.election_keys.proof());
+            this.election_keys.proof(),
+            this.auxiliary_keypair.public_key);
   }
 
   /**

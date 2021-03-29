@@ -1,16 +1,18 @@
 package com.sunya.electionguard.guardian;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.flogger.FluentLogger;
 import com.sunya.electionguard.ChaumPedersen;
 import com.sunya.electionguard.DecryptionProofTuple;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.Group;
-import com.sunya.electionguard.KeyCeremony;
 import com.sunya.electionguard.Rsa;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import java.math.BigInteger;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -32,18 +34,23 @@ public class DecryptingTrustee {
   /** The election (ElGamal) secret key */
   public final ElGamal.KeyPair election_keypair;
 
-  /** Other guardians' partial key backups of this guardian's keys. */
-  public final Map<String, KeyCeremony.ElectionPartialKeyBackup> otherGuardianPartialKeyBackups; // Map(GUARDIAN_ID, ElectionPartialKeyBackup)
+  /** Other guardians' partial key backups of this guardian's keys, keyed by guardian id. */
+  public final Map<String, KeyCeremony2.PartialKeyBackup> otherGuardianPartialKeyBackups;
+
+  /** All guardians' public coefficient commitments, keyed by guardian id. */
+  public final ImmutableMap<String, ImmutableList<Group.ElementModP>> guardianCommittments;
 
   public DecryptingTrustee(String id, int sequence_order,
                            java.security.PrivateKey rsa_private_key,
                            ElGamal.KeyPair election_keypair,
-                           Map<String, KeyCeremony.ElectionPartialKeyBackup> otherGuardianPartialKeyBackups) {
+                           Map<String, KeyCeremony2.PartialKeyBackup> otherGuardianPartialKeyBackups,
+                           Map<String, ImmutableList<Group.ElementModP>> guardianCommittments) {
     this.id = id;
     this.sequence_order = sequence_order;
     this.rsa_private_key = rsa_private_key;
     this.election_keypair = election_keypair;
     this.otherGuardianPartialKeyBackups = otherGuardianPartialKeyBackups;
+    this.guardianCommittments = ImmutableMap.copyOf(guardianCommittments);
   }
 
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -70,7 +77,7 @@ public class DecryptingTrustee {
       nonce_seed = rand_q();
     }
 
-    KeyCeremony.ElectionPartialKeyBackup backup = this.otherGuardianPartialKeyBackups.get(missing_guardian_id);
+    KeyCeremony2.PartialKeyBackup backup = this.otherGuardianPartialKeyBackups.get(missing_guardian_id);
     if (backup == null) {
       logger.atInfo().log("compensate_decrypt guardian %s missing backup for %s",
               this.id, missing_guardian_id);
@@ -78,7 +85,7 @@ public class DecryptingTrustee {
     }
 
     // LOOK why string?
-    Optional<String> decrypted_value = Rsa.decrypt(backup.encrypted_value(), this.rsa_private_key);
+    Optional<String> decrypted_value = Rsa.decrypt(backup.encryptedCoordinate(), this.rsa_private_key);
     if (decrypted_value.isEmpty()) {
       logger.atInfo().log("compensate decrypt guardian %s failed decryption for %s",
               this.id, missing_guardian_id);
@@ -139,9 +146,15 @@ public class DecryptingTrustee {
    * Compute the recovery public key for a given guardian.
    */
   private Optional<Group.ElementModP> recovery_public_key_for(String missing_guardian_id) {
-    KeyCeremony.ElectionPartialKeyBackup backup = this.otherGuardianPartialKeyBackups.get(missing_guardian_id);
-    if (backup == null) {
-      logger.atInfo().log("recovery_public_key_for guardian %s missing backup for %s", this.id, missing_guardian_id);
+    // KeyCeremony2.ElectionPartialKeyBackup backup = this.otherGuardianPartialKeyBackups.get(missing_guardian_id);
+    //if (backup == null) {
+    //  logger.atInfo().log("recovery_public_key_for guardian %s missing backup for %s", this.id, missing_guardian_id);
+    //  return Optional.empty();
+    //}
+
+    List<Group.ElementModP> otherCommitments = this.guardianCommittments.get(missing_guardian_id);
+    if (otherCommitments == null) {
+      logger.atInfo().log("recovery_public_key_for guardian %s missing commitments for %s", this.id, missing_guardian_id);
       return Optional.empty();
     }
 
@@ -149,7 +162,7 @@ public class DecryptingTrustee {
     // K_ij^(l^j) for j in 0..k-1.  K_ij is coefficients[j].public_key
     Group.ElementModP pub_key = ONE_MOD_P;
     int count = 0;
-    for (Group.ElementModP commitment : backup.coefficient_commitments()) {
+    for (Group.ElementModP commitment : otherCommitments) {
       Group.ElementModQ exponent = Group.pow_q(BigInteger.valueOf(this.sequence_order), BigInteger.valueOf(count));
       pub_key = mult_p(pub_key, pow_p(commitment, exponent));
       count++;

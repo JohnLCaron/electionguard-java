@@ -1,7 +1,7 @@
 package com.sunya.electionguard;
 
 import com.google.protobuf.ByteString;
-import com.sunya.electionguard.proto.KeyCeremonyProto;
+import com.sunya.electionguard.proto.CommonProto;
 import net.jqwik.api.Example;
 
 import java.math.BigInteger;
@@ -33,7 +33,7 @@ public class TestRsa {
   @Example
   public void test_serialize_public_keys() {
     KeyPair key_pair = rsa_keypair();
-    KeyCeremonyProto.RSAPublicKey proto = convertJavaPublicKey(key_pair.getPublic());
+    CommonProto.RSAPublicKey proto = convertJavaPublicKey(key_pair.getPublic());
     java.security.PublicKey roundtrip = convertJavaPublicKey(proto);
     assertThat(roundtrip).isEqualTo(key_pair.getPublic());
   }
@@ -42,7 +42,7 @@ public class TestRsa {
   public void test_serialize_private_keys() {
     KeyPair key_pair = rsa_keypair();
     java.security.PrivateKey privateKey = key_pair.getPrivate();
-    KeyCeremonyProto.RSAPrivateKey proto = convertJavaPrivateKey(privateKey);
+    CommonProto.RSAPrivateKey proto = convertJavaPrivateKey(privateKey);
     java.security.PrivateKey orgKey = convertJavaPrivateKey(proto);
     // This fails with expected:
     //    SunRsaSign RSA private CRT key, 4096 bits
@@ -62,7 +62,7 @@ public class TestRsa {
     return modOk && expOk;
   }
 
-  private static java.security.PublicKey convertJavaPublicKey(KeyCeremonyProto.RSAPublicKey proto) {
+  private static java.security.PublicKey convertJavaPublicKey(CommonProto.RSAPublicKey proto) {
     BigInteger publicExponent = new BigInteger(proto.getPublicExponent().toByteArray());
     BigInteger modulus = new BigInteger(proto.getModulus().toByteArray());
     RSAPublicKeySpec Spec = new RSAPublicKeySpec(modulus, publicExponent);
@@ -73,15 +73,15 @@ public class TestRsa {
     }
   }
 
-  private static KeyCeremonyProto.RSAPublicKey convertJavaPublicKey(java.security.PublicKey key) {
+  private static CommonProto.RSAPublicKey convertJavaPublicKey(java.security.PublicKey key) {
     RSAPublicKey publicKey = (RSAPublicKey) key;
-    KeyCeremonyProto.RSAPublicKey.Builder builder = KeyCeremonyProto.RSAPublicKey.newBuilder();
+    CommonProto.RSAPublicKey.Builder builder = CommonProto.RSAPublicKey.newBuilder();
     builder.setModulus(ByteString.copyFrom(publicKey.getModulus().toByteArray()));
     builder.setPublicExponent(ByteString.copyFrom(publicKey.getPublicExponent().toByteArray()));
     return builder.build();
   }
 
-  private static java.security.PrivateKey convertJavaPrivateKey(KeyCeremonyProto.RSAPrivateKey proto) {
+  private static java.security.PrivateKey convertJavaPrivateKey(CommonProto.RSAPrivateKey proto) {
     BigInteger privateExponent = new BigInteger(proto.getPrivateExponent().toByteArray());
     BigInteger modulus = new BigInteger(proto.getModulus().toByteArray());
     RSAPrivateKeySpec spec = new RSAPrivateKeySpec(modulus, privateExponent); // or RSAPrivateCrtKeySpec ?
@@ -94,9 +94,9 @@ public class TestRsa {
     }
   }
 
-  private static KeyCeremonyProto.RSAPrivateKey convertJavaPrivateKey(java.security.PrivateKey key) {
+  private static CommonProto.RSAPrivateKey convertJavaPrivateKey(java.security.PrivateKey key) {
     RSAPrivateKey privateKey = (RSAPrivateKey) key;
-    KeyCeremonyProto.RSAPrivateKey.Builder builder = KeyCeremonyProto.RSAPrivateKey.newBuilder();
+    CommonProto.RSAPrivateKey.Builder builder = CommonProto.RSAPrivateKey.newBuilder();
     builder.setModulus(ByteString.copyFrom(privateKey.getModulus().toByteArray()));
     builder.setPrivateExponent(ByteString.copyFrom(privateKey.getPrivateExponent().toByteArray()));
     return builder.build();

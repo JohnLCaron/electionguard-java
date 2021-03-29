@@ -18,6 +18,16 @@ message ElGamalCiphertext {
   ElementModP data = 2;
 }
 
+message RSAPublicKey {
+  bytes modulus = 1;
+  bytes public_exponent = 2;
+}
+
+message RSAPrivateKey {
+  bytes modulus = 1;
+  bytes private_exponent = 2;
+}
+
 message SchnorrProof {
   ElementModP public_key = 1; // k in the spec
   ElementModP commitment = 2; // h in the spec

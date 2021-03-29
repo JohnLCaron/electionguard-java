@@ -1,6 +1,7 @@
 package com.sunya.electionguard.guardian;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -35,41 +36,42 @@ public class KeyCeremonyTrustee {
 
   public final String id;
   // a unique number in [1, 256) that is the polynomial x value for this guardian
-  public final int sequence_order;
-  public final int number_of_guardians;
+  public final int xCoordinate;
+  // public final int numberOfGuardians;
+  public final GuardianSecrets guardianSecrets; // LOOK why public?
 
-  public final GuardianSecrets guardianSecrets;
+  // All of the guardians' public keys (including this one), keyed by guardian id.
+  public final Map<String, KeyCeremony2.PublicKeySet> allGuardianPublicKeys;
 
-  // Other guardians' public keys that are shared with this guardian
-  public final Map<String, KeyCeremony.PublicKeySet> allGuardianPublicKeys; // map(GUARDIAN_ID, PublicKeySet)
+  // This guardian's partial key backups of other guardians' keys, keyed by designated guardian id.
+  private final LoadingCache<String, KeyCeremony2.PartialKeyBackup> myPartialKeyBackups;
 
-  // This guardian's partial key backups of other guardians' keys. Needed for making joint public key.
-  private final LoadingCache<String, KeyCeremony.ElectionPartialKeyBackup> myPartialKeyBackups; // Map(GUARDIAN_ID, ElectionPartialKeyBackup)
+  // Other guardians' partial key backups of this guardian's keys, keyed by generating guardian id.
+  public final Map<String, KeyCeremony2.PartialKeyBackup> otherGuardianPartialKeyBackups;
 
-  // Other guardians' partial key backups of this guardian's keys. Needed for decryption.
-  public final Map<String, KeyCeremony.ElectionPartialKeyBackup> otherGuardianPartialKeyBackups; // Map(GUARDIAN_ID, ElectionPartialKeyBackup)
-
-  // https://github.com/microsoft/electionguard/discussions/79#discussioncomment-466332
-  // 0. Before communication, guardians generate primary public key, associated polynomials, auxiliary public key.
+  /**
+   *  Create a random polynomial of rank quorum.
+   */
   public KeyCeremonyTrustee(String id,
                             int sequence_order,
-                            int number_of_guardians,
                             int quorum,
                             @Nullable ElementModQ nonce_seed) {
 
+    Preconditions.checkArgument(!Strings.isNullOrEmpty(id));
     Preconditions.checkArgument(sequence_order > 0 && sequence_order < 256);
+    Preconditions.checkArgument(quorum > 0);
 
     this.id = id;
-    this.sequence_order = sequence_order;
-    this.number_of_guardians = number_of_guardians;
+    this.xCoordinate = sequence_order;
 
     this.guardianSecrets = GuardianSecrets.generate(quorum, nonce_seed);
     this.allGuardianPublicKeys = new HashMap<>();
     this.otherGuardianPartialKeyBackups = new HashMap<>();
 
+    // not obvious this needs to be cached?
     this.myPartialKeyBackups = CacheBuilder.newBuilder().build(new CacheLoader<>() {
       @Override
-      public KeyCeremony.ElectionPartialKeyBackup load(String otherId) {
+      public KeyCeremony2.PartialKeyBackup load(String otherId) {
         return generatePartialKeyBackup(otherId);
       }
     });
@@ -84,26 +86,22 @@ public class KeyCeremonyTrustee {
   }
 
   /** Share public keys for this guardian. */
-  private KeyCeremony.PublicKeySet sharePublicKeys() {
-    return KeyCeremony.PublicKeySet.create(
+  public KeyCeremony2.PublicKeySet sharePublicKeys() {
+    ElectionPolynomial polynomial = this.guardianSecrets.polynomial;
+    return KeyCeremony2.PublicKeySet.create(
             this.id,
-            this.sequence_order,
+            this.xCoordinate,
             this.guardianSecrets.rsa_keypair.getPublic(),
-            this.guardianSecrets.election_key_pair.public_key,
-            this.guardianSecrets.proof);
+            polynomial.coefficient_proofs);
   }
 
   /** Recieve publicKeys from another guardian. */
-  private void receivePublicKeys(KeyCeremony.PublicKeySet publicKeys) {
-    // if we knew what the guardian ids are supposed to be, we could check that they are not bogus. Use sequence_number?
-    if (publicKeys != null) {
-      this.allGuardianPublicKeys.put(publicKeys.owner_id(), publicKeys);
+  public boolean receivePublicKeys(KeyCeremony2.PublicKeySet publicKeys) {
+    if (publicKeys.isValid()) {
+      this.allGuardianPublicKeys.put(publicKeys.ownerId(), publicKeys);
+      return true;
     }
-  }
-
-  /** True if all public keys have been received. */
-  private boolean allPublicKeysReceived() {
-    return this.allGuardianPublicKeys.size() == this.number_of_guardians;
+    return false;
   }
 
   /**
@@ -117,56 +115,49 @@ public class KeyCeremonyTrustee {
 
   /** Share this guardians backup for otherGuardian. */
   @Nullable
-  private KeyCeremony.ElectionPartialKeyBackup shareMyPartialKeyBackup(String otherGuardian) {
+  public KeyCeremony2.PartialKeyBackup sendPartialKeyBackup(String otherGuardian) {
     if (id.equals(otherGuardian)) {
-      return null;
+      return null; // LOOK
     }
     if (this.allGuardianPublicKeys.get(otherGuardian) == null) {
-      return null;
+      return null; // LOOK
     }
 
     return myPartialKeyBackups.getUnchecked(otherGuardian);
   }
 
-  private KeyCeremony.ElectionPartialKeyBackup generatePartialKeyBackup(String otherGuardian) {
-    KeyCeremony.PublicKeySet otherKeys = this.allGuardianPublicKeys.get(otherGuardian);
+  private KeyCeremony2.PartialKeyBackup generatePartialKeyBackup(String otherGuardian) {
+    KeyCeremony2.PublicKeySet otherKeys = this.allGuardianPublicKeys.get(otherGuardian);
     Preconditions.checkNotNull(otherKeys);
 
     // Compute my polynomial's y coordinate at the other's x coordinate.
     ElementModQ value = ElectionPolynomial.compute_polynomial_coordinate(
-            BigInteger.valueOf(otherKeys.sequence_order()), this.guardianSecrets.polynomial);
+            BigInteger.valueOf(otherKeys.guardianXCoordinate()), this.guardianSecrets.polynomial);
 
     // Encrypt the value with the other guardian's public auxiliary key.
-    Optional<Auxiliary.ByteString> encrypted_value = Rsa.encrypt(value.to_hex(), otherKeys.auxiliary_public_key());
+    Optional<Auxiliary.ByteString> encrypted_value = Rsa.encrypt(value.to_hex(), otherKeys.auxiliaryPublicKey());
     Preconditions.checkArgument(encrypted_value.isPresent());
 
-    return KeyCeremony.ElectionPartialKeyBackup.create(
+    return KeyCeremony2.PartialKeyBackup.create(
             this.id,
             otherGuardian,
-            otherKeys.sequence_order(),
-            encrypted_value.get(),
-            this.guardianSecrets.polynomial.coefficient_commitments,
-            this.guardianSecrets.polynomial.coefficient_proofs);
+            otherKeys.guardianXCoordinate(),
+            encrypted_value.get());
   }
 
   /** Receive another guardian's PartialKeyBackup for this guardian. */
   @Nullable
-  private KeyCeremony.ElectionPartialKeyVerification receivePartialKeyBackup(KeyCeremony.ElectionPartialKeyBackup otherBackup) {
+  private KeyCeremony2.PartialKeyVerification receivePartialKeyBackup(KeyCeremony2.PartialKeyBackup otherBackup) {
     if (otherBackup != null) {
-      this.otherGuardianPartialKeyBackups.put(otherBackup.owner_id(), otherBackup);
+      this.otherGuardianPartialKeyBackups.put(otherBackup.generatingGuardianId(), otherBackup);
       return this.verifyPartialKeyBackup(otherBackup);
     }
     return null;
   }
 
-  /** True if all backups have been received. */
-  private boolean allBackupsReceived() {
-    return this.otherGuardianPartialKeyBackups.size() == this.number_of_guardians - 1;
-  }
-
   @Nullable
-  private KeyCeremony.ElectionPartialKeyVerification verifyPartialKeyBackup(String guardian_id) {
-    KeyCeremony.ElectionPartialKeyBackup backup = this.otherGuardianPartialKeyBackups.get(guardian_id);
+  private KeyCeremony2.PartialKeyVerification verifyPartialKeyBackup(String guardian_id) {
+    KeyCeremony2.PartialKeyBackup backup = this.otherGuardianPartialKeyBackups.get(guardian_id);
     if (backup == null) {
       return null;
     } else {
@@ -174,23 +165,26 @@ public class KeyCeremonyTrustee {
     }
   }
 
-  private KeyCeremony.ElectionPartialKeyVerification verifyPartialKeyBackup(KeyCeremony.ElectionPartialKeyBackup backup) {
+  public KeyCeremony2.PartialKeyVerification verifyPartialKeyBackup(KeyCeremony2.PartialKeyBackup backup) {
+    this.otherGuardianPartialKeyBackups.put(backup.generatingGuardianId(), backup);
+
       // decrypt the value with my private key.
-    Optional<String> decrypted_value = Rsa.decrypt(backup.encrypted_value(), this.guardianSecrets.rsa_keypair.getPrivate());
+    Optional<String> decrypted_value = Rsa.decrypt(backup.encryptedCoordinate(), this.guardianSecrets.rsa_keypair.getPrivate());
     if (decrypted_value.isEmpty()) {
       // LOOK if decryption fails, not the same as if verify_polynomial_coordinate failed.
-      return KeyCeremony.ElectionPartialKeyVerification.create(backup.owner_id(), backup.designated_id(), this.id, false);
+      return KeyCeremony2.PartialKeyVerification.create(backup.generatingGuardianId(), backup.designatedGuardianId(),false);
     }
+    // LOOK something else besides an exception.
     ElementModQ value = Group.hex_to_q(decrypted_value.get()).orElseThrow(IllegalStateException::new);
 
-    // Is that value on my polynomial?
-    boolean verify = ElectionPolynomial.verify_polynomial_coordinate(value, BigInteger.valueOf(backup.designated_sequence_order()),
-            backup.coefficient_commitments());
+    // Is that value consistent with the generating guardian's commitments?
+    KeyCeremony2.PublicKeySet generatingKeys = allGuardianPublicKeys.get(backup.generatingGuardianId());
+    boolean verify = ElectionPolynomial.verify_polynomial_coordinate(value, BigInteger.valueOf(backup.designatedGuardianXCoordinate()),
+            generatingKeys.coefficientCommitments());
 
-    return KeyCeremony.ElectionPartialKeyVerification.create(
-            backup.owner_id(),
-            backup.designated_id(),
-            this.id,
+    return KeyCeremony2.PartialKeyVerification.create(
+            backup.generatingGuardianId(),
+            backup.designatedGuardianId(),
             verify);
   }
 
@@ -200,12 +194,19 @@ public class KeyCeremonyTrustee {
    * @param guardian_id: Owner of election key
    */
   @Nullable
-  KeyCeremony.ElectionPartialKeyChallenge makeBackupChallenge(String guardian_id) {
-    KeyCeremony.ElectionPartialKeyBackup backup_in_question = this.myPartialKeyBackups.getUnchecked(guardian_id);
-    if (backup_in_question == null) {
+  public KeyCeremony2.PartialKeyChallengeResponse sendBackupChallenge(String guardian_id) {
+    KeyCeremony2.PartialKeyBackup backup = this.myPartialKeyBackups.getUnchecked(guardian_id);
+    if (backup == null) {
       return null;
     }
-    return KeyCeremony.generate_election_partial_key_challenge(backup_in_question, this.guardianSecrets.polynomial);
+    ElectionPolynomial polynomial = this.guardianSecrets.polynomial;
+    return KeyCeremony2.PartialKeyChallengeResponse.create(
+            backup.generatingGuardianId(),
+            backup.designatedGuardianId(),
+            backup.designatedGuardianXCoordinate(),
+            ElectionPolynomial.compute_polynomial_coordinate(BigInteger.valueOf(backup.designatedGuardianXCoordinate()), polynomial));
+
+    // return KeyCeremony.generate_election_partial_key_challenge(backup_in_question, this.guardianSecrets.polynomial);
   }
 
   /**
@@ -221,13 +222,30 @@ public class KeyCeremonyTrustee {
   /**
    * Creates a joint election key from the public keys of all guardians.
    */
-  private ElementModP publishJointKey() {
+  public ElementModP publishJointKey() {
     List<ElementModP> public_keys = allGuardianPublicKeys.values().stream()
-            .map(KeyCeremony.PublicKeySet::election_public_key).collect(Collectors.toList());
+            .map(KeyCeremony2.PublicKeySet::electionPublicKey).collect(Collectors.toList());
 
     return ElGamal.elgamal_combine_public_keys(public_keys);
   }
 
+  public boolean saveState() {
+    return true;
+  }
+
+  public boolean finish(boolean allOk) {
+    return true;
+  }
+
+
+  /**
+   * https://www.electionguard.vote/spec/0.95.0/4_Key_generation/#overview-of-key-generation
+   * <li>Each guardian generates an independent ElGamal public-private key pair. </li>
+   * <li>Each guardian provides a non-interactive zero-knowledge Schnorr proof of knowledge of possession of the associated private key. </li>
+   * <li>Each guardian generates random polynomial coefficients. (threshold verification) </li>
+   * <li>Each guardian provides a Schnorr proof of knowledge of the secret coefficient value associated with each published commitment. </li>
+   * <li>Each guardian provides an auxiliary public encryption function </li>
+   */
   @Immutable
   public static class GuardianSecrets {
     /** The Guardian's polynomial. */
@@ -272,39 +290,29 @@ public class KeyCeremonyTrustee {
     }
 
 
-    KeyCeremony.PublicKeySet sendPublicKeys() {
+    KeyCeremony2.PublicKeySet sendPublicKeys() {
       return KeyCeremonyTrustee.this.sharePublicKeys();
     }
 
-    void receivePublicKeys(KeyCeremony.PublicKeySet publicKeys) {
-      KeyCeremonyTrustee.this.receivePublicKeys(publicKeys);
+    boolean receivePublicKeys(KeyCeremony2.PublicKeySet publicKeys) {
+      return KeyCeremonyTrustee.this.receivePublicKeys(publicKeys);
     }
-
-    boolean allPublicKeysReceived() {
-      return KeyCeremonyTrustee.this.allPublicKeysReceived();
-    }
-
 
     @Nullable
-    KeyCeremony.ElectionPartialKeyBackup sendPartialKeyBackup(String otherId) {
-      return KeyCeremonyTrustee.this.shareMyPartialKeyBackup(otherId);
+    KeyCeremony2.PartialKeyBackup sendPartialKeyBackup(String otherId) {
+      return KeyCeremonyTrustee.this.sendPartialKeyBackup(otherId);
     }
 
-    void receivePartialKeyBackup(KeyCeremony.ElectionPartialKeyBackup backup) {
+    void receivePartialKeyBackup(KeyCeremony2.PartialKeyBackup backup) {
       KeyCeremonyTrustee.this.receivePartialKeyBackup(backup);
     }
 
-    KeyCeremony.ElectionPartialKeyVerification verifyPartialKeyBackup(KeyCeremony.ElectionPartialKeyBackup backup) {
+    KeyCeremony2.PartialKeyVerification verifyPartialKeyBackup(KeyCeremony2.PartialKeyBackup backup) {
       return KeyCeremonyTrustee.this.verifyPartialKeyBackup(backup);
     }
 
-    boolean allBackupsReceived() {
-      return KeyCeremonyTrustee.this.allBackupsReceived();
-    }
-
-
-    KeyCeremony.ElectionPartialKeyChallenge sendBackupChallenge(String guardian_id) {
-      return KeyCeremonyTrustee.this.makeBackupChallenge(guardian_id);
+    KeyCeremony2.PartialKeyChallengeResponse sendBackupChallenge(String guardian_id) {
+      return KeyCeremonyTrustee.this.sendBackupChallenge(guardian_id);
     }
 
     // static, could be done by anyone.
@@ -312,6 +320,7 @@ public class KeyCeremonyTrustee {
       return KeyCeremonyTrustee.verifyPartialKeyChallenge(id, challenge);
     }
 
+    // dont need this, its in PublicKeySet
     KeyCeremony.CoefficientValidationSet sendCoefficientValidationSet() {
       return KeyCeremonyTrustee.this.shareCoefficientValidationSet();
     }

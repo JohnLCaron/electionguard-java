@@ -47,7 +47,7 @@ void where taxed or prohibited by law.
 
 ## Input Validation
 
-Election Manifest and Input Ballot validation can be done by classes in the **com.sunya.electionguard.input package**.
+Election Manifest and Input Ballot validation can be done by classes in the **com.sunya.electionguard.input** package.
 These must be checked before starting encryption. 
 
 *   [InputValidation](https://github.com/JohnLCaron/electionguard-java/blob/master/docs/InputValidation.md)

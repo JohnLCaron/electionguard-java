@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+import "com/sunya/electionguard/proto/common.proto";
+
+option java_package = "com.sunya.electionguard.proto";
+option java_outer_classname = "RemoteKeyCeremonyProto";
+
+service RemoteKeyCeremonyService {
+  rpc registerTrustee (RegisterTrusteeRequest) returns (RegisterTrusteeResponse) {}
+}
+
+message RegisterTrusteeRequest {
+  string guardian_id = 1;
+  string remote_url = 2;
+}
+
+message RegisterTrusteeResponse {
+  KeyCeremonyError error = 1; // non empty on error
+  string guardian_id = 2;
+  uint32 guardian_x_coordinate = 3;
+  uint32 quorum = 4;
+}
+
+message KeyCeremonyError {
+  string message = 1;
+}

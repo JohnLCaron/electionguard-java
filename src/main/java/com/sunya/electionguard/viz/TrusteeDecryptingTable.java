@@ -5,8 +5,8 @@
 
 package com.sunya.electionguard.viz;
 
-import com.sunya.electionguard.KeyCeremony;
 import com.sunya.electionguard.guardian.DecryptingTrustee;
+import com.sunya.electionguard.guardian.KeyCeremony2;
 import ucar.ui.prefs.BeanTable;
 import ucar.ui.widget.BAMutil;
 import ucar.ui.widget.IndependentWindow;
@@ -65,7 +65,7 @@ public class TrusteeDecryptingTable extends JPanel {
 
   void setTrustee(TrusteeBean trusteeBean) {
     java.util.List<PartialKeyBackupBean> beanList = new ArrayList<>();
-    for (Map.Entry<String, KeyCeremony.ElectionPartialKeyBackup> e : trusteeBean.object.otherGuardianPartialKeyBackups.entrySet()) {
+    for (Map.Entry<String, KeyCeremony2.PartialKeyBackup> e : trusteeBean.object.otherGuardianPartialKeyBackups.entrySet()) {
       beanList.add(new PartialKeyBackupBean(e.getKey(), e.getValue()));
     }
     backupTable.setBeans(beanList);
@@ -106,15 +106,18 @@ public class TrusteeDecryptingTable extends JPanel {
     public String getRsaPrivateKey() {
       return object.rsa_private_key.toString();
     }
+    public int getCommitmentSize() {
+      return object.guardianCommittments.size();
+    }
   }
 
   public class PartialKeyBackupBean {
     String key;
-    KeyCeremony.ElectionPartialKeyBackup object;
+    KeyCeremony2.PartialKeyBackup object;
 
     public PartialKeyBackupBean(){}
 
-    PartialKeyBackupBean(String key, KeyCeremony.ElectionPartialKeyBackup object) {
+    PartialKeyBackupBean(String key, KeyCeremony2.PartialKeyBackup object) {
       this.key = key;
       this.object = object;
     }
@@ -123,19 +126,13 @@ public class TrusteeDecryptingTable extends JPanel {
       return key;
     }
     public String getOwnerId() {
-      return object.owner_id();
+      return object.generatingGuardianId();
     }
     public String getDesignatedId() {
-      return object.designated_id();
+      return object.designatedGuardianId();
     }
     public int getDesignatedSequence() {
-      return object.designated_sequence_order();
-    }
-    public int getCommitmentSize() {
-      return object.coefficient_commitments().size();
-    }
-    public int getProofSize() {
-      return object.coefficient_proofs().size();
+      return object.designatedGuardianXCoordinate();
     }
   }
 

@@ -8,11 +8,9 @@ import com.sunya.electionguard.Group;
 import com.sunya.electionguard.Guardian;
 import com.sunya.electionguard.GuardianBuilder;
 import com.sunya.electionguard.KeyCeremony;
-import com.sunya.electionguard.Rsa;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.math.BigInteger;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -57,15 +55,15 @@ public class KeyCeremonyFromProto {
 
   private static Auxiliary.KeyPair convertAuxiliaryKeyPair(KeyCeremonyProto.AuxiliaryKeyPair proto) {
     return new Auxiliary.KeyPair(
-            convertJavaPrivateKey(proto.getSecretKey()),
-            convertJavaPublicKey(proto.getPublicKey()));
+            CommonConvert.convertJavaPrivateKey(proto.getSecretKey()),
+            CommonConvert.convertJavaPublicKey(proto.getPublicKey()));
   }
 
   private static Auxiliary.PublicKey convertAuxiliaryPublicKey(KeyCeremonyProto.AuxiliaryPublicKey proto) {
     return new Auxiliary.PublicKey(
             proto.getOwnerId(),
             proto.getSequenceOrder(),
-            convertJavaPublicKey(proto.getKey()));
+            CommonConvert.convertJavaPublicKey(proto.getKey()));
   }
 
   private static KeyCeremony.ElectionKeyPair convertElectionKeys(KeyCeremonyProto.ElectionKeyPair proto) {
@@ -104,20 +102,6 @@ public class KeyCeremonyFromProto {
     return new ElGamal.KeyPair(
             CommonConvert.convertElementModQ(keypair.getSecretKey()),
             CommonConvert.convertElementModP(keypair.getPublicKey()));
-  }
-
-  // LOOK there may be something better to do when serializing. Find out before use in production.
-  private static java.security.PublicKey convertJavaPublicKey(KeyCeremonyProto.RSAPublicKey proto) {
-    BigInteger publicExponent = new BigInteger(proto.getPublicExponent().toByteArray());
-    BigInteger modulus = new BigInteger(proto.getModulus().toByteArray());
-    return Rsa.convertJavaPublicKey(modulus, publicExponent);
-  }
-
-  // LOOK there may be something better to do when serializing. Find out before use in production.
-  private static java.security.PrivateKey convertJavaPrivateKey(KeyCeremonyProto.RSAPrivateKey proto) {
-    BigInteger privateExponent = new BigInteger(proto.getPrivateExponent().toByteArray());
-    BigInteger modulus = new BigInteger(proto.getModulus().toByteArray());
-    return Rsa.convertJavaPrivateKey(modulus, privateExponent);
   }
 
   /////////////////////////////////////////////////////////////////////////////////////////////////////////

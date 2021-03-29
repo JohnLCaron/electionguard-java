@@ -45,9 +45,8 @@ public class GuardianPublicKeyVerifier {
     boolean error = false;
     List<SchnorrProof> coefficient_proofs = coeffSet.coefficient_proofs();
 
-    // loop through every proof TODO why only quorum, why not all??
-    for (int i = 0; i < this.electionRecord.quorum(); i++) {
-      SchnorrProof proof = coefficient_proofs.get(i);
+    int count = 0;
+    for (SchnorrProof proof : coefficient_proofs) {
       ElementModP commitment = proof.commitment; // h
       ElementModP public_key = proof.public_key; // k
       ElementModQ challenge = proof.challenge;   // c
@@ -57,14 +56,15 @@ public class GuardianPublicKeyVerifier {
       ElementModQ challenge_computed =  Hash.hash_elems(public_key, commitment);
       if (!challenge_computed.equals(challenge)) {
         error = true;
-        System.out.printf("Guardian %s coefficient_proof %d: equation 2A challenge validation failed.%n", coeffSet.owner_id(), i);
+        System.out.printf("Guardian %s coefficient_proof %d: equation 2A challenge validation failed.%n", coeffSet.owner_id(), count);
       }
 
       // check equation 2.B
       if (!this.verify_individual_key_computation(response, commitment, public_key, challenge)) {
         error = true;
-        System.out.printf("Guardian %s coefficient_proof %d: equation 2B validation failed.%n", coeffSet.owner_id(), i);
+        System.out.printf("Guardian %s coefficient_proof %d: equation 2B validation failed.%n", coeffSet.owner_id(), count);
       }
+      count++;
     }
     return !error;
   }
