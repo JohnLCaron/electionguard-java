@@ -16,6 +16,7 @@ import io.grpc.stub.StreamObserver;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Formatter;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -33,7 +34,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * </pre>
  * </strong>
  */
-public class KeyCeremonyRemote {
+class KeyCeremonyRemote {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   private static class CommandLine {
@@ -59,13 +60,13 @@ public class KeyCeremonyRemote {
 
     private final JCommander jc;
 
-    public CommandLine(String progName, String[] args) throws ParameterException {
+    CommandLine(String progName, String[] args) throws ParameterException {
       this.jc = new JCommander(this);
       this.jc.parse(args);
       jc.setProgramName(String.format("java -classpath electionguard-java-all.jar %s", progName));
     }
 
-    public void printUsage() {
+    void printUsage() {
       jc.usage();
     }
   }
@@ -160,17 +161,17 @@ public class KeyCeremonyRemote {
   final int nguardians;
   final int quorum;
   final Publisher publisher;
-  final List<KeyCeremonyRemoteTrusteeProxy> trusteeProxies = new ArrayList<>();
+  final List<KeyCeremonyRemoteTrusteeProxy> trusteeProxies = Collections.synchronizedList(new ArrayList<>());
   boolean startedKeyCeremony = false;
 
-  public KeyCeremonyRemote(Manifest manifest, int nguardians, int quorum, Publisher publisher) {
+  KeyCeremonyRemote(Manifest manifest, int nguardians, int quorum, Publisher publisher) {
     this.manifest = manifest;
     this.nguardians = nguardians;
     this.quorum = quorum;
     this.publisher = publisher;
   }
 
-  public void checkAllGuardiansAreRegistered() {
+  synchronized void checkAllGuardiansAreRegistered() {
     System.out.printf(" Number of Guardians registered = %d, need = %d%n", this.trusteeProxies.size(), this.nguardians);
     if (this.trusteeProxies.size() == this.nguardians) {
       this.startedKeyCeremony = true;
@@ -218,10 +219,11 @@ public class KeyCeremonyRemote {
       }
     }
     System.out.printf("Key Ceremony Trustees shutdown was success = %s%n", shutdownOk && finishOk);
+    System.exit(shutdownOk && finishOk ? 0 : 1);
   }
 
   AtomicInteger nextCoordinate = new AtomicInteger(0);
-  private KeyCeremonyRemoteTrusteeProxy registerTrustee(String guardianId, String url) {
+  private synchronized KeyCeremonyRemoteTrusteeProxy registerTrustee(String guardianId, String url) {
     KeyCeremonyRemoteTrusteeProxy.Builder builder = KeyCeremonyRemoteTrusteeProxy.builder();
     int coordinate = nextCoordinate.incrementAndGet();
     String trusteeId = guardianId + "-" + coordinate;

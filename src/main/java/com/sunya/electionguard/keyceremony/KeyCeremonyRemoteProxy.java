@@ -10,13 +10,13 @@ import io.grpc.StatusRuntimeException;
 import javax.annotation.Nullable;
 import java.util.concurrent.TimeUnit;
 
-public class KeyCeremonyRemoteProxy {
+class KeyCeremonyRemoteProxy {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   private final ManagedChannel channel;
   private final RemoteKeyCeremonyServiceGrpc.RemoteKeyCeremonyServiceBlockingStub blockingStub;
 
-  public KeyCeremonyRemoteProxy(String url) {
+  KeyCeremonyRemoteProxy(String url) {
     this.channel = ManagedChannelBuilder.forTarget(url)
             .usePlaintext()
             .enableFullStreamDecompression()
@@ -27,7 +27,7 @@ public class KeyCeremonyRemoteProxy {
     blockingStub = RemoteKeyCeremonyServiceGrpc.newBlockingStub(channel);
   }
 
-  public boolean shutdown() {
+  boolean shutdown() {
     try {
       channel.shutdownNow().awaitTermination(5, TimeUnit.SECONDS);
       return true;
@@ -38,7 +38,7 @@ public class KeyCeremonyRemoteProxy {
   }
 
   @Nullable
-  public RemoteKeyCeremonyProto.RegisterTrusteeResponse registerTrustee(String guardianId, String remoteUrl) {
+  RemoteKeyCeremonyProto.RegisterTrusteeResponse registerTrustee(String guardianId, String remoteUrl) {
     try {
       RemoteKeyCeremonyProto.RegisterTrusteeRequest request = RemoteKeyCeremonyProto.RegisterTrusteeRequest.newBuilder()
               .setGuardianId(guardianId)

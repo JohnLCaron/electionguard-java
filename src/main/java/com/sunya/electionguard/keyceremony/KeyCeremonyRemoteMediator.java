@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 /**
  * Mediate the key ceremony with remote Guardians.
  */
-public class KeyCeremonyRemoteMediator {
+class KeyCeremonyRemoteMediator {
   final Manifest election;
   final int quorum;
 
@@ -36,7 +36,7 @@ public class KeyCeremonyRemoteMediator {
   List<KeyCeremony.CoefficientValidationSet> coefficientValidationSets = new ArrayList<>();
   Map<String, KeyCeremony2.PublicKeySet> publicKeys = new HashMap<>();
 
-  public KeyCeremonyRemoteMediator(Manifest election, int quorum, 
+  KeyCeremonyRemoteMediator(Manifest election, int quorum,
                                    List<KeyCeremonyRemoteTrusteeProxy> trusteeProxies) {
     this.election = election;
     this.quorum = quorum;
@@ -220,7 +220,7 @@ public class KeyCeremonyRemoteMediator {
     return true;
   }
 
-  public boolean publishElectionRecord(Publisher publisher) {
+  boolean publishElectionRecord(Publisher publisher) {
     System.out.printf("Publish ElectionRecord to %s%n", publisher.publishPath());
     // the election record
     try {

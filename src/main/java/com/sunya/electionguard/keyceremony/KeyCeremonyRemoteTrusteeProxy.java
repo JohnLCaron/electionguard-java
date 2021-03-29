@@ -19,16 +19,16 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /** A Remote Trustee client proxy, communicating over gRpc. */
-public class KeyCeremonyRemoteTrusteeProxy {
+class KeyCeremonyRemoteTrusteeProxy {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
   private static final int MAX_MESSAGE = 51 * 1000 * 1000; // 51 Mb
 
-  public String id() {
+  String id() {
     return trusteeId;
   }
 
   @Nullable
-  public KeyCeremony2.PublicKeySet sendPublicKeys() {
+  KeyCeremony2.PublicKeySet sendPublicKeys() {
     try {
       RemoteTrusteeProto.PublicKeySetRequest request = RemoteTrusteeProto.PublicKeySetRequest.getDefaultInstance();
       RemoteTrusteeProto.PublicKeySet response = blockingStub.sendPublicKeys(request);
@@ -50,7 +50,7 @@ public class KeyCeremonyRemoteTrusteeProxy {
     }
   }
 
-  public boolean receivePublicKeys(KeyCeremony2.PublicKeySet keyset) {
+  boolean receivePublicKeys(KeyCeremony2.PublicKeySet keyset) {
     try {
       RemoteTrusteeProto.PublicKeySet.Builder request = RemoteTrusteeProto.PublicKeySet.newBuilder();
       request.setOwnerId(keyset.ownerId())
@@ -73,7 +73,7 @@ public class KeyCeremonyRemoteTrusteeProxy {
   }
 
   @Nullable
-  public KeyCeremony2.PartialKeyBackup sendPartialKeyBackup(String guardianId) {
+  KeyCeremony2.PartialKeyBackup sendPartialKeyBackup(String guardianId) {
     try {
       RemoteTrusteeProto.PartialKeyBackupRequest request = RemoteTrusteeProto.PartialKeyBackupRequest.newBuilder().setGuardianId(guardianId).build();
       RemoteTrusteeProto.PartialKeyBackup response = blockingStub.sendPartialKeyBackup(request);
@@ -96,7 +96,7 @@ public class KeyCeremonyRemoteTrusteeProxy {
   }
 
   @Nullable
-  public KeyCeremony2.PartialKeyVerification verifyPartialKeyBackup(KeyCeremony2.PartialKeyBackup backup) {
+  KeyCeremony2.PartialKeyVerification verifyPartialKeyBackup(KeyCeremony2.PartialKeyBackup backup) {
     try {
       RemoteTrusteeProto.PartialKeyBackup.Builder request = RemoteTrusteeProto.PartialKeyBackup.newBuilder();
       request.setGeneratingGuardianId(backup.generatingGuardianId())
@@ -123,7 +123,7 @@ public class KeyCeremonyRemoteTrusteeProxy {
   }
 
   @Nullable
-  public KeyCeremony2.PartialKeyChallengeResponse sendBackupChallenge(String guardianId) {
+  KeyCeremony2.PartialKeyChallengeResponse sendBackupChallenge(String guardianId) {
     try {
       RemoteTrusteeProto.PartialKeyChallenge request = RemoteTrusteeProto.PartialKeyChallenge.newBuilder().setGuardianId(guardianId).build();
       RemoteTrusteeProto.PartialKeyChallengeResponse response = blockingStub.sendBackupChallenge(request);
@@ -146,7 +146,7 @@ public class KeyCeremonyRemoteTrusteeProxy {
   }
 
   @Nullable
-  public Group.ElementModP sendJointPublicKey() {
+  Group.ElementModP sendJointPublicKey() {
     try {
       RemoteTrusteeProto.JointPublicKeyRequest request = RemoteTrusteeProto.JointPublicKeyRequest.getDefaultInstance();
       RemoteTrusteeProto.JointPublicKeyResponse response = blockingStub.sendJointPublicKey(request);
@@ -163,7 +163,7 @@ public class KeyCeremonyRemoteTrusteeProxy {
     }
   }
 
-  public boolean saveState() {
+  boolean saveState() {
     try {
       RemoteTrusteeProto.BooleanResponse response = blockingStub.saveState(com.google.protobuf.Empty.getDefaultInstance());
       if (response.hasError()) {
@@ -181,7 +181,7 @@ public class KeyCeremonyRemoteTrusteeProxy {
 
   //    public com.sunya.electionguard.proto.RemoteTrusteeProto.BooleanResponse finish(
   //    com.sunya.electionguard.proto.RemoteTrusteeProto.FinishRequest request) {
-  public boolean finish(boolean allOk) {
+  boolean finish(boolean allOk) {
     try {
       RemoteTrusteeProto.FinishRequest request = RemoteTrusteeProto.FinishRequest.newBuilder().setAllOk(allOk).build();
       RemoteTrusteeProto.BooleanResponse response = blockingStub.finish(request);
@@ -198,7 +198,7 @@ public class KeyCeremonyRemoteTrusteeProxy {
     }
   }
 
-  public boolean shutdown() {
+  boolean shutdown() {
     try {
       channel.shutdownNow().awaitTermination(5, TimeUnit.SECONDS);
       return true;
@@ -215,15 +215,15 @@ public class KeyCeremonyRemoteTrusteeProxy {
   private final ManagedChannel channel;
   private final RemoteTrusteeServiceGrpc.RemoteTrusteeServiceBlockingStub blockingStub;
 
-  public int coordinate() {
+  int coordinate() {
     return coordinate;
   }
 
-  public int quorum() {
+  int quorum() {
     return quorum;
   }
 
-  public static Builder builder() {
+  static Builder builder() {
     return new Builder();
   }
 
@@ -236,33 +236,33 @@ public class KeyCeremonyRemoteTrusteeProxy {
     blockingStub = RemoteTrusteeServiceGrpc.newBlockingStub(channel);
   }
 
-  public static class Builder {
+  static class Builder {
     String trusteeId;
     String target;
     int coordinate;
     int quorum;
 
-    public Builder setTrusteeId(String trusteeId) {
+    Builder setTrusteeId(String trusteeId) {
       this.trusteeId = trusteeId;
       return this;
     }
 
-    public Builder setUrl(String target) {
+    Builder setUrl(String target) {
       this.target = target;
       return this;
     }
 
-    public Builder setCoordinate(int coordinate) {
+    Builder setCoordinate(int coordinate) {
       this.coordinate = coordinate;
       return this;
     }
 
-    public Builder setQuorum(int quorum) {
+    Builder setQuorum(int quorum) {
       this.quorum = quorum;
       return this;
     }
 
-    public KeyCeremonyRemoteTrusteeProxy build() {
+    KeyCeremonyRemoteTrusteeProxy build() {
       ManagedChannel channel = ManagedChannelBuilder.forTarget(target)
               .usePlaintext()
               .enableFullStreamDecompression()

@@ -13,6 +13,9 @@ import com.sunya.electionguard.proto.CommonConvert;
 import com.sunya.electionguard.proto.RemoteKeyCeremonyProto;
 import com.sunya.electionguard.proto.RemoteTrusteeProto;
 import com.sunya.electionguard.proto.RemoteTrusteeServiceGrpc;
+import com.sunya.electionguard.proto.TrusteeProto;
+import com.sunya.electionguard.proto.TrusteeToProto;
+import com.sunya.electionguard.publish.Publisher;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.stub.StreamObserver;
@@ -26,7 +29,7 @@ import java.util.stream.Collectors;
 import static com.sunya.electionguard.Group.ElementModP;
 
 /** A Remote Trustee with a KeyCeremonyTrustee delegate, communicating over gRpc. */
-public class KeyCeremonyRemoteTrustee extends RemoteTrusteeServiceGrpc.RemoteTrusteeServiceImplBase {
+class KeyCeremonyRemoteTrustee extends RemoteTrusteeServiceGrpc.RemoteTrusteeServiceImplBase {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
   private static final Random random = new Random(System.currentTimeMillis());
 
@@ -40,18 +43,21 @@ public class KeyCeremonyRemoteTrustee extends RemoteTrusteeServiceGrpc.RemoteTru
     @Parameter(names = {"-serverPort"}, order = 2, description = "The KeyCeremonyRemote server port")
     int serverPort = 17111;
 
+    @Parameter(names = {"-out"}, order = 1, description = "Directory where Guardians is written for decryption", required = true)
+    String outputDir;
+
     @Parameter(names = {"-h", "--help"}, order = 9, description = "Display this help and exit", help = true)
     boolean help = false;
 
     private final JCommander jc;
 
-    public CommandLine(String progName, String[] args) throws ParameterException {
+    CommandLine(String progName, String[] args) throws ParameterException {
       this.jc = new JCommander(this);
       this.jc.parse(args);
       jc.setProgramName(String.format("java -classpath electionguard-java-all.jar %s", progName));
     }
 
-    public void printUsage() {
+    void printUsage() {
       jc.usage();
     }
   }
@@ -94,7 +100,8 @@ public class KeyCeremonyRemoteTrustee extends RemoteTrusteeServiceGrpc.RemoteTru
       KeyCeremonyRemoteTrustee keyCeremony = new KeyCeremonyRemoteTrustee(
               response.getGuardianId(),
               response.getGuardianXCoordinate(),
-              response.getQuorum());
+              response.getQuorum(),
+              cmdLine.outputDir);
 
       keyCeremony.start(port);
       keyCeremony.blockUntilShutdown();
@@ -148,12 +155,14 @@ public class KeyCeremonyRemoteTrustee extends RemoteTrusteeServiceGrpc.RemoteTru
 
   ////////////////////////////////////////////////////////////////////////////////
   private final KeyCeremonyTrustee delegate;
+  private final String outputDir;
 
-  public KeyCeremonyRemoteTrustee(String id,
+  KeyCeremonyRemoteTrustee(String id,
                             int sequence_order,
-                            int quorum) {
-
+                            int quorum,
+                            String outputDir) {
     this.delegate = new KeyCeremonyTrustee(id, sequence_order, quorum, null);
+    this.outputDir = outputDir;
   }
 
   @Override
@@ -312,37 +321,41 @@ public class KeyCeremonyRemoteTrustee extends RemoteTrusteeServiceGrpc.RemoteTru
   public void saveState(com.google.protobuf.Empty request,
                         StreamObserver<RemoteTrusteeProto.BooleanResponse> responseObserver) {
     RemoteTrusteeProto.BooleanResponse.Builder response = RemoteTrusteeProto.BooleanResponse.newBuilder();
+    boolean ok = true;
     try {
-      boolean ok = delegate.saveState();
-      response.setOk(ok);
+      TrusteeProto.Trustee trusteeProto = TrusteeToProto.convertTrustee(this.delegate);
+      Publisher.writeTrusteeProto(this.outputDir, trusteeProto);
       logger.atInfo().log("KeyCeremonyRemoteTrustee saveState %s", delegate.id);
 
     } catch (Throwable t) {
       logger.atSevere().withCause(t).log("KeyCeremonyRemoteTrustee saveState failed");
       t.printStackTrace();
       response.setError(RemoteTrusteeProto.RemoteTrusteeError.newBuilder().setMessage(t.getMessage()).build());
+      ok = false;
     }
 
+    response.setOk(ok);
     responseObserver.onNext(response.build());
     responseObserver.onCompleted();
   }
 
+  // LOOK what to do?
   @Override
   public void finish(RemoteTrusteeProto.FinishRequest request,
                      StreamObserver<RemoteTrusteeProto.BooleanResponse> responseObserver) {
     RemoteTrusteeProto.BooleanResponse.Builder response = RemoteTrusteeProto.BooleanResponse.newBuilder();
-    boolean ok = false;
+    boolean ok = true;
     try {
-      ok = delegate.finish(request.getAllOk());
-      response.setOk(ok);
-      logger.atInfo().log("KeyCeremonyRemoteTrustee finish %s", delegate.id);
+      logger.atInfo().log("KeyCeremonyRemoteTrustee finish ok = %s", request.getAllOk());
 
     } catch (Throwable t) {
       logger.atSevere().withCause(t).log("KeyCeremonyRemoteTrustee finish failed");
       t.printStackTrace();
       response.setError(RemoteTrusteeProto.RemoteTrusteeError.newBuilder().setMessage(t.getMessage()).build());
+      ok = false;
     }
 
+    response.setOk(ok);
     responseObserver.onNext(response.build());
     responseObserver.onCompleted();
     System.exit(ok ? 0 : 1);

@@ -17,15 +17,14 @@ public class TrusteeToProto {
     return builder.build();
   }
 
-  private static TrusteeProto.Trustee convertTrustee(KeyCeremonyTrustee trustee) {
+  public static TrusteeProto.Trustee convertTrustee(KeyCeremonyTrustee trustee) {
     TrusteeProto.Trustee.Builder builder = TrusteeProto.Trustee.newBuilder();
     builder.setGuardianId(trustee.id);
     builder.setGuardianXCoordinate(trustee.xCoordinate);
     builder.setElectionKeyPair(convertElgamalKeypair(trustee.secrets().election_key_pair));
     builder.setRsaPrivateKey(CommonConvert.convertJavaPrivateKey(trustee.secrets().rsa_keypair.getPrivate()));
     trustee.otherGuardianPartialKeyBackups.values().forEach(k -> builder.addOtherGuardianBackups(convertElectionPartialKeyBackup(k)));
-    trustee.guardianSecrets.polynomial.coefficient_commitments.forEach(k -> builder.addCoefficientCommitments(convertElementModP(k)));
-
+    trustee.secrets().polynomial.coefficient_commitments.forEach(k -> builder.addCoefficientCommitments(convertElementModP(k)));
     return builder.build();
   }
 

@@ -115,7 +115,7 @@ public class CommonConvert {
   }
 
   // LOOK there may be something better to do when serializing. Find out before use in production.
-  static CommonProto.RSAPrivateKey convertJavaPrivateKey(java.security.PrivateKey key) {
+  public static CommonProto.RSAPrivateKey convertJavaPrivateKey(java.security.PrivateKey key) {
     Rsa.KeyPieces pieces = Rsa.convertJavaPrivateKey(key);
     CommonProto.RSAPrivateKey.Builder builder = CommonProto.RSAPrivateKey.newBuilder();
     builder.setModulus(ByteString.copyFrom(pieces.modulus.toByteArray()));
