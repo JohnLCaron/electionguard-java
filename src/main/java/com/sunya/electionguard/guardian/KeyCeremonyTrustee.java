@@ -37,8 +37,7 @@ public class KeyCeremonyTrustee {
   public final String id;
   // a unique number in [1, 256) that is the polynomial x value for this guardian
   public final int xCoordinate;
-  // public final int numberOfGuardians;
-  public final GuardianSecrets guardianSecrets; // LOOK why public?
+  private final GuardianSecrets guardianSecrets;
 
   // All of the guardians' public keys (including this one), keyed by guardian id.
   public final Map<String, KeyCeremony2.PublicKeySet> allGuardianPublicKeys;
@@ -104,15 +103,6 @@ public class KeyCeremonyTrustee {
     return false;
   }
 
-  /**
-   * Share coefficient validation set to be used for validating the coefficients post election.
-   */
-  private KeyCeremony.CoefficientValidationSet shareCoefficientValidationSet() {
-    return KeyCeremony.CoefficientValidationSet.create(this.id,
-            this.guardianSecrets.polynomial.coefficient_commitments,
-            this.guardianSecrets.polynomial.coefficient_proofs);
-  }
-
   /** Share this guardians backup for otherGuardian. */
   @Nullable
   public KeyCeremony2.PartialKeyBackup sendPartialKeyBackup(String otherGuardian) {
@@ -143,26 +133,6 @@ public class KeyCeremonyTrustee {
             otherGuardian,
             otherKeys.guardianXCoordinate(),
             encrypted_value.get());
-  }
-
-  /** Receive another guardian's PartialKeyBackup for this guardian. */
-  @Nullable
-  private KeyCeremony2.PartialKeyVerification receivePartialKeyBackup(KeyCeremony2.PartialKeyBackup otherBackup) {
-    if (otherBackup != null) {
-      this.otherGuardianPartialKeyBackups.put(otherBackup.generatingGuardianId(), otherBackup);
-      return this.verifyPartialKeyBackup(otherBackup);
-    }
-    return null;
-  }
-
-  @Nullable
-  private KeyCeremony2.PartialKeyVerification verifyPartialKeyBackup(String guardian_id) {
-    KeyCeremony2.PartialKeyBackup backup = this.otherGuardianPartialKeyBackups.get(guardian_id);
-    if (backup == null) {
-      return null;
-    } else {
-      return verifyPartialKeyBackup(backup);
-    }
   }
 
   public KeyCeremony2.PartialKeyVerification verifyPartialKeyBackup(KeyCeremony2.PartialKeyBackup backup) {
@@ -205,8 +175,6 @@ public class KeyCeremonyTrustee {
             backup.designatedGuardianId(),
             backup.designatedGuardianXCoordinate(),
             ElectionPolynomial.compute_polynomial_coordinate(BigInteger.valueOf(backup.designatedGuardianXCoordinate()), polynomial));
-
-    // return KeyCeremony.generate_election_partial_key_challenge(backup_in_question, this.guardianSecrets.polynomial);
   }
 
   /**
@@ -228,15 +196,6 @@ public class KeyCeremonyTrustee {
 
     return ElGamal.elgamal_combine_public_keys(public_keys);
   }
-
-  public boolean saveState() {
-    return true;
-  }
-
-  public boolean finish(boolean allOk) {
-    return true;
-  }
-
 
   /**
    * https://www.electionguard.vote/spec/0.95.0/4_Key_generation/#overview-of-key-generation
@@ -289,7 +248,6 @@ public class KeyCeremonyTrustee {
       return id;
     }
 
-
     KeyCeremony2.PublicKeySet sendPublicKeys() {
       return KeyCeremonyTrustee.this.sharePublicKeys();
     }
@@ -302,27 +260,12 @@ public class KeyCeremonyTrustee {
     KeyCeremony2.PartialKeyBackup sendPartialKeyBackup(String otherId) {
       return KeyCeremonyTrustee.this.sendPartialKeyBackup(otherId);
     }
-
-    void receivePartialKeyBackup(KeyCeremony2.PartialKeyBackup backup) {
-      KeyCeremonyTrustee.this.receivePartialKeyBackup(backup);
-    }
-
     KeyCeremony2.PartialKeyVerification verifyPartialKeyBackup(KeyCeremony2.PartialKeyBackup backup) {
       return KeyCeremonyTrustee.this.verifyPartialKeyBackup(backup);
     }
 
     KeyCeremony2.PartialKeyChallengeResponse sendBackupChallenge(String guardian_id) {
       return KeyCeremonyTrustee.this.sendBackupChallenge(guardian_id);
-    }
-
-    // static, could be done by anyone.
-    KeyCeremony.ElectionPartialKeyVerification verifyPartialKeyChallenge(KeyCeremony.ElectionPartialKeyChallenge challenge) {
-      return KeyCeremonyTrustee.verifyPartialKeyChallenge(id, challenge);
-    }
-
-    // dont need this, its in PublicKeySet
-    KeyCeremony.CoefficientValidationSet sendCoefficientValidationSet() {
-      return KeyCeremonyTrustee.this.shareCoefficientValidationSet();
     }
 
     ElementModP sendJointPublicKey() {

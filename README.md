@@ -31,11 +31,15 @@ The entire workflow, consisting of the above steps plus verification can be run 
 
 *   [RunElectionWorkflow](https://github.com/JohnLCaron/electionguard-java/blob/master/docs/RunElectionWorkflow.md)
 
-### Simulated Remote Guardians 
+### Remote Guardians (experimental)
 
-An experimental refactoring that simulates remote Guardians:
+A refactoring that simulates remote Guardians:
 
 *   [Remote Guardian](https://github.com/JohnLCaron/electionguard-java/tree/master/src/main/java/com/sunya/electionguard/guardian)
+
+One that uses real remote Guardians over gRpc for the Key Ceremony:
+
+*   [Remote Guardian](https://github.com/JohnLCaron/electionguard-java/tree/master/src/main/java/com/sunya/electionguard/keyceremony)
 
 ## Election Record Visualization
 

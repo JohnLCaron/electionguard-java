@@ -54,12 +54,13 @@ public class Publisher {
   static final String PLAINTEXT_BALLOT_PREFIX = "plaintext_ballot_";
 
   // proto
-  static final String ELECTION_RECORD_FILE_NAME = "electionRecord.protobuf";
-  static final String GUARDIANS_FILE = "guardians.protobuf";
-  static final String SUBMITTED_BALLOT_PROTO = "submittedBallot.protobuf";
-  static final String SPOILED_BALLOT_FILE = "spoiledPlaintextBallot.protobuf";
-  static final String SPOILED_TALLY_FILE = "spoiledPlaintextTally.protobuf";
-  static final String TRUSTEES_FILE = "trustees.protobuf";
+  static final String PROTO_SUFFIX = ".protobuf";
+  static final String ELECTION_RECORD_FILE_NAME = "electionRecord" + PROTO_SUFFIX;
+  static final String GUARDIANS_FILE = "guardians" + PROTO_SUFFIX;
+  static final String SUBMITTED_BALLOT_PROTO = "submittedBallot" + PROTO_SUFFIX;
+  static final String SPOILED_BALLOT_FILE = "spoiledPlaintextBallot" + PROTO_SUFFIX;
+  static final String SPOILED_TALLY_FILE = "spoiledPlaintextTally" + PROTO_SUFFIX;
+  static final String TRUSTEES_FILE = "trustees" + PROTO_SUFFIX;
 
   private final Path publishDirectory;
   private final Path devicesDirPath;
@@ -369,6 +370,14 @@ public class Publisher {
 
     try (FileOutputStream out = new FileOutputStream(trusteesPath().toFile())) {
       trusteesProto.writeDelimitedTo(out);
+    }
+  }
+
+
+  public static void writeTrusteeProto(String outputDir, TrusteeProto.Trustee trusteeProto) throws IOException {
+    Path outputPath = Path.of(outputDir + "/" + trusteeProto.getGuardianId() + PROTO_SUFFIX);
+    try (FileOutputStream out = new FileOutputStream(outputPath.toFile())) {
+      trusteeProto.writeDelimitedTo(out);
     }
   }
 
