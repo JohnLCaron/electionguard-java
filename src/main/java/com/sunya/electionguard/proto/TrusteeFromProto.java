@@ -3,15 +3,17 @@ package com.sunya.electionguard.proto;
 import com.google.common.collect.ImmutableList;
 import com.sunya.electionguard.Auxiliary;
 import com.sunya.electionguard.ElGamal;
-import com.sunya.electionguard.KeyCeremony;
-import com.sunya.electionguard.Rsa;
+import com.sunya.electionguard.Group;
 import com.sunya.electionguard.guardian.DecryptingTrustee;
+import com.sunya.electionguard.guardian.KeyCeremony2;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.math.BigInteger;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static com.sunya.electionguard.proto.CommonConvert.convertElementModP;
 
 public class TrusteeFromProto {
 
@@ -24,48 +26,55 @@ public class TrusteeFromProto {
   }
 
   private static ImmutableList<DecryptingTrustee> convertTrustees(TrusteeProto.Trustees proto) {
+    Map<String, ImmutableList<Group.ElementModP>> commitments = new HashMap<>();
+    for (TrusteeProto.Trustee guardianProto : proto.getTrusteesList()) {
+      convertCommitments(guardianProto, commitments);
+    }
+
     ImmutableList.Builder<DecryptingTrustee> builder = ImmutableList.builder();
     for (TrusteeProto.Trustee guardianProto : proto.getTrusteesList()) {
-      builder.add(convertTrustee(guardianProto));
+      builder.add(convertTrustee(guardianProto, commitments));
     }
     return builder.build();
   }
 
-  private static DecryptingTrustee convertTrustee(TrusteeProto.Trustee proto) {
-
-    String guardian_id = proto.getGuardianId();
-    int sequence_order = proto.getGuardianSequence();
-    java.security.PrivateKey rsa_private_key = convertJavaPrivateKey(proto.getRsaPrivateKey());
-    ElGamal.KeyPair election_keypair = convertElgamalKeypair(proto.getElectionKeyPair());
-
-    Map<String, KeyCeremony.ElectionPartialKeyBackup> otherGuardianPartialKeyBackups =
-            proto.getOtherGuardianBackupsList().stream()
-                    .collect(Collectors.toMap(p -> p.getOwnerId(), p -> convertElectionPartialKeyBackup(p)));
-
-    return new DecryptingTrustee(guardian_id, sequence_order, rsa_private_key, election_keypair, otherGuardianPartialKeyBackups);
+  private static void convertCommitments(TrusteeProto.Trustee proto,
+                                         Map<String, ImmutableList<Group.ElementModP>> result) {
+    ImmutableList.Builder<Group.ElementModP> builder = ImmutableList.builder();
+    for (CommonProto.ElementModP commitment : proto.getCoefficientCommitmentsList()) {
+      builder.add(convertElementModP(commitment));
+    }
+    result.put(proto.getGuardianId(), builder.build());
   }
 
-  private static KeyCeremony.ElectionPartialKeyBackup convertElectionPartialKeyBackup(KeyCeremonyProto.ElectionPartialKeyBackup proto) {
-    return KeyCeremony.ElectionPartialKeyBackup.create(
-            proto.getOwnerId(),
-            proto.getDesignatedId(),
-            proto.getDesignatedSequenceOrder(),
-            new Auxiliary.ByteString(proto.getEncryptedValue().toByteArray()),
-            CommonConvert.convertList(proto.getCoefficientCommitmentsList(), CommonConvert::convertElementModP),
-            CommonConvert.convertList(proto.getCoefficientProofsList(), CommonConvert::convertSchnorrProof));
+  private static DecryptingTrustee convertTrustee(TrusteeProto.Trustee proto,
+                                                  Map<String, ImmutableList<Group.ElementModP>> commitments) {
+
+    String guardian_id = proto.getGuardianId();
+    int sequence_order = proto.getGuardianXCoordinate();
+    java.security.PrivateKey rsa_private_key = CommonConvert.convertJavaPrivateKey(proto.getRsaPrivateKey());
+    ElGamal.KeyPair election_keypair = convertElgamalKeypair(proto.getElectionKeyPair());
+
+    Map<String, KeyCeremony2.PartialKeyBackup> otherGuardianPartialKeyBackups =
+            proto.getOtherGuardianBackupsList().stream()
+                    .collect(Collectors.toMap(p -> p.getGeneratingGuardianId(), p -> convertElectionPartialKeyBackup(p)));
+
+    return new DecryptingTrustee(guardian_id, sequence_order, rsa_private_key, election_keypair,
+            otherGuardianPartialKeyBackups, commitments);
+  }
+
+  private static KeyCeremony2.PartialKeyBackup convertElectionPartialKeyBackup(TrusteeProto.ElectionPartialKeyBackup2 proto) {
+    return KeyCeremony2.PartialKeyBackup.create(
+            proto.getGeneratingGuardianId(),
+            proto.getDesignatedGuardianId(),
+            proto.getDesignatedGuardianXCoordinate(),
+            new Auxiliary.ByteString(proto.getEncryptedCoordinate().toByteArray()));
   }
 
   private static ElGamal.KeyPair convertElgamalKeypair(KeyCeremonyProto.ElGamalKeyPair keypair) {
     return new ElGamal.KeyPair(
             CommonConvert.convertElementModQ(keypair.getSecretKey()),
-            CommonConvert.convertElementModP(keypair.getPublicKey()));
-  }
-
-  // LOOK there may be something better to do when serializing. Find out before use in production.
-  private static java.security.PrivateKey convertJavaPrivateKey(KeyCeremonyProto.RSAPrivateKey proto) {
-    BigInteger privateExponent = new BigInteger(proto.getPrivateExponent().toByteArray());
-    BigInteger modulus = new BigInteger(proto.getModulus().toByteArray());
-    return Rsa.convertJavaPrivateKey(modulus, privateExponent);
+            convertElementModP(keypair.getPublicKey()));
   }
 
 }

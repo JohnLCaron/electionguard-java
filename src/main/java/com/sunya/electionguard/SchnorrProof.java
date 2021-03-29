@@ -18,7 +18,7 @@ import static com.sunya.electionguard.Proof.Usage.SecretValue;
 public class SchnorrProof extends Proof {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
-  /** k in the spec */
+  /** K in the spec */
   public final ElementModP public_key;
   /** h in the spec */
   public final ElementModP commitment;
@@ -36,11 +36,11 @@ public class SchnorrProof extends Proof {
   }
 
   /**
-   * Check validity of the `proof` for proving possession of the private key corresponding to `public_key`.
+   * Check validity of the proof of possession of the private key corresponding to public_key.
    * This is specification 2A and 2.B.
-   * @return true if the transcript is valid, false if anything is wrong
+   * @return true if the proof is valid, false if anything is wrong
    */
-  boolean is_valid() {
+  public boolean is_valid() {
     ElementModP k = this.public_key;
     ElementModP h = this.commitment;
     ElementModQ u = this.response;

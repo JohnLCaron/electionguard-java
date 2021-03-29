@@ -1,0 +1,97 @@
+syntax = "proto3";
+
+import "com/sunya/electionguard/proto/common.proto";
+import "google/protobuf/empty.proto";
+
+option java_package = "com.sunya.electionguard.proto";
+option java_outer_classname = "RemoteTrusteeProto";
+
+service RemoteTrusteeService {
+  rpc sendPublicKeys (PublicKeySetRequest) returns (PublicKeySet) {}
+  rpc receivePublicKeys (PublicKeySet) returns (BooleanResponse) {}
+  rpc sendPartialKeyBackup (PartialKeyBackupRequest) returns (PartialKeyBackup) {}
+  rpc verifyPartialKeyBackup (PartialKeyBackup) returns (PartialKeyVerification) {}
+  rpc sendBackupChallenge (PartialKeyChallenge) returns (PartialKeyChallengeResponse) {}
+  rpc sendJointPublicKey (JointPublicKeyRequest) returns (JointPublicKeyResponse) {}
+  rpc saveState (google.protobuf.Empty) returns (BooleanResponse) {}
+  rpc finish (FinishRequest) returns (BooleanResponse) {}
+}
+
+message PublicKeySetRequest {
+}
+
+message PublicKeySet {
+  RemoteTrusteeError error = 1; // non empty on error
+  /** guardian object_id. */
+  string owner_id = 2;
+  /** guardian x coordinate (aka sequence_order). */
+  uint32 guardian_x_coordinate = 3;
+  /** Auxiliary public key. */
+  RSAPublicKey auxiliary_public_key = 4;
+  /** The election polynomial coefficients commitments and proofs. */
+  repeated SchnorrProof coefficient_proofs = 5;
+}
+
+message PartialKeyBackupRequest {
+  string guardian_id = 1;
+}
+
+message PartialKeyBackup {
+  RemoteTrusteeError error = 1; // non empty on error
+  // The Id of the guardian that generated this backup.
+  string generating_guardian_id = 2;
+  // The Id of the guardian to receive this backup.
+  string designated_guardian_id = 3;
+  // The x coefficient of the designated guardian.
+  uint32 designated_guardian_x_coordinate = 4;
+  // The encrypted coordinate of the designated guardian?.
+  bytes encrypted_coordinate = 5;
+}
+
+message PartialKeyVerification {
+  RemoteTrusteeError error = 1; // non empty on error
+  // The Id of the guardian that generated this backup.
+  string generating_guardian_id = 2;
+  // The Id of the guardian to receive this backup.
+  string designated_guardian_id = 3;
+  // The x coefficient of the designated guardian.
+  uint32 designated_guardian_x_coordinate = 4;
+  bool verify = 5;
+}
+
+message PartialKeyChallenge {
+  string guardian_id = 1;
+}
+
+message PartialKeyChallengeResponse {
+  RemoteTrusteeError error = 1; // non empty on error
+  // The Id of the guardian that generated this backup.
+  string generating_guardian_id = 2;
+  // The Id of the guardian to receive this backup.
+  string designated_guardian_id = 3;
+  // The x coefficient of the designated guardian.
+  uint32 designated_guardian_x_coordinate = 4;
+  // The unencrypted coordinate of the designated guardian.
+  ElementModQ coordinate = 5;
+}
+
+message JointPublicKeyRequest {
+}
+
+message JointPublicKeyResponse {
+  RemoteTrusteeError error = 1; // non empty on error
+  ElementModP joint_public_key = 2;
+}
+
+message FinishRequest {
+  bool all_ok = 1;
+}
+
+message BooleanResponse {
+  RemoteTrusteeError error = 1; // non empty on error
+  bool ok = 2;
+}
+
+message RemoteTrusteeError {
+  string message = 1;
+}

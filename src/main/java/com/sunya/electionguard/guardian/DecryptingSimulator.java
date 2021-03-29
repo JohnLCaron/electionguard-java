@@ -111,6 +111,7 @@ public class DecryptingSimulator {
     try {
       Consumer consumer = new Consumer(cmdLine.encryptDir);
       ElectionRecord electionRecord = consumer.readElectionRecord();
+      // LOOK how to validate guardians??
       ElectionInputValidation validator = new ElectionInputValidation(electionRecord.election);
       Formatter errors = new Formatter();
       if (!validator.validateElection(errors)) {

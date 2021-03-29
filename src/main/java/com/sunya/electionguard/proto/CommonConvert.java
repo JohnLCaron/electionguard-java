@@ -3,6 +3,7 @@ package com.sunya.electionguard.proto;
 import com.google.protobuf.ByteString;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.Group;
+import com.sunya.electionguard.Rsa;
 import com.sunya.electionguard.SchnorrProof;
 
 import javax.annotation.Nullable;
@@ -22,7 +23,7 @@ public class CommonConvert {
   // from proto
   
   @Nullable
-  static Group.ElementModQ convertElementModQ(@Nullable CommonProto.ElementModQ modQ) {
+  public static Group.ElementModQ convertElementModQ(@Nullable CommonProto.ElementModQ modQ) {
     if (modQ == null || modQ.getValue().isEmpty()) {
       return null;
     }
@@ -31,7 +32,7 @@ public class CommonConvert {
   }
 
   @Nullable
-  static Group.ElementModP convertElementModP(@Nullable CommonProto.ElementModP modP) {
+  public static Group.ElementModP convertElementModP(@Nullable CommonProto.ElementModP modP) {
     if (modP == null || modP.getValue().isEmpty()) {
       return null;
     }
@@ -50,7 +51,7 @@ public class CommonConvert {
     );
   }
 
-  static SchnorrProof convertSchnorrProof(CommonProto.SchnorrProof proof) {
+  public static SchnorrProof convertSchnorrProof(CommonProto.SchnorrProof proof) {
     return new SchnorrProof(
             convertElementModP(proof.getPublicKey()),
             convertElementModP(proof.getCommitment()),
@@ -58,16 +59,30 @@ public class CommonConvert {
             convertElementModQ(proof.getResponse()));
   }
 
+  // LOOK there may be something better to do when serializing. Find out before use in production.
+  public static java.security.PublicKey convertJavaPublicKey(CommonProto.RSAPublicKey proto) {
+    BigInteger publicExponent = new BigInteger(proto.getPublicExponent().toByteArray());
+    BigInteger modulus = new BigInteger(proto.getModulus().toByteArray());
+    return Rsa.convertJavaPublicKey(modulus, publicExponent);
+  }
+
+  // LOOK there may be something better to do when serializing. Find out before use in production.
+  static java.security.PrivateKey convertJavaPrivateKey(CommonProto.RSAPrivateKey proto) {
+    BigInteger privateExponent = new BigInteger(proto.getPrivateExponent().toByteArray());
+    BigInteger modulus = new BigInteger(proto.getModulus().toByteArray());
+    return Rsa.convertJavaPrivateKey(modulus, privateExponent);
+  }
+
   /////////////////////////////////////////////////////////////////////////////////////////
   // to proto
 
-  static CommonProto.ElementModQ convertElementModQ(Group.ElementModQ modQ) {
+  public static CommonProto.ElementModQ convertElementModQ(Group.ElementModQ modQ) {
     CommonProto.ElementModQ.Builder builder = CommonProto.ElementModQ.newBuilder();
     builder.setValue(ByteString.copyFrom(modQ.getBigInt().toByteArray()));
     return builder.build();
   }
 
-  static CommonProto.ElementModP convertElementModP(Group.ElementModP modP) {
+  public static CommonProto.ElementModP convertElementModP(Group.ElementModP modP) {
     CommonProto.ElementModP.Builder builder = CommonProto.ElementModP.newBuilder();
     builder.setValue(ByteString.copyFrom(modP.getBigInt().toByteArray()));
     return builder.build();
@@ -80,12 +95,31 @@ public class CommonConvert {
     return builder.build();
   }
 
-  static CommonProto.SchnorrProof convertSchnorrProof(SchnorrProof proof) {
+  public static CommonProto.SchnorrProof convertSchnorrProof(SchnorrProof proof) {
     CommonProto.SchnorrProof.Builder builder = CommonProto.SchnorrProof.newBuilder();
     builder.setPublicKey(convertElementModP(proof.public_key));
     builder.setCommitment(convertElementModP(proof.commitment));
     builder.setChallenge(convertElementModQ(proof.challenge));
     builder.setResponse(convertElementModQ(proof.response));
+    return builder.build();
+  }
+
+
+  // LOOK there may be something better to do when serializing. Find out before use in production.
+  public static CommonProto.RSAPublicKey convertJavaPublicKey(java.security.PublicKey key) {
+    Rsa.KeyPieces pieces = Rsa.convertJavaPublicKey(key);
+    CommonProto.RSAPublicKey.Builder builder = CommonProto.RSAPublicKey.newBuilder();
+    builder.setModulus(ByteString.copyFrom(pieces.modulus.toByteArray()));
+    builder.setPublicExponent(ByteString.copyFrom(pieces.exponent.toByteArray()));
+    return builder.build();
+  }
+
+  // LOOK there may be something better to do when serializing. Find out before use in production.
+  static CommonProto.RSAPrivateKey convertJavaPrivateKey(java.security.PrivateKey key) {
+    Rsa.KeyPieces pieces = Rsa.convertJavaPrivateKey(key);
+    CommonProto.RSAPrivateKey.Builder builder = CommonProto.RSAPrivateKey.newBuilder();
+    builder.setModulus(ByteString.copyFrom(pieces.modulus.toByteArray()));
+    builder.setPrivateExponent(ByteString.copyFrom(pieces.exponent.toByteArray()));
     return builder.build();
   }
   

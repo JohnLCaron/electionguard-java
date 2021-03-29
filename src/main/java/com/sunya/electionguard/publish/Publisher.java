@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.Formatter;
 
 /** Publishes the Manifest Record to Json or protobuf files. */
 public class Publisher {
@@ -85,6 +86,27 @@ public class Publisher {
     if (createDirs) {
       createDirs();
     }
+  }
+
+  /** Make sure output dir exists and is writeable. */
+  public boolean validateOutputDir(Formatter error) {
+    if (!Files.exists(publishDirectory)) {
+      error.format(" Output directory '%s' does not exist%n", publishDirectory);
+      return false;
+    }
+    if (!Files.isDirectory(publishDirectory)) {
+      error.format(" Output directory '%s' is not a directory%n", publishDirectory);
+      return false;
+    }
+    if (!Files.isWritable(publishDirectory)) {
+      error.format(" Output directory '%s' is not writeable%n", publishDirectory);
+      return false;
+    }
+    if (!Files.isExecutable(publishDirectory)) {
+      error.format(" Output directory '%s' is not executable%n", publishDirectory);
+      return false;
+    }
+    return true;
   }
 
   private void createDirs() throws IOException {

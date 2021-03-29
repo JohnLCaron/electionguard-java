@@ -45,7 +45,7 @@ message CoefficientSets {
 message CoefficientSet {
   string guardian_id = 1;
   uint32 guardian_sequence = 2; // i=1,number of guardians
-  repeated ElementModQ coefficients = 3;
+  repeated ElementModQ coefficients = 3; // always k (quorum) number of coefficients
 }
 
 message ElectionKeyPair {
@@ -55,11 +55,11 @@ message ElectionKeyPair {
 }
 
 message ElectionPolynomial {
-  // The secret coefficients a_ij.
+  // The k secret coefficients a_ij.
   repeated ElementModQ coefficients = 1;
-  // The public keys K_ij generated from secret coefficients.
+  // The k public keys K_ij generated from secret coefficients.
   repeated ElementModP coefficient_commitments = 2;
-  // A proof of possession of the private key for each secret coefficient.
+  // The k proofs of possession of the secret coefficient.
   repeated SchnorrProof coefficient_proofs = 3;
 }
 
@@ -88,14 +88,4 @@ message ElectionPartialKeyBackup {
 message ElGamalKeyPair {
   ElementModQ secret_key = 1;
   ElementModP public_key = 2;
-}
-
-message RSAPublicKey {
-  bytes modulus = 1;
-  bytes public_exponent = 2;
-}
-
-message RSAPrivateKey {
-  bytes modulus = 1;
-  bytes private_exponent = 2;
 }

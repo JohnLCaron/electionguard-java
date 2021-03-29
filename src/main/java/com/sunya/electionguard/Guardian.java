@@ -93,9 +93,9 @@ public class Guardian extends ElectionObjectBase {
     return KeyCeremony.PublicKeySet.create(
             this.object_id,
             this.sequence_order,
-            this.auxiliary_keys.public_key,
             this.election_keys.key_pair().public_key,
-            this.election_keys.proof());
+            this.election_keys.proof(),
+            this.auxiliary_keys.public_key);
   }
 
   /** Get a read-only view of the Guardian Manifest Public Keys shared with this Guardian. */

@@ -7,7 +7,6 @@ import com.sunya.electionguard.ElectionPolynomial;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.Guardian;
 import com.sunya.electionguard.KeyCeremony;
-import com.sunya.electionguard.Rsa;
 
 import java.util.List;
 
@@ -39,8 +38,8 @@ public class KeyCeremonyToProto {
 
   private static KeyCeremonyProto.AuxiliaryKeyPair convertAuxiliaryKeyPair(Auxiliary.KeyPair org) {
     KeyCeremonyProto.AuxiliaryKeyPair.Builder builder = KeyCeremonyProto.AuxiliaryKeyPair.newBuilder();
-    builder.setSecretKey(convertJavaPrivateKey(org.secret_key)); // LOOK do we really need the private key ??
-    builder.setPublicKey(convertJavaPublicKey(org.public_key));
+    builder.setSecretKey(CommonConvert.convertJavaPrivateKey(org.secret_key)); // LOOK do we really need the private key ??
+    builder.setPublicKey(CommonConvert.convertJavaPublicKey(org.public_key));
     return builder.build();
   }
 
@@ -48,7 +47,7 @@ public class KeyCeremonyToProto {
     KeyCeremonyProto.AuxiliaryPublicKey.Builder builder = KeyCeremonyProto.AuxiliaryPublicKey.newBuilder();
     builder.setOwnerId(org.owner_id);
     builder.setSequenceOrder(org.sequence_order);
-    builder.setKey(convertJavaPublicKey(org.key));
+    builder.setKey(CommonConvert.convertJavaPublicKey(org.key));
     return builder.build();
   }
 
@@ -92,24 +91,6 @@ public class KeyCeremonyToProto {
     KeyCeremonyProto.ElGamalKeyPair.Builder builder = KeyCeremonyProto.ElGamalKeyPair.newBuilder();
     builder.setSecretKey(CommonConvert.convertElementModQ(keypair.secret_key));
     builder.setPublicKey(CommonConvert.convertElementModP(keypair.public_key));
-    return builder.build();
-  }
-
-  // LOOK there may be something better to do when serializing. Find out before use in production.
-  private static KeyCeremonyProto.RSAPublicKey convertJavaPublicKey(java.security.PublicKey key) {
-    Rsa.KeyPieces pieces = Rsa.convertJavaPublicKey(key);
-    KeyCeremonyProto.RSAPublicKey.Builder builder = KeyCeremonyProto.RSAPublicKey.newBuilder();
-    builder.setModulus(ByteString.copyFrom(pieces.modulus.toByteArray()));
-    builder.setPublicExponent(ByteString.copyFrom(pieces.exponent.toByteArray()));
-    return builder.build();
-  }
-
-  // LOOK there may be something better to do when serializing. Find out before use in production.
-  private static KeyCeremonyProto.RSAPrivateKey convertJavaPrivateKey(java.security.PrivateKey key) {
-    Rsa.KeyPieces pieces = Rsa.convertJavaPrivateKey(key);
-    KeyCeremonyProto.RSAPrivateKey.Builder builder = KeyCeremonyProto.RSAPrivateKey.newBuilder();
-    builder.setModulus(ByteString.copyFrom(pieces.modulus.toByteArray()));
-    builder.setPrivateExponent(ByteString.copyFrom(pieces.exponent.toByteArray()));
     return builder.build();
   }
 
