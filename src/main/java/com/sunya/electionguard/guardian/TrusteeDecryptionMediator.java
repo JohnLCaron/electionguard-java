@@ -41,7 +41,7 @@ public class TrusteeDecryptionMediator {
   private final Set<String> missingGuardians;
 
   // Map(AVAILABLE_GUARDIAN_ID, DecryptingTrustee.Proxy)
-  private final Map<String, DecryptingTrustee.Proxy> available_guardians = new HashMap<>();
+  private final Map<String, DecryptingTrusteeIF> available_guardians = new HashMap<>();
 
   // Map(AVAILABLE_GUARDIAN_ID, DecryptionShare)
   private final Map<String, DecryptionShare> tally_shares = new HashMap<>();
@@ -72,7 +72,7 @@ public class TrusteeDecryptionMediator {
    * @param guardian: The guardian who will participate in the decryption.
    * @return true on "success".
    */
-  public boolean announce(DecryptingTrustee.Proxy guardian) {
+  public boolean announce(DecryptingTrusteeIF guardian) {
     // Only allow a guardian to announce once
     if (available_guardians.containsKey(guardian.id())) {
       logger.atInfo().log("guardian %s already announced", guardian.id());
@@ -220,7 +220,7 @@ public class TrusteeDecryptionMediator {
 
     Map<String, DecryptionShare.CompensatedDecryptionShare> compensated_decryptions = new HashMap<>();
     // Loop through each of the available guardians and calculate decryption shares for the missing one
-    for (DecryptingTrustee.Proxy available_guardian : this.available_guardians.values()) {
+    for (DecryptingTrusteeIF available_guardian : this.available_guardians.values()) {
       Optional<DecryptionShare.CompensatedDecryptionShare> tally_share = TrusteeDecryptions.compute_compensated_decryption_share(
               available_guardian,
               missing_guardian_id,
@@ -343,7 +343,7 @@ public class TrusteeDecryptionMediator {
     Map<String, DecryptionShare.CompensatedDecryptionShare> compensated_decryptions = new HashMap<>();
 
     // Loop through each of the available guardians and calculate decryption shares for the missing one
-    for (DecryptingTrustee.Proxy available_guardian : this.available_guardians.values()) {
+    for (DecryptingTrusteeIF available_guardian : this.available_guardians.values()) {
       Optional<DecryptionShare.CompensatedDecryptionShare> ballot_share = TrusteeDecryptions.compute_compensated_decryption_share_for_ballot(
               available_guardian,
               missing_guardian_id,
@@ -377,13 +377,13 @@ public class TrusteeDecryptionMediator {
     // Compute lagrange coefficients for each of the available guardians
     this.guardianStates = new ArrayList<>();
     this.lagrange_coefficients = new HashMap<>();
-    for (DecryptingTrustee.Proxy guardian : this.available_guardians.values()) {
+    for (DecryptingTrusteeIF guardian : this.available_guardians.values()) {
       List<Integer> seq_orders = this.available_guardians.values().stream()
               .filter(g -> !g.id().equals(guardian.id()))
-              .map(g -> g.sequence_order()).collect(Collectors.toList());
-      Group.ElementModQ coeff = ElectionPolynomial.compute_lagrange_coefficient(guardian.sequence_order(), seq_orders);
+              .map(g -> g.xCoordinate()).collect(Collectors.toList());
+      Group.ElementModQ coeff = ElectionPolynomial.compute_lagrange_coefficient(guardian.xCoordinate(), seq_orders);
       this.lagrange_coefficients.put(guardian.id(), coeff);
-      this.guardianStates.add(new AvailableGuardian(guardian.id(), guardian.sequence_order(), coeff));
+      this.guardianStates.add(new AvailableGuardian(guardian.id(), guardian.xCoordinate(), coeff));
     }
   }
 

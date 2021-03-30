@@ -127,7 +127,7 @@ public class KeyCeremonySimulator {
   Group.ElementModQ commitmentsHash;
   CiphertextElectionContext context;
 
-  List<KeyCeremonyTrustee.KeyCeremonyProxy> trusteeProxies;
+  List<KeyCeremonyTrusteeProxy> trusteeProxies;
   List<KeyCeremony.CoefficientValidationSet> coefficientValidationSets = new ArrayList<>();
   Map<String, KeyCeremony2.PublicKeySet> publicKeys = new HashMap<>();
 
@@ -143,7 +143,7 @@ public class KeyCeremonySimulator {
       int seq = i + 1;
       KeyCeremonyTrustee trustee = new KeyCeremonyTrustee("trustee" + seq, seq, quorum, null);
       trustees.add(trustee);
-      this.trusteeProxies.add(trustee.getKeyCeremonyProxy());
+      this.trusteeProxies.add(new KeyCeremonyTrusteeProxy(trustee));
     }
 
     System.out.printf("%nKey Ceremony Round1: exchange public keys%n");
@@ -186,7 +186,7 @@ public class KeyCeremonySimulator {
     }
   }
 
-  KeyCeremonyTrustee.KeyCeremonyProxy findTrusteeById(String id) {
+  KeyCeremonyTrusteeProxy findTrusteeById(String id) {
     return trusteeProxies.stream().filter(t -> t.id().equals(id)).findAny().orElseThrow();
   }
 
@@ -197,11 +197,11 @@ public class KeyCeremonySimulator {
    */
   boolean round1() {
     boolean fail = false;
-    for (KeyCeremonyTrustee.KeyCeremonyProxy trustee : trusteeProxies) {
+    for (KeyCeremonyTrusteeProxy trustee : trusteeProxies) {
       KeyCeremony2.PublicKeySet publicKeys = trustee.sendPublicKeys();
       this.publicKeys.put(publicKeys.ownerId(), publicKeys);
       // one could gather all PublicKeySets and send all at once, for 2*n, rather than n*n total messages.
-      for (KeyCeremonyTrustee.KeyCeremonyProxy recipient : trusteeProxies) {
+      for (KeyCeremonyTrusteeProxy recipient : trusteeProxies) {
         if (!trustee.id().equals(recipient.id())) {
           boolean verify =  recipient.receivePublicKeys(publicKeys);
           if (!verify) {
@@ -221,9 +221,9 @@ public class KeyCeremonySimulator {
    */
   boolean round2(ListMultimap<String, KeyCeremony2.PartialKeyVerification> failures) {
     // Share Partial Key Backup
-    for (KeyCeremonyTrustee.KeyCeremonyProxy trustee : trusteeProxies) {
+    for (KeyCeremonyTrusteeProxy trustee : trusteeProxies) {
       // one could gather all KeyBackups and send all at once, for 2*n, rather than 2*n*n total messages.
-      for (KeyCeremonyTrustee.KeyCeremonyProxy recipient : trusteeProxies) {
+      for (KeyCeremonyTrusteeProxy recipient : trusteeProxies) {
         if (!trustee.id().equals(recipient.id())) {
           // LOOK not seeing the random nonce
           // Each guardian T_i then publishes the encryption E_l (R_i,l , P_i(l)) for every other guardian T_l
@@ -257,7 +257,7 @@ public class KeyCeremonySimulator {
       // sending guardian T_i to publish this P_i(l) together with the nonce R_i,l it used to encrypt P_i(l)
       // under the public key E_l of recipient guardian T_l .
       // LOOK wheres the nonce in ElectionPartialKeyChallenge?
-      KeyCeremonyTrustee.KeyCeremonyProxy challenged = findTrusteeById(failure.generatingGuardianId());
+      KeyCeremonyTrusteeProxy challenged = findTrusteeById(failure.generatingGuardianId());
       KeyCeremony2.PartialKeyChallengeResponse response = challenged.sendBackupChallenge(failure.designatedGuardianId());
 
       // If guardian T_i fails to produce a suitable P_i(l)
@@ -288,7 +288,7 @@ public class KeyCeremonySimulator {
     boolean allMatch = true;
 
     SortedMap<String, Group.ElementModP> jointKeys = new TreeMap<>();
-    for (KeyCeremonyTrustee.KeyCeremonyProxy sender : trusteeProxies) {
+    for (KeyCeremonyTrusteeProxy sender : trusteeProxies) {
       Group.ElementModP jointKey = sender.sendJointPublicKey();
       jointKeys.put(sender.id(), jointKey);
       if (this.jointKey == null) {

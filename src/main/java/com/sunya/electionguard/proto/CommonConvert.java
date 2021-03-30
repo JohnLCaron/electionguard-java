@@ -1,6 +1,7 @@
 package com.sunya.electionguard.proto;
 
 import com.google.protobuf.ByteString;
+import com.sunya.electionguard.ChaumPedersen;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.Rsa;
@@ -41,7 +42,7 @@ public class CommonConvert {
   }
 
   @Nullable
-  static ElGamal.Ciphertext convertCiphertext(@Nullable CommonProto.ElGamalCiphertext ciphertext) {
+  public static ElGamal.Ciphertext convertCiphertext(@Nullable CommonProto.ElGamalCiphertext ciphertext) {
     if (ciphertext == null || !ciphertext.hasPad()) {
       return null;
     }
@@ -49,6 +50,14 @@ public class CommonConvert {
             convertElementModP(ciphertext.getPad()),
             convertElementModP(ciphertext.getData())
     );
+  }
+
+  public static ChaumPedersen.ChaumPedersenProof convertChaumPedersenProof(CommonProto.ChaumPedersenProof proof) {
+    return new ChaumPedersen.ChaumPedersenProof(
+            convertElementModP(proof.getPad()),
+            convertElementModP(proof.getData()),
+            convertElementModQ(proof.getChallenge()),
+            convertElementModQ(proof.getResponse()));
   }
 
   public static SchnorrProof convertSchnorrProof(CommonProto.SchnorrProof proof) {
@@ -67,7 +76,7 @@ public class CommonConvert {
   }
 
   // LOOK there may be something better to do when serializing. Find out before use in production.
-  static java.security.PrivateKey convertJavaPrivateKey(CommonProto.RSAPrivateKey proto) {
+  public static java.security.PrivateKey convertJavaPrivateKey(CommonProto.RSAPrivateKey proto) {
     BigInteger privateExponent = new BigInteger(proto.getPrivateExponent().toByteArray());
     BigInteger modulus = new BigInteger(proto.getModulus().toByteArray());
     return Rsa.convertJavaPrivateKey(modulus, privateExponent);
@@ -88,10 +97,19 @@ public class CommonConvert {
     return builder.build();
   }
 
-  static CommonProto.ElGamalCiphertext convertCiphertext(ElGamal.Ciphertext ciphertext) {
+  public static CommonProto.ElGamalCiphertext convertCiphertext(ElGamal.Ciphertext ciphertext) {
     CommonProto.ElGamalCiphertext.Builder builder = CommonProto.ElGamalCiphertext.newBuilder();
     builder.setPad(convertElementModP(ciphertext.pad));
     builder.setData(convertElementModP(ciphertext.data));
+    return builder.build();
+  }
+
+  public static CommonProto.ChaumPedersenProof convertChaumPedersenProof(ChaumPedersen.ChaumPedersenProof proof) {
+    CommonProto.ChaumPedersenProof.Builder builder = CommonProto.ChaumPedersenProof.newBuilder();
+    builder.setPad(convertElementModP(proof.pad));
+    builder.setData(convertElementModP(proof.data));
+    builder.setChallenge(convertElementModQ(proof.challenge));
+    builder.setResponse(convertElementModQ(proof.response));
     return builder.build();
   }
 

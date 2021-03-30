@@ -4,7 +4,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Streams;
 import com.google.common.flogger.FluentLogger;
-import com.sunya.electionguard.Auxiliary;
 import com.sunya.electionguard.CiphertextBallot;
 import com.sunya.electionguard.CiphertextContest;
 import com.sunya.electionguard.CiphertextElectionContext;
@@ -18,7 +17,6 @@ import com.sunya.electionguard.KeyCeremony;
 import com.sunya.electionguard.Scheduler;
 import com.sunya.electionguard.SubmittedBallot;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -34,7 +32,7 @@ import static com.sunya.electionguard.DecryptionShare.CiphertextDecryptionSelect
 import static com.sunya.electionguard.DecryptionShare.CompensatedDecryptionShare;
 
 /** Static methods for decryption. */
-class TrusteeDecryptions {
+public class TrusteeDecryptions {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   ////////////////////////////////////////////////////////////////////////////
@@ -48,8 +46,8 @@ class TrusteeDecryptions {
    * @param context: The public election encryption context
    * @return a `DecryptionShare` or `None` if there is an error
    */
-  static Optional<DecryptionShare> compute_decryption_share(
-          DecryptingTrustee.Proxy guardian,
+  public static Optional<DecryptionShare> compute_decryption_share(
+          DecryptingTrusteeIF guardian,
           CiphertextTally tally,
           CiphertextElectionContext context) {
 
@@ -66,13 +64,13 @@ class TrusteeDecryptions {
     return Optional.of(new DecryptionShare(
             tally.object_id,
             guardian.id(),
-            guardian.election_public_key(),
+            guardian.electionPublicKey(),
             contests));
   }
 
   /** Compute the DecryptionShare for a list of ballots for a guardian. */
-  static Optional<Map<String, DecryptionShare>> compute_decryption_share_for_ballots(
-          DecryptingTrustee.Proxy guardian,
+  public static Optional<Map<String, DecryptionShare>> compute_decryption_share_for_ballots(
+          DecryptingTrusteeIF guardian,
           Iterable<SubmittedBallot> ballots,
           CiphertextElectionContext context) {
 
@@ -92,7 +90,7 @@ class TrusteeDecryptions {
 
   /** Compute the DecryptionShare for a single ballot for a guardian. */
   static Optional<DecryptionShare> compute_decryption_share_for_ballot(
-          DecryptingTrustee.Proxy guardian,
+          DecryptingTrusteeIF guardian,
           SubmittedBallot ballot,
           CiphertextElectionContext context) {
 
@@ -114,7 +112,7 @@ class TrusteeDecryptions {
     return Optional.of(new DecryptionShare(
             ballot.object_id,
             guardian.id(),
-            guardian.election_public_key(),
+            guardian.electionPublicKey(),
             contests));
   }
 
@@ -124,7 +122,7 @@ class TrusteeDecryptions {
    * @return Map(CONTEST_ID, CiphertextDecryptionContest)
    */
   private static Optional<CiphertextDecryptionContest> compute_decryption_share_for_contest(
-          DecryptingTrustee.Proxy guardian,
+          DecryptingTrusteeIF guardian,
           CiphertextContest ciphertextContest,
           CiphertextElectionContext context) {
 
@@ -152,11 +150,11 @@ class TrusteeDecryptions {
   }
 
   private static class RunComputeDecryptionShareForSelection implements Callable<Optional<CiphertextDecryptionSelection>> {
-    private final DecryptingTrustee.Proxy guardian;
+    private final DecryptingTrusteeIF guardian;
     private final CiphertextSelection selection;
     private final CiphertextElectionContext context;
 
-    RunComputeDecryptionShareForSelection(DecryptingTrustee.Proxy guardian, CiphertextSelection selection, CiphertextElectionContext context) {
+    RunComputeDecryptionShareForSelection(DecryptingTrusteeIF guardian, CiphertextSelection selection, CiphertextElectionContext context) {
       this.guardian = Preconditions.checkNotNull(guardian);
       this.selection = Preconditions.checkNotNull(selection);
       this.context = Preconditions.checkNotNull(context);
@@ -178,14 +176,14 @@ class TrusteeDecryptions {
    */
   @VisibleForTesting
   static Optional<CiphertextDecryptionSelection> compute_decryption_share_for_selection(
-          DecryptingTrustee.Proxy guardian,
+          DecryptingTrusteeIF guardian,
           CiphertextSelection selection,
           CiphertextElectionContext context) {
 
     try {
-      DecryptionProofTuple tuple = guardian.partially_decrypt(selection.ciphertext(), context.crypto_extended_base_hash, null);
-
-      if (tuple.proof.is_valid(selection.ciphertext(), guardian.election_public_key(),
+      Optional<DecryptionProofTuple> tupleo = guardian.partialDecrypt(selection.ciphertext(), context.crypto_extended_base_hash, null);
+      DecryptionProofTuple tuple = tupleo.orElseThrow(); // LOOK
+      if (tuple.proof.is_valid(selection.ciphertext(), guardian.electionPublicKey(),
               tuple.decryption, context.crypto_extended_base_hash)) {
         return Optional.of(DecryptionShare.create_ciphertext_decryption_selection(
                 selection.object_id,
@@ -216,8 +214,8 @@ class TrusteeDecryptions {
    * @param context: The public election encryption context
    * @return a `DecryptionShare` or `None` if there is an error
    */
-  static Optional<CompensatedDecryptionShare> compute_compensated_decryption_share(
-          DecryptingTrustee.Proxy guardian,
+  public static Optional<CompensatedDecryptionShare> compute_compensated_decryption_share(
+          DecryptingTrusteeIF guardian,
           String missing_guardian_id,
           CiphertextTally tally,
           CiphertextElectionContext context) {
@@ -237,7 +235,7 @@ class TrusteeDecryptions {
             tally.object_id,
             guardian.id(),
             missing_guardian_id,
-            guardian.election_public_key(),
+            guardian.electionPublicKey(),
             contests));
   }
 
@@ -246,7 +244,7 @@ class TrusteeDecryptions {
    * Parallizable over each of the tally's contests.
    */
   private static Optional<CiphertextCompensatedDecryptionContest> compute_compensated_decryption_share_for_contest(
-          DecryptingTrustee.Proxy guardian,
+          DecryptingTrusteeIF guardian,
           String missing_guardian_id,
           CiphertextContest contest,
           CiphertextElectionContext context) {
@@ -286,7 +284,7 @@ class TrusteeDecryptions {
    * @return Map(BALLOT_ID, CompensatedDecryptionShare)
    */
   static Optional<Map<String, CompensatedDecryptionShare>> compute_compensated_decryption_share_for_ballots(
-          DecryptingTrustee.Proxy guardian,
+          DecryptingTrusteeIF guardian,
           String missing_guardian_id,
           Iterable<SubmittedBallot> ballots,
           CiphertextElectionContext context) {
@@ -314,7 +312,7 @@ class TrusteeDecryptions {
    */
   @VisibleForTesting
   static Optional<CompensatedDecryptionShare> compute_compensated_decryption_share_for_ballot(
-          DecryptingTrustee.Proxy guardian,
+          DecryptingTrusteeIF guardian,
           String missing_guardian_id,
           SubmittedBallot ballot,
           CiphertextElectionContext context) {
@@ -340,18 +338,18 @@ class TrusteeDecryptions {
             ballot.object_id,
             guardian.id(),
             missing_guardian_id,
-            guardian.election_public_key(),
+            guardian.electionPublicKey(),
             contests));
   }
 
   private static class RunComputeCompensatedDecryptionShareForSelection implements
           Callable<Optional<CiphertextCompensatedDecryptionSelection>> {
-    final DecryptingTrustee.Proxy available_guardian;
+    final DecryptingTrusteeIF available_guardian;
     final String missing_guardian_id;
     final CiphertextSelection selection;
     final CiphertextElectionContext context;
 
-    RunComputeCompensatedDecryptionShareForSelection(DecryptingTrustee.Proxy available_guardian,
+    RunComputeCompensatedDecryptionShareForSelection(DecryptingTrusteeIF available_guardian,
                                                             String missing_guardian_id,
                                                             CiphertextSelection selection,
                                                             CiphertextElectionContext context) {
@@ -380,12 +378,12 @@ class TrusteeDecryptions {
    */
   @VisibleForTesting
   static Optional<CiphertextCompensatedDecryptionSelection> compute_compensated_decryption_share_for_selection(
-          DecryptingTrustee.Proxy available_guardian,
+          DecryptingTrusteeIF available_guardian,
           String missing_guardian_id,
           CiphertextSelection selection,
           CiphertextElectionContext context) {
 
-    Optional<DecryptionProofTuple> compensated = available_guardian.compensate_decrypt(
+    Optional<DecryptionProofTuple> compensated = available_guardian.compensatedDecrypt(
             missing_guardian_id,
             selection.ciphertext(),
             context.crypto_extended_base_hash,
@@ -397,7 +395,7 @@ class TrusteeDecryptions {
     }
     DecryptionProofTuple tuple = compensated.get();
 
-    Optional<Group.ElementModP> recovery_public_key = available_guardian.recovery_public_key_for(missing_guardian_id);
+    Optional<Group.ElementModP> recovery_public_key = available_guardian.recoverPublicKey(missing_guardian_id);
     if (recovery_public_key.isEmpty()) {
       logger.atWarning().log("compute compensated decryption share failed for %s missing recovery key: %s %s",
               available_guardian.id(), missing_guardian_id, selection.object_id);
@@ -458,7 +456,7 @@ class TrusteeDecryptions {
    * from the collection of compensated decryption shares.
    */
   // Map(MISSING_GUARDIAN_ID, DecryptionShare)
-  static DecryptionShare reconstruct_decryption_share(
+  public static DecryptionShare reconstruct_decryption_share(
           String missing_guardian_id,
           Group.ElementModP missing_public_key,
           CiphertextTally tally,
@@ -578,8 +576,7 @@ class TrusteeDecryptions {
    * @param shares                the collection of `CompensatedDecryptionShare` for the missing guardian, each keyed by the ID of the guardian that produced it
    * @param lagrange_coefficients the lagrange coefficients for the available guardians that provided shares
    */
-  @VisibleForTesting
-  static DecryptionShare reconstruct_decryption_share_for_ballot(
+  public static DecryptionShare reconstruct_decryption_share_for_ballot(
           String missing_guardian_id,
           Group.ElementModP missing_public_key,
           SubmittedBallot ballot,

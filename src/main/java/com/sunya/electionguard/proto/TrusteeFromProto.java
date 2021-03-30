@@ -1,6 +1,7 @@
 package com.sunya.electionguard.proto;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.sunya.electionguard.Auxiliary;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.Group;
@@ -23,6 +24,14 @@ public class TrusteeFromProto {
       proto = TrusteeProto.Trustees.parseDelimitedFrom(inp);
     }
     return convertTrustees(proto);
+  }
+
+  public static DecryptingTrustee readTrustee(String filename) throws IOException {
+    TrusteeProto.Trustee proto;
+    try (FileInputStream inp = new FileInputStream(filename)) {
+      proto = TrusteeProto.Trustee.parseDelimitedFrom(inp);
+    }
+    return convertTrustee(proto, ImmutableMap.of());
   }
 
   private static ImmutableList<DecryptingTrustee> convertTrustees(TrusteeProto.Trustees proto) {

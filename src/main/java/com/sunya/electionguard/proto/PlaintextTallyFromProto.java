@@ -1,6 +1,5 @@
 package com.sunya.electionguard.proto;
 
-import com.sunya.electionguard.ChaumPedersen;
 import com.sunya.electionguard.DecryptionShare;
 import com.sunya.electionguard.PlaintextTally;
 
@@ -13,9 +12,7 @@ import java.util.stream.Collectors;
 import static com.sunya.electionguard.proto.CommonConvert.convertElementModP;
 import static com.sunya.electionguard.proto.PlaintextTallyProto.CiphertextDecryptionSelection;
 import static com.sunya.electionguard.proto.PlaintextTallyProto.CiphertextCompensatedDecryptionSelection;
-import static com.sunya.electionguard.proto.PlaintextTallyProto.ChaumPedersenProof;
 import static com.sunya.electionguard.proto.CommonConvert.convertCiphertext;
-import static com.sunya.electionguard.proto.CommonConvert.convertElementModQ;
 
 public class PlaintextTallyFromProto {
 
@@ -61,7 +58,7 @@ public class PlaintextTallyFromProto {
             proto.getObjectId(),
             proto.getGuardianId(),
             convertElementModP(proto.getShare()),
-            proto.hasProof() ? Optional.of(convertProof(proto.getProof())) : Optional.empty(),
+            proto.hasProof() ? Optional.of(CommonConvert.convertChaumPedersenProof(proto.getProof())) : Optional.empty(),
             recovered.size() > 0 ? Optional.of(recovered) : Optional.empty());
   }
 
@@ -74,15 +71,7 @@ public class PlaintextTallyFromProto {
             proto.getMissingGuardianId(),
             convertElementModP(proto.getShare()),
             convertElementModP(proto.getRecoveryKey()),
-            convertProof(proto.getProof()));
-  }
-
-  private static ChaumPedersen.ChaumPedersenProof convertProof(ChaumPedersenProof proof) {
-    return new ChaumPedersen.ChaumPedersenProof(
-            convertElementModP(proof.getPad()),
-            convertElementModP(proof.getData()),
-            convertElementModQ(proof.getChallenge()),
-            convertElementModQ(proof.getResponse()));
+            CommonConvert.convertChaumPedersenProof(proto.getProof()));
   }
 
 }

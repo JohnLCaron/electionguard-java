@@ -91,6 +91,10 @@ class KeyCeremonyRemoteTrustee extends RemoteTrusteeServiceGrpc.RemoteTrusteeSer
     KeyCeremonyRemoteProxy proxy = new KeyCeremonyRemoteProxy(serverUrl);
     RemoteKeyCeremonyProto.RegisterTrusteeResponse response = proxy.registerTrustee(cmdLine.name, url);
     proxy.shutdown();
+    if (response.hasError()) {
+      System.out.printf("    registerTrustee error %s%n", response.getError().getMessage());
+      throw new RuntimeException(response.getError().getMessage());
+    }
     System.out.printf("    response %s %d %d %n", response.getGuardianId(),
             response.getGuardianXCoordinate(),
             response.getQuorum());

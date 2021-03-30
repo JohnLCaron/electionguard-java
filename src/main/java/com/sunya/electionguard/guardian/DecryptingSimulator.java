@@ -156,7 +156,7 @@ public class DecryptingSimulator {
   final ElectionRecord electionRecord;
   final Manifest election;
 
-  Iterable<DecryptingTrustee.Proxy> guardians;
+  Iterable<DecryptingTrusteeProxy> guardians;
   CiphertextTally encryptedTally;
   PlaintextTally decryptedTally;
   List<PlaintextBallot> spoiledDecryptedBallots;
@@ -174,7 +174,7 @@ public class DecryptingSimulator {
     this.encryptedTally = electionRecord.encryptedTally;
 
     this.guardians = provider.guardians();
-    for (DecryptingTrustee.Proxy guardian : provider.guardians()) {
+    for (DecryptingTrusteeProxy guardian : provider.guardians()) {
       // LOOK test Guardians against whats in the electionRecord.
     }
     System.out.printf("%nReady to decrypt%n");
@@ -202,7 +202,7 @@ public class DecryptingSimulator {
             guardianPublicKeys);
 
     int count = 0;
-    for (DecryptingTrustee.Proxy guardian : this.guardians) {
+    for (DecryptingTrusteeProxy guardian : this.guardians) {
       boolean ok = mediator.announce(guardian);
       Preconditions.checkArgument(ok);
       System.out.printf(" Guardian Present: %s%n", guardian.id());

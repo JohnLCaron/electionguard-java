@@ -5,5 +5,5 @@ package com.sunya.electionguard.guardian;
  * These are used in the decryption stage.
  */
 public interface ProxyGuardiansProvider {
-  Iterable<DecryptingTrustee.Proxy> guardians();
+  Iterable<DecryptingTrusteeProxy> guardians();
 }

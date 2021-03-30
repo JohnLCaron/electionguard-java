@@ -10,7 +10,6 @@ import com.sunya.electionguard.Group;
 import com.sunya.electionguard.Rsa;
 
 import javax.annotation.Nullable;
-import javax.annotation.concurrent.Immutable;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
@@ -67,7 +66,7 @@ public class DecryptingTrustee {
    *                             if no value is provided, a random number will be used.
    * @return the decryption and its proof
    */
-  Optional<DecryptionProofTuple> compensate_decrypt(
+  public Optional<DecryptionProofTuple> compensatedDecrypt(
           String missing_guardian_id,
           ElGamal.Ciphertext elgamal,
           Group.ElementModQ extended_base_hash,
@@ -117,7 +116,7 @@ public class DecryptingTrustee {
    *                            if no value is provided, a random number will be used.
    * @return a `Tuple[ElementModP, ChaumPedersenProof]` of the decryption and its proof
    */
-  private DecryptionProofTuple partially_decrypt(
+  public DecryptionProofTuple partialDecrypt(
           ElGamal.Ciphertext elgamal,
           Group.ElementModQ extended_base_hash,
           @Nullable Group.ElementModQ nonce_seed) {
@@ -145,7 +144,7 @@ public class DecryptingTrustee {
   /**
    * Compute the recovery public key for a given guardian.
    */
-  private Optional<Group.ElementModP> recovery_public_key_for(String missing_guardian_id) {
+  public Optional<Group.ElementModP> recoverPublicKey(String missing_guardian_id) {
     // KeyCeremony2.ElectionPartialKeyBackup backup = this.otherGuardianPartialKeyBackups.get(missing_guardian_id);
     //if (backup == null) {
     //  logger.atInfo().log("recovery_public_key_for guardian %s missing backup for %s", this.id, missing_guardian_id);
@@ -169,48 +168,5 @@ public class DecryptingTrustee {
     }
 
     return Optional.of(pub_key);
-  }
-
-  public Proxy getProxy() {
-    return new Proxy();
-  }
-
-  /**
-   * Simulation of message broker service for Guardians/Trustees.
-   */
-  @Immutable
-  public class Proxy {
-
-    String id() {
-      return id;
-    }
-
-    int sequence_order() {
-      return sequence_order;
-    }
-
-    Group.ElementModP election_public_key() {
-      return DecryptingTrustee.this.election_keypair.public_key;
-    }
-
-    Optional<DecryptionProofTuple> compensate_decrypt(
-            String missing_guardian_id,
-            ElGamal.Ciphertext elgamal,
-            Group.ElementModQ extended_base_hash,
-            @Nullable Group.ElementModQ nonce_seed) {
-
-      return DecryptingTrustee.this.compensate_decrypt(missing_guardian_id,
-              elgamal,
-              extended_base_hash,
-              nonce_seed);
-    }
-
-    DecryptionProofTuple partially_decrypt(ElGamal.Ciphertext elgamal, Group.ElementModQ extended_base_hash, @Nullable Group.ElementModQ nonce_seed) {
-      return DecryptingTrustee.this.partially_decrypt(elgamal, extended_base_hash, nonce_seed);
-    }
-
-    Optional<Group.ElementModP> recovery_public_key_for(String missing_guardian_id) {
-      return DecryptingTrustee.this.recovery_public_key_for(missing_guardian_id);
-    }
   }
 }
