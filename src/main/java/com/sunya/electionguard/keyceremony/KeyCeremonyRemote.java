@@ -5,6 +5,8 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.google.common.flogger.FluentLogger;
 import com.sunya.electionguard.Manifest;
+import com.sunya.electionguard.guardian.TrusteeKeyCeremonyMediator;
+import com.sunya.electionguard.guardian.KeyCeremonyTrusteeIF;
 import com.sunya.electionguard.input.ElectionInputValidation;
 import com.sunya.electionguard.proto.RemoteKeyCeremonyProto;
 import com.sunya.electionguard.proto.RemoteKeyCeremonyServiceGrpc;
@@ -21,6 +23,7 @@ import java.util.Formatter;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 /**
  * A command line program that performs the key ceremony with remote Guardians.
@@ -177,7 +180,7 @@ class KeyCeremonyRemote {
       this.startedKeyCeremony = true;
       System.out.printf("Begin Key Ceremony%n");
       try {
-        Thread.sleep(5000);
+        Thread.sleep(1000);
       } catch (InterruptedException e) {
         e.printStackTrace();
       }
@@ -187,7 +190,8 @@ class KeyCeremonyRemote {
 
   private void runKeyCeremony() {
     // This runs the key ceremony
-    KeyCeremonyRemoteMediator mediator = new KeyCeremonyRemoteMediator(manifest, quorum, trusteeProxies);
+    List<KeyCeremonyTrusteeIF> trusteeIfs = trusteeProxies.stream().collect(Collectors.toList());
+    TrusteeKeyCeremonyMediator mediator = new TrusteeKeyCeremonyMediator(manifest, quorum, trusteeIfs);
 
     // tell the remote trustees to save their state
     boolean allOk = true;

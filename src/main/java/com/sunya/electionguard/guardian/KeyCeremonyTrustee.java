@@ -48,6 +48,9 @@ public class KeyCeremonyTrustee {
   // Other guardians' partial key backups of this guardian's keys, keyed by generating guardian id.
   public final Map<String, KeyCeremony2.PartialKeyBackup> otherGuardianPartialKeyBackups;
 
+  final int quorum;
+
+
   // All secret info is in here.
   private final GuardianSecrets guardianSecrets;
 
@@ -65,6 +68,7 @@ public class KeyCeremonyTrustee {
 
     this.id = id;
     this.xCoordinate = sequence_order;
+    this.quorum = quorum;
 
     this.guardianSecrets = GuardianSecrets.generate(quorum, nonce_seed);
     this.allGuardianPublicKeys = new HashMap<>();

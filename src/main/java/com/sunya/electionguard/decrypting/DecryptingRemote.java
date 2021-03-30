@@ -239,7 +239,7 @@ class DecryptingRemote {
             Collectors.toMap(coeff -> coeff.owner_id(), coeff -> coeff.coefficient_commitments().get(0)));
 
     TrusteeDecryptionMediator mediator = new TrusteeDecryptionMediator(electionRecord.context,
-            electionRecord.encryptedTally,
+            this.encryptedTally,
             new ArrayList<>(), // LOOK not doing spoiled ballots yet
             guardianPublicKeys);
 

@@ -7,10 +7,10 @@ import com.sunya.electionguard.Group;
 import javax.annotation.Nullable;
 import java.util.Optional;
 
-public class DecryptingTrusteeProxy implements DecryptingTrusteeIF {
+public class DecryptingTrusteeSimulator implements DecryptingTrusteeIF {
   private final DecryptingTrustee delegate;
 
-  public DecryptingTrusteeProxy(DecryptingTrustee delegate) {
+  public DecryptingTrusteeSimulator(DecryptingTrustee delegate) {
     this.delegate = delegate;
   }
 
