@@ -4,6 +4,7 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.google.common.flogger.FluentLogger;
+import com.sunya.electionguard.DecryptionProofRecovery;
 import com.sunya.electionguard.DecryptionProofTuple;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.guardian.DecryptingTrustee;
@@ -18,7 +19,7 @@ import io.grpc.ServerBuilder;
 import io.grpc.stub.StreamObserver;
 
 import java.io.IOException;
-import java.util.Optional;
+import java.net.ServerSocket;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
@@ -72,7 +73,10 @@ class DecryptingRemoteTrustee extends DecryptingTrusteeServiceGrpc.DecryptingTru
     // which port? if not assigned, pick one at random
     int port = cmdLine.port;
     if (port == cmdLine.serverPort) {
-      port = cmdLine.serverPort + 1 + random.nextInt(10000); // LOOK how to check if its available?
+      port = cmdLine.serverPort + 1 + random.nextInt(10000);
+      while (!isLocalPortFree(port)) {
+        port = cmdLine.serverPort + 1 + random.nextInt(10000);
+      }
     }
     String url = "localhost:"+port;
     String serverUrl = "localhost:" + cmdLine.serverPort;
@@ -82,24 +86,27 @@ class DecryptingRemoteTrustee extends DecryptingTrusteeServiceGrpc.DecryptingTru
     try {
       DecryptingRemoteTrustee trustee = new DecryptingRemoteTrustee(cmdLine.guardianFile);
 
-      // register with the DecryptingRemote "server".
-      DecryptingRemoteProxy proxy = new DecryptingRemoteProxy(serverUrl);
-      DecryptingProto.RegisterDecryptingTrusteeResponse response = proxy.registerTrustee(trustee.id(), url);
-      proxy.shutdown();
+      if (cmdLine.serverPort != 0) {
+        // register with the DecryptingRemote "server".
+        DecryptingRemoteProxy proxy = new DecryptingRemoteProxy(serverUrl);
+        DecryptingProto.RegisterDecryptingTrusteeResponse response = proxy.registerTrustee(trustee.id(), url,
+                trustee.delegate.xCoordinate, trustee.delegate.publicKey());
+        proxy.shutdown();
 
-      if (response == null) {
-        System.out.printf("    registerTrustee returns null response%n");
-        throw new RuntimeException("registerTrustee returns null response");
+        if (response == null) {
+          System.out.printf("    registerTrustee returns null response%n");
+          throw new RuntimeException("registerTrustee returns null response");
+        }
+        if (response.hasError()) {
+          System.out.printf("    registerTrustee error %s%n", response.getError().getMessage());
+          throw new RuntimeException(response.getError().getMessage());
+        }
+        if (!response.getOk()) {
+          System.out.printf("    registerTrustee not ok%n");
+          throw new RuntimeException("registerTrustee not ok");
+        }
+        System.out.printf("    registered with DecryptingRemote %n");
       }
-      if (response.hasError()) {
-        System.out.printf("    registerTrustee error %s%n", response.getError().getMessage());
-        throw new RuntimeException(response.getError().getMessage());
-      }
-      if (!response.getOk()) {
-        System.out.printf("    registerTrustee not ok%n");
-        throw new RuntimeException("registerTrustee not ok");
-      }
-      System.out.printf("    registered with DecryptingRemote %n");
 
       trustee.start(port);
       trustee.blockUntilShutdown();
@@ -109,6 +116,15 @@ class DecryptingRemoteTrustee extends DecryptingTrusteeServiceGrpc.DecryptingTru
       System.out.printf("*** DecryptingRemoteTrustee FAILURE%n");
       t.printStackTrace();
       System.exit(3);
+    }
+  }
+
+  private static boolean isLocalPortFree(int port) {
+    try {
+      new ServerSocket(port).close();
+      return true;
+    } catch (IOException e) {
+      return false;
     }
   }
 
@@ -163,25 +179,25 @@ class DecryptingRemoteTrustee extends DecryptingTrusteeServiceGrpc.DecryptingTru
   }
 
   @Override
-  public void compensatedDecrypt(DecryptingTrusteeProto.DecryptRequest request,
-                                 StreamObserver<DecryptingTrusteeProto.DecryptionResponse> responseObserver) {
+  public void compensatedDecrypt(DecryptingTrusteeProto.CompensatedDecryptionRequest request,
+                                 StreamObserver<DecryptingTrusteeProto.CompensatedDecryptionResponse> responseObserver) {
 
-    DecryptingTrusteeProto.DecryptionResponse.Builder response = DecryptingTrusteeProto.DecryptionResponse.newBuilder();
+    DecryptingTrusteeProto.CompensatedDecryptionResponse.Builder response = DecryptingTrusteeProto.CompensatedDecryptionResponse.newBuilder();
     try {
-      Optional<DecryptionProofTuple> tupleo = delegate.compensatedDecrypt(
+      DecryptionProofRecovery tuple = delegate.compensatedDecrypt(
               request.getMissingGuardianId(),
               CommonConvert.convertCiphertext(request.getText()),
               CommonConvert.convertElementModQ(request.getExtendedBaseHash()),
               null);
-      DecryptionProofTuple tuple = tupleo.orElseThrow();
 
       response.setDecryption(CommonConvert.convertElementModP(tuple.decryption))
-              .setProof(CommonConvert.convertChaumPedersenProof(tuple.proof));
+              .setProof(CommonConvert.convertChaumPedersenProof(tuple.proof))
+              .setRecoveryPublicKey(CommonConvert.convertElementModP(tuple.recoveryPublicKey));
       logger.atInfo().log("DecryptingRemoteTrustee compensatedDecrypt %s", delegate.id);
     } catch (Throwable t) {
       logger.atSevere().withCause(t).log("DecryptingRemoteTrustee compensatedDecrypt failed");
-      t.printStackTrace();
-      response.setError(CommonProto.RemoteError.newBuilder().setMessage(t.getMessage()).build());
+      String mess = t.getMessage() != null ? t.getMessage() : "Unknown";
+      response.setError(CommonProto.RemoteError.newBuilder().setMessage(mess).build());
     }
 
     responseObserver.onNext(response.build());
@@ -189,7 +205,7 @@ class DecryptingRemoteTrustee extends DecryptingTrusteeServiceGrpc.DecryptingTru
   }
 
   @Override
-  public void partialDecrypt(DecryptingTrusteeProto.DecryptRequest request,
+  public void partialDecrypt(DecryptingTrusteeProto.DecryptionRequest request,
                                  StreamObserver<DecryptingTrusteeProto.DecryptionResponse> responseObserver) {
 
     DecryptingTrusteeProto.DecryptionResponse.Builder response = DecryptingTrusteeProto.DecryptionResponse.newBuilder();
@@ -204,24 +220,21 @@ class DecryptingRemoteTrustee extends DecryptingTrusteeServiceGrpc.DecryptingTru
       logger.atInfo().log("DecryptingRemoteTrustee partialDecrypt %s", delegate.id);
     } catch (Throwable t) {
       logger.atSevere().withCause(t).log("DecryptingRemoteTrustee partialDecrypt failed");
-      t.printStackTrace();
-      response.setError(CommonProto.RemoteError.newBuilder().setMessage(t.getMessage()).build());
+      String mess = t.getMessage() != null ? t.getMessage() : "Unknown";
+      response.setError(CommonProto.RemoteError.newBuilder().setMessage(mess).build());
     }
 
     responseObserver.onNext(response.build());
     responseObserver.onCompleted();
   }
 
-  //     public void recoverPublicKey(com.sunya.electionguard.proto.DecryptingTrusteeProto.RecoverPublicKeyRequest request,
-  //        io.grpc.stub.StreamObserver<com.sunya.electionguard.proto.DecryptingTrusteeProto.RecoverPublicKeyResponse> responseObserver) {
   @Override
   public void recoverPublicKey(DecryptingTrusteeProto.RecoverPublicKeyRequest request,
                                 StreamObserver<DecryptingTrusteeProto.RecoverPublicKeyResponse> responseObserver) {
 
     DecryptingTrusteeProto.RecoverPublicKeyResponse.Builder response = DecryptingTrusteeProto.RecoverPublicKeyResponse.newBuilder();
     try {
-      Optional<Group.ElementModP> keyo = delegate.recoverPublicKey(request.getGuardianId());
-      Group.ElementModP key = keyo.orElseThrow();
+      Group.ElementModP key = delegate.recoverPublicKey(request.getGuardianId());
 
       response.setRecoveredKey(CommonConvert.convertElementModP(key));
       logger.atInfo().log("DecryptingRemoteTrustee partialDecrypt %s", delegate.id);
@@ -232,6 +245,14 @@ class DecryptingRemoteTrustee extends DecryptingTrusteeServiceGrpc.DecryptingTru
     }
 
     responseObserver.onNext(response.build());
+    responseObserver.onCompleted();
+  }
+
+  @Override
+  public void ping(com.google.protobuf.Empty request,
+                   StreamObserver<DecryptingTrusteeProto.PingResponse> responseObserver) {
+    DecryptingTrusteeProto.PingResponse.Builder response = DecryptingTrusteeProto.PingResponse.newBuilder();
+    responseObserver.onNext(response.setOk(true).build());
     responseObserver.onCompleted();
   }
 

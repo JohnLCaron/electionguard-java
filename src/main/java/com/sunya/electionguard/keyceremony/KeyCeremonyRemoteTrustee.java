@@ -21,6 +21,7 @@ import io.grpc.ServerBuilder;
 import io.grpc.stub.StreamObserver;
 
 import java.io.IOException;
+import java.net.ServerSocket;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -81,7 +82,10 @@ class KeyCeremonyRemoteTrustee extends RemoteTrusteeServiceGrpc.RemoteTrusteeSer
     // which port? if not assigned, pick one at random
     int port = cmdLine.port;
     if (port == cmdLine.serverPort) {
-      port = cmdLine.serverPort + 1 + random.nextInt(10000); // LOOK how to check if its available?
+      port = cmdLine.serverPort + 1 + random.nextInt(10000);
+      while (!isLocalPortFree(port)) {
+        port = cmdLine.serverPort + 1 + random.nextInt(10000);
+      }
     }
     String url = "localhost:"+port;
     String serverUrl = "localhost:" + cmdLine.serverPort;
@@ -115,6 +119,15 @@ class KeyCeremonyRemoteTrustee extends RemoteTrusteeServiceGrpc.RemoteTrusteeSer
       System.out.printf("*** KeyCeremonyRemote FAILURE%n");
       t.printStackTrace();
       System.exit(3);
+    }
+  }
+
+  private static boolean isLocalPortFree(int port) {
+    try {
+      new ServerSocket(port).close();
+      return true;
+    } catch (IOException e) {
+      return false;
     }
   }
 
@@ -328,7 +341,7 @@ class KeyCeremonyRemoteTrustee extends RemoteTrusteeServiceGrpc.RemoteTrusteeSer
     boolean ok = true;
     try {
       TrusteeProto.Trustee trusteeProto = TrusteeToProto.convertTrustee(this.delegate);
-      Publisher.writeTrusteeProto(this.outputDir, trusteeProto);
+      Publisher.overwriteTrusteeProto(this.outputDir, trusteeProto);
       logger.atInfo().log("KeyCeremonyRemoteTrustee saveState %s", delegate.id);
 
     } catch (Throwable t) {

@@ -2,19 +2,18 @@ package com.sunya.electionguard.guardian;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Streams;
 import com.google.common.flogger.FluentLogger;
 import com.sunya.electionguard.CiphertextBallot;
 import com.sunya.electionguard.CiphertextContest;
 import com.sunya.electionguard.CiphertextElectionContext;
 import com.sunya.electionguard.CiphertextSelection;
 import com.sunya.electionguard.CiphertextTally;
+import com.sunya.electionguard.DecryptionProofRecovery;
 import com.sunya.electionguard.DecryptionProofTuple;
 import com.sunya.electionguard.DecryptionShare;
 import com.sunya.electionguard.ElectionPolynomial;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.KeyCeremony;
-import com.sunya.electionguard.Scheduler;
 import com.sunya.electionguard.SubmittedBallot;
 
 import java.util.ArrayList;
@@ -128,15 +127,21 @@ public class TrusteeDecryptions {
 
     Map<String, CiphertextDecryptionSelection> selections = new HashMap<>();
 
-    List<Callable<Optional<CiphertextDecryptionSelection>>> tasks =
+    // LOOK backout this parellization for now
+   /* List<Callable<Optional<CiphertextDecryptionSelection>>> tasks =
             Streams.stream(ciphertextContest.selections).map(selection ->
                     new RunComputeDecryptionShareForSelection(guardian, selection, context)).collect(Collectors.toList());
 
     Scheduler<Optional<CiphertextDecryptionSelection>> scheduler = new Scheduler<>();
     List<Optional<CiphertextDecryptionSelection>> selection_decryptions = scheduler.schedule(tasks, true);
+    */
 
-    // verify the decryptions are received and add them to the collection
-    for (Optional<CiphertextDecryptionSelection> decryption : selection_decryptions) {
+    for (CiphertextSelection selection : ciphertextContest.selections) {
+      Optional<CiphertextDecryptionSelection> decryption =
+              compute_decryption_share_for_selection(guardian, selection, context);
+
+      // verify the decryptions are received and add them to the collection
+      // for (Optional<CiphertextDecryptionSelection> decryption : selection_decryptions) {
       if (decryption.isEmpty()) {
         logger.atWarning().log("could not compute share for guardian %s contest %s",
                 guardian.id(), ciphertextContest.object_id);
@@ -149,6 +154,7 @@ public class TrusteeDecryptions {
             ciphertextContest.object_id, guardian.id(), ciphertextContest.description_hash, selections));
   }
 
+  // LOOK backout this parellization for now
   private static class RunComputeDecryptionShareForSelection implements Callable<Optional<CiphertextDecryptionSelection>> {
     private final DecryptingTrusteeIF guardian;
     private final CiphertextSelection selection;
@@ -251,6 +257,8 @@ public class TrusteeDecryptions {
 
       Map<String, CiphertextCompensatedDecryptionSelection> selections = new HashMap<>();
 
+    // LOOK backout this parellization for now
+    /* concurrent over the selection in this contest.
       List<Callable<Optional<CiphertextCompensatedDecryptionSelection>>> tasks =
               Streams.stream(contest.selections)
                       .map(selection -> new RunComputeCompensatedDecryptionShareForSelection(
@@ -259,13 +267,18 @@ public class TrusteeDecryptions {
 
       Scheduler<Optional<CiphertextCompensatedDecryptionSelection>> scheduler = new Scheduler<>();
       List<Optional<CiphertextCompensatedDecryptionSelection>>
-              selection_decryptions = scheduler.schedule(tasks, true);
+              selection_decryptions = scheduler.schedule(tasks, true); */
 
       // verify the decryptions are received and add them to the collection
-      for (Optional<CiphertextCompensatedDecryptionSelection> decryption : selection_decryptions) {
+      // for (Optional<CiphertextCompensatedDecryptionSelection> decryption : selection_decryptions) {
+
+      for (CiphertextSelection selection : contest.selections) {
+        Optional<CiphertextCompensatedDecryptionSelection> decryption =
+             compute_compensated_decryption_share_for_selection(guardian, missing_guardian_id, selection, context);
         if (decryption.isEmpty()) {
           logger.atWarning().log("could not compute share for guardian %s contest %s", guardian.id(), contest.object_id);
-          return Optional.empty();
+          continue;
+          // return Optional.empty();
         }
         selections.put(decryption.get().object_id(), decryption.get());
       }
@@ -342,6 +355,7 @@ public class TrusteeDecryptions {
             contests));
   }
 
+  // LOOK backout this parellization for now
   private static class RunComputeCompensatedDecryptionShareForSelection implements
           Callable<Optional<CiphertextCompensatedDecryptionSelection>> {
     final DecryptingTrusteeIF available_guardian;
@@ -370,7 +384,7 @@ public class TrusteeDecryptions {
    * Compute a compensated decryption share for a specific selection using the
    * available guardians' share of the missing guardian's private key polynomial.
    * <p>
-   * @param available_guardian: The available guardian that will partially decrypt the selection
+   * @param guardian: The available guardian that will partially decrypt the selection
    * @param missing_guardian_id: The id of the guardian that is missing
    * @param selection: The specific selection to decrypt
    * @param context: The public election encryption context
@@ -378,47 +392,49 @@ public class TrusteeDecryptions {
    */
   @VisibleForTesting
   static Optional<CiphertextCompensatedDecryptionSelection> compute_compensated_decryption_share_for_selection(
-          DecryptingTrusteeIF available_guardian,
+          DecryptingTrusteeIF guardian,
           String missing_guardian_id,
           CiphertextSelection selection,
           CiphertextElectionContext context) {
 
-    Optional<DecryptionProofTuple> compensated = available_guardian.compensatedDecrypt(
+    Optional<DecryptionProofRecovery> compensated = guardian.compensatedDecrypt(
             missing_guardian_id,
             selection.ciphertext(),
             context.crypto_extended_base_hash,
             null);
+
     if (compensated.isEmpty()) {
       logger.atWarning().log("compute compensated decryption share failed for %s missing: %s %s",
-              available_guardian.id(), missing_guardian_id, selection.object_id);
+              guardian.id(), missing_guardian_id, selection.object_id);
       return Optional.empty();
     }
-    DecryptionProofTuple tuple = compensated.get();
+    DecryptionProofRecovery tuple = compensated.get();
 
-    Optional<Group.ElementModP> recovery_public_key = available_guardian.recoverPublicKey(missing_guardian_id);
+    /* LOOK we always need the compensatedDecrypt and the recoverPublicKey, why not do both at once?
+    Optional<Group.ElementModP> recovery_public_key = guardian.recoverPublicKey(missing_guardian_id);
     if (recovery_public_key.isEmpty()) {
-      logger.atWarning().log("compute compensated decryption share failed for %s missing recovery key: %s %s",
-              available_guardian.id(), missing_guardian_id, selection.object_id);
+      logger.atWarning().log("recoverPublicKey failed for %s missing guardian: %s %s",
+              guardian.id(), missing_guardian_id, selection.object_id);
       return Optional.empty();
-    }
+    } */
 
     if (tuple.proof.is_valid(
             selection.ciphertext(),
-            recovery_public_key.get(),
+            tuple.recoveryPublicKey,
             tuple.decryption,
             context.crypto_extended_base_hash)) {
 
       CiphertextCompensatedDecryptionSelection share = CiphertextCompensatedDecryptionSelection.create(
               selection.object_id,
-              available_guardian.id(),
+              guardian.id(),
               missing_guardian_id,
               tuple.decryption,
-              recovery_public_key.get(),
+              tuple.recoveryPublicKey,
               tuple.proof);
       return Optional.of(share);
     } else {
       logger.atWarning().log("compute compensated decryption share proof failed for %s missing: %s %s",
-              available_guardian.id(), missing_guardian_id, selection.object_id);
+              guardian.id(), missing_guardian_id, selection.object_id);
       return Optional.empty();
     }
   }

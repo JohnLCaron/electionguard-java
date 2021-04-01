@@ -188,7 +188,11 @@ public class PartialDecryptionVerifier {
       for (CiphertextCompensatedDecryptionSelection compShare : share.recovered_parts().get().values()) {
         ElementModP M_il = compShare.share(); // M_i,l in the spec
         ElementModQ lagrange = lagrange_coefficients.get(compShare.guardian_id());
-        partial.add(Group.int_to_p_unchecked(Group.pow_pi(M_il.getBigInt(), lagrange.getBigInt())));
+        if (lagrange == null) {
+          throw new IllegalStateException("Cant find lagrange coefficient for " + compShare.guardian_id());
+        } else {
+          partial.add(Group.int_to_p_unchecked(Group.pow_pi(M_il.getBigInt(), lagrange.getBigInt())));
+        }
       }
       ElementModP product = Group.mult_p(partial);
       return M_i.equals(product);

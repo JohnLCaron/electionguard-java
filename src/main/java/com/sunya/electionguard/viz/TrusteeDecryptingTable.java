@@ -95,7 +95,7 @@ public class TrusteeDecryptingTable extends JPanel {
       return object.id;
     }
     public int getSequence() {
-      return object.sequence_order;
+      return object.xCoordinate;
     }
     public String getElectionPrivateKey() {
       return object.election_keypair.secret_key.toString();

@@ -110,7 +110,14 @@ class KeyCeremonyRemote {
       KeyCeremonyRemote keyCeremony = new KeyCeremonyRemote(election, cmdLine.nguardians, cmdLine.quorum, publisher);
 
       keyCeremony.start(cmdLine.port);
-      keyCeremony.blockUntilShutdown();
+
+      try {
+        Thread.sleep(5000);
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+      keyCeremony.runKeyCeremony();
+      // keyCeremony.blockUntilShutdown();
       System.exit(0);
 
     } catch (Throwable t) {
@@ -176,7 +183,7 @@ class KeyCeremonyRemote {
 
   synchronized void checkAllGuardiansAreRegistered() {
     System.out.printf(" Number of Guardians registered = %d, need = %d%n", this.trusteeProxies.size(), this.nguardians);
-    if (this.trusteeProxies.size() == this.nguardians) {
+    if (!this.startedKeyCeremony && this.trusteeProxies.size() == this.nguardians) {
       this.startedKeyCeremony = true;
       System.out.printf("Begin Key Ceremony%n");
       try {
@@ -267,13 +274,13 @@ class KeyCeremonyRemote {
         logger.atInfo().log("KeyCeremonyRemote registerTrustee registerTrustee %s", trustee.id());
 
       } catch (Throwable t) {
-        logger.atSevere().withCause(t).log("KeyCeremonyRemote sendPublicKeys failed");
+        logger.atSevere().withCause(t).log("KeyCeremonyRemote registerTrustee failed");
         t.printStackTrace();
         response.setError(RemoteKeyCeremonyProto.KeyCeremonyError.newBuilder().setMessage(t.getMessage()).build());
         responseObserver.onNext(response.build());
         responseObserver.onCompleted();
       }
-      KeyCeremonyRemote.this.checkAllGuardiansAreRegistered();
+      // KeyCeremonyRemote.this.checkAllGuardiansAreRegistered();
     }
   }
 

@@ -219,7 +219,7 @@ public class TrusteeDecryptionMediator {
           String missing_guardian_id) {
 
     Map<String, DecryptionShare.CompensatedDecryptionShare> compensated_decryptions = new HashMap<>();
-    // Loop through each of the available guardians and calculate decryption shares for the missing one
+    // Loop through each of the available guardians and calculate decryption shares for the missing guardian
     for (DecryptingTrusteeIF available_guardian : this.available_guardians.values()) {
       Optional<DecryptionShare.CompensatedDecryptionShare> tally_share = TrusteeDecryptions.compute_compensated_decryption_share(
               available_guardian,
@@ -227,7 +227,7 @@ public class TrusteeDecryptionMediator {
               this.ciphertext_tally,
               this.context);
       if (tally_share.isEmpty()) {
-        logger.atWarning().log("compensation failed for missing: %s", missing_guardian_id);
+        logger.atWarning().log("TrusteeDecryptions.compute_compensated_decryption_share failed for missing: %s", missing_guardian_id);
         break;
       } else {
         compensated_decryptions.put(available_guardian.id(), tally_share.get());

@@ -1,5 +1,6 @@
 package com.sunya.electionguard.guardian;
 
+import com.sunya.electionguard.DecryptionProofRecovery;
 import com.sunya.electionguard.DecryptionProofTuple;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.Group;
@@ -14,7 +15,7 @@ public interface DecryptingTrusteeIF {
 
   Group.ElementModP electionPublicKey();
 
-  Optional<DecryptionProofTuple> compensatedDecrypt(
+  Optional<DecryptionProofRecovery> compensatedDecrypt(
           String missing_guardian_id,
           ElGamal.Ciphertext elgamal,
           Group.ElementModQ extended_base_hash,
@@ -26,4 +27,7 @@ public interface DecryptingTrusteeIF {
           @Nullable Group.ElementModQ nonce_seed);
 
   Optional<Group.ElementModP> recoverPublicKey(String missing_guardian_id);
+
+  boolean ping();
+
 }

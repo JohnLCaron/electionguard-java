@@ -2,7 +2,7 @@ package com.sunya.electionguard.guardian;
 
 import com.sunya.electionguard.Group;
 
-import javax.annotation.Nullable;
+import java.util.Optional;
 
 public class KeyCeremonyTrusteeSimulator implements KeyCeremonyTrusteeIF {
   final KeyCeremonyTrustee delegate;
@@ -26,8 +26,8 @@ public class KeyCeremonyTrusteeSimulator implements KeyCeremonyTrusteeIF {
   }
 
   @Override
-  public KeyCeremony2.PublicKeySet sendPublicKeys() {
-    return this.delegate.sharePublicKeys();
+  public Optional<KeyCeremony2.PublicKeySet> sendPublicKeys() {
+    return Optional.of(this.delegate.sharePublicKeys());
   }
 
   @Override
@@ -35,23 +35,23 @@ public class KeyCeremonyTrusteeSimulator implements KeyCeremonyTrusteeIF {
     return this.delegate.receivePublicKeys(publicKeys);
   }
 
-  @Nullable
-  public KeyCeremony2.PartialKeyBackup sendPartialKeyBackup(String otherId) {
-    return this.delegate.sendPartialKeyBackup(otherId);
+  @Override
+  public Optional<KeyCeremony2.PartialKeyBackup> sendPartialKeyBackup(String otherId) {
+    return Optional.of(this.delegate.sendPartialKeyBackup(otherId));
   }
 
   @Override
-  public KeyCeremony2.PartialKeyVerification verifyPartialKeyBackup(KeyCeremony2.PartialKeyBackup backup) {
-    return this.delegate.verifyPartialKeyBackup(backup);
+  public Optional<KeyCeremony2.PartialKeyVerification> verifyPartialKeyBackup(KeyCeremony2.PartialKeyBackup backup) {
+    return Optional.of(this.delegate.verifyPartialKeyBackup(backup));
   }
 
   @Override
-  public KeyCeremony2.PartialKeyChallengeResponse sendBackupChallenge(String guardian_id) {
-    return this.delegate.sendBackupChallenge(guardian_id);
+  public Optional<KeyCeremony2.PartialKeyChallengeResponse> sendBackupChallenge(String guardian_id) {
+    return Optional.of(this.delegate.sendBackupChallenge(guardian_id));
   }
 
   @Override
-  public Group.ElementModP sendJointPublicKey() {
-    return this.delegate.publishJointKey();
+  public Optional<Group.ElementModP> sendJointPublicKey() {
+    return Optional.of(this.delegate.publishJointKey());
   }
 }

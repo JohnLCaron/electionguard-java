@@ -210,6 +210,7 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
       return ZERO_MOD_Q;
     }
 
+    // LOOK ordering of contests?
     // contest_hashes = [contest.crypto_hash for contest in this.contests]
     List<Group.ElementModQ> selection_hashes = contests.stream().map(s -> s.crypto_hash).collect(Collectors.toList());
     return Hash.hash_elems(this.object_id, seed_hash, selection_hashes);

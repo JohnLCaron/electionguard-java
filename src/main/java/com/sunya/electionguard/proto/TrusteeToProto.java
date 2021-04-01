@@ -2,6 +2,7 @@ package com.sunya.electionguard.proto;
 
 import com.google.protobuf.ByteString;
 import com.sunya.electionguard.ElGamal;
+import com.sunya.electionguard.SchnorrProof;
 import com.sunya.electionguard.guardian.KeyCeremony2;
 import com.sunya.electionguard.guardian.KeyCeremonyTrustee;
 
@@ -24,7 +25,7 @@ public class TrusteeToProto {
     builder.setElectionKeyPair(convertElgamalKeypair(trustee.secrets().election_key_pair));
     builder.setRsaPrivateKey(CommonConvert.convertJavaPrivateKey(trustee.secrets().rsa_keypair.getPrivate()));
     trustee.otherGuardianPartialKeyBackups.values().forEach(k -> builder.addOtherGuardianBackups(convertElectionPartialKeyBackup(k)));
-    trustee.secrets().polynomial.coefficient_commitments.forEach(k -> builder.addCoefficientCommitments(convertElementModP(k)));
+    trustee.allGuardianPublicKeys.values().forEach(k -> builder.addGuardianCommitments(convertCoefficients(k)));
     return builder.build();
   }
 
@@ -41,6 +42,15 @@ public class TrusteeToProto {
     KeyCeremonyProto.ElGamalKeyPair.Builder builder = KeyCeremonyProto.ElGamalKeyPair.newBuilder();
     builder.setSecretKey(CommonConvert.convertElementModQ(keypair.secret_key));
     builder.setPublicKey(CommonConvert.convertElementModP(keypair.public_key));
+    return builder.build();
+  }
+
+  private static TrusteeProto.CommitmentSet convertCoefficients(KeyCeremony2.PublicKeySet publicKetSey) {
+    TrusteeProto.CommitmentSet.Builder builder = TrusteeProto.CommitmentSet.newBuilder();
+    builder.setGuardianId(publicKetSey.ownerId());
+    for (SchnorrProof proof : publicKetSey.coefficientProofs()) {
+      builder.addCommitments(convertElementModP(proof.public_key));
+    }
     return builder.build();
   }
 

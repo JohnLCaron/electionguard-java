@@ -1,5 +1,6 @@
 package com.sunya.electionguard.guardian;
 
+import com.sunya.electionguard.DecryptionProofRecovery;
 import com.sunya.electionguard.DecryptionProofTuple;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.Group;
@@ -21,7 +22,7 @@ public class DecryptingTrusteeSimulator implements DecryptingTrusteeIF {
 
   @Override
   public int xCoordinate() {
-    return delegate.sequence_order;
+    return delegate.xCoordinate;
   }
 
   @Override
@@ -30,16 +31,16 @@ public class DecryptingTrusteeSimulator implements DecryptingTrusteeIF {
   }
 
   @Override
-  public Optional<DecryptionProofTuple> compensatedDecrypt(
+  public Optional<DecryptionProofRecovery> compensatedDecrypt(
           String missing_guardian_id,
           ElGamal.Ciphertext elgamal,
           Group.ElementModQ extended_base_hash,
           @Nullable Group.ElementModQ nonce_seed) {
 
-    return delegate.compensatedDecrypt(missing_guardian_id,
+    return Optional.of(delegate.compensatedDecrypt(missing_guardian_id,
             elgamal,
             extended_base_hash,
-            nonce_seed);
+            nonce_seed));
   }
 
   @Override
@@ -49,7 +50,12 @@ public class DecryptingTrusteeSimulator implements DecryptingTrusteeIF {
 
   @Override
   public Optional<Group.ElementModP> recoverPublicKey(String missing_guardian_id) {
-    return delegate.recoverPublicKey(missing_guardian_id);
+    return Optional.of(delegate.recoverPublicKey(missing_guardian_id));
+  }
+
+  @Override
+  public boolean ping() {
+    return true;
   }
 
 }

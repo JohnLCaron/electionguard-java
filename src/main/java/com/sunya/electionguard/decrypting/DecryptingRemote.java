@@ -4,7 +4,9 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Stopwatch;
 import com.google.common.flogger.FluentLogger;
+import com.sunya.electionguard.AvailableGuardian;
 import com.sunya.electionguard.CiphertextTally;
 import com.sunya.electionguard.CiphertextTallyBuilder;
 import com.sunya.electionguard.Group;
@@ -25,6 +27,7 @@ import io.grpc.ServerBuilder;
 import io.grpc.stub.StreamObserver;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Formatter;
@@ -111,7 +114,15 @@ class DecryptingRemote {
 
       DecryptingRemote decryptor = new DecryptingRemote(electionRecord, cmdLine.encryptDir, cmdLine.outputDir);
       decryptor.start(cmdLine.port);
-      decryptor.blockUntilShutdown();
+
+      // LOOK do something better
+      // wait for remote trustees to register
+      try {
+        Thread.sleep(15000);
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+      decryptor.runDecryption();
 
     } catch (Throwable t) {
       System.out.printf("*** DecryptBallots FAILURE%n");
@@ -163,6 +174,7 @@ class DecryptingRemote {
   }
 
   ///////////////////////////////////////////////////////////////////////////
+  final Stopwatch stopwatch = Stopwatch.createUnstarted();
   final ElectionRecord electionRecord;
   final String encryptDir;
   final String outputDir;
@@ -174,6 +186,7 @@ class DecryptingRemote {
 
   CiphertextTally encryptedTally;
   PlaintextTally decryptedTally;
+  List<AvailableGuardian> availableGuardians;
 
   DecryptingRemote(ElectionRecord electionRecord, String encryptDir, String outputDir) {
     this.electionRecord = electionRecord;
@@ -181,16 +194,19 @@ class DecryptingRemote {
     this.outputDir = outputDir;
     this.nguardians = electionRecord.context.number_of_guardians;
     this.quorum = electionRecord.context.quorum;
+    System.out.printf("DecryptingRemote startup at %s%n", LocalDateTime.now());
+    System.out.printf("DecryptingRemote quorum = %d nguardians = %d%n", this.quorum, this.nguardians);
+    stopwatch.start();
   }
 
   private synchronized void checkAllGuardiansAreRegistered() {
     System.out.printf(" Number of Guardians registered = %d, quorum = %d nguardians = %d%n",
             this.trusteeProxies.size(), this.quorum, this.nguardians);
-    if (this.trusteeProxies.size() == this.nguardians) {
+    if (!this.startedDecryption && this.trusteeProxies.size() == this.nguardians) {
       this.startedDecryption = true;
-      System.out.printf("Begin Key Ceremony%n");
+      System.out.printf("Begin Decryptions%n");
       try {
-        Thread.sleep(5000);
+        Thread.sleep(1000); // give it a sec to catch up
       } catch (InterruptedException e) {
         e.printStackTrace();
       }
@@ -261,7 +277,7 @@ class DecryptingRemote {
     //        mediator.decrypt_spoiled_ballots().orElseThrow();
     //this.spoiledDecryptedBallots = spoiledTallyAndBallot.stream().map(e -> e.ballot).collect(Collectors.toList());
     //this.spoiledDecryptedTallies = spoiledTallyAndBallot.stream().map(e -> e.tally).collect(Collectors.toList());
-    //this.availableGuardians = mediator.getAvailableGuardians();
+    this.availableGuardians = mediator.getAvailableGuardians();
     System.out.printf("Done decrypting tally%n%n%s%n", this.decryptedTally);
 
     // tell the remote trustees to shutdown
@@ -280,7 +296,9 @@ class DecryptingRemote {
             this.electionRecord,
             this.encryptedTally,
             this.decryptedTally,
-            new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+            new ArrayList<>(),
+            new ArrayList<>(),
+            this.availableGuardians);
 
     publisher.copyAcceptedBallots(inputDir);
   }
@@ -298,13 +316,12 @@ class DecryptingRemote {
 
   private class DecryptingRegistrationService extends DecryptingServiceGrpc.DecryptingServiceImplBase {
 
-    //     public void registerTrustee(com.sunya.electionguard.proto.DecryptingProto.RegisterDecryptingTrusteeRequest request,
-    //        io.grpc.stub.StreamObserver<com.sunya.electionguard.proto.DecryptingProto.RegisterDecryptingTrusteeResponse> responseObserver) {
     @Override
     public void registerTrustee(DecryptingProto.RegisterDecryptingTrusteeRequest request,
                                 StreamObserver<DecryptingProto.RegisterDecryptingTrusteeResponse> responseObserver) {
 
-      System.out.printf("KeyCeremonyRemote registerTrustee %s url %s %n", request.getGuardianId(), request.getRemoteUrl());
+      System.out.printf("DecryptingRemote registerTrustee %s: %s url %s %n", stopwatch.elapsed(TimeUnit.SECONDS),
+              request.getGuardianId(), request.getRemoteUrl());
 
       if (startedDecryption) {
         responseObserver.onNext(DecryptingProto.RegisterDecryptingTrusteeResponse.newBuilder()
@@ -320,16 +337,16 @@ class DecryptingRemote {
 
         responseObserver.onNext(response.build());
         responseObserver.onCompleted();
-        logger.atInfo().log("KeyCeremonyRemote registerTrustee registerTrustee %s", trustee.id());
+        logger.atInfo().log("DecryptingRemote registerTrustee registerTrustee %s", trustee.id());
 
       } catch (Throwable t) {
-        logger.atSevere().withCause(t).log("KeyCeremonyRemote sendPublicKeys failed");
+        logger.atSevere().withCause(t).log("DecryptingRemote registerTrustee failed");
         t.printStackTrace();
         response.setError(CommonProto.RemoteError.newBuilder().setMessage(t.getMessage()).build());
         responseObserver.onNext(response.build());
         responseObserver.onCompleted();
       }
-      DecryptingRemote.this.checkAllGuardiansAreRegistered();
+      // DecryptingRemote.this.checkAllGuardiansAreRegistered();
     }
   }
 

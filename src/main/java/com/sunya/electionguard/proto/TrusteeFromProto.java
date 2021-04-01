@@ -1,7 +1,6 @@
 package com.sunya.electionguard.proto;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.sunya.electionguard.Auxiliary;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.Group;
@@ -10,7 +9,6 @@ import com.sunya.electionguard.guardian.KeyCeremony2;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -31,33 +29,18 @@ public class TrusteeFromProto {
     try (FileInputStream inp = new FileInputStream(filename)) {
       proto = TrusteeProto.Trustee.parseDelimitedFrom(inp);
     }
-    return convertTrustee(proto, ImmutableMap.of());
+    return convertTrustee(proto);
   }
 
   private static ImmutableList<DecryptingTrustee> convertTrustees(TrusteeProto.Trustees proto) {
-    Map<String, ImmutableList<Group.ElementModP>> commitments = new HashMap<>();
-    for (TrusteeProto.Trustee guardianProto : proto.getTrusteesList()) {
-      convertCommitments(guardianProto, commitments);
-    }
-
     ImmutableList.Builder<DecryptingTrustee> builder = ImmutableList.builder();
     for (TrusteeProto.Trustee guardianProto : proto.getTrusteesList()) {
-      builder.add(convertTrustee(guardianProto, commitments));
+      builder.add(convertTrustee(guardianProto));
     }
     return builder.build();
   }
 
-  private static void convertCommitments(TrusteeProto.Trustee proto,
-                                         Map<String, ImmutableList<Group.ElementModP>> result) {
-    ImmutableList.Builder<Group.ElementModP> builder = ImmutableList.builder();
-    for (CommonProto.ElementModP commitment : proto.getCoefficientCommitmentsList()) {
-      builder.add(convertElementModP(commitment));
-    }
-    result.put(proto.getGuardianId(), builder.build());
-  }
-
-  private static DecryptingTrustee convertTrustee(TrusteeProto.Trustee proto,
-                                                  Map<String, ImmutableList<Group.ElementModP>> commitments) {
+  private static DecryptingTrustee convertTrustee(TrusteeProto.Trustee proto) {
 
     String guardian_id = proto.getGuardianId();
     int sequence_order = proto.getGuardianXCoordinate();
@@ -67,6 +50,10 @@ public class TrusteeFromProto {
     Map<String, KeyCeremony2.PartialKeyBackup> otherGuardianPartialKeyBackups =
             proto.getOtherGuardianBackupsList().stream()
                     .collect(Collectors.toMap(p -> p.getGeneratingGuardianId(), p -> convertElectionPartialKeyBackup(p)));
+
+    Map<String, ImmutableList<Group.ElementModP>> commitments =
+            proto.getGuardianCommitmentsList().stream()
+                    .collect(Collectors.toMap(p -> p.getGuardianId(), p -> convertCoefficients(p)));
 
     return new DecryptingTrustee(guardian_id, sequence_order, rsa_private_key, election_keypair,
             otherGuardianPartialKeyBackups, commitments);
@@ -84,6 +71,14 @@ public class TrusteeFromProto {
     return new ElGamal.KeyPair(
             CommonConvert.convertElementModQ(keypair.getSecretKey()),
             convertElementModP(keypair.getPublicKey()));
+  }
+
+  private static ImmutableList<Group.ElementModP> convertCoefficients(TrusteeProto.CommitmentSet proto) {
+    ImmutableList.Builder<Group.ElementModP> builder = ImmutableList.builder();
+    for (CommonProto.ElementModP commit : proto.getCommitmentsList()) {
+      builder.add(convertElementModP(commit));
+    }
+    return builder.build();
   }
 
 }

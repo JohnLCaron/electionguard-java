@@ -374,8 +374,11 @@ public class Publisher {
   }
 
 
-  public static void writeTrusteeProto(String outputDir, TrusteeProto.Trustee trusteeProto) throws IOException {
+  public static void overwriteTrusteeProto(String outputDir, TrusteeProto.Trustee trusteeProto) throws IOException {
     Path outputPath = Path.of(outputDir + "/" + trusteeProto.getGuardianId() + PROTO_SUFFIX);
+    if (Files.exists(outputPath)) {
+      Files.delete(outputPath);
+    }
     try (FileOutputStream out = new FileOutputStream(outputPath.toFile())) {
       trusteeProto.writeDelimitedTo(out);
     }

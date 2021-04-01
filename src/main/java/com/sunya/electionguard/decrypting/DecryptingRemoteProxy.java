@@ -1,6 +1,8 @@
 package com.sunya.electionguard.decrypting;
 
 import com.google.common.flogger.FluentLogger;
+import com.sunya.electionguard.Group;
+import com.sunya.electionguard.proto.CommonConvert;
 import com.sunya.electionguard.proto.DecryptingProto;
 import com.sunya.electionguard.proto.DecryptingServiceGrpc;
 import io.grpc.ManagedChannel;
@@ -19,9 +21,8 @@ class DecryptingRemoteProxy {
   DecryptingRemoteProxy(String url) {
     this.channel = ManagedChannelBuilder.forTarget(url)
             .usePlaintext()
-            .enableFullStreamDecompression()
-            .usePlaintext()
-            .maxInboundMessageSize(2000)
+            // .enableFullStreamDecompression()
+            // .maxInboundMessageSize(2000)
             .build();
 
     blockingStub = DecryptingServiceGrpc.newBlockingStub(channel);
@@ -38,11 +39,14 @@ class DecryptingRemoteProxy {
   }
 
   @Nullable
-  DecryptingProto.RegisterDecryptingTrusteeResponse registerTrustee(String guardianId, String remoteUrl) {
+  DecryptingProto.RegisterDecryptingTrusteeResponse registerTrustee(String guardianId, String remoteUrl, int coordinate,
+                                                                    Group.ElementModP publicKey) {
     try {
       DecryptingProto.RegisterDecryptingTrusteeRequest request = DecryptingProto.RegisterDecryptingTrusteeRequest.newBuilder()
               .setGuardianId(guardianId)
               .setRemoteUrl(remoteUrl)
+              .setGuardianXCoordinate(coordinate)
+              .setPublicKey(CommonConvert.convertElementModP(publicKey))
               .build();
       DecryptingProto.RegisterDecryptingTrusteeResponse response = blockingStub.registerTrustee(request);
       if (response.hasError()) {

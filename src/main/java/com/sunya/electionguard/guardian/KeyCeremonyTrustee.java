@@ -39,6 +39,8 @@ public class KeyCeremonyTrustee {
   // a unique number in [1, 256) that is the polynomial x value for this guardian
   public final int xCoordinate;
 
+  final int quorum;
+
   // All of the guardians' public keys (including this one), keyed by guardian id.
   public final Map<String, KeyCeremony2.PublicKeySet> allGuardianPublicKeys;
 
@@ -47,9 +49,6 @@ public class KeyCeremonyTrustee {
 
   // Other guardians' partial key backups of this guardian's keys, keyed by generating guardian id.
   public final Map<String, KeyCeremony2.PartialKeyBackup> otherGuardianPartialKeyBackups;
-
-  final int quorum;
-
 
   // All secret info is in here.
   private final GuardianSecrets guardianSecrets;

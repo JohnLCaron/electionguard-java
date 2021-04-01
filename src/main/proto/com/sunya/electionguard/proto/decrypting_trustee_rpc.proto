@@ -7,9 +7,10 @@ option java_package = "com.sunya.electionguard.proto";
 option java_outer_classname = "DecryptingTrusteeProto";
 
 service DecryptingTrusteeService {
-  rpc compensatedDecrypt (DecryptRequest) returns (DecryptionResponse) {}
-  rpc partialDecrypt (DecryptRequest) returns (DecryptionResponse) {}
+  rpc compensatedDecrypt (CompensatedDecryptionRequest) returns (CompensatedDecryptionResponse) {}
+  rpc partialDecrypt (DecryptionRequest) returns (DecryptionResponse) {}
   rpc recoverPublicKey (RecoverPublicKeyRequest) returns (RecoverPublicKeyResponse) {}
+  rpc ping (google.protobuf.Empty) returns (PingResponse) {}
 }
 
 //   Optional<DecryptionProofTuple> compensate_decrypt(
@@ -20,13 +21,27 @@ service DecryptingTrusteeService {
 
 //   DecryptionProofTuple partially_decrypt(ElGamal.Ciphertext elgamal, Group.ElementModQ extended_base_hash, @Nullable Group.ElementModQ nonce_seed) {
 
-message DecryptRequest {
+message CompensatedDecryptionRequest {
   // The text to decrypt.
   ElGamalCiphertext text = 1;
   // The election extended_base_hash.
-  ElementModQ extended_base_hash = 2;
+  ElementModQ extended_base_hash = 2; // LOOK could send once ?
   // The Id of the guardian thats missing, used only for compensatedDecrypt.
   string missing_guardian_id = 3;
+}
+
+message CompensatedDecryptionResponse {
+  RemoteError error = 1; // non empty on error
+  ElementModP decryption = 2;
+  ChaumPedersenProof proof = 3;
+  ElementModP recoveryPublicKey = 4;
+}
+
+message DecryptionRequest {
+  // The text to decrypt.
+  ElGamalCiphertext text = 1;
+  // The election extended_base_hash.
+  ElementModQ extended_base_hash = 2; // LOOK could send once ?
 }
 
 message DecryptionResponse {
@@ -46,5 +61,10 @@ message RecoverPublicKeyResponse {
   // The Id of the guardian that generated this backup.
   ElementModP recovered_key = 2;
 }
+
+message PingResponse {
+  bool ok = 1;
+}
+
 
 

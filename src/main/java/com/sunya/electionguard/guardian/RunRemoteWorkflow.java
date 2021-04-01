@@ -10,15 +10,15 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 
-import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.Formatter;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 /**
  * Runs the entire workflow from start to finish, using real remote guardians.
@@ -30,11 +30,11 @@ import java.util.concurrent.TimeUnit;
  *  java -classpath electionguard-java-all.jar com.sunya.electionguard.guardian.RunRemoteWorkflow --help
  * </pre>
  * </strong>
- *
  */
 public class RunRemoteWorkflow {
   private static final String classpath = "build/libs/electionguard-java-0.9.1-SNAPSHOT-all.jar";
   private static final String REMOTE_TRUSTEE = "remoteTrustee";
+  private static final String CMD_OUTPUT = "/home/snake/tmp/runRemoteWorkflow/";
 
   private static class CommandLine {
     @Parameter(names = {"-in"}, order = 0,
@@ -101,9 +101,9 @@ public class RunRemoteWorkflow {
     ListeningExecutorService service = MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(11));
     List<RunCommand> running = new ArrayList<>();
 
-    System.out.printf("%n==============================================================%n");
+    System.out.printf("%n1=============================================================%n");
     // PerformKeyCeremony
-    RunCommand keyCeremonyRemote = new RunCommand(service,
+    RunCommand keyCeremonyRemote = new RunCommand("KeyCeremonyRemote", service,
             "java",
             "-classpath", classpath,
             "com.sunya.electionguard.keyceremony.KeyCeremonyRemote",
@@ -120,7 +120,7 @@ public class RunRemoteWorkflow {
     }
 
     for (int i=1; i <= cmdLine.nguardians; i++) {
-      RunCommand command = new RunCommand(service,
+      RunCommand command = new RunCommand("KeyCeremonyRemoteTrustee" + i, service,
               "java",
               "-classpath", classpath,
               "com.sunya.electionguard.keyceremony.KeyCeremonyRemoteTrustee",
@@ -138,11 +138,11 @@ public class RunRemoteWorkflow {
     }
     System.out.printf("*** keyCeremonyRemote elapsed = %d ms%n", stopwatch.elapsed(TimeUnit.MILLISECONDS));
 
-    System.out.printf("%n==============================================================%n");
+    System.out.printf("%n2=============================================================%n");
     stopwatch.reset().start();
 
     // EncryptBallots
-    RunCommand encryptBallots = new RunCommand(service,
+    RunCommand encryptBallots = new RunCommand("EncryptBallots", service,
             "java",
             "-classpath", classpath,
             "com.sunya.electionguard.workflow.EncryptBallots",
@@ -169,9 +169,9 @@ public class RunRemoteWorkflow {
     System.out.printf("*** encryptBallots elapsed = %d sec%n", stopwatch.elapsed(TimeUnit.SECONDS));
     stopwatch.reset().start();
 
-    System.out.printf("%n==============================================================%n");
+    System.out.printf("%n3=============================================================%n");
     // DecryptBallots
-    RunCommand decryptBallots = new RunCommand(service,
+    RunCommand decryptBallots = new RunCommand("DecryptingRemote", service,
             "java",
             "-classpath", classpath,
             "com.sunya.electionguard.decrypting.DecryptingRemote",
@@ -186,8 +186,8 @@ public class RunRemoteWorkflow {
       System.exit(1);
     }
 
-    for (int i=1; i <= cmdLine.nguardians; i++) {
-      RunCommand command = new RunCommand(service,
+    for (int i=1; i <= cmdLine.quorum; i++) {
+      RunCommand command = new RunCommand("DecryptingRemoteTrustee" + i, service,
               "java",
               "-classpath", classpath,
               "com.sunya.electionguard.decrypting.DecryptingRemoteTrustee",
@@ -196,7 +196,7 @@ public class RunRemoteWorkflow {
     }
 
     try {
-      if (!decryptBallots.waitFor(30)) {
+      if (!decryptBallots.waitFor(300)) {
         System.out.format("Kill decryptBallots = %d%n", decryptBallots.kill());
       }
     } catch (Throwable e) {
@@ -205,10 +205,10 @@ public class RunRemoteWorkflow {
 
     System.out.printf("*** decryptBallots elapsed = %d sec%n", stopwatch.elapsed(TimeUnit.SECONDS));
     stopwatch.reset().start();
-    System.out.printf("%n==============================================================%n");
+    System.out.printf("%n4=============================================================%n");
 
     // VerifyElectionRecord
-    RunCommand verifyElectionRecord = new RunCommand(service,
+    RunCommand verifyElectionRecord = new RunCommand("VerifyElectionRecord", service,
       "java",
             "-classpath", classpath,
             "com.sunya.electionguard.verifier.VerifyElectionRecord",
@@ -228,12 +228,17 @@ public class RunRemoteWorkflow {
     } catch (Throwable e) {
       e.printStackTrace();
     }
-    System.out.printf("*** verifyElectionRecordelapsed = %d sec%n", stopwatch.elapsed(TimeUnit.SECONDS));
+    System.out.printf("*** verifyElectionRecord elapsed = %d sec%n", stopwatch.elapsed(TimeUnit.SECONDS));
 
     System.out.printf("%n*** All took = %d sec%n", stopwatchAll.elapsed(TimeUnit.SECONDS));
 
-    for (RunCommand command : running) {
-      command.kill();
+    try {
+      for (RunCommand command : running) {
+        command.kill();
+          command.show();
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
     }
 
     System.exit(0);
@@ -241,15 +246,16 @@ public class RunRemoteWorkflow {
 
   /** Run a command line program asynchronously */
   public static class RunCommand implements Callable<Boolean> {
-    String[] args;
+    final String name;
+    final String[] args;
+
     Process process;
-    Formatter out;
     boolean statusReturn;
     Throwable thrownException;
 
-    RunCommand(ListeningExecutorService service, String... args) {
+    RunCommand(String name, ListeningExecutorService service, String... args) {
+      this.name = name;
       this.args = args;
-      this.out = new Formatter();
 
       ListenableFuture<Boolean> future = service.submit(this);
       Futures.addCallback(
@@ -289,26 +295,37 @@ public class RunRemoteWorkflow {
       return -1;
     }
 
+    public void show() throws IOException {
+      System.out.printf("-----------------------------------------%n");
+      System.out.printf("Command %s%n", String.join(" ", args));
+
+      System.out.printf("---StdOut---%n");
+      try (Stream<String> lines = Files.lines(getStdOutFile().toPath())) {
+        lines.forEach(line -> System.out.printf("%s%n", line));
+      }
+
+      System.out.printf("---StdErr---%n");
+      try (Stream<String> lines = Files.lines(getStdErrFile().toPath())) {
+        lines.forEach(line -> System.out.printf("%s%n", line));
+      }
+
+      System.out.printf("---Done status = %s%n", this.statusReturn);
+    }
+
+    File getStdOutFile() {
+      return new File(CMD_OUTPUT + name + ".stdout");
+    }
+
+    File getStdErrFile() {
+      return new File(CMD_OUTPUT + name + ".stderr");
+    }
+
     private boolean run(String... args) throws IOException {
       System.out.printf(">Running command %s%n", String.join(" ", args));
-      ProcessBuilder builder = new ProcessBuilder(args);
+      ProcessBuilder builder = new ProcessBuilder(args)
+              .redirectOutput(getStdOutFile())
+              .redirectError(getStdErrFile());
       this.process = builder.start();
-
-      try (BufferedReader stdout = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-        out.format("---StdOut---%n");
-        String line;
-        while ((line = stdout.readLine()) != null) {
-          out.format("%s%n", line);
-        }
-      }
-      try (BufferedReader stdout = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
-        out.format("---StdErr---%n");
-        String line;
-        while ((line = stdout.readLine()) != null) {
-          out.format("%s%n", line);
-        }
-      }
-      out.format("---Done status = %s%n", this.statusReturn);
       return true;
     }
   }

@@ -13,8 +13,8 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
 
-import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -29,26 +29,24 @@ class KeyCeremonyRemoteTrusteeProxy implements com.sunya.electionguard.guardian.
   }
 
   @Override
-  @Nullable // LOOK NUllable? Optional?
-  public KeyCeremony2.PublicKeySet sendPublicKeys() {
+  public Optional<KeyCeremony2.PublicKeySet> sendPublicKeys() {
     try {
       RemoteTrusteeProto.PublicKeySetRequest request = RemoteTrusteeProto.PublicKeySetRequest.getDefaultInstance();
       RemoteTrusteeProto.PublicKeySet response = blockingStub.sendPublicKeys(request);
       if (response.hasError()) {
         logger.atSevere().log("sendPublicKeys failed: %s", response.getError().getMessage());
-        return null;
+        return Optional.empty();
       }
       List<SchnorrProof> proofs = response.getCoefficientProofsList().stream().map(CommonConvert::convertSchnorrProof).collect(Collectors.toList());
-      return KeyCeremony2.PublicKeySet.create(
+      return Optional.of(KeyCeremony2.PublicKeySet.create(
               response.getOwnerId(),
               response.getGuardianXCoordinate(),
               CommonConvert.convertJavaPublicKey(response.getAuxiliaryPublicKey()),
-              proofs);
+              proofs));
 
     } catch (StatusRuntimeException e) {
       logger.atSevere().withCause(e).log("sendPublicKeys failed: ");
-      e.printStackTrace();
-      return null;
+      return Optional.empty();
     }
   }
 
@@ -70,38 +68,34 @@ class KeyCeremonyRemoteTrusteeProxy implements com.sunya.electionguard.guardian.
 
     } catch (StatusRuntimeException e) {
       logger.atSevere().withCause(e).log("receivePublicKeys failed: ");
-      e.printStackTrace();
       return false;
     }
   }
 
   @Override
-  @Nullable
-  public KeyCeremony2.PartialKeyBackup sendPartialKeyBackup(String guardianId) {
+  public Optional<KeyCeremony2.PartialKeyBackup> sendPartialKeyBackup(String guardianId) {
     try {
       RemoteTrusteeProto.PartialKeyBackupRequest request = RemoteTrusteeProto.PartialKeyBackupRequest.newBuilder().setGuardianId(guardianId).build();
       RemoteTrusteeProto.PartialKeyBackup response = blockingStub.sendPartialKeyBackup(request);
       if (response.hasError()) {
         logger.atSevere().log("sendPartialKeyBackup failed: %s", response.getError().getMessage());
-        return null;
+        return Optional.empty();
       }
-      return KeyCeremony2.PartialKeyBackup.create(
+      return Optional.of(KeyCeremony2.PartialKeyBackup.create(
               response.getGeneratingGuardianId(),
               response.getDesignatedGuardianId(),
               response.getDesignatedGuardianXCoordinate(),
-              new Auxiliary.ByteString(response.getEncryptedCoordinate().toByteArray()));
+              new Auxiliary.ByteString(response.getEncryptedCoordinate().toByteArray())));
 
 
     } catch (StatusRuntimeException e) {
       logger.atSevere().withCause(e).log("sendPartialKeyBackup failed: ");
-      e.printStackTrace();
-      return null;
+      return Optional.empty();
     }
   }
 
   @Override
-  @Nullable
-  public KeyCeremony2.PartialKeyVerification verifyPartialKeyBackup(KeyCeremony2.PartialKeyBackup backup) {
+  public Optional<KeyCeremony2.PartialKeyVerification> verifyPartialKeyBackup(KeyCeremony2.PartialKeyBackup backup) {
     try {
       RemoteTrusteeProto.PartialKeyBackup.Builder request = RemoteTrusteeProto.PartialKeyBackup.newBuilder();
       request.setGeneratingGuardianId(backup.generatingGuardianId())
@@ -112,61 +106,56 @@ class KeyCeremonyRemoteTrusteeProxy implements com.sunya.electionguard.guardian.
       RemoteTrusteeProto.PartialKeyVerification response = blockingStub.verifyPartialKeyBackup(request.build());
       if (response.hasError()) {
         logger.atSevere().log("verifyPartialKeyBackup failed: %s", response.getError().getMessage());
-        return null;
+        return Optional.empty();
       }
 
-      return KeyCeremony2.PartialKeyVerification.create(
+      return Optional.of(KeyCeremony2.PartialKeyVerification.create(
               response.getGeneratingGuardianId(),
               response.getDesignatedGuardianId(),
-              response.getVerify());
+              response.getVerify()));
 
     } catch (StatusRuntimeException e) {
       logger.atSevere().withCause(e).log("verifyPartialKeyBackup failed: ");
-      e.printStackTrace();
-      return null;
+      return Optional.empty();
     }
   }
 
   @Override
-  @Nullable
-  public KeyCeremony2.PartialKeyChallengeResponse sendBackupChallenge(String guardianId) {
+  public Optional<KeyCeremony2.PartialKeyChallengeResponse> sendBackupChallenge(String guardianId) {
     try {
       RemoteTrusteeProto.PartialKeyChallenge request = RemoteTrusteeProto.PartialKeyChallenge.newBuilder().setGuardianId(guardianId).build();
       RemoteTrusteeProto.PartialKeyChallengeResponse response = blockingStub.sendBackupChallenge(request);
       if (response.hasError()) {
         logger.atSevere().log("sendBackupChallenge failed: %s", response.getError().getMessage());
-        return null;
+        return Optional.empty();
       }
 
-      return KeyCeremony2.PartialKeyChallengeResponse.create(
+      return Optional.of(KeyCeremony2.PartialKeyChallengeResponse.create(
               response.getGeneratingGuardianId(),
               response.getDesignatedGuardianId(),
               response.getDesignatedGuardianXCoordinate(),
-              CommonConvert.convertElementModQ(response.getCoordinate()));
+              CommonConvert.convertElementModQ(response.getCoordinate())));
 
     } catch (StatusRuntimeException e) {
       logger.atSevere().withCause(e).log("sendBackupChallenge failed: ");
-      e.printStackTrace();
-      return null;
+      return Optional.empty();
     }
   }
 
   @Override
-  @Nullable
-  public Group.ElementModP sendJointPublicKey() {
+  public Optional<Group.ElementModP> sendJointPublicKey() {
     try {
       RemoteTrusteeProto.JointPublicKeyRequest request = RemoteTrusteeProto.JointPublicKeyRequest.getDefaultInstance();
       RemoteTrusteeProto.JointPublicKeyResponse response = blockingStub.sendJointPublicKey(request);
       if (response.hasError()) {
         logger.atSevere().log("sendJointPublicKey failed: %s", response.getError().getMessage());
-        return null;
+        return Optional.empty();
       }
-      return CommonConvert.convertElementModP(response.getJointPublicKey());
+      return Optional.of(CommonConvert.convertElementModP(response.getJointPublicKey()));
 
     } catch (StatusRuntimeException e) {
       logger.atSevere().withCause(e).log("sendJointPublicKey failed: ");
-      e.printStackTrace();
-      return null;
+      return Optional.empty();
     }
   }
 

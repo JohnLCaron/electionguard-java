@@ -1,6 +1,9 @@
 package com.sunya.electionguard.decrypting;
 
+import com.google.common.base.Preconditions;
 import com.google.common.flogger.FluentLogger;
+import com.google.protobuf.Empty;
+import com.sunya.electionguard.DecryptionProofRecovery;
 import com.sunya.electionguard.DecryptionProofTuple;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.Group;
@@ -36,36 +39,32 @@ class DecryptingRemoteTrusteeProxy implements DecryptingTrusteeIF  {
     return electionPublicKey;
   }
 
-  //   public Optional<DecryptionProofTuple> compensatedDecrypt(
-  //          String missing_guardian_id,
-  //          ElGamal.Ciphertext elgamal,
-  //          Group.ElementModQ extended_base_hash,
-  //          @Nullable Group.ElementModQ nonce_seed) {
-
   @Override
-  public Optional<DecryptionProofTuple> compensatedDecrypt(
+  public Optional<DecryptionProofRecovery> compensatedDecrypt(
           String missing_guardian_id,
           ElGamal.Ciphertext text,
           Group.ElementModQ extended_base_hash,
-          @Nullable Group.ElementModQ nonce_seed) {
+          @Nullable Group.ElementModQ nonce_seed) { // LOOK dont have to ignore
+
     try {
-      DecryptingTrusteeProto.DecryptRequest.Builder request = DecryptingTrusteeProto.DecryptRequest.newBuilder()
+      DecryptingTrusteeProto.CompensatedDecryptionRequest.Builder request = DecryptingTrusteeProto.CompensatedDecryptionRequest.newBuilder()
               .setMissingGuardianId(missing_guardian_id)
               .setText(CommonConvert.convertCiphertext(text))
               .setExtendedBaseHash(CommonConvert.convertElementModQ(extended_base_hash));
 
-      DecryptingTrusteeProto.DecryptionResponse response = blockingStub.compensatedDecrypt(request.build());
-      if (response.hasError()) {
+      DecryptingTrusteeProto.CompensatedDecryptionResponse response = blockingStub.compensatedDecrypt(request.build());
+      if (response.hasError() && !response.getError().getMessage().isEmpty()) {
         logger.atSevere().log("compensatedDecrypt failed: %s", response.getError().getMessage());
         return Optional.empty();
       }
-      return Optional.of(new DecryptionProofTuple(
+      return Optional.of(new DecryptionProofRecovery(
               CommonConvert.convertElementModP(response.getDecryption()),
-              CommonConvert.convertChaumPedersenProof(response.getProof())));
+              CommonConvert.convertChaumPedersenProof(response.getProof()),
+              CommonConvert.convertElementModP(response.getRecoveryPublicKey()))
+              );
 
     } catch (StatusRuntimeException e) {
-      logger.atSevere().withCause(e).log("compensatedDecrypt failed: ");
-      e.printStackTrace();
+      logger.atSevere().withCause(e).log("compensatedDecrypt failed");
       return Optional.empty();
     }
   }
@@ -76,12 +75,12 @@ class DecryptingRemoteTrusteeProxy implements DecryptingTrusteeIF  {
           Group.ElementModQ extended_base_hash,
           @Nullable Group.ElementModQ nonce_seed) {
     try {
-      DecryptingTrusteeProto.DecryptRequest.Builder request = DecryptingTrusteeProto.DecryptRequest.newBuilder()
+      DecryptingTrusteeProto.DecryptionRequest.Builder request = DecryptingTrusteeProto.DecryptionRequest.newBuilder()
               .setText(CommonConvert.convertCiphertext(text))
               .setExtendedBaseHash(CommonConvert.convertElementModQ(extended_base_hash));
 
       DecryptingTrusteeProto.DecryptionResponse response = blockingStub.partialDecrypt(request.build());
-      if (response.hasError()) {
+      if (response.hasError() && !response.getError().getMessage().isEmpty()) {
         logger.atSevere().log("partialDecrypt failed: %s", response.getError().getMessage());
         return Optional.empty();
       }
@@ -91,7 +90,6 @@ class DecryptingRemoteTrusteeProxy implements DecryptingTrusteeIF  {
 
     } catch (StatusRuntimeException e) {
       logger.atSevere().withCause(e).log("partialDecrypt failed: ");
-      e.printStackTrace();
       return Optional.empty();
     }
   }
@@ -114,6 +112,12 @@ class DecryptingRemoteTrusteeProxy implements DecryptingTrusteeIF  {
       e.printStackTrace();
       return Optional.empty();
     }
+  }
+
+  @Override
+  public boolean ping() {
+      DecryptingTrusteeProto.PingResponse response = blockingStub.ping(Empty.getDefaultInstance());
+      return response.getOk();
   }
 
   /*
@@ -155,13 +159,13 @@ class DecryptingRemoteTrusteeProxy implements DecryptingTrusteeIF  {
     return new Builder();
   }
 
-  /** Construct client for accessing HelloWorld server using the existing channel. */
   private DecryptingRemoteTrusteeProxy(String trusteeId, int xCoordinate, Group.ElementModP electionPublicKey, ManagedChannel channel) {
-    this.trusteeId = trusteeId;
+    this.trusteeId = Preconditions.checkNotNull(trusteeId);
+    Preconditions.checkArgument(xCoordinate > 0);
     this.xCoordinate = xCoordinate;
-    this.electionPublicKey = electionPublicKey;
-    this.channel = channel;
-    blockingStub = DecryptingTrusteeServiceGrpc.newBlockingStub(channel);
+    this.electionPublicKey = Preconditions.checkNotNull(electionPublicKey);
+    this.channel = Preconditions.checkNotNull(channel);
+    this.blockingStub = DecryptingTrusteeServiceGrpc.newBlockingStub(channel);
   }
 
   static class Builder {
@@ -193,8 +197,10 @@ class DecryptingRemoteTrusteeProxy implements DecryptingTrusteeIF  {
     DecryptingRemoteTrusteeProxy build() {
       ManagedChannel channel = ManagedChannelBuilder.forTarget(target)
               .usePlaintext()
-              .enableFullStreamDecompression()
-              .maxInboundMessageSize(MAX_MESSAGE).usePlaintext().build();
+              .keepAliveTime(1, TimeUnit.MINUTES)
+              // .enableFullStreamDecompression()
+              // .maxInboundMessageSize(MAX_MESSAGE)
+              .build();
       return new DecryptingRemoteTrusteeProxy(trusteeId, xCoordinate, electionPublicKey, channel);
     }
   }
