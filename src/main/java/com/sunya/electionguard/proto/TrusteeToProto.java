@@ -38,8 +38,8 @@ public class TrusteeToProto {
     return builder.build();
   }
 
-  private static KeyCeremonyProto.ElGamalKeyPair convertElgamalKeypair(ElGamal.KeyPair keypair) {
-    KeyCeremonyProto.ElGamalKeyPair.Builder builder = KeyCeremonyProto.ElGamalKeyPair.newBuilder();
+  private static CommonProto.ElGamalKeyPair convertElgamalKeypair(ElGamal.KeyPair keypair) {
+    CommonProto.ElGamalKeyPair.Builder builder = CommonProto.ElGamalKeyPair.newBuilder();
     builder.setSecretKey(CommonConvert.convertElementModQ(keypair.secret_key));
     builder.setPublicKey(CommonConvert.convertElementModP(keypair.public_key));
     return builder.build();

@@ -68,7 +68,7 @@ public class KeyCeremonyFromProto {
 
   private static KeyCeremony.ElectionKeyPair convertElectionKeys(KeyCeremonyProto.ElectionKeyPair proto) {
     return KeyCeremony.ElectionKeyPair.create(
-            convertElgamalKeypair(proto.getKeyPair()),
+            CommonConvert.convertElgamalKeypair(proto.getKeyPair()),
             CommonConvert.convertSchnorrProof(proto.getProof()),
             convertElectionPolynomial(proto.getPolynomial()));
   }
@@ -96,12 +96,6 @@ public class KeyCeremonyFromProto {
             CommonConvert.convertList(proto.getCoefficientsList(), CommonConvert::convertElementModQ),
             CommonConvert.convertList(proto.getCoefficientCommitmentsList(), CommonConvert::convertElementModP),
             CommonConvert.convertList(proto.getCoefficientProofsList(), CommonConvert::convertSchnorrProof));
-  }
-
-  private static ElGamal.KeyPair convertElgamalKeypair(KeyCeremonyProto.ElGamalKeyPair keypair) {
-    return new ElGamal.KeyPair(
-            CommonConvert.convertElementModQ(keypair.getSecretKey()),
-            CommonConvert.convertElementModP(keypair.getPublicKey()));
   }
 
   /////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -11,14 +11,6 @@ service DecryptingTrusteeService {
   rpc partialDecrypt (DecryptionRequest) returns (DecryptionResponse) {}
 }
 
-//   Optional<DecryptionProofTuple> compensate_decrypt(
-//          String missing_guardian_id,
-//          ElGamal.Ciphertext elgamal,
-//          Group.ElementModQ extended_base_hash,
-//          @Nullable Group.ElementModQ nonce_seed) {
-
-//   DecryptionProofTuple partially_decrypt(ElGamal.Ciphertext elgamal, Group.ElementModQ extended_base_hash, @Nullable Group.ElementModQ nonce_seed) {
-
 message CompensatedDecryptionRequest {
   // The text to decrypt.
   ElGamalCiphertext text = 1;
@@ -46,22 +38,6 @@ message DecryptionResponse {
   RemoteError error = 1; // non empty on error
   ElementModP decryption = 2;
   ChaumPedersenProof proof = 3;
-}
-
-//   Optional<Group.ElementModP> recovery_public_key_for(String missing_guardian_id) {
-
-message RecoverPublicKeyRequest {
-  string guardian_id = 1;
-}
-
-message RecoverPublicKeyResponse {
-  RemoteError error = 1; // non empty on error
-  // The Id of the guardian that generated this backup.
-  ElementModP recovered_key = 2;
-}
-
-message PingResponse {
-  bool ok = 1;
 }
 
 

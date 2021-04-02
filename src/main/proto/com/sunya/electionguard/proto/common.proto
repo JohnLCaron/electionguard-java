@@ -18,6 +18,11 @@ message ElGamalCiphertext {
   ElementModP data = 2;
 }
 
+message ElGamalKeyPair {
+  ElementModQ secret_key = 1;
+  ElementModP public_key = 2;
+}
+
 message RSAPublicKey {
   bytes modulus = 1;
   bytes public_exponent = 2;

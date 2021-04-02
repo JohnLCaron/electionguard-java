@@ -67,7 +67,7 @@ public class TrusteeFromProto {
             new Auxiliary.ByteString(proto.getEncryptedCoordinate().toByteArray()));
   }
 
-  private static ElGamal.KeyPair convertElgamalKeypair(KeyCeremonyProto.ElGamalKeyPair keypair) {
+  private static ElGamal.KeyPair convertElgamalKeypair(CommonProto.ElGamalKeyPair keypair) {
     return new ElGamal.KeyPair(
             CommonConvert.convertElementModQ(keypair.getSecretKey()),
             convertElementModP(keypair.getPublicKey()));

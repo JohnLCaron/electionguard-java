@@ -4,6 +4,7 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import com.sunya.electionguard.AvailableGuardian;
 import com.sunya.electionguard.CiphertextTally;
 import com.sunya.electionguard.CiphertextTallyBuilder;
@@ -15,12 +16,12 @@ import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.Scheduler;
 import com.sunya.electionguard.SpoiledBallotAndTally;
 import com.sunya.electionguard.input.ElectionInputValidation;
+import com.sunya.electionguard.proto.TrusteeFromProto;
 import com.sunya.electionguard.publish.Consumer;
 import com.sunya.electionguard.publish.Publisher;
 import com.sunya.electionguard.verifier.ElectionRecord;
 
 import java.io.IOException;
-import java.lang.reflect.Constructor;
 import java.util.Formatter;
 import java.util.List;
 import java.util.Map;
@@ -48,10 +49,6 @@ public class DecryptingSimulator {
     @Parameter(names = {"-guardiansLocation"}, order = 1,
             description = "location of serialized guardian files")
     String guardiansProviderLocation;
-
-    @Parameter(names = {"-guardians"}, order = 2,
-            description = "GuardianProvider classname")
-    String guardiansProviderClass;
 
     @Parameter(names = {"-out"}, order = 3,
             description = "Directory where augmented election record is published", required = true)
@@ -90,23 +87,7 @@ public class DecryptingSimulator {
       System.exit(1);
     }
 
-    ProxyGuardiansProvider guardiansProvider = null;
-    try {
-      if (cmdLine.guardiansProviderClass != null) {
-        try {
-          guardiansProvider = makeGuardiansProvider(cmdLine.guardiansProviderClass);
-        } catch (Throwable t) {
-          t.printStackTrace();
-          System.exit(2);
-        }
-      } else {
-        guardiansProvider = new RemoteGuardiansProvider(cmdLine.guardiansProviderLocation);
-      }
-    } catch (Throwable t) {
-      System.out.printf("*** Must specify -guardians or valid -guardiansLocation: FAILURE%n");
-      t.printStackTrace();
-      System.exit(3);
-    }
+    RemoteGuardiansProvider guardiansProvider = new RemoteGuardiansProvider(cmdLine.guardiansProviderLocation);
 
     try {
       Consumer consumer = new Consumer(cmdLine.encryptDir);
@@ -142,13 +123,29 @@ public class DecryptingSimulator {
     }
   }
 
-  public static ProxyGuardiansProvider makeGuardiansProvider(String className) throws Throwable {
-    Class<?> c = Class.forName(className);
-    if (!(ProxyGuardiansProvider.class.isAssignableFrom(c))) {
-      throw new IllegalArgumentException(String.format("%s must implement %s", c.getName(), ProxyGuardiansProvider.class));
+  private static class RemoteGuardiansProvider {
+    private final String location;
+    private Iterable<DecryptingTrusteeSimulator> guardians;
+
+    public RemoteGuardiansProvider(String location) {
+      this.location = location;
     }
-    Constructor<ProxyGuardiansProvider> constructor = (Constructor<ProxyGuardiansProvider>) c.getConstructor();
-    return constructor.newInstance();
+
+    public Iterable<DecryptingTrusteeSimulator> guardians() {
+      if (guardians == null) {
+        guardians = read(location);
+      }
+      return guardians;
+    }
+
+    ImmutableList<DecryptingTrusteeSimulator> read(String location) {
+      try {
+        ImmutableList<DecryptingTrustee> trustees = TrusteeFromProto.readTrustees(location);
+        return trustees.stream().map(DecryptingTrusteeSimulator::new).collect(ImmutableList.toImmutableList());
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    }
   }
 
   ///////////////////////////////////////////////////////////////////////////
@@ -165,7 +162,7 @@ public class DecryptingSimulator {
   int quorum;
   int numberOfGuardians;
 
-  public DecryptingSimulator(Consumer consumer, ElectionRecord electionRecord, ProxyGuardiansProvider provider) {
+  public DecryptingSimulator(Consumer consumer, ElectionRecord electionRecord, RemoteGuardiansProvider provider) {
     this.consumer = consumer;
     this.electionRecord = electionRecord;
     this.election = electionRecord.election;
