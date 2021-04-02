@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+import "com/sunya/electionguard/proto/common.proto";
+import "google/protobuf/empty.proto";
+
+option java_package = "com.sunya.electionguard.proto";
+option java_outer_classname = "DecryptingTrusteeProto";
+
+service DecryptingTrusteeService {
+  rpc partialDecrypt (PartialDecryptionRequest) returns (PartialDecryptionResponse) {}
+  rpc compensatedDecrypt (CompensatedDecryptionRequest) returns (CompensatedDecryptionResponse) {}
+}
+
+message PartialDecryptionRequest {
+  ElementModQ extended_base_hash = 1; // The election extended_base_hash.
+  repeated ElGamalCiphertext text = 2; // The text(s) to decrypt.
+}
+
+message PartialDecryptionResponse {
+  RemoteError error = 1; // non empty on error
+  repeated PartialDecryptionResult results = 2;;
+}
+
+message PartialDecryptionResult {
+  ElementModP decryption = 1;
+  ChaumPedersenProof proof = 2;
+}
+
+message CompensatedDecryptionRequest {
+  ElementModQ extended_base_hash = 1; // The election extended_base_hash.
+  string missing_guardian_id = 2; // The id of the guardian that's missing.
+  repeated ElGamalCiphertext text = 3; // The text(s) to decrypt.
+}
+
+message CompensatedDecryptionResponse {
+  RemoteError error = 1; // non empty on error
+  repeated CompensatedDecryptionResult results = 2;;
+}
+
+message CompensatedDecryptionResult {
+  ElementModP decryption = 1;
+  ChaumPedersenProof proof = 2;
+  ElementModP recoveryPublicKey = 3;
+}
+
+
+

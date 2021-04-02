@@ -1,27 +1,31 @@
 syntax = "proto3";
 
 import "com/sunya/electionguard/proto/common.proto";
-import "com/sunya/electionguard/proto/key_ceremony.proto";
 
 option java_package = "com.sunya.electionguard.proto";
 option java_outer_classname = "TrusteeProto";
 
-// LOOK replaces key_ceremony.proto ??
-
-message Trustees {
-  repeated Trustee trustees = 1;
+message DecryptingTrustees {
+  repeated DecryptingTrustee trustees = 1;
 }
 
-message Trustee {
+message DecryptingTrustee {
   string guardian_id = 1;
   uint32 guardian_x_coordinate = 2;     // the x coefficient (sequence_order), must be > 0
   ElGamalKeyPair election_key_pair = 3;
   RSAPrivateKey rsa_private_key = 4;    // auxiliary private key
   // Other guardians' partial key backups shared with this guardian
   repeated ElectionPartialKeyBackup2 other_guardian_backups = 5;
-  // The public keys K_ij generated from the election polynomial coefficients.
-  // Duplicated here and in ElectionRecordProto.CoefficientValidationSet
-  repeated ElementModP coefficient_commitments = 6;
+  // The commitments {"public keys K_ij") generated from the election polynomial coefficients.
+  // Duplicated here and in ElectionRecordProto.CoefficientValidationSet, to keep the trustees independent
+  repeated CommitmentSet guardian_commitments = 6;
+}
+
+message CommitmentSet {
+  // for which guardian
+  string guardian_id = 1;
+  // coefficient commitments, always quorum number of them
+  repeated ElementModP commitments = 3;
 }
 
 message ElectionPartialKeyBackup2 {

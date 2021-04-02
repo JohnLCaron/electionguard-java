@@ -14,6 +14,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Formatter;
 
 class TrusteesPanel extends JPanel {
@@ -27,7 +30,7 @@ class TrusteesPanel extends JPanel {
   final TrusteeDecryptingTable trusteesDecryptingTable;
 
   boolean eventOk = true;
-  String inputDir = "none";
+  String inputFile = "none";
 
   TrusteesPanel(PreferencesExt prefs, JFrame frame) {
     this.prefs = prefs;
@@ -39,10 +42,10 @@ class TrusteesPanel extends JPanel {
       if (!this.eventOk) {
         return;
       }
-      this.inputDir = (String) inputBallotDirCB.getSelectedItem();
-      if (setInputBallots(this.inputDir)) {
+      this.inputFile = (String) inputBallotDirCB.getSelectedItem();
+      if (setInputFile(this.inputFile)) {
         this.eventOk = false;
-        this.inputBallotDirCB.addItem(this.inputDir);
+        this.inputBallotDirCB.addItem(this.inputFile);
         this.eventOk = true;
       }
     });
@@ -91,10 +94,16 @@ class TrusteesPanel extends JPanel {
     add(tabbedPane, BorderLayout.CENTER);
   }
 
-  boolean setInputBallots(String inputDir) {
+  boolean setInputFile(String inputFile) {
     try {
-      ImmutableList<DecryptingTrustee> trustees = TrusteeFromProto.readTrustees(inputDir);
-      trusteesDecryptingTable.setTrustees(trustees);
+      Path path = Paths.get(inputFile);
+      if (Files.isDirectory(path)) {
+        ImmutableList<DecryptingTrustee> trustees = TrusteeFromProto.readTrustees(inputFile);
+        trusteesDecryptingTable.setTrustees(trustees);
+      } else {
+        DecryptingTrustee trustee = TrusteeFromProto.readTrustee(inputFile);
+        trusteesDecryptingTable.setTrustees(ImmutableList.of(trustee));
+      }
     } catch (IOException e) {
       e.printStackTrace();
       return false;
@@ -103,7 +112,7 @@ class TrusteesPanel extends JPanel {
   }
 
   void showInfo(Formatter f) {
-    f.format("%s%n", this.inputDir);
+    f.format("%s%n", this.inputFile);
   }
 
   void save() {

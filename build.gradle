@@ -28,6 +28,7 @@ repositories {
 ext.junitPlatformVersion = '1.7.0'
 ext.junitJupiterVersion = '5.7.0'
 ext.jqwikVersion = '1.3.10'
+ext.grpcVersion = '1.36.1'
 
 compileTestJava {
     // To enable argument names in reporting and debugging
@@ -47,9 +48,10 @@ dependencies {
     annotationProcessor "com.google.auto.value:auto-value:1.7.4"
 
     // grpc
-    implementation "io.grpc:grpc-protobuf:1.36.0"
-    implementation "io.grpc:grpc-stub:1.36.0"
-    runtimeOnly "io.grpc:grpc-netty-shaded:1.36.0"
+    implementation "io.grpc:grpc-protobuf:${grpcVersion}"
+    implementation "io.grpc:grpc-stub:${grpcVersion}"
+    implementation "io.grpc:grpc-services:${grpcVersion}"
+    runtimeOnly "io.grpc:grpc-netty-shaded:${grpcVersion}"
     compile("javax.annotation:javax.annotation-api:1.3.2")
 
     // temporary until i get uibase hosted on a maven repo
@@ -62,8 +64,8 @@ dependencies {
 
     testImplementation 'com.google.truth:truth:1.1'
     testImplementation 'com.google.truth.extensions:truth-java8-extension:1.1'
+    testImplementation "io.grpc:grpc-testing:${grpcVersion}"
     testImplementation "net.jqwik:jqwik:${jqwikVersion}" // aggregate jqwik dependency
-    // Add if you also want to use the Jupiter engine or Assertions from it
     testImplementation "org.junit.jupiter:junit-jupiter:5.7.0"
 }
 

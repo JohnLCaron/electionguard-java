@@ -18,6 +18,11 @@ message ElGamalCiphertext {
   ElementModP data = 2;
 }
 
+message ElGamalKeyPair {
+  ElementModQ secret_key = 1;
+  ElementModP public_key = 2;
+}
+
 message RSAPublicKey {
   bytes modulus = 1;
   bytes public_exponent = 2;
@@ -28,9 +33,20 @@ message RSAPrivateKey {
   bytes private_exponent = 2;
 }
 
+message ChaumPedersenProof {
+  ElementModP pad = 1; // a in the spec
+  ElementModP data = 2; // b in the spec
+  ElementModQ challenge = 3; // c in the spec
+  ElementModQ response = 4; // v in the spec
+}
+
 message SchnorrProof {
   ElementModP public_key = 1; // k in the spec
   ElementModP commitment = 2; // h in the spec
   ElementModQ challenge = 3; // c in the spec
   ElementModQ response = 4; // u in the spec
+}
+
+message RemoteError {
+  string message = 1;
 }

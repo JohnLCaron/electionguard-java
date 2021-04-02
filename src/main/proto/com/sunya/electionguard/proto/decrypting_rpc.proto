@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+import "com/sunya/electionguard/proto/common.proto";
+
+option java_package = "com.sunya.electionguard.proto";
+option java_outer_classname = "DecryptingProto";
+
+service DecryptingService {
+  rpc registerTrustee (RegisterDecryptingTrusteeRequest) returns (RegisterDecryptingTrusteeResponse) {}
+}
+
+message RegisterDecryptingTrusteeRequest {
+  string guardian_id = 1;
+  string remote_url = 2;
+  uint32 guardian_x_coordinate = 3;
+  ElementModP public_key = 4;
+}
+
+message RegisterDecryptingTrusteeResponse {
+  RemoteError error = 1; // non empty on error
+  bool ok = 2;
+}

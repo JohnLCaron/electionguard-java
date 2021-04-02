@@ -1,6 +1,5 @@
 package com.sunya.electionguard.proto;
 
-import com.sunya.electionguard.ChaumPedersen;
 import com.sunya.electionguard.DecryptionShare;
 import com.sunya.electionguard.PlaintextTally;
 
@@ -9,11 +8,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.sunya.electionguard.proto.CommonConvert.convertElementModP;
-import static com.sunya.electionguard.proto.CommonConvert.convertElementModQ;
 import static com.sunya.electionguard.proto.CommonConvert.convertCiphertext;
 import static com.sunya.electionguard.proto.PlaintextTallyProto.CiphertextDecryptionSelection;
 import static com.sunya.electionguard.proto.PlaintextTallyProto.CiphertextCompensatedDecryptionSelection;
-import static com.sunya.electionguard.proto.PlaintextTallyProto.ChaumPedersenProof;
 
 public class PlaintextTallyToProto {
 
@@ -56,7 +53,7 @@ public class PlaintextTallyToProto {
     builder.setGuardianId(org.guardian_id());
     builder.setShare(convertElementModP(org.share()));
     // Optional
-    org.proof().ifPresent( proof -> builder.setProof(convertProof(proof)));
+    org.proof().ifPresent( proof -> builder.setProof(CommonConvert.convertChaumPedersenProof(proof)));
     // Optional
     org.recovered_parts().ifPresent(org_recoverd ->  {
       for (Map.Entry<String, DecryptionShare.CiphertextCompensatedDecryptionSelection> entry : org_recoverd.entrySet()) {
@@ -75,16 +72,7 @@ public class PlaintextTallyToProto {
     builder.setMissingGuardianId(org.missing_guardian_id());
     builder.setShare(convertElementModP(org.share()));
     builder.setRecoveryKey(convertElementModP(org.recovery_key()));
-    builder.setProof(convertProof(org.proof()));
-    return builder.build();
-  }
-
-  private static ChaumPedersenProof convertProof(ChaumPedersen.ChaumPedersenProof proof) {
-    ChaumPedersenProof.Builder builder = ChaumPedersenProof.newBuilder();
-    builder.setPad(convertElementModP(proof.pad));
-    builder.setData(convertElementModP(proof.data));
-    builder.setChallenge(convertElementModQ(proof.challenge));
-    builder.setResponse(convertElementModQ(proof.response));
+    builder.setProof(CommonConvert.convertChaumPedersenProof(org.proof()));
     return builder.build();
   }
 }

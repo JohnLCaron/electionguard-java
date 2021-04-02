@@ -12,17 +12,18 @@ import java.util.Formatter;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Runs the entire workflow from start to finish.
+ * Runs the entire workflow from start to finish, using simulated remote guardians.
+ * Runs the components out of the fatJar, so be sure to build that first.
  * <p>
  * For command line help:
  * <strong>
  * <pre>
- *  java -classpath electionguard-java-all.jar com.sunya.electionguard.workflow.RunElectionWorkflow --help
+ *  java -classpath electionguard-java-all.jar com.sunya.electionguard.guardian.RunRemoteWorkflowSimulated --help
  * </pre>
  * </strong>
  *
  */
-public class RemoteWorkflow {
+public class RunRemoteWorkflowSimulated {
   private static final String classpath = "build/libs/electionguard-java-0.9.1-SNAPSHOT-all.jar";
 
   private static class CommandLine {
@@ -65,7 +66,7 @@ public class RemoteWorkflow {
   }
 
   public static void main(String[] args) {
-    String progName = RemoteWorkflow.class.getName();
+    String progName = RunRemoteWorkflowSimulated.class.getName();
     CommandLine cmdLine;
     Stopwatch stopwatchAll = Stopwatch.createStarted();
     Stopwatch stopwatch = Stopwatch.createStarted();

@@ -84,8 +84,3 @@ message ElectionPartialKeyBackup {
   // The proofs of possession of the private keys for the election polynomial secret coefficients.
   repeated SchnorrProof coefficient_proofs = 6;
 }
-
-message ElGamalKeyPair {
-  ElementModQ secret_key = 1;
-  ElementModP public_key = 2;
-}

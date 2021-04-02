@@ -66,10 +66,3 @@ message CiphertextCompensatedDecryptionSelection {
   // The Proof that the share was decrypted correctly.
   ChaumPedersenProof proof = 7;
 }
-
-message ChaumPedersenProof {
-  ElementModP pad = 1; // a in the spec
-  ElementModP data = 2; // b in the spec
-  ElementModQ challenge = 3; // c in the spec
-  ElementModQ response = 4; // v in the spec
-}

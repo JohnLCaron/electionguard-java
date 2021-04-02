@@ -13,6 +13,7 @@ import com.sunya.electionguard.verifier.ElectionRecord;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -44,12 +45,13 @@ public class Consumer {
     return true;
   }
 
-    public ElectionRecord readElectionRecord() throws IOException {
+  public ElectionRecord readElectionRecord() throws IOException {
     if (Files.exists(publisher.electionRecordProtoPath())) {
       return readElectionRecordProto();
-    } else {
+    } if (Files.exists(publisher.constantsPath()))  {
       return readElectionRecordJson();
     }
+    throw new FileNotFoundException(String.format("No election record found in %s", publisher.publishPath()));
   }
 
   public Manifest readManifest() throws IOException {

@@ -11,8 +11,8 @@ import com.sunya.electionguard.guardian.KeyCeremony2;
 import com.sunya.electionguard.guardian.KeyCeremonyTrustee;
 import com.sunya.electionguard.proto.CommonConvert;
 import com.sunya.electionguard.proto.RemoteKeyCeremonyProto;
-import com.sunya.electionguard.proto.RemoteTrusteeProto;
-import com.sunya.electionguard.proto.RemoteTrusteeServiceGrpc;
+import com.sunya.electionguard.proto.RemoteKeyCeremonyTrusteeProto;
+import com.sunya.electionguard.proto.RemoteKeyCeremonyTrusteeServiceGrpc;
 import com.sunya.electionguard.proto.TrusteeProto;
 import com.sunya.electionguard.proto.TrusteeToProto;
 import com.sunya.electionguard.publish.Publisher;
@@ -21,6 +21,7 @@ import io.grpc.ServerBuilder;
 import io.grpc.stub.StreamObserver;
 
 import java.io.IOException;
+import java.net.ServerSocket;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -29,7 +30,7 @@ import java.util.stream.Collectors;
 import static com.sunya.electionguard.Group.ElementModP;
 
 /** A Remote Trustee with a KeyCeremonyTrustee delegate, communicating over gRpc. */
-class KeyCeremonyRemoteTrustee extends RemoteTrusteeServiceGrpc.RemoteTrusteeServiceImplBase {
+class KeyCeremonyRemoteTrustee extends RemoteKeyCeremonyTrusteeServiceGrpc.RemoteKeyCeremonyTrusteeServiceImplBase {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
   private static final Random random = new Random(System.currentTimeMillis());
 
@@ -81,7 +82,10 @@ class KeyCeremonyRemoteTrustee extends RemoteTrusteeServiceGrpc.RemoteTrusteeSer
     // which port? if not assigned, pick one at random
     int port = cmdLine.port;
     if (port == cmdLine.serverPort) {
-      port = cmdLine.serverPort + 1 + random.nextInt(10000); // LOOK how to check if its available?
+      port = cmdLine.serverPort + 1 + random.nextInt(10000);
+      while (!isLocalPortFree(port)) {
+        port = cmdLine.serverPort + 1 + random.nextInt(10000);
+      }
     }
     String url = "localhost:"+port;
     String serverUrl = "localhost:" + cmdLine.serverPort;
@@ -91,6 +95,10 @@ class KeyCeremonyRemoteTrustee extends RemoteTrusteeServiceGrpc.RemoteTrusteeSer
     KeyCeremonyRemoteProxy proxy = new KeyCeremonyRemoteProxy(serverUrl);
     RemoteKeyCeremonyProto.RegisterTrusteeResponse response = proxy.registerTrustee(cmdLine.name, url);
     proxy.shutdown();
+    if (response.hasError()) {
+      System.out.printf("    registerTrustee error %s%n", response.getError().getMessage());
+      throw new RuntimeException(response.getError().getMessage());
+    }
     System.out.printf("    response %s %d %d %n", response.getGuardianId(),
             response.getGuardianXCoordinate(),
             response.getQuorum());
@@ -111,6 +119,15 @@ class KeyCeremonyRemoteTrustee extends RemoteTrusteeServiceGrpc.RemoteTrusteeSer
       System.out.printf("*** KeyCeremonyRemote FAILURE%n");
       t.printStackTrace();
       System.exit(3);
+    }
+  }
+
+  private static boolean isLocalPortFree(int port) {
+    try {
+      new ServerSocket(port).close();
+      return true;
+    } catch (IOException e) {
+      return false;
     }
   }
 
@@ -166,10 +183,10 @@ class KeyCeremonyRemoteTrustee extends RemoteTrusteeServiceGrpc.RemoteTrusteeSer
   }
 
   @Override
-  public void sendPublicKeys(RemoteTrusteeProto.PublicKeySetRequest request,
-                             StreamObserver<RemoteTrusteeProto.PublicKeySet> responseObserver) {
+  public void sendPublicKeys(RemoteKeyCeremonyTrusteeProto.PublicKeySetRequest request,
+                             StreamObserver<RemoteKeyCeremonyTrusteeProto.PublicKeySet> responseObserver) {
 
-    RemoteTrusteeProto.PublicKeySet.Builder response = RemoteTrusteeProto.PublicKeySet.newBuilder();
+    RemoteKeyCeremonyTrusteeProto.PublicKeySet.Builder response = RemoteKeyCeremonyTrusteeProto.PublicKeySet.newBuilder();
     try {
       KeyCeremony2.PublicKeySet keyset = delegate.sharePublicKeys();
       response.setOwnerId(keyset.ownerId())
@@ -180,7 +197,7 @@ class KeyCeremonyRemoteTrustee extends RemoteTrusteeServiceGrpc.RemoteTrusteeSer
     } catch (Throwable t) {
       logger.atSevere().withCause(t).log("KeyCeremonyRemoteTrustee sendPublicKeys failed");
       t.printStackTrace();
-      response.setError(RemoteTrusteeProto.RemoteTrusteeError.newBuilder().setMessage(t.getMessage()).build());
+      response.setError(RemoteKeyCeremonyTrusteeProto.RemoteTrusteeError.newBuilder().setMessage(t.getMessage()).build());
     }
 
     responseObserver.onNext(response.build());
@@ -188,10 +205,10 @@ class KeyCeremonyRemoteTrustee extends RemoteTrusteeServiceGrpc.RemoteTrusteeSer
   }
 
   @Override
-  public void receivePublicKeys(RemoteTrusteeProto.PublicKeySet proto,
-                                StreamObserver<RemoteTrusteeProto.BooleanResponse> responseObserver) {
+  public void receivePublicKeys(RemoteKeyCeremonyTrusteeProto.PublicKeySet proto,
+                                StreamObserver<RemoteKeyCeremonyTrusteeProto.BooleanResponse> responseObserver) {
 
-    RemoteTrusteeProto.BooleanResponse.Builder response = RemoteTrusteeProto.BooleanResponse.newBuilder();
+    RemoteKeyCeremonyTrusteeProto.BooleanResponse.Builder response = RemoteKeyCeremonyTrusteeProto.BooleanResponse.newBuilder();
     try {
       List<SchnorrProof> proofs = proto.getCoefficientProofsList().stream().map(CommonConvert::convertSchnorrProof).collect(Collectors.toList());
       KeyCeremony2.PublicKeySet keyset = KeyCeremony2.PublicKeySet.create(
@@ -206,7 +223,7 @@ class KeyCeremonyRemoteTrustee extends RemoteTrusteeServiceGrpc.RemoteTrusteeSer
     } catch (Throwable t) {
       logger.atSevere().withCause(t).log("KeyCeremonyRemoteTrustee receivePublicKeys failed");
       t.printStackTrace();
-      response.setError(RemoteTrusteeProto.RemoteTrusteeError.newBuilder().setMessage(t.getMessage()).build());
+      response.setError(RemoteKeyCeremonyTrusteeProto.RemoteTrusteeError.newBuilder().setMessage(t.getMessage()).build());
     }
 
     responseObserver.onNext(response.build());
@@ -214,15 +231,15 @@ class KeyCeremonyRemoteTrustee extends RemoteTrusteeServiceGrpc.RemoteTrusteeSer
   }
 
   @Override
-  public void sendPartialKeyBackup(RemoteTrusteeProto.PartialKeyBackupRequest request,
-                                   StreamObserver<RemoteTrusteeProto.PartialKeyBackup> responseObserver) {
+  public void sendPartialKeyBackup(RemoteKeyCeremonyTrusteeProto.PartialKeyBackupRequest request,
+                                   StreamObserver<RemoteKeyCeremonyTrusteeProto.PartialKeyBackup> responseObserver) {
 
-    RemoteTrusteeProto.PartialKeyBackup.Builder response = RemoteTrusteeProto.PartialKeyBackup.newBuilder();
+    RemoteKeyCeremonyTrusteeProto.PartialKeyBackup.Builder response = RemoteKeyCeremonyTrusteeProto.PartialKeyBackup.newBuilder();
     try {
       KeyCeremony2.PartialKeyBackup backup = delegate.sendPartialKeyBackup(request.getGuardianId());
       if (backup == null) {
         logger.atSevere().log("KeyCeremonyRemoteTrustee sendPartialKeyBackup failed");
-        response.setError(RemoteTrusteeProto.RemoteTrusteeError.newBuilder().setMessage("why?").build());
+        response.setError(RemoteKeyCeremonyTrusteeProto.RemoteTrusteeError.newBuilder().setMessage("why?").build());
 
       } else {
         response.setGeneratingGuardianId(backup.generatingGuardianId())
@@ -235,7 +252,7 @@ class KeyCeremonyRemoteTrustee extends RemoteTrusteeServiceGrpc.RemoteTrusteeSer
     } catch (Throwable t) {
       logger.atSevere().withCause(t).log("KeyCeremonyRemoteTrustee sendPartialKeyBackup failed");
       t.printStackTrace();
-      response.setError(RemoteTrusteeProto.RemoteTrusteeError.newBuilder().setMessage(t.getMessage()).build());
+      response.setError(RemoteKeyCeremonyTrusteeProto.RemoteTrusteeError.newBuilder().setMessage(t.getMessage()).build());
     }
 
     responseObserver.onNext(response.build());
@@ -243,10 +260,10 @@ class KeyCeremonyRemoteTrustee extends RemoteTrusteeServiceGrpc.RemoteTrusteeSer
   }
 
   @Override
-  public void verifyPartialKeyBackup(RemoteTrusteeProto.PartialKeyBackup proto,
-                                     StreamObserver<RemoteTrusteeProto.PartialKeyVerification> responseObserver) {
+  public void verifyPartialKeyBackup(RemoteKeyCeremonyTrusteeProto.PartialKeyBackup proto,
+                                     StreamObserver<RemoteKeyCeremonyTrusteeProto.PartialKeyVerification> responseObserver) {
 
-    RemoteTrusteeProto.PartialKeyVerification.Builder response = RemoteTrusteeProto.PartialKeyVerification.newBuilder();
+    RemoteKeyCeremonyTrusteeProto.PartialKeyVerification.Builder response = RemoteKeyCeremonyTrusteeProto.PartialKeyVerification.newBuilder();
     try {
       KeyCeremony2.PartialKeyBackup backup = KeyCeremony2.PartialKeyBackup.create(
               proto.getGeneratingGuardianId(),
@@ -264,7 +281,7 @@ class KeyCeremonyRemoteTrustee extends RemoteTrusteeServiceGrpc.RemoteTrusteeSer
     } catch (Throwable t) {
       logger.atSevere().withCause(t).log("KeyCeremonyRemoteTrustee verifyPartialKeyBackup failed");
       t.printStackTrace();
-      response.setError(RemoteTrusteeProto.RemoteTrusteeError.newBuilder().setMessage(t.getMessage()).build());
+      response.setError(RemoteKeyCeremonyTrusteeProto.RemoteTrusteeError.newBuilder().setMessage(t.getMessage()).build());
     }
 
     responseObserver.onNext(response.build());
@@ -272,14 +289,14 @@ class KeyCeremonyRemoteTrustee extends RemoteTrusteeServiceGrpc.RemoteTrusteeSer
   }
 
   @Override
-  public void sendBackupChallenge(RemoteTrusteeProto.PartialKeyChallenge request,
-                                  StreamObserver<RemoteTrusteeProto.PartialKeyChallengeResponse> responseObserver) {
-    RemoteTrusteeProto.PartialKeyChallengeResponse.Builder response = RemoteTrusteeProto.PartialKeyChallengeResponse.newBuilder();
+  public void sendBackupChallenge(RemoteKeyCeremonyTrusteeProto.PartialKeyChallenge request,
+                                  StreamObserver<RemoteKeyCeremonyTrusteeProto.PartialKeyChallengeResponse> responseObserver) {
+    RemoteKeyCeremonyTrusteeProto.PartialKeyChallengeResponse.Builder response = RemoteKeyCeremonyTrusteeProto.PartialKeyChallengeResponse.newBuilder();
     try {
       KeyCeremony2.PartialKeyChallengeResponse backup = delegate.sendBackupChallenge(request.getGuardianId());
       if (backup == null) {
         logger.atSevere().log("KeyCeremonyRemoteTrustee sendBackupChallenge failed");
-        response.setError(RemoteTrusteeProto.RemoteTrusteeError.newBuilder().setMessage("why?").build());
+        response.setError(RemoteKeyCeremonyTrusteeProto.RemoteTrusteeError.newBuilder().setMessage("why?").build());
       } else {
         response.setGeneratingGuardianId(backup.generatingGuardianId())
                 .setDesignatedGuardianId(backup.designatedGuardianId())
@@ -291,7 +308,7 @@ class KeyCeremonyRemoteTrustee extends RemoteTrusteeServiceGrpc.RemoteTrusteeSer
     } catch (Throwable t) {
       logger.atSevere().withCause(t).log("KeyCeremonyRemoteTrustee sendBackupChallenge failed");
       t.printStackTrace();
-      response.setError(RemoteTrusteeProto.RemoteTrusteeError.newBuilder().setMessage(t.getMessage()).build());
+      response.setError(RemoteKeyCeremonyTrusteeProto.RemoteTrusteeError.newBuilder().setMessage(t.getMessage()).build());
     }
 
     responseObserver.onNext(response.build());
@@ -299,9 +316,9 @@ class KeyCeremonyRemoteTrustee extends RemoteTrusteeServiceGrpc.RemoteTrusteeSer
   }
 
   @Override
-  public void sendJointPublicKey(RemoteTrusteeProto.JointPublicKeyRequest request,
-                                 StreamObserver<RemoteTrusteeProto.JointPublicKeyResponse> responseObserver) {
-    RemoteTrusteeProto.JointPublicKeyResponse.Builder response = RemoteTrusteeProto.JointPublicKeyResponse.newBuilder();
+  public void sendJointPublicKey(RemoteKeyCeremonyTrusteeProto.JointPublicKeyRequest request,
+                                 StreamObserver<RemoteKeyCeremonyTrusteeProto.JointPublicKeyResponse> responseObserver) {
+    RemoteKeyCeremonyTrusteeProto.JointPublicKeyResponse.Builder response = RemoteKeyCeremonyTrusteeProto.JointPublicKeyResponse.newBuilder();
     try {
       ElementModP jointKey = delegate.publishJointKey();
       response.setJointPublicKey(CommonConvert.convertElementModP(jointKey));
@@ -310,7 +327,7 @@ class KeyCeremonyRemoteTrustee extends RemoteTrusteeServiceGrpc.RemoteTrusteeSer
     } catch (Throwable t) {
       logger.atSevere().withCause(t).log("KeyCeremonyRemoteTrustee sendJointPublicKey failed");
       t.printStackTrace();
-      response.setError(RemoteTrusteeProto.RemoteTrusteeError.newBuilder().setMessage(t.getMessage()).build());
+      response.setError(RemoteKeyCeremonyTrusteeProto.RemoteTrusteeError.newBuilder().setMessage(t.getMessage()).build());
     }
 
     responseObserver.onNext(response.build());
@@ -319,18 +336,18 @@ class KeyCeremonyRemoteTrustee extends RemoteTrusteeServiceGrpc.RemoteTrusteeSer
 
   @Override
   public void saveState(com.google.protobuf.Empty request,
-                        StreamObserver<RemoteTrusteeProto.BooleanResponse> responseObserver) {
-    RemoteTrusteeProto.BooleanResponse.Builder response = RemoteTrusteeProto.BooleanResponse.newBuilder();
+                        StreamObserver<RemoteKeyCeremonyTrusteeProto.BooleanResponse> responseObserver) {
+    RemoteKeyCeremonyTrusteeProto.BooleanResponse.Builder response = RemoteKeyCeremonyTrusteeProto.BooleanResponse.newBuilder();
     boolean ok = true;
     try {
-      TrusteeProto.Trustee trusteeProto = TrusteeToProto.convertTrustee(this.delegate);
-      Publisher.writeTrusteeProto(this.outputDir, trusteeProto);
+      TrusteeProto.DecryptingTrustee trusteeProto = TrusteeToProto.convertTrustee(this.delegate);
+      Publisher.overwriteTrusteeProto(this.outputDir, trusteeProto);
       logger.atInfo().log("KeyCeremonyRemoteTrustee saveState %s", delegate.id);
 
     } catch (Throwable t) {
       logger.atSevere().withCause(t).log("KeyCeremonyRemoteTrustee saveState failed");
       t.printStackTrace();
-      response.setError(RemoteTrusteeProto.RemoteTrusteeError.newBuilder().setMessage(t.getMessage()).build());
+      response.setError(RemoteKeyCeremonyTrusteeProto.RemoteTrusteeError.newBuilder().setMessage(t.getMessage()).build());
       ok = false;
     }
 
@@ -341,9 +358,9 @@ class KeyCeremonyRemoteTrustee extends RemoteTrusteeServiceGrpc.RemoteTrusteeSer
 
   // LOOK what to do?
   @Override
-  public void finish(RemoteTrusteeProto.FinishRequest request,
-                     StreamObserver<RemoteTrusteeProto.BooleanResponse> responseObserver) {
-    RemoteTrusteeProto.BooleanResponse.Builder response = RemoteTrusteeProto.BooleanResponse.newBuilder();
+  public void finish(RemoteKeyCeremonyTrusteeProto.FinishRequest request,
+                     StreamObserver<RemoteKeyCeremonyTrusteeProto.BooleanResponse> responseObserver) {
+    RemoteKeyCeremonyTrusteeProto.BooleanResponse.Builder response = RemoteKeyCeremonyTrusteeProto.BooleanResponse.newBuilder();
     boolean ok = true;
     try {
       logger.atInfo().log("KeyCeremonyRemoteTrustee finish ok = %s", request.getAllOk());
@@ -351,7 +368,7 @@ class KeyCeremonyRemoteTrustee extends RemoteTrusteeServiceGrpc.RemoteTrusteeSer
     } catch (Throwable t) {
       logger.atSevere().withCause(t).log("KeyCeremonyRemoteTrustee finish failed");
       t.printStackTrace();
-      response.setError(RemoteTrusteeProto.RemoteTrusteeError.newBuilder().setMessage(t.getMessage()).build());
+      response.setError(RemoteKeyCeremonyTrusteeProto.RemoteTrusteeError.newBuilder().setMessage(t.getMessage()).build());
       ok = false;
     }
 

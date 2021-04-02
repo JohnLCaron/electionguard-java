@@ -132,6 +132,16 @@ public class ChaumPedersen {
       this.response = Preconditions.checkNotNull(response);
     }
 
+    @Override
+    public String toString() {
+      return "ChaumPedersenProof{" +
+              "\n   pad      =" + pad.toShortString() +
+              "\n   data     =" + data.toShortString() +
+              "\n   challenge=" + challenge +
+              "\n   response =" + response +
+              '}';
+    }
+
     /**
      * Validates a Chaum-Pedersen proof.
      * e.g.
@@ -189,9 +199,15 @@ public class ChaumPedersen {
                 String.format("same_c %s%n", same_c) +
                 String.format("consistent_gv %s%n", consistent_gv) +
                 String.format("consistent_av %s%n", consistent_av) +
-                String.format("k %s%n", k) +
-                String.format("q %s%n", q) +
-                String.format("proof %s%n", this));
+                String.format("%npad %s%n", this.pad.toShortString()) +
+                String.format("data %s%n", this.data.toShortString()) +
+                String.format("challenge %s%n", this.challenge) +
+                String.format("response %s%n", this.response) +
+                String.format("g_pow_p(v) %s%n", g_pow_p(v).toShortString()) +
+                String.format("pow_p(k, c) %s%n", pow_p(k, c).toShortString()) +
+                String.format("mult_p(a, pow_p(k, c)) %s%n", mult_p(a, pow_p(k, c)).toShortString())
+        );
+        // throw new IllegalStateException("found an invalid Chaum-Pedersen proof");
       }
       return success;
     }
@@ -223,8 +239,6 @@ public class ChaumPedersen {
               "\n   challenge=" + challenge +
               "\n   response =" + response +
               "\n   constant =" + constant +
-              "\n   name     ='" + name + '\'' +
-              "\n   usage    =" + usage +
               '}';
     }
 

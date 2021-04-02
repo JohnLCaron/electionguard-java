@@ -28,16 +28,18 @@ import static com.sunya.electionguard.Group.ElementModQ;
 import static com.sunya.electionguard.Group.rand_q;
 
 /**
- * Simulate a KeyCeremonyTrustee/Guardian where object is in a separate process space, and is never shared.
- * Communication happens through the KeyCeremonyTrustee.KeyCeremonyProxy.
+ * A Trustee/Guardian used in the KeyCeremony, with secrets hidden as well as possible.
+ * This object must not be used with untrusted code.
  */
 public class KeyCeremonyTrustee {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   public final String id;
+
   // a unique number in [1, 256) that is the polynomial x value for this guardian
   public final int xCoordinate;
-  private final GuardianSecrets guardianSecrets;
+
+  final int quorum;
 
   // All of the guardians' public keys (including this one), keyed by guardian id.
   public final Map<String, KeyCeremony2.PublicKeySet> allGuardianPublicKeys;
@@ -47,6 +49,9 @@ public class KeyCeremonyTrustee {
 
   // Other guardians' partial key backups of this guardian's keys, keyed by generating guardian id.
   public final Map<String, KeyCeremony2.PartialKeyBackup> otherGuardianPartialKeyBackups;
+
+  // All secret info is in here.
+  private final GuardianSecrets guardianSecrets;
 
   /**
    *  Create a random polynomial of rank quorum.
@@ -62,6 +67,7 @@ public class KeyCeremonyTrustee {
 
     this.id = id;
     this.xCoordinate = sequence_order;
+    this.quorum = quorum;
 
     this.guardianSecrets = GuardianSecrets.generate(quorum, nonce_seed);
     this.allGuardianPublicKeys = new HashMap<>();
@@ -94,7 +100,7 @@ public class KeyCeremonyTrustee {
             polynomial.coefficient_proofs);
   }
 
-  /** Recieve publicKeys from another guardian. */
+  /** Receive publicKeys from another guardian. */
   public boolean receivePublicKeys(KeyCeremony2.PublicKeySet publicKeys) {
     if (publicKeys.isValid()) {
       this.allGuardianPublicKeys.put(publicKeys.ownerId(), publicKeys);
@@ -233,43 +239,6 @@ public class KeyCeremonyTrustee {
       SchnorrProof proof = SchnorrProof.make_schnorr_proof(key_pair, rand_q());
       java.security.KeyPair rsa_keypair = Rsa.rsa_keypair();
       return new GuardianSecrets(key_pair, proof, polynomial, rsa_keypair);
-    }
-  }
-
-  public KeyCeremonyProxy getKeyCeremonyProxy() {
-    return new KeyCeremonyProxy();
-  }
-
-  /** Simulation of message broker service for Guardians/Trustees. */
-  @Immutable
-  public class KeyCeremonyProxy {
-
-    String id() {
-      return id;
-    }
-
-    KeyCeremony2.PublicKeySet sendPublicKeys() {
-      return KeyCeremonyTrustee.this.sharePublicKeys();
-    }
-
-    boolean receivePublicKeys(KeyCeremony2.PublicKeySet publicKeys) {
-      return KeyCeremonyTrustee.this.receivePublicKeys(publicKeys);
-    }
-
-    @Nullable
-    KeyCeremony2.PartialKeyBackup sendPartialKeyBackup(String otherId) {
-      return KeyCeremonyTrustee.this.sendPartialKeyBackup(otherId);
-    }
-    KeyCeremony2.PartialKeyVerification verifyPartialKeyBackup(KeyCeremony2.PartialKeyBackup backup) {
-      return KeyCeremonyTrustee.this.verifyPartialKeyBackup(backup);
-    }
-
-    KeyCeremony2.PartialKeyChallengeResponse sendBackupChallenge(String guardian_id) {
-      return KeyCeremonyTrustee.this.sendBackupChallenge(guardian_id);
-    }
-
-    ElementModP sendJointPublicKey() {
-      return KeyCeremonyTrustee.this.publishJointKey();
     }
   }
 

@@ -35,7 +35,7 @@ The entire workflow, consisting of the above steps plus verification can be run 
 
 A refactoring that simulates remote Guardians:
 
-*   [Remote Guardian](https://github.com/JohnLCaron/electionguard-java/tree/master/src/main/java/com/sunya/electionguard/guardian)
+*   [Sumulate Remote Guardian](https://github.com/JohnLCaron/electionguard-java/tree/master/src/main/java/com/sunya/electionguard/guardian)
 
 One that uses real remote Guardians over gRpc for the Key Ceremony:
 

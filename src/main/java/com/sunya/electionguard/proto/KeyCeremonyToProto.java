@@ -53,7 +53,7 @@ public class KeyCeremonyToProto {
 
   private static KeyCeremonyProto.ElectionKeyPair convertElectionKeys(KeyCeremony.ElectionKeyPair org) {
     KeyCeremonyProto.ElectionKeyPair.Builder builder = KeyCeremonyProto.ElectionKeyPair.newBuilder();
-    builder.setKeyPair(convertElgamalKeypair(org.key_pair()));
+    builder.setKeyPair(CommonConvert.convertElgamalKeypair(org.key_pair()));
     builder.setProof(CommonConvert.convertSchnorrProof(org.proof()));
     builder.setPolynomial(convertElectionPolynomial(org.polynomial()));
     return builder.build();
@@ -84,13 +84,6 @@ public class KeyCeremonyToProto {
     org.coefficients.forEach(c -> builder.addCoefficients(convertElementModQ(c)));
     org.coefficient_commitments.forEach(c -> builder.addCoefficientCommitments(convertElementModP(c)));
     org.coefficient_proofs.forEach(p -> builder.addCoefficientProofs(convertSchnorrProof(p)));
-    return builder.build();
-  }
-
-  private static KeyCeremonyProto.ElGamalKeyPair convertElgamalKeypair(ElGamal.KeyPair keypair) {
-    KeyCeremonyProto.ElGamalKeyPair.Builder builder = KeyCeremonyProto.ElGamalKeyPair.newBuilder();
-    builder.setSecretKey(CommonConvert.convertElementModQ(keypair.secret_key));
-    builder.setPublicKey(CommonConvert.convertElementModP(keypair.public_key));
     return builder.build();
   }
 
