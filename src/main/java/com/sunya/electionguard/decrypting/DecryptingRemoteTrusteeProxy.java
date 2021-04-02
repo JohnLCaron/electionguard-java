@@ -1,14 +1,15 @@
 package com.sunya.electionguard.decrypting;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import com.google.common.flogger.FluentLogger;
-import com.google.protobuf.Empty;
 import com.sunya.electionguard.DecryptionProofRecovery;
 import com.sunya.electionguard.DecryptionProofTuple;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.guardian.DecryptingTrusteeIF;
 import com.sunya.electionguard.proto.CommonConvert;
+import com.sunya.electionguard.proto.CommonProto;
 import com.sunya.electionguard.proto.DecryptingTrusteeProto;
 import com.sunya.electionguard.proto.DecryptingTrusteeServiceGrpc;
 import io.grpc.ManagedChannel;
@@ -16,8 +17,9 @@ import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
 
 import javax.annotation.Nullable;
-import java.util.Optional;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /** A Remote Trustee client proxy, communicating over gRpc. */
 class DecryptingRemoteTrusteeProxy implements DecryptingTrusteeIF  {
@@ -40,77 +42,72 @@ class DecryptingRemoteTrusteeProxy implements DecryptingTrusteeIF  {
   }
 
   @Override
-  public Optional<DecryptionProofRecovery> compensatedDecrypt(
+  public List<DecryptionProofRecovery> compensatedDecrypt(
           String missing_guardian_id,
-          ElGamal.Ciphertext text,
+          List<ElGamal.Ciphertext> text,
           Group.ElementModQ extended_base_hash,
-          @Nullable Group.ElementModQ nonce_seed) { // LOOK dont have to ignore
+          @Nullable Group.ElementModQ nonce_seed) { // LOOK currently ignoring
 
     try {
+      List<CommonProto.ElGamalCiphertext> texts = text.stream().map(CommonConvert::convertCiphertext).collect(Collectors.toList());
+
       DecryptingTrusteeProto.CompensatedDecryptionRequest.Builder request = DecryptingTrusteeProto.CompensatedDecryptionRequest.newBuilder()
               .setMissingGuardianId(missing_guardian_id)
-              .setText(CommonConvert.convertCiphertext(text))
+              .addAllText(texts)
               .setExtendedBaseHash(CommonConvert.convertElementModQ(extended_base_hash));
 
       DecryptingTrusteeProto.CompensatedDecryptionResponse response = blockingStub.compensatedDecrypt(request.build());
       if (response.hasError() && !response.getError().getMessage().isEmpty()) {
         logger.atSevere().log("compensatedDecrypt failed: %s", response.getError().getMessage());
-        return Optional.empty();
+        return ImmutableList.of();
       }
-      return Optional.of(new DecryptionProofRecovery(
-              CommonConvert.convertElementModP(response.getDecryption()),
-              CommonConvert.convertChaumPedersenProof(response.getProof()),
-              CommonConvert.convertElementModP(response.getRecoveryPublicKey()))
-              );
+      return response.getResultsList().stream()
+              .map(this::convertDecryptionProofRecovery).collect(Collectors.toList());
 
     } catch (StatusRuntimeException e) {
       logger.atSevere().withCause(e).log("compensatedDecrypt failed");
-      return Optional.empty();
+      return ImmutableList.of();
     }
+  }
+
+  private DecryptionProofRecovery convertDecryptionProofRecovery(DecryptingTrusteeProto.CompensatedDecryptionResult proto) {
+    return new DecryptionProofRecovery(
+            CommonConvert.convertElementModP(proto.getDecryption()),
+            CommonConvert.convertChaumPedersenProof(proto.getProof()),
+            CommonConvert.convertElementModP(proto.getRecoveryPublicKey()));
   }
 
   @Override
-  public Optional<DecryptionProofTuple> partialDecrypt(
-          ElGamal.Ciphertext text,
+  public List<DecryptionProofTuple> partialDecrypt(
+          List<ElGamal.Ciphertext> text,
           Group.ElementModQ extended_base_hash,
-          @Nullable Group.ElementModQ nonce_seed) {
+          @Nullable Group.ElementModQ nonce_seed) { // LOOK currently ignoring
     try {
-      DecryptingTrusteeProto.DecryptionRequest.Builder request = DecryptingTrusteeProto.DecryptionRequest.newBuilder()
-              .setText(CommonConvert.convertCiphertext(text))
+      List<CommonProto.ElGamalCiphertext> texts = text.stream().map(CommonConvert::convertCiphertext).collect(Collectors.toList());
+
+      DecryptingTrusteeProto.PartialDecryptionRequest.Builder request = DecryptingTrusteeProto.PartialDecryptionRequest.newBuilder()
+              .addAllText(texts)
               .setExtendedBaseHash(CommonConvert.convertElementModQ(extended_base_hash));
 
-      DecryptingTrusteeProto.DecryptionResponse response = blockingStub.partialDecrypt(request.build());
+      DecryptingTrusteeProto.PartialDecryptionResponse response = blockingStub.partialDecrypt(request.build());
       if (response.hasError() && !response.getError().getMessage().isEmpty()) {
         logger.atSevere().log("partialDecrypt failed: %s", response.getError().getMessage());
-        return Optional.empty();
+        return ImmutableList.of();
       }
-      return Optional.of(new DecryptionProofTuple(
-              CommonConvert.convertElementModP(response.getDecryption()),
-              CommonConvert.convertChaumPedersenProof(response.getProof())));
+      return response.getResultsList().stream()
+              .map(this::convertDecryptionProofTuple).collect(Collectors.toList());
 
     } catch (StatusRuntimeException e) {
       logger.atSevere().withCause(e).log("partialDecrypt failed: ");
-      return Optional.empty();
+      return ImmutableList.of();
     }
   }
 
-  /*
-  boolean finish(boolean allOk) {
-    try {
-      RemoteTrusteeProto.FinishRequest request = RemoteTrusteeProto.FinishRequest.newBuilder().setAllOk(allOk).build();
-      RemoteTrusteeProto.BooleanResponse response = blockingStub.finish(request);
-      if (response.hasError()) {
-        logger.atSevere().log("commit failed: %s", response.getError().getMessage());
-        return false;
-      }
-      return response.getOk();
-
-    } catch (StatusRuntimeException e) {
-      logger.atSevere().withCause(e).log("commit failed: ");
-      e.printStackTrace();
-      return false;
-    }
-  } */
+  private DecryptionProofTuple convertDecryptionProofTuple(  DecryptingTrusteeProto.PartialDecryptionResult proto) {
+    return new DecryptionProofTuple(
+            CommonConvert.convertElementModP(proto.getDecryption()),
+            CommonConvert.convertChaumPedersenProof(proto.getProof()));
+  }
 
   boolean shutdown() {
     try {

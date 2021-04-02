@@ -6,7 +6,7 @@ import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.Group;
 
 import javax.annotation.Nullable;
-import java.util.Optional;
+import java.util.List;
 
 public interface DecryptingTrusteeIF {
   /** Guardian id. */
@@ -16,14 +16,14 @@ public interface DecryptingTrusteeIF {
   /** Elgamal election public key. */
   Group.ElementModP electionPublicKey();
 
-  Optional<DecryptionProofRecovery> compensatedDecrypt(
+  List<DecryptionProofRecovery> compensatedDecrypt(
           String missing_guardian_id,
-          ElGamal.Ciphertext message,
+          List<ElGamal.Ciphertext> texts,
           Group.ElementModQ extended_base_hash,
           @Nullable Group.ElementModQ nonce_seed);
 
-  Optional<DecryptionProofTuple> partialDecrypt(
-          ElGamal.Ciphertext message,
+  List<DecryptionProofTuple> partialDecrypt(
+          List<ElGamal.Ciphertext> texts,
           Group.ElementModQ extended_base_hash,
           @Nullable Group.ElementModQ nonce_seed);
 

@@ -2,6 +2,7 @@ package com.sunya.electionguard.guardian;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import com.google.common.flogger.FluentLogger;
 import com.sunya.electionguard.CiphertextBallot;
 import com.sunya.electionguard.CiphertextContest;
@@ -187,8 +188,13 @@ public class TrusteeDecryptions {
           CiphertextElectionContext context) {
 
     try {
-      Optional<DecryptionProofTuple> tupleo = guardian.partialDecrypt(selection.ciphertext(), context.crypto_extended_base_hash, null);
-      DecryptionProofTuple tuple = tupleo.orElseThrow(); // LOOK
+      List<DecryptionProofTuple> results = guardian.partialDecrypt(ImmutableList.of(selection.ciphertext()), context.crypto_extended_base_hash, null);
+      if (results.isEmpty()) {
+        logger.atWarning().log("compute_decryption_share_for_selection guardian.partialDecrypt failed",
+                guardian.id(), selection.object_id);
+        return Optional.empty();
+      }
+      DecryptionProofTuple tuple = results.get(0);
       if (tuple.proof.is_valid(selection.ciphertext(), guardian.electionPublicKey(),
               tuple.decryption, context.crypto_extended_base_hash)) {
         return Optional.of(DecryptionShare.create_ciphertext_decryption_selection(
@@ -397,9 +403,9 @@ public class TrusteeDecryptions {
           CiphertextSelection selection,
           CiphertextElectionContext context) {
 
-    Optional<DecryptionProofRecovery> compensated = guardian.compensatedDecrypt(
+    List<DecryptionProofRecovery> compensated = guardian.compensatedDecrypt(
             missing_guardian_id,
-            selection.ciphertext(),
+            ImmutableList.of(selection.ciphertext()),
             context.crypto_extended_base_hash,
             null);
 
@@ -408,15 +414,7 @@ public class TrusteeDecryptions {
               guardian.id(), missing_guardian_id, selection.object_id);
       return Optional.empty();
     }
-    DecryptionProofRecovery tuple = compensated.get();
-
-    /* LOOK we always need the compensatedDecrypt and the recoverPublicKey, why not do both at once?
-    Optional<Group.ElementModP> recovery_public_key = guardian.recoverPublicKey(missing_guardian_id);
-    if (recovery_public_key.isEmpty()) {
-      logger.atWarning().log("recoverPublicKey failed for %s missing guardian: %s %s",
-              guardian.id(), missing_guardian_id, selection.object_id);
-      return Optional.empty();
-    } */
+    DecryptionProofRecovery tuple = compensated.get(0);
 
     if (tuple.proof.is_valid(
             selection.ciphertext(),

@@ -14,6 +14,7 @@ import com.sunya.electionguard.Rsa;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -73,15 +74,15 @@ public class DecryptingTrustee {
    * <p>
    *
    * @param missing_guardian_id: the guardian
-   * @param elgamal:             the `ElGamalCiphertext` that will be partially decrypted
+   * @param texts:               the ciphertext(s) that will be decrypted
    * @param extended_base_hash:  the extended base hash of the election used to generate the ElGamal Ciphertext
    * @param nonce_seed:          an optional value used to generate the `ChaumPedersenProof`
    *                             if no value is provided, a random number will be used.
    * @return the decryption and its proof
    */
-  public DecryptionProofRecovery compensatedDecrypt(
+  public List<DecryptionProofRecovery> compensatedDecrypt(
           String missing_guardian_id,
-          ElGamal.Ciphertext elgamal,
+          List<ElGamal.Ciphertext> texts,
           Group.ElementModQ extended_base_hash,
           @Nullable Group.ElementModQ nonce_seed) {
 
@@ -95,7 +96,6 @@ public class DecryptingTrustee {
       logger.atInfo().log(mess);
       throw new IllegalStateException(mess);
     }
-
     Optional<String> decrypted_value = Rsa.decrypt(backup.encryptedCoordinate(), this.rsa_private_key);
     if (decrypted_value.isEmpty()) {
       String mess = String.format("compensate decrypt guardian %s failed decryption for %s",
@@ -112,45 +112,51 @@ public class DecryptingTrustee {
     }
     Group.ElementModQ partialSecretKey = partialSecretKeyO.get();
 
-    // 𝑀_{𝑖,l} = 𝐴^P𝑖_{l}
-    Group.ElementModP partial_decryption = elgamal.partial_decrypt(partialSecretKey);
+    Group.ElementModP recovered = recoverPublicKey(missing_guardian_id);
 
-    // 𝑀_{𝑖,l} = 𝐴^𝑠𝑖 mod 𝑝 and 𝐾𝑖 = 𝑔^𝑠𝑖 mod 𝑝
-    ChaumPedersen.ChaumPedersenProof proof = ChaumPedersen.make_chaum_pedersen(
-            elgamal,
-            partialSecretKey,
-            partial_decryption,
-            nonce_seed,
-            extended_base_hash);
+    List<DecryptionProofRecovery> results = new ArrayList<>();
+    for (ElGamal.Ciphertext text : texts) {
+      // 𝑀_{𝑖,l} = 𝐴^P𝑖_{l}
+      Group.ElementModP partial_decryption = text.partial_decrypt(partialSecretKey);
 
-    Group.ElementModP publicKey = recoverPublicKey(missing_guardian_id);
+      // 𝑀_{𝑖,l} = 𝐴^𝑠𝑖 mod 𝑝 and 𝐾𝑖 = 𝑔^𝑠𝑖 mod 𝑝
+      ChaumPedersen.ChaumPedersenProof proof = ChaumPedersen.make_chaum_pedersen(
+              text,
+              partialSecretKey,
+              partial_decryption,
+              nonce_seed,
+              extended_base_hash);
 
-    boolean valid = proof.is_valid(elgamal, publicKey, partial_decryption, extended_base_hash);
-    if (!valid) {
-      logger.atWarning().log(
-            String.format(" compensatedDecrypt invalid proof for %s = %s%n ", this.id, proof) +
-            String.format("   message = %s %n ", elgamal) +
-            String.format("   public_key = %s %n ", publicKey.toShortString()) +
-            String.format("   partial_decryption = %s %n ", partial_decryption.toShortString()) +
-            String.format("   extended_base_hash = %s %n ", extended_base_hash)
-      );
+      Group.ElementModP publicKey = recoverPublicKey(missing_guardian_id);
+
+      boolean valid = proof.is_valid(text, publicKey, partial_decryption, extended_base_hash);
+      if (!valid) {
+        logger.atWarning().log(
+                String.format(" compensatedDecrypt invalid proof for %s = %s%n ", this.id, proof) +
+                        String.format("   message = %s %n ", text) +
+                        String.format("   public_key = %s %n ", publicKey.toShortString()) +
+                        String.format("   partial_decryption = %s %n ", partial_decryption.toShortString()) +
+                        String.format("   extended_base_hash = %s %n ", extended_base_hash)
+        );
+      }
+
+      results.add(new DecryptionProofRecovery(partial_decryption, proof, recovered));
     }
-
-    return new DecryptionProofRecovery(partial_decryption, proof, recoverPublicKey(missing_guardian_id));
+    return results;
   }
 
   /**
    * Compute a partial decryption of an elgamal encryption.
    *
-   * @param elgamal:            the `ElGamalCiphertext` that will be partially decrypted
+   * @param texts:            the `ElGamalCiphertext` that will be partially decrypted
    * @param extended_base_hash: the extended base hash of the election that
    *                            was used to generate t he ElGamal Ciphertext
    * @param nonce_seed:         an optional value used to generate the `ChaumPedersenProof`
    *                            if no value is provided, a random number will be used.
    * @return a `Tuple[ElementModP, ChaumPedersenProof]` of the decryption and its proof
    */
-  public DecryptionProofTuple partialDecrypt(
-          ElGamal.Ciphertext elgamal,
+  public List<DecryptionProofTuple> partialDecrypt(
+          List<ElGamal.Ciphertext> texts,
           Group.ElementModQ extended_base_hash,
           @Nullable Group.ElementModQ nonce_seed) {
 
@@ -158,30 +164,33 @@ public class DecryptingTrustee {
       nonce_seed = rand_q();
     }
 
-    //TODO: ISSUE #47: Decrypt the election secret key
+    List<DecryptionProofTuple> results = new ArrayList<>();
+    for (ElGamal.Ciphertext text : texts) {
+      // 𝑀_i = 𝐴^𝑠𝑖 mod 𝑝
+      Group.ElementModP partial_decryption = text.partial_decrypt(this.election_keypair.secret_key);
+      // 𝑀_i = 𝐴^𝑠𝑖 mod 𝑝 and 𝐾𝑖 = 𝑔^𝑠𝑖 mod 𝑝
+      ChaumPedersen.ChaumPedersenProof proof = ChaumPedersen.make_chaum_pedersen(
+              text,
+              this.election_keypair.secret_key,
+              partial_decryption,
+              nonce_seed,
+              extended_base_hash);
 
-    // 𝑀_i = 𝐴^𝑠𝑖 mod 𝑝
-    Group.ElementModP partial_decryption = elgamal.partial_decrypt(this.election_keypair.secret_key);
+      boolean valid = proof.is_valid(text, this.election_keypair.public_key, partial_decryption, extended_base_hash);
+      if (!valid) {
+        logger.atWarning().log(
+                String.format(" partialDecrypt invalid proof for %s = %s%n ", this.id, proof) +
+                        String.format("   message = %s %n ", text) +
+                        String.format("   public_key = %s %n ", this.election_keypair.public_key.toShortString()) +
+                        String.format("   partial_decryption = %s %n ", partial_decryption.toShortString()) +
+                        String.format("   extended_base_hash = %s %n ", extended_base_hash)
+        );
+      }
 
-    // 𝑀_i = 𝐴^𝑠𝑖 mod 𝑝 and 𝐾𝑖 = 𝑔^𝑠𝑖 mod 𝑝
-    ChaumPedersen.ChaumPedersenProof proof = ChaumPedersen.make_chaum_pedersen(
-            elgamal,
-            this.election_keypair.secret_key,
-            partial_decryption,
-            nonce_seed,
-            extended_base_hash);
-
-    boolean valid = proof.is_valid(elgamal, this.election_keypair.public_key, partial_decryption, extended_base_hash);
-    if (!valid) {
-      logger.atWarning().log(
-              String.format(" partialDecrypt invalid proof for %s = %s%n ", this.id, proof) +
-                      String.format("   message = %s %n ", elgamal) +
-                      String.format("   public_key = %s %n ", this.election_keypair.public_key.toShortString()) +
-                      String.format("   partial_decryption = %s %n ", partial_decryption.toShortString()) +
-                      String.format("   extended_base_hash = %s %n ", extended_base_hash)
-      );
+      results.add(new DecryptionProofTuple(partial_decryption, proof));
     }
-    return new DecryptionProofTuple(partial_decryption, proof);
+
+    return results;
   }
 
   /** Compute the recovery public key for a given guardian. */

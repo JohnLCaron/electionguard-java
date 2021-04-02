@@ -6,6 +6,7 @@ import com.beust.jcommander.ParameterException;
 import com.google.common.flogger.FluentLogger;
 import com.sunya.electionguard.DecryptionProofRecovery;
 import com.sunya.electionguard.DecryptionProofTuple;
+import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.guardian.DecryptingTrustee;
 import com.sunya.electionguard.proto.CommonConvert;
 import com.sunya.electionguard.proto.CommonProto;
@@ -19,8 +20,10 @@ import io.grpc.stub.StreamObserver;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /** A Remote Trustee with a DecryptingTrustee delegate, communicating over gRpc. */
 class DecryptingRemoteTrustee extends DecryptingTrusteeServiceGrpc.DecryptingTrusteeServiceImplBase {
@@ -183,15 +186,16 @@ class DecryptingRemoteTrustee extends DecryptingTrusteeServiceGrpc.DecryptingTru
 
     DecryptingTrusteeProto.CompensatedDecryptionResponse.Builder response = DecryptingTrusteeProto.CompensatedDecryptionResponse.newBuilder();
     try {
-      DecryptionProofRecovery tuple = delegate.compensatedDecrypt(
+      List<ElGamal.Ciphertext > texts = request.getTextList().stream().map(CommonConvert::convertCiphertext).collect(Collectors.toList());
+
+      List<DecryptionProofRecovery> tuples = delegate.compensatedDecrypt(
               request.getMissingGuardianId(),
-              CommonConvert.convertCiphertext(request.getText()),
+              texts,
               CommonConvert.convertElementModQ(request.getExtendedBaseHash()),
               null);
 
-      response.setDecryption(CommonConvert.convertElementModP(tuple.decryption))
-              .setProof(CommonConvert.convertChaumPedersenProof(tuple.proof))
-              .setRecoveryPublicKey(CommonConvert.convertElementModP(tuple.recoveryPublicKey));
+      List<DecryptingTrusteeProto.CompensatedDecryptionResult> protos = tuples.stream().map(this::convertDecryptionProofRecovery).collect(Collectors.toList());
+      response.addAllResults(protos);
       logger.atInfo().log("DecryptingRemoteTrustee compensatedDecrypt %s", delegate.id);
     } catch (Throwable t) {
       logger.atSevere().withCause(t).log("DecryptingRemoteTrustee compensatedDecrypt failed");
@@ -203,19 +207,28 @@ class DecryptingRemoteTrustee extends DecryptingTrusteeServiceGrpc.DecryptingTru
     responseObserver.onCompleted();
   }
 
-  @Override
-  public void partialDecrypt(DecryptingTrusteeProto.DecryptionRequest request,
-                                 StreamObserver<DecryptingTrusteeProto.DecryptionResponse> responseObserver) {
+  private DecryptingTrusteeProto.CompensatedDecryptionResult convertDecryptionProofRecovery(DecryptionProofRecovery tuple) {
+    return DecryptingTrusteeProto.CompensatedDecryptionResult.newBuilder()
+            .setDecryption(CommonConvert.convertElementModP(tuple.decryption))
+            .setProof(CommonConvert.convertChaumPedersenProof(tuple.proof))
+            .setRecoveryPublicKey(CommonConvert.convertElementModP(tuple.recoveryPublicKey))
+            .build();
+  }
 
-    DecryptingTrusteeProto.DecryptionResponse.Builder response = DecryptingTrusteeProto.DecryptionResponse.newBuilder();
+  @Override
+  public void partialDecrypt(DecryptingTrusteeProto.PartialDecryptionRequest request,
+                                 StreamObserver<DecryptingTrusteeProto.PartialDecryptionResponse> responseObserver) {
+
+    DecryptingTrusteeProto.PartialDecryptionResponse.Builder response = DecryptingTrusteeProto.PartialDecryptionResponse.newBuilder();
     try {
-      DecryptionProofTuple tuple = delegate.partialDecrypt(
-              CommonConvert.convertCiphertext(request.getText()),
+      List<ElGamal.Ciphertext > texts = request.getTextList().stream().map(CommonConvert::convertCiphertext).collect(Collectors.toList());
+      List<DecryptionProofTuple> tuples = delegate.partialDecrypt(
+              texts,
               CommonConvert.convertElementModQ(request.getExtendedBaseHash()),
               null);
 
-      response.setDecryption(CommonConvert.convertElementModP(tuple.decryption))
-              .setProof(CommonConvert.convertChaumPedersenProof(tuple.proof));
+      List<DecryptingTrusteeProto.PartialDecryptionResult> protos = tuples.stream().map(this::convertDecryptionProofTuple).collect(Collectors.toList());
+      response.addAllResults(protos);
       logger.atInfo().log("DecryptingRemoteTrustee partialDecrypt %s", delegate.id);
     } catch (Throwable t) {
       logger.atSevere().withCause(t).log("DecryptingRemoteTrustee partialDecrypt failed");
@@ -225,6 +238,13 @@ class DecryptingRemoteTrustee extends DecryptingTrusteeServiceGrpc.DecryptingTru
 
     responseObserver.onNext(response.build());
     responseObserver.onCompleted();
+  }
+
+  private DecryptingTrusteeProto.PartialDecryptionResult convertDecryptionProofTuple(DecryptionProofTuple tuple) {
+    return DecryptingTrusteeProto.PartialDecryptionResult.newBuilder()
+            .setDecryption(CommonConvert.convertElementModP(tuple.decryption))
+            .setProof(CommonConvert.convertChaumPedersenProof(tuple.proof))
+          .build();
   }
 
 }

@@ -6,7 +6,7 @@ import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.Group;
 
 import javax.annotation.Nullable;
-import java.util.Optional;
+import java.util.List;
 
 public class DecryptingTrusteeSimulator implements DecryptingTrusteeIF {
   private final DecryptingTrustee delegate;
@@ -31,21 +31,24 @@ public class DecryptingTrusteeSimulator implements DecryptingTrusteeIF {
   }
 
   @Override
-  public Optional<DecryptionProofRecovery> compensatedDecrypt(
+  public List<DecryptionProofRecovery> compensatedDecrypt(
           String missing_guardian_id,
-          ElGamal.Ciphertext elgamal,
+          List<ElGamal.Ciphertext> elgamal,
           Group.ElementModQ extended_base_hash,
           @Nullable Group.ElementModQ nonce_seed) {
 
-    return Optional.of(delegate.compensatedDecrypt(missing_guardian_id,
+    return delegate.compensatedDecrypt(missing_guardian_id,
             elgamal,
             extended_base_hash,
-            nonce_seed));
+            nonce_seed);
   }
 
   @Override
-  public Optional<DecryptionProofTuple> partialDecrypt(ElGamal.Ciphertext elgamal, Group.ElementModQ extended_base_hash, @Nullable Group.ElementModQ nonce_seed) {
-    return Optional.of(delegate.partialDecrypt(elgamal, extended_base_hash, nonce_seed));
+  public List<DecryptionProofTuple> partialDecrypt(
+          List<ElGamal.Ciphertext> elgamal,
+          Group.ElementModQ extended_base_hash,
+          @Nullable Group.ElementModQ nonce_seed) {
+    return delegate.partialDecrypt(elgamal, extended_base_hash, nonce_seed);
   }
 
 }
