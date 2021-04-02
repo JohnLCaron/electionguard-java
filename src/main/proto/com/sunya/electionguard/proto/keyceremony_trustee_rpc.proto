@@ -4,9 +4,9 @@ import "com/sunya/electionguard/proto/common.proto";
 import "google/protobuf/empty.proto";
 
 option java_package = "com.sunya.electionguard.proto";
-option java_outer_classname = "RemoteTrusteeProto";
+option java_outer_classname = "RemoteKeyCeremonyTrusteeProto";
 
-service RemoteTrusteeService {
+service RemoteKeyCeremonyTrusteeService {
   rpc sendPublicKeys (PublicKeySetRequest) returns (PublicKeySet) {}
   rpc receivePublicKeys (PublicKeySet) returns (BooleanResponse) {}
   rpc sendPartialKeyBackup (PartialKeyBackupRequest) returns (PartialKeyBackup) {}

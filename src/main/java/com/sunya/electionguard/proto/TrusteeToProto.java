@@ -12,14 +12,14 @@ import static com.sunya.electionguard.proto.CommonConvert.convertElementModP;
 
 public class TrusteeToProto {
 
-  public static TrusteeProto.Trustees convertTrustees(List<KeyCeremonyTrustee> trustees) {
-    TrusteeProto.Trustees.Builder builder = TrusteeProto.Trustees.newBuilder();
+  public static TrusteeProto.DecryptingTrustees convertTrustees(List<KeyCeremonyTrustee> trustees) {
+    TrusteeProto.DecryptingTrustees.Builder builder = TrusteeProto.DecryptingTrustees.newBuilder();
     trustees.forEach(t -> builder.addTrustees(convertTrustee(t)));
     return builder.build();
   }
 
-  public static TrusteeProto.Trustee convertTrustee(KeyCeremonyTrustee trustee) {
-    TrusteeProto.Trustee.Builder builder = TrusteeProto.Trustee.newBuilder();
+  public static TrusteeProto.DecryptingTrustee convertTrustee(KeyCeremonyTrustee trustee) {
+    TrusteeProto.DecryptingTrustee.Builder builder = TrusteeProto.DecryptingTrustee.newBuilder();
     builder.setGuardianId(trustee.id);
     builder.setGuardianXCoordinate(trustee.xCoordinate);
     builder.setElectionKeyPair(convertElgamalKeypair(trustee.secrets().election_key_pair));

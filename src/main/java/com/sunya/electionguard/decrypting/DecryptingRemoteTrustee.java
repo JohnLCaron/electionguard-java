@@ -6,7 +6,6 @@ import com.beust.jcommander.ParameterException;
 import com.google.common.flogger.FluentLogger;
 import com.sunya.electionguard.DecryptionProofRecovery;
 import com.sunya.electionguard.DecryptionProofTuple;
-import com.sunya.electionguard.Group;
 import com.sunya.electionguard.guardian.DecryptingTrustee;
 import com.sunya.electionguard.proto.CommonConvert;
 import com.sunya.electionguard.proto.CommonProto;
@@ -227,55 +226,5 @@ class DecryptingRemoteTrustee extends DecryptingTrusteeServiceGrpc.DecryptingTru
     responseObserver.onNext(response.build());
     responseObserver.onCompleted();
   }
-
-  @Override
-  public void recoverPublicKey(DecryptingTrusteeProto.RecoverPublicKeyRequest request,
-                                StreamObserver<DecryptingTrusteeProto.RecoverPublicKeyResponse> responseObserver) {
-
-    DecryptingTrusteeProto.RecoverPublicKeyResponse.Builder response = DecryptingTrusteeProto.RecoverPublicKeyResponse.newBuilder();
-    try {
-      Group.ElementModP key = delegate.recoverPublicKey(request.getGuardianId());
-
-      response.setRecoveredKey(CommonConvert.convertElementModP(key));
-      logger.atInfo().log("DecryptingRemoteTrustee partialDecrypt %s", delegate.id);
-    } catch (Throwable t) {
-      logger.atSevere().withCause(t).log("DecryptingRemoteTrustee partialDecrypt failed");
-      t.printStackTrace();
-      response.setError(CommonProto.RemoteError.newBuilder().setMessage(t.getMessage()).build());
-    }
-
-    responseObserver.onNext(response.build());
-    responseObserver.onCompleted();
-  }
-
-  @Override
-  public void ping(com.google.protobuf.Empty request,
-                   StreamObserver<DecryptingTrusteeProto.PingResponse> responseObserver) {
-    DecryptingTrusteeProto.PingResponse.Builder response = DecryptingTrusteeProto.PingResponse.newBuilder();
-    responseObserver.onNext(response.setOk(true).build());
-    responseObserver.onCompleted();
-  }
-
-  /*
-  @Override
-  public void finish(RemoteTrusteeProto.FinishRequest request,
-                     StreamObserver<RemoteTrusteeProto.BooleanResponse> responseObserver) {
-    RemoteTrusteeProto.BooleanResponse.Builder response = RemoteTrusteeProto.BooleanResponse.newBuilder();
-    boolean ok = true;
-    try {
-      logger.atInfo().log("KeyCeremonyRemoteTrustee finish ok = %s", request.getAllOk());
-
-    } catch (Throwable t) {
-      logger.atSevere().withCause(t).log("KeyCeremonyRemoteTrustee finish failed");
-      t.printStackTrace();
-      response.setError(RemoteTrusteeProto.RemoteTrusteeError.newBuilder().setMessage(t.getMessage()).build());
-      ok = false;
-    }
-
-    response.setOk(ok);
-    responseObserver.onNext(response.build());
-    responseObserver.onCompleted();
-    System.exit(ok ? 0 : 1);
-  } */
 
 }

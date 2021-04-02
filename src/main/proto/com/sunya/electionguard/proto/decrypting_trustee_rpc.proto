@@ -9,8 +9,6 @@ option java_outer_classname = "DecryptingTrusteeProto";
 service DecryptingTrusteeService {
   rpc compensatedDecrypt (CompensatedDecryptionRequest) returns (CompensatedDecryptionResponse) {}
   rpc partialDecrypt (DecryptionRequest) returns (DecryptionResponse) {}
-  rpc recoverPublicKey (RecoverPublicKeyRequest) returns (RecoverPublicKeyResponse) {}
-  rpc ping (google.protobuf.Empty) returns (PingResponse) {}
 }
 
 //   Optional<DecryptionProofTuple> compensate_decrypt(

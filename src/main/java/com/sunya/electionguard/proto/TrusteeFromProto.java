@@ -17,30 +17,30 @@ import static com.sunya.electionguard.proto.CommonConvert.convertElementModP;
 public class TrusteeFromProto {
 
   public static ImmutableList<DecryptingTrustee> readTrustees(String filename) throws IOException {
-    TrusteeProto.Trustees proto;
+    TrusteeProto.DecryptingTrustees proto;
     try (FileInputStream inp = new FileInputStream(filename)) {
-      proto = TrusteeProto.Trustees.parseDelimitedFrom(inp);
+      proto = TrusteeProto.DecryptingTrustees.parseDelimitedFrom(inp);
     }
     return convertTrustees(proto);
   }
 
   public static DecryptingTrustee readTrustee(String filename) throws IOException {
-    TrusteeProto.Trustee proto;
+    TrusteeProto.DecryptingTrustee proto;
     try (FileInputStream inp = new FileInputStream(filename)) {
-      proto = TrusteeProto.Trustee.parseDelimitedFrom(inp);
+      proto = TrusteeProto.DecryptingTrustee.parseDelimitedFrom(inp);
     }
     return convertTrustee(proto);
   }
 
-  private static ImmutableList<DecryptingTrustee> convertTrustees(TrusteeProto.Trustees proto) {
+  private static ImmutableList<DecryptingTrustee> convertTrustees(TrusteeProto.DecryptingTrustees proto) {
     ImmutableList.Builder<DecryptingTrustee> builder = ImmutableList.builder();
-    for (TrusteeProto.Trustee guardianProto : proto.getTrusteesList()) {
+    for (TrusteeProto.DecryptingTrustee guardianProto : proto.getTrusteesList()) {
       builder.add(convertTrustee(guardianProto));
     }
     return builder.build();
   }
 
-  private static DecryptingTrustee convertTrustee(TrusteeProto.Trustee proto) {
+  private static DecryptingTrustee convertTrustee(TrusteeProto.DecryptingTrustee proto) {
 
     String guardian_id = proto.getGuardianId();
     int sequence_order = proto.getGuardianXCoordinate();

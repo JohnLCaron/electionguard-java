@@ -135,7 +135,7 @@ public class KeyCeremonySimulator {
     System.out.printf("%nKey Ceremony publishElectionRecord = %s%n", ok);
 
     List<KeyCeremonyTrustee> trustees = trusteeProxies.stream().map(t -> t.delegate).collect(Collectors.toList());
-    TrusteeProto.Trustees trusteesProto = TrusteeToProto.convertTrustees(trustees);
+    TrusteeProto.DecryptingTrustees trusteesProto = TrusteeToProto.convertTrustees(trustees);
     boolean okt;
     try {
       publisher.writeTrusteesProto(trusteesProto);

@@ -94,32 +94,6 @@ class DecryptingRemoteTrusteeProxy implements DecryptingTrusteeIF  {
     }
   }
 
-  @Override
-  public Optional<Group.ElementModP> recoverPublicKey(String guardianId) {
-    try {
-      DecryptingTrusteeProto.RecoverPublicKeyRequest.Builder request = DecryptingTrusteeProto.RecoverPublicKeyRequest.newBuilder()
-              .setGuardianId(guardianId);
-
-      DecryptingTrusteeProto.RecoverPublicKeyResponse response = blockingStub.recoverPublicKey(request.build());
-      if (response.hasError()) {
-        logger.atSevere().log("partialDecrypt failed: %s", response.getError().getMessage());
-        return Optional.empty();
-      }
-      return Optional.of(CommonConvert.convertElementModP(response.getRecoveredKey()));
-
-    } catch (StatusRuntimeException e) {
-      logger.atSevere().withCause(e).log("partialDecrypt failed: ");
-      e.printStackTrace();
-      return Optional.empty();
-    }
-  }
-
-  @Override
-  public boolean ping() {
-      DecryptingTrusteeProto.PingResponse response = blockingStub.ping(Empty.getDefaultInstance());
-      return response.getOk();
-  }
-
   /*
   boolean finish(boolean allOk) {
     try {

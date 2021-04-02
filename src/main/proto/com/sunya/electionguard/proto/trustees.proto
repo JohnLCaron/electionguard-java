@@ -8,11 +8,11 @@ option java_outer_classname = "TrusteeProto";
 
 // LOOK replaces key_ceremony.proto ??
 
-message Trustees {
-  repeated Trustee trustees = 1;
+message DecryptingTrustees {
+  repeated DecryptingTrustee trustees = 1;
 }
 
-message Trustee {
+message DecryptingTrustee {
   string guardian_id = 1;
   uint32 guardian_x_coordinate = 2;     // the x coefficient (sequence_order), must be > 0
   ElGamalKeyPair election_key_pair = 3;

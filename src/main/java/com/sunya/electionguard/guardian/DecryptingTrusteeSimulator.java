@@ -44,18 +44,8 @@ public class DecryptingTrusteeSimulator implements DecryptingTrusteeIF {
   }
 
   @Override
-  public Optional<DecryptionProofTuple>  partialDecrypt(ElGamal.Ciphertext elgamal, Group.ElementModQ extended_base_hash, @Nullable Group.ElementModQ nonce_seed) {
+  public Optional<DecryptionProofTuple> partialDecrypt(ElGamal.Ciphertext elgamal, Group.ElementModQ extended_base_hash, @Nullable Group.ElementModQ nonce_seed) {
     return Optional.of(delegate.partialDecrypt(elgamal, extended_base_hash, nonce_seed));
-  }
-
-  @Override
-  public Optional<Group.ElementModP> recoverPublicKey(String missing_guardian_id) {
-    return Optional.of(delegate.recoverPublicKey(missing_guardian_id));
-  }
-
-  @Override
-  public boolean ping() {
-    return true;
   }
 
 }

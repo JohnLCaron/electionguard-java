@@ -225,7 +225,7 @@ public class TestBallotInputValidation {
 
   @Example
   public void testOvervoteValidate() {
-    testValidate(testOvervote(), "OVERVOTE: Ballot Selection votes (2) exceeds limit (1)");
+    testValidate(testOvervote(), "Ballot Selection votes (2) exceeds limit (1)");
   }
 
   @Example

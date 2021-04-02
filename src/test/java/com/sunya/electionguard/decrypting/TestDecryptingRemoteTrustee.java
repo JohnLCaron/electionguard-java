@@ -16,6 +16,7 @@ import java.util.Optional;
 
 import static com.google.common.truth.Truth8.assertThat;
 
+/** Test DecryptingRemoteTrustee. Needs one to be running on 17771. */
 public class TestDecryptingRemoteTrustee {
   String trusteeProto = "/home/snake/tmp/electionguard/remoteWorkflow/keyCeremony/remoteTrustee-1.protobuf";
   String electionRecordDir = "/home/snake/tmp/electionguard/remoteWorkflow/accumTally/";
@@ -43,11 +44,6 @@ public class TestDecryptingRemoteTrustee {
   }
 
   @Example
-  public void testPing() {
-    System.out.printf("ping = %s%n", proxy.ping());
-  }
-
-  @Example
   public void testCompensatedDecrypt() {
     for (CiphertextTally.Contest contest : tally.contests.values()) {
       for (CiphertextTally.Selection selection : contest.selections.values()) {
@@ -58,7 +54,7 @@ public class TestDecryptingRemoteTrustee {
                 null);
 
         System.out.printf("compensatedDecrypt = %s%n", result.isPresent());
-        // assertThat(result).isPresent();
+        assertThat(result).isPresent();
       }
     }
   }
