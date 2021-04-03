@@ -238,6 +238,6 @@ public class EncryptBallots {
 
   void saveInvalidBallots(Publisher publisher, List<PlaintextBallot> ballots) throws IOException {
     publisher.publish_invalid_ballots("invalid_ballots", ballots);
-    System.out.printf("Save invalid ballot in %s/invalid_ballots%n", publisher.publishPath());
+    System.out.printf("Save %d invalid ballot in %s/invalid_ballots%n", ballots.size(), publisher.publishPath());
   }
 }

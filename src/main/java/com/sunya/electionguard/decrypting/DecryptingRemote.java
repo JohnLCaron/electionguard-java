@@ -11,8 +11,10 @@ import com.sunya.electionguard.CiphertextTally;
 import com.sunya.electionguard.CiphertextTallyBuilder;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.InternalManifest;
+import com.sunya.electionguard.PlaintextBallot;
 import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.Scheduler;
+import com.sunya.electionguard.SpoiledBallotAndTally;
 import com.sunya.electionguard.input.ElectionInputValidation;
 import com.sunya.electionguard.proto.CommonConvert;
 import com.sunya.electionguard.proto.CommonProto;
@@ -111,7 +113,7 @@ class DecryptingRemote {
         System.exit(1);
       }
 
-      DecryptingRemote decryptor = new DecryptingRemote(electionRecord, cmdLine.encryptDir, cmdLine.outputDir);
+      DecryptingRemote decryptor = new DecryptingRemote(consumer, electionRecord, cmdLine.encryptDir, cmdLine.outputDir);
       decryptor.start(cmdLine.port);
 
       // LOOK do something better
@@ -153,7 +155,7 @@ class DecryptingRemote {
       System.err.println("*** server shut down");
     }));
 
-    System.out.printf("---- KeyCeremonyRemoteService started, listening on %d ----%n", port);
+    System.out.printf("---- DecryptingRemote started, listening on %d ----%n", port);
   }
 
   private void stopit() throws InterruptedException {
@@ -171,6 +173,8 @@ class DecryptingRemote {
 
   ///////////////////////////////////////////////////////////////////////////
   final Stopwatch stopwatch = Stopwatch.createUnstarted();
+
+  final Consumer consumer;
   final ElectionRecord electionRecord;
   final String encryptDir;
   final String outputDir;
@@ -182,9 +186,12 @@ class DecryptingRemote {
 
   CiphertextTally encryptedTally;
   PlaintextTally decryptedTally;
+  List<PlaintextBallot> spoiledDecryptedBallots;
+  List<PlaintextTally> spoiledDecryptedTallies;
   List<AvailableGuardian> availableGuardians;
 
-  DecryptingRemote(ElectionRecord electionRecord, String encryptDir, String outputDir) {
+  DecryptingRemote(Consumer consumer, ElectionRecord electionRecord, String encryptDir, String outputDir) {
+    this.consumer = consumer;
     this.electionRecord = electionRecord;
     this.encryptDir = encryptDir;
     this.outputDir = outputDir;
@@ -237,7 +244,7 @@ class DecryptingRemote {
 
     DecryptingTrusteeMediator mediator = new DecryptingTrusteeMediator(electionRecord.context,
             this.encryptedTally,
-            new ArrayList<>(), // LOOK not doing spoiled ballots yet
+            consumer.spoiledBallotsProto(),
             guardianPublicKeys);
 
     int count = 0;
@@ -254,10 +261,14 @@ class DecryptingRemote {
 
     // Here's where the ciphertext Tally is decrypted.
     this.decryptedTally = mediator.get_plaintext_tally().orElseThrow();
-    //List<SpoiledBallotAndTally> spoiledTallyAndBallot =
-    //        mediator.decrypt_spoiled_ballots().orElseThrow();
-    //this.spoiledDecryptedBallots = spoiledTallyAndBallot.stream().map(e -> e.ballot).collect(Collectors.toList());
-    //this.spoiledDecryptedTallies = spoiledTallyAndBallot.stream().map(e -> e.tally).collect(Collectors.toList());
+
+
+    // Here's where the spoiled ballots are decrypted.
+    List<SpoiledBallotAndTally> spoiledTallyAndBallot = mediator.decrypt_spoiled_ballots().orElseThrow();
+    System.out.printf("SpoiledBallotAndTally = %d%n", spoiledTallyAndBallot.size());
+    this.spoiledDecryptedBallots = spoiledTallyAndBallot.stream().map(e -> e.ballot).collect(Collectors.toList());
+    this.spoiledDecryptedTallies = spoiledTallyAndBallot.stream().map(e -> e.tally).collect(Collectors.toList());
+
     this.availableGuardians = mediator.getAvailableGuardians();
     System.out.printf("Done decrypting tally%n%n%s%n", this.decryptedTally);
 
@@ -268,7 +279,7 @@ class DecryptingRemote {
         shutdownOk = false;
       }
     }
-    System.out.printf("Key Ceremony Trustees shutdown was success = %s%n", shutdownOk);
+    System.out.printf("DecryptingRemoteTrusteeProxy shutdown was success = %s%n", shutdownOk);
   }
 
   void publish(String inputDir, String publishDir) throws IOException {
@@ -277,12 +288,14 @@ class DecryptingRemote {
             this.electionRecord,
             this.encryptedTally,
             this.decryptedTally,
-            new ArrayList<>(),
-            new ArrayList<>(),
+            this.spoiledDecryptedBallots,
+            this.spoiledDecryptedTallies,
             this.availableGuardians);
 
     publisher.copyAcceptedBallots(inputDir);
   }
+
+  //////////////////////////////////////////////////////////////////////////////////////////
 
   private synchronized DecryptingRemoteTrusteeProxy registerTrustee(DecryptingProto.RegisterDecryptingTrusteeRequest request) {
     DecryptingRemoteTrusteeProxy.Builder builder = DecryptingRemoteTrusteeProxy.builder();
