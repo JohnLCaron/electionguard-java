@@ -1,4 +1,4 @@
-package com.sunya.electionguard.guardian;
+package com.sunya.electionguard.decrypting;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
@@ -193,7 +193,7 @@ public class DecryptingSimulator {
     Map<String, Group.ElementModP> guardianPublicKeys = electionRecord.guardianCoefficients.stream().collect(
             Collectors.toMap(coeff -> coeff.owner_id(), coeff -> coeff.coefficient_commitments().get(0)));
 
-    TrusteeDecryptionMediator mediator = new TrusteeDecryptionMediator(electionRecord.context,
+    DecryptingTrusteeMediator mediator = new DecryptingTrusteeMediator(electionRecord.context,
             this.encryptedTally,
             consumer.spoiledBallotsProto(),
             guardianPublicKeys);

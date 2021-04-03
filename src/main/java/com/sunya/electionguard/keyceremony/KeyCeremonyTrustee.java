@@ -1,4 +1,4 @@
-package com.sunya.electionguard.guardian;
+package com.sunya.electionguard.keyceremony;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
@@ -10,7 +10,6 @@ import com.sunya.electionguard.Auxiliary;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.ElectionPolynomial;
 import com.sunya.electionguard.Group;
-import com.sunya.electionguard.KeyCeremony;
 import com.sunya.electionguard.Rsa;
 import com.sunya.electionguard.SchnorrProof;
 
@@ -39,8 +38,6 @@ public class KeyCeremonyTrustee {
   // a unique number in [1, 256) that is the polynomial x value for this guardian
   public final int xCoordinate;
 
-  final int quorum;
-
   // All of the guardians' public keys (including this one), keyed by guardian id.
   public final Map<String, KeyCeremony2.PublicKeySet> allGuardianPublicKeys;
 
@@ -67,7 +64,6 @@ public class KeyCeremonyTrustee {
 
     this.id = id;
     this.xCoordinate = sequence_order;
-    this.quorum = quorum;
 
     this.guardianSecrets = GuardianSecrets.generate(quorum, nonce_seed);
     this.allGuardianPublicKeys = new HashMap<>();
@@ -184,16 +180,6 @@ public class KeyCeremonyTrustee {
   }
 
   /**
-   * Verify challenge of previous verification of election partial key.
-   *
-   * @param challenge: Manifest partial key challenge
-   * @return Manifest partial key verification
-   */
-  static KeyCeremony.ElectionPartialKeyVerification verifyPartialKeyChallenge(String verifier_id, KeyCeremony.ElectionPartialKeyChallenge challenge) {
-    return KeyCeremony.verify_election_partial_key_challenge(verifier_id, challenge);
-  }
-
-  /**
    * Creates a joint election key from the public keys of all guardians.
    */
   public ElementModP publishJointKey() {
@@ -203,14 +189,6 @@ public class KeyCeremonyTrustee {
     return ElGamal.elgamal_combine_public_keys(public_keys);
   }
 
-  /**
-   * https://www.electionguard.vote/spec/0.95.0/4_Key_generation/#overview-of-key-generation
-   * <li>Each guardian generates an independent ElGamal public-private key pair. </li>
-   * <li>Each guardian provides a non-interactive zero-knowledge Schnorr proof of knowledge of possession of the associated private key. </li>
-   * <li>Each guardian generates random polynomial coefficients. (threshold verification) </li>
-   * <li>Each guardian provides a Schnorr proof of knowledge of the secret coefficient value associated with each published commitment. </li>
-   * <li>Each guardian provides an auxiliary public encryption function </li>
-   */
   @Immutable
   public static class GuardianSecrets {
     /** The Guardian's polynomial. */

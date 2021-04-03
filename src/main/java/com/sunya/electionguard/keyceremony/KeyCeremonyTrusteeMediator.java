@@ -1,4 +1,4 @@
-package com.sunya.electionguard.guardian;
+package com.sunya.electionguard.keyceremony;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 /**
  * Mediate the key ceremony with remote Guardians.
  */
-public class TrusteeKeyCeremonyMediator {
+public class KeyCeremonyTrusteeMediator {
   final Manifest election;
   final int quorum;
 
@@ -40,7 +40,7 @@ public class TrusteeKeyCeremonyMediator {
    * This runs the key ceremony. Caller calls publishElectionRecord() separately.
    * Caller is in charge od saving trustee state.
    */
-  public TrusteeKeyCeremonyMediator(Manifest election, int quorum,
+  public KeyCeremonyTrusteeMediator(Manifest election, int quorum,
                                     List<KeyCeremonyTrusteeIF> trusteeProxies) {
     this.election = election;
     this.quorum = quorum;
@@ -175,7 +175,7 @@ public class TrusteeKeyCeremonyMediator {
         // encryption and the equation above, the claim of malfeasance is dismissed and the key
         // generation process continues undeterred.
         KeyCeremony2.PublicKeySet generatingKeys = publicKeysMap.get(response.generatingGuardianId());
-        KeyCeremony2.PartialKeyVerification challenge_verify = KeyCeremony2.verify_election_partial_key_challenge(response, generatingKeys.coefficientCommitments());
+        KeyCeremony2.PartialKeyVerification challenge_verify = KeyCeremony2.verifyElectionPartialKeyChallenge(response, generatingKeys.coefficientCommitments());
         if (!challenge_verify.verified()) {
           System.out.printf("***FAILED to validate Guardian %s backup that was challenged by Guardian %s%n",
                   failure.generatingGuardianId(), failure.designatedGuardianId());

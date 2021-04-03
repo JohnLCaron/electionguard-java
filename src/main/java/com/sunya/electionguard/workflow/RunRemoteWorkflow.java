@@ -1,4 +1,4 @@
-package com.sunya.electionguard.guardian;
+package com.sunya.electionguard.workflow;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;

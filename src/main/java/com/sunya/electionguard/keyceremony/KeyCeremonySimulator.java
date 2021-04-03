@@ -1,4 +1,4 @@
-package com.sunya.electionguard.guardian;
+package com.sunya.electionguard.keyceremony;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
@@ -109,7 +109,7 @@ public class KeyCeremonySimulator {
 
   List<KeyCeremonyTrusteeSimulator> trusteeProxies;
 
-  public KeyCeremonySimulator(Manifest manifest, int nguardians, int quorum, Publisher publisher) throws IOException {
+  public KeyCeremonySimulator(Manifest manifest, int nguardians, int quorum, Publisher publisher) {
     this.manifest = manifest;
     this.numberOfGuardians = nguardians;
     this.quorum = quorum;
@@ -117,11 +117,9 @@ public class KeyCeremonySimulator {
     System.out.printf("  Create %d Guardians, quorum = %d%n", this.numberOfGuardians, this.quorum);
 
     this.trusteeProxies = new ArrayList<>();
-    List<KeyCeremonyTrustee> trustees = new ArrayList<>();
     for (int i = 0; i < nguardians; i++) {
       int seq = i + 1;
       KeyCeremonyTrustee trustee = new KeyCeremonyTrustee("trustee" + seq, seq, quorum, null);
-      trustees.add(trustee);
       this.trusteeProxies.add(new KeyCeremonyTrusteeSimulator(trustee));
     }
   }
@@ -129,7 +127,7 @@ public class KeyCeremonySimulator {
   private void runKeyCeremony() {
     // This runs the key ceremony
     List<KeyCeremonyTrusteeIF> trusteeIfs = new ArrayList<>(trusteeProxies);
-    TrusteeKeyCeremonyMediator mediator = new TrusteeKeyCeremonyMediator(manifest, quorum, trusteeIfs);
+    KeyCeremonyTrusteeMediator mediator = new KeyCeremonyTrusteeMediator(manifest, quorum, trusteeIfs);
 
     boolean ok = mediator.publishElectionRecord(this.publisher);
     System.out.printf("%nKey Ceremony publishElectionRecord = %s%n", ok);

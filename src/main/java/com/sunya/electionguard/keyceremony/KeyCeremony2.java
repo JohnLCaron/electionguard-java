@@ -1,4 +1,4 @@
-package com.sunya.electionguard.guardian;
+package com.sunya.electionguard.keyceremony;
 
 import com.google.auto.value.AutoValue;
 import com.google.common.base.Preconditions;
@@ -37,10 +37,6 @@ public class KeyCeremony2 {
 
     public ElementModP electionPublicKey() {
       return coefficientCommitments().get(0);
-    }
-
-    public SchnorrProof electionPublicKeyProof() {
-      return coefficientProofs().get(0);
     }
 
     public ImmutableList<ElementModP> coefficientCommitments() {
@@ -113,7 +109,7 @@ public class KeyCeremony2 {
    * Verify a response to a challenge to a partial key backup.
    * @param response: The response to a partial key backup challenge
    */
-  public static PartialKeyVerification verify_election_partial_key_challenge(
+  public static PartialKeyVerification verifyElectionPartialKeyChallenge(
           PartialKeyChallengeResponse response, List<ElementModP> coefficient_commitments) {
 
     boolean ok = ElectionPolynomial.verify_polynomial_coordinate(

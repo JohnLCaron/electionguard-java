@@ -7,7 +7,6 @@ import com.sunya.electionguard.DecryptionProofRecovery;
 import com.sunya.electionguard.DecryptionProofTuple;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.Group;
-import com.sunya.electionguard.guardian.DecryptingTrusteeIF;
 import com.sunya.electionguard.proto.CommonConvert;
 import com.sunya.electionguard.proto.CommonProto;
 import com.sunya.electionguard.proto.DecryptingTrusteeProto;
@@ -24,7 +23,6 @@ import java.util.stream.Collectors;
 /** A Remote Trustee client proxy, communicating over gRpc. */
 class DecryptingRemoteTrusteeProxy implements DecryptingTrusteeIF  {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
-  private static final int MAX_MESSAGE = 51 * 1000 * 1000; // 51 Mb
 
   @Override
   public String id() {

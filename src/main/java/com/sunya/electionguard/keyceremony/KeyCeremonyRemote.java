@@ -5,8 +5,6 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.google.common.flogger.FluentLogger;
 import com.sunya.electionguard.Manifest;
-import com.sunya.electionguard.guardian.TrusteeKeyCeremonyMediator;
-import com.sunya.electionguard.guardian.KeyCeremonyTrusteeIF;
 import com.sunya.electionguard.input.ElectionInputValidation;
 import com.sunya.electionguard.proto.RemoteKeyCeremonyProto;
 import com.sunya.electionguard.proto.RemoteKeyCeremonyServiceGrpc;
@@ -23,7 +21,6 @@ import java.util.Formatter;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 /**
  * A command line program that performs the key ceremony with remote Guardians.
@@ -136,19 +133,16 @@ class KeyCeremonyRemote {
             // .intercept(new MyServerInterceptor())
             .build().start();
 
-    Runtime.getRuntime().addShutdownHook(new Thread() {
-      @Override
-      public void run() {
-        // Use stderr here since the logger may have been reset by its JVM shutdown hook.
-        System.err.println("*** shutting down gRPC server since JVM is shutting down");
-        try {
-          stopit();
-        } catch (InterruptedException e) {
-          e.printStackTrace(System.err);
-        }
-        System.err.println("*** server shut down");
+    Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+      // Use stderr here since the logger may have been reset by its JVM shutdown hook.
+      System.err.println("*** shutting down gRPC server since JVM is shutting down");
+      try {
+        stopit();
+      } catch (InterruptedException e) {
+        e.printStackTrace(System.err);
       }
-    });
+      System.err.println("*** server shut down");
+    }));
 
     System.out.printf("---- KeyCeremonyRemoteService started, listening on %d ----%n", port);
   }
@@ -197,8 +191,8 @@ class KeyCeremonyRemote {
 
   private void runKeyCeremony() {
     // This runs the key ceremony
-    List<KeyCeremonyTrusteeIF> trusteeIfs = trusteeProxies.stream().collect(Collectors.toList());
-    TrusteeKeyCeremonyMediator mediator = new TrusteeKeyCeremonyMediator(manifest, quorum, trusteeIfs);
+    List<KeyCeremonyTrusteeIF> trusteeIfs = new ArrayList<>(trusteeProxies);
+    KeyCeremonyTrusteeMediator mediator = new KeyCeremonyTrusteeMediator(manifest, quorum, trusteeIfs);
 
     // tell the remote trustees to save their state
     boolean allOk = true;

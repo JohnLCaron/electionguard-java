@@ -5,8 +5,8 @@
 
 package com.sunya.electionguard.viz;
 
-import com.sunya.electionguard.guardian.DecryptingTrustee;
-import com.sunya.electionguard.guardian.KeyCeremony2;
+import com.sunya.electionguard.decrypting.DecryptingTrustee;
+import com.sunya.electionguard.keyceremony.KeyCeremony2;
 import ucar.ui.prefs.BeanTable;
 import ucar.ui.widget.BAMutil;
 import ucar.ui.widget.IndependentWindow;
