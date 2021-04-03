@@ -12,11 +12,8 @@ import com.sunya.electionguard.CiphertextTally;
 import com.sunya.electionguard.DecryptionProofRecovery;
 import com.sunya.electionguard.DecryptionProofTuple;
 import com.sunya.electionguard.DecryptionShare;
-import com.sunya.electionguard.ElectionPolynomial;
 import com.sunya.electionguard.Group;
-import com.sunya.electionguard.KeyCeremony;
 import com.sunya.electionguard.SubmittedBallot;
-import com.sunya.electionguard.decrypting.DecryptingTrusteeIF;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Callable;
-import java.util.stream.Collectors;
 
 import static com.sunya.electionguard.DecryptionShare.CiphertextCompensatedDecryptionContest;
 import static com.sunya.electionguard.DecryptionShare.CiphertextCompensatedDecryptionSelection;
@@ -32,7 +28,10 @@ import static com.sunya.electionguard.DecryptionShare.CiphertextDecryptionContes
 import static com.sunya.electionguard.DecryptionShare.CiphertextDecryptionSelection;
 import static com.sunya.electionguard.DecryptionShare.CompensatedDecryptionShare;
 
-/** Static methods for decryption. */
+/**
+ * Static methods for decryption for trustees.
+ * LOOK can we merge with the library Decryptions class ?
+ */
 public class TrusteeDecryptions {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
@@ -299,34 +298,6 @@ public class TrusteeDecryptions {
   }
 
   /**
-   * Compute the compensated decryption for the given ballots, for a specific guardian.
-   * Parallizable over each of the ballot's selections.
-   * @return Map(BALLOT_ID, CompensatedDecryptionShare)
-   */
-  static Optional<Map<String, CompensatedDecryptionShare>> compute_compensated_decryption_share_for_ballots(
-          DecryptingTrusteeIF guardian,
-          String missing_guardian_id,
-          Iterable<SubmittedBallot> ballots,
-          CiphertextElectionContext context) {
-
-    Map<String, CompensatedDecryptionShare> decrypted_ballots = new HashMap<>();
-
-    for (SubmittedBallot spoiled_ballot : ballots) {
-      Optional<CompensatedDecryptionShare> compensated_ballot =
-              compute_compensated_decryption_share_for_ballot(
-                      guardian, missing_guardian_id, spoiled_ballot, context);
-
-      if (compensated_ballot.isPresent()) {
-        decrypted_ballots.put(spoiled_ballot.object_id, compensated_ballot.get());
-      } else {
-        return Optional.empty();
-      }
-    }
-
-    return Optional.of(decrypted_ballots);
-  }
-
-  /**
    * Compute the compensated decryption for a single ballot.
    * Parallizable over each of the ballot's selections.
    */
@@ -436,32 +407,6 @@ public class TrusteeDecryptions {
               guardian.id(), missing_guardian_id, selection.object_id);
       return Optional.empty();
     }
-  }
-
-  ////////////////////////////////////////////////////////////////////////////////////////////////
-
-  /** Produce all Lagrange coefficients for a collection of available Guardians, used when reconstructing a missing share. */
-  @VisibleForTesting
-  static Map<String, Group.ElementModQ> compute_lagrange_coefficients_for_guardians(
-          List<KeyCeremony.PublicKeySet> all_available_guardian_keys) {
-
-    Map<String, Group.ElementModQ> result = new HashMap<>();
-    all_available_guardian_keys
-            .forEach(g -> result.put(g.owner_id(),
-                    compute_lagrange_coefficients_for_guardian(all_available_guardian_keys, g)));
-    return result;
-  }
-
-  /** Produce a Lagrange coefficient for a single KeyCeremonyTrustee, to be used when reconstructing a missing share. */
-  private static Group.ElementModQ compute_lagrange_coefficients_for_guardian(
-          List<KeyCeremony.PublicKeySet> all_available_guardian_keys,
-          KeyCeremony.PublicKeySet guardian_keys) {
-
-    List<Integer> other_guardian_orders = all_available_guardian_keys.stream()
-            .filter(g -> !g.owner_id().equals(guardian_keys.owner_id()))
-            .map(g -> g.sequence_order()).collect(Collectors.toList());
-
-    return ElectionPolynomial.compute_lagrange_coefficient(guardian_keys.sequence_order(), other_guardian_orders);
   }
 
   ///////////////////////////////////////////////////////////////////////////////////////////////
