@@ -4,8 +4,8 @@ import com.google.common.collect.ImmutableList;
 import com.sunya.electionguard.Auxiliary;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.Group;
-import com.sunya.electionguard.guardian.DecryptingTrustee;
-import com.sunya.electionguard.guardian.KeyCeremony2;
+import com.sunya.electionguard.decrypting.DecryptingTrustee;
+import com.sunya.electionguard.keyceremony.KeyCeremony2;
 
 import java.io.FileInputStream;
 import java.io.IOException;

@@ -5,7 +5,6 @@ import com.google.protobuf.ByteString;
 import com.sunya.electionguard.Auxiliary;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.SchnorrProof;
-import com.sunya.electionguard.guardian.KeyCeremony2;
 import com.sunya.electionguard.proto.CommonConvert;
 import com.sunya.electionguard.proto.RemoteKeyCeremonyTrusteeProto;
 import com.sunya.electionguard.proto.RemoteKeyCeremonyTrusteeServiceGrpc;
@@ -21,7 +20,7 @@ import java.util.stream.Collectors;
 import static com.sunya.electionguard.proto.RemoteKeyCeremonyTrusteeServiceGrpc.RemoteKeyCeremonyTrusteeServiceBlockingStub;
 
 /** A Remote Trustee client proxy, communicating over gRpc. */
-class KeyCeremonyRemoteTrusteeProxy implements com.sunya.electionguard.guardian.KeyCeremonyTrusteeIF {
+class KeyCeremonyRemoteTrusteeProxy implements KeyCeremonyTrusteeIF {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
   private static final int MAX_MESSAGE = 51 * 1000 * 1000; // 51 Mb
 
@@ -211,12 +210,10 @@ class KeyCeremonyRemoteTrusteeProxy implements com.sunya.electionguard.guardian.
   private final ManagedChannel channel;
   private final RemoteKeyCeremonyTrusteeServiceBlockingStub blockingStub;
 
-  @Override
   public int coordinate() {
     return coordinate;
   }
 
-  @Override
   public int quorum() {
     return quorum;
   }

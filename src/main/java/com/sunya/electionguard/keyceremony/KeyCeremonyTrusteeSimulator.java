@@ -1,4 +1,4 @@
-package com.sunya.electionguard.guardian;
+package com.sunya.electionguard.keyceremony;
 
 import com.sunya.electionguard.Group;
 
@@ -13,16 +13,6 @@ public class KeyCeremonyTrusteeSimulator implements KeyCeremonyTrusteeIF {
 
   public String id() {
     return this.delegate.id;
-  }
-
-  @Override
-  public int coordinate() {
-    return delegate.xCoordinate;
-  }
-
-  @Override
-  public int quorum() {
-    return delegate.quorum;
   }
 
   @Override

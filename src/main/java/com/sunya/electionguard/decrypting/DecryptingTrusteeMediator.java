@@ -1,4 +1,4 @@
-package com.sunya.electionguard.guardian;
+package com.sunya.electionguard.decrypting;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.flogger.FluentLogger;
@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
  * Orchestrates the decryption of encrypted Tallies and Ballots.
  * Mutable.
  */
-public class TrusteeDecryptionMediator {
+public class DecryptingTrusteeMediator {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   private final CiphertextElectionContext context;
@@ -53,7 +53,7 @@ public class TrusteeDecryptionMediator {
   private Map<String, Group.ElementModQ> lagrange_coefficients;
   private List<AvailableGuardian> guardianStates;
 
-  public TrusteeDecryptionMediator(CiphertextElectionContext context,
+  public DecryptingTrusteeMediator(CiphertextElectionContext context,
                                    CiphertextTally encryptedTally,
                                    Iterable<SubmittedBallot> spoiled_ballots,
                                    Map<String, Group.ElementModP> guardianPublicKeys) {
@@ -325,12 +325,7 @@ public class TrusteeDecryptionMediator {
               this.lagrange_coefficients);
 
       // LOOK ballot_shares now include missing_ballots
-      // LOOK use merge
-      Map<String, DecryptionShare> guardian_shares = this.ballot_shares.get(missing_guardian_id);
-      if (guardian_shares == null) {
-        guardian_shares = new HashMap<>();
-        this.ballot_shares.put(missing_guardian_id, guardian_shares);
-      }
+      Map<String, DecryptionShare> guardian_shares = this.ballot_shares.computeIfAbsent(missing_guardian_id, k -> new HashMap<>());
       guardian_shares.put(ballot.object_id, missing_decryption_share);
 
       this.ballot_shares.get(missing_guardian_id).put(ballot.object_id, missing_decryption_share);

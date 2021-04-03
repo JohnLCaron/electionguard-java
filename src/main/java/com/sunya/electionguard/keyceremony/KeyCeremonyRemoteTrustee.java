@@ -7,8 +7,6 @@ import com.google.common.flogger.FluentLogger;
 import com.google.protobuf.ByteString;
 import com.sunya.electionguard.Auxiliary;
 import com.sunya.electionguard.SchnorrProof;
-import com.sunya.electionguard.guardian.KeyCeremony2;
-import com.sunya.electionguard.guardian.KeyCeremonyTrustee;
 import com.sunya.electionguard.proto.CommonConvert;
 import com.sunya.electionguard.proto.RemoteKeyCeremonyProto;
 import com.sunya.electionguard.proto.RemoteKeyCeremonyTrusteeProto;
@@ -140,19 +138,16 @@ class KeyCeremonyRemoteTrustee extends RemoteKeyCeremonyTrusteeServiceGrpc.Remot
             // .intercept(new MyServerInterceptor())
             .build().start();
 
-    Runtime.getRuntime().addShutdownHook(new Thread() {
-      @Override
-      public void run() {
-        // Use stderr here since the logger may have been reset by its JVM shutdown hook.
-        System.err.println("*** shutting down gRPC server since JVM is shutting down");
-        try {
-          stopit();
-        } catch (InterruptedException e) {
-          e.printStackTrace(System.err);
-        }
-        System.err.println("*** server shut down");
+    Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+      // Use stderr here since the logger may have been reset by its JVM shutdown hook.
+      System.err.println("*** shutting down gRPC server since JVM is shutting down");
+      try {
+        stopit();
+      } catch (InterruptedException e) {
+        e.printStackTrace(System.err);
       }
-    });
+      System.err.println("*** server shut down");
+    }));
 
     System.out.printf("---- KeyCeremonyRemoteService started, listening on %d ----%n", port);
   }

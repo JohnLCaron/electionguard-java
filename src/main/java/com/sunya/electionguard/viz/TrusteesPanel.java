@@ -1,7 +1,7 @@
 package com.sunya.electionguard.viz;
 
 import com.google.common.collect.ImmutableList;
-import com.sunya.electionguard.guardian.DecryptingTrustee;
+import com.sunya.electionguard.decrypting.DecryptingTrustee;
 import com.sunya.electionguard.proto.TrusteeFromProto;
 import ucar.ui.prefs.ComboBox;
 import ucar.ui.widget.BAMutil;

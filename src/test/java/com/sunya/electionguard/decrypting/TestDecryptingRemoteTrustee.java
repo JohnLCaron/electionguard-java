@@ -6,11 +6,9 @@ import com.sunya.electionguard.DecryptionProofRecovery;
 import com.sunya.electionguard.DecryptionProofTuple;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.Group;
-import com.sunya.electionguard.guardian.DecryptingTrustee;
 import com.sunya.electionguard.proto.TrusteeFromProto;
 import com.sunya.electionguard.publish.Consumer;
 import com.sunya.electionguard.verifier.ElectionRecord;
-import net.jqwik.api.Example;
 
 import java.io.IOException;
 import java.util.List;

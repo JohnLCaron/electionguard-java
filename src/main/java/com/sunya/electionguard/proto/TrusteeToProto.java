@@ -3,8 +3,8 @@ package com.sunya.electionguard.proto;
 import com.google.protobuf.ByteString;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.SchnorrProof;
-import com.sunya.electionguard.guardian.KeyCeremony2;
-import com.sunya.electionguard.guardian.KeyCeremonyTrustee;
+import com.sunya.electionguard.keyceremony.KeyCeremony2;
+import com.sunya.electionguard.keyceremony.KeyCeremonyTrustee;
 
 import java.util.List;
 

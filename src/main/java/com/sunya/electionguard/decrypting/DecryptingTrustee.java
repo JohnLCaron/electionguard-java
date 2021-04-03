@@ -1,4 +1,4 @@
-package com.sunya.electionguard.guardian;
+package com.sunya.electionguard.decrypting;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
@@ -10,6 +10,7 @@ import com.sunya.electionguard.DecryptionProofTuple;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.Rsa;
+import com.sunya.electionguard.keyceremony.KeyCeremony2;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;

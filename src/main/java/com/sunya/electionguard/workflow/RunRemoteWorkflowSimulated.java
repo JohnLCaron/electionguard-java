@@ -1,4 +1,4 @@
-package com.sunya.electionguard.guardian;
+package com.sunya.electionguard.workflow;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
@@ -89,7 +89,7 @@ public class RunRemoteWorkflowSimulated {
     Formatter out = new Formatter();
     command0.run(out, "java",
             "-classpath", classpath,
-            "com.sunya.electionguard.guardian.KeyCeremonySimulator",
+            "com.sunya.electionguard.keyceremony.KeyCeremonySimulator",
             "-in", cmdLine.inputDir,
             "-out", cmdLine.encryptDir,
             "-nguardians", Integer.toString(cmdLine.nguardians),
@@ -126,7 +126,7 @@ public class RunRemoteWorkflowSimulated {
     RunCommand command2 = new RunCommand();
     out = new Formatter();
     command2.run(out, "java", "-classpath", classpath,
-            "com.sunya.electionguard.guardian.DecryptingSimulator",
+            "com.sunya.electionguard.decrypting.DecryptingSimulator",
             "-in", cmdLine.encryptDir,
             "-guardiansLocation", cmdLine.encryptDir + "/private/trustees.protobuf",
             "-out", cmdLine.outputDir

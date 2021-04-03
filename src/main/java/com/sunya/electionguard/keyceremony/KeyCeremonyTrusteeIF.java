@@ -1,16 +1,11 @@
-package com.sunya.electionguard.guardian;
+package com.sunya.electionguard.keyceremony;
 
 import com.sunya.electionguard.Group;
 
-import javax.annotation.Nullable;
 import java.util.Optional;
 
 public interface KeyCeremonyTrusteeIF {
   String id();
-
-  int coordinate();
-
-  int quorum(); // LOOK needed?
 
   Optional<KeyCeremony2.PublicKeySet> sendPublicKeys();
 
