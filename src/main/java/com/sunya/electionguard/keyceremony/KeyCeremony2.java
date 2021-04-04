@@ -50,6 +50,9 @@ public class KeyCeremony2 {
         }
       }
       return true;
+      // g^P_i(0) of the shared polynomial P_i matches K_i
+      // Group.ElementModP value = ElectionPolynomial.compute_gPcoordinate(BigInteger.ZERO, coefficientCommitments());
+      // return value.equals(coefficientCommitments().get(0));
     }
   }
 

@@ -155,22 +155,34 @@ public class ElectionPolynomial {
   /**
    * Verify a polynomial coordinate value is in fact on the polynomial's curve.
    *
+   * @param expected                Expected value
    * @param coordinate              Value to be checked
-   * @param exponent_modifier       Unique modifier (usually sequence order) for exponent
    * @param coefficient_commitments Commitments for coefficients of polynomial
    */
-  public static boolean verify_polynomial_coordinate(ElementModQ coordinate, BigInteger exponent_modifier, List<ElementModP> coefficient_commitments) {
-    ElementModP commitment_output = Group.ONE_MOD_P;
+  public static boolean verify_polynomial_coordinate(ElementModQ expected, BigInteger coordinate, List<ElementModP> coefficient_commitments) {
+    ElementModP commitment_output = compute_gPcoordinate(coordinate, coefficient_commitments);
+
+    ElementModP value_output = g_pow_p(expected);
+    return value_output.equals(commitment_output);
+  }
+
+
+  /**
+   * Compute g^P(coordinate).
+   *
+   * @param coordinate              Polynomial coordinate.
+   * @param coefficient_commitments Commitments for coefficients of polynomial (K_ij)
+   */
+  public static ElementModP compute_gPcoordinate(BigInteger coordinate, List<ElementModP> coefficient_commitments) {
+    ElementModP result = Group.ONE_MOD_P;
     int count = 0;
     for (ElementModP commitment : coefficient_commitments) {
-      ElementModP exponent = Group.int_to_p_unchecked(Group.pow_pi(exponent_modifier, BigInteger.valueOf(count)));
+      ElementModP exponent = Group.int_to_p_unchecked(Group.pow_pi(coordinate, BigInteger.valueOf(count)));
       ElementModP factor = Group.pow_p(commitment, exponent);
-      commitment_output = Group.mult_p(commitment_output, factor);
+      result = Group.mult_p(result, factor);
       count++;
     }
-
-    ElementModP value_output = g_pow_p(coordinate);
-    return value_output.equals(commitment_output);
+    return result;
   }
 
 }

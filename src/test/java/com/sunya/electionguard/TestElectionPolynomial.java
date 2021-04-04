@@ -12,7 +12,7 @@ import static com.sunya.electionguard.Group.*;
 
 
 public class TestElectionPolynomial {
-  private static final int TEST_POLYNOMIAL_DEGREE = 3;
+  private static final int TEST_POLYNOMIAL_DEGREE = 5;
   private static final BigInteger TEST_EXPONENT_MODIFIER = BigInteger.ONE;
 
   @Example
@@ -39,5 +39,19 @@ public class TestElectionPolynomial {
     Group.ElementModQ value = compute_polynomial_coordinate(TEST_EXPONENT_MODIFIER, polynomial);
     assertThat(verify_polynomial_coordinate(
             value, TEST_EXPONENT_MODIFIER, polynomial.coefficient_commitments)).isTrue();
+  }
+
+  @Example
+  public void test_verify_polynomial_coordinate_zero() {
+    ElectionPolynomial polynomial = generate_polynomial(TEST_POLYNOMIAL_DEGREE, null);
+    Group.ElementModP value = ElectionPolynomial.compute_gPcoordinate(BigInteger.ZERO, polynomial.coefficient_commitments);
+    assertThat(value).isEqualTo(polynomial.coefficient_commitments.get(0));
+  }
+
+  @Example
+  public void test_verify_polynomial_coordinate_zero1() {
+    ElectionPolynomial polynomial = generate_polynomial(TEST_POLYNOMIAL_DEGREE, null);
+    Group.ElementModP product = Group.mult_p(polynomial.coefficient_commitments);
+    assertThat(product).isEqualTo(polynomial.coefficient_commitments.get(0));
   }
 }

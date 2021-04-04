@@ -174,8 +174,8 @@ public class KeyCeremonyTrusteeMediator {
         // alternate guardian. If, however, the published P_i(l) satisfy both the published
         // encryption and the equation above, the claim of malfeasance is dismissed and the key
         // generation process continues undeterred.
-        KeyCeremony2.PublicKeySet generatingKeys = publicKeysMap.get(response.generatingGuardianId());
-        KeyCeremony2.PartialKeyVerification challenge_verify = KeyCeremony2.verifyElectionPartialKeyChallenge(response, generatingKeys.coefficientCommitments());
+        KeyCeremony2.PublicKeySet challengedGuardianKeys = publicKeysMap.get(response.generatingGuardianId());
+        KeyCeremony2.PartialKeyVerification challenge_verify = KeyCeremony2.verifyElectionPartialKeyChallenge(response, challengedGuardianKeys.coefficientCommitments());
         if (!challenge_verify.verified()) {
           System.out.printf("***FAILED to validate Guardian %s backup that was challenged by Guardian %s%n",
                   failure.generatingGuardianId(), failure.designatedGuardianId());

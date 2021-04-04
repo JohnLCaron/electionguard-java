@@ -122,7 +122,7 @@ public class KeyCeremonyTrustee {
     KeyCeremony2.PublicKeySet otherKeys = this.allGuardianPublicKeys.get(otherGuardian);
     Preconditions.checkNotNull(otherKeys);
 
-    // Compute my polynomial's y coordinate at the other's x coordinate.
+    // Compute my polynomial's y value at the other's x coordinate.
     ElementModQ value = ElectionPolynomial.compute_polynomial_coordinate(
             BigInteger.valueOf(otherKeys.guardianXCoordinate()), this.guardianSecrets.polynomial);
 
