@@ -278,7 +278,7 @@ class CiphertextTallyPojo {
 
 During Tally Decryption, the _EncryptedTally_ is decrypted into a **_PlaintextTally_** by a quorum number of Guardians. 
 This is the count of the election results for whatever set of ballots were accumulated in the election record.
-The PlaintextTally is added to the election record:
+The PlaintextTally as well as the list of **_AvailableGuardians_** are added to the election record:
 
 ````
 class PlaintextTallyPojo {
@@ -323,15 +323,49 @@ class PlaintextTallyPojo {
   }
 ````
 
+````
+class AvailableGuardian {
+  String guardian_id; /** The guardian id. */
+  int x_coordinate; /** The guardian x coordinate value, aka sequence_order. */
+  Group.ElementModQ lagrangeCoordinate; /** Its lagrange coordinate when decrypting. */
+}
+````
+
 ### Spoiled Ballot Decryption
 
 During this step, which may be done at the same time as the Tally Decryption, the Encrypted Ballots that were marked
 as spoiled (but not the cast ballots!) are decrypted by a quorum number of Guardians. For each spoiled SubmittedBallot,
-a PlaintextBallot and a PlaintextTally (that is just for that one spoiled SubmittedBallot =) are produced. These are added 
+a PlaintextBallot and a PlaintextTally (that is just for that one spoiled SubmittedBallot) are produced. These are added 
 to the Election Record. These objects are the same as the ones already documented.
 
 ### Election Validation
 
 The entire Election Record may be submitted to an ElectionGuard Validator, which uses just the Election Record
 to validate with all the checks that are in the [Validator specification](https://www.electionguard.vote/spec/0.95.0/9_Verifier_construction/);
+
+The complete set of objects looks like:
+
+````
+  class ElectionRecord {
+    Manifest election;
+  
+    // KeyCeremony
+    ElectionConstants constants;
+    CiphertextElectionContext context;
+    List<CoefficientValidationSet> guardianCoefficients;
+  
+    // Encyption
+    List<EncryptionDevice> devices; 
+    List<SubmittedBallot> acceptedBallots; // All ballots, cast and spoiled
+  
+    // Tally Accumulation
+    CiphertextTally encryptedTally;
+  
+    // Decryption
+    PlaintextTally decryptedTally;
+    List<PlaintextBallot> spoiledBallots; 
+    List<PlaintextTally> spoiledTallies; 
+    List<AvailableGuardian> availableGuardians; 
+  }
+````
 
