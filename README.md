@@ -1,4 +1,5 @@
 # 🗳 ElectionGuard Java
+_last changed: April 4, 2021_
 
 This is a port of https://github.com/microsoft/electionguard-python/ to Java.
 
@@ -33,15 +34,16 @@ The entire workflow, consisting of the above steps plus verification can be run 
 
 ### Remote Guardians (experimental)
 
-A refactoring that simulates remote Guardians:
+A refactoring that uses remote Guardians over gRpc:
 
-*   [Sumulate Remote Guardian](https://github.com/JohnLCaron/electionguard-java/tree/master/src/main/java/com/sunya/electionguard/guardian)
+*   [Remote KeyCeremony](https://github.com/JohnLCaron/electionguard-java/tree/master/src/main/java/com/sunya/electionguard/keyceremony)
+*   [Remote Decrypting](https://github.com/JohnLCaron/electionguard-java/tree/master/src/main/java/com/sunya/electionguard/decrypting)
 
-One that uses real remote Guardians over gRpc for the Key Ceremony:
+## Election Record
 
-*   [Remote Guardian](https://github.com/JohnLCaron/electionguard-java/tree/master/src/main/java/com/sunya/electionguard/keyceremony)
+*   [Election record](https://github.com/JohnLCaron/electionguard-java/blob/master/docs/ElectionRecord.md)
 
-## Election Record Visualization
+### Election Record Visualization
 
 A simple Swing-based visualization of the Election Record is available. This is a debugging tool for developers, 
 not a polished tool for end-users (eg election officials). No documentation, no warentees, 
