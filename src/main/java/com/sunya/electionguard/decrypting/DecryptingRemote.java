@@ -45,7 +45,7 @@ import java.util.stream.Collectors;
  * For command line help:
  * <strong>
  * <pre>
- *  java -classpath electionguard-java-all.jar com.sunya.electionguard.workflow.DecryptingRemote --help
+ *  java -classpath electionguard-java-all.jar com.sunya.electionguard.decrypting.DecryptingRemote --help
  * </pre>
  * </strong>
  */
@@ -57,14 +57,14 @@ class DecryptingRemote {
             description = "Directory containing input election record and encrypted ballots and tally", required = true)
     String encryptDir;
 
-    @Parameter(names = {"-out"}, order = 3,
+    @Parameter(names = {"-out"}, order = 1,
             description = "Directory where augmented election record is published", required = true)
     String outputDir;
 
-    @Parameter(names = {"-port"}, order = 5, description = "The port to run the server on")
+    @Parameter(names = {"-port"}, order = 2, description = "The port to run the server on")
     int port = 17711;
 
-    @Parameter(names = {"-h", "--help"}, order = 6, description = "Display this help and exit", help = true)
+    @Parameter(names = {"-h", "--help"}, order = 9, description = "Display this help and exit", help = true)
     boolean help = false;
 
     private final JCommander jc;
@@ -314,8 +314,7 @@ class DecryptingRemote {
     public void registerTrustee(DecryptingProto.RegisterDecryptingTrusteeRequest request,
                                 StreamObserver<DecryptingProto.RegisterDecryptingTrusteeResponse> responseObserver) {
 
-      System.out.printf("DecryptingRemote registerTrustee %s: %s url %s %n", stopwatch.elapsed(TimeUnit.SECONDS),
-              request.getGuardianId(), request.getRemoteUrl());
+      System.out.printf("DecryptingRemote registerTrustee %s url %s %n", request.getGuardianId(), request.getRemoteUrl());
 
       if (startedDecryption) {
         responseObserver.onNext(DecryptingProto.RegisterDecryptingTrusteeResponse.newBuilder()
@@ -331,7 +330,7 @@ class DecryptingRemote {
 
         responseObserver.onNext(response.build());
         responseObserver.onCompleted();
-        logger.atInfo().log("DecryptingRemote registerTrustee registerTrustee %s", trustee.id());
+        logger.atInfo().log("DecryptingRemote registerTrustee %s", trustee.id());
 
       } catch (Throwable t) {
         logger.atSevere().withCause(t).log("DecryptingRemote registerTrustee failed");

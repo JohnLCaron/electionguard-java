@@ -21,13 +21,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 /**
- * Runs the entire workflow from start to finish, using real remote guardians.
+ * Runs the entire workflow from start to finish, using remote guardians.
  * Runs the components out of the fatJar, so be sure to build that first.
  * <p>
  * For command line help:
  * <strong>
  * <pre>
- *  java -classpath electionguard-java-all.jar com.sunya.electionguard.guardian.RunRemoteWorkflow --help
+ *  java -classpath electionguard-java-all.jar com.sunya.electionguard.workflow.RunRemoteWorkflow --help
  * </pre>
  * </strong>
  */
@@ -38,7 +38,7 @@ public class RunRemoteWorkflow {
 
   private static class CommandLine {
     @Parameter(names = {"-in"}, order = 0,
-            description = "Directory containing input election description", required = true)
+            description = "Directory containing input election manifest", required = true)
     String inputDir;
 
     @Parameter(names = {"-nguardians"}, order = 2, description = "Number of quardians to create", required = true)
@@ -48,7 +48,7 @@ public class RunRemoteWorkflow {
     int quorum = 5;
 
     @Parameter(names = {"-trusteeDir"}, order = 4,
-            description = "Directory containing trustee serializarion", required = true)
+            description = "Directory containing Guardian serializations", required = true)
     String trusteeDir;
 
     @Parameter(names = {"-encryptDir"}, order = 4,

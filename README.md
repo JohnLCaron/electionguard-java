@@ -16,7 +16,29 @@ To verify an __Election Record__:
 
 The full [Verification Specification](https://www.electionguard.vote/spec/0.95.0/9_Verifier_construction/) is implemented.
 
-## Workflow Simulation
+## Workflow
+
+### Workflow using Remote Guardians
+
+The following command line programs run the entire workflow needed to run an election:
+
+1.   [RemoteKeyCeremony](https://github.com/JohnLCaron/electionguard-java/blob/master/docs/RemoteKeyCeremony.md)
+
+2.   [RemoteKeyCeremonyTrustee](https://github.com/JohnLCaron/electionguard-java/blob/master/docs/RemoteKeyCeremonyTrustee.md)
+
+3.   [EncryptBallots](https://github.com/JohnLCaron/electionguard-java/blob/master/docs/EncryptBallots.md)
+
+4.   [AccumulateTally](https://github.com/JohnLCaron/electionguard-java/blob/master/docs/AccumulateTally.md)
+
+5.   [RemoteDecryption](https://github.com/JohnLCaron/electionguard-java/blob/master/docs/RemoteDecryption.md)
+
+6.   [RemoteDecryptionTrustee](https://github.com/JohnLCaron/electionguard-java/blob/master/docs/RemoteDecryptionTrustee.md)
+
+The entire workflow, consisting of the above steps plus verification can be run from a single command:
+
+*   [RunRemoteWorkflow](https://github.com/JohnLCaron/electionguard-java/blob/master/docs/RunRemoteWorkflow.md)
+
+### Workflow Simulation
 
 The following command line programs simulate the pieces of the workflow needed to run an election:
 
@@ -31,13 +53,6 @@ The following command line programs simulate the pieces of the workflow needed t
 The entire workflow, consisting of the above steps plus verification can be run from a single command:
 
 *   [RunElectionWorkflow](https://github.com/JohnLCaron/electionguard-java/blob/master/docs/RunElectionWorkflow.md)
-
-### Remote Guardians (experimental)
-
-A refactoring that uses remote Guardians over gRpc:
-
-*   [Remote KeyCeremony](https://github.com/JohnLCaron/electionguard-java/tree/master/src/main/java/com/sunya/electionguard/keyceremony)
-*   [Remote Decrypting](https://github.com/JohnLCaron/electionguard-java/tree/master/src/main/java/com/sunya/electionguard/decrypting)
 
 ## Election Record
 

@@ -33,16 +33,16 @@ class KeyCeremonyRemoteTrustee extends RemoteKeyCeremonyTrusteeServiceGrpc.Remot
   private static final Random random = new Random(System.currentTimeMillis());
 
   private static class CommandLine {
-    @Parameter(names = {"-name"}, order = 0, description = "Trustee name", required = true)
+    @Parameter(names = {"-name"}, order = 0, description = "Guardian name", required = true)
     String name;
 
     @Parameter(names = {"-port"}, order = 1, description = "This KeyCeremonyRemoteTrustee port")
-    int port = 17111;
+    int port = 0;
 
     @Parameter(names = {"-serverPort"}, order = 2, description = "The KeyCeremonyRemote server port")
     int serverPort = 17111;
 
-    @Parameter(names = {"-out"}, order = 1, description = "Directory where Guardians is written for decryption", required = true)
+    @Parameter(names = {"-out"}, order = 3, description = "Directory where the Guardian state is written", required = true)
     String outputDir;
 
     @Parameter(names = {"-h", "--help"}, order = 9, description = "Display this help and exit", help = true)
@@ -79,7 +79,7 @@ class KeyCeremonyRemoteTrustee extends RemoteKeyCeremonyTrusteeServiceGrpc.Remot
 
     // which port? if not assigned, pick one at random
     int port = cmdLine.port;
-    if (port == cmdLine.serverPort) {
+    if (port == 0) {
       port = cmdLine.serverPort + 1 + random.nextInt(10000);
       while (!isLocalPortFree(port)) {
         port = cmdLine.serverPort + 1 + random.nextInt(10000);
@@ -213,7 +213,7 @@ class KeyCeremonyRemoteTrustee extends RemoteKeyCeremonyTrusteeServiceGrpc.Remot
               proofs);
       boolean valid = delegate.receivePublicKeys(keyset);
       response.setOk(valid);
-      logger.atInfo().log("KeyCeremonyRemoteTrustee receivePublicKeys %s", delegate.id);
+      logger.atInfo().log("KeyCeremonyRemoteTrustee receivePublicKeys %s", proto.getOwnerId());
 
     } catch (Throwable t) {
       logger.atSevere().withCause(t).log("KeyCeremonyRemoteTrustee receivePublicKeys failed");
@@ -241,7 +241,7 @@ class KeyCeremonyRemoteTrustee extends RemoteKeyCeremonyTrusteeServiceGrpc.Remot
                 .setDesignatedGuardianId(backup.designatedGuardianId())
                 .setDesignatedGuardianXCoordinate(backup.designatedGuardianXCoordinate())
                 .setEncryptedCoordinate(ByteString.copyFrom(backup.encryptedCoordinate().getBytes()));
-        logger.atInfo().log("KeyCeremonyRemoteTrustee sendPartialKeyBackup %s", delegate.id);
+        logger.atInfo().log("KeyCeremonyRemoteTrustee sendPartialKeyBackup %s", request.getGuardianId());
       }
 
     } catch (Throwable t) {
@@ -271,7 +271,7 @@ class KeyCeremonyRemoteTrustee extends RemoteKeyCeremonyTrusteeServiceGrpc.Remot
               .setDesignatedGuardianId(verify.designatedGuardianId())
               .setDesignatedGuardianXCoordinate(backup.designatedGuardianXCoordinate())
               .setVerify(verify.verified());
-      logger.atInfo().log("KeyCeremonyRemoteTrustee verifyPartialKeyBackup %s", delegate.id);
+      logger.atInfo().log("KeyCeremonyRemoteTrustee verifyPartialKeyBackup %s", proto.getGeneratingGuardianId());
 
     } catch (Throwable t) {
       logger.atSevere().withCause(t).log("KeyCeremonyRemoteTrustee verifyPartialKeyBackup failed");
@@ -297,7 +297,7 @@ class KeyCeremonyRemoteTrustee extends RemoteKeyCeremonyTrusteeServiceGrpc.Remot
                 .setDesignatedGuardianId(backup.designatedGuardianId())
                 .setDesignatedGuardianXCoordinate(backup.designatedGuardianXCoordinate())
                 .setCoordinate(CommonConvert.convertElementModQ(backup.coordinate()));
-        logger.atInfo().log("KeyCeremonyRemoteTrustee sendBackupChallenge %s", delegate.id);
+        logger.atInfo().log("KeyCeremonyRemoteTrustee sendBackupChallenge %s", backup.designatedGuardianId());
       }
 
     } catch (Throwable t) {
