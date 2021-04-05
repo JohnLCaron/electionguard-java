@@ -30,7 +30,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * For command line help:
  * <strong>
  * <pre>
- *  java -classpath electionguard-java-all.jar com.sunya.electionguard.workflow.KeyCeremonyRemote --help
+ *  java -classpath electionguard-java-all.jar com.sunya.electionguard.keyceremony.KeyCeremonyRemote --help
  * </pre>
  * </strong>
  */
@@ -39,23 +39,23 @@ class KeyCeremonyRemote {
 
   private static class CommandLine {
     @Parameter(names = {"-in"}, order = 0,
-            description = "Directory containing input election description", required = true)
+            description = "Directory containing election manifest", required = true)
     String inputDir;
 
     @Parameter(names = {"-out"}, order = 1,
-            description = "Directory where Guardians and election context are written")
+            description = "Directory where election record is written")
     String outputDir;
 
-    @Parameter(names = {"-nguardians"}, order = 4, description = "Number of quardians to create", required = true)
+    @Parameter(names = {"-nguardians"}, order = 2, description = "Number of Guardians that will be used", required = true)
     int nguardians;
 
-    @Parameter(names = {"-quorum"}, order = 5, description = "Number of quardians that make a quorum", required = true)
+    @Parameter(names = {"-quorum"}, order = 3, description = "Number of Guardians that make a quorum", required = true)
     int quorum;
 
-    @Parameter(names = {"-port"}, order = 5, description = "The port to run the server on")
+    @Parameter(names = {"-port"}, order = 4, description = "The port to run the server on")
     int port = 17111;
 
-    @Parameter(names = {"-h", "--help"}, order = 6, description = "Display this help and exit", help = true)
+    @Parameter(names = {"-h", "--help"}, order = 9, description = "Display this help and exit", help = true)
     boolean help = false;
 
     private final JCommander jc;

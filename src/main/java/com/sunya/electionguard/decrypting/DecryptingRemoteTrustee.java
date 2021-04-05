@@ -33,10 +33,10 @@ class DecryptingRemoteTrustee extends DecryptingTrusteeServiceGrpc.DecryptingTru
     @Parameter(names = {"-guardianFile"}, order = 1, description = "location of serialized guardian file", required = true)
     String guardianFile;
 
-    @Parameter(names = {"-port"}, order = 1, description = "This DecryptingRemoteTrustee port")
-    int port = 17711;
+    @Parameter(names = {"-port"}, order = 2, description = "This DecryptingRemoteTrustee port")
+    int port = 0;
 
-    @Parameter(names = {"-serverPort"}, order = 2, description = "The DecryptingRemote server port")
+    @Parameter(names = {"-serverPort"}, order = 3, description = "The DecryptingRemote server port")
     int serverPort = 17711;
 
     @Parameter(names = {"-h", "--help"}, order = 9, description = "Display this help and exit", help = true)
@@ -73,7 +73,7 @@ class DecryptingRemoteTrustee extends DecryptingTrusteeServiceGrpc.DecryptingTru
 
     // which port? if not assigned, pick one at random
     int port = cmdLine.port;
-    if (port == cmdLine.serverPort) {
+    if (port == 0) {
       port = cmdLine.serverPort + 1 + random.nextInt(10000);
       while (!isLocalPortFree(port)) {
         port = cmdLine.serverPort + 1 + random.nextInt(10000);
@@ -192,7 +192,7 @@ class DecryptingRemoteTrustee extends DecryptingTrusteeServiceGrpc.DecryptingTru
 
       List<DecryptingTrusteeProto.CompensatedDecryptionResult> protos = tuples.stream().map(this::convertDecryptionProofRecovery).collect(Collectors.toList());
       response.addAllResults(protos);
-      logger.atInfo().log("DecryptingRemoteTrustee compensatedDecrypt %s", delegate.id);
+      logger.atInfo().log("DecryptingRemoteTrustee compensatedDecrypt %s", request.getMissingGuardianId());
     } catch (Throwable t) {
       logger.atSevere().withCause(t).log("DecryptingRemoteTrustee compensatedDecrypt failed");
       String mess = t.getMessage() != null ? t.getMessage() : "Unknown";
