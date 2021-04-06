@@ -2,6 +2,7 @@ package com.sunya.electionguard.keyceremony;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
+import com.google.common.flogger.FluentLogger;
 import com.sunya.electionguard.CiphertextElectionContext;
 import com.sunya.electionguard.ElectionConstants;
 import com.sunya.electionguard.Group;
@@ -25,6 +26,8 @@ import java.util.stream.Collectors;
  * Mediate the key ceremony with remote Guardians.
  */
 public class KeyCeremonyTrusteeMediator {
+  private static final FluentLogger logger = FluentLogger.forEnclosingClass();
+
   final Manifest election;
   final int quorum;
 
@@ -102,7 +105,7 @@ public class KeyCeremonyTrusteeMediator {
           if (!trustee.id().equals(recipient.id())) {
             boolean verify = recipient.receivePublicKeys(publicKeys);
             if (!verify) {
-              System.out.printf("PublicKey Commitments:'%s' failed to validate '%s'", recipient.id(), trustee.id());
+              System.out.printf("PublicKey Commitments: '%s' failed to validate '%s'", recipient.id(), trustee.id());
               fail = true;
             }
           }

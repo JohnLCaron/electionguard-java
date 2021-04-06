@@ -34,7 +34,6 @@ class Dlog {
   private static synchronized Integer discrete_log_internal(BigInteger e) {
     while (!e.equals(dlog_max_elem)) {
       dlog_max_exp = dlog_max_exp + 1;
-      // System.out.printf("dlog_max_exp %d%n", dlog_max_exp);
       if (dlog_max_exp > MAX) {
         throw new RuntimeException(String.format("Discrete_log_internal exceeds max %d%n", dlog_max_exp));
       }

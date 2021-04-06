@@ -243,4 +243,25 @@ class DecryptingRemoteTrustee extends DecryptingTrusteeServiceGrpc.DecryptingTru
           .build();
   }
 
+  @Override
+  public void finish(CommonProto.FinishRequest request,
+                     StreamObserver<CommonProto.BooleanResponse> responseObserver) {
+    CommonProto.BooleanResponse.Builder response = CommonProto.BooleanResponse.newBuilder();
+    boolean ok = true;
+    try {
+      logger.atInfo().log("DecryptingTrusteeProto finish ok = %s", request.getAllOk());
+
+    } catch (Throwable t) {
+      logger.atSevere().withCause(t).log("DecryptingTrusteeProto finish failed");
+      t.printStackTrace();
+      response.setError(CommonProto.RemoteError.newBuilder().setMessage(t.getMessage()).build());
+      ok = false;
+    }
+
+    response.setOk(ok);
+    responseObserver.onNext(response.build());
+    responseObserver.onCompleted();
+    System.exit(ok ? 0 : 1);
+  }
+
 }

@@ -107,6 +107,23 @@ class DecryptingRemoteTrusteeProxy implements DecryptingTrusteeIF  {
             CommonConvert.convertChaumPedersenProof(proto.getProof()));
   }
 
+  boolean finish(boolean allOk) {
+    try {
+      CommonProto.FinishRequest request = CommonProto.FinishRequest.newBuilder().setAllOk(allOk).build();
+      CommonProto.BooleanResponse response = blockingStub.finish(request);
+      if (response.hasError()) {
+        logger.atSevere().log("commit failed: %s", response.getError().getMessage());
+        return false;
+      }
+      return response.getOk();
+
+    } catch (StatusRuntimeException e) {
+      logger.atSevere().withCause(e).log("commit failed: ");
+      e.printStackTrace();
+      return false;
+    }
+  }
+
   boolean shutdown() {
     try {
       channel.shutdownNow().awaitTermination(5, TimeUnit.SECONDS);

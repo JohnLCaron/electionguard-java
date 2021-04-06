@@ -9,6 +9,7 @@ option java_outer_classname = "DecryptingTrusteeProto";
 service DecryptingTrusteeService {
   rpc partialDecrypt (PartialDecryptionRequest) returns (PartialDecryptionResponse) {}
   rpc compensatedDecrypt (CompensatedDecryptionRequest) returns (CompensatedDecryptionResponse) {}
+  rpc finish (FinishRequest) returns (BooleanResponse) {}
 }
 
 message PartialDecryptionRequest {

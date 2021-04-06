@@ -50,3 +50,12 @@ message SchnorrProof {
 message RemoteError {
   string message = 1;
 }
+
+message FinishRequest {
+  bool all_ok = 1;
+}
+
+message BooleanResponse {
+  RemoteError error = 1; // non empty on error
+  bool ok = 2;
+}

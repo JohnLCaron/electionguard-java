@@ -6,6 +6,7 @@ import com.sunya.electionguard.Auxiliary;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.SchnorrProof;
 import com.sunya.electionguard.proto.CommonConvert;
+import com.sunya.electionguard.proto.CommonProto;
 import com.sunya.electionguard.proto.RemoteKeyCeremonyTrusteeProto;
 import com.sunya.electionguard.proto.RemoteKeyCeremonyTrusteeServiceGrpc;
 import io.grpc.ManagedChannel;
@@ -32,6 +33,7 @@ class KeyCeremonyRemoteTrusteeProxy implements KeyCeremonyTrusteeIF {
   @Override
   public Optional<KeyCeremony2.PublicKeySet> sendPublicKeys() {
     try {
+      logger.atInfo().log("%s sendPublicKeys", id());
       RemoteKeyCeremonyTrusteeProto.PublicKeySetRequest request = RemoteKeyCeremonyTrusteeProto.PublicKeySetRequest.getDefaultInstance();
       RemoteKeyCeremonyTrusteeProto.PublicKeySet response = blockingStub.sendPublicKeys(request);
       if (response.hasError()) {
@@ -54,13 +56,14 @@ class KeyCeremonyRemoteTrusteeProxy implements KeyCeremonyTrusteeIF {
   @Override
   public boolean receivePublicKeys(KeyCeremony2.PublicKeySet keyset) {
     try {
+      logger.atInfo().log("%s receivePublicKeys from %s", id(), keyset.ownerId());
       RemoteKeyCeremonyTrusteeProto.PublicKeySet.Builder request = RemoteKeyCeremonyTrusteeProto.PublicKeySet.newBuilder();
       request.setOwnerId(keyset.ownerId())
               .setGuardianXCoordinate(keyset.guardianXCoordinate())
               .setAuxiliaryPublicKey(CommonConvert.convertJavaPublicKey(keyset.auxiliaryPublicKey()));
       keyset.coefficientProofs().forEach(p -> request.addCoefficientProofs(CommonConvert.convertSchnorrProof(p)));
 
-      RemoteKeyCeremonyTrusteeProto.BooleanResponse response = blockingStub.receivePublicKeys(request.build());
+      CommonProto.BooleanResponse response = blockingStub.receivePublicKeys(request.build());
       if (response.hasError()) {
         logger.atSevere().log("receivePublicKeys failed: %s", response.getError().getMessage());
         return false;
@@ -162,7 +165,7 @@ class KeyCeremonyRemoteTrusteeProxy implements KeyCeremonyTrusteeIF {
 
   boolean saveState() {
     try {
-      RemoteKeyCeremonyTrusteeProto.BooleanResponse response = blockingStub.saveState(com.google.protobuf.Empty.getDefaultInstance());
+      CommonProto.BooleanResponse response = blockingStub.saveState(com.google.protobuf.Empty.getDefaultInstance());
       if (response.hasError()) {
         logger.atSevere().log("saveState failed: %s", response.getError().getMessage());
         return false;
@@ -178,8 +181,8 @@ class KeyCeremonyRemoteTrusteeProxy implements KeyCeremonyTrusteeIF {
 
   boolean finish(boolean allOk) {
     try {
-      RemoteKeyCeremonyTrusteeProto.FinishRequest request = RemoteKeyCeremonyTrusteeProto.FinishRequest.newBuilder().setAllOk(allOk).build();
-      RemoteKeyCeremonyTrusteeProto.BooleanResponse response = blockingStub.finish(request);
+      CommonProto.FinishRequest request = CommonProto.FinishRequest.newBuilder().setAllOk(allOk).build();
+      CommonProto.BooleanResponse response = blockingStub.finish(request);
       if (response.hasError()) {
         logger.atSevere().log("commit failed: %s", response.getError().getMessage());
         return false;
