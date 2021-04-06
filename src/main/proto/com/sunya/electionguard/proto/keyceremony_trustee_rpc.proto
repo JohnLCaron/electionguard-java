@@ -21,7 +21,7 @@ message PublicKeySetRequest {
 }
 
 message PublicKeySet {
-  RemoteTrusteeError error = 1; // non empty on error
+  RemoteError error = 1; // non empty on error
   /** guardian object_id. */
   string owner_id = 2;
   /** guardian x coordinate (aka sequence_order). */
@@ -37,7 +37,7 @@ message PartialKeyBackupRequest {
 }
 
 message PartialKeyBackup {
-  RemoteTrusteeError error = 1; // non empty on error
+  RemoteError error = 1; // non empty on error
   // The Id of the guardian that generated this backup.
   string generating_guardian_id = 2;
   // The Id of the guardian to receive this backup.
@@ -49,7 +49,7 @@ message PartialKeyBackup {
 }
 
 message PartialKeyVerification {
-  RemoteTrusteeError error = 1; // non empty on error
+  RemoteError error = 1; // non empty on error
   // The Id of the guardian that generated this backup.
   string generating_guardian_id = 2;
   // The Id of the guardian to receive this backup.
@@ -64,7 +64,7 @@ message PartialKeyChallenge {
 }
 
 message PartialKeyChallengeResponse {
-  RemoteTrusteeError error = 1; // non empty on error
+  RemoteError error = 1; // non empty on error
   // The Id of the guardian that generated this backup.
   string generating_guardian_id = 2;
   // The Id of the guardian to receive this backup.
@@ -79,19 +79,6 @@ message JointPublicKeyRequest {
 }
 
 message JointPublicKeyResponse {
-  RemoteTrusteeError error = 1; // non empty on error
+  RemoteError error = 1; // non empty on error
   ElementModP joint_public_key = 2;
-}
-
-message FinishRequest {
-  bool all_ok = 1;
-}
-
-message BooleanResponse {
-  RemoteTrusteeError error = 1; // non empty on error
-  bool ok = 2;
-}
-
-message RemoteTrusteeError {
-  string message = 1;
 }

@@ -115,8 +115,13 @@ public class EncryptBallots {
       ballotProvider = new FakeBallotProvider(electionRecord.election, cmdLine.nballots);
     }
 
-    System.out.printf(" BallotEncryptor read context from %s%n Ballots from %s%n Write to %s%n",
-            cmdLine.inputDir, cmdLine.ballotProviderClass, cmdLine.encryptDir);
+    System.out.printf(" EncryptBallots: read context from %s%n", cmdLine.inputDir);
+    if (cmdLine.ballotProviderClass != null) {
+      System.out.printf("   Ballots from %s %n", cmdLine.ballotProviderClass);
+    } else {
+      System.out.printf("   Generate %d random Ballots %n", cmdLine.nballots);
+    }
+    System.out.printf("   Write to %s%n", cmdLine.encryptDir);
     EncryptBallots encryptor = new EncryptBallots(electionRecord, cmdLine.deviceName);
 
     BallotInputValidation ballotValidator = new BallotInputValidation(electionRecord.election);
@@ -198,7 +203,7 @@ public class EncryptBallots {
     this.encryptor = new Encrypt.EncryptionMediator(metadata, electionRecord.context, this.device);
 
     this.ballotBox = new BallotBox(electionRecord.election, electionRecord.context);
-    System.out.printf("%nReady to encrypt at location: '%s'%n", this.device.location);
+    System.out.printf("%nReady to encrypt with device: '%s'%n", this.device.location);
   }
 
   Optional<CiphertextBallot> encryptBallot(PlaintextBallot plaintextBallot) {

@@ -124,7 +124,7 @@ public class RunRemoteWorkflow {
               "java",
               "-classpath", classpath,
               "com.sunya.electionguard.keyceremony.KeyCeremonyRemoteTrustee",
-              "-name", REMOTE_TRUSTEE,
+              "-name", REMOTE_TRUSTEE + i,
               "-out", cmdLine.trusteeDir);
       running.add(command);
     }
@@ -191,7 +191,7 @@ public class RunRemoteWorkflow {
               "java",
               "-classpath", classpath,
               "com.sunya.electionguard.decrypting.DecryptingRemoteTrustee",
-              "-guardianFile", cmdLine.trusteeDir + "/" + REMOTE_TRUSTEE + "-" + i + ".protobuf");
+              "-guardianFile", cmdLine.trusteeDir + "/" + REMOTE_TRUSTEE + i + ".protobuf");
       running.add(command);
     }
 

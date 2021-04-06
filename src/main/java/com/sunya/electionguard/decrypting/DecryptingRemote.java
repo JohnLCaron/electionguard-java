@@ -96,6 +96,8 @@ class DecryptingRemote {
       System.exit(1);
     }
 
+    boolean allOk = false;
+    DecryptingRemote decryptor = null;
     try {
       Consumer consumer = new Consumer(cmdLine.encryptDir);
       ElectionRecord electionRecord = consumer.readElectionRecord();
@@ -113,26 +115,36 @@ class DecryptingRemote {
         System.exit(1);
       }
 
-      DecryptingRemote decryptor = new DecryptingRemote(consumer, electionRecord, cmdLine.encryptDir, cmdLine.outputDir);
+      decryptor = new DecryptingRemote(consumer, electionRecord, cmdLine.encryptDir, cmdLine.outputDir);
       decryptor.start(cmdLine.port);
 
-      // LOOK do something better
-      // wait for remote trustees to register
-      try {
-        Thread.sleep(15000);
-      } catch (InterruptedException e) {
-        e.printStackTrace();
+      System.out.printf("Waiting for guardians to register: elapsed seconds = ");
+      Stopwatch stopwatch = Stopwatch.createStarted();
+      while (!decryptor.ready()) {
+        System.out.printf("%s ", stopwatch.elapsed(TimeUnit.SECONDS));
+        try {
+          Thread.sleep(5000);
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
       }
-      decryptor.runDecryption();
+      System.out.printf("%n");
+
+      allOk = decryptor.runDecryption();
 
     } catch (Throwable t) {
       System.out.printf("*** DecryptBallots FAILURE%n");
       t.printStackTrace();
-      System.exit(3);
+      allOk = false;
 
     } finally {
+      if (decryptor != null) {
+        decryptor.shutdownRemoteTrustees(allOk);
+      }
       Scheduler.shutdown();
     }
+
+    System.exit(allOk ? 0 : 1);
   }
 
   ///////////////////////////////////////////////////////////////////////////
@@ -202,7 +214,12 @@ class DecryptingRemote {
     stopwatch.start();
   }
 
-  private void runDecryption() {
+  // LOOK how to allow < nguardians to proceed?
+  boolean ready() {
+    return trusteeProxies.size() == quorum;
+  }
+
+  private boolean runDecryption() {
     // Do the accumulation if the encryptedTally doesnt exist
     if (this.electionRecord.encryptedTally == null) {
       accumulateTally();
@@ -222,7 +239,7 @@ class DecryptingRemote {
     }
 
     System.out.printf("*** DecryptBallots %s%n", ok ? "SUCCESS" : "FAILURE");
-    System.exit(ok ? 0 : 1);
+    return ok;
   }
 
   void accumulateTally() {
@@ -262,7 +279,6 @@ class DecryptingRemote {
     // Here's where the ciphertext Tally is decrypted.
     this.decryptedTally = mediator.get_plaintext_tally().orElseThrow();
 
-
     // Here's where the spoiled ballots are decrypted.
     List<SpoiledBallotAndTally> spoiledTallyAndBallot = mediator.decrypt_spoiled_ballots().orElseThrow();
     System.out.printf("SpoiledBallotAndTally = %d%n", spoiledTallyAndBallot.size());
@@ -271,15 +287,28 @@ class DecryptingRemote {
 
     this.availableGuardians = mediator.getAvailableGuardians();
     System.out.printf("Done decrypting tally%n%n%s%n", this.decryptedTally);
+  }
 
-    // tell the remote trustees to shutdown
+  private void shutdownRemoteTrustees(boolean allOk) {
+    System.out.printf("Shutdown Remote Trustees%n");
+    // tell the remote trustees to finish
+    for (DecryptingRemoteTrusteeProxy trustee : trusteeProxies) {
+      try {
+        boolean ok = trustee.finish(allOk);
+        System.out.printf(" DecryptingRemoteTrusteeProxy %s shutdown was success = %s%n", trustee.id(), ok);
+      } catch (Throwable t) {
+        t.printStackTrace();
+      }
+    }
+
+    // close the proxy channels
     boolean shutdownOk = true;
     for (DecryptingRemoteTrusteeProxy trustee : trusteeProxies) {
       if (!trustee.shutdown()) {
         shutdownOk = false;
       }
     }
-    System.out.printf("DecryptingRemoteTrusteeProxy shutdown was success = %s%n", shutdownOk);
+    System.out.printf(" Proxy channel shutdown was success = %s%n", shutdownOk);
   }
 
   void publish(String inputDir, String publishDir) throws IOException {
@@ -298,6 +327,11 @@ class DecryptingRemote {
   //////////////////////////////////////////////////////////////////////////////////////////
 
   private synchronized DecryptingRemoteTrusteeProxy registerTrustee(DecryptingProto.RegisterDecryptingTrusteeRequest request) {
+    for (DecryptingRemoteTrusteeProxy proxy : trusteeProxies) {
+      if (proxy.id().equalsIgnoreCase(request.getGuardianId())) {
+        throw new IllegalArgumentException("Already have a guardian id=" + request.getGuardianId());
+      }
+    }
     DecryptingRemoteTrusteeProxy.Builder builder = DecryptingRemoteTrusteeProxy.builder();
     builder.setTrusteeId(request.getGuardianId());
     builder.setUrl(request.getRemoteUrl());
