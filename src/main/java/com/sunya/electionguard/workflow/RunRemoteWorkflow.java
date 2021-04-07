@@ -41,29 +41,32 @@ public class RunRemoteWorkflow {
             description = "Directory containing input election manifest", required = true)
     String inputDir;
 
-    @Parameter(names = {"-nguardians"}, order = 2, description = "Number of quardians to create", required = true)
+    @Parameter(names = {"-nguardians"}, order = 2, description = "Number of guardians to create", required = true)
     int nguardians = 6;
 
-    @Parameter(names = {"-quorum"}, order = 3, description = "Number of quardians that make a quorum", required = true)
+    @Parameter(names = {"-quorum"}, order = 3, description = "Number of guardians that make a quorum", required = true)
     int quorum = 5;
 
     @Parameter(names = {"-trusteeDir"}, order = 4,
             description = "Directory containing Guardian serializations", required = true)
     String trusteeDir;
 
-    @Parameter(names = {"-encryptDir"}, order = 4,
+    @Parameter(names = {"-encryptDir"}, order = 5,
             description = "Directory containing ballot encryption", required = true)
     String encryptDir;
 
-    @Parameter(names = {"-nballots"}, order = 5,
+    @Parameter(names = {"-nballots"}, order = 6,
             description = "number of ballots to generate", required = true)
     int nballots;
 
-    @Parameter(names = {"-out"}, order = 6,
+    @Parameter(names = {"-navailable"}, order = 7, description = "Number of guardians available for decryption")
+    int navailable = 0;
+
+    @Parameter(names = {"-out"}, order = 8,
             description = "Directory where complete election record is published", required = true)
     String outputDir;
 
-    @Parameter(names = {"-h", "--help"}, order = 7, description = "Display this help and exit", help = true)
+    @Parameter(names = {"-h", "--help"}, order = 99, description = "Display this help and exit", help = true)
     boolean help = false;
 
     private final JCommander jc;
@@ -171,12 +174,14 @@ public class RunRemoteWorkflow {
 
     System.out.printf("%n3=============================================================%n");
     // DecryptBallots
+    int navailable = cmdLine.navailable > 0 ? cmdLine.navailable : cmdLine.quorum;
     RunCommand decryptBallots = new RunCommand("DecryptingRemote", service,
             "java",
             "-classpath", classpath,
             "com.sunya.electionguard.decrypting.DecryptingRemote",
             "-in", cmdLine.encryptDir,
-            "-out", cmdLine.outputDir
+            "-out", cmdLine.outputDir,
+            "-navailable", Integer.toString(navailable)
     );
     running.add(decryptBallots);
     try {

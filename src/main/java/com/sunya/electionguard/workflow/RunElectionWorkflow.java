@@ -30,10 +30,10 @@ public class RunElectionWorkflow {
             description = "Directory containing input election description", required = true)
     String inputDir;
 
-    @Parameter(names = {"-nguardians"}, order = 2, description = "Number of quardians to create", required = true)
+    @Parameter(names = {"-nguardians"}, order = 2, description = "Number of guardians to create", required = true)
     int nguardians = 6;
 
-    @Parameter(names = {"-quorum"}, order = 3, description = "Number of quardians that make a quorum", required = true)
+    @Parameter(names = {"-quorum"}, order = 3, description = "Number of guardians that make a quorum", required = true)
     int quorum = 5;
 
     @Parameter(names = {"-encryptDir"}, order = 4,

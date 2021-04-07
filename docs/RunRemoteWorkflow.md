@@ -1,4 +1,5 @@
 # 🗳 ElectionGuard Java 
+_last changed: April 7, 2021_
 
 ## RunRemoteWorkflow
 
@@ -10,16 +11,13 @@ This workflow generates Remote Guardians for testing purposes, and so cannot be 
 Usage: java -classpath electionguard-java-all.jar 
       com.sunya.electionguard.workflow.RunRemoteWorkflow [options]
   Options:
-Usage: java -classpath electionguard-java-all.jar 
-      com.sunya.electionguard.workflow.RunRemoteWorkflow [options]
-  Options:
   * -in
       Directory containing input election manifest
   * -nguardians
-      Number of quardians to create
+      Number of guardians to create
       Default: 6
   * -quorum
-      Number of quardians that make a quorum
+      Number of guardians that make a quorum
       Default: 5
   * -trusteeDir
       Directory containing Guardian serializations
@@ -28,6 +26,9 @@ Usage: java -classpath electionguard-java-all.jar
   * -nballots
       number of ballots to generate
       Default: 0
+    -navailable
+      Number of guardians available for decryption
+      Default: 5
   * -out
       Directory where complete election record is published
     -h, --help
@@ -38,7 +39,8 @@ The input directory containing the election manifest is required. It is in Json 
 If Json, it must contain the file _description.json_. If Protobuf, it must contain the file _electionRecord.proto_, from
 which only the election description is read.
 
-You must specify the number of guardians and quorum.
+You must specify nguardians and quorum. If you specify navailable, it must lie between quorum and nguardians inclusive. By
+default, quorum number of guardians will be used for decryption.
 
 The directory where the Guardian serializations are stored must be specified. Remote Guardians are automatically 
 generated using this workflow, and so it cannot be used in a real election.

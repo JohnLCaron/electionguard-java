@@ -20,10 +20,10 @@ Usage: java -classpath electionguard-java-all.jar
     -coefficients
       CoefficientsProvider classname
     -nguardians
-      Number of quardians to create (required if no coefficients)
+      Number of guardians to create (required if no coefficients)
       Default: 0
     -quorum
-      Number of quardians that make a quorum (required if no coefficients)
+      Number of guardians that make a quorum (required if no coefficients)
       Default: 0
     -h, --help
       Display this help and exit

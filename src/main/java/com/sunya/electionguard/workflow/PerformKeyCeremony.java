@@ -54,10 +54,10 @@ public class PerformKeyCeremony {
     @Parameter(names = {"-coefficients"}, order = 3, description = "CoefficientsProvider classname")
     String coefficientsProviderClass;
 
-    @Parameter(names = {"-nguardians"}, order = 4, description = "Number of quardians to create (required if no coefficients)")
+    @Parameter(names = {"-nguardians"}, order = 4, description = "Number of guardians to create (required if no coefficients)")
     int nguardians;
 
-    @Parameter(names = {"-quorum"}, order = 5, description = "Number of quardians that make a quorum (required if no coefficients)")
+    @Parameter(names = {"-quorum"}, order = 5, description = "Number of guardians that make a quorum (required if no coefficients)")
     int quorum;
 
     @Parameter(names = {"-h", "--help"}, order = 6, description = "Display this help and exit", help = true)
@@ -298,7 +298,7 @@ public class PerformKeyCeremony {
             new ElectionConstants(),
             this.coefficientValidationSets);
 
-    // the quardians - private info
+    // the guardians - private info
     List<Guardian> guardians = guardianBuilders.stream().map(gb -> gb.build()).collect(Collectors.toList());
     KeyCeremonyProto.Guardians guardianProto = KeyCeremonyToProto.convertGuardians(guardians, this.quorum);
 

@@ -1,4 +1,5 @@
 # 🗳 ElectionGuard Java 
+_last changed: April 7, 2021_
 
 ## DecryptBallots
 
@@ -19,6 +20,9 @@ Usage: java -classpath electionguard-java-all.jar
       tally 
   * -out
       Directory where augmented election record is published
+  * -navailable
+      Number of available Guardians
+      Default: 0
     -port
       The port to run the server on
       Default: 17711
@@ -32,6 +36,9 @@ encrypted ballots into an encrypted tally.
 
 The output directory where the results of the decryption are written is required.
 For safety in case of failure, the output directory should be different from the input directory.
+
+You use navailable to set the number of guardians used for decryption. It must lie between quorum and nguardians 
+(inclusive) from the election record. If not set, quorum number of guardians will be used.
 
 The port to run the DecryptingRemote server may be given, otherwise the default is used.
 
@@ -51,7 +58,7 @@ Command java -classpath build/libs/electionguard-java-0.9.1-SNAPSHOT-all.jar com
   -in /data/electionguard/publishEncryption -out /data/electionguard/publishDecryption
 ---StdOut---
 DecryptingRemote startup at 2021-04-05T08:54:50.495486
-DecryptingRemote quorum = 2 nguardians = 3
+DecryptingRemote quorum = 2 navailable = 2 nguardians = 3
 ---- DecryptingRemote started, listening on 17711 ----
 DecryptingRemote registerTrustee: remoteTrustee-1 url localhost:27001 
 DecryptingRemote registerTrustee: remoteTrustee-2 url localhost:23256 
