@@ -19,10 +19,10 @@ Usage: java -classpath electionguard-java-all.jar
       Input election record is in proto format
       Default: false
   * -nguardians
-      Number of quardians to create
+      Number of guardians to create
       Default: 6
   * -quorum
-      Number of quardians that make a quorum
+      Number of guardians that make a quorum
       Default: 5
   * -encryptDir
       Directory containing ballot encryption

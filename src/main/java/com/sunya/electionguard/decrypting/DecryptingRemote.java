@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
 /**
  * A command line program to decrypt a tally and optionally a collection of ballots with remote Guardians.
  * It opens up a channel to allow guardians to register with it.
- * It waits until it nguardians register, then starts the decryption.
+ * It waits until navailable guardians register, then starts the decryption.
  * <p>
  * For command line help:
  * <strong>
@@ -61,7 +61,10 @@ class DecryptingRemote {
             description = "Directory where augmented election record is published", required = true)
     String outputDir;
 
-    @Parameter(names = {"-port"}, order = 2, description = "The port to run the server on")
+    @Parameter(names = {"-navailable"}, order = 2, description = "Number of available Guardians", required = true)
+    int navailable;
+
+    @Parameter(names = {"-port"}, order = 3, description = "The port to run the server on")
     int port = 17711;
 
     @Parameter(names = {"-h", "--help"}, order = 9, description = "Display this help and exit", help = true)
@@ -115,7 +118,7 @@ class DecryptingRemote {
         System.exit(1);
       }
 
-      decryptor = new DecryptingRemote(consumer, electionRecord, cmdLine.encryptDir, cmdLine.outputDir);
+      decryptor = new DecryptingRemote(consumer, electionRecord, cmdLine.encryptDir, cmdLine.outputDir, cmdLine.navailable);
       decryptor.start(cmdLine.port);
 
       System.out.printf("Waiting for guardians to register: elapsed seconds = ");
@@ -190,6 +193,7 @@ class DecryptingRemote {
   final ElectionRecord electionRecord;
   final String encryptDir;
   final String outputDir;
+  final int navailable;
 
   final int nguardians;
   final int quorum;
@@ -202,21 +206,27 @@ class DecryptingRemote {
   List<PlaintextTally> spoiledDecryptedTallies;
   List<AvailableGuardian> availableGuardians;
 
-  DecryptingRemote(Consumer consumer, ElectionRecord electionRecord, String encryptDir, String outputDir) {
+  DecryptingRemote(Consumer consumer, ElectionRecord electionRecord, String encryptDir, String outputDir, int navailable) {
     this.consumer = consumer;
     this.electionRecord = electionRecord;
     this.encryptDir = encryptDir;
     this.outputDir = outputDir;
+    this.navailable = navailable;
+
     this.nguardians = electionRecord.context.number_of_guardians;
     this.quorum = electionRecord.context.quorum;
+    Preconditions.checkArgument(this.navailable >= this.quorum,
+            String.format("Available guardians (%d) must be >= quorum (%d)", this.navailable, this.quorum));
+    Preconditions.checkArgument(this.navailable <= this.nguardians,
+            String.format("Available guardians (%d) must be <= nguardians (%d)", this.navailable, this.nguardians));
+
     System.out.printf("DecryptingRemote startup at %s%n", LocalDateTime.now());
-    System.out.printf("DecryptingRemote quorum = %d nguardians = %d%n", this.quorum, this.nguardians);
+    System.out.printf("DecryptingRemote quorum = %d available = %d nguardians = %d%n", this.quorum, this.navailable, this.nguardians);
     stopwatch.start();
   }
 
-  // LOOK how to allow < nguardians to proceed?
   boolean ready() {
-    return trusteeProxies.size() == quorum;
+    return trusteeProxies.size() == this.navailable;
   }
 
   private boolean runDecryption() {
