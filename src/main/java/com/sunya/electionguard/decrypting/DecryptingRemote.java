@@ -259,7 +259,7 @@ class DecryptingRemote {
     Map<String, Group.ElementModP> guardianPublicKeys = electionRecord.guardianCoefficients.stream().collect(
             Collectors.toMap(coeff -> coeff.owner_id(), coeff -> coeff.coefficient_commitments().get(0)));
 
-    DecryptingTrusteeMediator mediator = new DecryptingTrusteeMediator(electionRecord.context,
+    RemoteDecryptionMediator mediator = new RemoteDecryptionMediator(electionRecord.context,
             this.encryptedTally,
             consumer.spoiledBallotsProto(),
             guardianPublicKeys);
