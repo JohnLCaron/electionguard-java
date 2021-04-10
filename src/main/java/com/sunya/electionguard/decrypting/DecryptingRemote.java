@@ -15,6 +15,7 @@ import com.sunya.electionguard.PlaintextBallot;
 import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.Scheduler;
 import com.sunya.electionguard.SpoiledBallotAndTally;
+import com.sunya.electionguard.input.CiphertextTallyInputValidation;
 import com.sunya.electionguard.input.ElectionInputValidation;
 import com.sunya.electionguard.proto.CommonConvert;
 import com.sunya.electionguard.proto.CommonProto;
@@ -235,6 +236,12 @@ class DecryptingRemote {
       accumulateTally();
     } else {
       this.encryptedTally = this.electionRecord.encryptedTally;
+      CiphertextTallyInputValidation validator = new CiphertextTallyInputValidation(electionRecord.election);
+      Formatter errors = new Formatter();
+      if (!validator.validateTally(this.encryptedTally, errors)) {
+        System.out.printf("*** CiphertextTallyInputValidation FAILED on electionRecord%n%s", errors);
+        System.exit(1);
+      }
     }
 
     decryptTally();

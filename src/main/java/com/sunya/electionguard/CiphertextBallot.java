@@ -38,7 +38,7 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
    *
    * @param object_id:               The object_id of this specific ballot
    * @param style_id:                The `object_id` of the `BallotStyle` in the `Manifest` Manifest
-   * @param manifest_hash:        Hash of the election description
+   * @param manifest_hash:           Hash of the election manifest
    * @param previous_code:           Previous tracking hash (or seed hash) in the ballot chain
    * @param contests:                List of contests for this ballot
    * @param nonce:                   optional nonce used as part of the encryption process
@@ -89,7 +89,7 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////
   /** The object_id of the Manifest.BallotStyle. */
   public final String style_id;
-  /** The ElectionDescription hash. */
+  /** The Manifest crypto_hash. */
   public final Group.ElementModQ manifest_hash;
   /** The previous tracking code in the ballot chain. */
   public final Group.ElementModQ previous_code;
@@ -467,7 +467,7 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
 
   /**
    * The encrypted selections made by a voter for a specific contest.
-   * The object_id is the PlaintextBallotContest.object_id.
+   * The object_id is the Manifest.ContestDescription.object_id.
    * <p>
    * CiphertextBallotContest can only be a complete representation of a contest dataset.  While
    * PlaintextBallotContest supports a partial representation, a CiphertextBallotContest includes all data
@@ -539,7 +539,8 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
         available selections for the contest, and that the proof was generated with the nonce. */
     public final Optional<ChaumPedersen.ConstantChaumPedersenProof> proof;
 
-    public Contest(String object_id, Group.ElementModQ contest_hash,
+    public Contest(String object_id,
+                   Group.ElementModQ contest_hash,
                    List<Selection> ballot_selections,
                    Group.ElementModQ crypto_hash,
                    ElGamal.Ciphertext encrypted_total,

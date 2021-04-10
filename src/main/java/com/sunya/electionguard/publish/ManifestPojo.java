@@ -18,7 +18,7 @@ public class ManifestPojo {
   public InternationalizedText name;
   public String election_scope_id;
   public String type;
-  public String start_date; // ISO-8601 Local or UTC? Assume local has zone offset
+  public String start_date; // LOOK specify ISO-8601 format
   public String end_date; // ISO-8601 Local or UTC? Assume local has zone offset
   public ContactInformation contact_information;
 

@@ -18,9 +18,9 @@ import static com.sunya.electionguard.Proof.Usage.SecretValue;
 public class SchnorrProof extends Proof {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
-  /** K in the spec. The commitment {"public keys K_ij") generated from the election polynomial coefficients. */
+  /** The commitment K_ij. */
   public final ElementModP public_key;
-  /** h in the spec */
+  /** h in the spec = g^nonce. LOOK why is this called committment? Confusing*/
   public final ElementModP commitment;
   /** c in the spec */
   public final ElementModQ challenge;

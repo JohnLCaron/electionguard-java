@@ -1,7 +1,9 @@
 # 🗳 ElectionGuard Input Validation
+_last changed: April 10, 2021_
 
-The Election Manifest and each input plaintext ballot are expected to be validated before being passed to the 
-electionguard library. This document summarizes the expected validations.
+The election manifest and each input plaintext ballot are expected to be validated before being passed to the 
+electionguard library. Both the encrypted and decrypted tallies may also be validated against the manifest,
+and against each other for consistency. This document summarizes the expected (non-crypto) validations.
 
 A specific validation is referenced as, eg, Manifest.B.5 and Ballot.A.2.1
 
@@ -33,6 +35,7 @@ A specific validation is referenced as, eg, Manifest.B.5 and Ballot.A.2.1
 
 5. Within a ContestDescription, all SelectionDescription have a unique candidate_id.
 
+
 ## Input Ballot
 
 ### A. Referential integrity
@@ -55,3 +58,66 @@ A specific validation is referenced as, eg, Manifest.B.5 and Ballot.A.2.1
 
 2. Within a PlaintextBallotContest, the sum of the PlaintextBallotSelection votes must be <= ContestDescription.votes_allowed.
 
+
+## Ciphertext Tally
+
+### A. Referential integrity
+
+1. For each CiphertextTally.Contest in the tally, the object_id must match a ContestDescription.object_id in Manifest.contests.
+
+   1.1 CiphertextTally.Contest description_hash must match the ContestDescription.crypto_hash.
+   
+2. Within the CiphertextTally.Contest and matching ContestDescription, each CiphertextTally.Selection.object_id must match a SelectionDescription.object_id.
+   
+   2.1 CiphertextTally.Selection description_hash must match the SelectionDescription.crypto_hash.
+
+### B. Duplication
+
+1. All CiphertextTally.Contest must have a unique contest_id. In the contests map, the key must match the value.object_id.  
+
+2. Within a CiphertextTally.Contest, all CiphertextTally.Selection have a unique object_id. In the selections map, the key must match the value.object_id.
+
+
+## Plaintext Tally
+
+### A. Referential integrity with Manifest
+
+1. For each PlaintextTally.Contest in the tally, the object_id must match a ContestDescription.object_id in Manifest.contests.
+   
+2. Within the PlaintextTally.Contest and matching ContestDescription, each PlaintextTally.Selection.object_id must match a SelectionDescription.object_id.
+
+### B. Referential integrity with Ciphertext Tally
+
+1. For each PlaintextTally.Contest in the tally, the object_id must match a CiphertextTally.Contest.object_id.
+   
+2. Within the PlaintextTally.Contest and matching CiphertextTally.Contest, each PlaintextTally.Selection.object_id must match a CiphertextTally.Selection.object_id.
+
+  2.1 The PlaintextTally.Selection.message must match the CiphertextTally.Selection.message.
+   
+### C. Duplication
+
+1. All PlaintextTally.Contest must have a unique contest_id. In the contests map, the key must match the value.object_id.  
+
+2. Within a PlaintextTally.Contest, all PlaintextTally.Selection have a unique object_id. In the selections map, the key must match the value.object_id.
+
+### D. Shares
+
+1. All Selection shares have an object_id matching the Selection object_id.
+
+2. Within a selection, the selection shares have a unique guardian_id. 
+
+3 There are _nguardian_ shares.
+
+### E. Recovered Shares
+
+1. For each CiphertextDecryptionSelection share with recovered_parts, each recovered_part has an object_id matching the share object_id.
+
+2. Each recovered_part has a unique guardian_id, matching the key in the share's map. 
+
+3. There are _navailable_ recovered_parts. Note that navailable may be greater than quorum.
+
+4. Each recovered_part has a missing_guardian_id matching the share's guardian_id
+
+
+
+ 
