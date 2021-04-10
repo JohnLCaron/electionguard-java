@@ -79,7 +79,8 @@ public class PlaintextTally {
     public abstract ElementModP value();
     /** The encrypted vote count. */
     public abstract ElGamal.Ciphertext message();
-    /** The Guardians' shares of the decryption of a selection. `M_i` in the spec. Must be quorum of them. */
+
+    /** The Guardians' shares of the decryption of a selection. `M_i` in the spec. Must be nguardians of them. */
     public abstract ImmutableList<DecryptionShare.CiphertextDecryptionSelection> shares();
 
     public static Selection create(String object_id, Integer tally, ElementModP value, ElGamal.Ciphertext message,

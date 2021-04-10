@@ -3,7 +3,9 @@ package com.sunya.electionguard.verifier;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
+import com.sunya.electionguard.input.CiphertextTallyInputValidation;
 import com.sunya.electionguard.input.ElectionInputValidation;
+import com.sunya.electionguard.input.PlaintextTallyInputValidation;
 import com.sunya.electionguard.publish.Consumer;
 
 import java.util.Formatter;
@@ -120,6 +122,19 @@ public class VerifyElectionRecord {
     PartialDecryptionVerifier pdv = new PartialDecryptionVerifier(electionRecord, electionRecord.decryptedTally);
     boolean pdvOk = pdv.verify_replacement_partial_decryptions();
 
+    System.out.println("------------ PlaintextTallyInputValidation ------------");
+    PlaintextTallyInputValidation validator = new PlaintextTallyInputValidation(
+            electionRecord.election,
+            electionRecord.encryptedTally,
+            electionRecord.context.number_of_guardians,
+            electionRecord.availableGuardians.size());
+    Formatter errors = new Formatter();
+    boolean ptiValid = true;
+    if (!validator.validateTally(electionRecord.decryptedTally, errors)) {
+      System.out.printf("*** PlaintextTallyInputValidation FAILED on electionRecord%n%s", errors);
+      ptiValid = false;
+    }
+
     System.out.println("------------ [box 11] Correctness of Decryption of Tallies ------------");
     TallyDecryptionVerifier tdv = new TallyDecryptionVerifier(electionRecord.election, electionRecord.decryptedTally);
     boolean tdvOk = tdv.verify_tally_decryption();
@@ -130,7 +145,7 @@ public class VerifyElectionRecord {
     PlaintextBallotVerifier pbv = new PlaintextBallotVerifier(electionRecord);
     boolean pbvOk = pbv.verify_plaintext_ballot();
 
-    boolean allOk = (blvOk && gpkvOk && epkvOk && sevOk && cvlvOk && bcvOk && bavOk && dvOk && pdvOk && tdvOk && dvsOk && pbvOk);
+    boolean allOk = (blvOk && gpkvOk && epkvOk && sevOk && cvlvOk && bcvOk && bavOk && dvOk && ptiValid && pdvOk && tdvOk && dvsOk && pbvOk);
     if (allOk) {
       System.out.printf("%n===== ALL OK! ===== %n");
     } else {

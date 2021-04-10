@@ -6,8 +6,8 @@ _This document may slightly lag both the electionguard-python and electionguard-
 ## The Election Record
 
 The **_Election Record_** is the publicly available record of the ElectionGuard process. 
-The reference electionguard-python library produces a JSON serialization of the election record. 
-The electionguard-java library supports JSON serialization and also protobuf serialization. 
+The reference _electionguard-python_ library produces a JSON serialization of the election record. 
+The _electionguard-java_ library supports JSON serialization and also protobuf serialization. 
 In this document simple Java value classes are used to document the election record objects. 
 See the implementing libraries for the language specific API. 
 
@@ -25,8 +25,8 @@ class ManifestPojo {
   InternationalizedText name;
   String election_scope_id;
   String type;
-  String start_date; // ISO-8601 Local or UTC? Assume local has zone offset
-  String end_date; // ISO-8601 Local or UTC? Assume local has zone offset
+  String start_date; // ISO-8601
+  String end_date; // ISO-8601
   ContactInformation contact_information;
 
   List<GeopoliticalUnit> geopolitical_units;
@@ -102,49 +102,50 @@ class ManifestPojo {
     String candidate_id;
     int sequence_order;
   }
+}
 ````
 
 ### Key Ceremony
 
 The Key Ceremony takes the manifest as input, as well as the total number of Guardians and the mininum number
-of Guardians required for decryption. It adds the **_ElectionConstants_**, **_CiphertextElectionContext_**,
-and a **_CoefficientValidationSet_** for each Guardian, to the Election Record.
+of Guardians required for decryption. After a successful key ceremony, it adds the **_ElectionConstants_**, 
+**_CiphertextElectionContext_**, and a **_CoefficientValidationSet_** for each Guardian, to the Election Record.
 
 During the Key Ceremony, the Guardian state needed for decryption is also created, but that is private state 
 and not part of the election record.
 
 ````
   class ElectionConstants {
-    BigInteger large_prime; /** large prime or p. */
-    BigInteger small_prime; /** small prime or q. */
-    BigInteger cofactor; /** cofactor or r. */
-    BigInteger generator; /** generator or g. */
+    BigInteger large_prime; // large prime or p. 
+    BigInteger small_prime; // small prime or q. 
+    BigInteger cofactor;    // cofactor or r. 
+    BigInteger generator;   // generator or g. 
   }
 ````
 
 ````
   class CiphertextElectionContext {
-    int number_of_guardians; /** The number of guardians necessary to generate the key. */
-    int quorum; /** The quorum of guardians necessary to decrypt an election.  Must be less than number_of_guardians. */
-    Group.ElementModP elgamal_public_key; /** The joint key (K) in the ElectionGuard Spec. */
-    Group.ElementModQ description_hash; /** The Manifest crypto_hash. */
-    Group.ElementModQ crypto_base_hash; /** The base hash code (𝑄) in the ElectionGuard Spec. */
-    Group.ElementModQ crypto_extended_base_hash; /** The extended base hash code (𝑄') in the ElectionGuard Spec. */
+    int number_of_guardians;                 // The number of guardians necessary to generate the key. 
+    int quorum;                              // The quorum of guardians necessary to decrypt an election.
+    Group.ElementModP elgamal_public_key;    // The joint key (K) in the ElectionGuard Spec. 
+    Group.ElementModQ description_hash;      // The Manifest crypto_hash. 
+    Group.ElementModQ crypto_base_hash;      // The base hash code (𝑄) in the ElectionGuard Spec. 
+    Group.ElementModQ crypto_extended_base_hash; // The extended base hash code (𝑄') in the ElectionGuard Spec. 
   }
 ````
 
 ````
   class CoefficientValidationSet {
-    String owner_id; /** Guardian.object_id. */
-    List<ElementModP> coefficient_commitments; /** The Kij of the specification. */
-    List<SchnorrProof> coefficient_proofs; /** The proof of knowledge for the coefficient commitments. */
+    String owner_id;                           // Guardian object_id. 
+    List<ElementModP> coefficient_commitments; // The K_ij of the specification. 
+    List<SchnorrProof> coefficient_proofs;     // The proof of knowledge for the coefficient commitments. 
   }
 
   class SchnorrProof {
-    ElementModP public_key; /** K in the spec. The commitment {"keys K_ij") generated from the election polynomial coefficients. */
-    ElementModP commitment; /** h in the spec */
-    ElementModQ challenge; /** c in the spec */
-    ElementModQ response; /** u in the spec */
+    ElementModP public_key; // The commitment K_ij
+    ElementModP commitment; // h in the spec 
+    ElementModQ challenge;  // c in the spec 
+    ElementModQ response;   // u in the spec
   }
 ````
 
@@ -169,11 +170,12 @@ class PlaintextBallotPojo {
     boolean is_placeholder_selection;
     String extra_data;
   }
+}
 ````
 
 ### Encryption 
 
-During encryption, one or more _PlaintextBallots_ are given to the encryption device, which are
+During encryption, one or more _PlaintextBallots_ are given to the encryption device, and are
 encrypted into **_CiphertextBallots_**. The ballot is then either cast or spoiled, and the CiphertextBallot
 is added to the election record as a **_Submitted Ballot_**. The plaintext ballots are not part of the election record, 
 but presumably kept safe and secret by the election authorities, for recounts and audits.
@@ -181,35 +183,35 @@ but presumably kept safe and secret by the election authorities, for recounts an
 ````
 /** Conversion between SubmittedBallot and Json, using python's object model and naming. */
 class SubmittedBallotPojo {
-  String object_id;
-  String style_id;
-  ElementModQ manifest_hash;
+  String object_id;          // The object_id of this specific ballot
+  String style_id;           // The object_id of the Manifest.BallotStyle
+  ElementModQ manifest_hash; // The manifest cyrpto_hash
   ElementModQ code;
-  ElementModQ previous_code;
+  ElementModQ previous_code; // Previous tracking hash (or seed hash) in the ballot chain
   List<CiphertextBallotContestPojo> contests;
-  long timestamp;
-  ElementModQ crypto_hash;
-  ElementModQ nonce; // LOOK ignored until Optional serialization gets fixed
-  BallotBox.State state;
+  long timestamp;            // When the ballot encryption is generated, in seconds since the Unix epoch.
+  ElementModQ crypto_hash;   // This ballot's cyrpto_hash
+  ElementModQ nonce;         // LOOK ignored until Optional serialization gets fixed
+  BallotBox.State state;     // CAST or SPOLIED
 
   class CiphertextBallotContestPojo {
-    String object_id;
-    ElementModQ description_hash;
+    String object_id;             // The object_id of the Manifest.ContestDescription
+    ElementModQ description_hash; // The cyrpto_hash of the Manifest.ContestDescription
     List<CiphertextBallotSelectionPojo> ballot_selections;
-    ElementModQ crypto_hash;
-    ElGamalCiphertextPojo ciphertext_accumulation;
-    ElementModQ nonce;
-    ConstantChaumPedersenProofPojo proof;
+    ElementModQ crypto_hash;      
+    ElGamalCiphertextPojo ciphertext_accumulation; // encrypted total votes in the contest
+    ElementModQ nonce;                    // The nonce used to generate the ciphertext_accumulation
+    ConstantChaumPedersenProofPojo proof; // The proof for the encrypted_total
   }
 
   class CiphertextBallotSelectionPojo {
-    String object_id;
-    ElementModQ description_hash;
-    ElGamalCiphertextPojo ciphertext;
+    String object_id;                   // The object_id of the Manifest.SelectionDescription
+    ElementModQ description_hash;       // The cyrpto_hash of the Manifest.SelectionDescription
+    ElGamalCiphertextPojo ciphertext;   // encrypted vote count for this selection
     ElementModQ crypto_hash;
     boolean is_placeholder_selection;
-    ElementModQ nonce;
-    DisjunctiveChaumPedersenProofPojo proof;
+    ElementModQ nonce;                  // The nonce used to generate the ciphertext
+    DisjunctiveChaumPedersenProofPojo proof; // proof of knowledge that the vote count = 0 or 1
     ElGamalCiphertextPojo extended_data;
   }
 
@@ -237,40 +239,42 @@ class SubmittedBallotPojo {
     ElementModP pad;
     ElementModP data;
   }
+}
 ````
 
 The encrypting device information is also added to the election record:
 
 ````
   class EncryptionDevice {
-    long uuid; /** Unique identifier for device. */
-    String session_id; /** Used to identify session and protect the timestamp. */
-    int launch_code; /** Election initialization value. */
-    String location; /** Arbitrary string to designate the location of the device. */
+    long uuid;          // Unique identifier for device. 
+    String session_id;  // Used to identify session and protect the timestamp. 
+    int launch_code;    // Election initialization value. 
+    String location;    // Arbitrary string to designate the location of the device. 
 }
 ````
 
 ### Tally Accumulation 
 
-During Tally Accumulation, all of the Encrypted Ballots are added together in a way that does not
-require the ballots to be decrypted first. The result is an **_EncryptedTally_** that is added to the
+During Tally Accumulation, the Encrypted Ballots are added together in a way that does not
+require the ballots to be decrypted first. The result is an **_EncryptedTally_**, which is then added to the
 election record:
 
 ````
+/** Conversion between CiphertextTally and Json, using python's object model and naming. */
 class CiphertextTallyPojo {
-  String object_id;
+  String object_id;                     // arbitrary string to describe this tally
   Map<String, CiphertextTallyContestPojo> contests;
 
   class CiphertextTallyContestPojo {
-    String object_id;
-    Group.ElementModQ description_hash;
+    String object_id;                   // The Manifest ContestDescription object_id
+    Group.ElementModQ description_hash; // The Manifest ContestDescription crypto_hash
     Map<String, CiphertextTallySelectionPojo> selections;
   }
 
   class CiphertextTallySelectionPojo {
-    String object_id;
-    Group.ElementModQ description_hash;
-    ElGamal.Ciphertext ciphertext;
+    String object_id;                   // The Manifest SelectionDescription object_id
+    Group.ElementModQ description_hash; // The Manifest SelectionDescription crypto_hash
+    ElGamal.Ciphertext ciphertext;      // accumulated vote for this selection
   }
 ````
 
@@ -281,38 +285,39 @@ This is the count of the election results for whatever set of ballots were accum
 The PlaintextTally as well as the list of **_AvailableGuardians_** are added to the election record:
 
 ````
+/** Conversion between PlaintextTally and Json, using python's object model and naming. */
 class PlaintextTallyPojo {
-  String object_id;
-  Map<String, PlaintextTallyContestPojo> contests;
+  String object_id;             // matches CiphertextTally object_id
+  Map<String, PlaintextTallyContestPojo> contests; // keyed by Contest object_id
 
   class PlaintextTallyContestPojo {
-    String object_id;
-    Map<String, PlaintextTallySelectionPojo> selections;
+    String object_id;           // The Manifest ContestDescription object_id
+    Map<String, PlaintextTallySelectionPojo> selections; // keyed by Selection object_id
   }
 
   class PlaintextTallySelectionPojo {
-    String object_id;
-    Integer tally;
-    Group.ElementModP value;
-    ElGamal.Ciphertext message;
-    List<CiphertextDecryptionSelectionPojo> shares;
+    String object_id;           // The Manifest SelectionDescription object_id
+    Integer tally;              // The vote for this selection
+    Group.ElementModP value;    // g^tally or M in the spec
+    ElGamal.Ciphertext message; // The encrypted vote count
+    List<CiphertextDecryptionSelectionPojo> shares; // Guardians' shares of the decryption, keyed by guardian_id.
   }
 
   class CiphertextDecryptionSelectionPojo {
-    String object_id;
-    String guardian_id;
-    Group.ElementModP share;
-    ChaumPedersenProofPojo proof; 
-    Map<String, CiphertextCompensatedDecryptionSelectionPojo> recovered_parts;
+    String object_id;               // The Manifest SelectionDescription object_id
+    String guardian_id;             // The Guardian that this share belongs to
+    Group.ElementModP share;        // The Share of the decryption of a selection. `M_i` in the spec.
+    ChaumPedersenProofPojo proof;   // For available guartdians, proof that the share was decrypted correctly.
+    Map<String, CiphertextCompensatedDecryptionSelectionPojo> recovered_parts; // For missing guardians, keyed by available guardian_id.
   }
 
   class CiphertextCompensatedDecryptionSelectionPojo {
     String object_id;
-    String guardian_id;
-    String missing_guardian_id;
-    Group.ElementModP share;
-    Group.ElementModP recovery_key;
-    ChaumPedersenProofPojo proof;
+    String guardian_id;             // available Guardian that this share belongs to
+    String missing_guardian_id;     // missing Guardian for whom this share is calculated on behalf of
+    Group.ElementModP share;        // share of the decryption of a selection. M_il in the spe
+    Group.ElementModP recovery_key; // available guardian's share of the missing_guardian's public key.
+    ChaumPedersenProofPojo proof;   // proof that the share was decrypted correctly
   }
 
   class ChaumPedersenProofPojo {
@@ -325,9 +330,9 @@ class PlaintextTallyPojo {
 
 ````
 class AvailableGuardian {
-  String guardian_id; /** The guardian id. */
-  int x_coordinate; /** The guardian x coordinate value, aka sequence_order. */
-  Group.ElementModQ lagrangeCoordinate; /** Its lagrange coordinate when decrypting. */
+  String guardian_id;   // The guardian id. 
+  int x_coordinate;     // The guardian x coordinate value, aka sequence_order. 
+  Group.ElementModQ lagrangeCoordinate; // Its lagrange coordinate when decrypting. 
 }
 ````
 
