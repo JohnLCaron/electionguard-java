@@ -34,7 +34,10 @@ public class TrusteeToProto {
     builder.setGeneratingGuardianId(org.generatingGuardianId());
     builder.setDesignatedGuardianId(org.designatedGuardianId());
     builder.setDesignatedGuardianXCoordinate(org.designatedGuardianXCoordinate());
-    builder.setEncryptedCoordinate(ByteString.copyFrom(org.encryptedCoordinate().getBytes()));
+    if (org.encryptedCoordinate() != null) {
+      builder.setEncryptedCoordinate(ByteString.copyFrom(org.encryptedCoordinate().getBytes()));
+    }
+    builder.setError(org.error());
     return builder.build();
   }
 

@@ -22,14 +22,7 @@ public class TestKeyCeremony {
   static Auxiliary.Decryptor identity_auxiliary_decrypt = (m, k) -> Optional.of(new String(m.getBytes()));
   static Auxiliary.Encryptor identity_auxiliary_encrypt = (m, k) -> Optional.of(new Auxiliary.ByteString(m.getBytes()));
 
-  @Example
-  public void test_generate_rsa_auxiliary_key_pair() {
-    Auxiliary.KeyPair auxiliary_key_pair = generate_rsa_auxiliary_key_pair();
 
-    assertThat(auxiliary_key_pair).isNotNull();
-    assertThat(auxiliary_key_pair.public_key).isNotNull();
-    assertThat(auxiliary_key_pair.secret_key).isNotNull();
-  }
 
   @Example
   public void test_generate_election_key_pair() {

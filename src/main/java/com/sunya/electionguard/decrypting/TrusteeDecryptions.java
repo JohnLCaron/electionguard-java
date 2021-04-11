@@ -9,7 +9,6 @@ import com.sunya.electionguard.CiphertextContest;
 import com.sunya.electionguard.CiphertextElectionContext;
 import com.sunya.electionguard.CiphertextSelection;
 import com.sunya.electionguard.CiphertextTally;
-import com.sunya.electionguard.DecryptionProofRecovery;
 import com.sunya.electionguard.DecryptionProofTuple;
 import com.sunya.electionguard.DecryptionShare;
 import com.sunya.electionguard.Group;

@@ -94,9 +94,9 @@ class KeyCeremonyRemoteTrustee extends RemoteKeyCeremonyTrusteeServiceGrpc.Remot
     KeyCeremonyRemoteProxy proxy = new KeyCeremonyRemoteProxy(serverUrl);
     RemoteKeyCeremonyProto.RegisterTrusteeResponse response = proxy.registerTrustee(cmdLine.name, url);
     proxy.shutdown();
-    if (response.hasError()) {
-      System.out.printf("    registerTrustee error %s%n", response.getError().getMessage());
-      throw new RuntimeException(response.getError().getMessage());
+    if (!response.getError().isEmpty()) {
+      System.out.printf("    registerTrustee error %s%n", response.getError());
+      throw new RuntimeException(response.getError());
     }
     System.out.printf("    response %s %d %d %n", response.getGuardianId(),
             response.getGuardianXCoordinate(),
@@ -233,22 +233,20 @@ class KeyCeremonyRemoteTrustee extends RemoteKeyCeremonyTrusteeServiceGrpc.Remot
     RemoteKeyCeremonyTrusteeProto.PartialKeyBackup.Builder response = RemoteKeyCeremonyTrusteeProto.PartialKeyBackup.newBuilder();
     try {
       KeyCeremony2.PartialKeyBackup backup = delegate.sendPartialKeyBackup(request.getGuardianId());
-      if (backup == null) {
-        logger.atSevere().log("KeyCeremonyRemoteTrustee sendPartialKeyBackup failed");
-        response.setError(CommonProto.RemoteError.newBuilder().setMessage("why?").build());
 
-      } else {
-        response.setGeneratingGuardianId(backup.generatingGuardianId())
-                .setDesignatedGuardianId(backup.designatedGuardianId())
-                .setDesignatedGuardianXCoordinate(backup.designatedGuardianXCoordinate())
-                .setEncryptedCoordinate(ByteString.copyFrom(backup.encryptedCoordinate().getBytes()));
-        logger.atInfo().log("KeyCeremonyRemoteTrustee sendPartialKeyBackup %s", request.getGuardianId());
+      response.setGeneratingGuardianId(backup.generatingGuardianId())
+              .setDesignatedGuardianId(backup.designatedGuardianId())
+              .setDesignatedGuardianXCoordinate(backup.designatedGuardianXCoordinate())
+              .setError(backup.error());
+      if (backup.encryptedCoordinate() != null) {
+        response.setEncryptedCoordinate(ByteString.copyFrom(backup.encryptedCoordinate().getBytes()));
       }
+      logger.atInfo().log("KeyCeremonyRemoteTrustee sendPartialKeyBackup %s", request.getGuardianId());
 
     } catch (Throwable t) {
       logger.atSevere().withCause(t).log("KeyCeremonyRemoteTrustee sendPartialKeyBackup failed");
       t.printStackTrace();
-      response.setError(CommonProto.RemoteError.newBuilder().setMessage(t.getMessage()).build());
+      response.setError(t.getMessage());
     }
 
     responseObserver.onNext(response.build());
@@ -265,19 +263,21 @@ class KeyCeremonyRemoteTrustee extends RemoteKeyCeremonyTrusteeServiceGrpc.Remot
               proto.getGeneratingGuardianId(),
               proto.getDesignatedGuardianId(),
               proto.getDesignatedGuardianXCoordinate(),
-              new Auxiliary.ByteString(proto.getEncryptedCoordinate().toByteArray()));
+              new Auxiliary.ByteString(proto.getEncryptedCoordinate().toByteArray()),
+              null);
 
       KeyCeremony2.PartialKeyVerification verify = delegate.verifyPartialKeyBackup(backup);
+
       response.setGeneratingGuardianId(verify.generatingGuardianId())
               .setDesignatedGuardianId(verify.designatedGuardianId())
               .setDesignatedGuardianXCoordinate(backup.designatedGuardianXCoordinate())
-              .setVerify(verify.verified());
+              .setError(verify.error());
       logger.atInfo().log("KeyCeremonyRemoteTrustee verifyPartialKeyBackup %s", proto.getGeneratingGuardianId());
 
     } catch (Throwable t) {
       logger.atSevere().withCause(t).log("KeyCeremonyRemoteTrustee verifyPartialKeyBackup failed");
       t.printStackTrace();
-      response.setError(CommonProto.RemoteError.newBuilder().setMessage(t.getMessage()).build());
+      response.setError(t.getMessage());
     }
 
     responseObserver.onNext(response.build());
@@ -290,21 +290,20 @@ class KeyCeremonyRemoteTrustee extends RemoteKeyCeremonyTrusteeServiceGrpc.Remot
     RemoteKeyCeremonyTrusteeProto.PartialKeyChallengeResponse.Builder response = RemoteKeyCeremonyTrusteeProto.PartialKeyChallengeResponse.newBuilder();
     try {
       KeyCeremony2.PartialKeyChallengeResponse backup = delegate.sendBackupChallenge(request.getGuardianId());
-      if (backup == null) {
-        logger.atSevere().log("KeyCeremonyRemoteTrustee sendBackupChallenge failed");
-        response.setError(CommonProto.RemoteError.newBuilder().setMessage("why?").build());
-      } else {
-        response.setGeneratingGuardianId(backup.generatingGuardianId())
-                .setDesignatedGuardianId(backup.designatedGuardianId())
-                .setDesignatedGuardianXCoordinate(backup.designatedGuardianXCoordinate())
-                .setCoordinate(CommonConvert.convertElementModQ(backup.coordinate()));
-        logger.atInfo().log("KeyCeremonyRemoteTrustee sendBackupChallenge %s", backup.designatedGuardianId());
+      response.setGeneratingGuardianId(backup.generatingGuardianId())
+              .setDesignatedGuardianId(backup.designatedGuardianId())
+              .setDesignatedGuardianXCoordinate(backup.designatedGuardianXCoordinate())
+              .setError(backup.error());
+      if (backup.coordinate() != null) {
+        response.setCoordinate(CommonConvert.convertElementModQ(backup.coordinate()));
       }
+
+      logger.atInfo().log("KeyCeremonyRemoteTrustee sendBackupChallenge %s", backup.designatedGuardianId());
 
     } catch (Throwable t) {
       logger.atSevere().withCause(t).log("KeyCeremonyRemoteTrustee sendBackupChallenge failed");
       t.printStackTrace();
-      response.setError(CommonProto.RemoteError.newBuilder().setMessage(t.getMessage()).build());
+      response.setError(t.getMessage());
     }
 
     responseObserver.onNext(response.build());

@@ -8,11 +8,13 @@ import com.sunya.electionguard.ElectionPolynomial;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.SchnorrProof;
 
+import javax.annotation.Nullable;
 import java.math.BigInteger;
 import java.util.List;
 
 import static com.sunya.electionguard.Group.ElementModP;
 
+/** Value classes for the key ceremony. Replaces KeyCeremony. */
 public class KeyCeremony2 {
 
   /** A Guardian's public key set of auxiliary and election keys, coefficient_commitments, and proofs. */
@@ -50,9 +52,6 @@ public class KeyCeremony2 {
         }
       }
       return true;
-      // g^P_i(0) of the shared polynomial P_i matches K_i
-      // Group.ElementModP value = ElectionPolynomial.compute_gPcoordinate(BigInteger.ZERO, coefficientCommitments());
-      // return value.equals(coefficientCommitments().get(0));
     }
   }
 
@@ -66,16 +65,23 @@ public class KeyCeremony2 {
     /** The x coordinate (aka sequence order) of the designated guardian. */
     public abstract int designatedGuardianXCoordinate();
     /** The encrypted coordinate of generatingGuardianId polynomial's value at designatedGuardianXCoordinate. */
-    public abstract Auxiliary.ByteString encryptedCoordinate();
+    @Nullable public abstract Auxiliary.ByteString encryptedCoordinate();
+
+    public abstract String error(); // empty means no error
 
     public static PartialKeyBackup create(String owner_id,
                                           String designated_id,
                                           int designated_sequence_order,
-                                          Auxiliary.ByteString encrypted_value) {
+                                          @Nullable Auxiliary.ByteString encrypted_value,
+                                          @Nullable String error) {
+      if (error == null || error.trim().isEmpty()) {
+        error = "";
+      }
       return new AutoValue_KeyCeremony2_PartialKeyBackup(owner_id,
               designated_id,
               designated_sequence_order,
-              encrypted_value);
+              encrypted_value,
+              error);
     }
   }
 
@@ -84,10 +90,13 @@ public class KeyCeremony2 {
   public abstract static class PartialKeyVerification {
     public abstract String generatingGuardianId();
     public abstract String designatedGuardianId();
-    public abstract boolean verified();
+    public abstract String error(); // empty means no error
 
-    public static PartialKeyVerification create(String owner_id, String designated_id, boolean verified) {
-      return new AutoValue_KeyCeremony2_PartialKeyVerification(owner_id, designated_id, verified);
+    public static PartialKeyVerification create(String owner_id, String designated_id, @Nullable String error) {
+      if (error == null || error.trim().isEmpty()) {
+        error = "";
+      }
+      return new AutoValue_KeyCeremony2_PartialKeyVerification(owner_id, designated_id, error);
     }
   }
 
@@ -98,13 +107,18 @@ public class KeyCeremony2 {
     public abstract String designatedGuardianId();
     public abstract int designatedGuardianXCoordinate();
     /** The unencrypted coordinate of generatingGuardianId polynomial's value at designatedGuardianXCoordinate. */
-    public abstract Group.ElementModQ coordinate();
+    @Nullable public abstract Group.ElementModQ coordinate();
+    public abstract String error(); // empty means no error
 
     public static PartialKeyChallengeResponse create(
             String owner_id, String designated_id, int designated_sequence_order,
-            Group.ElementModQ value) {
+            Group.ElementModQ value,
+            String error) {
+      if (error == null || error.trim().isEmpty()) {
+        error = "";
+      }
       return new AutoValue_KeyCeremony2_PartialKeyChallengeResponse(
-              owner_id, designated_id, designated_sequence_order, value);
+              owner_id, designated_id, designated_sequence_order, value, error);
     }
   }
 
@@ -123,6 +137,6 @@ public class KeyCeremony2 {
     return PartialKeyVerification.create(
             response.generatingGuardianId(),
             response.designatedGuardianId(),
-            ok);
+            ok ? null : "verify_polynomial_coordinate failed");
   }
 }

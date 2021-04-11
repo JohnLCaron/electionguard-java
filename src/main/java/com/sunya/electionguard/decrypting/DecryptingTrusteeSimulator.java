@@ -1,6 +1,5 @@
 package com.sunya.electionguard.decrypting;
 
-import com.sunya.electionguard.DecryptionProofRecovery;
 import com.sunya.electionguard.DecryptionProofTuple;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.Group;

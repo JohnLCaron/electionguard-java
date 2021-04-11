@@ -138,8 +138,9 @@ public class KeyCeremonyTrusteeMediator {
               fail = true;
             } else {
               KeyCeremony2.PartialKeyVerification verify = verifyO.get();
-              if (!verify.verified()) {
-                System.out.printf("Guardian %s backup challenged by Guardian %s%n", trustee.id(), recipient.id());
+              if (!verify.error().isEmpty()) {
+                System.out.printf("Guardian %s backup challenged by Guardian %s error = '%s'%n",
+                        trustee.id(), recipient.id(), verify.error());
                 failures.put(trustee.id(), verify);
               }
             }
@@ -179,9 +180,9 @@ public class KeyCeremonyTrusteeMediator {
         // generation process continues undeterred.
         KeyCeremony2.PublicKeySet challengedGuardianKeys = publicKeysMap.get(response.generatingGuardianId());
         KeyCeremony2.PartialKeyVerification challenge_verify = KeyCeremony2.verifyElectionPartialKeyChallenge(response, challengedGuardianKeys.coefficientCommitments());
-        if (!challenge_verify.verified()) {
-          System.out.printf("***FAILED to validate Guardian %s backup that was challenged by Guardian %s%n",
-                  failure.generatingGuardianId(), failure.designatedGuardianId());
+        if (!challenge_verify.error().isEmpty()) {
+          System.out.printf("***FAILED to validate Guardian %s backup that was challenged by Guardian %s error = %s%n",
+                  failure.generatingGuardianId(), failure.designatedGuardianId(), challenge_verify.error());
           fail = true;
         } else {
           System.out.printf("***SUCCESS validate Guardian %s backup that was challenged by Guardian %s%n",

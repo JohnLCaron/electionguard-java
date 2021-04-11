@@ -1,7 +1,12 @@
-package com.sunya.electionguard;
+package com.sunya.electionguard.decrypting;
 
 import com.google.common.base.Preconditions;
+import com.sunya.electionguard.ChaumPedersen;
+import com.sunya.electionguard.Group;
 
+import javax.annotation.concurrent.Immutable;
+
+@Immutable
 public class DecryptionProofRecovery {
   public final Group.ElementModP decryption;
   public final ChaumPedersen.ChaumPedersenProof proof;

@@ -285,7 +285,7 @@ class KeyCeremonyRemote {
 
       if (startedKeyCeremony) {
         responseObserver.onNext(RemoteKeyCeremonyProto.RegisterTrusteeResponse.newBuilder()
-                .setError(RemoteKeyCeremonyProto.KeyCeremonyError.newBuilder().setMessage("startedKeyCeremony").build())
+                .setError("Already started KeyCeremony")
                 .build());
         responseObserver.onCompleted();
         return;
@@ -303,7 +303,7 @@ class KeyCeremonyRemote {
 
       } catch (Throwable t) {
         logger.atSevere().withCause(t).log("KeyCeremonyRemote registerTrustee failed");
-        response.setError(RemoteKeyCeremonyProto.KeyCeremonyError.newBuilder().setMessage(t.getMessage()).build());
+        response.setError(t.getMessage());
         responseObserver.onNext(response.build());
         responseObserver.onCompleted();
       }
