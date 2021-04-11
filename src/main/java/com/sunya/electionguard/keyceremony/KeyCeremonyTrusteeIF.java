@@ -7,6 +7,8 @@ import java.util.Optional;
 public interface KeyCeremonyTrusteeIF {
   String id();
 
+  int coordinate();
+
   Optional<KeyCeremony2.PublicKeySet> sendPublicKeys();
 
   boolean receivePublicKeys(KeyCeremony2.PublicKeySet keyset);

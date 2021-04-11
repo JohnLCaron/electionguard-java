@@ -39,7 +39,7 @@ public class KeyCeremonyTrustee {
   public final Map<String, KeyCeremony2.PublicKeySet> allGuardianPublicKeys;
 
   // This guardian's partial key backups of other guardians' keys, keyed by designated guardian id.
-  private final Map<String, KeyCeremony2.PartialKeyBackup> myPartialKeyBackups;
+  final Map<String, KeyCeremony2.PartialKeyBackup> myPartialKeyBackups;
 
   // Other guardians' partial key backups of this guardian's keys, keyed by generating guardian id.
   public final Map<String, KeyCeremony2.PartialKeyBackup> otherGuardianPartialKeyBackups;

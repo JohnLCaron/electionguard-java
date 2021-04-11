@@ -31,6 +31,11 @@ class KeyCeremonyRemoteTrusteeProxy implements KeyCeremonyTrusteeIF {
   }
 
   @Override
+  public int coordinate() {
+    return coordinate;
+  }
+
+  @Override
   public Optional<KeyCeremony2.PublicKeySet> sendPublicKeys() {
     try {
       logger.atInfo().log("%s sendPublicKeys", id());
@@ -200,10 +205,6 @@ class KeyCeremonyRemoteTrusteeProxy implements KeyCeremonyTrusteeIF {
   private final int quorum;
   private final ManagedChannel channel;
   private final RemoteKeyCeremonyTrusteeServiceBlockingStub blockingStub;
-
-  public int coordinate() {
-    return coordinate;
-  }
 
   public int quorum() {
     return quorum;

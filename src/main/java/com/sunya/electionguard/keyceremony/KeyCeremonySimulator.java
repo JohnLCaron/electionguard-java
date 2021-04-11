@@ -125,9 +125,9 @@ public class KeyCeremonySimulator {
   }
 
   private void runKeyCeremony() {
-    // This runs the key ceremony
     List<KeyCeremonyTrusteeIF> trusteeIfs = new ArrayList<>(trusteeProxies);
     KeyCeremonyTrusteeMediator mediator = new KeyCeremonyTrusteeMediator(manifest, quorum, trusteeIfs);
+    mediator.runKeyCeremony();
 
     boolean ok = mediator.publishElectionRecord(this.publisher);
     System.out.printf("%nKey Ceremony publishElectionRecord = %s%n", ok);

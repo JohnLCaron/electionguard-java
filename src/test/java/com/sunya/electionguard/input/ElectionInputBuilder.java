@@ -18,7 +18,7 @@ public class ElectionInputBuilder {
   private Manifest.BallotStyle ballotStyle;
   private String district = districtDef;
 
-  ElectionInputBuilder(String election_scope_id) {
+  public ElectionInputBuilder(String election_scope_id) {
     this.election_scope_id = election_scope_id;
   }
 
@@ -37,13 +37,13 @@ public class ElectionInputBuilder {
     return this;
   }
 
-  ContestBuilder addContest(String contest_id) {
+  public ContestBuilder addContest(String contest_id) {
     ContestBuilder c = new ContestBuilder(contest_id);
     contests.add(c);
     return c;
   }
 
-  Manifest build() {
+  public Manifest build() {
     Manifest.GeopoliticalUnit gpUnit = new Manifest.GeopoliticalUnit(district, "name", Manifest.ReportingUnitType.congressional, null);
     Manifest.BallotStyle ballotStyle = this.ballotStyle != null ? this.ballotStyle :
             new Manifest.BallotStyle(style, ImmutableList.of(district), null, null);
@@ -91,17 +91,17 @@ public class ElectionInputBuilder {
       return this;
     }
 
-    ContestBuilder addSelection(String id, String candidate_id) {
+    public ContestBuilder addSelection(String id, String candidate_id) {
       SelectionBuilder s = new SelectionBuilder(id, candidate_id);
       selections.add(s);
       return this;
     }
 
-    ElectionInputBuilder done() {
+    public ElectionInputBuilder done() {
       return ElectionInputBuilder.this;
     }
 
-    Manifest.ContestDescription build() {
+    public Manifest.ContestDescription build() {
       // String object_id,
       //                              String electoral_district_id,
       //                              int sequence_order,
