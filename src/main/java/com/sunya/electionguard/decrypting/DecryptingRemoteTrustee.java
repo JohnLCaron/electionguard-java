@@ -4,7 +4,6 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.google.common.flogger.FluentLogger;
-import com.sunya.electionguard.DecryptionProofRecovery;
 import com.sunya.electionguard.DecryptionProofTuple;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.proto.CommonConvert;

@@ -212,9 +212,9 @@ class KeyCeremonyRemote {
       throw new IllegalStateException(String.format("Need %d guardians, but only %d registered", nguardians,
               trusteeProxies.size()));
     }
-    // This runs the key ceremony
     List<KeyCeremonyTrusteeIF> trusteeIfs = new ArrayList<>(trusteeProxies);
     KeyCeremonyTrusteeMediator mediator = new KeyCeremonyTrusteeMediator(manifest, quorum, trusteeIfs);
+    mediator.runKeyCeremony();
 
     // tell the remote trustees to save their state
     boolean allOk = true;
@@ -285,7 +285,7 @@ class KeyCeremonyRemote {
 
       if (startedKeyCeremony) {
         responseObserver.onNext(RemoteKeyCeremonyProto.RegisterTrusteeResponse.newBuilder()
-                .setError(RemoteKeyCeremonyProto.KeyCeremonyError.newBuilder().setMessage("startedKeyCeremony").build())
+                .setError("Already started KeyCeremony")
                 .build());
         responseObserver.onCompleted();
         return;
@@ -303,7 +303,7 @@ class KeyCeremonyRemote {
 
       } catch (Throwable t) {
         logger.atSevere().withCause(t).log("KeyCeremonyRemote registerTrustee failed");
-        response.setError(RemoteKeyCeremonyProto.KeyCeremonyError.newBuilder().setMessage(t.getMessage()).build());
+        response.setError(t.getMessage());
         responseObserver.onNext(response.build());
         responseObserver.onCompleted();
       }

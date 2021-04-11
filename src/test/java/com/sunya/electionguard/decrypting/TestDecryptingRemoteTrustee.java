@@ -2,7 +2,6 @@ package com.sunya.electionguard.decrypting;
 
 import com.google.common.collect.ImmutableList;
 import com.sunya.electionguard.CiphertextTally;
-import com.sunya.electionguard.DecryptionProofRecovery;
 import com.sunya.electionguard.DecryptionProofTuple;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.Group;

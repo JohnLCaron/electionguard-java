@@ -37,7 +37,6 @@ message PartialKeyBackupRequest {
 }
 
 message PartialKeyBackup {
-  RemoteError error = 1; // non empty on error
   // The Id of the guardian that generated this backup.
   string generating_guardian_id = 2;
   // The Id of the guardian to receive this backup.
@@ -46,17 +45,19 @@ message PartialKeyBackup {
   uint32 designated_guardian_x_coordinate = 4;
   // The encrypted coordinate of the designated guardian?.
   bytes encrypted_coordinate = 5;
+  // if not empty, an error has occurred.
+  string error = 6;
 }
 
 message PartialKeyVerification {
-  RemoteError error = 1; // non empty on error
   // The Id of the guardian that generated this backup.
   string generating_guardian_id = 2;
   // The Id of the guardian to receive this backup.
   string designated_guardian_id = 3;
   // The x coefficient of the designated guardian.
   uint32 designated_guardian_x_coordinate = 4;
-  bool verify = 5;
+  // if not empty, an error has occurred.
+  string error = 5;
 }
 
 message PartialKeyChallenge {
@@ -64,7 +65,6 @@ message PartialKeyChallenge {
 }
 
 message PartialKeyChallengeResponse {
-  RemoteError error = 1; // non empty on error
   // The Id of the guardian that generated this backup.
   string generating_guardian_id = 2;
   // The Id of the guardian to receive this backup.
@@ -73,6 +73,8 @@ message PartialKeyChallengeResponse {
   uint32 designated_guardian_x_coordinate = 4;
   // The unencrypted coordinate of the designated guardian.
   ElementModQ coordinate = 5;
+  // if not empty, an error has occurred.
+  string error = 6;
 }
 
 message JointPublicKeyRequest {

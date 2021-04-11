@@ -31,6 +31,11 @@ class KeyCeremonyRemoteTrusteeProxy implements KeyCeremonyTrusteeIF {
   }
 
   @Override
+  public int coordinate() {
+    return coordinate;
+  }
+
+  @Override
   public Optional<KeyCeremony2.PublicKeySet> sendPublicKeys() {
     try {
       logger.atInfo().log("%s sendPublicKeys", id());
@@ -81,16 +86,12 @@ class KeyCeremonyRemoteTrusteeProxy implements KeyCeremonyTrusteeIF {
     try {
       RemoteKeyCeremonyTrusteeProto.PartialKeyBackupRequest request = RemoteKeyCeremonyTrusteeProto.PartialKeyBackupRequest.newBuilder().setGuardianId(guardianId).build();
       RemoteKeyCeremonyTrusteeProto.PartialKeyBackup response = blockingStub.sendPartialKeyBackup(request);
-      if (response.hasError()) {
-        logger.atSevere().log("sendPartialKeyBackup failed: %s", response.getError().getMessage());
-        return Optional.empty();
-      }
       return Optional.of(KeyCeremony2.PartialKeyBackup.create(
               response.getGeneratingGuardianId(),
               response.getDesignatedGuardianId(),
               response.getDesignatedGuardianXCoordinate(),
-              new Auxiliary.ByteString(response.getEncryptedCoordinate().toByteArray())));
-
+              new Auxiliary.ByteString(response.getEncryptedCoordinate().toByteArray()),
+              response.getError()));
 
     } catch (StatusRuntimeException e) {
       logger.atSevere().withCause(e).log("sendPartialKeyBackup failed: ");
@@ -108,15 +109,10 @@ class KeyCeremonyRemoteTrusteeProxy implements KeyCeremonyTrusteeIF {
               .setEncryptedCoordinate(ByteString.copyFrom(backup.encryptedCoordinate().getBytes()));
 
       RemoteKeyCeremonyTrusteeProto.PartialKeyVerification response = blockingStub.verifyPartialKeyBackup(request.build());
-      if (response.hasError()) {
-        logger.atSevere().log("verifyPartialKeyBackup failed: %s", response.getError().getMessage());
-        return Optional.empty();
-      }
-
       return Optional.of(KeyCeremony2.PartialKeyVerification.create(
               response.getGeneratingGuardianId(),
               response.getDesignatedGuardianId(),
-              response.getVerify()));
+              response.getError()));
 
     } catch (StatusRuntimeException e) {
       logger.atSevere().withCause(e).log("verifyPartialKeyBackup failed: ");
@@ -129,16 +125,13 @@ class KeyCeremonyRemoteTrusteeProxy implements KeyCeremonyTrusteeIF {
     try {
       RemoteKeyCeremonyTrusteeProto.PartialKeyChallenge request = RemoteKeyCeremonyTrusteeProto.PartialKeyChallenge.newBuilder().setGuardianId(guardianId).build();
       RemoteKeyCeremonyTrusteeProto.PartialKeyChallengeResponse response = blockingStub.sendBackupChallenge(request);
-      if (response.hasError()) {
-        logger.atSevere().log("sendBackupChallenge failed: %s", response.getError().getMessage());
-        return Optional.empty();
-      }
-
-      return Optional.of(KeyCeremony2.PartialKeyChallengeResponse.create(
+       return Optional.of(KeyCeremony2.PartialKeyChallengeResponse.create(
               response.getGeneratingGuardianId(),
               response.getDesignatedGuardianId(),
               response.getDesignatedGuardianXCoordinate(),
-              CommonConvert.convertElementModQ(response.getCoordinate())));
+              CommonConvert.convertElementModQ(response.getCoordinate()),
+              response.getError()));
+
 
     } catch (StatusRuntimeException e) {
       logger.atSevere().withCause(e).log("sendBackupChallenge failed: ");
@@ -212,10 +205,6 @@ class KeyCeremonyRemoteTrusteeProxy implements KeyCeremonyTrusteeIF {
   private final int quorum;
   private final ManagedChannel channel;
   private final RemoteKeyCeremonyTrusteeServiceBlockingStub blockingStub;
-
-  public int coordinate() {
-    return coordinate;
-  }
 
   public int quorum() {
     return quorum;

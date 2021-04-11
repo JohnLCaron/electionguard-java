@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.flogger.FluentLogger;
 import com.sunya.electionguard.ChaumPedersen;
-import com.sunya.electionguard.DecryptionProofRecovery;
 import com.sunya.electionguard.DecryptionProofTuple;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.Group;

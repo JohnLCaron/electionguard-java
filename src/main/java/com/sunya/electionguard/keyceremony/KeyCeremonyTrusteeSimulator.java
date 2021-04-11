@@ -11,8 +11,14 @@ public class KeyCeremonyTrusteeSimulator implements KeyCeremonyTrusteeIF {
     this.delegate = delegate;
   }
 
+  @Override
   public String id() {
     return this.delegate.id;
+  }
+
+  @Override
+  public int coordinate() {
+    return this.delegate.xCoordinate;
   }
 
   @Override

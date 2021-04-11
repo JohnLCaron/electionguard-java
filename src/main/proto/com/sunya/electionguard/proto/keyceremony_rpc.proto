@@ -15,12 +15,8 @@ message RegisterTrusteeRequest {
 }
 
 message RegisterTrusteeResponse {
-  KeyCeremonyError error = 1; // non empty on error
   string guardian_id = 2;
   uint32 guardian_x_coordinate = 3;
   uint32 quorum = 4;
-}
-
-message KeyCeremonyError {
-  string message = 1;
+  string error = 5; // error if not empty
 }

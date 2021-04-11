@@ -44,17 +44,12 @@ class KeyCeremonyRemoteProxy {
               .setGuardianId(guardianId)
               .setRemoteUrl(remoteUrl)
               .build();
-      RemoteKeyCeremonyProto.RegisterTrusteeResponse response = blockingStub.registerTrustee(request);
-      if (response.hasError()) {
-        logger.atSevere().log("sendPublicKeys failed: %s", response.getError().getMessage());
-        return null;
-      }
-      return response;
+      return blockingStub.registerTrustee(request);
 
     } catch (StatusRuntimeException e) {
       logger.atSevere().withCause(e).log("sendPublicKeys failed: ");
       e.printStackTrace();
-      return null;
+      return null; // LOOK
     }
   }
 
