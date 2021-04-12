@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 /** A Remote Trustee with a DecryptingTrustee delegate, communicating over gRpc. */
 class DecryptingRemoteTrustee extends DecryptingTrusteeServiceGrpc.DecryptingTrusteeServiceImplBase {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
-  private static final Random random = new Random(System.currentTimeMillis());
+  private static final Random random = new Random();
 
   private static class CommandLine {
     @Parameter(names = {"-guardianFile"}, order = 1, description = "location of serialized guardian file", required = true)
@@ -88,9 +88,9 @@ class DecryptingRemoteTrustee extends DecryptingTrusteeServiceGrpc.DecryptingTru
 
       if (cmdLine.serverPort != 0) {
         // register with the DecryptingRemote "server".
-        DecryptingRemoteProxy proxy = new DecryptingRemoteProxy(serverUrl);
+        DecryptingMediatorRunnerProxy proxy = new DecryptingMediatorRunnerProxy(serverUrl);
         DecryptingProto.RegisterDecryptingTrusteeResponse response = proxy.registerTrustee(trustee.id(), url,
-                trustee.delegate.xCoordinate, trustee.delegate.publicKey());
+                trustee.delegate.xCoordinate(), trustee.delegate.electionPublicKey());
         proxy.shutdown();
 
         if (response == null) {
@@ -172,7 +172,7 @@ class DecryptingRemoteTrustee extends DecryptingTrusteeServiceGrpc.DecryptingTru
   }
 
   String id() {
-    return delegate.id;
+    return delegate.id();
   }
 
   @Override
@@ -224,7 +224,7 @@ class DecryptingRemoteTrustee extends DecryptingTrusteeServiceGrpc.DecryptingTru
 
       List<DecryptingTrusteeProto.PartialDecryptionResult> protos = tuples.stream().map(this::convertDecryptionProofTuple).collect(Collectors.toList());
       response.addAllResults(protos);
-      logger.atInfo().log("DecryptingRemoteTrustee partialDecrypt %s", delegate.id);
+      logger.atInfo().log("DecryptingRemoteTrustee partialDecrypt %s", delegate.id());
     } catch (Throwable t) {
       logger.atSevere().withCause(t).log("DecryptingRemoteTrustee partialDecrypt failed");
       String mess = t.getMessage() != null ? t.getMessage() : "Unknown";

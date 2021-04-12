@@ -29,10 +29,10 @@ public class TestDecryptingRemoteTrustee {
 
     String url = "localhost:"+port;
     DecryptingRemoteTrusteeProxy.Builder builder = DecryptingRemoteTrusteeProxy.builder();
-    builder.setTrusteeId(trustee.id);
+    builder.setTrusteeId(trustee.id());
     builder.setUrl(url);
-    builder.setXCoordinate(trustee.xCoordinate);
-    builder.setElectionPublicKey(trustee.publicKey());
+    builder.setXCoordinate(trustee.xCoordinate());
+    builder.setElectionPublicKey(trustee.electionPublicKey());
     this.proxy = builder.build();
 
     Consumer consumer = new Consumer(electionRecordDir);

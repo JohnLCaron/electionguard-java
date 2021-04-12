@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.input.ElectionInputBuilder;
+import com.sunya.electionguard.simulate.KeyCeremonyTrusteeSimulator;
 import net.jqwik.api.Example;
 
 import java.util.ArrayList;

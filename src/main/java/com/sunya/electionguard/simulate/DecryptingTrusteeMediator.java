@@ -1,4 +1,4 @@
-package com.sunya.electionguard.decrypting;
+package com.sunya.electionguard.simulate;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.flogger.FluentLogger;
@@ -12,6 +12,7 @@ import com.sunya.electionguard.Group;
 import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.SpoiledBallotAndTally;
 import com.sunya.electionguard.SubmittedBallot;
+import com.sunya.electionguard.decrypting.DecryptingTrusteeIF;
 
 import java.util.ArrayList;
 import java.util.HashMap;

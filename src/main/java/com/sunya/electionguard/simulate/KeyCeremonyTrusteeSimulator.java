@@ -1,11 +1,14 @@
-package com.sunya.electionguard.keyceremony;
+package com.sunya.electionguard.simulate;
 
 import com.sunya.electionguard.Group;
+import com.sunya.electionguard.keyceremony.KeyCeremony2;
+import com.sunya.electionguard.keyceremony.KeyCeremonyTrustee;
+import com.sunya.electionguard.keyceremony.KeyCeremonyTrusteeIF;
 
 import java.util.Optional;
 
 public class KeyCeremonyTrusteeSimulator implements KeyCeremonyTrusteeIF {
-  final KeyCeremonyTrustee delegate;
+  public final KeyCeremonyTrustee delegate;
 
   public KeyCeremonyTrusteeSimulator(KeyCeremonyTrustee delegate) {
     this.delegate = delegate;

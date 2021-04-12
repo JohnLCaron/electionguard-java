@@ -1,6 +1,7 @@
 package com.sunya.electionguard.decrypting;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
 import com.google.common.flogger.FluentLogger;
 import com.sunya.electionguard.AvailableGuardian;
 import com.sunya.electionguard.CiphertextElectionContext;
@@ -13,6 +14,7 @@ import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.SpoiledBallotAndTally;
 import com.sunya.electionguard.SubmittedBallot;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -23,10 +25,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Orchestrates the decryption of encrypted Tallies and Ballots.
- * Mutable.
+ * Orchestrates the decryption of encrypted Tallies and Ballots with remote Guardians. Mutable.
+ * Replaces DecryptionMediator in the main library.
  */
-public class RemoteDecryptionMediator {
+public class DecryptingMediator {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   private final CiphertextElectionContext context;
@@ -53,16 +55,27 @@ public class RemoteDecryptionMediator {
   private Map<String, Group.ElementModQ> lagrange_coefficients;
   private List<AvailableGuardian> guardianStates;
 
-  public RemoteDecryptionMediator(CiphertextElectionContext context,
-                                  CiphertextTally encryptedTally,
-                                  Iterable<SubmittedBallot> spoiled_ballots,
-                                  Map<String, Group.ElementModP> guardianPublicKeys) {
+  public DecryptingMediator(CiphertextElectionContext context,
+                            CiphertextTally encryptedTally,
+                            Iterable<SubmittedBallot> spoiled_ballots,
+                            Map<String, Group.ElementModP> guardianPublicKeys) {
+    Preconditions.checkNotNull(context);
+    Preconditions.checkNotNull(encryptedTally);
+    Preconditions.checkNotNull(spoiled_ballots);
+    Preconditions.checkNotNull(guardianPublicKeys);
+    Preconditions.checkArgument(!guardianPublicKeys.isEmpty());
+
     this.context = context;
     this.ciphertext_tally = encryptedTally;
     this.ciphertext_ballots = spoiled_ballots;
     this.guardianPublicKeys = guardianPublicKeys;
 
     this.missingGuardians = new HashSet<>(guardianPublicKeys.keySet());
+  }
+
+  @Nullable
+  public List<AvailableGuardian> getAvailableGuardians() {
+    return this.guardianStates;
   }
 
   /**
@@ -250,7 +263,6 @@ public class RemoteDecryptionMediator {
    * @return Map(BALLOT_ID, PlaintextTally)
    */
   public Optional<Map<String, PlaintextTally>> get_plaintext_ballots() {
-
     if (!compute_ballot_shares()){
       return Optional.empty();
     }
@@ -345,10 +357,6 @@ public class RemoteDecryptionMediator {
     } else {
       return Optional.of(compensated_decryptions);
     }
-  }
-
-  public List<AvailableGuardian> getAvailableGuardians() {
-    return this.guardianStates;
   }
 
   private void compute_lagrange_coefficients() {

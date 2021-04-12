@@ -50,7 +50,7 @@ import java.util.stream.Collectors;
  * </pre>
  * </strong>
  */
-class DecryptingRemote {
+class DecryptingMediatorRunner {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   private static class CommandLine {
@@ -85,7 +85,7 @@ class DecryptingRemote {
   }
 
   public static void main(String[] args) {
-    String progName = DecryptingRemote.class.getName();
+    String progName = DecryptingMediatorRunner.class.getName();
     CommandLine cmdLine = null;
 
     try {
@@ -101,7 +101,7 @@ class DecryptingRemote {
     }
 
     boolean allOk = false;
-    DecryptingRemote decryptor = null;
+    DecryptingMediatorRunner decryptor = null;
     try {
       Consumer consumer = new Consumer(cmdLine.encryptDir);
       ElectionRecord electionRecord = consumer.readElectionRecord();
@@ -119,7 +119,7 @@ class DecryptingRemote {
         System.exit(1);
       }
 
-      decryptor = new DecryptingRemote(consumer, electionRecord, cmdLine.encryptDir, cmdLine.outputDir, cmdLine.navailable);
+      decryptor = new DecryptingMediatorRunner(consumer, electionRecord, cmdLine.encryptDir, cmdLine.outputDir, cmdLine.navailable);
       decryptor.start(cmdLine.port);
 
       System.out.printf("Waiting for guardians to register: elapsed seconds = ");
@@ -207,7 +207,7 @@ class DecryptingRemote {
   List<PlaintextTally> spoiledDecryptedTallies;
   List<AvailableGuardian> availableGuardians;
 
-  DecryptingRemote(Consumer consumer, ElectionRecord electionRecord, String encryptDir, String outputDir, int navailable) {
+  DecryptingMediatorRunner(Consumer consumer, ElectionRecord electionRecord, String encryptDir, String outputDir, int navailable) {
     this.consumer = consumer;
     this.electionRecord = electionRecord;
     this.encryptDir = encryptDir;
@@ -276,7 +276,7 @@ class DecryptingRemote {
     Map<String, Group.ElementModP> guardianPublicKeys = electionRecord.guardianCoefficients.stream().collect(
             Collectors.toMap(coeff -> coeff.owner_id(), coeff -> coeff.coefficient_commitments().get(0)));
 
-    RemoteDecryptionMediator mediator = new RemoteDecryptionMediator(electionRecord.context,
+    DecryptingMediator mediator = new DecryptingMediator(electionRecord.context,
             this.encryptedTally,
             consumer.spoiledBallotsProto(),
             guardianPublicKeys);
@@ -376,7 +376,7 @@ class DecryptingRemote {
 
       DecryptingProto.RegisterDecryptingTrusteeResponse.Builder response = DecryptingProto.RegisterDecryptingTrusteeResponse.newBuilder();
       try {
-        DecryptingRemoteTrusteeProxy trustee = DecryptingRemote.this.registerTrustee(request);
+        DecryptingRemoteTrusteeProxy trustee = DecryptingMediatorRunner.this.registerTrustee(request);
         response.setOk(true);
 
         responseObserver.onNext(response.build());

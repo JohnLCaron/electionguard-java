@@ -12,13 +12,13 @@ import io.grpc.StatusRuntimeException;
 import javax.annotation.Nullable;
 import java.util.concurrent.TimeUnit;
 
-class DecryptingRemoteProxy {
+class DecryptingMediatorRunnerProxy {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   private final ManagedChannel channel;
   private final DecryptingServiceGrpc.DecryptingServiceBlockingStub blockingStub;
 
-  DecryptingRemoteProxy(String url) {
+  DecryptingMediatorRunnerProxy(String url) {
     this.channel = ManagedChannelBuilder.forTarget(url)
             .usePlaintext()
             // .enableFullStreamDecompression()

@@ -1,10 +1,13 @@
-package com.sunya.electionguard.keyceremony;
+package com.sunya.electionguard.simulate;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.input.ElectionInputValidation;
+import com.sunya.electionguard.keyceremony.KeyCeremonyTrustee;
+import com.sunya.electionguard.keyceremony.KeyCeremonyTrusteeIF;
+import com.sunya.electionguard.keyceremony.KeyCeremonyTrusteeMediator;
 import com.sunya.electionguard.proto.TrusteeProto;
 import com.sunya.electionguard.proto.TrusteeToProto;
 import com.sunya.electionguard.publish.Consumer;

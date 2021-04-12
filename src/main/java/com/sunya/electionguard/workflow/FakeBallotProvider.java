@@ -14,7 +14,7 @@ import java.util.Random;
 
 /** Create nballots randomly generated fake Ballots. */
 public class FakeBallotProvider implements BallotProvider {
-  private static final Random random = new Random(System.currentTimeMillis());
+  private static final Random random = new Random();
   private final int nballots;
   private final Manifest election;
 
