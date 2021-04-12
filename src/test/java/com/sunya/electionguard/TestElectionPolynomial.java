@@ -2,14 +2,11 @@ package com.sunya.electionguard;
 
 import com.google.common.collect.ImmutableList;
 import net.jqwik.api.Example;
-
 import java.math.BigInteger;
 
 import static com.google.common.truth.Truth.assertThat;
-
 import static com.sunya.electionguard.ElectionPolynomial.*;
 import static com.sunya.electionguard.Group.*;
-
 
 public class TestElectionPolynomial {
   private static final int TEST_POLYNOMIAL_DEGREE = 5;
@@ -46,12 +43,5 @@ public class TestElectionPolynomial {
     ElectionPolynomial polynomial = generate_polynomial(TEST_POLYNOMIAL_DEGREE, null);
     Group.ElementModP value = ElectionPolynomial.compute_gPcoordinate(BigInteger.ZERO, polynomial.coefficient_commitments);
     assertThat(value).isEqualTo(polynomial.coefficient_commitments.get(0));
-  }
-
-  @Example
-  public void test_verify_polynomial_coordinate_zero1() {
-    ElectionPolynomial polynomial = generate_polynomial(TEST_POLYNOMIAL_DEGREE, null);
-    Group.ElementModP product = Group.mult_p(polynomial.coefficient_commitments);
-    assertThat(product).isEqualTo(polynomial.coefficient_commitments.get(0));
   }
 }
