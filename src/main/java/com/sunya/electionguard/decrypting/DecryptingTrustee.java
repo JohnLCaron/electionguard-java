@@ -26,11 +26,11 @@ import static com.sunya.electionguard.Group.pow_p;
 import static com.sunya.electionguard.Group.rand_q;
 
 @Immutable
-public class DecryptingTrustee {
+public class DecryptingTrustee implements DecryptingTrusteeIF {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
-  public final String id;
-  public final int xCoordinate;
+  private final String id;
+  private final int xCoordinate;
 
   /** The auxiliary private key */
   public final java.security.PrivateKey rsa_private_key;
@@ -62,7 +62,18 @@ public class DecryptingTrustee {
     this.guardianCommittments = ImmutableMap.copyOf(guardianCommittments);
   }
 
-  public Group.ElementModP publicKey() {
+  @Override
+  public String id() {
+    return id;
+  }
+
+  @Override
+  public int xCoordinate() {
+    return xCoordinate;
+  }
+
+  @Override
+  public Group.ElementModP electionPublicKey() {
     return election_keypair.public_key;
   }
 
@@ -78,7 +89,7 @@ public class DecryptingTrustee {
    * @param extended_base_hash:  the extended base hash of the election used to generate the ElGamal Ciphertext
    * @param nonce_seed:          an optional value used to generate the `ChaumPedersenProof`
    *                             if no value is provided, a random number will be used.
-   * @return the decryption and its proof
+   * @return a DecryptionProofRecovery with the decryption and its proof and a recovery key
    */
   public List<DecryptionProofRecovery> compensatedDecrypt(
           String missing_guardian_id,
@@ -150,10 +161,10 @@ public class DecryptingTrustee {
    *
    * @param texts:            the `ElGamalCiphertext` that will be partially decrypted
    * @param extended_base_hash: the extended base hash of the election that
-   *                            was used to generate t he ElGamal Ciphertext
+   *                            was used to generate the ElGamal Ciphertext
    * @param nonce_seed:         an optional value used to generate the `ChaumPedersenProof`
    *                            if no value is provided, a random number will be used.
-   * @return a `Tuple[ElementModP, ChaumPedersenProof]` of the decryption and its proof
+   * @return a DecryptionProofTuple of the decryption and its proof
    */
   public List<DecryptionProofTuple> partialDecrypt(
           List<ElGamal.Ciphertext> texts,

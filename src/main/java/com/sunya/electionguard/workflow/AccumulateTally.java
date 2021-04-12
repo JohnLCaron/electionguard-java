@@ -110,7 +110,7 @@ public class AccumulateTally {
     this.consumer = consumer;
     this.electionRecord = electionRecord;
     this.election = electionRecord.election;
-    System.out.printf("%nReady to decrypt%n");
+    System.out.printf("%nReady to accumulate%n");
   }
 
   void accumulateTally() {

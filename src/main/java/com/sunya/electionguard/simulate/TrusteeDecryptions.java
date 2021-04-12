@@ -1,4 +1,4 @@
-package com.sunya.electionguard.decrypting;
+package com.sunya.electionguard.simulate;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
@@ -13,6 +13,8 @@ import com.sunya.electionguard.DecryptionProofTuple;
 import com.sunya.electionguard.DecryptionShare;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.SubmittedBallot;
+import com.sunya.electionguard.decrypting.DecryptingTrusteeIF;
+import com.sunya.electionguard.decrypting.DecryptionProofRecovery;
 
 import java.util.ArrayList;
 import java.util.HashMap;

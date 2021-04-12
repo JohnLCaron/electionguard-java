@@ -152,8 +152,9 @@ public class RunRemoteWorkflow {
             "-in", cmdLine.encryptDir,
             "-nballots", Integer.toString(cmdLine.nballots),
             "-out", cmdLine.encryptDir,
-            "-device", "deviceName"
-            );
+            "-device", "deviceName",
+            "--save"
+    );
     running.add(encryptBallots);
     try {
       Thread.sleep(1000);
@@ -173,12 +174,42 @@ public class RunRemoteWorkflow {
     stopwatch.reset().start();
 
     System.out.printf("%n3=============================================================%n");
+    stopwatch.reset().start();
+
+    // -in /home/snake/tmp/electionguard/remoteWorkflow/encryptor -out /home/snake/tmp/electionguard/remoteWorkflow/accumTally
+    // Accumulate the Tally
+    RunCommand accumTally = new RunCommand("AccumTally", service,
+            "java",
+            "-classpath", classpath,
+            "com.sunya.electionguard.workflow.AccumulateTally",
+            "-in", cmdLine.encryptDir,
+            "-out", cmdLine.encryptDir
+    );
+    running.add(accumTally);
+    try {
+      Thread.sleep(1000);
+    } catch (Throwable e) {
+      e.printStackTrace();
+      System.exit(1);
+    }
+
+    try {
+      if (!accumTally.waitFor(30)) {
+        System.out.format("Kill accumTally = %d%n", accumTally.kill());
+      }
+    } catch (Throwable e) {
+      e.printStackTrace();
+    }
+    System.out.printf("*** accumTally elapsed = %d sec%n", stopwatch.elapsed(TimeUnit.SECONDS));
+    stopwatch.reset().start();
+
+    System.out.printf("%n4=============================================================%n");
     // DecryptBallots
     int navailable = cmdLine.navailable > 0 ? cmdLine.navailable : cmdLine.quorum;
     RunCommand decryptBallots = new RunCommand("DecryptingRemote", service,
             "java",
             "-classpath", classpath,
-            "com.sunya.electionguard.decrypting.DecryptingRemote",
+            "com.sunya.electionguard.decrypting.DecryptingMediatorRunner",
             "-in", cmdLine.encryptDir,
             "-out", cmdLine.outputDir,
             "-navailable", Integer.toString(navailable)
@@ -210,7 +241,7 @@ public class RunRemoteWorkflow {
 
     System.out.printf("*** decryptBallots elapsed = %d sec%n", stopwatch.elapsed(TimeUnit.SECONDS));
     stopwatch.reset().start();
-    System.out.printf("%n4=============================================================%n");
+    System.out.printf("%n5=============================================================%n");
 
     // VerifyElectionRecord
     RunCommand verifyElectionRecord = new RunCommand("VerifyElectionRecord", service,

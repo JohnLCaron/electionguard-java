@@ -181,7 +181,7 @@ public class EncryptBallots {
   }
 
   ///////////////////////////////////////////////////////////////////////////
-  private static final Random random = new Random(System.currentTimeMillis());
+  private static final Random random = new Random();
 
   final ElectionRecord electionRecord;
   final int numberOfGuardians;

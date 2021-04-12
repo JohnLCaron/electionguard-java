@@ -447,7 +447,7 @@ public class Encrypt {
       PlaintextBallot.Contest use_contest = plaintext_contests.get(contestDescription.object_id);
 
       // no selections provided for the contest, so create a placeholder contest
-      // LOOK says "create a placeholder contest" but selections are not placeholders, but have all votes = 0.
+      // LOOK says "create a placeholder contest" but selections are not placeholders.
       if (use_contest == null) {
         use_contest = contest_from(contestDescription);
       }

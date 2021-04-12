@@ -1,4 +1,4 @@
-package com.sunya.electionguard.decrypting;
+package com.sunya.electionguard.simulate;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
@@ -15,6 +15,7 @@ import com.sunya.electionguard.PlaintextBallot;
 import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.Scheduler;
 import com.sunya.electionguard.SpoiledBallotAndTally;
+import com.sunya.electionguard.decrypting.DecryptingTrustee;
 import com.sunya.electionguard.input.ElectionInputValidation;
 import com.sunya.electionguard.proto.TrusteeFromProto;
 import com.sunya.electionguard.publish.Consumer;
@@ -125,23 +126,22 @@ public class DecryptingSimulator {
 
   private static class RemoteGuardiansProvider {
     private final String location;
-    private Iterable<DecryptingTrusteeSimulator> guardians;
+    private Iterable<DecryptingTrustee> guardians;
 
     public RemoteGuardiansProvider(String location) {
       this.location = location;
     }
 
-    public Iterable<DecryptingTrusteeSimulator> guardians() {
+    public Iterable<DecryptingTrustee> guardians() {
       if (guardians == null) {
         guardians = read(location);
       }
       return guardians;
     }
 
-    ImmutableList<DecryptingTrusteeSimulator> read(String location) {
+    ImmutableList<DecryptingTrustee> read(String location) {
       try {
-        ImmutableList<DecryptingTrustee> trustees = TrusteeFromProto.readTrustees(location);
-        return trustees.stream().map(DecryptingTrusteeSimulator::new).collect(ImmutableList.toImmutableList());
+        return TrusteeFromProto.readTrustees(location);
       } catch (IOException e) {
         throw new RuntimeException(e);
       }
@@ -153,7 +153,7 @@ public class DecryptingSimulator {
   final ElectionRecord electionRecord;
   final Manifest election;
 
-  Iterable<DecryptingTrusteeSimulator> guardians;
+  Iterable<DecryptingTrustee> guardians;
   CiphertextTally encryptedTally;
   PlaintextTally decryptedTally;
   List<PlaintextBallot> spoiledDecryptedBallots;
@@ -171,7 +171,7 @@ public class DecryptingSimulator {
     this.encryptedTally = electionRecord.encryptedTally;
 
     this.guardians = provider.guardians();
-    for (DecryptingTrusteeSimulator guardian : provider.guardians()) {
+    for (DecryptingTrustee guardian : provider.guardians()) {
       // LOOK test Guardians against whats in the electionRecord.
     }
     System.out.printf("%nReady to decrypt%n");
@@ -199,7 +199,7 @@ public class DecryptingSimulator {
             guardianPublicKeys);
 
     int count = 0;
-    for (DecryptingTrusteeSimulator guardian : this.guardians) {
+    for (DecryptingTrustee guardian : this.guardians) {
       boolean ok = mediator.announce(guardian);
       Preconditions.checkArgument(ok);
       System.out.printf(" Guardian Present: %s%n", guardian.id());

@@ -144,6 +144,9 @@ public class DecryptWithShares {
       HashMap<String, PlaintextTally.Selection> plaintext_selections = new HashMap<>();
 
       for (CiphertextSelection selection : contest.selections) {
+        if (selection.is_placeholder) {
+          continue;
+        }
         // Map(AVAILABLE_GUARDIAN_ID, KeyAndSelection)
         Map<String, KeyAndSelection> tally_shares =
                 DecryptionShare.get_tally_shares_for_selection2(selection.object_id, shares);

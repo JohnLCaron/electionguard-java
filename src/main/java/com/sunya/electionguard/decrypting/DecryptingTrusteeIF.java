@@ -12,7 +12,7 @@ public interface DecryptingTrusteeIF {
   String id();
   /** Guardian x coordinate (sequence_number). */
   int xCoordinate();
-  /** Elgamal election public key. */
+  /** Elgamal election public key = K_i. */
   Group.ElementModP electionPublicKey();
 
   List<DecryptionProofRecovery> compensatedDecrypt(

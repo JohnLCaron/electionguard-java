@@ -371,7 +371,7 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
     public Selection(String object_id, Group.ElementModQ description_hash, ElGamal.Ciphertext ciphertext,
                      Group.ElementModQ crypto_hash, boolean is_placeholder_selection, Optional<Group.ElementModQ> nonce,
                      Optional<ChaumPedersen.DisjunctiveChaumPedersenProof> proof, Optional<ElGamal.Ciphertext> extended_data) {
-      super(object_id, description_hash, ciphertext);
+      super(object_id, description_hash, ciphertext, is_placeholder_selection);
 
       this.crypto_hash = Preconditions.checkNotNull(crypto_hash);
       this.is_placeholder_selection = is_placeholder_selection;

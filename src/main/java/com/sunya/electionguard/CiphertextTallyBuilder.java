@@ -363,7 +363,7 @@ public class CiphertextTallyBuilder {
     private ElGamal.Ciphertext ciphertext_accumulate = new ElGamal.Ciphertext(ONE_MOD_P, ONE_MOD_P);
 
     public Selection(String selectionDescriptionId, ElementModQ description_hash) {
-      super(selectionDescriptionId, description_hash, new ElGamal.Ciphertext(ONE_MOD_P, ONE_MOD_P));
+      super(selectionDescriptionId, description_hash, new ElGamal.Ciphertext(ONE_MOD_P, ONE_MOD_P), false);
     }
 
     @Override

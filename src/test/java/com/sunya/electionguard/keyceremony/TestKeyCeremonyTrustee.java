@@ -13,7 +13,7 @@ public class TestKeyCeremonyTrustee {
   private static final int GUARDIAN_X_COORDINATE = 11;
   private static final int QUORUM = 3;
   private static final String GUARDIAN2_ID = "Guardian 2";
-  private static final int GUARDIAN2_X_COORDINATE = 11; // LOOK who would catch duplicate?
+  private static final int GUARDIAN2_X_COORDINATE = 2;
 
   @Example
   public void testKeyCeremonyTrusteeGeneration() {

@@ -31,7 +31,7 @@ import static com.sunya.electionguard.Group.ElementModP;
 /** A Remote Trustee with a KeyCeremonyTrustee delegate, communicating over gRpc. */
 class KeyCeremonyRemoteTrustee extends RemoteKeyCeremonyTrusteeServiceGrpc.RemoteKeyCeremonyTrusteeServiceImplBase {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
-  private static final Random random = new Random(System.currentTimeMillis());
+  private static final Random random = new Random();
 
   private static class CommandLine {
     @Parameter(names = {"-name"}, order = 0, description = "Guardian name", required = true)
@@ -122,10 +122,13 @@ class KeyCeremonyRemoteTrustee extends RemoteKeyCeremonyTrusteeServiceGrpc.Remot
   }
 
   private static boolean isLocalPortFree(int port) {
+    System.out.printf("Try %d port ", port);
     try {
       new ServerSocket(port).close();
+      System.out.printf("free%n", port);
       return true;
     } catch (IOException e) {
+      System.out.printf("taken%n", port);
       return false;
     }
   }

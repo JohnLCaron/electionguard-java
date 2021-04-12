@@ -25,7 +25,7 @@ import static com.sunya.electionguard.DecryptionShare.CiphertextDecryptionContes
 import static com.sunya.electionguard.DecryptionShare.CiphertextDecryptionSelection;
 import static com.sunya.electionguard.DecryptionShare.CompensatedDecryptionShare;
 
-/** Static methods for remote decryption. */
+/** Static methods for remote decryption. Replaces Decryptions in the main library. */
 public class RemoteDecryptions {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 

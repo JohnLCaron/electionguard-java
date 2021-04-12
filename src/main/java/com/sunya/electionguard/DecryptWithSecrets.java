@@ -10,7 +10,7 @@ import static com.sunya.electionguard.Group.*;
 import static com.sunya.electionguard.InternalManifest.ContestWithPlaceholders;
 
 
-/** Static methods for decryption when you know the secret keys. */
+/** Static methods for decryption when you know the secret keys. LOOK Unused. */
 class DecryptWithSecrets {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
