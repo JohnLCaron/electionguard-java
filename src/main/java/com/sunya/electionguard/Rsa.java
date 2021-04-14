@@ -30,7 +30,7 @@ public class Rsa {
     try {
       return Optional.of(new Auxiliary.ByteString(rsa_encrypt(message, public_key)));
     } catch (Exception e) {
-      logger.atSevere().withCause(e).log("rsa_encrypt failed");
+      logger.atWarning().withCause(e).log("rsa_encrypt failed");
       return Optional.empty();
     }
   }
@@ -40,7 +40,7 @@ public class Rsa {
     try {
       return Optional.of(rsa_decrypt(encrypted_message.getBytes(), secret_key));
     } catch (Exception e) {
-      logger.atSevere().withCause(e).log("rsa_decrypt failed");
+      logger.atWarning().withCause(e).log("rsa_decrypt failed");
       return Optional.empty();
     }
   }

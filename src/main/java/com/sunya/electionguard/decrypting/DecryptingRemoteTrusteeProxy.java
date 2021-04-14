@@ -54,8 +54,8 @@ class DecryptingRemoteTrusteeProxy implements DecryptingTrusteeIF  {
               .setExtendedBaseHash(CommonConvert.convertElementModQ(extended_base_hash));
 
       DecryptingTrusteeProto.CompensatedDecryptionResponse response = blockingStub.compensatedDecrypt(request.build());
-      if (response.hasError() && !response.getError().getMessage().isEmpty()) {
-        logger.atSevere().log("compensatedDecrypt failed: %s", response.getError().getMessage());
+      if (!response.getError().isEmpty()) {
+        logger.atSevere().log("compensatedDecrypt failed: %s", response.getError());
         return ImmutableList.of();
       }
       return response.getResultsList().stream()
@@ -87,8 +87,8 @@ class DecryptingRemoteTrusteeProxy implements DecryptingTrusteeIF  {
               .setExtendedBaseHash(CommonConvert.convertElementModQ(extended_base_hash));
 
       DecryptingTrusteeProto.PartialDecryptionResponse response = blockingStub.partialDecrypt(request.build());
-      if (response.hasError() && !response.getError().getMessage().isEmpty()) {
-        logger.atSevere().log("partialDecrypt failed: %s", response.getError().getMessage());
+      if (!response.getError().isEmpty()) {
+        logger.atSevere().log("partialDecrypt failed: %s", response.getError());
         return ImmutableList.of();
       }
       return response.getResultsList().stream()
@@ -109,12 +109,12 @@ class DecryptingRemoteTrusteeProxy implements DecryptingTrusteeIF  {
   boolean finish(boolean allOk) {
     try {
       CommonProto.FinishRequest request = CommonProto.FinishRequest.newBuilder().setAllOk(allOk).build();
-      CommonProto.BooleanResponse response = blockingStub.finish(request);
-      if (response.hasError()) {
-        logger.atSevere().log("commit failed: %s", response.getError().getMessage());
+      CommonProto.ErrorResponse response = blockingStub.finish(request);
+      if (!response.getError().isEmpty()) {
+        logger.atSevere().log("commit failed: %s", response.getError());
         return false;
       }
-      return response.getOk();
+      return true;
 
     } catch (StatusRuntimeException e) {
       logger.atSevere().withCause(e).log("commit failed: ");

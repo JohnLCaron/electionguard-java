@@ -6,17 +6,17 @@ option java_package = "com.sunya.electionguard.proto";
 option java_outer_classname = "RemoteKeyCeremonyProto";
 
 service RemoteKeyCeremonyService {
-  rpc registerTrustee (RegisterTrusteeRequest) returns (RegisterTrusteeResponse) {}
+  rpc registerTrustee (RegisterKeyCeremonyTrusteeRequest) returns (RegisterKeyCeremonyTrusteeResponse) {}
 }
 
-message RegisterTrusteeRequest {
-  string guardian_id = 1;
-  string remote_url = 2;
+message RegisterKeyCeremonyTrusteeRequest {
+  string guardian_id = 1; // the KeyCeremonyTrustee's id
+  string remote_url = 2;  // the KeyCeremonyTrustee's url
 }
 
-message RegisterTrusteeResponse {
-  string guardian_id = 2;
-  uint32 guardian_x_coordinate = 3;
-  uint32 quorum = 4;
+message RegisterKeyCeremonyTrusteeResponse {
+  string guardian_id = 2; // echoed from the request
+  uint32 guardian_x_coordinate = 3; // assign the KeyCeremonyTrustee's xcoordinate
+  uint32 quorum = 4; // tell the KeyCeremonyTrustee what the quorum size is.
   string error = 5; // error if not empty
 }

@@ -7,7 +7,6 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
 
-import javax.annotation.Nullable;
 import java.util.concurrent.TimeUnit;
 
 class KeyCeremonyRemoteProxy {
@@ -37,10 +36,9 @@ class KeyCeremonyRemoteProxy {
     }
   }
 
-  @Nullable
-  RemoteKeyCeremonyProto.RegisterTrusteeResponse registerTrustee(String guardianId, String remoteUrl) {
+  RemoteKeyCeremonyProto.RegisterKeyCeremonyTrusteeResponse registerTrustee(String guardianId, String remoteUrl) {
     try {
-      RemoteKeyCeremonyProto.RegisterTrusteeRequest request = RemoteKeyCeremonyProto.RegisterTrusteeRequest.newBuilder()
+      RemoteKeyCeremonyProto.RegisterKeyCeremonyTrusteeRequest request = RemoteKeyCeremonyProto.RegisterKeyCeremonyTrusteeRequest.newBuilder()
               .setGuardianId(guardianId)
               .setRemoteUrl(remoteUrl)
               .build();
@@ -49,7 +47,9 @@ class KeyCeremonyRemoteProxy {
     } catch (StatusRuntimeException e) {
       logger.atSevere().withCause(e).log("sendPublicKeys failed: ");
       e.printStackTrace();
-      return null; // LOOK
+      return RemoteKeyCeremonyProto.RegisterKeyCeremonyTrusteeResponse.newBuilder()
+              .setError("sendPublicKeys failed: " + e.getMessage())
+              .build();
     }
   }
 

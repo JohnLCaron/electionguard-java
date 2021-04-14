@@ -19,8 +19,10 @@ import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.stub.StreamObserver;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.util.Formatter;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -92,7 +94,7 @@ class KeyCeremonyRemoteTrustee extends RemoteKeyCeremonyTrusteeServiceGrpc.Remot
 
     // first contact the KeyCeremonyRemote "server" to get parameters
     KeyCeremonyRemoteProxy proxy = new KeyCeremonyRemoteProxy(serverUrl);
-    RemoteKeyCeremonyProto.RegisterTrusteeResponse response = proxy.registerTrustee(cmdLine.name, url);
+    RemoteKeyCeremonyProto.RegisterKeyCeremonyTrusteeResponse response = proxy.registerTrustee(cmdLine.name, url);
     proxy.shutdown();
     if (!response.getError().isEmpty()) {
       System.out.printf("    registerTrustee error %s%n", response.getError());
@@ -125,10 +127,10 @@ class KeyCeremonyRemoteTrustee extends RemoteKeyCeremonyTrusteeServiceGrpc.Remot
     System.out.printf("Try %d port ", port);
     try {
       new ServerSocket(port).close();
-      System.out.printf("free%n", port);
+      System.out.printf("free%n");
       return true;
     } catch (IOException e) {
-      System.out.printf("taken%n", port);
+      System.out.printf("taken%n");
       return false;
     }
   }
@@ -170,15 +172,23 @@ class KeyCeremonyRemoteTrustee extends RemoteKeyCeremonyTrusteeServiceGrpc.Remot
   }
 
   ////////////////////////////////////////////////////////////////////////////////
-  private final KeyCeremonyTrustee delegate;
-  private final String outputDir;
+  final KeyCeremonyTrustee delegate;
+  final String outputDir;
 
   KeyCeremonyRemoteTrustee(String id,
-                            int sequence_order,
+                            int xCoordinate,
                             int quorum,
-                            String outputDir) {
-    this.delegate = new KeyCeremonyTrustee(id, sequence_order, quorum, null);
+                            String outputDir) throws IOException {
+    this.delegate = new KeyCeremonyTrustee(id, xCoordinate, quorum, null);
     this.outputDir = outputDir;
+
+    // fail fast on bad output directory
+    Publisher publisher = new Publisher(outputDir, false, false);
+    Formatter errors = new Formatter();
+    if (!publisher.validateOutputDir(errors)) {
+      System.out.printf("*** Publisher validateOutputDir FAILED on %s%n%s", outputDir, errors);
+      throw new FileNotFoundException(errors.toString());
+    }
   }
 
   @Override
@@ -196,7 +206,7 @@ class KeyCeremonyRemoteTrustee extends RemoteKeyCeremonyTrusteeServiceGrpc.Remot
     } catch (Throwable t) {
       logger.atSevere().withCause(t).log("KeyCeremonyRemoteTrustee %s sendPublicKeys failed", delegate.id);
       t.printStackTrace();
-      response.setError(CommonProto.RemoteError.newBuilder().setMessage(t.getMessage()).build());
+      response.setError("KeyCeremonyRemoteTrustee sendPublicKeys failed:" + t.getMessage());
     }
 
     responseObserver.onNext(response.build());
@@ -205,9 +215,9 @@ class KeyCeremonyRemoteTrustee extends RemoteKeyCeremonyTrusteeServiceGrpc.Remot
 
   @Override
   public void receivePublicKeys(RemoteKeyCeremonyTrusteeProto.PublicKeySet proto,
-                                StreamObserver<CommonProto.BooleanResponse> responseObserver) {
+                                StreamObserver<CommonProto.ErrorResponse> responseObserver) {
 
-    CommonProto.BooleanResponse.Builder response = CommonProto.BooleanResponse.newBuilder();
+    CommonProto.ErrorResponse.Builder response = CommonProto.ErrorResponse.newBuilder();
     try {
       List<SchnorrProof> proofs = proto.getCoefficientProofsList().stream().map(CommonConvert::convertSchnorrProof).collect(Collectors.toList());
       KeyCeremony2.PublicKeySet keyset = KeyCeremony2.PublicKeySet.create(
@@ -215,14 +225,14 @@ class KeyCeremonyRemoteTrustee extends RemoteKeyCeremonyTrusteeServiceGrpc.Remot
               proto.getGuardianXCoordinate(),
               CommonConvert.convertJavaPublicKey(proto.getAuxiliaryPublicKey()),
               proofs);
-      boolean valid = delegate.receivePublicKeys(keyset);
-      response.setOk(valid);
+      String error = delegate.receivePublicKeys(keyset);
+      response.setError(error);
       logger.atInfo().log("KeyCeremonyRemoteTrustee receivePublicKeys from %s", proto.getOwnerId());
 
     } catch (Throwable t) {
       logger.atSevere().withCause(t).log("KeyCeremonyRemoteTrustee receivePublicKeys from %s failed", proto.getOwnerId());
       t.printStackTrace();
-      response.setError(CommonProto.RemoteError.newBuilder().setMessage(t.getMessage()).build());
+      response.setError(t.getMessage());
     }
 
     responseObserver.onNext(response.build());
@@ -325,7 +335,7 @@ class KeyCeremonyRemoteTrustee extends RemoteKeyCeremonyTrusteeServiceGrpc.Remot
     } catch (Throwable t) {
       logger.atSevere().withCause(t).log("KeyCeremonyRemoteTrustee sendJointPublicKey failed");
       t.printStackTrace();
-      response.setError(CommonProto.RemoteError.newBuilder().setMessage(t.getMessage()).build());
+      response.setError("KeyCeremonyRemoteTrustee sendJointPublicKey failed:" + t.getMessage());
     }
 
     responseObserver.onNext(response.build());
@@ -334,9 +344,8 @@ class KeyCeremonyRemoteTrustee extends RemoteKeyCeremonyTrusteeServiceGrpc.Remot
 
   @Override
   public void saveState(com.google.protobuf.Empty request,
-                        StreamObserver<CommonProto.BooleanResponse> responseObserver) {
-    CommonProto.BooleanResponse.Builder response = CommonProto.BooleanResponse.newBuilder();
-    boolean ok = true;
+                        StreamObserver<CommonProto.ErrorResponse> responseObserver) {
+    CommonProto.ErrorResponse.Builder response = CommonProto.ErrorResponse.newBuilder();
     try {
       TrusteeProto.DecryptingTrustee trusteeProto = TrusteeToProto.convertTrustee(this.delegate);
       Publisher.overwriteTrusteeProto(this.outputDir, trusteeProto);
@@ -345,19 +354,17 @@ class KeyCeremonyRemoteTrustee extends RemoteKeyCeremonyTrusteeServiceGrpc.Remot
     } catch (Throwable t) {
       logger.atSevere().withCause(t).log("KeyCeremonyRemoteTrustee saveState failed");
       t.printStackTrace();
-      response.setError(CommonProto.RemoteError.newBuilder().setMessage(t.getMessage()).build());
-      ok = false;
+      response.setError(t.getMessage());
     }
 
-    response.setOk(ok);
     responseObserver.onNext(response.build());
     responseObserver.onCompleted();
   }
 
   @Override
   public void finish(CommonProto.FinishRequest request,
-                     StreamObserver<CommonProto.BooleanResponse> responseObserver) {
-    CommonProto.BooleanResponse.Builder response = CommonProto.BooleanResponse.newBuilder();
+                     StreamObserver<CommonProto.ErrorResponse> responseObserver) {
+    CommonProto.ErrorResponse.Builder response = CommonProto.ErrorResponse.newBuilder();
     boolean ok = true;
     try {
       logger.atInfo().log("KeyCeremonyRemoteTrustee finish ok = %s", request.getAllOk());
@@ -365,14 +372,15 @@ class KeyCeremonyRemoteTrustee extends RemoteKeyCeremonyTrusteeServiceGrpc.Remot
     } catch (Throwable t) {
       logger.atSevere().withCause(t).log("KeyCeremonyRemoteTrustee finish failed");
       t.printStackTrace();
-      response.setError(CommonProto.RemoteError.newBuilder().setMessage(t.getMessage()).build());
+      response.setError(t.getMessage());
       ok = false;
     }
 
-    response.setOk(ok);
     responseObserver.onNext(response.build());
     responseObserver.onCompleted();
-    System.exit(ok ? 0 : 1);
+    if (server != null) {
+      System.exit(request.getAllOk() && ok ? 0 : 1);
+    }
   }
 
 }

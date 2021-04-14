@@ -9,7 +9,7 @@ option java_outer_classname = "DecryptingTrusteeProto";
 service DecryptingTrusteeService {
   rpc partialDecrypt (PartialDecryptionRequest) returns (PartialDecryptionResponse) {}
   rpc compensatedDecrypt (CompensatedDecryptionRequest) returns (CompensatedDecryptionResponse) {}
-  rpc finish (FinishRequest) returns (BooleanResponse) {}
+  rpc finish (FinishRequest) returns (ErrorResponse) {}
 }
 
 message PartialDecryptionRequest {
@@ -18,7 +18,7 @@ message PartialDecryptionRequest {
 }
 
 message PartialDecryptionResponse {
-  RemoteError error = 1; // non empty on error
+  string error = 1; // non empty on error
   repeated PartialDecryptionResult results = 2;;
 }
 
@@ -34,7 +34,7 @@ message CompensatedDecryptionRequest {
 }
 
 message CompensatedDecryptionResponse {
-  RemoteError error = 1; // non empty on error
+  string error = 1; // non empty on error
   repeated CompensatedDecryptionResult results = 2;;
 }
 

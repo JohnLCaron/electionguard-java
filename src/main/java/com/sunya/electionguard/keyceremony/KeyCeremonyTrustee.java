@@ -84,17 +84,17 @@ public class KeyCeremonyTrustee {
             polynomial.coefficient_proofs);
   }
 
-  /** Receive publicKeys from another guardian. */
-  public boolean receivePublicKeys(KeyCeremony2.PublicKeySet publicKeys) {
+  /** Receive publicKeys from another guardian. Return error message or empty string on success. */
+  public String receivePublicKeys(KeyCeremony2.PublicKeySet publicKeys) {
     Preconditions.checkNotNull(publicKeys);
     if (publicKeys.ownerId().equals(this.id)) {
-      return false;
+      return "Guardian Id equals mine";
     }
     if (publicKeys.isValid()) {
       this.allGuardianPublicKeys.put(publicKeys.ownerId(), publicKeys);
-      return true;
+      return "";
     }
-    return false;
+    return "Invalid Schnorr proof";
   }
 
   /** Share this guardians backup for otherGuardian. */

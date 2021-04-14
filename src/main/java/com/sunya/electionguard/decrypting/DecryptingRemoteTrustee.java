@@ -8,7 +8,6 @@ import com.sunya.electionguard.DecryptionProofTuple;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.proto.CommonConvert;
 import com.sunya.electionguard.proto.CommonProto;
-import com.sunya.electionguard.proto.DecryptingProto;
 import com.sunya.electionguard.proto.DecryptingTrusteeProto;
 import com.sunya.electionguard.proto.DecryptingTrusteeServiceGrpc;
 import com.sunya.electionguard.proto.TrusteeFromProto;
@@ -89,7 +88,7 @@ class DecryptingRemoteTrustee extends DecryptingTrusteeServiceGrpc.DecryptingTru
       if (cmdLine.serverPort != 0) {
         // register with the DecryptingRemote "server".
         DecryptingMediatorRunnerProxy proxy = new DecryptingMediatorRunnerProxy(serverUrl);
-        DecryptingProto.RegisterDecryptingTrusteeResponse response = proxy.registerTrustee(trustee.id(), url,
+        CommonProto.ErrorResponse response = proxy.registerTrustee(trustee.id(), url,
                 trustee.delegate.xCoordinate(), trustee.delegate.electionPublicKey());
         proxy.shutdown();
 
@@ -97,13 +96,9 @@ class DecryptingRemoteTrustee extends DecryptingTrusteeServiceGrpc.DecryptingTru
           System.out.printf("    registerTrustee returns null response%n");
           throw new RuntimeException("registerTrustee returns null response");
         }
-        if (response.hasError()) {
-          System.out.printf("    registerTrustee error %s%n", response.getError().getMessage());
-          throw new RuntimeException(response.getError().getMessage());
-        }
-        if (!response.getOk()) {
-          System.out.printf("    registerTrustee not ok%n");
-          throw new RuntimeException("registerTrustee not ok");
+        if (!response.getError().isEmpty()) {
+          System.out.printf("    registerTrustee error %s%n", response.getError());
+          throw new RuntimeException(response.getError());
         }
         System.out.printf("    registered with DecryptingRemote %n");
       }
@@ -195,7 +190,7 @@ class DecryptingRemoteTrustee extends DecryptingTrusteeServiceGrpc.DecryptingTru
     } catch (Throwable t) {
       logger.atSevere().withCause(t).log("DecryptingRemoteTrustee compensatedDecrypt failed");
       String mess = t.getMessage() != null ? t.getMessage() : "Unknown";
-      response.setError(CommonProto.RemoteError.newBuilder().setMessage(mess).build());
+      response.setError(mess);
     }
 
     responseObserver.onNext(response.build());
@@ -228,7 +223,7 @@ class DecryptingRemoteTrustee extends DecryptingTrusteeServiceGrpc.DecryptingTru
     } catch (Throwable t) {
       logger.atSevere().withCause(t).log("DecryptingRemoteTrustee partialDecrypt failed");
       String mess = t.getMessage() != null ? t.getMessage() : "Unknown";
-      response.setError(CommonProto.RemoteError.newBuilder().setMessage(mess).build());
+      response.setError(mess);
     }
 
     responseObserver.onNext(response.build());
@@ -244,8 +239,8 @@ class DecryptingRemoteTrustee extends DecryptingTrusteeServiceGrpc.DecryptingTru
 
   @Override
   public void finish(CommonProto.FinishRequest request,
-                     StreamObserver<CommonProto.BooleanResponse> responseObserver) {
-    CommonProto.BooleanResponse.Builder response = CommonProto.BooleanResponse.newBuilder();
+                     StreamObserver<CommonProto.ErrorResponse> responseObserver) {
+    CommonProto.ErrorResponse.Builder response = CommonProto.ErrorResponse.newBuilder();
     boolean ok = true;
     try {
       logger.atInfo().log("DecryptingTrusteeProto finish ok = %s", request.getAllOk());
@@ -253,11 +248,10 @@ class DecryptingRemoteTrustee extends DecryptingTrusteeServiceGrpc.DecryptingTru
     } catch (Throwable t) {
       logger.atSevere().withCause(t).log("DecryptingTrusteeProto finish failed");
       t.printStackTrace();
-      response.setError(CommonProto.RemoteError.newBuilder().setMessage(t.getMessage()).build());
+      response.setError(t.getMessage());
       ok = false;
     }
 
-    response.setOk(ok);
     responseObserver.onNext(response.build());
     responseObserver.onCompleted();
     System.exit(ok ? 0 : 1);

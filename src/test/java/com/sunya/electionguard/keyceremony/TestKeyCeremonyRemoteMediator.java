@@ -13,7 +13,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 import static org.junit.Assert.fail;
 
-public class TestKeyCeremonyTrusteeMediator {
+public class TestKeyCeremonyRemoteMediator {
 
   private static final String GUARDIAN1_ID = "Guardian 1";
   private static final int GUARDIAN1_X_COORDINATE = 11;
@@ -25,7 +25,7 @@ public class TestKeyCeremonyTrusteeMediator {
 
   Manifest manifest;
 
-  public TestKeyCeremonyTrusteeMediator() {
+  public TestKeyCeremonyRemoteMediator() {
     ElectionInputBuilder ebuilder = new ElectionInputBuilder("ballot_id");
     this.manifest = ebuilder.addContest("contest_id")
             .addSelection("selection_id", "candidate_1")
@@ -34,12 +34,12 @@ public class TestKeyCeremonyTrusteeMediator {
             .build();
   }
 
-  private KeyCeremonyTrusteeMediator makeMediator() {
+  private KeyCeremonyRemoteMediator makeMediator() {
     KeyCeremonyTrustee trustee1 = new KeyCeremonyTrustee(GUARDIAN1_ID, GUARDIAN1_X_COORDINATE, QUORUM, null);
     KeyCeremonyTrustee trustee2 = new KeyCeremonyTrustee(GUARDIAN2_ID, GUARDIAN2_X_COORDINATE, QUORUM, null);
     KeyCeremonyTrustee trustee3 = new KeyCeremonyTrustee(GUARDIAN3_ID, GUARDIAN3_X_COORDINATE, QUORUM, null);
 
-    return new KeyCeremonyTrusteeMediator(this.manifest, QUORUM,
+    return new KeyCeremonyRemoteMediator(this.manifest, QUORUM,
             ImmutableList.of(new KeyCeremonyTrusteeSimulator(trustee1),
                     new KeyCeremonyTrusteeSimulator(trustee2),
                     new KeyCeremonyTrusteeSimulator((trustee3))));
@@ -47,7 +47,7 @@ public class TestKeyCeremonyTrusteeMediator {
 
   @Example
   public void testConstructor() {
-    KeyCeremonyTrusteeMediator mediator = makeMediator();
+    KeyCeremonyRemoteMediator mediator = makeMediator();
 
     assertThat(mediator.election).isEqualTo(this.manifest);
     assertThat(mediator.quorum).isEqualTo(QUORUM);
@@ -71,7 +71,7 @@ public class TestKeyCeremonyTrusteeMediator {
     KeyCeremonyTrustee trustee3 = new KeyCeremonyTrustee(GUARDIAN2_ID, GUARDIAN3_X_COORDINATE, QUORUM, null);
 
     try {
-      new KeyCeremonyTrusteeMediator(this.manifest, QUORUM,
+      new KeyCeremonyRemoteMediator(this.manifest, QUORUM,
               ImmutableList.of(new KeyCeremonyTrusteeSimulator(trustee1),
                       new KeyCeremonyTrusteeSimulator(trustee2),
                       new KeyCeremonyTrusteeSimulator((trustee3))));
@@ -88,7 +88,7 @@ public class TestKeyCeremonyTrusteeMediator {
     KeyCeremonyTrustee trustee3 = new KeyCeremonyTrustee(GUARDIAN3_ID, GUARDIAN2_X_COORDINATE, QUORUM, null);
 
     try {
-      new KeyCeremonyTrusteeMediator(this.manifest, QUORUM,
+      new KeyCeremonyRemoteMediator(this.manifest, QUORUM,
               ImmutableList.of(new KeyCeremonyTrusteeSimulator(trustee1),
                       new KeyCeremonyTrusteeSimulator(trustee2),
                       new KeyCeremonyTrusteeSimulator((trustee3))));
@@ -100,7 +100,7 @@ public class TestKeyCeremonyTrusteeMediator {
 
   @Example
   public void testRound1() {
-    KeyCeremonyTrusteeMediator mediator = makeMediator();
+    KeyCeremonyRemoteMediator mediator = makeMediator();
     assertThat(mediator.trusteeProxies).hasSize(QUORUM);
 
     assertThat(mediator.round1()).isTrue();
@@ -117,7 +117,7 @@ public class TestKeyCeremonyTrusteeMediator {
 
   @Example
   public void testRound2() {
-    KeyCeremonyTrusteeMediator mediator = makeMediator();
+    KeyCeremonyRemoteMediator mediator = makeMediator();
 
     assertThat(mediator.round1()).isTrue();
     ArrayList<KeyCeremony2.PartialKeyVerification> failures = new ArrayList<>();
@@ -132,7 +132,7 @@ public class TestKeyCeremonyTrusteeMediator {
 
   @Example
   public void testRound3() {
-    KeyCeremonyTrusteeMediator mediator = makeMediator();
+    KeyCeremonyRemoteMediator mediator = makeMediator();
 
     assertThat(mediator.round1()).isTrue();
     assertThat(mediator.round2(new ArrayList<>())).isTrue();
@@ -152,7 +152,7 @@ public class TestKeyCeremonyTrusteeMediator {
 
   @Example
   public void testRunKeyCeremony() {
-    KeyCeremonyTrusteeMediator mediator = makeMediator();
+    KeyCeremonyRemoteMediator mediator = makeMediator();
     mediator.runKeyCeremony();
 
     assertThat(mediator.coefficientValidationSets).isNotEmpty();

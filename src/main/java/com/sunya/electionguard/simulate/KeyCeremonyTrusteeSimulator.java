@@ -20,7 +20,7 @@ public class KeyCeremonyTrusteeSimulator implements KeyCeremonyTrusteeIF {
   }
 
   @Override
-  public int coordinate() {
+  public int xCoordinate() {
     return this.delegate.xCoordinate;
   }
 
@@ -30,7 +30,7 @@ public class KeyCeremonyTrusteeSimulator implements KeyCeremonyTrusteeIF {
   }
 
   @Override
-  public boolean receivePublicKeys(KeyCeremony2.PublicKeySet publicKeys) {
+  public String receivePublicKeys(KeyCeremony2.PublicKeySet publicKeys) {
     return this.delegate.receivePublicKeys(publicKeys);
   }
 

@@ -25,11 +25,18 @@ import static com.sunya.electionguard.Group.mult_p;
 import static com.sunya.electionguard.Group.pow_p;
 import static com.sunya.electionguard.Group.rand_q;
 
+/**
+ * A Trustee/Guardian used in Decryptions, with secrets hidden as much as possible.
+ * This object must not be used with untrusted code.
+ */
 @Immutable
 public class DecryptingTrustee implements DecryptingTrusteeIF {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
+  /** The Guardian id. */
   private final String id;
+
+  /** A unique number in [1, 256) that is the polynomial x value for this guardian. aka sequence_order. */
   private final int xCoordinate;
 
   /** The auxiliary private key */
