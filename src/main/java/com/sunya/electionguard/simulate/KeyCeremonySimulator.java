@@ -7,7 +7,7 @@ import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.input.ElectionInputValidation;
 import com.sunya.electionguard.keyceremony.KeyCeremonyTrustee;
 import com.sunya.electionguard.keyceremony.KeyCeremonyTrusteeIF;
-import com.sunya.electionguard.keyceremony.KeyCeremonyTrusteeMediator;
+import com.sunya.electionguard.keyceremony.KeyCeremonyRemoteMediator;
 import com.sunya.electionguard.proto.TrusteeProto;
 import com.sunya.electionguard.proto.TrusteeToProto;
 import com.sunya.electionguard.publish.Consumer;
@@ -129,7 +129,7 @@ public class KeyCeremonySimulator {
 
   private void runKeyCeremony() {
     List<KeyCeremonyTrusteeIF> trusteeIfs = new ArrayList<>(trusteeProxies);
-    KeyCeremonyTrusteeMediator mediator = new KeyCeremonyTrusteeMediator(manifest, quorum, trusteeIfs);
+    KeyCeremonyRemoteMediator mediator = new KeyCeremonyRemoteMediator(manifest, quorum, trusteeIfs);
     mediator.runKeyCeremony();
 
     boolean ok = mediator.publishElectionRecord(this.publisher);

@@ -47,15 +47,10 @@ message SchnorrProof {
   ElementModQ response = 4; // u in the spec
 }
 
-message RemoteError {
-  string message = 1;
-}
-
 message FinishRequest {
   bool all_ok = 1;
 }
 
-message BooleanResponse {
-  RemoteError error = 1; // non empty on error
-  bool ok = 2;
+message ErrorResponse {
+  string error = 1; // non empty on error
 }

@@ -8,56 +8,43 @@ option java_outer_classname = "RemoteKeyCeremonyTrusteeProto";
 
 service RemoteKeyCeremonyTrusteeService {
   rpc sendPublicKeys (PublicKeySetRequest) returns (PublicKeySet) {}
-  rpc receivePublicKeys (PublicKeySet) returns (BooleanResponse) {}
+  rpc receivePublicKeys (PublicKeySet) returns (ErrorResponse) {}
   rpc sendPartialKeyBackup (PartialKeyBackupRequest) returns (PartialKeyBackup) {}
   rpc verifyPartialKeyBackup (PartialKeyBackup) returns (PartialKeyVerification) {}
   rpc sendBackupChallenge (PartialKeyChallenge) returns (PartialKeyChallengeResponse) {}
   rpc sendJointPublicKey (JointPublicKeyRequest) returns (JointPublicKeyResponse) {}
-  rpc saveState (google.protobuf.Empty) returns (BooleanResponse) {}
-  rpc finish (FinishRequest) returns (BooleanResponse) {}
+  rpc saveState (google.protobuf.Empty) returns (ErrorResponse) {}
+  rpc finish (FinishRequest) returns (ErrorResponse) {}
 }
 
 message PublicKeySetRequest {
 }
 
 message PublicKeySet {
-  RemoteError error = 1; // non empty on error
-  /** guardian object_id. */
-  string owner_id = 2;
-  /** guardian x coordinate (aka sequence_order). */
-  uint32 guardian_x_coordinate = 3;
-  /** Auxiliary public key. */
-  RSAPublicKey auxiliary_public_key = 4;
-  /** The election polynomial coefficients commitments and proofs. */
-  repeated SchnorrProof coefficient_proofs = 5;
+  string owner_id = 2; // the Trustee's id
+  uint32 guardian_x_coordinate = 3; // the Trustee's xcoordinate
+  RSAPublicKey auxiliary_public_key = 4; // the Trustee's RSA public key
+  repeated SchnorrProof coefficient_proofs = 5; // The polynomial coefficients commitments and proofs
+  string error = 6; // if not empty, an error has occurred.
 }
 
 message PartialKeyBackupRequest {
-  string guardian_id = 1;
+  string guardian_id = 1; // the Trustee's id
 }
 
 message PartialKeyBackup {
-  // The Id of the guardian that generated this backup.
-  string generating_guardian_id = 2;
-  // The Id of the guardian to receive this backup.
-  string designated_guardian_id = 3;
-  // The x coefficient of the designated guardian.
-  uint32 designated_guardian_x_coordinate = 4;
-  // The encrypted coordinate of the designated guardian?.
-  bytes encrypted_coordinate = 5;
-  // if not empty, an error has occurred.
-  string error = 6;
+  string generating_guardian_id = 2; // The Id of the Trustee that generated this backup.
+  string designated_guardian_id = 3; // The Id of the Trustee to receive this backup.
+  uint32 designated_guardian_x_coordinate = 4; // The x coefficient of the designated guardian.
+  bytes encrypted_coordinate = 5; // The encrypted coordinate of the designated guardian.
+  string error = 6; // if not empty, an error has occurred.
 }
 
 message PartialKeyVerification {
-  // The Id of the guardian that generated this backup.
-  string generating_guardian_id = 2;
-  // The Id of the guardian to receive this backup.
-  string designated_guardian_id = 3;
-  // The x coefficient of the designated guardian.
-  uint32 designated_guardian_x_coordinate = 4;
-  // if not empty, an error has occurred.
-  string error = 5;
+  string generating_guardian_id = 2; // The Id of the Trustee that generated this backup.
+  string designated_guardian_id = 3; // The Id of the Trustee to receive this backup.
+  uint32 designated_guardian_x_coordinate = 4; // The x coefficient of the designated guardian.
+  string error = 5; // if not empty, an error has occurred.
 }
 
 message PartialKeyChallenge {
@@ -65,22 +52,17 @@ message PartialKeyChallenge {
 }
 
 message PartialKeyChallengeResponse {
-  // The Id of the guardian that generated this backup.
-  string generating_guardian_id = 2;
-  // The Id of the guardian to receive this backup.
-  string designated_guardian_id = 3;
-  // The x coefficient of the designated guardian.
-  uint32 designated_guardian_x_coordinate = 4;
-  // The unencrypted coordinate of the designated guardian.
-  ElementModQ coordinate = 5;
-  // if not empty, an error has occurred.
-  string error = 6;
+  string generating_guardian_id = 2; // The Id of the Trustee that generated this backup.
+  string designated_guardian_id = 3; // The Id of the Trustee to receive this backup.
+  uint32 designated_guardian_x_coordinate = 4; // The x coefficient of the designated guardian.
+  ElementModQ coordinate = 5; // The unencrypted coordinate of the designated guardian.
+  string error = 6; // if not empty, an error has occurred.
 }
 
 message JointPublicKeyRequest {
 }
 
 message JointPublicKeyResponse {
-  RemoteError error = 1; // non empty on error
-  ElementModP joint_public_key = 2;
+  ElementModP joint_public_key = 2; // non empty on error
+  string error = 3; // if not empty, an error has occurred.
 }

@@ -15,6 +15,7 @@ import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.stub.StreamObserver;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,7 +27,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * A command line program that performs the key ceremony with remote Guardians.
  * It opens up a channel to allow guardians to register with it.
- * It waits until it nguardians register, then starts the key ceremony.
+ * It waits until nguardians register, then starts the key ceremony.
  * <p>
  * For command line help:
  * <strong>
@@ -44,7 +45,7 @@ class KeyCeremonyRemote {
     String inputDir;
 
     @Parameter(names = {"-out"}, order = 1,
-            description = "Directory where election record is written")
+            description = "Directory where election record is written", required = true)
     String outputDir;
 
     @Parameter(names = {"-nguardians"}, order = 2, description = "Number of Guardians that will be used", required = true)
@@ -101,13 +102,7 @@ class KeyCeremonyRemote {
         System.exit(1);
       }
 
-      // LOOK check that outputDir exists and can be written to
-      Publisher publisher = new Publisher(cmdLine.outputDir, false, false);
-      if (!publisher.validateOutputDir(errors)) {
-        System.out.printf("*** Publisher validateOutputDir FAILED on %s%n%s", cmdLine.outputDir, errors);
-        System.exit(1);
-      }
-      keyCeremony = new KeyCeremonyRemote(election, cmdLine.nguardians, cmdLine.quorum, publisher);
+      keyCeremony = new KeyCeremonyRemote(election, cmdLine.nguardians, cmdLine.quorum, cmdLine.outputDir);
       keyCeremony.start(cmdLine.port);
 
       System.out.print("Waiting for guardians to register: elapsed seconds = ");
@@ -123,10 +118,9 @@ class KeyCeremonyRemote {
       System.out.printf("%n");
 
       allOk = keyCeremony.runKeyCeremony();
-      // keyCeremony.blockUntilShutdown();
 
     } catch (Throwable t) {
-      System.out.printf("*** KeyCeremonyRemote FAILURE%n");
+      System.out.printf("*** KeyCeremonyRemote FAILURE = %s%n", t.getMessage());
       t.printStackTrace();
       allOk = false;
 
@@ -167,13 +161,6 @@ class KeyCeremonyRemote {
     }
   }
 
-  /** Await termination on the main thread since the grpc library uses daemon threads. */
-  private void blockUntilShutdown() throws InterruptedException {
-    if (server != null) {
-      server.awaitTermination();
-    }
-  }
-
   ///////////////////////////////////////////////////////////////////////////
   final Manifest manifest;
   final int nguardians;
@@ -182,29 +169,21 @@ class KeyCeremonyRemote {
   final List<KeyCeremonyRemoteTrusteeProxy> trusteeProxies = Collections.synchronizedList(new ArrayList<>());
   boolean startedKeyCeremony = false;
 
-  KeyCeremonyRemote(Manifest manifest, int nguardians, int quorum, Publisher publisher) {
+  KeyCeremonyRemote(Manifest manifest, int nguardians, int quorum, String outputDir) throws IOException {
     this.manifest = manifest;
     this.nguardians = nguardians;
     this.quorum = quorum;
-    this.publisher = publisher;
+
+    this.publisher = new Publisher(outputDir, false, false);
+    Formatter errors = new Formatter();
+    if (!publisher.validateOutputDir(errors)) {
+      System.out.printf("*** Publisher validateOutputDir FAILED on %s%n%s", outputDir, errors);
+      throw new FileNotFoundException(errors.toString());
+    }
   }
 
   boolean ready() {
     return trusteeProxies.size() == nguardians;
-  }
-
-  synchronized void checkAllGuardiansAreRegistered() {
-    System.out.printf(" Number of Guardians registered = %d, need = %d%n", this.trusteeProxies.size(), this.nguardians);
-    if (!this.startedKeyCeremony && this.trusteeProxies.size() == this.nguardians) {
-      this.startedKeyCeremony = true;
-      System.out.printf("Begin Key Ceremony%n");
-      try {
-        Thread.sleep(1000);
-      } catch (InterruptedException e) {
-        e.printStackTrace();
-      }
-      runKeyCeremony();
-    }
   }
 
   private boolean runKeyCeremony() {
@@ -213,7 +192,7 @@ class KeyCeremonyRemote {
               trusteeProxies.size()));
     }
     List<KeyCeremonyTrusteeIF> trusteeIfs = new ArrayList<>(trusteeProxies);
-    KeyCeremonyTrusteeMediator mediator = new KeyCeremonyTrusteeMediator(manifest, quorum, trusteeIfs);
+    KeyCeremonyRemoteMediator mediator = new KeyCeremonyRemoteMediator(manifest, quorum, trusteeIfs);
     mediator.runKeyCeremony();
 
     // tell the remote trustees to save their state
@@ -254,8 +233,8 @@ class KeyCeremonyRemote {
     System.out.printf(" Proxy channel shutdown was success = %s%n", shutdownOk);
   }
 
-  AtomicInteger nextCoordinate = new AtomicInteger(0);
-  private synchronized KeyCeremonyRemoteTrusteeProxy registerTrustee(String guardianId, String url) {
+  private AtomicInteger nextCoordinate = new AtomicInteger(0);
+  synchronized KeyCeremonyRemoteTrusteeProxy registerTrustee(String guardianId, String url) {
     for (KeyCeremonyRemoteTrusteeProxy proxy : trusteeProxies) {
       if (proxy.id().toLowerCase().contains(guardianId.toLowerCase()) ||
               guardianId.toLowerCase().contains(proxy.id().toLowerCase())) {
@@ -278,24 +257,24 @@ class KeyCeremonyRemote {
   private class KeyCeremonyRemoteService extends RemoteKeyCeremonyServiceGrpc.RemoteKeyCeremonyServiceImplBase {
 
     @Override
-    public void registerTrustee(RemoteKeyCeremonyProto.RegisterTrusteeRequest request,
-                                StreamObserver<RemoteKeyCeremonyProto.RegisterTrusteeResponse> responseObserver) {
+    public void registerTrustee(RemoteKeyCeremonyProto.RegisterKeyCeremonyTrusteeRequest request,
+                                StreamObserver<RemoteKeyCeremonyProto.RegisterKeyCeremonyTrusteeResponse> responseObserver) {
 
       System.out.printf("KeyCeremonyRemote registerTrustee %s url %s %n", request.getGuardianId(), request.getRemoteUrl());
 
       if (startedKeyCeremony) {
-        responseObserver.onNext(RemoteKeyCeremonyProto.RegisterTrusteeResponse.newBuilder()
+        responseObserver.onNext(RemoteKeyCeremonyProto.RegisterKeyCeremonyTrusteeResponse.newBuilder()
                 .setError("Already started KeyCeremony")
                 .build());
         responseObserver.onCompleted();
         return;
       }
 
-      RemoteKeyCeremonyProto.RegisterTrusteeResponse.Builder response = RemoteKeyCeremonyProto.RegisterTrusteeResponse.newBuilder();
+      RemoteKeyCeremonyProto.RegisterKeyCeremonyTrusteeResponse.Builder response = RemoteKeyCeremonyProto.RegisterKeyCeremonyTrusteeResponse.newBuilder();
       try {
         KeyCeremonyRemoteTrusteeProxy trustee = KeyCeremonyRemote.this.registerTrustee(request.getGuardianId(), request.getRemoteUrl());
         response.setGuardianId(trustee.id());
-        response.setGuardianXCoordinate(trustee.coordinate());
+        response.setGuardianXCoordinate(trustee.xCoordinate());
         response.setQuorum(trustee.quorum());
         responseObserver.onNext(response.build());
         responseObserver.onCompleted();
@@ -307,7 +286,6 @@ class KeyCeremonyRemote {
         responseObserver.onNext(response.build());
         responseObserver.onCompleted();
       }
-      // KeyCeremonyRemote.this.checkAllGuardiansAreRegistered();
     }
   }
 

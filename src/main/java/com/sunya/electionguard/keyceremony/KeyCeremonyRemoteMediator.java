@@ -21,10 +21,8 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-/**
- * Mediate the key ceremony with remote Guardians.
- */
-public class KeyCeremonyTrusteeMediator {
+/** Mediate the key ceremony using remote Guardians. */
+public class KeyCeremonyRemoteMediator {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   final Manifest election;
@@ -38,12 +36,8 @@ public class KeyCeremonyTrusteeMediator {
   Group.ElementModQ commitmentsHash;
   CiphertextElectionContext context;
 
-  /**
-   * This runs the key ceremony. Caller calls publishElectionRecord() separately.
-   * Caller is in charge od saving trustee state.
-   */
-  public KeyCeremonyTrusteeMediator(Manifest election, int quorum,
-                                    List<KeyCeremonyTrusteeIF> trusteeProxies) {
+  public KeyCeremonyRemoteMediator(Manifest election, int quorum,
+                                   List<KeyCeremonyTrusteeIF> trusteeProxies) {
     this.election = election;
     this.quorum = quorum;
     this.trusteeProxies = trusteeProxies;
@@ -57,14 +51,15 @@ public class KeyCeremonyTrusteeMediator {
       } else {
         ids.add(trustee.id());
       }
-      if (coords.contains(trustee.coordinate())) {
-        throw new IllegalStateException(String.format("Duplicate trustee xCoordinate = %d", trustee.coordinate()));
+      if (coords.contains(trustee.xCoordinate())) {
+        throw new IllegalStateException(String.format("Duplicate trustee xCoordinate = %d", trustee.xCoordinate()));
       } else {
-        coords.add(trustee.coordinate());
+        coords.add(trustee.xCoordinate());
       }
     }
   }
 
+  /** Run the key ceremony. Caller calls publishElectionRecord() separately. */
   public void runKeyCeremony() {
     System.out.printf("  Key Ceremony Round1: exchange public keys%n");
     if (!round1()) {
@@ -119,9 +114,9 @@ public class KeyCeremonyTrusteeMediator {
         // one could gather all PublicKeySets and send all at once, for 2*n, rather than n*n total messages.
         for (KeyCeremonyTrusteeIF recipient : trusteeProxies) {
           if (!trustee.id().equals(recipient.id())) {
-            boolean verify = recipient.receivePublicKeys(publicKeys);
-            if (!verify) {
-              System.out.printf("PublicKey Commitments: '%s' failed to validate '%s'", recipient.id(), trustee.id());
+            String error = recipient.receivePublicKeys(publicKeys);
+            if (!error.isEmpty()) {
+              System.out.printf("PublicKey Commitments: '%s' failed to validate '%s' = %s", recipient.id(), trustee.id(), error);
               fail = true;
             }
           }
@@ -170,6 +165,7 @@ public class KeyCeremonyTrusteeMediator {
   /**
    * Round 3. For any partial backup verification failures, each challenged guardian broadcasts its response to the challenge.
    * The mediator verifies the challenge. In point to point, each guardian would validate.
+   * Return true on success.
    */
   public boolean round3(List<KeyCeremony2.PartialKeyVerification> failures) {
     boolean fail = false;
@@ -184,7 +180,8 @@ public class KeyCeremonyTrusteeMediator {
       // sending guardian T_i publishes an unencypted P_i(l).
       Optional<KeyCeremonyTrusteeIF> challengedO = findTrusteeById(failure.generatingGuardianId());
       if (challengedO.isEmpty()) {
-        fail = true; // LOOK error message? weve already tested?
+        System.out.printf("generatingGuardianId %s not found in trusteeProxies%n", failure.generatingGuardianId());
+        fail = true;
       } else {
         KeyCeremonyTrusteeIF challenged = challengedO.get();
         Optional<KeyCeremony2.PartialKeyChallengeResponse> responseO = challenged.sendBackupChallenge(failure.designatedGuardianId());
@@ -217,6 +214,7 @@ public class KeyCeremonyTrusteeMediator {
   /**
    * Round 4. All guardians compute and send their joint election public key.
    * If they agree, then key ceremony is a success.
+   * Return true on success.
    */
   public boolean round4() {
     boolean fail = false;

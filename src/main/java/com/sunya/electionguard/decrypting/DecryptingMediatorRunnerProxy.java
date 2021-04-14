@@ -3,6 +3,7 @@ package com.sunya.electionguard.decrypting;
 import com.google.common.flogger.FluentLogger;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.proto.CommonConvert;
+import com.sunya.electionguard.proto.CommonProto;
 import com.sunya.electionguard.proto.DecryptingProto;
 import com.sunya.electionguard.proto.DecryptingServiceGrpc;
 import io.grpc.ManagedChannel;
@@ -39,8 +40,8 @@ class DecryptingMediatorRunnerProxy {
   }
 
   @Nullable
-  DecryptingProto.RegisterDecryptingTrusteeResponse registerTrustee(String guardianId, String remoteUrl, int coordinate,
-                                                                    Group.ElementModP publicKey) {
+  CommonProto.ErrorResponse registerTrustee(String guardianId, String remoteUrl, int coordinate,
+                                            Group.ElementModP publicKey) {
     try {
       DecryptingProto.RegisterDecryptingTrusteeRequest request = DecryptingProto.RegisterDecryptingTrusteeRequest.newBuilder()
               .setGuardianId(guardianId)
@@ -48,9 +49,9 @@ class DecryptingMediatorRunnerProxy {
               .setGuardianXCoordinate(coordinate)
               .setPublicKey(CommonConvert.convertElementModP(publicKey))
               .build();
-      DecryptingProto.RegisterDecryptingTrusteeResponse response = blockingStub.registerTrustee(request);
-      if (response.hasError()) {
-        logger.atSevere().log("registerTrustee failed: %s", response.getError().getMessage());
+      CommonProto.ErrorResponse response = blockingStub.registerTrustee(request);
+      if (!response.getError().isEmpty()) {
+        logger.atSevere().log("registerTrustee failed: %s", response.getError());
         return null;
       }
       return response;

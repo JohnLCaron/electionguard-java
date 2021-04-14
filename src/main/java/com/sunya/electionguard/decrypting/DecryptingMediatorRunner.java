@@ -363,22 +363,20 @@ class DecryptingMediatorRunner {
 
     @Override
     public void registerTrustee(DecryptingProto.RegisterDecryptingTrusteeRequest request,
-                                StreamObserver<DecryptingProto.RegisterDecryptingTrusteeResponse> responseObserver) {
+                                StreamObserver<CommonProto.ErrorResponse> responseObserver) {
 
       System.out.printf("DecryptingRemote registerTrustee %s url %s %n", request.getGuardianId(), request.getRemoteUrl());
 
       if (startedDecryption) {
-        responseObserver.onNext(DecryptingProto.RegisterDecryptingTrusteeResponse.newBuilder()
-                .setError(CommonProto.RemoteError.newBuilder().setMessage("Already started Decryption").build()).build());
+        responseObserver.onNext(CommonProto.ErrorResponse.newBuilder()
+                .setError("Already started Decryption").build());
         responseObserver.onCompleted();
         return;
       }
 
-      DecryptingProto.RegisterDecryptingTrusteeResponse.Builder response = DecryptingProto.RegisterDecryptingTrusteeResponse.newBuilder();
+      CommonProto.ErrorResponse.Builder response = CommonProto.ErrorResponse.newBuilder();
       try {
         DecryptingRemoteTrusteeProxy trustee = DecryptingMediatorRunner.this.registerTrustee(request);
-        response.setOk(true);
-
         responseObserver.onNext(response.build());
         responseObserver.onCompleted();
         logger.atInfo().log("DecryptingRemote registerTrustee %s", trustee.id());
@@ -386,11 +384,10 @@ class DecryptingMediatorRunner {
       } catch (Throwable t) {
         logger.atSevere().withCause(t).log("DecryptingRemote registerTrustee failed");
         t.printStackTrace();
-        response.setError(CommonProto.RemoteError.newBuilder().setMessage(t.getMessage()).build());
+        response.setError(t.getMessage());
         responseObserver.onNext(response.build());
         responseObserver.onCompleted();
       }
-      // DecryptingRemote.this.checkAllGuardiansAreRegistered();
     }
   }
 

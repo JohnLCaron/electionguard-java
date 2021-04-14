@@ -31,7 +31,7 @@ class KeyCeremonyRemoteTrusteeProxy implements KeyCeremonyTrusteeIF {
   }
 
   @Override
-  public int coordinate() {
+  public int xCoordinate() {
     return coordinate;
   }
 
@@ -41,8 +41,8 @@ class KeyCeremonyRemoteTrusteeProxy implements KeyCeremonyTrusteeIF {
       logger.atInfo().log("%s sendPublicKeys", id());
       RemoteKeyCeremonyTrusteeProto.PublicKeySetRequest request = RemoteKeyCeremonyTrusteeProto.PublicKeySetRequest.getDefaultInstance();
       RemoteKeyCeremonyTrusteeProto.PublicKeySet response = blockingStub.sendPublicKeys(request);
-      if (response.hasError()) {
-        logger.atSevere().log("sendPublicKeys failed: %s", response.getError().getMessage());
+      if (!response.getError().isEmpty()) {
+        logger.atSevere().log("sendPublicKeys failed: %s", response.getError());
         return Optional.empty();
       }
       List<SchnorrProof> proofs = response.getCoefficientProofsList().stream().map(CommonConvert::convertSchnorrProof).collect(Collectors.toList());
@@ -59,7 +59,7 @@ class KeyCeremonyRemoteTrusteeProxy implements KeyCeremonyTrusteeIF {
   }
 
   @Override
-  public boolean receivePublicKeys(KeyCeremony2.PublicKeySet keyset) {
+  public String receivePublicKeys(KeyCeremony2.PublicKeySet keyset) {
     try {
       logger.atInfo().log("%s receivePublicKeys from %s", id(), keyset.ownerId());
       RemoteKeyCeremonyTrusteeProto.PublicKeySet.Builder request = RemoteKeyCeremonyTrusteeProto.PublicKeySet.newBuilder();
@@ -68,16 +68,15 @@ class KeyCeremonyRemoteTrusteeProxy implements KeyCeremonyTrusteeIF {
               .setAuxiliaryPublicKey(CommonConvert.convertJavaPublicKey(keyset.auxiliaryPublicKey()));
       keyset.coefficientProofs().forEach(p -> request.addCoefficientProofs(CommonConvert.convertSchnorrProof(p)));
 
-      CommonProto.BooleanResponse response = blockingStub.receivePublicKeys(request.build());
-      if (response.hasError()) {
-        logger.atSevere().log("receivePublicKeys failed: %s", response.getError().getMessage());
-        return false;
+      CommonProto.ErrorResponse response = blockingStub.receivePublicKeys(request.build());
+      if (!response.getError().isEmpty()) {
+        logger.atSevere().log("receivePublicKeys failed: %s", response.getError());
       }
-      return response.getOk();
+      return response.getError();
 
     } catch (StatusRuntimeException e) {
       logger.atSevere().withCause(e).log("receivePublicKeys failed: ");
-      return false;
+      return "receivePublicKeys failed: " + e.getMessage();
     }
   }
 
@@ -144,11 +143,11 @@ class KeyCeremonyRemoteTrusteeProxy implements KeyCeremonyTrusteeIF {
     try {
       RemoteKeyCeremonyTrusteeProto.JointPublicKeyRequest request = RemoteKeyCeremonyTrusteeProto.JointPublicKeyRequest.getDefaultInstance();
       RemoteKeyCeremonyTrusteeProto.JointPublicKeyResponse response = blockingStub.sendJointPublicKey(request);
-      if (response.hasError()) {
-        logger.atSevere().log("sendJointPublicKey failed: %s", response.getError().getMessage());
+      if (!response.getError().isEmpty()) {
+        logger.atSevere().log("sendJointPublicKey failed: %s", response.getError());
         return Optional.empty();
       }
-      return Optional.of(CommonConvert.convertElementModP(response.getJointPublicKey()));
+      return Optional.ofNullable(CommonConvert.convertElementModP(response.getJointPublicKey()));
 
     } catch (StatusRuntimeException e) {
       logger.atSevere().withCause(e).log("sendJointPublicKey failed: ");
@@ -158,12 +157,12 @@ class KeyCeremonyRemoteTrusteeProxy implements KeyCeremonyTrusteeIF {
 
   boolean saveState() {
     try {
-      CommonProto.BooleanResponse response = blockingStub.saveState(com.google.protobuf.Empty.getDefaultInstance());
-      if (response.hasError()) {
-        logger.atSevere().log("saveState failed: %s", response.getError().getMessage());
+      CommonProto.ErrorResponse response = blockingStub.saveState(com.google.protobuf.Empty.getDefaultInstance());
+      if (!response.getError().isEmpty()) {
+        logger.atSevere().log("saveState failed: %s", response.getError());
         return false;
       }
-      return response.getOk();
+      return true;
 
     } catch (StatusRuntimeException e) {
       logger.atSevere().withCause(e).log("saveState failed: ");
@@ -175,12 +174,12 @@ class KeyCeremonyRemoteTrusteeProxy implements KeyCeremonyTrusteeIF {
   boolean finish(boolean allOk) {
     try {
       CommonProto.FinishRequest request = CommonProto.FinishRequest.newBuilder().setAllOk(allOk).build();
-      CommonProto.BooleanResponse response = blockingStub.finish(request);
-      if (response.hasError()) {
-        logger.atSevere().log("commit failed: %s", response.getError().getMessage());
+      CommonProto.ErrorResponse response = blockingStub.finish(request);
+      if (!response.getError().isEmpty()) {
+        logger.atSevere().log("commit failed: %s", response.getError());
         return false;
       }
-      return response.getOk();
+      return true;
 
     } catch (StatusRuntimeException e) {
       logger.atSevere().withCause(e).log("commit failed: ");
