@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
  * </strong>
  */
 public class RunElectionWorkflow {
-  private static final String classpath = "build/libs/electionguard-java-0.9.1-SNAPSHOT-all.jar";
+  public static final String classpath = "build/libs/electionguard-java-0.9.1-all.jar";
 
   private static class CommandLine {
     @Parameter(names = {"-in"}, order = 0,
