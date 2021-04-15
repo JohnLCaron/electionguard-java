@@ -12,7 +12,7 @@ import java.util.Formatter;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Runs the entire workflow from start to finish.
+ * Runs the entire workflow from start to finish, with in-process Guardians (unsafe for production).
  * <p>
  * For command line help:
  * <strong>
@@ -20,7 +20,6 @@ import java.util.concurrent.TimeUnit;
  *  java -classpath electionguard-java-all.jar com.sunya.electionguard.workflow.RunElectionWorkflow --help
  * </pre>
  * </strong>
- *
  */
 public class RunElectionWorkflow {
   private static final String classpath = "build/libs/electionguard-java-0.9.1-SNAPSHOT-all.jar";
