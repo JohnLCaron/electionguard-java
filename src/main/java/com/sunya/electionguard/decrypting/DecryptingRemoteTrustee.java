@@ -254,7 +254,9 @@ class DecryptingRemoteTrustee extends DecryptingTrusteeServiceGrpc.DecryptingTru
 
     responseObserver.onNext(response.build());
     responseObserver.onCompleted();
-    System.exit(ok ? 0 : 1);
+    if (server != null) {
+      System.exit(request.getAllOk() && ok ? 0 : 1);
+    }
   }
 
 }

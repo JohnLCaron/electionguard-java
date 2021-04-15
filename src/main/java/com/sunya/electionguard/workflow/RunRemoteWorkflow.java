@@ -32,7 +32,7 @@ import java.util.stream.Stream;
  * </strong>
  */
 public class RunRemoteWorkflow {
-  private static final String classpath = "build/libs/electionguard-java-0.9.1-SNAPSHOT-all.jar";
+  private static final String classpath = RunElectionWorkflow.classpath;
   private static final String REMOTE_TRUSTEE = "remoteTrustee";
   private static final String CMD_OUTPUT = "/home/snake/tmp/runRemoteWorkflow/";
 

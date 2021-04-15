@@ -1,5 +1,5 @@
 # 🗳 ElectionGuard Java
-_last changed: April 4, 2021_
+_last changed: April 15, 2021_
 
 This is a port of https://github.com/microsoft/electionguard-python/ to Java.
 
@@ -16,9 +16,7 @@ To verify an __Election Record__:
 
 The full [Verification Specification](https://www.electionguard.vote/spec/0.95.0/9_Verifier_construction/) is implemented.
 
-## Workflow
-
-### Workflow using Remote Guardians
+## Workflow using Remote Guardians
 
 The following command line programs run the entire workflow needed to run an election:
 
@@ -44,9 +42,8 @@ The entire workflow, consisting of the above steps plus verification can be run 
 
 ### Election Record Visualization
 
-A simple Swing-based visualization of the Election Record is available. This is a debugging tool for developers, 
-not a polished tool for end-users (eg election officials). No documentation, no warentees, 
-void where taxed or prohibited by law.
+A simple Swing-based visualization of the Election Record. This is a debugging tool for developers, 
+not a polished tool for end-users (eg election officials). 
 
 *   [Visualization](https://github.com/JohnLCaron/electionguard-java/blob/master/docs/Visualization.md)
 
@@ -90,13 +87,13 @@ These may be interesting to implement in other libraries:
  * Also serializes using protobuf.
  * Uses AutoValue for (some) immutable value classes.
  * Uses Flogger for logging.
- * Uses JUnit5 / jqwik library for property based testing.
+ * Uses JUnit5, jqwik, Mockito for testing.
  * Uses gradle for building.
  
 ## TODO
 
   * Not yet compatible with python library JSON serialization, due to different ways to serialize Optional.
-    It incorporates a workaround which should work for now, however.
+    It incorporates a workaround which should work for now.
   * Review error logging.
   * Measure computational performance.
   * Investigate parallelization strategies.
