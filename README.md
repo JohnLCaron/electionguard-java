@@ -38,22 +38,6 @@ The entire workflow, consisting of the above steps plus verification can be run 
 
 *   [RunRemoteWorkflow](https://github.com/JohnLCaron/electionguard-java/blob/master/docs/RunRemoteWorkflow.md)
 
-### Workflow Simulation
-
-The following command line programs simulate the pieces of the workflow needed to run an election:
-
-1.   [PerformKeyCeremony](https://github.com/JohnLCaron/electionguard-java/blob/master/docs/PerformKeyCeremony.md)
-
-2.   [EncryptBallots](https://github.com/JohnLCaron/electionguard-java/blob/master/docs/EncryptBallots.md)
-
-2.   [AccumulateTally](https://github.com/JohnLCaron/electionguard-java/blob/master/docs/AccumulateTally.md)
-
-4.   [DecryptBallots](https://github.com/JohnLCaron/electionguard-java/blob/master/docs/DecryptBallots.md)
-
-The entire workflow, consisting of the above steps plus verification can be run from a single command:
-
-*   [RunElectionWorkflow](https://github.com/JohnLCaron/electionguard-java/blob/master/docs/RunElectionWorkflow.md)
-
 ## Election Record
 
 *   [Election record](https://github.com/JohnLCaron/electionguard-java/blob/master/docs/ElectionRecord.md)

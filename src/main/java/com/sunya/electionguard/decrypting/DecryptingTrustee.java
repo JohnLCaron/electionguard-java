@@ -156,6 +156,8 @@ public class DecryptingTrustee implements DecryptingTrusteeIF {
                         String.format("   partial_decryption = %s %n ", partial_decryption.toShortString()) +
                         String.format("   extended_base_hash = %s %n ", extended_base_hash)
         );
+        throw new IllegalArgumentException(String.format("CompensatedDecrypt invalid proof for %s missing = %s",
+                this.id, missing_guardian_id));
       }
 
       results.add(new DecryptionProofRecovery(partial_decryption, proof, recovered));
@@ -203,11 +205,10 @@ public class DecryptingTrustee implements DecryptingTrusteeIF {
                         String.format("   partial_decryption = %s %n ", partial_decryption.toShortString()) +
                         String.format("   extended_base_hash = %s %n ", extended_base_hash)
         );
+        throw new IllegalArgumentException(String.format("PartialDecrypt invalid proof for %s", this.id));
       }
-
       results.add(new DecryptionProofTuple(partial_decryption, proof));
     }
-
     return results;
   }
 
