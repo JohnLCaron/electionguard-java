@@ -185,7 +185,7 @@ public class SubmittedBallotPojo {
     pojo.object_id = org.object_id;
     pojo.style_id = org.style_id;
     pojo.manifest_hash = org.manifest_hash;
-    pojo.previous_code = org.previous_code;
+    pojo.previous_code = org.code_seed;
     pojo.contests = convertList(org.contests, SubmittedBallotPojo::convertContest);
     pojo.code = org.code;
     pojo.timestamp = org.timestamp;

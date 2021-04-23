@@ -497,7 +497,7 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
     // munge
     CiphertextBallot bad_subject = new CiphertextBallot(
             subject.object_id, subject.style_id, subject.manifest_hash,
-            subject.previous_code, subject.contests,
+            subject.code_seed, subject.contests,
             subject.code, subject.timestamp, subject.crypto_hash,
             Optional.empty());
 
