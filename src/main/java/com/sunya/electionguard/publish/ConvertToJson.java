@@ -43,8 +43,15 @@ class ConvertToJson {
     }
   }
 
-  static void writeCoefficientValidation(KeyCeremony.CoefficientValidationSet object, Path where) throws IOException {
-    Type type = new TypeToken<KeyCeremony.CoefficientValidationSet>(){}.getType();
+  static void writeGuardianRecord(GuardianRecord object, Path where) throws IOException {
+    Type type = new TypeToken<GuardianRecord>(){}.getType();
+    try (FileWriter writer = new FileWriter(where.toFile())) {
+      enhancedGson.toJson(object, type, writer);
+    }
+  }
+
+  static void writeGuardianRecordPrivate(GuardianRecordPrivate object, Path where) throws IOException {
+    Type type = new TypeToken<GuardianRecordPrivate>(){}.getType();
     try (FileWriter writer = new FileWriter(where.toFile())) {
       enhancedGson.toJson(object, type, writer);
     }

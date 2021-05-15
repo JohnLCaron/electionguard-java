@@ -11,6 +11,7 @@ public class TestPartialDecryptionVerifier {
   @Example
   public void testSelectionEncryptionValidationProto() throws IOException {
     String topdir = TestParameterVerifier.topdirProto;
+    System.out.printf("testSelectionEncryptionValidationProto %s%n", topdir);
     Consumer consumer = new Consumer(topdir);
     ElectionRecord electionrecord = consumer.readElectionRecordProto();
     PartialDecryptionVerifier validator = new PartialDecryptionVerifier(electionrecord, electionrecord.decryptedTally);
@@ -22,6 +23,7 @@ public class TestPartialDecryptionVerifier {
   @Example
   public void testSelectionEncryptionValidationJson() throws IOException {
     String topdir = TestParameterVerifier.topdirJson;
+    System.out.printf("testSelectionEncryptionValidationJson %s%n", topdir);
     Consumer consumer = new Consumer(topdir);
     ElectionRecord electionrecord = consumer.readElectionRecordJson();
     PartialDecryptionVerifier validator = new PartialDecryptionVerifier(electionrecord, electionrecord.decryptedTally);

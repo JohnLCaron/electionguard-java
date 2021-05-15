@@ -189,9 +189,9 @@ public class DecryptingSimulator {
   void decryptTally() {
     System.out.printf("%nDecrypt tally%n");
 
-    // The guardians' election public key is in the electionRecord.guardianCoefficients.
-    Map<String, Group.ElementModP> guardianPublicKeys = electionRecord.guardianCoefficients.stream().collect(
-            Collectors.toMap(coeff -> coeff.owner_id(), coeff -> coeff.coefficient_commitments().get(0)));
+    // The guardians' election public key is in the electionRecord.guardianRecords.
+    Map<String, Group.ElementModP> guardianPublicKeys = electionRecord.guardianRecords.stream().collect(
+            Collectors.toMap(coeff -> coeff.guardian_id(), coeff -> coeff.election_public_key()));
 
     DecryptingTrusteeMediator mediator = new DecryptingTrusteeMediator(electionRecord.context,
             this.encryptedTally,

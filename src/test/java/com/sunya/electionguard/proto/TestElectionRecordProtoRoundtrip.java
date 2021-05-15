@@ -26,7 +26,7 @@ public class TestElectionRecordProtoRoundtrip {
             consumer.election(),
             consumer.context(),
             consumer.constants(),
-            consumer.guardianCoefficients(),
+            consumer.guardianRecords(),
             consumer.devices(),
             consumer.ciphertextTally(),
             consumer.decryptedTally(),
@@ -39,7 +39,7 @@ public class TestElectionRecordProtoRoundtrip {
     assertThat(roundtrip.devices).isEqualTo(consumer.devices());
     assertThat(roundtrip.encryptedTally).isEqualTo(consumer.ciphertextTally());
     assertThat(roundtrip.decryptedTally).isEqualTo(consumer.decryptedTally());
-    assertThat(roundtrip.guardianCoefficients).isEqualTo(consumer.guardianCoefficients());
+    assertThat(roundtrip.guardianRecords).isEqualTo(consumer.guardianRecords());
   }
 
   @Example
@@ -65,6 +65,6 @@ public class TestElectionRecordProtoRoundtrip {
     assertThat(roundtrip.devices).isEqualTo(consumer.devices());
     assertThat(roundtrip.encryptedTally).isEqualTo(consumer.ciphertextTally());
     assertThat(roundtrip.decryptedTally).isEqualTo(consumer.decryptedTally());
-    assertThat(roundtrip.guardianCoefficients).isEqualTo(consumer.guardianCoefficients());
+    assertThat(roundtrip.guardianRecords).isEqualTo(consumer.guardianRecords());
   }
 }

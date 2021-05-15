@@ -121,8 +121,7 @@ public class ElectionPolynomial {
    * @param polynomial:        A Guardian's polynomial
    */
   public static ElementModQ compute_polynomial_coordinate(BigInteger exponent_modifier, ElectionPolynomial polynomial) {
-    // LOOK is it really allowed to be zero?
-    Preconditions.checkArgument(Group.between(BigInteger.ZERO, exponent_modifier, Q), "exponent_modifier is out of range");
+    Preconditions.checkArgument(Group.between(BigInteger.ONE, exponent_modifier, Q), "exponent_modifier is out of range");
 
     ElementModQ computed_value = ZERO_MOD_Q;
     int count = 0;
@@ -157,15 +156,14 @@ public class ElectionPolynomial {
    *
    * @param expected                Expected value
    * @param coordinate              Value to be checked
-   * @param coefficient_commitments Commitments for coefficients of polynomial
+   * @param commitments Commitments for coefficients of polynomial
    */
-  public static boolean verify_polynomial_coordinate(ElementModQ expected, BigInteger coordinate, List<ElementModP> coefficient_commitments) {
-    ElementModP commitment_output = compute_gPcoordinate(coordinate, coefficient_commitments);
+  public static boolean verify_polynomial_coordinate(ElementModQ expected, BigInteger coordinate, List<ElementModP> commitments) {
+    ElementModP commitment_output = compute_gPcoordinate(coordinate, commitments);
 
     ElementModP value_output = g_pow_p(expected);
     return value_output.equals(commitment_output);
   }
-
 
   /**
    * Compute g^P(coordinate).

@@ -186,26 +186,26 @@ public class ChaumPedersen {
               && in_bounds_c && in_bounds_v && in_bounds_q && same_c && consistent_gv && consistent_av;
 
       if (!success) {
-        logger.atWarning().log("found an invalid Chaum-Pedersen proof, " +
-                String.format("in_bounds_alpha %s%n", in_bounds_alpha) +
-                String.format("in_bounds_beta %s%n", in_bounds_beta) +
-                String.format("in_bounds_k %s%n", in_bounds_k) +
-                String.format("in_bounds_m %s%n", in_bounds_m) +
-                String.format("in_bounds_a %s%n", in_bounds_a) +
-                String.format("in_bounds_b %s%n", in_bounds_b) +
-                String.format("in_bounds_c %s%n", in_bounds_c) +
-                String.format("in_bounds_v %s%n", in_bounds_v) +
-                String.format("in_bounds_q %s%n", in_bounds_q) +
-                String.format("same_c %s%n", same_c) +
-                String.format("consistent_gv %s%n", consistent_gv) +
-                String.format("consistent_av %s%n", consistent_av) +
-                String.format("%npad %s%n", this.pad.toShortString()) +
-                String.format("data %s%n", this.data.toShortString()) +
-                String.format("challenge %s%n", this.challenge) +
-                String.format("response %s%n", this.response) +
-                String.format("g_pow_p(v) %s%n", g_pow_p(v).toShortString()) +
-                String.format("pow_p(k, c) %s%n", pow_p(k, c).toShortString()) +
-                String.format("mult_p(a, pow_p(k, c)) %s%n", mult_p(a, pow_p(k, c)).toShortString())
+        logger.atWarning().log("found an invalid Chaum-Pedersen proof%n" +
+                String.format(" in_bounds_alpha %s%n", in_bounds_alpha) +
+                String.format(" in_bounds_beta %s%n", in_bounds_beta) +
+                String.format(" in_bounds_k %s%n", in_bounds_k) +
+                String.format(" in_bounds_m %s%n", in_bounds_m) +
+                String.format(" in_bounds_a %s%n", in_bounds_a) +
+                String.format(" in_bounds_b %s%n", in_bounds_b) +
+                String.format(" in_bounds_c %s%n", in_bounds_c) +
+                String.format(" in_bounds_v %s%n", in_bounds_v) +
+                String.format(" in_bounds_q %s%n", in_bounds_q) +
+                String.format(" same_c %s%n", same_c) +
+                String.format(" consistent_gv %s%n", consistent_gv) +
+                String.format(" consistent_av %s%n", consistent_av) +
+                String.format("%n pad %s%n", this.pad.toShortString()) +
+                String.format(" data %s%n", this.data.toShortString()) +
+                String.format(" challenge %s%n", this.challenge) +
+                String.format(" response %s%n", this.response) +
+                String.format(" g_pow_p(v) %s%n", g_pow_p(v).toShortString()) +
+                String.format(" pow_p(k, c) %s%n", pow_p(k, c).toShortString()) +
+                String.format(" mult_p(a, pow_p(k, c)) %s%n", mult_p(a, pow_p(k, c)).toShortString())
         );
         // throw new IllegalStateException("found an invalid Chaum-Pedersen proof");
       }

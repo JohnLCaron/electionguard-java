@@ -33,7 +33,7 @@ public class Consumer {
     publisher = new Publisher(topDir, false, false);
   }
 
-  public boolean isValidElectionRecord(Formatter error) throws IOException {
+  public boolean isValidElectionRecord(Formatter error) {
     if (!Files.exists(publisher.publishPath())) {
       error.format("%s does not exist", publisher.publishPath());
       return false;
@@ -150,10 +150,10 @@ public class Consumer {
     return result;
   }
 
-  public List<KeyCeremony.CoefficientValidationSet> guardianCoefficients() throws IOException {
-    List<KeyCeremony.CoefficientValidationSet> result = new ArrayList<>();
-    for (File file : publisher.coefficientsFiles()) {
-      KeyCeremony.CoefficientValidationSet fromPython = ConvertFromJson.readCoefficientValidation(file.getAbsolutePath());
+  public List<GuardianRecord> guardianRecords() throws IOException {
+    List<GuardianRecord> result = new ArrayList<>();
+    for (File file : publisher.guardianRecordsFiles()) {
+      GuardianRecord fromPython = ConvertFromJson.readGuardianRecord(file.getAbsolutePath());
       result.add(fromPython);
     }
     return result;
@@ -164,7 +164,7 @@ public class Consumer {
             this.constants(), // required
             this.context(), // required
             this.election(), // required
-            this.guardianCoefficients(), // required
+            this.guardianRecords(), // required
             this.devices(),
             this.ciphertextTally(),
             this.decryptedTally(),
@@ -172,6 +172,15 @@ public class Consumer {
             CloseableIterableAdapter.wrap(this.spoiledBallots()),
             CloseableIterableAdapter.wrap(this.spoiledTallies()),
             this.availableGuardians());
+  }
+
+  public List<GuardianRecordPrivate> readGuardianPrivateJson() throws IOException {
+    List<GuardianRecordPrivate> result = new ArrayList<>();
+    for (File file : publisher.guardianRecordPrivateFiles()) {
+      GuardianRecordPrivate fromPython = ConvertFromJson.readGuardianRecordPrivate(file.getAbsolutePath());
+      result.add(fromPython);
+    }
+    return result;
   }
 
   ///////////////////////////////////////////// Proto

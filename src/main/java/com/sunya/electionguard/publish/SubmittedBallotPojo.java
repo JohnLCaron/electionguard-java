@@ -26,7 +26,7 @@ public class SubmittedBallotPojo {
   public String style_id;
   public ElementModQ manifest_hash;
   public ElementModQ code;
-  public ElementModQ previous_code;
+  public ElementModQ code_seed;
   public List<CiphertextBallotContestPojo> contests;
   public long timestamp;
   public ElementModQ crypto_hash;
@@ -98,7 +98,7 @@ public class SubmittedBallotPojo {
             pojo.object_id,
             pojo.style_id,
             pojo.manifest_hash,
-            pojo.previous_code,
+            pojo.code_seed,
             convertList(pojo.contests, SubmittedBallotPojo::translateContest),
             pojo.code,
             pojo.timestamp,
@@ -185,7 +185,7 @@ public class SubmittedBallotPojo {
     pojo.object_id = org.object_id;
     pojo.style_id = org.style_id;
     pojo.manifest_hash = org.manifest_hash;
-    pojo.previous_code = org.code_seed;
+    pojo.code_seed = org.code_seed;
     pojo.contests = convertList(org.contests, SubmittedBallotPojo::convertContest);
     pojo.code = org.code;
     pojo.timestamp = org.timestamp;

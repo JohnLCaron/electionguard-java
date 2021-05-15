@@ -1,9 +1,7 @@
 package com.sunya.electionguard;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.flogger.FluentLogger;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,90 +9,101 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static com.sunya.electionguard.DecryptionShare.CompensatedDecryptionShare;
+import static com.sunya.electionguard.KeyCeremonyMediator.GuardianPair;
+
 /**
- * Orchestrates the decryption of encrypted Tallies and Ballots.
- * Mutable.
+ * The Decryption Mediator composes partial decryptions from each Guardian
+ * to form a decrypted representation of an election tally.
  */
 public class DecryptionMediator {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
+  private final String id;
   private final CiphertextElectionContext context;
-  private final CiphertextTally ciphertext_tally;
-  private final Iterable<SubmittedBallot> ciphertext_ballots; // spoiled ballots
 
-  // Map(AVAILABLE_GUARDIAN_ID, DecryptionShare)
+  // Map(GUARDIAN_ID, Guardian)
+  private final Map<String, KeyCeremony.ElectionPublicKey> available_guardians = new HashMap<>();
+  // Map(GUARDIAN_ID, ElectionPublicKey)
+  private final Map<String, KeyCeremony.ElectionPublicKey> missing_guardians = new HashMap<>();
+
+  // Map(GUARDIAN_ID, DecryptionShare)
   private final Map<String, DecryptionShare> tally_shares = new HashMap<>();
 
-  // Map<ALL_GUARDIAN_ID, Map<BALLOT_ID, DecryptionShare>>
+  // Map<BALLOT_ID, Map<GUARDIAN_ID, DecryptionShare>>
   private final Map<String, Map<String, DecryptionShare>> ballot_shares = new HashMap<>();
 
-  // Map(AVAILABLE_GUARDIAN_ID, Guardian)
-  private final Map<String, Guardian> available_guardians = new HashMap<>();
-  // Map(MISSING_GUARDIAN_ID, ElectionPublicKey)
-  private final Map<String, KeyCeremony.ElectionPublicKey> missing_guardians = new HashMap<>();
-  // Map(AVAILABLE_GUARDIAN_ID, ElementModQ)
-  private Map<String, Group.ElementModQ> lagrange_coefficients;
-  private List<AvailableGuardian> guardianStates;
+  private final Map<GuardianPair, CompensatedDecryptionShare> compensated_tally_shares = new HashMap<>();
 
-  public DecryptionMediator(CiphertextElectionContext context,
-                            CiphertextTally encryptedTally,
-                            Iterable<SubmittedBallot> spoiled_ballots) {
+  // Map<BALLOT_ID, Map<GuardianPair, DecryptionShare>>
+  private final Map<String, Map<GuardianPair, CompensatedDecryptionShare>> compensated_ballot_shares = new HashMap<>();
+
+  public DecryptionMediator(String id, CiphertextElectionContext context) {
+    this.id = id;
     this.context = context;
-    this.ciphertext_tally = encryptedTally;
-    this.ciphertext_ballots = spoiled_ballots;
   }
 
   /**
    * Announce that a Guardian is present and participating in the decryption.
-   * A Decryption Share will be generated for the Guardian.
-   * <p>
-   * @param guardian: The guardian who will participate in the decryption.
-   * @return true on "success".
+   *
+   * @param guardian_key:  The election public key of the guardian who will participate in the decryption.
+   * @param tally_share:   Guardian's decryption share of the tally
+   * @param ballot_shares: Guardian's decryption shares of the ballots
    */
-  public boolean announce(Guardian guardian) {
+  public void announce(KeyCeremony.ElectionPublicKey guardian_key, DecryptionShare tally_share,
+                          Map<String, DecryptionShare> ballot_shares) {
+    String guardian_id = guardian_key.owner_id();
+
     // Only allow a guardian to announce once
-    if (available_guardians.containsKey(guardian.object_id)) {
-      logger.atInfo().log("guardian %s already announced", guardian.object_id);
-      return false;
+    if (available_guardians.containsKey(guardian_id)) {
+      logger.atInfo().log("guardian %s already announced", guardian_id);
+      return;
     }
 
-    // Compute the Decryption Share for the guardian.
-    Optional<DecryptionShare> tally_share =
-            Decryptions.compute_decryption_share(guardian, this.ciphertext_tally, this.context);
-    if (tally_share.isEmpty()) {
-      logger.atWarning().log("announce could not generate decryption share for %s", guardian.object_id);
-      return false;
-    }
-    this.tally_shares.put(guardian.object_id, tally_share.get());
+    this.save_tally_share(guardian_id, tally_share);
 
-    // Compute the spoiled ballot decryption shares
-    Optional<Map<String, DecryptionShare>> ballot_shares =
-            Decryptions.compute_decryption_share_for_ballots(guardian, this.ciphertext_ballots, context);
-    if (ballot_shares.isEmpty()) {
-      logger.atWarning().log("announce could not generate spoiled ballot decryption share for %s", guardian.object_id);
-      return false;
+    if (!ballot_shares.isEmpty()) {
+      this.save_ballot_shares(guardian_id, ballot_shares);
     }
-    this.ballot_shares.put(guardian.object_id, ballot_shares.get());
 
     // Mark guardian in attendance and check their keys
-    this.mark_available(guardian);
-    return this.validate_missing_guardian_keys(guardian);
+    this.mark_available(guardian_key);
+  }
+
+  /**
+   * Announce that a Guardian is missing and not participating in the decryption.
+   * @param missing_guardian_key: The election public key of the missing guardian
+   */
+  public void announce_missing(KeyCeremony.ElectionPublicKey missing_guardian_key) {
+    String missing_guardian_id = missing_guardian_key.owner_id();
+
+    // If guardian is available, can't be marked missing
+    if (this.available_guardians.containsKey(missing_guardian_id)) {
+      logger.atWarning().log("guardian %s already announced", missing_guardian_id);
+      return;
+    }
+    this.mark_missing(missing_guardian_key);
   }
 
   /** This guardian removes itself from the missing list since it generated a valid share. */
-  private void mark_available(Guardian guardian) {
-    this.available_guardians.put(guardian.object_id, guardian);
-    this.missing_guardians.remove(guardian.object_id);
+  private void mark_available(KeyCeremony.ElectionPublicKey guardian_key) {
+    String guardian_id = guardian_key.owner_id();
+    this.available_guardians.put(guardian_id, guardian_key);
+    this.missing_guardians.remove(guardian_id);
+  }
+
+  private void mark_missing(KeyCeremony.ElectionPublicKey guardian_key) {
+    this.missing_guardians.put(guardian_key.owner_id(), guardian_key);
   }
 
   /** Check the guardian's collections of keys and ensure the public keys match for the missing guardians. */
-  private boolean validate_missing_guardian_keys(Guardian guardian) {
+  private boolean validate_missing_guardians(List<KeyCeremony.ElectionPublicKey> guardian_keys) {
 
     // Check this guardian's collection of public keys for other guardians that have not announced
     Map<String, KeyCeremony.ElectionPublicKey> missing_guardians =
-            guardian.otherGuardianElectionKeys().entrySet().stream()
-                    .filter(e -> !this.available_guardians.containsKey(e.getKey()))
-                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+            guardian_keys.stream()
+                    .filter(g -> !this.available_guardians.containsKey(g.owner_id()))
+                    .collect(Collectors.toMap(g -> g.owner_id(), g -> g));
 
     //  Check that the public keys match for any missing guardians already reported.
     //  Note this check naively assumes that the first guardian to announce is telling the truth.
@@ -107,7 +116,7 @@ public class DecryptionMediator {
       if (this.missing_guardians.containsKey(guardian_id)) {
         if (!this.missing_guardians.get(guardian_id).equals(public_key)) {
           logger.atWarning().log("announce guardian: %s expected public key mismatch for missing %s",
-                  guardian.object_id, guardian_id);
+                  guardian_id, guardian_id); // LOOK
           return false;
         }
       } else {
@@ -117,122 +126,151 @@ public class DecryptionMediator {
     return true;
   }
 
-  // Decrypt the tally.
-  // Get the plaintext tally for the election by composing each Guardian's
-  // decrypted representation of each selection into a decrypted representation
-  public Optional<PlaintextTally> get_plaintext_tally(Auxiliary.Decryptor decrypt) {
+  /** Determine if the announcement phase is complete */
+   boolean announcement_complete() {
+     // If a quorum not announced, not ready
+     if (this.available_guardians.size() < this.context.quorum) {
+       logger.atWarning().log("cannot decrypt with less than quorum available guardians");
+       return false;
+     }
+     // If guardians missing or available not accounted for, not ready
+     if (this.available_guardians.size() + this.missing_guardians.size() != this.context.number_of_guardians) {
+       logger.atWarning().log("cannot decrypt without accounting for all guardians missing or present");
+       return false;
+     }
+     return true;
+   }
+
+  boolean ready_to_decrypt(Map<String, DecryptionShare> shares) {
+    // If all guardian shares are represented including if necessary
+    // the missing guardians reconstructed shares, the decryption can be made
+    return shares.size() == this.context.number_of_guardians;
+  }
+
+   /**  Get all available guardian keys. */
+  public List<KeyCeremony.ElectionPublicKey> get_available_guardians() {
+    return new ArrayList<>(this.available_guardians.values());
+  }
+
+  /**  Get all missing guardian keys. */
+  public List<KeyCeremony.ElectionPublicKey> get_missing_guardians() {
+    return new ArrayList<>(this.missing_guardians.values());
+  }
+
+  public void receive_tally_compensation_share(CompensatedDecryptionShare tally_compensation_share) {
+    this.compensated_tally_shares.put(
+            GuardianPair.create(
+                    tally_compensation_share.guardian_id,
+                    tally_compensation_share.missing_guardian_id),
+            tally_compensation_share);
+  }
+
+  public void receive_ballot_compensation_shares(Map<String, CompensatedDecryptionShare> ballot_compensation_shares) {
+
+    for (Map.Entry<String, CompensatedDecryptionShare> entry : ballot_compensation_shares.entrySet()) {
+      String ballot_id = entry.getKey();
+      CompensatedDecryptionShare share = entry.getValue();
+      // Dict[ BALLOT_ID, Dict[GuardianPair, CompensatedDecryptionShare]
+      Map<GuardianPair, CompensatedDecryptionShare> shares =
+              this.compensated_ballot_shares.computeIfAbsent(ballot_id, k -> new HashMap<>());
+      shares.put(
+              GuardianPair.create(
+                      share.guardian_id,
+                      share.missing_guardian_id),
+              share);
+    }
+  }
+
+  List<AvailableGuardian> availableGuardians() {
+    Map<String, Group.ElementModQ> lagrange_coefficients = Decryptions.compute_lagrange_coefficients_for_guardians(
+            new ArrayList<>(available_guardians.values()));
+
+    List<AvailableGuardian> result = new ArrayList<>();
+    available_guardians.values().forEach(g -> result.add( new AvailableGuardian(
+            g.owner_id(), g.sequence_order(), lagrange_coefficients.get(g.owner_id()))));
+    return result;
+  }
+
+  void reconstruct_shares_for_tally(CiphertextTally ciphertext_tally) {
+    Map<String, Group.ElementModQ> lagrange_coefficients = Decryptions.compute_lagrange_coefficients_for_guardians(
+            new ArrayList<>(available_guardians.values()));
+
+    for (Map.Entry<String, KeyCeremony.ElectionPublicKey> entry : this.missing_guardians.entrySet()) {
+      String missing_guardian_id = entry.getKey();
+      KeyCeremony.ElectionPublicKey missing_guardian_key = entry.getValue();
+
+      // Share already reconstructed
+      if (this.tally_shares.containsKey(missing_guardian_id)) {
+        continue;
+      }
+
+      Map<String, CompensatedDecryptionShare> compensated_shares = filter_by_missing_guardian(missing_guardian_id, this.compensated_tally_shares);
+
+      DecryptionShare reconstructed_share = Decryptions.reconstruct_decryption_share(
+              missing_guardian_key,
+              ciphertext_tally,
+              compensated_shares,
+              lagrange_coefficients);
+
+      // Add reconstructed share into tally shares
+      this.tally_shares.put(missing_guardian_id, reconstructed_share);
+    }
+  }
+
+  void reconstruct_shares_for_ballots(List<SubmittedBallot> ciphertext_ballots) {
+    Map<String, Group.ElementModQ> lagrange_coefficients = Decryptions.compute_lagrange_coefficients_for_guardians(
+            new ArrayList<>(available_guardians.values()));
+
+    for (SubmittedBallot ciphertext_ballot : ciphertext_ballots) {
+      String ballot_id = ciphertext_ballot.object_id;
+      Map<String, DecryptionShare> ballot_shares = this.ballot_shares.computeIfAbsent(ballot_id, m -> new HashMap<>());
+
+      for (Map.Entry<String, KeyCeremony.ElectionPublicKey> entry : this.missing_guardians.entrySet()) {
+        String missing_guardian_id = entry.getKey();
+        KeyCeremony.ElectionPublicKey missing_guardian_key = entry.getValue();
+
+        // Share already reconstructed
+        if (this.ballot_shares.containsKey(missing_guardian_id)) {
+          continue;
+        }
+
+        Map<String, CompensatedDecryptionShare> compensated_shares =
+                filter_by_missing_guardian(missing_guardian_id,
+                        this.compensated_ballot_shares.computeIfAbsent(ballot_id, m -> new HashMap<>()));
+
+        DecryptionShare reconstructed_share = Decryptions.reconstruct_decryption_share_for_ballot(
+                missing_guardian_key,
+                ciphertext_ballot,
+                compensated_shares,
+                lagrange_coefficients);
+
+        // Add reconstructed share for this guardian
+        ballot_shares.put(missing_guardian_id, reconstructed_share);
+      }
+
+      // Add all shares for this ballot
+      this.ballot_shares.put(ballot_id, ballot_shares);
+    }
+  }
+
+  /**
+   * Get the plaintext tally for the election by composing each Guardian's
+   * decrypted representation of each selection into a decrypted representation.
+   */
+  public Optional<PlaintextTally> get_plaintext_tally(CiphertextTally ciphertext_tally) {
     // Make sure a Quorum of Guardians have announced
-    if (this.available_guardians.size() < this.context.quorum) {
+    if (!this.announcement_complete() || !this.ready_to_decrypt(this.tally_shares)) {
       logger.atWarning().log("cannot get plaintext tally with less than quorum available guardians");
-      return Optional.empty();
-    }
-    compute_lagrange_coefficients();
-
-    // If all Guardians are present decrypt the tally
-    if (this.available_guardians.size() == this.context.number_of_guardians) {
-      return DecryptWithShares.decrypt_tally(
-              this.ciphertext_tally,
-              this.tally_shares,
-              this.context);
-    }
-
-    // If guardians are missing, compensate
-    this.compute_missing_shares_for_tally(decrypt);
-    if (this.tally_shares.size() != this.context.number_of_guardians) {
-      logger.atWarning().log("get plaintext tally failed with share length mismatch");
       return Optional.empty();
     }
 
     // The tally_shares have been augmented with missing guardians. Can now decrypt.
     return DecryptWithShares.decrypt_tally(
-            this.ciphertext_tally,
+            ciphertext_tally,
             this.tally_shares,
             this.context);
   }
 
-  private void compute_missing_shares_for_tally(Auxiliary.Decryptor decrypt) {
-    Map<String, DecryptionShare> missing_tally_shares = new HashMap<>(); // Map(MISSING_GUARDIAN_ID, DecryptionShare)
-
-    for (Map.Entry<String, KeyCeremony.ElectionPublicKey> entry : this.missing_guardians.entrySet()) {
-      String missing_guardian_id = entry.getKey();
-      KeyCeremony.ElectionPublicKey public_key = entry.getValue();
-      if (this.tally_shares.containsKey(missing_guardian_id)) {
-        continue;
-      }
-
-      Optional<Map<String, DecryptionShare.CompensatedDecryptionShare>> compensated_shares =
-              this.get_compensated_shares_for_tally(missing_guardian_id, decrypt);
-      if (compensated_shares.isEmpty()) {
-        logger.atWarning().log("compute_missing_shares_for_tally failed compensating for %s", missing_guardian_id);
-        return;
-      }
-
-      DecryptionShare missing_decryption_share = Decryptions.reconstruct_decryption_share(
-              missing_guardian_id,
-              public_key,
-              this.ciphertext_tally,
-              compensated_shares.get(),
-              this.lagrange_coefficients);
-      missing_tally_shares.put(missing_guardian_id, missing_decryption_share);
-    }
-
-    if (missing_tally_shares.isEmpty()) {
-      logger.atWarning().log("get plaintext tally failed with computing missing decryption shares");
-      return;
-    }
-
-    // Add the newly calculated shares
-    for (Map.Entry<String, DecryptionShare> entry : missing_tally_shares.entrySet()) {
-      this.tally_shares.put(entry.getKey(), entry.getValue());
-    }
-  }
-
-  /**
-   * Compensate for a missing guardian by reconstructing the share using the available guardians.
-   * <p>
-   * @param missing_guardian_id: the guardian that failed to `announce`.
-   * @return a collection of `CompensatedTallyDecryptionShare` generated from all available guardians
-   * These are also stored in this.compensated_decryption_shares.
-   */
-  @VisibleForTesting
-  Optional<Map<String, DecryptionShare.CompensatedDecryptionShare>> get_compensated_shares_for_tally(
-          String missing_guardian_id, @Nullable Auxiliary.Decryptor decryptor) {
-
-    Map<String, DecryptionShare.CompensatedDecryptionShare> compensated_decryptions = new HashMap<>();
-    // Loop through each of the available guardians and calculate decryption shares for the missing one
-    for (Guardian available_guardian : this.available_guardians.values()) {
-      Optional<DecryptionShare.CompensatedDecryptionShare> tally_share = Decryptions.compute_compensated_decryption_share(
-              available_guardian,
-              missing_guardian_id,
-              this.ciphertext_tally,
-              this.context,
-              decryptor);
-      if (tally_share.isEmpty()) {
-        logger.atWarning().log("compensation failed for missing: %s", missing_guardian_id);
-        break;
-      } else {
-        compensated_decryptions.put(available_guardian.object_id, tally_share.get());
-      }
-    }
-
-    // Verify that we generated the correct number of partials
-    if (compensated_decryptions.size() != this.available_guardians.size()) {
-      logger.atWarning().log("compensate mismatch partial decryptions for missing guardian %s", missing_guardian_id);
-      return Optional.empty();
-    } else {
-      return Optional.of(compensated_decryptions);
-    }
-  }
-
-  /** You must call get_plaintext_tally() first. */
-  public Optional<List<SpoiledBallotAndTally>> decrypt_spoiled_ballots(Auxiliary.Decryptor decryptor) {
-    if (!compute_ballot_shares(decryptor)){
-      return Optional.empty();
-    }
-
-    // LOOK must augment this.ballot_shares with missing guardians
-    return DecryptWithShares.decrypt_spoiled_ballots(this.ciphertext_ballots, this.ballot_shares, this.context);
-  }
 
   /**
    * Get the plaintext spoiled ballots for the election by composing each Guardian's
@@ -240,130 +278,54 @@ public class DecryptionMediator {
    * @return Map(BALLOT_ID, PlaintextTally)
    */
   public Optional<Map<String, PlaintextTally>> get_plaintext_ballots(
-          Auxiliary.Decryptor decryptor) {
+          Iterable<SubmittedBallot> ciphertext_ballots) {
 
-    if (!compute_ballot_shares(decryptor)){
+    if (!this.announcement_complete()) {
+      logger.atWarning().log("cannot get plaintext ballots with less than quorum available guardians");
       return Optional.empty();
     }
 
-    return DecryptWithShares.decrypt_ballots(
-            this.ciphertext_ballots, // LOOK running through ballots twice
-            this.ballot_shares, // MAP(AVAILABLE_GUARDIAN_ID, Map(BALLOT_ID, DecryptionShare))
-            this.context);
-  }
-
-  private boolean compute_ballot_shares(Auxiliary.Decryptor decryptor) {
-    // Make sure a Quorum of Guardians have announced
-    if (this.available_guardians.size() < this.context.quorum) {
-      logger.atWarning().log("cannot decrypt with less than quorum available guardians");
-      return false;
-    }
-
-    // If guardians are missing, for each ballot compute compensated ballot_shares, add to this.ballot_shares
-    if (this.available_guardians.size() < this.context.number_of_guardians) {
-      for (SubmittedBallot ballot : this.ciphertext_ballots) { // LOOK running through ballots
-        if (this.count_ballot_shares(ballot.object_id) < this.context.number_of_guardians) {
-          this.compute_missing_shares_for_ballot(ballot, decryptor);
-        }
-        if (this.count_ballot_shares(ballot.object_id) != this.context.number_of_guardians) {
-          logger.atWarning().log("decrypt_spoiled_ballots failed with share length mismatch");
-          return false;
-        }
-      }
-    }
-    return true;
-  }
-
-  private int count_ballot_shares(String ballot_id) {
-    int count = 0;
-    for (Map<String, DecryptionShare> shares : this.ballot_shares.values()) {
-      if (shares.containsKey(ballot_id)) {
-        count += 1;
-      }
-    }
-    return count;
-  }
-
-  private void compute_missing_shares_for_ballot(SubmittedBallot ballot, Auxiliary.Decryptor decrypt) {
-    for (Map.Entry<String, KeyCeremony.ElectionPublicKey> entry : this.missing_guardians.entrySet()) {
-      String missing_guardian_id = entry.getKey();
-      KeyCeremony.ElectionPublicKey public_key = entry.getValue();
-
-      Optional<Map<String, DecryptionShare.CompensatedDecryptionShare>> compensated_shares =
-              this.get_compensated_shares_for_ballot(ballot, missing_guardian_id, decrypt);
-      if (compensated_shares.isEmpty()) {
-        logger.atWarning().log("get plaintext ballot failed compensating for %s", missing_guardian_id);
-        return;
+    Map<String, PlaintextTally> ballots = new HashMap<>();
+    for (SubmittedBallot ciphertext_ballot : ciphertext_ballots) {
+      Map<String, DecryptionShare> ballot_shares = this.ballot_shares.get(ciphertext_ballot.object_id);
+      if (ballot_shares == null || !this.ready_to_decrypt(ballot_shares)) {
+        // Skip ballot if not ready to decrypt LOOK silent failure
+        continue;
       }
 
-      DecryptionShare missing_decryption_share = Decryptions.reconstruct_decryption_share_for_ballot(
-              missing_guardian_id,
-              public_key,
-              ballot,
-              compensated_shares.get(),
-              this.lagrange_coefficients);
+      Optional<PlaintextTally> tallyO = DecryptWithShares.decrypt_ballot(
+              ciphertext_ballot,
+              ballot_shares,
+              this.context.crypto_extended_base_hash);
 
-      // LOOK ballot_shares now include missing_ballots
-      // LOOK use merge
-      Map<String, DecryptionShare> guardian_shares = this.ballot_shares.get(missing_guardian_id);
-      if (guardian_shares == null) {
-        guardian_shares = new HashMap<>();
-        this.ballot_shares.put(missing_guardian_id, guardian_shares);
-      }
-      guardian_shares.put(ballot.object_id, missing_decryption_share);
+      // LOOK silent failure
+      tallyO.ifPresent(t -> ballots.put(t.object_id, t));
+    }
 
-      this.ballot_shares.get(missing_guardian_id).put(ballot.object_id, missing_decryption_share);
+    return Optional.of(ballots);
+  }
+
+  void save_tally_share(String guardian_id, DecryptionShare guardians_tally_share) {
+    this.tally_shares.put(guardian_id, guardians_tally_share);
+  }
+
+  // Dict[BALLOT_ID, DecryptionShare]
+  void save_ballot_shares(String guardian_id, Map<String, DecryptionShare> guardians_ballot_shares) {
+
+    for (Map.Entry<String, DecryptionShare> entry : guardians_ballot_shares.entrySet()) {
+      String ballot_id = entry.getKey();
+      DecryptionShare guardian_ballot_share = entry.getValue();
+
+      Map<String, DecryptionShare> shares = this.ballot_shares.computeIfAbsent(ballot_id, k -> new HashMap<>());
+      shares.put(guardian_id, guardian_ballot_share);
     }
   }
 
-  private Optional<Map<String, DecryptionShare.CompensatedDecryptionShare>> get_compensated_shares_for_ballot(
-          SubmittedBallot ballot, String missing_guardian_id, @Nullable Auxiliary.Decryptor decryptor) {
+  // Filter a guardian pair and compensated share dictionary by missing guardian
+  Map<String, CompensatedDecryptionShare> filter_by_missing_guardian(String missing_guardian_id,
+                                                                     Map<GuardianPair, CompensatedDecryptionShare> shares) {
 
-    Map<String, DecryptionShare.CompensatedDecryptionShare> compensated_decryptions = new HashMap<>();
-
-    // Loop through each of the available guardians and calculate decryption shares for the missing one
-    for (Guardian available_guardian : this.available_guardians.values()) {
-      Optional<DecryptionShare.CompensatedDecryptionShare> ballot_share = Decryptions.compute_compensated_decryption_share_for_ballot(
-              available_guardian,
-              missing_guardian_id,
-              ballot,
-              this.context,
-              decryptor);
-      if (ballot_share.isEmpty()) {
-        logger.atWarning().log("compensation failed for missing: %s", missing_guardian_id);
-        break;
-      } else {
-        compensated_decryptions.put(available_guardian.object_id, ballot_share.get());
-      }
-    }
-
-    // Verify that we generated the correct number of partials
-    if (compensated_decryptions.size() != this.available_guardians.size()) {
-      logger.atWarning().log("compensate mismatch partial decryptions for missing guardian %s", missing_guardian_id);
-      return Optional.empty();
-    } else {
-      return Optional.of(compensated_decryptions);
-    }
-  }
-
-  public List<AvailableGuardian> getAvailableGuardians() {
-    return this.guardianStates;
-  }
-
-  private void compute_lagrange_coefficients() {
-    if (this.lagrange_coefficients != null) {
-      return;
-    }
-    // Compute lagrange coefficients for each of the available guardians
-    this.guardianStates = new ArrayList<>();
-    this.lagrange_coefficients = new HashMap<>();
-    for (Guardian guardian : this.available_guardians.values()) {
-      List<Integer> seq_orders = this.available_guardians.values().stream()
-              .filter(g -> !g.object_id.equals(guardian.object_id))
-              .map(g -> g.sequence_order()).collect(Collectors.toList());
-      Group.ElementModQ coeff = ElectionPolynomial.compute_lagrange_coefficient(guardian.sequence_order(), seq_orders);
-      this.lagrange_coefficients.put(guardian.object_id, coeff);
-      this.guardianStates.add(new AvailableGuardian(guardian.object_id, guardian.sequence_order(), coeff));
-    }
+    return shares.entrySet().stream().filter(e -> e.getKey().designated_id().equals(missing_guardian_id)).collect(
+            Collectors.toMap(e -> e.getKey().owner_id(), e -> e.getValue()));
   }
 }

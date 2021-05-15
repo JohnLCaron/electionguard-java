@@ -96,7 +96,7 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
   /** The list of contests for this ballot. */
   public final ImmutableList<Contest> contests;
   /** The rotated tracking code for this ballot. */
-  public final Group.ElementModQ code; // not optional
+  public final Group.ElementModQ code;
   /** Timestamp when the ballot was encrypted. */
   // LOOK maybe millisecs?
   public final long timestamp; // Timestamp at which the ballot encryption is generated, in seconds since the epoch UTC.

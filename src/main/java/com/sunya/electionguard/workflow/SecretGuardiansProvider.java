@@ -2,9 +2,6 @@ package com.sunya.electionguard.workflow;
 
 import com.google.common.collect.ImmutableList;
 import com.sunya.electionguard.Guardian;
-import com.sunya.electionguard.proto.KeyCeremonyFromProto;
-
-import java.io.IOException;
 
 /**
  * A GuardiansProvider using serialized Guardian objects from a "secret" place on disk.
@@ -26,10 +23,6 @@ public class SecretGuardiansProvider implements GuardiansProvider {
   }
 
   static ImmutableList<Guardian> read(String location) {
-    try {
-      return KeyCeremonyFromProto.readGuardians(location);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+      return null; // KeyCeremonyFromProto.readGuardians(location);
   }
 }

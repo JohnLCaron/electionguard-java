@@ -10,7 +10,7 @@ import java.io.IOException;
 import static com.google.common.truth.Truth.assertThat;
 
 public class TestReadPythonJson {
-  private static final String pythonPublish = "src/test/data/python-publish/";
+  private static final String pythonPublish = "src/test/data/python-trogdar/";
   private static Publisher publisher;
 
   @BeforeContainer
@@ -63,11 +63,11 @@ public class TestReadPythonJson {
   }
 
   @Example
-  public void testCoefficientsPythonJson() throws IOException {
-    for (File file : publisher.coefficientsFiles()) {
-      KeyCeremony.CoefficientValidationSet fromPython = ConvertFromJson.readCoefficientValidation(file.getAbsolutePath());
+  public void testGuardianRecordsPythonJson() throws IOException {
+    for (File file : publisher.guardianRecordsFiles()) {
+      GuardianRecord fromPython = ConvertFromJson.readGuardianRecord(file.getAbsolutePath());
       assertThat(fromPython).isNotNull();
-      System.out.printf(" CoefficientValidationSet %s%n", fromPython.owner_id());
+      System.out.printf(" CoefficientValidationSet %s%n", fromPython.guardian_id());
     }
   }
 

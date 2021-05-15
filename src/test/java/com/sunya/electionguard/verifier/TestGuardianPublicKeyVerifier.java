@@ -19,12 +19,12 @@ public class TestGuardianPublicKeyVerifier {
     GuardianPublicKeyVerifier kgv = new GuardianPublicKeyVerifier(electionRecord);
     assertThat(kgv.verify_all_guardians()).isTrue();
 
-    for (KeyCeremony.CoefficientValidationSet coeff : electionRecord.guardianCoefficients) {
+    for (GuardianRecord coeff : electionRecord.guardianRecords) {
       boolean kgvOk = kgv.verify_one_guardian(coeff);
       assertThat(kgvOk).isTrue();
     }
 
-    for (KeyCeremony.CoefficientValidationSet coeff : electionRecord.guardianCoefficients) {
+    for (GuardianRecord coeff : electionRecord.guardianRecords) {
       verify_equations(electionRecord.generatorP(), coeff);
       verify_challenges(coeff);
     }
@@ -38,19 +38,19 @@ public class TestGuardianPublicKeyVerifier {
     GuardianPublicKeyVerifier kgv = new GuardianPublicKeyVerifier(electionRecord);
     assertThat(kgv.verify_all_guardians()).isTrue();
 
-    for (KeyCeremony.CoefficientValidationSet coeff : electionRecord.guardianCoefficients) {
+    for (GuardianRecord coeff : electionRecord.guardianRecords) {
       boolean kgvOk = kgv.verify_one_guardian(coeff);
       assertThat(kgvOk).isTrue();
     }
 
-    for (KeyCeremony.CoefficientValidationSet coeff : electionRecord.guardianCoefficients) {
+    for (GuardianRecord coeff : electionRecord.guardianRecords) {
       verify_equations(electionRecord.generatorP(), coeff);
       verify_challenges(coeff);
     }
   }
 
-  private void verify_equations(Group.ElementModP genP, KeyCeremony.CoefficientValidationSet coeff) {
-    for (SchnorrProof proof : coeff.coefficient_proofs()) {
+  private void verify_equations(Group.ElementModP genP, GuardianRecord coeff) {
+    for (SchnorrProof proof : coeff.election_proofs()) {
       Group.ElementModP commitment = proof.commitment; // h
       Group.ElementModP public_key = proof.public_key; // k
       Group.ElementModQ challenge = proof.challenge;   // c
@@ -61,8 +61,8 @@ public class TestGuardianPublicKeyVerifier {
     }
   }
 
-  private void verify_challenges(KeyCeremony.CoefficientValidationSet coeff) {
-    for (SchnorrProof proof : coeff.coefficient_proofs()) {
+  private void verify_challenges(GuardianRecord coeff) {
+    for (SchnorrProof proof : coeff.election_proofs()) {
       Group.ElementModP commitment = proof.commitment; // h
       Group.ElementModP public_key = proof.public_key; // k
       Group.ElementModQ challenge = proof.challenge;   // c

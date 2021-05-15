@@ -98,7 +98,11 @@ public class BallotBox {
   }
 
   /** Get all the ballots as a CloseableIterable. */
-  CloseableIterable<SubmittedBallot> getAcceptedBallots() {
+  CloseableIterable<SubmittedBallot> getAcceptedBallotsAsCloseableIterable() {
     return CloseableIterableAdapter.wrap(store);
+  }
+
+  Iterable<SubmittedBallot> getAcceptedBallots() {
+    return store;
   }
 }

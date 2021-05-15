@@ -16,7 +16,7 @@ public class DecryptionShare {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   /** owner object_id */
-  final String owner_id;
+  final String owner_id; // LOOK can be removed
 
   /** guardian.object_id */
   final String guardian_id;

@@ -4,10 +4,10 @@ import com.google.protobuf.ByteString;
 import com.sunya.electionguard.AvailableGuardian;
 import com.sunya.electionguard.CiphertextElectionContext;
 import com.sunya.electionguard.ElectionConstants;
+import com.sunya.electionguard.GuardianRecord;
 import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.Encrypt;
 import com.sunya.electionguard.Group;
-import com.sunya.electionguard.KeyCeremony;
 import com.sunya.electionguard.CiphertextTally;
 import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.SchnorrProof;
@@ -24,7 +24,7 @@ public class ElectionRecordToProto {
           Manifest description,
           CiphertextElectionContext context,
           ElectionConstants constants,
-          Iterable<KeyCeremony.CoefficientValidationSet> guardianCoefficients,
+          Iterable<GuardianRecord> guardianRecords,
           @Nullable Iterable<Encrypt.EncryptionDevice> devices,
           @Nullable CiphertextTally ciphertext_tally,
           @Nullable PlaintextTally decryptedTally,
@@ -35,8 +35,8 @@ public class ElectionRecordToProto {
     builder.setManifest( ManifestToProto.translateToProto(description));
     builder.setContext( convertContext(context));
 
-    for (KeyCeremony.CoefficientValidationSet coeff : guardianCoefficients) {
-      builder.addGuardianCoefficients(convertValidationCoefficients(coeff));
+    for (GuardianRecord guardianRecord : guardianRecords) {
+      builder.addGuardianRecords(convertGuardianRecord(guardianRecord));
     }
 
     if (devices != null) {
@@ -95,13 +95,15 @@ public class ElectionRecordToProto {
     return builder.build();
   }
 
-  static ElectionRecordProto.CoefficientValidationSet convertValidationCoefficients(KeyCeremony.CoefficientValidationSet validationSet) {
-    ElectionRecordProto.CoefficientValidationSet.Builder builder = ElectionRecordProto.CoefficientValidationSet.newBuilder();
-    builder.setOwnerId(validationSet.owner_id());
-    for (Group.ElementModP commitment : validationSet.coefficient_commitments()) {
+  static ElectionRecordProto.GuardianRecord convertGuardianRecord(GuardianRecord guardianRecord) {
+    ElectionRecordProto.GuardianRecord.Builder builder = ElectionRecordProto.GuardianRecord.newBuilder();
+    builder.setGuardianId(guardianRecord.guardian_id());
+    builder.setSequence(guardianRecord.sequence_order());
+    builder.setElectionPublicKey(convertElementModP(guardianRecord.election_public_key()));
+    for (Group.ElementModP commitment : guardianRecord.election_commitments()) {
       builder.addCoefficientCommitments(convertElementModP(commitment));
     }
-    for (SchnorrProof proof : validationSet.coefficient_proofs()) {
+    for (SchnorrProof proof : guardianRecord.election_proofs()) {
       builder.addCoefficientProofs(CommonConvert.convertSchnorrProof(proof));
     }
     return builder.build();

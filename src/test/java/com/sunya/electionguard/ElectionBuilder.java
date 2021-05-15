@@ -21,7 +21,7 @@ public class ElectionBuilder {
   int quorum; // The quorum of guardians necessary to decrypt an election.  Must be less than `number_of_guardians`
   Manifest description;
   Group.ElementModQ commitment_hash;
-  Optional<Group.ElementModP> elgamal_public_key = Optional.empty();
+  Optional<Group.ElementModP> election_joint_public_key = Optional.empty();
 
   public ElectionBuilder(int number_of_guardians, int quorum, Manifest description) {
     this.number_of_guardians = number_of_guardians;
@@ -29,8 +29,8 @@ public class ElectionBuilder {
     this.description = description;
   }
 
-  ElectionBuilder set_public_key(Group.ElementModP elgamal_public_key) {
-    this.elgamal_public_key = Optional.of(elgamal_public_key);
+  ElectionBuilder set_public_key(Group.ElementModP election_joint_public_key) {
+    this.election_joint_public_key = Optional.of(election_joint_public_key);
     return this;
   }
 
@@ -44,7 +44,7 @@ public class ElectionBuilder {
       return Optional.empty();
     }
 
-    if (this.elgamal_public_key.isEmpty()) {
+    if (this.election_joint_public_key.isEmpty()) {
       return Optional.empty();
     }
 
@@ -52,7 +52,7 @@ public class ElectionBuilder {
             CiphertextElectionContext.create(
               this.number_of_guardians,
               this.quorum,
-              this.elgamal_public_key.get(),
+              this.election_joint_public_key.get(),
               this.description,
               commitment_hash == null ? rand_q() : commitment_hash)));
   }
