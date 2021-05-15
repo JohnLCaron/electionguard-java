@@ -326,7 +326,6 @@ public class KeyCeremony {
     List<ElectionPublicKey> sorted = election_public_keys.stream()
             .sorted(Comparator.comparing(ElectionPublicKey::sequence_order))
             .collect(Collectors.toList());
-    sorted.forEach(pk -> System.out.printf(" ElectionPublicKey %s %d%n", pk.owner_id(), pk.sequence_order()));
 
     List<ElementModP> public_keys = sorted.stream()
             .map(ElectionPublicKey::key)
@@ -337,7 +336,6 @@ public class KeyCeremony {
     for (ElectionPublicKey pk : sorted) {
       commitments.addAll(pk.coefficient_commitments());
     }
-    commitments.forEach(pk -> System.out.printf("    %s %n", pk.toShortString()));
     ElementModQ commitment_hash = Hash.hash_elems(commitments);
 
     return ElectionJointKey.create(joint_public_keys, commitment_hash);

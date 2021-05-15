@@ -414,12 +414,10 @@ public class TestEndToEndElectionIntegration {
     List<GuardianRecord> sorted = roundtrip.guardianRecords.stream()
             .sorted(Comparator.comparing(GuardianRecord::sequence_order))
             .collect(Collectors.toList());
-    sorted.forEach(pk -> System.out.printf(" GuardianRecord %s %d %n", pk.guardian_id(), pk.sequence_order()));
     List<Group.ElementModP> commitments = new ArrayList<>();
     for (GuardianRecord guardian : sorted) {
       commitments.addAll(guardian.election_commitments());
     }
-    commitments.forEach(pk -> System.out.printf("    %s %n", pk.toShortString()));
 
     Group.ElementModQ commitment_hash = Hash.hash_elems(commitments);
     Group.ElementModQ expectedExtendedHash = Hash.hash_elems(roundtrip.baseHash(), commitment_hash);
