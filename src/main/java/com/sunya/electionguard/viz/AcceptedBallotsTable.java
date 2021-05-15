@@ -138,7 +138,7 @@ public class AcceptedBallotsTable extends JPanel {
     }
 
     public String getPrevTracking() {
-      return ballot.previous_code.toString();
+      return ballot.code_seed.toString();
     }
 
     public String getState() {

@@ -1,5 +1,6 @@
 package com.sunya.electionguard;
 
+import com.google.auto.value.AutoValue;
 import com.google.common.flogger.FluentLogger;
 
 import javax.annotation.Nullable;
@@ -11,151 +12,147 @@ import static com.sunya.electionguard.KeyCeremony.*;
 public class KeyCeremonyMediator {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
+  /** Pair of guardians involved in sharing. */
+  @AutoValue
+  abstract static class GuardianPair {
+    abstract String owner_id();
+    abstract String designated_id();
+
+    public static GuardianPair create(String owner_id, String designated_id) {
+      return new AutoValue_KeyCeremonyMediator_GuardianPair(owner_id, designated_id);
+    }
+  }
+
+  /** Pair of guardians involved in sharing. */
+  @AutoValue
+  abstract static class BackupVerificationState {
+    abstract boolean all_sent();
+    abstract boolean all_verified();
+    abstract List<GuardianPair> failed_verifications();
+
+    public static BackupVerificationState create(boolean all_sent, boolean all_verified, List<GuardianPair> failed_verifications) {
+      return new AutoValue_KeyCeremonyMediator_BackupVerificationState(all_sent, all_verified, failed_verifications);
+    }
+  }
+
+  private final String id;
   private final CeremonyDetails ceremony_details;
   private final Map<String, Auxiliary.PublicKey> auxiliary_public_keys; // Map(GUARDIAN_ID, Auxiliary.PublicKey)
   private final Map<String, ElectionPublicKey> election_public_keys;  // Map(GUARDIAN_ID, ElectionPublicKey)
   private final Map<GuardianPair, ElectionPartialKeyBackup> election_partial_key_backups;
   private final Map<GuardianPair, ElectionPartialKeyVerification> election_partial_key_verifications;
-  private final Map<GuardianPair, ElectionPartialKeyChallenge> election_partial_key_challenges;
-  private final List<GuardianBuilder> guardians;
 
-  public KeyCeremonyMediator(CeremonyDetails ceremony_details) {
+  public KeyCeremonyMediator(String id, CeremonyDetails ceremony_details) {
+    this.id = id;
     this.ceremony_details = ceremony_details;
     this.auxiliary_public_keys = new HashMap<>();
     this.election_public_keys = new HashMap<>();
     this.election_partial_key_backups = new HashMap<>();
     this.election_partial_key_verifications = new HashMap<>();
-    this.election_partial_key_challenges = new HashMap<>();
-    this.guardians = new ArrayList<>();
   }
+
+  /////// ROUND 1: Announce guardians with public keys
 
   /** Announce the guardian as present and participating the Key Ceremony. */
-  public void announce(GuardianBuilder guardian) {
-    this.confirm_presence_of_guardian(guardian.share_public_keys());
-    this.guardians.add(guardian);
-
-    // When all guardians have announced, share the public keys among them
-    if (this.all_guardians_in_attendance()) {
-      for (GuardianBuilder sender : this.guardians) {
-        for (GuardianBuilder recipient : this.guardians) {
-          if (!sender.object_id.equals(recipient.object_id)) {
-            recipient.save_guardian_public_keys(sender.share_public_keys());
-          }
-        }
-      }
-    }
-  }
-
-  /**
-   * Orchestrate the Key Ceremony by sharing keys among the announced guardians.
-   *
-   * @param encryptor: Auxiliary encrypt function, or null for default.
-   * @return a collection of guardians, or None if there is an error
-   */
-  public Optional<List<GuardianBuilder>> orchestrate(@Nullable Auxiliary.Encryptor encryptor) {
-    if (!this.all_guardians_in_attendance()) {
-      return Optional.empty();
-    }
-    if (encryptor == null) {
-      encryptor = Rsa::encrypt;
-    }
-
-    // Partial Key Backup Generation
-    for (GuardianBuilder guardian : this.guardians) {
-      guardian.generate_election_partial_key_backups(encryptor);
-    }
-
-    // Share Partial Key Backup
-    for (GuardianBuilder sender : this.guardians) {
-      for (GuardianBuilder recipient : this.guardians) {
-        if (!sender.object_id.equals(recipient.object_id)) {
-          Optional<ElectionPartialKeyBackup> backup = sender.share_election_partial_key_backup(recipient.object_id);
-
-          if (backup.isPresent()) {
-            this.receive_election_partial_key_backup(backup.get());
-          } else {
-            logger.atInfo().log("orchestrate failed sender {sender.object_id} could not share backup with recipient: {recipient.object_id}");
-            return Optional.empty();
-          }
-        }
-      }
-    }
-
-    // Save the backups
-    if (this.all_election_partial_key_backups_available()) {
-      for (GuardianBuilder recipient_guardian : this.guardians) {
-        List<ElectionPartialKeyBackup> backups = this.share_election_partial_key_backups_to_guardian(recipient_guardian.object_id);
-        for (ElectionPartialKeyBackup backup : backups) {
-          recipient_guardian.save_election_partial_key_backup(backup);
-        }
-      }
-    }
-    return Optional.of(this.guardians);
-  }
-
-  /**
-   * Verify that the guardians correctly shared keys.
-   * @param decryptor: Auxiliary decrypt function
-   * @return True if verification succeeds, else False
-   */
-  public boolean verify(@Nullable Auxiliary.Decryptor decryptor) {
-    if (decryptor == null) {
-      decryptor = Rsa::decrypt;
-    }
-
-    for (GuardianBuilder recipient : this.guardians) {
-      for (GuardianBuilder sender : this.guardians) {
-        if (!sender.object_id.equals(recipient.object_id)) {
-          Optional<ElectionPartialKeyVerification> verification = recipient.verify_election_partial_key_backup(sender.object_id, decryptor);
-
-          if (verification.isPresent()) {
-            this.receive_election_partial_key_verification(verification.get());
-          } else {
-            logger.atInfo().log("verify failed recipient %s could not verify backup from sender: %s",
-                    recipient.object_id, sender.object_id);
-            return false;
-          }
-        }
-      }
-    }
-
-    return this.all_election_partial_key_verifications_received() &&
-            this.all_election_partial_key_backups_verified();
-  }
-
-  /**
-   * Confirm presence of guardian by passing their public key set.
-   * @param public_key_set: Public key set
-   */
-  void confirm_presence_of_guardian(PublicKeySet public_key_set) {
-    this.receive_auxiliary_public_key(
-            new Auxiliary.PublicKey(
-                    public_key_set.owner_id(),
-                    public_key_set.sequence_order(),
-                    public_key_set.auxiliary_public_key()));
-
-    this.receive_election_public_key(
-            ElectionPublicKey.create(
-                    public_key_set.owner_id(),
-                    public_key_set.sequence_order(),
-                    public_key_set.election_public_key_proof(),
-                    public_key_set.election_public_key()));
-  }
+  public void announce(PublicKeySet public_key_set) {
+    this.receive_election_public_key(public_key_set.election());
+    this.receive_auxiliary_public_key(public_key_set.auxiliary());
+   }
 
   /**
    * Check the attendance of all the guardians expected.
    * @return True if all guardians in attendance
    */
-  public boolean all_guardians_in_attendance() {
+  public boolean all_guardians_announced() {
     return this.all_auxiliary_public_keys_available() && this.all_election_public_keys_available();
   }
 
-  /**
-   * Share a list of all the guardians in attendance.
-   * @return list of guardians ids
-   */
-  Iterable<String> share_guardians_in_attendance() {
-    return this.election_public_keys.keySet();
+  /** When all guardians have announced, share their public keys indicating their announcement. */
+  public Optional<List<PublicKeySet>> share_announced(@Nullable String requesting_guardian_id) {
+    if (!this.all_guardians_announced()) {
+      return Optional.empty();
+    }
+    List<PublicKeySet> result = new ArrayList<>();
+    for (String guardian_id : this.get_announced_guardians()) {
+      if (!guardian_id.equals(requesting_guardian_id)) {
+          result.add(PublicKeySet.create(
+                  this.election_public_keys.get(guardian_id),
+                  this.auxiliary_public_keys.get(guardian_id)));
+        }
+    }
+    return Optional.of(result);
+  }
+
+  // ROUND 2: Share Election Partial Key Backups for compensating
+
+  /** Receive all the election partial key backups generated by a guardian. */
+  public void receive_backups(List<ElectionPartialKeyBackup> backups) {
+    if (!this.all_guardians_announced()) {
+      return;
+    }
+    for (ElectionPartialKeyBackup backup : backups) {
+      this.receive_election_partial_key_backup(backup);
+    }
+  }
+
+   /** return true if all guardians have sent backups. */
+   boolean all_backups_available() {
+     return this.all_guardians_announced() && this.all_election_partial_key_backups_available();
+   }
+
+   /** Share all backups designated for a specific guardian. */
+   public Optional<List<ElectionPartialKeyBackup>> share_backups(@Nullable String requesting_guardian_id) {
+     if (!this.all_guardians_announced() || !this.all_backups_available()) {
+       return Optional.empty();
+     }
+     if (requesting_guardian_id == null) {
+       return Optional.of(new ArrayList<>(this.election_partial_key_backups.values()));
+     } else {
+       return Optional.of(this.share_election_partial_key_backups_to_guardian(requesting_guardian_id));
+     }
+   }
+
+   // ROUND 3: Share verifications of backups
+
+   /**  Receive all the election partial key verifications performed by a guardian. */
+   public void receive_backup_verifications(List<ElectionPartialKeyVerification> verifications) {
+     if (!this.all_backups_available()) {
+       return;
+     }
+     for (ElectionPartialKeyVerification verification : verifications) {
+       this.receive_election_partial_key_verification(verification);
+     }
+   }
+
+  BackupVerificationState get_verification_state() {
+    if (! this.all_backups_available() || !this.all_election_partial_key_verifications_received()) {
+      return BackupVerificationState.create(false, false, new ArrayList<>());
+    }
+    return this.check_verification_of_election_partial_key_backups();
+  }
+
+  public boolean all_backups_verified() {
+    return this.get_verification_state().all_verified();
+  }
+
+  // ROUND 4 (Optional): If a verification fails, guardian must issue challenge
+
+  /** Mediator receives challenge and will act to mediate and verify. */
+  ElectionPartialKeyVerification verify_challenge(ElectionPartialKeyChallenge challenge) {
+    ElectionPartialKeyVerification verification = verify_election_partial_key_challenge(this.id, challenge);
+    if (verification.verified()) {
+      this.receive_election_partial_key_verification(verification);
+    }
+    return verification;
+  }
+
+    // FINAL: Publish joint public election key
+  /** Publish joint election key from the public keys of all guardians. */
+  public Optional<ElectionJointKey> publish_joint_key() {
+    if (!this.all_backups_verified()) {
+      return Optional.empty();
+    }
+    return Optional.of(KeyCeremony.combine_election_public_keys( this.election_public_keys.values()));
   }
 
   /**
@@ -177,10 +174,10 @@ public class KeyCeremonyMediator {
   /**
    * Share all currently stored auxiliary public keys for all guardians.
    * @return list of auxiliary public keys
-   */
+   *
   Iterable<Auxiliary.PublicKey> share_auxiliary_public_keys() {
     return this.auxiliary_public_keys.values();
-  }
+  } */
 
   /**
    * Receive election public key from guardian.
@@ -192,28 +189,28 @@ public class KeyCeremonyMediator {
 
   /** True if all election public keys for all guardians available. */
   boolean all_election_public_keys_available() {
-    return (this.election_public_keys.size()) == this.ceremony_details.number_of_guardians();
+    return this.election_public_keys.size() == this.ceremony_details.number_of_guardians();
   }
 
   /**
    * Share all currently stored election public keys for all guardians.
    * @return list of election public keys
    */
-  Iterable<ElectionPublicKey> share_election_public_keys() {
-    return this.election_public_keys.values();
+  Iterable<String> get_announced_guardians() {
+    return this.election_public_keys.keySet();
   }
+
+  //// Election Partial Key Backups
 
   /**
    * Receive election partial key backup from guardian.
    * @param backup: Manifest partial key backup
-   * @return boolean indicating success or failure
    */
-  boolean receive_election_partial_key_backup(ElectionPartialKeyBackup backup) {
+  void receive_election_partial_key_backup(ElectionPartialKeyBackup backup) {
     if (backup.owner_id().equals(backup.designated_id())) {
-      return false;
+      return;
     }
     this.election_partial_key_backups.put(GuardianPair.create(backup.owner_id(), backup.designated_id()), backup);
-    return true;
   }
 
   /** True if all election partial key backups for all guardians available. */
@@ -230,7 +227,7 @@ public class KeyCeremonyMediator {
    */
   List<ElectionPartialKeyBackup> share_election_partial_key_backups_to_guardian(String guardian_id) {
     List<ElectionPartialKeyBackup> backups = new ArrayList<>();
-    for (String current_guardian_id : this.share_guardians_in_attendance()) {
+    for (String current_guardian_id : this.get_announced_guardians()) {
       if (!guardian_id.equals(current_guardian_id)) {
         ElectionPartialKeyBackup backup = this.election_partial_key_backups.get(
                 GuardianPair.create(current_guardian_id, guardian_id));
@@ -271,46 +268,18 @@ public class KeyCeremonyMediator {
     return true;
   }
 
-  /** Share list of guardians with failed partial key backup verifications. */
-  List<GuardianPair> share_failed_partial_key_verifications() {
-    List<GuardianPair> failed_verifications = new ArrayList<>();
-    for (Map.Entry<GuardianPair, ElectionPartialKeyVerification> pair : this.election_partial_key_verifications.entrySet()) {
-      if (!pair.getValue().verified()) {
-        failed_verifications.add(pair.getKey());
+  /** return: All election partial key backups verified. */
+  BackupVerificationState check_verification_of_election_partial_key_backups() {
+    if (!this.all_election_partial_key_verifications_received()) {
+      return BackupVerificationState.create(false, false, new ArrayList<>());
+    }
+    ArrayList<GuardianPair> failed_verifications = new ArrayList<>();
+    for (ElectionPartialKeyVerification verification : this.election_partial_key_verifications.values()) {
+      if (!verification.verified()) {
+        failed_verifications.add(GuardianPair.create(verification.owner_id(), verification.designated_id()));
       }
     }
-    return failed_verifications;
-  }
-
-  /** Share list of guardians with missing election partial key challenges. */
-  List<GuardianPair> share_missing_election_partial_key_challenges() {
-    List<GuardianPair> failed_verifications = new ArrayList<>(this.share_failed_partial_key_verifications());
-    for (GuardianPair pair : this.election_partial_key_challenges.keySet()) {
-      failed_verifications.remove(pair);
-    }
-    return failed_verifications;
-  }
-
-  /** Receive an election partial key challenge from a guardian with a failed verification. */
-  void receive_election_partial_key_challenge(ElectionPartialKeyChallenge challenge) {
-    this.election_partial_key_challenges.put(
-            GuardianPair.create(challenge.owner_id(), challenge.designated_id()), challenge);
-  }
-
-  /** Share all open election partial key challenges with guardians. */
-  List<ElectionPartialKeyChallenge> share_open_election_partial_key_challenges() {
-    return new ArrayList<>(this.election_partial_key_challenges.values());
-  }
-
-  /** Publish joint election key from the public keys of all guardians. */
-  public Optional<Group.ElementModP> publish_joint_key() {
-    if (!this.all_election_public_keys_available()) {
-      return Optional.empty();
-    }
-    if (!this.all_election_partial_key_backups_verified()) {
-      return Optional.empty();
-    }
-    return Optional.of(KeyCeremony.combine_election_public_keys(this.election_public_keys));
+    return BackupVerificationState.create(true, failed_verifications.isEmpty(), failed_verifications);
   }
 
 }

@@ -26,7 +26,7 @@ public class SubmittedBallot extends CiphertextBallot {
    * @param object_id:               the object_id of this specific ballot
    * @param style_id:                The `object_id` of the `BallotStyle` in the `Manifest` Manifest
    * @param manifest_hash:           Hash of the election manifest
-   * @param previous_codeO:          Previous tracking hash or seed
+   * @param code_seedO:              Seed for ballot code
    * @param contests:                List of contests for this ballot
    * @param ballot_code:             This ballot's tracking hash, not Optional.
    * @param timestampO:              Timestamp at which the ballot encryption is generated in tick
@@ -36,7 +36,7 @@ public class SubmittedBallot extends CiphertextBallot {
           String object_id,
           String style_id,
           Group.ElementModQ manifest_hash,
-          Optional<Group.ElementModQ> previous_codeO,
+          Optional<Group.ElementModQ> code_seedO,
           List<Contest> contests,
           Group.ElementModQ ballot_code,
           Optional<Long> timestampO,
@@ -50,7 +50,7 @@ public class SubmittedBallot extends CiphertextBallot {
     Group.ElementModQ contest_hash = Hash.hash_elems(object_id, manifest_hash, contest_hashes);
 
     long timestamp = timestampO.orElse(System.currentTimeMillis());
-    Group.ElementModQ previous_ballot_code = previous_codeO.orElse(manifest_hash); // LOOK spec #6.A says H0 = H(Qbar)
+    Group.ElementModQ code_seed = code_seedO.orElse(manifest_hash); // LOOK spec #6.A says H0 = H(Qbar)
 
     // copy the contests and selections, removing all nonces
     List<Contest> new_contests = contests.stream().map(Contest::removeNonces).collect(Collectors.toList());
@@ -59,7 +59,7 @@ public class SubmittedBallot extends CiphertextBallot {
             object_id,
             style_id,
             manifest_hash,
-            previous_ballot_code,
+            code_seed,
             new_contests,
             ballot_code,
             timestamp,
@@ -73,7 +73,7 @@ public class SubmittedBallot extends CiphertextBallot {
   public final BallotBox.State state;
 
   public SubmittedBallot(CiphertextBallot ballot, BallotBox.State state) {
-    super(ballot.object_id, ballot.style_id, ballot.manifest_hash, ballot.previous_code, ballot.contests,
+    super(ballot.object_id, ballot.style_id, ballot.manifest_hash, ballot.code_seed, ballot.contests,
             ballot.code, ballot.timestamp, ballot.crypto_hash, ballot.nonce);
     this.state = Preconditions.checkNotNull(state);
   }
@@ -81,14 +81,14 @@ public class SubmittedBallot extends CiphertextBallot {
   public SubmittedBallot(String object_id,
                          String style_id,
                          Group.ElementModQ manifest_hash,
-                         Group.ElementModQ previous_code,
+                         Group.ElementModQ code_seed,
                          List<Contest> contests,
                          Group.ElementModQ code,
                          long timestamp,
                          Group.ElementModQ crypto_hash,
                          Optional<Group.ElementModQ> nonce,
                          BallotBox.State state) {
-    super(object_id, style_id, manifest_hash, previous_code, contests, code, timestamp, crypto_hash, nonce);
+    super(object_id, style_id, manifest_hash, code_seed, contests, code, timestamp, crypto_hash, nonce);
     this.state = state;
   }
 
@@ -114,7 +114,7 @@ public class SubmittedBallot extends CiphertextBallot {
             "\n style_id     ='" + style_id + '\'' +
             "\n manifest_hash=" + manifest_hash +
             "\n code         =" + code +
-            "\n previous_code=" + previous_code +
+            "\n code_seed    =" + code_seed +
             "\n tracking_hash=" + code +
             "\n timestamp    =" + timestamp +
             "\n crypto_hash  =" + crypto_hash +

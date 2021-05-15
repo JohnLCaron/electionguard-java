@@ -5,12 +5,12 @@ import com.sunya.electionguard.AvailableGuardian;
 import com.sunya.electionguard.CiphertextElectionContext;
 import com.sunya.electionguard.ElectionConstants;
 import com.sunya.electionguard.CiphertextTally;
+import com.sunya.electionguard.GuardianRecord;
 import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.verifier.ElectionRecord;
 import com.sunya.electionguard.Encrypt;
 import com.sunya.electionguard.Group;
-import com.sunya.electionguard.KeyCeremony;
 import com.sunya.electionguard.SchnorrProof;
 
 import javax.annotation.concurrent.Immutable;
@@ -38,8 +38,8 @@ public class ElectionRecordFromProto {
     ElectionConstants constants = convertConstants(proto.getConstants());
     CiphertextElectionContext context = convertContext(proto.getContext());
     Manifest description = ManifestFromProto.translateFromProto(proto.getManifest());
-    List<KeyCeremony.CoefficientValidationSet> guardianCoefficients =
-            proto.getGuardianCoefficientsList().stream().map(ElectionRecordFromProto::convertValidationCoefficients).collect(Collectors.toList());
+    List<GuardianRecord> guardianRecords =
+            proto.getGuardianRecordsList().stream().map(ElectionRecordFromProto::convertGuardianRecord).collect(Collectors.toList());
     List<Encrypt.EncryptionDevice> devices =
             proto.getDeviceList().stream().map(ElectionRecordFromProto::convertDevice).collect(Collectors.toList());
 
@@ -52,7 +52,7 @@ public class ElectionRecordFromProto {
             proto.getAvailableGuardiansList().stream().map(ElectionRecordFromProto::convertAvailableGuardian).collect(Collectors.toList());
 
 
-    return new ElectionRecord(constants, context, description, guardianCoefficients,
+    return new ElectionRecord(constants, context, description, guardianRecords,
             devices, ciphertextTally, decryptedTally, null, null, null, guardians);
   }
 
@@ -89,17 +89,19 @@ public class ElectionRecordFromProto {
     return new Encrypt.EncryptionDevice(device.getUuid(), device.getSessionId(), device.getLaunchCode(), device.getLocation());
   }
 
-  static KeyCeremony.CoefficientValidationSet convertValidationCoefficients(ElectionRecordProto.CoefficientValidationSet coeff) {
-   List<Group.ElementModP> coefficient_commitments = coeff.getCoefficientCommitmentsList().stream()
+  static GuardianRecord convertGuardianRecord(ElectionRecordProto.GuardianRecord guardianRecord) {
+   List<Group.ElementModP> coefficient_commitments = guardianRecord.getCoefficientCommitmentsList().stream()
             .map(CommonConvert::convertElementModP)
             .collect(Collectors.toList());
 
-    List<SchnorrProof> coefficient_proofs = coeff.getCoefficientProofsList().stream()
+    List<SchnorrProof> coefficient_proofs = guardianRecord.getCoefficientProofsList().stream()
             .map(CommonConvert::convertSchnorrProof)
             .collect(Collectors.toList());
 
-    return KeyCeremony.CoefficientValidationSet.create(
-            coeff.getOwnerId(),
+    return GuardianRecord.create(
+            guardianRecord.getGuardianId(),
+            guardianRecord.getSequence(),
+            CommonConvert.convertElementModP(guardianRecord.getElectionPublicKey()),
             coefficient_commitments,
             coefficient_proofs
     );

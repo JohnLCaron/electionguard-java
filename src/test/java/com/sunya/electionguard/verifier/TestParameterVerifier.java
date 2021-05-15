@@ -9,8 +9,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 public class TestParameterVerifier {
   public static final String topdirProto = "src/test/data/electionRecordProto/";
-  // public static final String topdirJson = "src/test/data/electionRecordJson/";
-  public static final String topdirJson = "/home/snake/tmp/electionguard/publishEndToEnd/";
+  public static final String topdirJson = "src/test/data/publishEndToEnd/";
 
 
   @Example

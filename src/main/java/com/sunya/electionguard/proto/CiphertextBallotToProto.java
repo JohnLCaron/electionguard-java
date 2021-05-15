@@ -30,7 +30,7 @@ public class CiphertextBallotToProto {
     builder.setBallotStyleId(ballot.style_id);
     builder.setDescriptionHash(convertElementModQ(ballot.manifest_hash));
     builder.setTrackingHash(convertElementModQ(ballot.code));
-    builder.setPreviousTrackingHash(convertElementModQ(ballot.previous_code));
+    builder.setPreviousTrackingHash(convertElementModQ(ballot.code_seed));
     ballot.contests.forEach(value -> builder.addContests(convertContest(value)));
     builder.setTimestamp(ballot.timestamp);
     builder.setCryptoHash(convertElementModQ(ballot.crypto_hash));

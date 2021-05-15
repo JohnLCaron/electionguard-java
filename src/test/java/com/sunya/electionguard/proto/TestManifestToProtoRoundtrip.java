@@ -12,7 +12,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 
 public class TestManifestToProtoRoundtrip {
-  public static final String testElectionRecord = "src/test/data/electionRecordJson/";
+  public static final String testElectionRecord = "src/test/data/publishEndToEnd/";
   private static Publisher publisher;
 
   @BeforeContainer

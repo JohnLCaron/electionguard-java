@@ -4,8 +4,8 @@ import com.google.common.flogger.FluentLogger;
 import com.sunya.electionguard.CiphertextElectionContext;
 import com.sunya.electionguard.ElectionConstants;
 import com.sunya.electionguard.Group;
+import com.sunya.electionguard.GuardianRecord;
 import com.sunya.electionguard.Hash;
-import com.sunya.electionguard.KeyCeremony;
 import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.publish.Publisher;
 
@@ -30,7 +30,7 @@ public class KeyCeremonyRemoteMediator {
   final List<KeyCeremonyTrusteeIF> trusteeProxies;
 
   Map<String, KeyCeremony2.PublicKeySet> publicKeysMap = new HashMap<>();
-  List<KeyCeremony.CoefficientValidationSet> coefficientValidationSets = new ArrayList<>();
+  List<GuardianRecord> guardianRecords = new ArrayList<>();
 
   Group.ElementModP jointKey;
   Group.ElementModQ commitmentsHash;
@@ -248,17 +248,21 @@ public class KeyCeremonyRemoteMediator {
   }
 
   public boolean makeCoefficientValidationSets() {
-    // The hashing is order dependent, I think.
+    // The hashing is order dependent, use the x coordinate to sort.
     List<KeyCeremony2.PublicKeySet> sorted = this.publicKeysMap.values().stream()
-            .sorted(Comparator.comparing(KeyCeremony2.PublicKeySet::ownerId))
+            .sorted(Comparator.comparing(KeyCeremony2.PublicKeySet::guardianXCoordinate))
             .collect(Collectors.toList());
 
     List<Group.ElementModP> commitments = new ArrayList<>();
     for (KeyCeremony2.PublicKeySet keys : sorted) {
-      KeyCeremony.CoefficientValidationSet coeffSet = KeyCeremony.CoefficientValidationSet.create(
-              keys.ownerId(), keys.coefficientCommitments(), keys.coefficientProofs());
-      this.coefficientValidationSets.add(coeffSet);
-      commitments.addAll(coeffSet.coefficient_commitments());
+      GuardianRecord guardianRecord = GuardianRecord.create(
+              keys.ownerId(),
+              keys.guardianXCoordinate(),
+              keys.coefficientCommitments().get(0),
+              keys.coefficientCommitments(),
+              keys.coefficientProofs());
+      this.guardianRecords.add(guardianRecord);
+      commitments.addAll(keys.coefficientCommitments());
     }
     this.commitmentsHash = Hash.hash_elems(commitments);
     return true;
@@ -272,7 +276,7 @@ public class KeyCeremonyRemoteMediator {
               this.election,
               this.context,
               new ElectionConstants(),
-              this.coefficientValidationSets);
+              this.guardianRecords);
       return true;
     } catch (IOException e) {
       e.printStackTrace();

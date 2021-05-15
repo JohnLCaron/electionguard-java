@@ -17,8 +17,8 @@ message ElectionRecord {
   ElectionContext context = 3;
   repeated EncryptionDevice device = 4;
 
-  // Set of coefficient validation pieces, one for each guardian
-  repeated CoefficientValidationSet guardian_coefficients = 5;
+  // Public guardian info
+  repeated GuardianRecord guardian_records = 5;
 
   CiphertextTally ciphertext_tally = 6;
   PlaintextTally decrypted_tally = 7;
@@ -41,10 +41,12 @@ message Constants {
   bytes generator = 4;   // generator or g
 }
 
-message CoefficientValidationSet {
-  string owner_id = 1; // guardian id
-  repeated ElementModP coefficient_commitments = 2;  // Kij, j=0...quorum-1
-  repeated SchnorrProof coefficient_proofs = 3;
+message GuardianRecord {
+  string guardian_id = 1; // guardian id
+  uint32 sequence = 2;
+  ElementModP election_public_key = 3;
+  repeated ElementModP coefficient_commitments = 4;  // Kij, j=0...quorum-1
+  repeated SchnorrProof coefficient_proofs = 5;
 }
 
 // The device that does the encryption.

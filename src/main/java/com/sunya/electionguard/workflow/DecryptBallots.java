@@ -3,10 +3,11 @@ package com.sunya.electionguard.workflow;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
-import com.google.common.base.Preconditions;
 import com.sunya.electionguard.AvailableGuardian;
 import com.sunya.electionguard.CiphertextTallyBuilder;
 import com.sunya.electionguard.DecryptionMediator;
+import com.sunya.electionguard.DecryptionShare;
+import com.sunya.electionguard.KeyCeremony;
 import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.InternalManifest;
 import com.sunya.electionguard.Guardian;
@@ -14,7 +15,6 @@ import com.sunya.electionguard.PlaintextBallot;
 import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.CiphertextTally;
 import com.sunya.electionguard.Scheduler;
-import com.sunya.electionguard.SpoiledBallotAndTally;
 import com.sunya.electionguard.input.ElectionInputValidation;
 import com.sunya.electionguard.publish.Consumer;
 import com.sunya.electionguard.publish.Publisher;
@@ -24,7 +24,7 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.util.Formatter;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 /**
  * A command line program to decrypt a collection of ballots.
@@ -156,7 +156,7 @@ public class DecryptBallots {
   CiphertextTally encryptedTally;
   PlaintextTally decryptedTally;
   List<PlaintextBallot> spoiledDecryptedBallots;
-  List<PlaintextTally> spoiledDecryptedTallies;
+  Map<String, PlaintextTally> spoiledDecryptedTallies;
   List<AvailableGuardian> availableGuardians;
   int quorum;
   int numberOfGuardians;
@@ -188,13 +188,17 @@ public class DecryptBallots {
 
   void decryptTally() {
     System.out.printf("%nDecrypt tally%n");
-    DecryptionMediator mediator = new DecryptionMediator(electionRecord.context, this.encryptedTally, consumer.spoiledBallotsProto());
+    DecryptionMediator mediator = new DecryptionMediator("DecryptBallots", electionRecord.context);
 
+    // Announce each guardian as present
     int count = 0;
     for (Guardian guardian : this.guardians) {
-      boolean ok = mediator.announce(guardian);
-      Preconditions.checkArgument(ok);
-      System.out.printf(" Guardian Present: %s%n", guardian.object_id);
+      System.out.printf("Guardian Present: %s%n", guardian.object_id);
+      KeyCeremony.ElectionPublicKey guardian_key = guardian.share_election_public_key();
+      DecryptionShare tally_share = guardian.compute_tally_share(this.encryptedTally, electionRecord.context).orElseThrow();
+      Map<String, DecryptionShare> ballot_shares = guardian.compute_ballot_shares(electionRecord.acceptedBallots, electionRecord.context);
+      mediator.announce(guardian_key, tally_share, ballot_shares);
+
       count++;
       if (count == this.quorum) {
         System.out.printf("Quorum of %d reached%n", this.quorum);
@@ -202,25 +206,29 @@ public class DecryptBallots {
       }
     }
 
-    // Here's where the ciphertext Tally is decrypted.
-    this.decryptedTally = mediator.get_plaintext_tally(null).orElseThrow();
-    List<SpoiledBallotAndTally> spoiledTallyAndBallot =
-            mediator.decrypt_spoiled_ballots(null).orElseThrow();
-    this.spoiledDecryptedBallots = spoiledTallyAndBallot.stream().map(e -> e.ballot).collect(Collectors.toList());
-    this.spoiledDecryptedTallies = spoiledTallyAndBallot.stream().map(e -> e.tally).collect(Collectors.toList());
-    this.availableGuardians = mediator.getAvailableGuardians();
+    // Get the plaintext Tally
+    this.decryptedTally = mediator.get_plaintext_tally(this.encryptedTally).orElseThrow();
+    System.out.printf("Tally Decrypted%n");
+
+    // Get the plaintext Spoiled Ballots
+    this.spoiledDecryptedTallies = mediator.get_plaintext_ballots(electionRecord.spoiledBallots()).orElseThrow();
+    System.out.printf("Spoiled Ballot Tallies Decrypted%n");
+
+    // LOOK
+    // this.spoiledDecryptedBallots = spoiledTallyAndBallot.stream().map(e -> e.ballot).col    // Generate a Homomorphically Accumulated Tally of the ballots
+    // this.availableGuardians = mediator.getAvailableGuardians();
 
     System.out.printf("Done decrypting tally%n%n%s%n", this.decryptedTally);
   }
 
   boolean publish(String inputDir, String publishDir) throws IOException {
     Publisher publisher = new Publisher(publishDir, true, false);
-    publisher.writeDecryptionResultsProto(
+    publisher.writeDecryptionResultsJson(
             this.electionRecord,
             this.encryptedTally,
             this.decryptedTally,
             this.spoiledDecryptedBallots,
-            this.spoiledDecryptedTallies,
+            this.spoiledDecryptedTallies.values(),
             this.availableGuardians);
 
     publisher.copyAcceptedBallots(inputDir);

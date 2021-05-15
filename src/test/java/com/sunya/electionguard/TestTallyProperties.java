@@ -34,7 +34,7 @@ public class TestTallyProperties extends TestProperties {
     }
 
     CiphertextTallyBuilder result = new CiphertextTallyBuilder("whatever", everything.metadata, everything.context);
-    result.batch_append(store.getAcceptedBallots());
+    result.batch_append(store.getAcceptedBallotsAsCloseableIterable());
 
     Map<String, Integer> decrypted_tallies = this.decrypt_with_secret(result, everything.secret_key);
     System.out.printf("%n test_tally_cast_ballots_accumulates_valid_tally actual %s%n", decrypted_tallies);
@@ -63,7 +63,7 @@ public class TestTallyProperties extends TestProperties {
     }
 
     CiphertextTallyBuilder result = new CiphertextTallyBuilder("whatever", everything.metadata, everything.context);
-    result.batch_append(store.getAcceptedBallots());
+    result.batch_append(store.getAcceptedBallotsAsCloseableIterable());
 
     Map<String, Integer> decrypted_tallies = this.decrypt_with_secret(result, everything.secret_key);
     System.out.printf("%n test_tally_spoiled_ballots_accumulates_valid_tally decrypted_tallies %s%n%n", decrypted_tallies);

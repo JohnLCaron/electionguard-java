@@ -1,5 +1,6 @@
 package com.sunya.electionguard;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import net.jqwik.api.Example;
 
@@ -17,132 +18,84 @@ public class TestKeyCeremonyMediator {
   private static final String GUARDIAN_1_ID = "Guardian 1";
   private static final String GUARDIAN_2_ID = "Guardian 2";
   private static final String VERIFIER_ID = "Guardian 3";
-  private static final GuardianBuilder GUARDIAN_1 = GuardianBuilder.createForTesting(GUARDIAN_1_ID, 1, NUMBER_OF_GUARDIANS, QUORUM,null);
-  private static final GuardianBuilder GUARDIAN_2 = GuardianBuilder.createForTesting(GUARDIAN_2_ID, 2, NUMBER_OF_GUARDIANS, QUORUM, null);
-  private static final GuardianBuilder VERIFIER =   GuardianBuilder.createForTesting(VERIFIER_ID, 3, NUMBER_OF_GUARDIANS, QUORUM, null);
-
-  static Auxiliary.Decryptor identity_auxiliary_decrypt = (m, k) -> Optional.of(new String(m.getBytes()));
-  static Auxiliary.Encryptor identity_auxiliary_encrypt = (m, k) -> Optional.of(new Auxiliary.ByteString(m.getBytes()));
+  private static final Guardian GUARDIAN_1 = Guardian.createForTesting(GUARDIAN_1_ID, 1, NUMBER_OF_GUARDIANS, QUORUM,null);
+  private static final Guardian GUARDIAN_2 = Guardian.createForTesting(GUARDIAN_2_ID, 2, NUMBER_OF_GUARDIANS, QUORUM, null);
+  private static final Guardian VERIFIER =   Guardian.createForTesting(VERIFIER_ID, 3, NUMBER_OF_GUARDIANS, QUORUM, null);
+  private static final List<Guardian> GUARDIANS = ImmutableList.of(GUARDIAN_1, GUARDIAN_2);
 
   static {
     GUARDIAN_1.save_guardian_public_keys(GUARDIAN_2.share_public_keys());
     GUARDIAN_2.save_guardian_public_keys(GUARDIAN_1.share_public_keys());
     VERIFIER.save_guardian_public_keys(GUARDIAN_2.share_public_keys());
-    GUARDIAN_1.generate_election_partial_key_backups(identity_auxiliary_encrypt);
-    GUARDIAN_2.generate_election_partial_key_backups(identity_auxiliary_encrypt);
+    GUARDIAN_1.generate_election_partial_key_backups(Auxiliary.identity_auxiliary_encrypt);
+    GUARDIAN_2.generate_election_partial_key_backups(Auxiliary.identity_auxiliary_encrypt);
   }
 
+  // Round 1: Mediator takes attendance and guardians announce
   @Example
-  public void test_mediator_takes_attendance() {
-    KeyCeremonyMediator mediator = new KeyCeremonyMediator(CEREMONY_DETAILS);
+  public void test_take_attendance() {
+    KeyCeremonyMediator mediator = new KeyCeremonyMediator("mediator_attendance", CEREMONY_DETAILS);
 
-    mediator.confirm_presence_of_guardian(GUARDIAN_1.share_public_keys());
-    assertThat(mediator.all_guardians_in_attendance()).isFalse();
+    mediator.announce(GUARDIAN_1.share_public_keys());
+    assertThat(mediator.all_guardians_announced()).isFalse();
 
-    mediator.confirm_presence_of_guardian(GUARDIAN_2.share_public_keys());
-    assertThat(mediator.all_guardians_in_attendance()).isTrue();
+    mediator.announce(GUARDIAN_2.share_public_keys());
+    assertThat(mediator.all_guardians_announced()).isTrue();
 
-    Iterable<String> guardians = mediator.share_guardians_in_attendance();
-    assertThat(guardians).isNotNull();
-    assertThat(Iterables.size(guardians)).isEqualTo(NUMBER_OF_GUARDIANS);
+    Optional<List<PublicKeySet>> guardian_keys = mediator.share_announced(null);
+    assertThat(guardian_keys).isPresent();
+    assertThat(Iterables.size(guardian_keys.get())).isEqualTo(NUMBER_OF_GUARDIANS);
   }
 
+  // Round 2: Exchange of election partial key backups
   @Example
-  public void test_exchange_of_auxiliary_public_keys() {
-    KeyCeremonyMediator mediator = new KeyCeremonyMediator(CEREMONY_DETAILS);
+  public void test_exchange_of_backups() {
+    KeyCeremonyMediator mediator = new KeyCeremonyMediator("mediator_backups_exchange", CEREMONY_DETAILS);
+    KeyCeremonyHelper.perform_round_1(GUARDIANS, mediator);
 
-    mediator.receive_auxiliary_public_key(GUARDIAN_1.share_auxiliary_public_key());
-    assertThat(mediator.all_auxiliary_public_keys_available()).isFalse();
+    // Round 2 - Guardians Only
+    GUARDIAN_1.generate_election_partial_key_backups(null);
+    GUARDIAN_2.generate_election_partial_key_backups(null);
+    KeyCeremony.ElectionPartialKeyBackup backup_from_1_for_2 = GUARDIAN_1.share_election_partial_key_backup(GUARDIAN_2_ID).orElseThrow();
+    KeyCeremony.ElectionPartialKeyBackup backup_from_2_for_1 = GUARDIAN_2.share_election_partial_key_backup(GUARDIAN_1_ID).orElseThrow();
 
-    Iterable<Auxiliary.PublicKey> partial_list = mediator.share_auxiliary_public_keys();
-    assertThat(partial_list).isNotNull();
-    assertThat(Iterables.size(partial_list)).isEqualTo(1);
+    mediator.receive_backups(ImmutableList.of(backup_from_1_for_2));
+    assertThat(mediator.all_backups_available()).isFalse();
+    mediator.receive_backups(ImmutableList.of(backup_from_2_for_1));
+    assertThat(mediator.all_backups_available()).isTrue();
 
-    mediator.receive_auxiliary_public_key(GUARDIAN_2.share_auxiliary_public_key());
-    assertThat(mediator.all_auxiliary_public_keys_available()).isTrue();
+    List<ElectionPartialKeyBackup> guardian1_backups = mediator.share_backups(GUARDIAN_1_ID).orElseThrow();
+    List<ElectionPartialKeyBackup> guardian2_backups = mediator.share_backups(GUARDIAN_2_ID).orElseThrow();
+    assertThat(guardian1_backups).hasSize(1);
+    assertThat(guardian2_backups).hasSize(1);
 
-    partial_list = mediator.share_auxiliary_public_keys();
-    assertThat(partial_list).isNotNull();
-    assertThat(Iterables.size(partial_list)).isEqualTo(2);
+    assertThat(guardian1_backups.get(0)).isEqualTo(backup_from_2_for_1);
+    assertThat(guardian2_backups.get(0)).isEqualTo(backup_from_1_for_2);
   }
 
-  @Example
-  public void test_exchange_of_election_public_keys() {
-    KeyCeremonyMediator mediator = new KeyCeremonyMediator(CEREMONY_DETAILS);
-
-    mediator.receive_election_public_key(GUARDIAN_1.share_election_public_key());
-    assertThat(mediator.all_election_public_keys_available()).isFalse();
-
-    Iterable<ElectionPublicKey>partial_list = mediator.share_election_public_keys();
-    assertThat(partial_list).isNotNull();
-    assertThat(Iterables.size(partial_list)).isEqualTo(1);
-
-    mediator.receive_election_public_key(GUARDIAN_2.share_election_public_key());
-    assertThat(mediator.all_election_public_keys_available()).isTrue();
-
-    partial_list = mediator.share_election_public_keys();
-    assertThat(partial_list).isNotNull();
-    assertThat(Iterables.size(partial_list)).isEqualTo(2);
-  }
-
-  @Example
-  public void test_exchange_of_election_partial_key_backup() {
-    KeyCeremonyMediator mediator = new KeyCeremonyMediator(CEREMONY_DETAILS);
-    mediator.confirm_presence_of_guardian(GUARDIAN_1.share_public_keys());
-    mediator.confirm_presence_of_guardian(GUARDIAN_2.share_public_keys());
-    Optional<ElectionPartialKeyBackup> backup_from_1_for_2 = GUARDIAN_1.share_election_partial_key_backup(GUARDIAN_2_ID);
-    Optional<ElectionPartialKeyBackup> backup_from_2_for_1 = GUARDIAN_2.share_election_partial_key_backup(GUARDIAN_1_ID);
-
-    mediator.receive_election_partial_key_backup(backup_from_1_for_2.orElseThrow());
-    assertThat(mediator.all_election_partial_key_backups_available()).isFalse();
-
-    mediator.receive_election_partial_key_backup(backup_from_2_for_1.orElseThrow());
-    assertThat(mediator.all_election_partial_key_backups_available()).isTrue();
-
-    List<ElectionPartialKeyBackup> guardian1_backups = mediator.share_election_partial_key_backups_to_guardian(GUARDIAN_1_ID);
-    List<ElectionPartialKeyBackup> guardian2_backups = mediator.share_election_partial_key_backups_to_guardian(GUARDIAN_2_ID);
-
-    assertThat(guardian1_backups).isNotNull();
-    assertThat(guardian2_backups).isNotNull();
-    assertThat(guardian1_backups.size()).isEqualTo(1);
-    assertThat(guardian2_backups.size()).isEqualTo(1);
-    for (ElectionPartialKeyBackup backup : guardian1_backups) {
-      assertThat(backup.designated_id()).isEqualTo(GUARDIAN_1_ID);
-    }
-    for (ElectionPartialKeyBackup backup : guardian2_backups) {
-      assertThat(backup.designated_id()).isEqualTo(GUARDIAN_2_ID);
-    }
-    assertThat(guardian1_backups.get(0)).isEqualTo(backup_from_2_for_1.get());
-    assertThat(guardian2_backups.get(0)).isEqualTo(backup_from_1_for_2.get());
-  }
-
-  /** Test for the happy path of the verification process where each key is successfully verified and no bad actors. */
+  // Test for the happy path of the verification process where each key is successfully verified and no bad actors.
   @Example
   public void test_partial_key_backup_verification_success() {
-     KeyCeremonyMediator mediator = new KeyCeremonyMediator(CEREMONY_DETAILS);
+    KeyCeremonyMediator mediator = new KeyCeremonyMediator("mediator_verification", CEREMONY_DETAILS);
+    KeyCeremonyHelper.perform_round_1(GUARDIANS, mediator);
+    KeyCeremonyHelper.perform_round_2(GUARDIANS, mediator);
 
-     mediator.confirm_presence_of_guardian(GUARDIAN_1.share_public_keys());
-     mediator.confirm_presence_of_guardian(GUARDIAN_2.share_public_keys());
-     mediator.receive_election_partial_key_backup(GUARDIAN_1.share_election_partial_key_backup(GUARDIAN_2_ID).orElseThrow());
-     mediator.receive_election_partial_key_backup(GUARDIAN_2.share_election_partial_key_backup(GUARDIAN_1_ID).orElseThrow());
+    // Round 3 - Guardians Only
+    KeyCeremony.ElectionPartialKeyVerification verification1 =
+            GUARDIAN_1.verify_election_partial_key_backup(GUARDIAN_2_ID, Auxiliary.identity_auxiliary_decrypt).orElseThrow();
+    KeyCeremony.ElectionPartialKeyVerification verification2 =
+            GUARDIAN_2.verify_election_partial_key_backup(GUARDIAN_1_ID, Auxiliary.identity_auxiliary_decrypt).orElseThrow();
 
-     GUARDIAN_1.save_election_partial_key_backup(mediator.share_election_partial_key_backups_to_guardian(GUARDIAN_1_ID).get(0));
-     GUARDIAN_2.save_election_partial_key_backup(mediator.share_election_partial_key_backups_to_guardian(GUARDIAN_2_ID).get(0));
-     Optional<ElectionPartialKeyVerification> verification1 = GUARDIAN_1.verify_election_partial_key_backup(GUARDIAN_2_ID, identity_auxiliary_decrypt);
-     Optional<ElectionPartialKeyVerification> verification2 = GUARDIAN_2.verify_election_partial_key_backup(GUARDIAN_1_ID, identity_auxiliary_decrypt);
+    mediator.receive_backup_verifications(ImmutableList.of(verification1));
+    assertThat(mediator.get_verification_state().all_sent()).isFalse();
+    assertThat(mediator.all_backups_verified()).isFalse();
+    assertThat(mediator.publish_joint_key()).isEmpty();
 
-     mediator.receive_election_partial_key_verification(verification1.orElseThrow());
-     assertThat(mediator.all_election_partial_key_verifications_received()).isFalse();
-     assertThat(mediator.all_election_partial_key_backups_verified()).isFalse();
-     assertThat(mediator.publish_joint_key()).isNotNull();
-
-     mediator.receive_election_partial_key_verification(verification2.orElseThrow());
-     Optional<Group.ElementModP> joint_key = mediator.publish_joint_key();
-
-     assertThat(mediator.all_election_partial_key_verifications_received()).isTrue();
-     assertThat(mediator.all_election_partial_key_backups_verified()).isTrue();
-     assertThat(joint_key).isNotNull();
-   }
+    mediator.receive_backup_verifications(ImmutableList.of(verification2));
+    assertThat(mediator.get_verification_state().all_sent()).isTrue();
+    assertThat(mediator.all_backups_verified()).isTrue();
+    assertThat(mediator.publish_joint_key()).isPresent();
+  }
 
   /**
    * In this case, the recipient guardian does not correctly verify the sent key backup.
@@ -150,54 +103,41 @@ public class TestKeyCeremonyMediator {
    */
   @Example
   public void test_partial_key_backup_verification_failure() {
-    KeyCeremonyMediator mediator = new KeyCeremonyMediator(CEREMONY_DETAILS);
-    mediator.confirm_presence_of_guardian(GUARDIAN_1.share_public_keys());
-    mediator.confirm_presence_of_guardian(GUARDIAN_2.share_public_keys());
-    mediator.receive_election_partial_key_backup(GUARDIAN_1.share_election_partial_key_backup(GUARDIAN_2_ID).orElseThrow());
-    mediator.receive_election_partial_key_backup(GUARDIAN_2.share_election_partial_key_backup(GUARDIAN_1_ID).orElseThrow());
-    GUARDIAN_1.save_election_partial_key_backup(mediator.share_election_partial_key_backups_to_guardian(GUARDIAN_1_ID).get(0));
-    GUARDIAN_2.save_election_partial_key_backup(mediator.share_election_partial_key_backups_to_guardian(GUARDIAN_2_ID).get(0));
-    Optional<ElectionPartialKeyVerification> verification1O = GUARDIAN_1.verify_election_partial_key_backup(GUARDIAN_2_ID, identity_auxiliary_decrypt);
-    Optional<ElectionPartialKeyVerification> verification2O = GUARDIAN_2.verify_election_partial_key_backup(GUARDIAN_1_ID, identity_auxiliary_decrypt);
-    assertThat(verification1O).isPresent();
-    assertThat(verification2O).isPresent();
-    ElectionPartialKeyVerification verification1 = verification1O.get();
-    ElectionPartialKeyVerification verification2 = verification2O.get();
+    KeyCeremonyMediator mediator = new KeyCeremonyMediator("mediator_verification", CEREMONY_DETAILS);
+    KeyCeremonyHelper.perform_round_1(GUARDIANS, mediator);
+    KeyCeremonyHelper.perform_round_2(GUARDIANS, mediator);
 
-    ElectionPartialKeyVerification failed_verification2 = ElectionPartialKeyVerification.create(
-            verification2.owner_id(),
-            verification2.designated_id(),
-            verification2.verifier_id(),
+    // Round 3 - Guardians Only
+    KeyCeremony.ElectionPartialKeyVerification verification1 =
+            GUARDIAN_1.verify_election_partial_key_backup(GUARDIAN_2_ID, Auxiliary.identity_auxiliary_decrypt).orElseThrow();
+
+    KeyCeremony.ElectionPartialKeyVerification failed_verification2 = ElectionPartialKeyVerification.create(
+            GUARDIAN_1_ID,
+            GUARDIAN_2_ID,
+            GUARDIAN_2_ID,
             false);
 
-    mediator.receive_election_partial_key_verification(verification1);
-    mediator.receive_election_partial_key_verification(failed_verification2);
-    List<GuardianPair> failed_pairs = mediator.share_failed_partial_key_verifications();
-    List<GuardianPair> missing_challenges = mediator.share_missing_election_partial_key_challenges();
+    mediator.receive_backup_verifications(ImmutableList.of(verification1, failed_verification2));
+    KeyCeremonyMediator.BackupVerificationState state = mediator.get_verification_state();
 
-    assertThat(mediator.all_election_partial_key_verifications_received()).isTrue();
-    assertThat(mediator.all_election_partial_key_backups_verified()).isFalse();
+    assertThat(state.all_sent()).isTrue();
+    assertThat(state.all_verified()).isFalse();
     assertThat(mediator.publish_joint_key()).isEmpty();
-    assertThat(failed_pairs.size()).isEqualTo(1);
-    assertThat(failed_pairs.get(0)).isEqualTo(GuardianPair.create(GUARDIAN_1_ID, GUARDIAN_2_ID));
-    assertThat(missing_challenges.size()).isEqualTo(1);
-    assertThat(missing_challenges.get(0)).isEqualTo(GuardianPair.create(GUARDIAN_1_ID, GUARDIAN_2_ID));
+    assertThat(state.failed_verifications()).hasSize(1);
+    assertThat(state.failed_verifications().get(0))
+            .isEqualTo(KeyCeremonyMediator.GuardianPair.create(GUARDIAN_1_ID, GUARDIAN_2_ID));
 
-    Optional<ElectionPartialKeyChallenge> challenge = GUARDIAN_1.publish_election_backup_challenge(GUARDIAN_2_ID);
-    mediator.receive_election_partial_key_challenge(challenge.orElseThrow());
-    List<GuardianPair> no_missing_challenges = mediator.share_missing_election_partial_key_challenges();
+    KeyCeremony.ElectionPartialKeyChallenge challenge = GUARDIAN_1.publish_election_backup_challenge(GUARDIAN_2_ID).orElseThrow();
+    mediator.verify_challenge(challenge);
+    KeyCeremonyMediator.BackupVerificationState new_state = mediator.get_verification_state();
+    boolean all_verified = mediator.all_backups_verified();
+    Optional<ElectionJointKey> joint_key = mediator.publish_joint_key();
 
-    assertThat(mediator.all_election_partial_key_backups_verified()).isFalse();
-    assertThat(no_missing_challenges.size()).isEqualTo(0);
-
-    List<ElectionPartialKeyChallenge>  challenges = mediator.share_open_election_partial_key_challenges();
-    ElectionPartialKeyVerification challenge_verification = VERIFIER.verify_election_partial_key_challenge(challenges.get(0));
-    mediator.receive_election_partial_key_verification(challenge_verification);
-    Optional<Group.ElementModP> joint_key = mediator.publish_joint_key();
-
-    assertThat(challenges.size()).isEqualTo(1);
-    assertThat(mediator.all_election_partial_key_backups_verified()).isTrue();
-    assertThat(joint_key).isNotNull();
+    assertThat(new_state.all_sent()).isTrue();
+    assertThat(new_state.all_verified()).isTrue();
+    assertThat(new_state.failed_verifications()).hasSize(0);
+    assertThat(all_verified).isTrue();
+    assertThat(joint_key).isPresent();
   }
 
 }

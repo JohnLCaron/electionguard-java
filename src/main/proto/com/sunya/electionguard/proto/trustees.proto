@@ -17,7 +17,7 @@ message DecryptingTrustee {
   // Other guardians' partial key backups shared with this guardian
   repeated ElectionPartialKeyBackup2 other_guardian_backups = 5;
   // The commitments {"public keys K_ij") generated from the election polynomial coefficients.
-  // Duplicated here and in ElectionRecordProto.CoefficientValidationSet, to keep the trustees independent
+  // Duplicated here and in ElectionRecordProto.GuardianRecord, to keep the trustees independent
   repeated CommitmentSet guardian_commitments = 6;
 }
 

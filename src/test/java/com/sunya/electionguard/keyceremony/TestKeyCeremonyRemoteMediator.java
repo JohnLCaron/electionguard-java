@@ -58,7 +58,7 @@ public class TestKeyCeremonyRemoteMediator {
     assertThat(mediator.findTrusteeById("Unknown")).isEmpty();
 
     assertThat(mediator.publicKeysMap).isEmpty();
-    assertThat(mediator.coefficientValidationSets).isEmpty();
+    assertThat(mediator.guardianRecords).isEmpty();
     assertThat(mediator.commitmentsHash).isNull();
     assertThat(mediator.jointKey).isNull();
     assertThat(mediator.context).isNull();
@@ -104,7 +104,7 @@ public class TestKeyCeremonyRemoteMediator {
     assertThat(mediator.trusteeProxies).hasSize(QUORUM);
 
     assertThat(mediator.round1()).isTrue();
-    assertThat(mediator.coefficientValidationSets).isEmpty();
+    assertThat(mediator.guardianRecords).isEmpty();
     assertThat(mediator.commitmentsHash).isNull();
     assertThat(mediator.jointKey).isNull();
     assertThat(mediator.context).isNull();
@@ -124,7 +124,7 @@ public class TestKeyCeremonyRemoteMediator {
     assertThat(mediator.round2(failures)).isTrue();
     assertThat(failures).isEmpty();
 
-    assertThat(mediator.coefficientValidationSets).isEmpty();
+    assertThat(mediator.guardianRecords).isEmpty();
     assertThat(mediator.commitmentsHash).isNull();
     assertThat(mediator.jointKey).isNull();
     assertThat(mediator.context).isNull();
@@ -144,7 +144,7 @@ public class TestKeyCeremonyRemoteMediator {
 
     assertThat(mediator.round3(failures)).isTrue();
 
-    assertThat(mediator.coefficientValidationSets).isEmpty();
+    assertThat(mediator.guardianRecords).isEmpty();
     assertThat(mediator.commitmentsHash).isNull();
     assertThat(mediator.jointKey).isNull();
     assertThat(mediator.context).isNull();
@@ -155,7 +155,7 @@ public class TestKeyCeremonyRemoteMediator {
     KeyCeremonyRemoteMediator mediator = makeMediator();
     mediator.runKeyCeremony();
 
-    assertThat(mediator.coefficientValidationSets).isNotEmpty();
+    assertThat(mediator.guardianRecords).isNotEmpty();
     assertThat(mediator.commitmentsHash).isNotNull();
     assertThat(mediator.jointKey).isNotNull();
     assertThat(mediator.context).isNotNull();

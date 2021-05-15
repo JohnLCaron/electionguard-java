@@ -6,8 +6,6 @@ import com.sunya.electionguard.*;
 
 import java.io.*;
 
-import static com.sunya.electionguard.KeyCeremony.CoefficientValidationSet;
-
 /** Static helper methods for reading serialized classes from json files. */
 public class ConvertFromJson {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
@@ -33,10 +31,20 @@ public class ConvertFromJson {
     }
   }
 
-  public static CoefficientValidationSet readCoefficientValidation(String pathname) throws IOException {
+  public static GuardianRecord readGuardianRecord(String pathname) throws IOException {
     try (InputStream is = new FileInputStream(pathname)) {
       Reader reader = new InputStreamReader(is);
-      return enhancedGson.fromJson(reader, CoefficientValidationSet.class);
+      return enhancedGson.fromJson(reader, GuardianRecord.class);
+    } catch (Exception ioe) {
+      logger.atSevere().log("Failed reading file '%s'", pathname);
+      throw ioe;
+    }
+  }
+
+  public static GuardianRecordPrivate readGuardianRecordPrivate(String pathname) throws IOException {
+    try (InputStream is = new FileInputStream(pathname)) {
+      Reader reader = new InputStreamReader(is);
+      return enhancedGson.fromJson(reader, GuardianRecordPrivate.class);
     } catch (Exception ioe) {
       logger.atSevere().log("Failed reading file '%s'", pathname);
       throw ioe;

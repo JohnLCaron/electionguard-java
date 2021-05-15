@@ -14,17 +14,17 @@ public class CompactSubmittedBallot {
   final CompactPlaintextBallot compact_plaintext_ballot;
   final long timestamp;
   final ElementModQ ballot_nonce; // LOOK why not optional?
-  final ElementModQ previous_code;
+  final ElementModQ code_seed;
   final ElementModQ code;
   final BallotBox.State ballot_box_state;
 
   public CompactSubmittedBallot(CompactPlaintextBallot compact_plaintext_ballot, long timestamp,
-                                ElementModQ ballot_nonce, ElementModQ previous_code, ElementModQ code,
+                                ElementModQ ballot_nonce, ElementModQ code_seed, ElementModQ code,
                                 BallotBox.State ballot_box_state) {
     this.compact_plaintext_ballot = Preconditions.checkNotNull(compact_plaintext_ballot);
     this.timestamp = timestamp;
     this.ballot_nonce = Preconditions.checkNotNull(ballot_nonce);
-    this.previous_code = Preconditions.checkNotNull(previous_code);
+    this.code_seed = Preconditions.checkNotNull(code_seed);
     this.code = Preconditions.checkNotNull(code);
     this.ballot_box_state = Preconditions.checkNotNull(ballot_box_state);
   }
@@ -39,7 +39,7 @@ public class CompactSubmittedBallot {
             CompactPlaintextBallot.compress_plaintext_ballot(plaintext_ballot),
             ballot.timestamp,
             ballot_nonce,
-            ballot.previous_code,
+            ballot.code_seed,
             ballot.code,
             ballot.state);
   }
@@ -70,7 +70,7 @@ public class CompactSubmittedBallot {
             plaintext_ballot.object_id,
             plaintext_ballot.style_id,
             internal_manifest.manifest.crypto_hash,
-            compact_ballot.previous_code,
+            compact_ballot.code_seed,
             contests,
             compact_ballot.code,
             compact_ballot.timestamp,

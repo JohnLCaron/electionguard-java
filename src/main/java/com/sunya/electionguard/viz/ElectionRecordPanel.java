@@ -5,8 +5,8 @@ import com.sunya.electionguard.AvailableGuardian;
 import com.sunya.electionguard.CiphertextElectionContext;
 import com.sunya.electionguard.ElectionConstants;
 import com.sunya.electionguard.Group;
+import com.sunya.electionguard.GuardianRecord;
 import com.sunya.electionguard.Manifest;
-import com.sunya.electionguard.KeyCeremony;
 import com.sunya.electionguard.publish.CloseableIterableAdapter;
 import com.sunya.electionguard.publish.Consumer;
 import com.sunya.electionguard.verifier.ElectionRecord;
@@ -20,7 +20,6 @@ import ucar.util.prefs.PreferencesExt;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.io.IOException;
 import java.util.Formatter;
 
 class ElectionRecordPanel extends JPanel {
@@ -173,9 +172,9 @@ class ElectionRecordPanel extends JPanel {
       f.format("  election base hash = %s%n", context.crypto_base_hash);
       f.format("  extended base hash = %s%n", context.crypto_extended_base_hash);
 
-      f.format("%n  Guardian Coefficient Validation Sets%n");
-      for (KeyCeremony.CoefficientValidationSet coeff : record.guardianCoefficients) {
-        f.format("    %s%n", coeff.owner_id());
+      f.format("%n  Guardian Records Validation Sets%n");
+      for (GuardianRecord coeff : record.guardianRecords) {
+        f.format("    %s%n", coeff.guardian_id());
       }
 
       ElectionConstants constants = record.constants;

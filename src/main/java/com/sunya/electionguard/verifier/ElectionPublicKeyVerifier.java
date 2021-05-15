@@ -2,8 +2,8 @@ package com.sunya.electionguard.verifier;
 
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.Group;
+import com.sunya.electionguard.GuardianRecord;
 import com.sunya.electionguard.Hash;
-import com.sunya.electionguard.KeyCeremony;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -30,24 +30,24 @@ public class ElectionPublicKeyVerifier {
 
     // Equation 3.B
     if (!public_key.equals(expected_public_key)) {
-      System.out.printf(" ***Expected Public key does not match.%n");
+      System.out.printf(" ***3.B Public key does not match expected.%n");
       return false;
     }
 
     // Equation 3.A
-    // The hashing is order dependent.
-    List<KeyCeremony.CoefficientValidationSet> sorted = this.electionRecord.guardianCoefficients.stream()
-            .sorted(Comparator.comparing(KeyCeremony.CoefficientValidationSet::owner_id))
+    // The hashing is order dependent, use the sequence_order to sort.
+    List<GuardianRecord> sorted = this.electionRecord.guardianRecords.stream()
+            .sorted(Comparator.comparing(GuardianRecord::sequence_order))
             .collect(Collectors.toList());
     List<Group.ElementModP> commitments = new ArrayList<>();
-    for (KeyCeremony.CoefficientValidationSet coeff : sorted) {
-      commitments.addAll(coeff.coefficient_commitments());
+    for (GuardianRecord coeff : sorted) {
+      commitments.addAll(coeff.election_commitments());
     }
     ElementModQ commitment_hash = Hash.hash_elems(commitments);
     ElementModQ expectedExtendedHash = Hash.hash_elems(this.electionRecord.baseHash(), commitment_hash);
 
     if (!this.electionRecord.extendedHash().equals(expectedExtendedHash)) {
-      System.out.printf(" ***Expected extended hash does not match.%n");
+      System.out.printf(" ***3.A. extended hash does not match expected.%n");
       return false;
     }
     System.out.printf(" Public key validation success.%n");
@@ -56,9 +56,8 @@ public class ElectionPublicKeyVerifier {
 
   ElementModP computePublicKey() {
     List<ElementModP> Ki = new ArrayList<>();
-    for (KeyCeremony.CoefficientValidationSet coeff : this.electionRecord.guardianCoefficients) {
-      // the first commitment is the public key for guardian i.
-      Ki.add(coeff.coefficient_commitments().get(0));
+    for (GuardianRecord coeff : this.electionRecord.guardianRecords) {
+      Ki.add(coeff.election_public_key());
     }
     return ElGamal.elgamal_combine_public_keys(Ki);
   }

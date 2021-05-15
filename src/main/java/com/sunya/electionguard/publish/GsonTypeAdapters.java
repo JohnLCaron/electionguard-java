@@ -9,10 +9,11 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
+import com.sunya.electionguard.GuardianRecord;
+import com.sunya.electionguard.GuardianRecordPrivate;
 import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.SubmittedBallot;
 import com.sunya.electionguard.Group;
-import com.sunya.electionguard.KeyCeremony;
 import com.sunya.electionguard.CiphertextTally;
 import com.sunya.electionguard.PlaintextBallot;
 import com.sunya.electionguard.PlaintextTally;
@@ -20,6 +21,14 @@ import com.sunya.electionguard.PlaintextTally;
 import java.lang.reflect.Type;
 import java.math.BigInteger;
 
+/**
+ * LOOK: why do we need custom serializers?
+ *    1. target must have no-arg constructors. But it may be private. AutoValue requires custom serializer.
+ *    2. no circular references
+ *    3. missing objects are set to their default (null, zero, false)
+ *    4. collections must not be \<?>
+ *    5. can do custom naming with @SerializedName
+ */
 class GsonTypeAdapters {
 
   static Gson enhancedGson() {
@@ -30,8 +39,10 @@ class GsonTypeAdapters {
             .registerTypeAdapter(Group.ElementModP.class, new ModPSerializer())
             .registerTypeAdapter(Manifest.class, new ElectionDescriptionSerializer())
             .registerTypeAdapter(Manifest.class, new ElectionDescriptionDeserializer())
-            .registerTypeAdapter(KeyCeremony.CoefficientValidationSet.class, new CoefficientValidationSerializer())
-            .registerTypeAdapter(KeyCeremony.CoefficientValidationSet.class, new CoefficientValidationDeserializer())
+            .registerTypeAdapter(GuardianRecord.class, new GuardianRecordSerializer()) // @AutoValue
+            .registerTypeAdapter(GuardianRecord.class, new GuardianRecordDeserializer())
+            .registerTypeAdapter(GuardianRecordPrivate.class, new GuardianRecordPrivateSerializer()) // @AutoValue
+            .registerTypeAdapter(GuardianRecordPrivate.class, new GuardianRecordPrivateDeserializer())
             .registerTypeAdapter(SubmittedBallot.class, new CiphertextBallotSerializer())
             .registerTypeAdapter(SubmittedBallot.class, new CiphertextBallotDeserializer())
             .registerTypeAdapter(PlaintextBallot.class, new PlaintextBallotSerializer())
@@ -90,18 +101,33 @@ class GsonTypeAdapters {
     }
   }
 
-  private static class CoefficientValidationSerializer implements JsonSerializer<KeyCeremony.CoefficientValidationSet> {
+  private static class GuardianRecordSerializer implements JsonSerializer<GuardianRecord> {
     @Override
-    public JsonElement serialize(KeyCeremony.CoefficientValidationSet src, Type typeOfSrc, JsonSerializationContext context) {
-      return CoefficientValidationPojo.serialize(src);
+    public JsonElement serialize(GuardianRecord src, Type typeOfSrc, JsonSerializationContext context) {
+      return GuardianRecordPojo.serialize(src);
     }
   }
 
-  private static class CoefficientValidationDeserializer implements JsonDeserializer<KeyCeremony.CoefficientValidationSet> {
+  private static class GuardianRecordDeserializer implements JsonDeserializer<GuardianRecord> {
     @Override
-    public KeyCeremony.CoefficientValidationSet deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+    public GuardianRecord deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
             throws JsonParseException {
-      return CoefficientValidationPojo.deserialize(json);
+      return GuardianRecordPojo.deserialize(json);
+    }
+  }
+
+  private static class GuardianRecordPrivateSerializer implements JsonSerializer<GuardianRecordPrivate> {
+    @Override
+    public JsonElement serialize(GuardianRecordPrivate src, Type typeOfSrc, JsonSerializationContext context) {
+      return GuardianRecordPrivatePojo.serialize(src);
+    }
+  }
+
+  private static class GuardianRecordPrivateDeserializer implements JsonDeserializer<GuardianRecordPrivate> {
+    @Override
+    public GuardianRecordPrivate deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+            throws JsonParseException {
+      return GuardianRecordPrivatePojo.deserialize(json);
     }
   }
 

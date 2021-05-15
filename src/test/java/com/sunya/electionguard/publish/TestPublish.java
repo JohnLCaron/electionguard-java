@@ -5,11 +5,10 @@ import com.google.common.collect.ImmutableMap;
 import com.sunya.electionguard.CiphertextElectionContext;
 import com.sunya.electionguard.CiphertextTallyBuilder;
 import com.sunya.electionguard.ElectionConstants;
+import com.sunya.electionguard.GuardianRecord;
 import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.InternalManifest;
 import com.sunya.electionguard.Guardian;
-import com.sunya.electionguard.GuardianBuilder;
-import com.sunya.electionguard.KeyCeremony;
 import com.sunya.electionguard.CiphertextTally;
 import com.sunya.electionguard.PlaintextBallot;
 import com.sunya.electionguard.PlaintextTally;
@@ -47,8 +46,8 @@ public class TestPublish {
     InternalManifest metadata = new InternalManifest(election);
 
     CiphertextElectionContext context = CiphertextElectionContext.create(1, 1, ONE_MOD_P, election, rand_q());
-    List<KeyCeremony.CoefficientValidationSet> coefficients = ImmutableList.of(
-            KeyCeremony.CoefficientValidationSet.create("hiD", ImmutableList.of(), ImmutableList.of()));
+    Guardian guardian = Guardian.createForTesting("GuardianId", 1, 1, 1, null);
+    List<GuardianRecord> coefficients = ImmutableList.of(guardian.publish());
     PlaintextTally plaintext_tally = new PlaintextTally("PlaintextTallyId", ImmutableMap.of());
 
     CiphertextTally ciphertext_tally =
@@ -76,7 +75,7 @@ public class TestPublish {
             new PlaintextBallot("PlaintextBallotId", "ballot_style", ImmutableList.of()));
 
     List<Guardian> guardians = ImmutableList.of(
-            GuardianBuilder.createForTesting("GuardianId", 1, 1, 1, null).build());
+            Guardian.createForTesting("GuardianId", 1, 1, 1, null));
 
     Publisher publisher = new Publisher(outputDir, false, false);
     publisher.publish_private_data(
