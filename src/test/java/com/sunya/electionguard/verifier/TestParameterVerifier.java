@@ -10,6 +10,7 @@ import static com.google.common.truth.Truth.assertThat;
 public class TestParameterVerifier {
   public static final String topdirProto = "src/test/data/electionRecordProto/";
   public static final String topdirJson = "src/test/data/publishEndToEnd/";
+  public static final String topdirJsonPython = "src/test/data/python-trogdar/";
 
 
   @Example

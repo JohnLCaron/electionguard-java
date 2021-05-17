@@ -10,6 +10,7 @@ import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.publish.CloseableIterableAdapter;
 import com.sunya.electionguard.publish.Consumer;
 import com.sunya.electionguard.verifier.ElectionRecord;
+import com.sunya.electionguard.verifier.VerifyElectionRecord;
 import ucar.ui.prefs.ComboBox;
 import ucar.ui.widget.BAMutil;
 import ucar.ui.widget.FileManager;
@@ -90,6 +91,17 @@ class ElectionRecordPanel extends JPanel {
     BAMutil.setActionProperties(infoAction, "Information", "info on current Manifest Record", false, 'I', -1);
     BAMutil.addActionToContainer(buttPanel, infoAction);
 
+    AbstractAction verifyAction = new AbstractAction() {
+      public void actionPerformed(ActionEvent e) {
+        Formatter f = new Formatter();
+        verify(f);
+        ta.setText(f.toString());
+        infoWindow.show();
+      }
+    };
+    BAMutil.setActionProperties(verifyAction, "Dump", "Verify Election Record", false, 'V', -1);
+    BAMutil.addActionToContainer(buttPanel, verifyAction);
+
     // components
     this.electionDescriptionTable = new ElectionDescriptionTable((PreferencesExt) prefs.node("Manifest"))
             .addActions(buttPanel);
@@ -109,7 +121,7 @@ class ElectionRecordPanel extends JPanel {
 
     JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
     tabbedPane.addTab("Manifest", this.electionDescriptionTable);
-    tabbedPane.addTab("AcceptedBallots", this.acceptedBallotsTable);
+    tabbedPane.addTab("SubmittedBallots", this.acceptedBallotsTable);
     tabbedPane.addTab("CiphertextTally", this.ciphertextTallyTable);
     tabbedPane.addTab("ElectionTally", this.electionTallyTable);
     tabbedPane.addTab("SpoiledTallies", this.spoiledTallyTable);
@@ -118,15 +130,15 @@ class ElectionRecordPanel extends JPanel {
     add(tabbedPane, BorderLayout.CENTER);
   }
 
-  boolean setElectionRecord(String electionRecord) {
+  boolean setElectionRecord(String electionRecordLocation) {
     try {
-      this.consumer = new Consumer(electionRecord);
+      this.consumer = new Consumer(electionRecordLocation);
       Formatter error = new Formatter();
       if (!this.consumer.isValidElectionRecord(error)) {
         JOptionPane.showMessageDialog(null, error.toString());
         return false;
       }
-      this.record =  consumer.readElectionRecord();
+      this.record = consumer.readElectionRecord();
       electionDescriptionTable.setElectionDescription(record.election);
 
       if (record.acceptedBallots != null) {
@@ -173,8 +185,8 @@ class ElectionRecordPanel extends JPanel {
       f.format("  extended base hash = %s%n", context.crypto_extended_base_hash);
 
       f.format("%n  Guardian Records Validation Sets%n");
-      for (GuardianRecord coeff : record.guardianRecords) {
-        f.format("    %s%n", coeff.guardian_id());
+      for (GuardianRecord gr : record.guardianRecords) {
+        f.format("    %s %d%n", gr.guardian_id(), gr.sequence_order());
       }
 
       ElectionConstants constants = record.constants;
@@ -190,6 +202,16 @@ class ElectionRecordPanel extends JPanel {
       }
     }
   }
+
+  void verify(Formatter f) {
+    if (record == null) {
+      return;
+    }
+    f.format(" Verify ElectionRecord from %s%n", this.consumer.location());
+    boolean ok = VerifyElectionRecord.verifyElectionRecord(this.record);
+    f.format(" OK =  %s%n", ok);
+  }
+
 
   void save() {
     fileChooser.save();

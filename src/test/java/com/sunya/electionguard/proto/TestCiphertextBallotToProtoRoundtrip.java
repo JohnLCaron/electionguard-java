@@ -3,6 +3,7 @@ package com.sunya.electionguard.proto;
 import com.sunya.electionguard.SubmittedBallot;
 import com.sunya.electionguard.publish.ConvertFromJson;
 import com.sunya.electionguard.publish.Publisher;
+import com.sunya.electionguard.verifier.TestParameterVerifier;
 import net.jqwik.api.Example;
 import net.jqwik.api.lifecycle.BeforeContainer;
 
@@ -16,7 +17,7 @@ public class TestCiphertextBallotToProtoRoundtrip {
 
   @BeforeContainer
   public static void setup() throws IOException {
-    publisher = new Publisher(TestManifestToProtoRoundtrip.testElectionRecord, false, false);
+    publisher = new Publisher(TestParameterVerifier.topdirJson, false, false);
   }
 
   @Example

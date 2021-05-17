@@ -34,7 +34,8 @@ public class PlaintextBallotsTable extends JPanel {
     infoWindow = new IndependentWindow("Extra Information", BAMutil.getImage("electionguard-logo.png"), infoTA);
     infoWindow.setBounds((Rectangle) prefs.getBean("InfoWindowBounds", new Rectangle(300, 300, 800, 100)));
 
-    ballotTable = new BeanTable<>(BallotBean.class, (PreferencesExt) prefs.node("BallotTable"), false);
+    ballotTable = new BeanTable<>(BallotBean.class, (PreferencesExt) prefs.node("BallotTable"), false,
+            "PlaintextBallot", "PlaintextBallot", null);
     ballotTable.addListSelectionListener(e -> {
       BallotBean ballot = ballotTable.getSelectedBean();
       if (ballot != null) {
@@ -44,7 +45,8 @@ public class PlaintextBallotsTable extends JPanel {
     ballotTable.addPopupOption("Show Ballot", ballotTable.makeShowAction(infoTA, infoWindow,
             bean -> ((BallotBean)bean).ballot.toString()));
 
-    contestTable = new BeanTable<>(ContestBean.class, (PreferencesExt) prefs.node("ContestTable"), false);
+    contestTable = new BeanTable<>(ContestBean.class, (PreferencesExt) prefs.node("ContestTable"), false,
+            "Contest", "PlaintextBallot.Contest", null);
     contestTable.addListSelectionListener(e -> {
       ContestBean contest = contestTable.getSelectedBean();
       if (contest != null) {
@@ -54,7 +56,8 @@ public class PlaintextBallotsTable extends JPanel {
     contestTable.addPopupOption("Show Contest", contestTable.makeShowAction(infoTA, infoWindow,
             bean -> ((ContestBean)bean).contest.toString()));
 
-    selectionTable = new BeanTable<>(SelectionBean.class, (PreferencesExt) prefs.node("SelectionTable"), false);
+    selectionTable = new BeanTable<>(SelectionBean.class, (PreferencesExt) prefs.node("SelectionTable"), false,
+            "Selection", "PlaintextBallot.Selection", null);
     selectionTable.addPopupOption("Show Selection", selectionTable.makeShowAction(infoTA, infoWindow,
             bean -> ((SelectionBean)bean).selection.toString()));
 
@@ -70,12 +73,14 @@ public class PlaintextBallotsTable extends JPanel {
   }
 
   void setBallots(CloseableIterable<PlaintextBallot> ballots) {
+    System.out.printf(" setBallots %n");
 
     try (CloseableIterator<PlaintextBallot> iter = ballots.iterator())  {
       java.util.List<BallotBean> beanList = new ArrayList<>();
       while (iter.hasNext()) {
         PlaintextBallot ballot = iter.next();
         beanList.add(new BallotBean(ballot));
+        System.out.printf(" BallotBean %s%n", ballot.object_id);
       }
       ballotTable.setBeans(beanList);
       if (beanList.size() > 0) {

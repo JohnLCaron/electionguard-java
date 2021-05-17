@@ -33,6 +33,10 @@ public class Consumer {
     publisher = new Publisher(topDir, false, false);
   }
 
+  public String location() {
+    return publisher.publishPath().toAbsolutePath().toString();
+  }
+
   public boolean isValidElectionRecord(Formatter error) {
     if (!Files.exists(publisher.publishPath())) {
       error.format("%s does not exist", publisher.publishPath());
@@ -63,6 +67,21 @@ public class Consumer {
   }
 
   //////////////////// Json
+
+  public ElectionRecord readElectionRecordJson() throws IOException {
+    return new ElectionRecord(
+            this.constants(), // required
+            this.context(), // required
+            this.election(), // required
+            this.guardianRecords(), // required
+            this.devices(),
+            this.ciphertextTally(),
+            this.decryptedTally(),
+            CloseableIterableAdapter.wrap(this.acceptedBallots()),
+            CloseableIterableAdapter.wrap(this.spoiledBallots()),
+            CloseableIterableAdapter.wrap(this.spoiledTallies()),
+            this.availableGuardians());
+  }
 
   public Manifest election() throws IOException {
     return ConvertFromJson.readElection(publisher.manifestPath().toString());
@@ -112,7 +131,6 @@ public class Consumer {
   }
 
   // Decrypted, spoiled ballots
-  // LOOK python is not writing these
   public List<PlaintextBallot> spoiledBallots() throws IOException {
     List<PlaintextBallot> result = new ArrayList<>();
     for (File file : publisher.spoiledBallotFiles()) {
@@ -157,21 +175,6 @@ public class Consumer {
       result.add(fromPython);
     }
     return result;
-  }
-
-  public ElectionRecord readElectionRecordJson() throws IOException {
-    return new ElectionRecord(
-            this.constants(), // required
-            this.context(), // required
-            this.election(), // required
-            this.guardianRecords(), // required
-            this.devices(),
-            this.ciphertextTally(),
-            this.decryptedTally(),
-            CloseableIterableAdapter.wrap(this.acceptedBallots()),
-            CloseableIterableAdapter.wrap(this.spoiledBallots()),
-            CloseableIterableAdapter.wrap(this.spoiledTallies()),
-            this.availableGuardians());
   }
 
   public List<GuardianRecordPrivate> readGuardianPrivateJson() throws IOException {
