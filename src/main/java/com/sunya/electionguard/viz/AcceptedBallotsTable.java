@@ -38,7 +38,8 @@ public class AcceptedBallotsTable extends JPanel {
     infoWindow = new IndependentWindow("Extra Information", BAMutil.getImage("electionguard-logo.png"), infoTA);
     infoWindow.setBounds((Rectangle) prefs.getBean("InfoWindowBounds", new Rectangle(300, 300, 800, 100)));
 
-    ballotTable = new BeanTable<>(SubmittedBallotBean.class, (PreferencesExt) prefs.node("BallotTable"), false);
+    ballotTable = new BeanTable<>(SubmittedBallotBean.class, (PreferencesExt) prefs.node("BallotTable"), false,
+            "SubmittedBallot", "encrypted_ballots", null);
     ballotTable.addListSelectionListener(e -> {
       SubmittedBallotBean ballot = ballotTable.getSelectedBean();
       if (ballot != null) {
@@ -48,7 +49,8 @@ public class AcceptedBallotsTable extends JPanel {
     ballotTable.addPopupOption("Show Ballot", ballotTable.makeShowAction(infoTA, infoWindow,
             bean -> ((SubmittedBallotBean)bean).ballot.toString()));
 
-    contestTable = new BeanTable<>(ContestBean.class, (PreferencesExt) prefs.node("ContestTable"), false);
+    contestTable = new BeanTable<>(ContestBean.class, (PreferencesExt) prefs.node("ContestTable"), false,
+            "Contest", "CiphertextBallot.Contest", null);
     contestTable.addListSelectionListener(e -> {
       ContestBean contest = contestTable.getSelectedBean();
       if (contest != null) {
@@ -58,7 +60,8 @@ public class AcceptedBallotsTable extends JPanel {
     contestTable.addPopupOption("Show Contest", contestTable.makeShowAction(infoTA, infoWindow,
             bean -> ((ContestBean)bean).contest.toString()));
 
-    selectionTable = new BeanTable<>(SelectionBean.class, (PreferencesExt) prefs.node("SelectionTable"), false);
+    selectionTable = new BeanTable<>(SelectionBean.class, (PreferencesExt) prefs.node("SelectionTable"), false,
+            "Selection", "CiphertextBallot.Selection", null);
     selectionTable.addPopupOption("Show Selection", selectionTable.makeShowAction(infoTA, infoWindow,
             bean -> ((SelectionBean)bean).selection.toString()));
 

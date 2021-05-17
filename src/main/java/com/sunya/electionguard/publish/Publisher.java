@@ -35,7 +35,7 @@ public class Publisher {
   static final String SPOILED_BALLOT_DIR = "plaintext_ballots";
   static final String SPOILED_TALLY_DIR = "spoiled_ballots";
   static final String GUARDIANS_DIR = "guardians";
-  static final String AVAILABLE_GUARDIANS_DIR = "available_guardians";
+  static final String AVAILABLE_GUARDIANS_DIR = "lagrange_coordinates";
 
   static final String MANIFEST_FILE_NAME = "manifest" + SUFFIX;
   static final String CONTEXT_FILE_NAME = "context" + SUFFIX;
@@ -44,9 +44,9 @@ public class Publisher {
   static final String TALLY_FILE_NAME = "tally" + SUFFIX;
 
   static final String DEVICE_PREFIX = "device_";
-  // static final String COEFFICIENT_PREFIX = "coefficient_validation_set_";
+  static final String AVAILABLE_GUARDIAN_PREFIX = "available_guardian_";
   static final String BALLOT_PREFIX = "ballot_";
-  static final String GUARDIAN_RECORD_PREFIX = "coefficient_validation_set_guardian_"; // LOOK
+  static final String GUARDIAN_RECORD_PREFIX = "coefficient_validation_set_"; // LOOK
 
   // json private
   static final String PRIVATE_PLAINTEXT_BALLOTS_DIR = "plaintext";
@@ -246,7 +246,7 @@ public class Publisher {
   }
 
   public Path availableGuardianPath(String id) {
-    String fileName = GUARDIAN_PRIVATE_PREFIX + id + SUFFIX;
+    String fileName = AVAILABLE_GUARDIAN_PREFIX + id + SUFFIX;
     return availableGuardianDirPath.resolve(fileName);
   }
 

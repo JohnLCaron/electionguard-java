@@ -41,6 +41,10 @@ public class PartialDecryptionVerifier {
 
   /** Verify 10.A for available guardians, if there are missing guardians. */
   boolean verify_replacement_partial_decryptions() {
+    if (this.lagrange_coefficients.size() == 0) {
+      System.out.printf(" ***Replacement Partial Decryptions failure : lagrange_coefficients not found in election record. %n");
+      return false;
+    }
     // Verify 10.A for available guardians, if there are missing guardians.
     boolean error = !this.verify_lagrange_coefficients();
 

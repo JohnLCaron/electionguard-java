@@ -264,7 +264,10 @@ public class PlaintextBallot extends ElectionObjectBase {
     }
   }
 
-  /** Create a PlaintextBallot from a CiphertextBallot and its decrypted tally. */
+  /**
+   * Create a PlaintextBallot from a CiphertextBallot and its decrypted tally.
+   * Need CiphertextBallot for the style_id.
+   */
   static PlaintextBallot from(CiphertextBallot cballot, PlaintextTally tally) {
     List<Contest> contests = new ArrayList<>();
     for (CiphertextBallot.Contest ccontest : cballot.contests) {
@@ -280,4 +283,18 @@ public class PlaintextBallot extends ElectionObjectBase {
     }
     return new PlaintextBallot(cballot.object_id, cballot.style_id, contests);
   }
+
+  /* experimental: get ballot from tally alone.
+  static PlaintextBallot from(PlaintextTally tally) {
+    List<Contest> contests = new ArrayList<>();
+    for (PlaintextTally.Contest tcontest : tally.contests.values()) {
+      List<Selection> selections = new ArrayList<>();
+      for (PlaintextTally.Selection tselection : tcontest.selections().values()) {
+        selections.add(new Selection(tselection.object_id(), tselection.tally(), false, null));
+      }
+      contests.add(new Contest(tcontest.object_id(), selections));
+    }
+    return new PlaintextBallot(tally.object_id, cballot.style_id, contests);
+  } */
+
 }

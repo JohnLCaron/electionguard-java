@@ -3,6 +3,7 @@ package com.sunya.electionguard.proto;
 import com.sunya.electionguard.verifier.ElectionRecord;
 import com.sunya.electionguard.publish.Consumer;
 import com.sunya.electionguard.publish.Publisher;
+import com.sunya.electionguard.verifier.TestParameterVerifier;
 import net.jqwik.api.Example;
 import net.jqwik.api.lifecycle.BeforeContainer;
 
@@ -17,7 +18,24 @@ public class TestElectionRecordProtoRoundtrip {
 
   @BeforeContainer
   public static void setUp() throws IOException {
-    consumer = new Consumer(TestManifestToProtoRoundtrip.testElectionRecord);
+    consumer = new Consumer(TestParameterVerifier.topdirJson);
+  }
+
+  @Example
+  public void testConsumer() throws IOException {
+    assertThat(consumer.election()).isNotNull();
+    assertThat(consumer.context()).isNotNull();
+    assertThat(consumer.constants()).isNotNull();
+    assertThat(consumer.ciphertextTally()).isNotNull();
+    assertThat(consumer.decryptedTally()).isNotNull();
+    assertThat(consumer.devices()).hasSize(1);
+    assertThat(consumer.guardianRecords()).hasSize(7);
+    assertThat(consumer.availableGuardians()).hasSize(5);
+
+    assertThat(consumer.acceptedBallots()).hasSize(6);
+    // assertThat(consumer.spoiledBallots()).hasSize(2);
+    // assertThat(consumer.inputBallots()).hasSize(7);
+    assertThat(consumer.spoiledTallies()).hasSize(2);
   }
 
   @Example
@@ -30,7 +48,7 @@ public class TestElectionRecordProtoRoundtrip {
             consumer.devices(),
             consumer.ciphertextTally(),
             consumer.decryptedTally(),
-            null);
+            consumer.availableGuardians());
 
     ElectionRecord roundtrip = ElectionRecordFromProto.translateFromProto(protoFromJson);
     assertThat(roundtrip.election).isEqualTo(consumer.election());
@@ -40,6 +58,7 @@ public class TestElectionRecordProtoRoundtrip {
     assertThat(roundtrip.encryptedTally).isEqualTo(consumer.ciphertextTally());
     assertThat(roundtrip.decryptedTally).isEqualTo(consumer.decryptedTally());
     assertThat(roundtrip.guardianRecords).isEqualTo(consumer.guardianRecords());
+    assertThat(roundtrip.availableGuardians).isEqualTo(consumer.availableGuardians());
   }
 
   @Example
@@ -54,7 +73,7 @@ public class TestElectionRecordProtoRoundtrip {
             consumer.decryptedTally(),
             consumer.spoiledBallots(),
             consumer.spoiledTallies(),
-            null);
+            consumer.availableGuardians());
 
     Consumer consumer2 = new Consumer(publisher);
     ElectionRecord roundtrip = consumer2.readElectionRecordProto();
@@ -66,5 +85,6 @@ public class TestElectionRecordProtoRoundtrip {
     assertThat(roundtrip.encryptedTally).isEqualTo(consumer.ciphertextTally());
     assertThat(roundtrip.decryptedTally).isEqualTo(consumer.decryptedTally());
     assertThat(roundtrip.guardianRecords).isEqualTo(consumer.guardianRecords());
+    assertThat(roundtrip.availableGuardians).isEqualTo(consumer.availableGuardians());
   }
 }

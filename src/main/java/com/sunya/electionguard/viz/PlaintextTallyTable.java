@@ -38,7 +38,8 @@ public class PlaintextTallyTable extends JPanel {
     infoWindow = new IndependentWindow("Extra Information", BAMutil.getImage("electionguard-logo.png"), infoTA);
     infoWindow.setBounds((Rectangle) prefs.getBean("InfoWindowBounds", new Rectangle(300, 300, 800, 100)));
 
-    tallyTable = new BeanTable<>(PlaintextTallyBean.class, (PreferencesExt) prefs.node("TallyTable"), false);
+    tallyTable = new BeanTable<>(PlaintextTallyBean.class, (PreferencesExt) prefs.node("TallyTable"), false,
+            "PlaintextTally", "PlaintextTally", null);
     tallyTable.addListSelectionListener(e -> {
       PlaintextTallyBean tallyBean = tallyTable.getSelectedBean();
       if (tallyBean != null) {
@@ -48,7 +49,8 @@ public class PlaintextTallyTable extends JPanel {
     tallyTable.addPopupOption("Show Tally", tallyTable.makeShowAction(infoTA, infoWindow,
             bean -> ((PlaintextTallyBean)bean).tally.toString()));
 
-    contestTable = new BeanTable<>(ContestBean.class, (PreferencesExt) prefs.node("ContestTable"), false);
+    contestTable = new BeanTable<>(ContestBean.class, (PreferencesExt) prefs.node("ContestTable"), false,
+            "Contest", "PlaintextTally.Contest", null);
     contestTable.addListSelectionListener(e -> {
       ContestBean contest = contestTable.getSelectedBean();
       if (contest != null) {
@@ -58,7 +60,8 @@ public class PlaintextTallyTable extends JPanel {
     contestTable.addPopupOption("Show Contest", contestTable.makeShowAction(infoTA, infoWindow,
             bean -> ((ContestBean)bean).contest.toString()));
 
-    selectionTable = new BeanTable<>(SelectionBean.class, (PreferencesExt) prefs.node("SelectionTable"), false);
+    selectionTable = new BeanTable<>(SelectionBean.class, (PreferencesExt) prefs.node("SelectionTable"), false,
+            "Selection", "PlaintextTally.Selection", null);
     selectionTable.addPopupOption("Show Selection", selectionTable.makeShowAction(infoTA, infoWindow,
             bean -> ((SelectionBean)bean).selection.toString()));
 
