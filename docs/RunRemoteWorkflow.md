@@ -1,5 +1,5 @@
 # 🗳 ElectionGuard Java 
-_last changed: April 7, 2021_
+_last changed: May 18, 2021_
 
 ## RunRemoteWorkflow
 
@@ -42,8 +42,8 @@ which only the election description is read.
 You must specify nguardians and quorum. If you specify navailable, it must lie between quorum and nguardians inclusive. By
 default, quorum number of guardians will be used for decryption.
 
-The directory where the Guardian serializations are stored must be specified. Remote Guardians are automatically 
-generated using this workflow, and so it cannot be used in a real election.
+The directory where the Guardian serializations are stored must be specified, and must be kept secret. 
+Remote Guardians are automatically generated using this workflow.
 
 The _encryptDir_ is the output directory of _RemoteKeyCeremony_ and the input directory of _EncryptBallots_.
 You should make this separate from the input directory.
