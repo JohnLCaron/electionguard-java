@@ -1,5 +1,5 @@
 # 🗳 ElectionGuard Java
-_last changed: April 15, 2021_
+_last changed: May 18, 2021_
 
 This is a port of https://github.com/microsoft/electionguard-python/ to Java.
 
@@ -77,6 +77,12 @@ The jars will be in _build/libs_.
 These may be interesting to implement in other libraries:
 
 *   [Protobuf definitions](https://github.com/JohnLCaron/electionguard-java/tree/master/src/main/proto/com/sunya/electionguard/proto)
+
+### Python vs Java
+
+These may be interesting to implement in other libraries:
+
+*   [PythonVsJava](https://github.com/JohnLCaron/electionguard-java/blob/master/docs/PythonVsJava.md)
 
 ## Notes
 

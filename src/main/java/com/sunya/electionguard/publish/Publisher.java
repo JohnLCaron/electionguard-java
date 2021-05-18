@@ -293,13 +293,6 @@ public class Publisher {
     }
   }
 
-  public void writeGuardiansJson(Iterable<GuardianRecordPrivate> guardianRecords) throws IOException {
-    Files.createDirectories(privateDirPath);
-    for (GuardianRecordPrivate guardianRecord : guardianRecords) {
-      ConvertToJson.writeGuardianRecordPrivate(guardianRecord, this.guardiansPrivatePath(guardianRecord.guardian_id()));
-    }
-  }
-
   public void writeDecryptionResultsJson(
           ElectionRecord election,
           CiphertextTally encryptedTally,
@@ -386,45 +379,6 @@ public class Publisher {
         ConvertToJson.writeAvailableGuardian(guardian, this.availableGuardianPath(guardian.guardian_id));
       }
     }
-  }
-
-  /**
-   * Publish the private data for an election.
-   * Useful for generating sample data sets.
-   * Do not use this in a production application.
-   */
-  public void publish_private_data(
-          @Nullable Iterable<PlaintextBallot> original_ballots,
-          @Nullable Iterable<Guardian> guardians) throws IOException {
-
-    Files.createDirectories(privateDirPath);
-
-    if (guardians != null) {
-      for (Guardian guardian : guardians) {
-        String guardian_name = GUARDIAN_PRIVATE_PREFIX + guardian.object_id;
-        ConvertToJson.writeGuardian(guardian, privateDirPath.resolve(guardian_name));
-      }
-    }
-
-    if (original_ballots != null) {
-      Path ballotsDirPath = privateDirPath.resolve(PRIVATE_PLAINTEXT_BALLOTS_DIR);
-      Files.createDirectories(ballotsDirPath);
-      for (PlaintextBallot plaintext_ballot : original_ballots) {
-        String ballot_name = PLAINTEXT_BALLOT_PREFIX + plaintext_ballot.object_id + SUFFIX;
-        ConvertToJson.writePlaintextBallot(plaintext_ballot, ballotsDirPath.resolve(ballot_name));
-      }
-    }
-  }
-
-  public void publish_invalid_ballots(String directory, Iterable<PlaintextBallot> invalid_ballots) throws IOException {
-    Path invalidBallotsPath = publishDirectory.resolve(directory);
-    Files.createDirectories(invalidBallotsPath);
-
-    for (PlaintextBallot plaintext_ballot : invalid_ballots) {
-      String ballot_name = PLAINTEXT_BALLOT_PREFIX + plaintext_ballot.object_id + SUFFIX;
-      ConvertToJson.writePlaintextBallot(plaintext_ballot, invalidBallotsPath.resolve(ballot_name));
-    }
-
   }
 
   //////////////////////////////////////////////////////////////////
@@ -629,6 +583,55 @@ public class Publisher {
     Path source = new Publisher(inputDir, false, false).ciphertextBallotProtoPath();
     Path dest = ciphertextBallotProtoPath();
     Files.copy(source, dest, StandardCopyOption.COPY_ATTRIBUTES);
+  }
+
+  ////////////////////////////////////////////////////////////////////////////////
+  // private, probably not needed
+
+  public void writeGuardiansJson(Iterable<GuardianRecordPrivate> guardianRecords) throws IOException {
+    Files.createDirectories(privateDirPath);
+    for (GuardianRecordPrivate guardianRecord : guardianRecords) {
+      ConvertToJson.writeGuardianRecordPrivate(guardianRecord, this.guardiansPrivatePath(guardianRecord.guardian_id()));
+    }
+  }
+
+  /**
+   * Publish the private data for an election.
+   * Useful for generating sample data sets.
+   * Do not use this in a production application.
+   */
+  public void publish_private_data(
+          @Nullable Iterable<PlaintextBallot> original_ballots,
+          @Nullable Iterable<Guardian> guardians) throws IOException {
+
+    Files.createDirectories(privateDirPath);
+
+    if (guardians != null) {
+      for (Guardian guardian : guardians) {
+        String guardian_name = GUARDIAN_PRIVATE_PREFIX + guardian.object_id;
+        ConvertToJson.writeGuardian(guardian, privateDirPath.resolve(guardian_name));
+      }
+    }
+
+    if (original_ballots != null) {
+      Path ballotsDirPath = privateDirPath.resolve(PRIVATE_PLAINTEXT_BALLOTS_DIR);
+      Files.createDirectories(ballotsDirPath);
+      for (PlaintextBallot plaintext_ballot : original_ballots) {
+        String ballot_name = PLAINTEXT_BALLOT_PREFIX + plaintext_ballot.object_id + SUFFIX;
+        ConvertToJson.writePlaintextBallot(plaintext_ballot, ballotsDirPath.resolve(ballot_name));
+      }
+    }
+  }
+
+  public void publish_invalid_ballots(String directory, Iterable<PlaintextBallot> invalid_ballots) throws IOException {
+    Path invalidBallotsPath = publishDirectory.resolve(directory);
+    Files.createDirectories(invalidBallotsPath);
+
+    for (PlaintextBallot plaintext_ballot : invalid_ballots) {
+      String ballot_name = PLAINTEXT_BALLOT_PREFIX + plaintext_ballot.object_id + SUFFIX;
+      ConvertToJson.writePlaintextBallot(plaintext_ballot, invalidBallotsPath.resolve(ballot_name));
+    }
+
   }
 
 }

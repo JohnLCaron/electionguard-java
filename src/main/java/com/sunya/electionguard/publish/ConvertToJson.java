@@ -50,13 +50,6 @@ class ConvertToJson {
     }
   }
 
-  static void writeGuardianRecordPrivate(GuardianRecordPrivate object, Path where) throws IOException {
-    Type type = new TypeToken<GuardianRecordPrivate>(){}.getType();
-    try (FileWriter writer = new FileWriter(where.toFile())) {
-      enhancedGson.toJson(object, type, writer);
-    }
-  }
-
   static void writeElection(Manifest object, Path where) throws IOException {
     Type type = new TypeToken<Manifest>(){}.getType();
     try (FileWriter writer = new FileWriter(where.toFile())) {
@@ -78,13 +71,6 @@ class ConvertToJson {
     }
   }
 
-  static void writeGuardian(Guardian guardian, Path where) throws IOException {
-    Type type = new TypeToken<Guardian>(){}.getType();
-    try (FileWriter writer = new FileWriter(where.toFile())) {
-      enhancedGson.toJson(guardian, type, writer);
-    }
-  }
-
   static void writePlaintextBallot(PlaintextBallot ballot, Path where) throws IOException {
     Type type = new TypeToken<PlaintextBallot>(){}.getType();
     try (FileWriter writer = new FileWriter(where.toFile())) {
@@ -94,6 +80,23 @@ class ConvertToJson {
 
   static void writePlaintextTally(PlaintextTally object, Path where) throws IOException {
     Type type = new TypeToken<PlaintextTally>(){}.getType();
+    try (FileWriter writer = new FileWriter(where.toFile())) {
+      enhancedGson.toJson(object, type, writer);
+    }
+  }
+
+
+  /////////////////////////////////////////////////////////////////////////
+
+  static void writeGuardian(Guardian guardian, Path where) throws IOException {
+    Type type = new TypeToken<Guardian>(){}.getType();
+    try (FileWriter writer = new FileWriter(where.toFile())) {
+      enhancedGson.toJson(guardian, type, writer);
+    }
+  }
+
+  static void writeGuardianRecordPrivate(GuardianRecordPrivate object, Path where) throws IOException {
+    Type type = new TypeToken<GuardianRecordPrivate>(){}.getType();
     try (FileWriter writer = new FileWriter(where.toFile())) {
       enhancedGson.toJson(object, type, writer);
     }

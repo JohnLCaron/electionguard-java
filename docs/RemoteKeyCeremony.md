@@ -1,11 +1,12 @@
 # 🗳 ElectionGuard Java 
+_last changed: May 18, 2021_
 
-## Perform Key Ceremony
+## Remote Key Ceremony
 
 The _com.sunya.electionguard.keyceremony.KeyCeremonyRemote_ command line program uses remote Guardians to perform a 
 [key ceremony](https://www.electionguard.vote/spec/0.95.0/4_Key_generation/). 
 
-The output are the first pieces of the Election Record: the election description, election context, and Guardians' coefficient validations.
+The output are the first pieces of the Election Record: the election description, election context, and GuardianRecords.
 
 ````
 Usage: java -classpath electionguard-java-all.jar 
@@ -33,7 +34,7 @@ If Json, it must contain the file _description.json_. If Protobuf, it must conta
 which only the election description is read.
 
 The output directory where the Election Record is written is required and must be writeable. When the key ceremony is successful,
-the first parts of the record are written: the election manifest, election context, and Guardians' coefficient validations.
+the first parts of the record are written: the election manifest, election context, and GuardianRecords.
 
 The number of guardians and quorum must be provided. The KeyCeremonyRemote is started and waits until nguardians
 register with it, and then begins the key ceremony.
@@ -86,7 +87,7 @@ INFO: KeyCeremonyRemote registerTrustee registerTrustee remoteTrustee-1
 
 ## Security Issues
 
-No secret information is transmitted to KeyCeremonyRemote.
+All secret information resides with the KeyCeremonyRemoteTrustee. No secret information is transmitted to KeyCeremonyRemote.
 
 ## Key Ceremony information exchange and messaging rounds. See electionguard Issue #84
 
