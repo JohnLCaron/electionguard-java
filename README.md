@@ -80,8 +80,6 @@ These may be interesting to implement in other libraries:
 
 ### Python vs Java
 
-These may be interesting to implement in other libraries:
-
 *   [PythonVsJava](https://github.com/JohnLCaron/electionguard-java/blob/master/docs/PythonVsJava.md)
 
 ## Notes
