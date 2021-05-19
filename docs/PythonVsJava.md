@@ -14,16 +14,16 @@ Extensions to the Python library are kept in subdirectories of **com.sunya.elect
 * **keyceremony**: Run the Key Ceremony with remote Guardians aka Trustees.
 * **proto**: Protobuf serialization helper classes.
 * **publish**: JSON helper serialization classes, and top level publisher/consumer for both protobuf and JSON serialization.
-* **verifier**: The electionguard-Java verifier.
+* **verifier**: The electionguard-java verifier.
 * **viz**: Simple visualization UI to examine the election record.
-* **workflow**: Command line utilities to run the entire electionguard remote workflow, eventually in production settings.
+* **workflow**: Command line utilities to run the entire electionguard remote workflow, including in production settings.
 The non-remote workflow can also be run for testing purposes.
 
 ## Classes
 
-* Python class
-* standard Java class equivalent to Python class
-* remote Java class refactored for remote Guardians
+* Python: Python class name
+* standard Java: Java class equivalent to Python class
+* remote Java: Java class refactored for remote Guardians
 
 ### Guardian
 
@@ -31,15 +31,15 @@ The non-remote workflow can also be run for testing purposes.
 | --- | --- | --- |
 | Guardian | Guardian | KeyCeremonyTrustee, DecryptingTrustee |
 | GuardianRecord | GuardianRecord | same |
-| GuardianPrivateRecord | GuardianPrivateRecord | - |
+| GuardianPrivateRecord | GuardianPrivateRecord | DecryptingTrustee |
 
 ### KeyCeremony
 
 | Python | standard Java | remote Java |
 | --- | --- | --- |
 | key_ceremony | KeyCeremony | KeyCeremony2 |
-| key_ceremony_helper | KeyCeremonyHelper | - |
-| key_ceremony_mediator | KeyCeremonyMediator | KeyCeremonyRemoteMediator |
+| KeyCeremonyHelper | KeyCeremonyHelper | - |
+| KeyCeremonyMediator | KeyCeremonyMediator | KeyCeremonyRemoteMediator |
 | PublicKeySet | KeyCeremony.PublicKeySet | KeyCeremonyTrustee |
 
 ### Decryption
@@ -47,10 +47,10 @@ The non-remote workflow can also be run for testing purposes.
 | Python | standard Java | remote Java |
 | --- | --- | --- |
 | decryption | Decryptions | RemoteDecryptions |
-| decryption_helper | DecryptionHelper | - |
-| decryption_mediator | DecryptionMediator | DecryptingMediator |
+| DecryptionHelper | DecryptionHelper | - |
+| DecryptionMediator | DecryptionMediator | DecryptingMediator |
 | decrypt_with_shares | DecryptWithShares | same |
-| decryption_share | DecryptionShare | same |
+| DecryptionShare | DecryptionShare | same |
 | ElectionPublicKey | KeyCeremony.ElectionPublicKey | DecryptingTrustee |
 
 ### Workflow
@@ -59,10 +59,10 @@ The non-remote workflow can also be run for testing purposes.
 | --- | --- | --- |
 | TestEndToEndElection | RunElectionWorkflow | RunRemoteWorkflow |
 | KeyCeremonyMediator | PerformKeyCeremony | KeyCeremonyRemote |
-| EncryptionMediator | EncryptBallots | EncryptBallots |
+| EncryptionMediator | EncryptBallots | same |
 | - | AccumulateTally | AccumulateTally |
 | DecryptionMediator | DecryptBallots | DecryptingMediatorRunner |
-| - | VerifyElectionRecord | VerifyElectionRecord |
+| - | VerifyElectionRecord | same |
 
 ## Serialization from Java
 
