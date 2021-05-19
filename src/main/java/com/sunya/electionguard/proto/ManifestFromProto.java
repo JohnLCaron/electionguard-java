@@ -6,16 +6,8 @@ import javax.annotation.Nullable;
 import java.time.OffsetDateTime;
 
 import static com.sunya.electionguard.proto.CommonConvert.convertList;
-import static com.sunya.electionguard.proto.ManifestProto.AnnotatedString;
-import static com.sunya.electionguard.proto.ManifestProto.BallotStyle;
-import static com.sunya.electionguard.proto.ManifestProto.Candidate;
-import static com.sunya.electionguard.proto.ManifestProto.ContactInformation;
-import static com.sunya.electionguard.proto.ManifestProto.ContestDescription;
-import static com.sunya.electionguard.proto.ManifestProto.GeopoliticalUnit;
-import static com.sunya.electionguard.proto.ManifestProto.InternationalizedText;
-import static com.sunya.electionguard.proto.ManifestProto.Language;
-import static com.sunya.electionguard.proto.ManifestProto.Party;
-import static com.sunya.electionguard.proto.ManifestProto.SelectionDescription;
+
+import com.sunya.electionguard.protogen.ManifestProto;
 
 public class ManifestFromProto {
 
@@ -52,11 +44,11 @@ public class ManifestFromProto {
             contact);
   }
 
-  static Manifest.AnnotatedString convertAnnotatedString(AnnotatedString annotated) {
+  static Manifest.AnnotatedString convertAnnotatedString(ManifestProto.AnnotatedString annotated) {
     return new Manifest.AnnotatedString(annotated.getAnnotation(), annotated.getValue());
   }
 
-  static Manifest.BallotStyle convertBallotStyle(BallotStyle style) {
+  static Manifest.BallotStyle convertBallotStyle(ManifestProto.BallotStyle style) {
     return new Manifest.BallotStyle(
             style.getObjectId(),
             style.getGeopoliticalUnitIdsList(),
@@ -64,7 +56,7 @@ public class ManifestFromProto {
             style.getImageUrl());
   }
 
-  static Manifest.Candidate convertCandidate(Candidate candidate) {
+  static Manifest.Candidate convertCandidate(ManifestProto.Candidate candidate) {
     return new Manifest.Candidate(
             candidate.getObjectId(),
             convertInternationalizedText(candidate.getName()),
@@ -74,7 +66,7 @@ public class ManifestFromProto {
   }
 
   @Nullable
-  static Manifest.ContactInformation convertContactInformation(@Nullable ContactInformation contact) {
+  static Manifest.ContactInformation convertContactInformation(@Nullable ManifestProto.ContactInformation contact) {
     if (contact == null) {
       return null;
     }
@@ -85,7 +77,7 @@ public class ManifestFromProto {
             contact.getName());
   }
 
-  static Manifest.ContestDescription convertContestDescription(ContestDescription contest) {
+  static Manifest.ContestDescription convertContestDescription(ManifestProto.ContestDescription contest) {
     return new Manifest.ContestDescription(
             contest.getObjectId(),
             contest.getElectoralDistrictId(),
@@ -99,7 +91,7 @@ public class ManifestFromProto {
             contest.hasBallotSubtitle() ? convertInternationalizedText(contest.getBallotSubtitle()) : null);
   }
 
-  static Manifest.VoteVariationType convertVoteVariationType(ContestDescription.VoteVariationType type) {
+  static Manifest.VoteVariationType convertVoteVariationType(ManifestProto.ContestDescription.VoteVariationType type) {
     return Manifest.VoteVariationType.valueOf(type.name());
   }
 
@@ -107,11 +99,11 @@ public class ManifestFromProto {
     return Manifest.ElectionType.valueOf(type.name());
   }
 
-  static Manifest.ReportingUnitType convertReportingUnitType(GeopoliticalUnit.ReportingUnitType type) {
+  static Manifest.ReportingUnitType convertReportingUnitType(ManifestProto.GeopoliticalUnit.ReportingUnitType type) {
     return Manifest.ReportingUnitType.valueOf(type.name());
   }
 
-  static Manifest.GeopoliticalUnit convertGeopoliticalUnit(GeopoliticalUnit geoUnit) {
+  static Manifest.GeopoliticalUnit convertGeopoliticalUnit(ManifestProto.GeopoliticalUnit geoUnit) {
     return new Manifest.GeopoliticalUnit(
             geoUnit.getObjectId(),
             geoUnit.getName(),
@@ -119,15 +111,15 @@ public class ManifestFromProto {
             geoUnit.hasContactInformation() ? convertContactInformation(geoUnit.getContactInformation()) : null);
   }
 
-  static Manifest.InternationalizedText convertInternationalizedText(InternationalizedText text) {
+  static Manifest.InternationalizedText convertInternationalizedText(ManifestProto.InternationalizedText text) {
     return new Manifest.InternationalizedText(convertList(text.getTextList(), ManifestFromProto::convertLanguage));
   }
 
-  static Manifest.Language convertLanguage(Language language) {
+  static Manifest.Language convertLanguage(ManifestProto.Language language) {
     return new Manifest.Language(language.getValue(), language.getLanguage());
   }
 
-  static Manifest.Party convertParty(Party party) {
+  static Manifest.Party convertParty(ManifestProto.Party party) {
     return new Manifest.Party(
             party.getObjectId(),
             convertInternationalizedText(party.getName()),
@@ -136,7 +128,7 @@ public class ManifestFromProto {
             party.getLogoUri());
   }
 
-  static Manifest.SelectionDescription convertSelectionDescription(SelectionDescription selection) {
+  static Manifest.SelectionDescription convertSelectionDescription(ManifestProto.SelectionDescription selection) {
     return new Manifest.SelectionDescription(
             selection.getObjectId(),
             selection.getCandidateId(),

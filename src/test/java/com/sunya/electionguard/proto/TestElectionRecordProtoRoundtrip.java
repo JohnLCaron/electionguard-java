@@ -1,5 +1,6 @@
 package com.sunya.electionguard.proto;
 
+import com.sunya.electionguard.protogen.ElectionRecordProto;
 import com.sunya.electionguard.verifier.ElectionRecord;
 import com.sunya.electionguard.publish.Consumer;
 import com.sunya.electionguard.publish.Publisher;

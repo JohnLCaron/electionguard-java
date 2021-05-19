@@ -9,8 +9,9 @@ import java.util.stream.Collectors;
 
 import static com.sunya.electionguard.proto.CommonConvert.convertElementModP;
 import static com.sunya.electionguard.proto.CommonConvert.convertCiphertext;
-import static com.sunya.electionguard.proto.PlaintextTallyProto.CiphertextDecryptionSelection;
-import static com.sunya.electionguard.proto.PlaintextTallyProto.CiphertextCompensatedDecryptionSelection;
+
+import com.sunya.electionguard.protogen.PlaintextTallyProto;
+
 
 public class PlaintextTallyToProto {
 
@@ -34,7 +35,7 @@ public class PlaintextTallyToProto {
 
   static PlaintextTallyProto.PlaintextTallySelection convertSelection(PlaintextTally.Selection selection) {
 
-    List<CiphertextDecryptionSelection> shares =
+    List<PlaintextTallyProto.CiphertextDecryptionSelection> shares =
             selection.shares().stream().map(PlaintextTallyToProto::convertShare).collect(Collectors.toList());
 
     PlaintextTallyProto.PlaintextTallySelection.Builder builder = PlaintextTallyProto.PlaintextTallySelection.newBuilder();
@@ -46,8 +47,8 @@ public class PlaintextTallyToProto {
     return builder.build();
   }
 
-  private static CiphertextDecryptionSelection convertShare(DecryptionShare.CiphertextDecryptionSelection org) {
-    CiphertextDecryptionSelection.Builder builder = CiphertextDecryptionSelection.newBuilder();
+  private static PlaintextTallyProto.CiphertextDecryptionSelection convertShare(DecryptionShare.CiphertextDecryptionSelection org) {
+    PlaintextTallyProto.CiphertextDecryptionSelection.Builder builder = PlaintextTallyProto.CiphertextDecryptionSelection.newBuilder();
 
     builder.setObjectId(org.object_id());
     builder.setGuardianId(org.guardian_id());
@@ -63,10 +64,10 @@ public class PlaintextTallyToProto {
     return builder.build();
   }
 
-  private static CiphertextCompensatedDecryptionSelection convertCompensatedShare(
+  private static PlaintextTallyProto.CiphertextCompensatedDecryptionSelection convertCompensatedShare(
           DecryptionShare.CiphertextCompensatedDecryptionSelection org) {
 
-    CiphertextCompensatedDecryptionSelection.Builder builder = CiphertextCompensatedDecryptionSelection.newBuilder();
+    PlaintextTallyProto.CiphertextCompensatedDecryptionSelection.Builder builder = PlaintextTallyProto.CiphertextCompensatedDecryptionSelection.newBuilder();
     builder.setObjectId(org.object_id());
     builder.setGuardianId(org.guardian_id());
     builder.setMissingGuardianId(org.missing_guardian_id());

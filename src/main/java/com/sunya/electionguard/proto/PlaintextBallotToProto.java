@@ -2,9 +2,7 @@ package com.sunya.electionguard.proto;
 
 import com.sunya.electionguard.PlaintextBallot;
 
-import static com.sunya.electionguard.proto.PlaintextBallotProto.PlaintextBallotContest;
-import static com.sunya.electionguard.proto.PlaintextBallotProto.PlaintextBallotSelection;
-import static com.sunya.electionguard.proto.PlaintextBallotProto.ExtendedData;
+import com.sunya.electionguard.protogen.PlaintextBallotProto;
 
 public class PlaintextBallotToProto {
 
@@ -16,15 +14,15 @@ public class PlaintextBallotToProto {
     return builder.build();
   }
 
-  static PlaintextBallotContest convertContest(PlaintextBallot.Contest contest) {
-    PlaintextBallotContest.Builder builder = PlaintextBallotContest.newBuilder();
+  static PlaintextBallotProto.PlaintextBallotContest convertContest(PlaintextBallot.Contest contest) {
+    PlaintextBallotProto.PlaintextBallotContest.Builder builder = PlaintextBallotProto.PlaintextBallotContest.newBuilder();
     builder.setContestId(contest.contest_id);
     contest.ballot_selections.forEach(value -> builder.addBallotSelections(convertSelection(value)));
     return builder.build();
   }
 
-  static PlaintextBallotSelection convertSelection(PlaintextBallot.Selection selection) {
-    PlaintextBallotSelection.Builder builder = PlaintextBallotSelection.newBuilder();
+  static PlaintextBallotProto.PlaintextBallotSelection convertSelection(PlaintextBallot.Selection selection) {
+    PlaintextBallotProto.PlaintextBallotSelection.Builder builder = PlaintextBallotProto.PlaintextBallotSelection.newBuilder();
     builder.setSelectionId(selection.selection_id);
     builder.setVote(selection.vote);
     builder.setIsPlaceholderSelection(selection.is_placeholder_selection);
@@ -32,8 +30,8 @@ public class PlaintextBallotToProto {
     return builder.build();
   }
 
-  static ExtendedData convertExtendedData(PlaintextBallot.ExtendedData data) {
-    ExtendedData.Builder builder = ExtendedData.newBuilder();
+  static PlaintextBallotProto.ExtendedData convertExtendedData(PlaintextBallot.ExtendedData data) {
+    PlaintextBallotProto.ExtendedData.Builder builder = PlaintextBallotProto.ExtendedData.newBuilder();
     builder.setValue(data.value);
     builder.setLength(data.length);
     return builder.build();

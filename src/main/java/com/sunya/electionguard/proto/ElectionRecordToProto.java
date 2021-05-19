@@ -14,13 +14,15 @@ import com.sunya.electionguard.SchnorrProof;
 
 import javax.annotation.Nullable;
 
-import static com.sunya.electionguard.proto.ElectionRecordProto.ElectionRecord;
 import static com.sunya.electionguard.proto.CommonConvert.convertElementModP;
 import static com.sunya.electionguard.proto.CommonConvert.convertElementModQ;
 
+import com.sunya.electionguard.protogen.ElectionRecordProto;
+
+
 public class ElectionRecordToProto {
 
-  public static ElectionRecord buildElectionRecord(
+  public static ElectionRecordProto.ElectionRecord buildElectionRecord(
           Manifest description,
           CiphertextElectionContext context,
           ElectionConstants constants,
@@ -30,7 +32,7 @@ public class ElectionRecordToProto {
           @Nullable PlaintextTally decryptedTally,
           @Nullable Iterable<AvailableGuardian> availableGuardians) {
 
-    ElectionRecord.Builder builder = ElectionRecord.newBuilder();
+    ElectionRecordProto.ElectionRecord.Builder builder = ElectionRecordProto.ElectionRecord.newBuilder();
     builder.setConstants( convertConstants(constants));
     builder.setManifest( ManifestToProto.translateToProto(description));
     builder.setContext( convertContext(context));

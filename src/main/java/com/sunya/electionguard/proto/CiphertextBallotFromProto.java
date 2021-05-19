@@ -8,14 +8,13 @@ import com.sunya.electionguard.CiphertextBallot;
 import javax.annotation.Nullable;
 import java.util.Optional;
 
-import static com.sunya.electionguard.proto.CiphertextBallotProto.CiphertextBallotContest;
-import static com.sunya.electionguard.proto.CiphertextBallotProto.CiphertextBallotSelection;
-import static com.sunya.electionguard.proto.CiphertextBallotProto.ConstantChaumPedersenProof;
-import static com.sunya.electionguard.proto.CiphertextBallotProto.DisjunctiveChaumPedersenProof;
 import static com.sunya.electionguard.proto.CommonConvert.convertCiphertext;
 import static com.sunya.electionguard.proto.CommonConvert.convertElementModQ;
 import static com.sunya.electionguard.proto.CommonConvert.convertElementModP;
 import static com.sunya.electionguard.proto.CommonConvert.convertList;
+
+import com.sunya.electionguard.protogen.CiphertextBallotProto;
+
 
 public class CiphertextBallotFromProto {
 
@@ -42,7 +41,7 @@ public class CiphertextBallotFromProto {
             Optional.ofNullable(convertElementModQ(ballot.getNonce())));
   }
 
-  static CiphertextBallot.Contest convertContest(CiphertextBallotContest contest) {
+  static CiphertextBallot.Contest convertContest(CiphertextBallotProto.CiphertextBallotContest contest) {
     return new CiphertextBallot.Contest(
             contest.getObjectId(),
             convertElementModQ(contest.getDescriptionHash()),
@@ -53,7 +52,7 @@ public class CiphertextBallotFromProto {
             Optional.ofNullable(convertConstantProof(contest.getProof())));
   }
 
-  static CiphertextBallot.Selection convertSelection(CiphertextBallotSelection selection) {
+  static CiphertextBallot.Selection convertSelection(CiphertextBallotProto.CiphertextBallotSelection selection) {
     return new CiphertextBallot.Selection(
             selection.getObjectId(),
             convertElementModQ(selection.getDescriptionHash()),
@@ -66,7 +65,7 @@ public class CiphertextBallotFromProto {
   }
 
   @Nullable
-  static ChaumPedersen.ConstantChaumPedersenProof convertConstantProof(@Nullable ConstantChaumPedersenProof proof) {
+  static ChaumPedersen.ConstantChaumPedersenProof convertConstantProof(@Nullable CiphertextBallotProto.ConstantChaumPedersenProof proof) {
     if (proof == null || !proof.hasPad()) {
       return null;
     }
@@ -79,7 +78,7 @@ public class CiphertextBallotFromProto {
   }
 
   @Nullable
-  static ChaumPedersen.DisjunctiveChaumPedersenProof convertDisjunctiveProof(@Nullable DisjunctiveChaumPedersenProof proof) {
+  static ChaumPedersen.DisjunctiveChaumPedersenProof convertDisjunctiveProof(@Nullable CiphertextBallotProto.DisjunctiveChaumPedersenProof proof) {
     if (proof == null || proof.getProofZeroPad() == null) {
       return null;
     }

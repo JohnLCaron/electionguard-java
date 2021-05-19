@@ -23,6 +23,9 @@ import java.util.stream.Collectors;
 import static com.sunya.electionguard.proto.CommonConvert.convertElementModP;
 import static com.sunya.electionguard.proto.CommonConvert.convertElementModQ;
 
+import com.sunya.electionguard.protogen.ElectionRecordProto;
+
+
 @Immutable
 public class ElectionRecordFromProto {
 

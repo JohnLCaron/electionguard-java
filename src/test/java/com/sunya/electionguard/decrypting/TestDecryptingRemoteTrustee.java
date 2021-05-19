@@ -4,8 +4,8 @@ import com.sunya.electionguard.CiphertextTally;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.proto.CommonConvert;
-import com.sunya.electionguard.proto.CommonProto;
-import com.sunya.electionguard.proto.DecryptingTrusteeProto;
+import com.sunya.electionguard.protogen.CommonProto;
+import com.sunya.electionguard.protogen.DecryptingTrusteeProto;
 import com.sunya.electionguard.publish.Consumer;
 import com.sunya.electionguard.verifier.ElectionRecord;
 

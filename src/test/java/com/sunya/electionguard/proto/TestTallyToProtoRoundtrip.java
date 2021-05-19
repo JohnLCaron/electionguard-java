@@ -2,6 +2,8 @@ package com.sunya.electionguard.proto;
 
 import com.sunya.electionguard.CiphertextTally;
 import com.sunya.electionguard.PlaintextTally;
+import com.sunya.electionguard.protogen.CiphertextTallyProto;
+import com.sunya.electionguard.protogen.PlaintextTallyProto;
 import com.sunya.electionguard.publish.ConvertFromJson;
 import com.sunya.electionguard.publish.Publisher;
 import com.sunya.electionguard.verifier.TestParameterVerifier;

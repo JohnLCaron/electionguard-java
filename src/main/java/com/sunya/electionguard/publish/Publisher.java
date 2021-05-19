@@ -2,15 +2,10 @@ package com.sunya.electionguard.publish;
 
 import com.google.common.collect.Iterables;
 import com.sunya.electionguard.*;
-import com.sunya.electionguard.proto.CiphertextBallotProto;
 import com.sunya.electionguard.proto.CiphertextBallotToProto;
-import com.sunya.electionguard.proto.ElectionRecordProto;
 import com.sunya.electionguard.proto.ElectionRecordToProto;
-import com.sunya.electionguard.proto.PlaintextBallotProto;
 import com.sunya.electionguard.proto.PlaintextBallotToProto;
-import com.sunya.electionguard.proto.PlaintextTallyProto;
 import com.sunya.electionguard.proto.PlaintextTallyToProto;
-import com.sunya.electionguard.proto.TrusteeProto;
 import com.sunya.electionguard.verifier.ElectionRecord;
 
 import javax.annotation.Nullable;
@@ -21,6 +16,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Formatter;
+
+import com.sunya.electionguard.protogen.CiphertextBallotProto;
+import com.sunya.electionguard.protogen.ElectionRecordProto;
+import com.sunya.electionguard.protogen.PlaintextBallotProto;
+import com.sunya.electionguard.protogen.PlaintextTallyProto;
+import com.sunya.electionguard.protogen.TrusteeProto;
 
 /** Publishes the Manifest Record to Json or protobuf files. */
 public class Publisher {
@@ -415,11 +416,11 @@ public class Publisher {
               context.number_of_guardians, Iterables.size(guardianRecords)));
     }
 
-    ElectionRecordProto.ElectionRecord ElectionRecordProto = ElectionRecordToProto.buildElectionRecord(
+    ElectionRecordProto.ElectionRecord electionRecordProto = ElectionRecordToProto.buildElectionRecord(
             description, context, constants, guardianRecords,
             null, null, null, null);
     try (FileOutputStream out = new FileOutputStream(electionRecordProtoPath().toFile())) {
-      ElectionRecordProto.writeDelimitedTo(out);
+      electionRecordProto.writeDelimitedTo(out);
     }
   }
 
