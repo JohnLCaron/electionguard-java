@@ -3,12 +3,9 @@ package com.sunya.electionguard.publish;
 import com.google.common.collect.AbstractIterator;
 import com.sunya.electionguard.*;
 import com.sunya.electionguard.proto.CiphertextBallotFromProto;
-import com.sunya.electionguard.proto.CiphertextBallotProto;
 import com.sunya.electionguard.proto.ElectionRecordFromProto;
 import com.sunya.electionguard.proto.PlaintextBallotFromProto;
-import com.sunya.electionguard.proto.PlaintextBallotProto;
 import com.sunya.electionguard.proto.PlaintextTallyFromProto;
-import com.sunya.electionguard.proto.PlaintextTallyProto;
 import com.sunya.electionguard.verifier.ElectionRecord;
 
 import java.io.File;
@@ -20,6 +17,9 @@ import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.List;
 import java.util.function.Predicate;
+
+import com.sunya.electionguard.protogen.*;
+
 
 /** Helper class for consumers of published election records in Json or protobuf. */
 public class Consumer {

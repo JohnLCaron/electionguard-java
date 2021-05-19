@@ -1,7 +1,6 @@
 package com.sunya.electionguard.proto;
 
 import com.google.common.collect.ImmutableList;
-import com.google.protobuf.ByteString;
 import com.sunya.electionguard.Auxiliary;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.Group;
@@ -14,6 +13,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.sunya.electionguard.proto.CommonConvert.convertElementModP;
+
+import com.sunya.electionguard.protogen.CommonProto;
+import com.sunya.electionguard.protogen.TrusteeProto;
+
 
 public class TrusteeFromProto {
 

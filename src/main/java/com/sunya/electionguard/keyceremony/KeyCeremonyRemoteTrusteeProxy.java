@@ -6,9 +6,9 @@ import com.sunya.electionguard.Auxiliary;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.SchnorrProof;
 import com.sunya.electionguard.proto.CommonConvert;
-import com.sunya.electionguard.proto.CommonProto;
-import com.sunya.electionguard.proto.RemoteKeyCeremonyTrusteeProto;
-import com.sunya.electionguard.proto.RemoteKeyCeremonyTrusteeServiceGrpc;
+import com.sunya.electionguard.protogen.CommonProto;
+import com.sunya.electionguard.protogen.RemoteKeyCeremonyTrusteeProto;
+import com.sunya.electionguard.protogen.RemoteKeyCeremonyTrusteeServiceGrpc;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
@@ -18,7 +18,7 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static com.sunya.electionguard.proto.RemoteKeyCeremonyTrusteeServiceGrpc.RemoteKeyCeremonyTrusteeServiceBlockingStub;
+import static com.sunya.electionguard.protogen.RemoteKeyCeremonyTrusteeServiceGrpc.RemoteKeyCeremonyTrusteeServiceBlockingStub;
 
 /** A Remote Trustee client proxy, communicating over gRpc. */
 class KeyCeremonyRemoteTrusteeProxy implements KeyCeremonyTrusteeIF {

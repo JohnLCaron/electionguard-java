@@ -3,9 +3,8 @@ package com.sunya.electionguard.proto;
 import com.sunya.electionguard.PlaintextBallot;
 
 import static com.sunya.electionguard.proto.CommonConvert.convertList;
-import static com.sunya.electionguard.proto.PlaintextBallotProto.ExtendedData;
-import static com.sunya.electionguard.proto.PlaintextBallotProto.PlaintextBallotContest;
-import static com.sunya.electionguard.proto.PlaintextBallotProto.PlaintextBallotSelection;
+
+import com.sunya.electionguard.protogen.PlaintextBallotProto;
 
 public class PlaintextBallotFromProto {
 
@@ -16,13 +15,13 @@ public class PlaintextBallotFromProto {
             convertList(ballot.getContestsList(), PlaintextBallotFromProto::convertContest));
   }
 
-  static PlaintextBallot.Contest convertContest(PlaintextBallotContest contest) {
+  static PlaintextBallot.Contest convertContest(PlaintextBallotProto.PlaintextBallotContest contest) {
     return new PlaintextBallot.Contest(
             contest.getContestId(),
             convertList(contest.getBallotSelectionsList(), PlaintextBallotFromProto::convertSelection));
   }
 
-  static PlaintextBallot.Selection convertSelection(PlaintextBallotSelection selection) {
+  static PlaintextBallot.Selection convertSelection(PlaintextBallotProto.PlaintextBallotSelection selection) {
     return new PlaintextBallot.Selection(
             selection.getSelectionId(),
             selection.getVote(),
@@ -30,7 +29,7 @@ public class PlaintextBallotFromProto {
             selection.hasExtendedData() ? convertExtendedData(selection.getExtendedData()) : null);
   }
 
-  static PlaintextBallot.ExtendedData convertExtendedData(ExtendedData data) {
+  static PlaintextBallot.ExtendedData convertExtendedData(PlaintextBallotProto.ExtendedData data) {
     return new PlaintextBallot.ExtendedData(
             data.getValue(),
             data.getLength());

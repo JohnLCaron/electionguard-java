@@ -8,7 +8,7 @@ import com.sunya.electionguard.input.ElectionInputValidation;
 import com.sunya.electionguard.keyceremony.KeyCeremonyTrustee;
 import com.sunya.electionguard.keyceremony.KeyCeremonyTrusteeIF;
 import com.sunya.electionguard.keyceremony.KeyCeremonyRemoteMediator;
-import com.sunya.electionguard.proto.TrusteeProto;
+import com.sunya.electionguard.protogen.TrusteeProto;
 import com.sunya.electionguard.proto.TrusteeToProto;
 import com.sunya.electionguard.publish.Consumer;
 import com.sunya.electionguard.publish.Publisher;

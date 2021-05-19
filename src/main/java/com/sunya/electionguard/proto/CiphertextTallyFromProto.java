@@ -5,10 +5,10 @@ import com.sunya.electionguard.CiphertextTally;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.sunya.electionguard.proto.CiphertextTallyProto.CiphertextTallyContest;
-import static com.sunya.electionguard.proto.CiphertextTallyProto.CiphertextTallySelection;
 import static com.sunya.electionguard.proto.CommonConvert.convertCiphertext;
 import static com.sunya.electionguard.proto.CommonConvert.convertElementModQ;
+
+import com.sunya.electionguard.protogen.CiphertextTallyProto;
 
 public class CiphertextTallyFromProto {
 
@@ -21,7 +21,7 @@ public class CiphertextTallyFromProto {
             tally.getObjectId(), contests);
   }
 
-  static CiphertextTally.Contest convertContest(CiphertextTallyContest proto) {
+  static CiphertextTally.Contest convertContest(CiphertextTallyProto.CiphertextTallyContest proto) {
     Map<String, CiphertextTally.Selection> selections = proto.getTallySelectionsMap().entrySet().stream()
             .collect(Collectors.toMap(Map.Entry::getKey,
                     e -> convertSelection(e.getValue())));
@@ -32,7 +32,7 @@ public class CiphertextTallyFromProto {
             selections);
   }
 
-  static CiphertextTally.Selection convertSelection(CiphertextTallySelection proto) {
+  static CiphertextTally.Selection convertSelection(CiphertextTallyProto.CiphertextTallySelection proto) {
 
     return new CiphertextTally.Selection(
             proto.getObjectId(),

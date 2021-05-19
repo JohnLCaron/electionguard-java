@@ -9,7 +9,7 @@ import static com.sunya.electionguard.proto.CommonConvert.convertCiphertext;
 import static com.sunya.electionguard.proto.CommonConvert.convertElementModQ;
 import static com.sunya.electionguard.proto.CommonConvert.convertElementModP;
 
-import static com.sunya.electionguard.proto.CiphertextBallotProto.*;
+import com.sunya.electionguard.protogen.CiphertextBallotProto;
 
 public class CiphertextBallotToProto {
 
@@ -38,8 +38,8 @@ public class CiphertextBallotToProto {
     return builder.build();
   }
 
-  static CiphertextBallotContest convertContest(CiphertextBallot.Contest contest) {
-    CiphertextBallotContest.Builder builder = CiphertextBallotContest.newBuilder();
+  static CiphertextBallotProto.CiphertextBallotContest convertContest(CiphertextBallot.Contest contest) {
+    CiphertextBallotProto.CiphertextBallotContest.Builder builder = CiphertextBallotProto.CiphertextBallotContest.newBuilder();
     builder.setObjectId(contest.object_id);
     builder.setDescriptionHash(convertElementModQ(contest.contest_hash));
     contest.ballot_selections.forEach(value -> builder.addSelections(convertSelection(value)));
@@ -50,8 +50,8 @@ public class CiphertextBallotToProto {
     return builder.build();
   }
 
-  static CiphertextBallotSelection convertSelection(CiphertextBallot.Selection selection) {
-    CiphertextBallotSelection.Builder builder = CiphertextBallotSelection.newBuilder();
+  static CiphertextBallotProto.CiphertextBallotSelection convertSelection(CiphertextBallot.Selection selection) {
+    CiphertextBallotProto.CiphertextBallotSelection.Builder builder = CiphertextBallotProto.CiphertextBallotSelection.newBuilder();
     builder.setObjectId(selection.object_id);
     builder.setDescriptionHash(convertElementModQ(selection.description_hash));
     builder.setCiphertext(convertCiphertext(selection.ciphertext()));
@@ -63,8 +63,8 @@ public class CiphertextBallotToProto {
     return builder.build();
   }
 
-  static ConstantChaumPedersenProof convertConstantProof(ChaumPedersen.ConstantChaumPedersenProof proof) {
-    ConstantChaumPedersenProof.Builder builder = ConstantChaumPedersenProof.newBuilder();
+  static CiphertextBallotProto.ConstantChaumPedersenProof convertConstantProof(ChaumPedersen.ConstantChaumPedersenProof proof) {
+    CiphertextBallotProto.ConstantChaumPedersenProof.Builder builder = CiphertextBallotProto.ConstantChaumPedersenProof.newBuilder();
     builder.setPad(convertElementModP(proof.pad));
     builder.setData(convertElementModP(proof.data));
     builder.setChallenge(convertElementModQ(proof.challenge));
@@ -73,8 +73,8 @@ public class CiphertextBallotToProto {
     return builder.build();
   }
 
-  static DisjunctiveChaumPedersenProof convertDisjunctiveProof(ChaumPedersen.DisjunctiveChaumPedersenProof proof) {
-    DisjunctiveChaumPedersenProof.Builder builder = DisjunctiveChaumPedersenProof.newBuilder();
+  static CiphertextBallotProto.DisjunctiveChaumPedersenProof convertDisjunctiveProof(ChaumPedersen.DisjunctiveChaumPedersenProof proof) {
+    CiphertextBallotProto.DisjunctiveChaumPedersenProof.Builder builder = CiphertextBallotProto.DisjunctiveChaumPedersenProof.newBuilder();
     builder.setProofZeroPad(convertElementModP(proof.proof_zero_pad));
     builder.setProofZeroData(convertElementModP(proof.proof_zero_data));
     builder.setProofOnePad(convertElementModP(proof.proof_one_pad));

@@ -10,9 +10,10 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.sunya.electionguard.proto.CommonConvert.convertElementModP;
-import static com.sunya.electionguard.proto.PlaintextTallyProto.CiphertextDecryptionSelection;
-import static com.sunya.electionguard.proto.PlaintextTallyProto.CiphertextCompensatedDecryptionSelection;
 import static com.sunya.electionguard.proto.CommonConvert.convertCiphertext;
+
+import com.sunya.electionguard.protogen.PlaintextTallyProto;
+
 
 public class PlaintextTallyFromProto {
 
@@ -48,9 +49,9 @@ public class PlaintextTallyFromProto {
             shares);
   }
 
-  private static DecryptionShare.CiphertextDecryptionSelection convertShare(CiphertextDecryptionSelection proto) {
+  private static DecryptionShare.CiphertextDecryptionSelection convertShare(PlaintextTallyProto.CiphertextDecryptionSelection proto) {
     Map<String, DecryptionShare.CiphertextCompensatedDecryptionSelection> recovered = new HashMap<>();
-    for (Map.Entry<String, CiphertextCompensatedDecryptionSelection> entry : proto.getRecoveredPartsMap().entrySet()) {
+    for (Map.Entry<String, PlaintextTallyProto.CiphertextCompensatedDecryptionSelection> entry : proto.getRecoveredPartsMap().entrySet()) {
       recovered.put(entry.getKey(), convertCompensatedShare(entry.getValue()));
     }
 
@@ -63,7 +64,7 @@ public class PlaintextTallyFromProto {
   }
 
   private static DecryptionShare.CiphertextCompensatedDecryptionSelection convertCompensatedShare(
-          CiphertextCompensatedDecryptionSelection proto) {
+          PlaintextTallyProto.CiphertextCompensatedDecryptionSelection proto) {
 
     return DecryptionShare.CiphertextCompensatedDecryptionSelection.create(
             proto.getObjectId(),

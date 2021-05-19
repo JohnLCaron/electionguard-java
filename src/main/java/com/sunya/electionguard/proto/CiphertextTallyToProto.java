@@ -7,6 +7,8 @@ import java.util.Map;
 import static com.sunya.electionguard.proto.CommonConvert.convertCiphertext;
 import static com.sunya.electionguard.proto.CommonConvert.convertElementModQ;
 
+import com.sunya.electionguard.protogen.CiphertextTallyProto;
+
 public class CiphertextTallyToProto {
 
   public static CiphertextTallyProto.CiphertextTally translateToProto(CiphertextTally tally) {

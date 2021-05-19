@@ -1,7 +1,7 @@
 package com.sunya.electionguard;
 
 import com.google.protobuf.ByteString;
-import com.sunya.electionguard.proto.CommonProto;
+import com.sunya.electionguard.protogen.CommonProto;
 import net.jqwik.api.Example;
 
 import java.math.BigInteger;

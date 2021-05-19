@@ -155,13 +155,13 @@ public class TestKeyCeremony {
                     RECIPIENT_GUARDIAN_ID,
                     RECIPIENT_SEQUENCE_ORDER,
                     Group.TWO_MOD_P,
-                    ImmutableList.of(Group.TWO_MOD_P, Group.TWO_MOD_P), new ArrayList()));
+                    ImmutableList.of(Group.TWO_MOD_P, Group.TWO_MOD_P), new ArrayList<>()));
     public_keys.add(
             ElectionPublicKey.create(
                     SENDER_GUARDIAN_ID,
                     SENDER_SEQUENCE_ORDER,
                     Group.TWO_MOD_P,
-                    ImmutableList.of(Group.TWO_MOD_P, Group.TWO_MOD_P), new ArrayList()));
+                    ImmutableList.of(Group.TWO_MOD_P, Group.TWO_MOD_P), new ArrayList<>()));
 
     ElectionJointKey joint_key = combine_election_public_keys(public_keys);
     assertThat(joint_key).isNotNull();
