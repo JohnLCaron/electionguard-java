@@ -4,7 +4,7 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.google.common.base.Stopwatch;
-import com.sunya.electionguard.workflow.RunElectionWorkflow;
+import com.sunya.electionguard.workflow.RunStandardWorkflow;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
  *
  */
 public class RunRemoteWorkflowSimulated {
-  private static final String classpath = RunElectionWorkflow.classpath;
+  private static final String classpath = RunStandardWorkflow.classpath;
 
   private static class CommandLine {
     @Parameter(names = {"-in"}, order = 0,

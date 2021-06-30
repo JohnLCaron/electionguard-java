@@ -276,7 +276,7 @@ public class PerformKeyCeremony {
   }
 
   boolean publish(String publishDir) throws IOException {
-    Publisher publisher = new Publisher(publishDir, true, false);
+    Publisher publisher = new Publisher(publishDir, true, true);
     publisher.writeKeyCeremonyJson(
             this.election,
             this.context,
