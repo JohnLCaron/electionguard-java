@@ -17,11 +17,11 @@ import java.util.concurrent.TimeUnit;
  * For command line help:
  * <strong>
  * <pre>
- *  java -classpath electionguard-java-all.jar com.sunya.electionguard.workflow.RunElectionWorkflow --help
+ *  java -classpath electionguard-java-all.jar com.sunya.electionguard.workflow.RunStandardWorkflow --help
  * </pre>
  * </strong>
  */
-public class RunElectionWorkflow {
+public class RunStandardWorkflow {
   public static final String classpath = "build/libs/electionguard-java-0.9.3-SNAPSHOT-all.jar";
 
   private static class CommandLine {
@@ -64,7 +64,7 @@ public class RunElectionWorkflow {
   }
 
   public static void main(String[] args) {
-    String progName = RunElectionWorkflow.class.getName();
+    String progName = RunStandardWorkflow.class.getName();
     CommandLine cmdLine;
     Stopwatch stopwatchAll = Stopwatch.createStarted();
     Stopwatch stopwatch = Stopwatch.createStarted();

@@ -1,8 +1,8 @@
 # 🗳 ElectionGuard Java 
 
-## RunElectionWorkflow
+## RunStandardWorkflow
 
-The _com.sunya.electionguard.workflow.RunElectionWorkflow_ command line utility simulates an
+The _com.sunya.electionguard.workflow.RunStandardWorkflow_ command line utility simulates an
 entire ElectionGuard workflow, calling each of the workflow programs in turn. It is used for testing,
 it cannot be used in an actual election.
 
@@ -11,7 +11,7 @@ publishes the final record.
 
 ````
 Usage: java -classpath electionguard-java-all.jar 
-      com.sunya.electionguard.workflow.RunElectionWorkflow [options]
+      com.sunya.electionguard.workflow.RunStandardWorkflow [options]
   Options:
   * -in
       Directory containing input election description
@@ -42,16 +42,18 @@ which only the election description is read.
 You must specify the number of guardians and quorum, and the Guardian's polynomial coefficients are generated at random.
 
 The _encryptDir_ is the output directory of _PerformKeyCeremony_ and the input directory of _EncryptBallots_.
-You should make this separate from the input directory.
+It must start with "publish".
+Current contents will be deleted, so make this separate from the input directory.
 
 The _out_ directory is the output directory of _EncryptBallots_ and the input directory of _DecryptBallots _
 and _VerifyElectionRecord_.
-You should make this separate from the input and the encryptDir directory.
+It must start with "publish".
+Current contents will be deleted, so make this separate from the encryptDir directory.
 
 Example:
 
 ````
-java -classpath electionguard-java-all.jar com.sunya.electionguard.workflow.RunElectionWorkflow \
+java -classpath electionguard-java-all.jar com.sunya.electionguard.workflow.RunStandardWorkflow \
     -in /data/electionguard/cook_county/metadata \
     -nguardians 6 -quorum 5
     -encryptDir /data/electionguard/publishEncryption

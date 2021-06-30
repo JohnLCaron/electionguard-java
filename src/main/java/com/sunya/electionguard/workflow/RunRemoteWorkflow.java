@@ -32,7 +32,7 @@ import java.util.stream.Stream;
  * </strong>
  */
 public class RunRemoteWorkflow {
-  private static final String classpath = RunElectionWorkflow.classpath;
+  private static final String classpath = RunStandardWorkflow.classpath;
   private static final String REMOTE_TRUSTEE = "remoteTrustee";
   private static final String CMD_OUTPUT = "/home/snake/tmp/runRemoteWorkflow/";
 
