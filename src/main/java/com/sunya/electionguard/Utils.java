@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.io.BaseEncoding;
 
 import java.math.BigInteger;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
@@ -56,5 +57,17 @@ class Utils {
   /** Decode the Base16 encoded string s. */
   static byte[] b16decode(String s) {
     return BaseEncoding.base16().decode(s.toUpperCase());
+  }
+
+  public static String to_iso_date_string(OffsetDateTime date_time) {
+    return date_time.toString();
+    /* LOOK Should be:
+    utc_datetime = (
+            date_time.astimezone(timezone.utc).replace(microsecond = 0)
+            if date_time.tzinfo
+            else date_time.replace(microsecond = 0)
+    )
+    return utc_datetime.strftime("%Y-%m-%dT%H:%M:%SZ")
+    */
   }
 }

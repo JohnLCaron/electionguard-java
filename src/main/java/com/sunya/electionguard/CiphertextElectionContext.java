@@ -8,6 +8,8 @@ import java.util.Objects;
 import static com.sunya.electionguard.Group.G;
 import static com.sunya.electionguard.Group.P;
 import static com.sunya.electionguard.Group.Q;
+import static com.sunya.electionguard.Group.int_to_p_unchecked;
+import static com.sunya.electionguard.Group.int_to_q_unchecked;
 
 /**
  * The cryptographic context of an election.
@@ -20,7 +22,7 @@ import static com.sunya.electionguard.Group.Q;
 public class CiphertextElectionContext {
 
   /**
-   * Makes a CiphertextElectionContext object.
+   * Makes a CiphertextElectionContext object. python: election.make_ciphertext_election_context()
    * @param number_of_guardians The number of guardians necessary to generate the public key.
    * @param quorum The quorum of guardians necessary to decrypt an election.  Must be less than number_of_guardians.
    * @param joint_public_key the joint public key of the election, K.
@@ -64,7 +66,10 @@ public class CiphertextElectionContext {
   }
 
   public static Group.ElementModQ make_crypto_base_hash(int number_of_guardians, int quorum, Manifest election) {
-    return Hash.hash_elems(P, Q, G, number_of_guardians, quorum, election.crypto_hash());
+    return Hash.hash_elems(int_to_p_unchecked(P),
+                    int_to_q_unchecked(Q),
+                    int_to_p_unchecked(G),
+                    number_of_guardians, quorum, election.crypto_hash());
   }
 
   /////////////////////////////////////////////////////////////////////////////////////////////////
