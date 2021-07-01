@@ -25,7 +25,6 @@ import static org.mockito.Mockito.verify;
 
 /** Test DecryptingRemoteTrustee. Needs one to be running on 17771. */
 public class TestDecryptingRemoteTrustee {
-  private static final String DECRYPTING_DATA_DIR = "src/test/data/decrypting/";
 
   @Mock
   StreamObserver<DecryptingTrusteeProto.CompensatedDecryptionResponse> observeCompensatedDecryption;
@@ -48,14 +47,14 @@ public class TestDecryptingRemoteTrustee {
   public TestDecryptingRemoteTrustee() throws IOException {
     MockitoAnnotations.openMocks(this);
 
-    Consumer consumer = new Consumer(DECRYPTING_DATA_DIR);
+    Consumer consumer = new Consumer(TestDecryptingMediator.DECRYPTING_DATA_DIR);
     ElectionRecord electionRecord = consumer.readElectionRecord();
     this.tally = electionRecord.encryptedTally;
     this.extendedHash =  electionRecord.extendedHash();
   }
 
   DecryptingRemoteTrustee makeDecryptingRemoteTrustee() throws IOException {
-    return new DecryptingRemoteTrustee(DECRYPTING_DATA_DIR + "/remoteTrustee1.protobuf");
+    return new DecryptingRemoteTrustee(TestDecryptingMediator.TRUSTEE_DATA_DIR + "/remoteTrustee1.protobuf");
   }
 
   @Example

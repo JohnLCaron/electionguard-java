@@ -33,6 +33,9 @@ public class VerifyElectionRecord {
             description = "Directory containing input election record", required = true)
     String inputDir;
 
+    @Parameter(names = {"-skip10"}, order = 2, description = "Skip Box 10 validation")
+    boolean skip10 = false;
+
     @Parameter(names = {"-h", "--help"}, order = 2, description = "Display this help and exit", help = true)
     boolean help = false;
 
@@ -75,7 +78,7 @@ public class VerifyElectionRecord {
       }
 
       System.out.printf(" VerifyElectionRecord read from %s%n", cmdLine.inputDir);
-      boolean ok = verifyElectionRecord(electionRecord);
+      boolean ok = verifyElectionRecord(electionRecord, cmdLine.skip10);
       System.exit(ok ? 0 : 1);
     } catch (Throwable t) {
       t.printStackTrace();
@@ -83,7 +86,7 @@ public class VerifyElectionRecord {
     }
   }
 
-  public static boolean verifyElectionRecord(ElectionRecord electionRecord) {
+  public static boolean verifyElectionRecord(ElectionRecord electionRecord, boolean skip10) {
     System.out.println("============ Ballot Verification =========================");
     System.out.println("------------ [box 1] Parameter Validation ------------");
     ParameterVerifier blv = new ParameterVerifier(electionRecord);
@@ -121,7 +124,7 @@ public class VerifyElectionRecord {
     System.out.println("------------ [box 10] Correctness of Replacement Partial Decryptions ------------");
     boolean pdvOk = true;
     if (electionRecord.context.number_of_guardians == electionRecord.context.quorum) {
-      System.out.println("  not needed since there are no missing guardians%n");
+      System.out.println("  not needed since there are no missing guardians");
     } else {
       PartialDecryptionVerifier pdv = new PartialDecryptionVerifier(electionRecord, electionRecord.decryptedTally);
       pdvOk = pdv.verify_replacement_partial_decryptions();
@@ -140,17 +143,20 @@ public class VerifyElectionRecord {
       ptiValid = false;
     }
 
-    System.out.println("------------ [box 11] Correctness of Decryption of Tallies ------------");
+    System.out.println("------------ [box 11] Correct Decryption of Tallies ------------");
     TallyDecryptionVerifier tdv = new TallyDecryptionVerifier(electionRecord.election, electionRecord.decryptedTally);
     boolean tdvOk = tdv.verify_tally_decryption();
 
-    System.out.println("------------ [box 12] Correct Decryption of Spoiled Ballots ------------");
+    System.out.println("------------ [box 12] Correct Decryption of Spoiled Tallies ------------");
     boolean dvsOk = dv.verify_spoiled_tallies(electionRecord.spoiledTallies);
 
+    // 12B
     PlaintextBallotVerifier pbv = new PlaintextBallotVerifier(electionRecord);
     boolean pbvOk = pbv.verify_plaintext_ballot();
 
-    boolean allOk = (blvOk && gpkvOk && epkvOk && sevOk && cvlvOk && bcvOk && bavOk && dvOk && ptiValid && pdvOk && tdvOk && dvsOk && pbvOk);
+    boolean allOk = (blvOk && gpkvOk && epkvOk && sevOk && cvlvOk && bcvOk && bavOk && dvOk && ptiValid &&
+            (pdvOk || skip10) &&
+            tdvOk && dvsOk && pbvOk);
     if (allOk) {
       System.out.printf("%n===== ALL OK! ===== %n");
     } else {

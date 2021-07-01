@@ -35,13 +35,13 @@ public class Encrypt {
     /** Unique identifier for device. */
     public final long device_id;
     /** Used to identify session and protect the timestamp. */
-    public final int session_id;
+    public final long session_id;
     /** Election initialization value. */
-    public final int launch_code;
+    public final long launch_code;
     /** Arbitrary string to designate the location of the device. */
     public final String location;
 
-    public EncryptionDevice(long device_id, int session_id, int launch_code, String location) {
+    public EncryptionDevice(long device_id, long session_id, long launch_code, String location) {
       this.device_id = device_id;
       this.session_id = session_id;
       this.launch_code = launch_code;

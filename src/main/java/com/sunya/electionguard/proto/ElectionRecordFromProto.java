@@ -38,6 +38,7 @@ public class ElectionRecordFromProto {
   }
 
   public static ElectionRecord translateFromProto(ElectionRecordProto.ElectionRecord proto) {
+    String version = proto.getVersion();
     ElectionConstants constants = convertConstants(proto.getConstants());
     CiphertextElectionContext context = convertContext(proto.getContext());
     Manifest description = ManifestFromProto.translateFromProto(proto.getManifest());
@@ -55,7 +56,7 @@ public class ElectionRecordFromProto {
             proto.getAvailableGuardiansList().stream().map(ElectionRecordFromProto::convertAvailableGuardian).collect(Collectors.toList());
 
 
-    return new ElectionRecord(constants, context, description, guardianRecords,
+    return new ElectionRecord(version, constants, context, description, guardianRecords,
             devices, ciphertextTally, decryptedTally, null, null, null, guardians);
   }
 
@@ -85,7 +86,8 @@ public class ElectionRecordFromProto {
             convertElementModP(context.getJointPublicKey()),
             convertElementModQ(context.getDescriptionHash()),
             convertElementModQ(context.getCryptoBaseHash()),
-            convertElementModQ(context.getCryptoExtendedBaseHash()));
+            convertElementModQ(context.getCryptoExtendedBaseHash()),
+            convertElementModQ(context.getCommitmentHash()));
   }
 
   static Encrypt.EncryptionDevice convertDevice(ElectionRecordProto.EncryptionDevice device) {

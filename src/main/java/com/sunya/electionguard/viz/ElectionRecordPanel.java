@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.sunya.electionguard.AvailableGuardian;
 import com.sunya.electionguard.CiphertextElectionContext;
 import com.sunya.electionguard.ElectionConstants;
+import com.sunya.electionguard.Encrypt;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.GuardianRecord;
 import com.sunya.electionguard.Manifest;
@@ -166,6 +167,7 @@ class ElectionRecordPanel extends JPanel {
   void showInfo(Formatter f) {
     f.format("Election Record %s%n", this.electionRecordDir);
     if (this.record != null) {
+      f.format("  version = %s%n", record.version);
       Manifest manifest = record.election;
       f.format("%nManifest%n");
       f.format("  election_scope_id = %s%n", manifest.election_scope_id);
@@ -180,9 +182,15 @@ class ElectionRecordPanel extends JPanel {
       f.format("  number_of_guardians = %s%n", context.number_of_guardians);
       f.format("  quorum = %s%n", context.quorum);
       f.format("  election public key = %s%n", context.elgamal_public_key.toShortString());
-      f.format("  description hash = %s%n", context.description_hash);
+      f.format("  description hash = %s%n", context.manifest_hash);
       f.format("  election base hash = %s%n", context.crypto_base_hash);
       f.format("  extended base hash = %s%n", context.crypto_extended_base_hash);
+      f.format("  commitment hash = %s%n", context.commitment_hash);
+
+      f.format("%n  EncryptionDevices%n");
+      for (Encrypt.EncryptionDevice device : record.devices) {
+        f.format("    %d session=%d launch=%d location=%s%n", device.device_id, device.session_id, device.launch_code, device.location);
+      }
 
       f.format("%n  Guardian Records Validation Sets%n");
       for (GuardianRecord gr : record.guardianRecords) {
@@ -208,7 +216,7 @@ class ElectionRecordPanel extends JPanel {
       return;
     }
     f.format(" Verify ElectionRecord from %s%n", this.consumer.location());
-    boolean ok = VerifyElectionRecord.verifyElectionRecord(this.record);
+    boolean ok = VerifyElectionRecord.verifyElectionRecord(this.record, false);
     f.format(" OK =  %s%n", ok);
   }
 

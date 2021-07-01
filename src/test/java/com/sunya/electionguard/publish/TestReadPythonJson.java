@@ -10,7 +10,7 @@ import java.io.IOException;
 import static com.google.common.truth.Truth.assertThat;
 
 public class TestReadPythonJson {
-  private static final String pythonPublish = "src/test/data/python-trogdar/";
+  private static final String pythonPublish = "src/test/data/python-1.2.2/";
   private static Publisher publisher;
 
   @BeforeContainer
@@ -33,7 +33,7 @@ public class TestReadPythonJson {
   }
 
   @Example
-  public void testElectionPythonJson() throws IOException {
+  public void testManifestPythonJson() throws IOException {
     Manifest fromPython = ConvertFromJson.readElection(publisher.manifestPath().toString());
     assertThat(fromPython).isNotNull();
     System.out.printf("ElectionDescription %s%n", fromPython.election_scope_id);

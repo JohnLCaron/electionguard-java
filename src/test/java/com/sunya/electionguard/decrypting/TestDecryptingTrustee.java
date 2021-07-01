@@ -11,17 +11,16 @@ public class TestDecryptingTrustee {
   private static final String GUARDIAN_ID = "remoteTrustee";
   private static final int NGUARDIANS = 3;
 
-  private static final String DECRYPTING_DATA_DIR = "src/test/data/decrypting/";
   DecryptingTrustee trustee1;
 
   public TestDecryptingTrustee() throws IOException {
-    trustee1 = TrusteeFromProto.readTrustee(DECRYPTING_DATA_DIR + "/remoteTrustee1.protobuf");
+    trustee1 = TrusteeFromProto.readTrustee(TestDecryptingMediator.TRUSTEE_DATA_DIR + "/remoteTrustee1.protobuf");
   }
 
   @Example
   public void testKeyCeremonyTrusteeGeneration() {
     assertThat(trustee1.id()).isEqualTo(GUARDIAN_ID + 1);
-    assertThat(trustee1.xCoordinate()).isEqualTo(2);
+    assertThat(trustee1.xCoordinate()).isEqualTo(1);
     assertThat(trustee1.electionPublicKey()).isNotNull();
 
     assertThat(trustee1.guardianCommittments.size()).isEqualTo(NGUARDIANS);

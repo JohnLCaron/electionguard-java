@@ -27,6 +27,7 @@ import static com.sunya.electionguard.Group.ElementModP;
  */
 public class DecryptionVerifier {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
+  private static final boolean show = false;
 
   final ElectionRecord electionRecord;
   final PlaintextTally decryptedTally;
@@ -56,6 +57,7 @@ public class DecryptionVerifier {
     AtomicBoolean valid = new AtomicBoolean(true);
     try (Stream<PlaintextTally> tallies = talliesIterable.iterator().stream()) {
       tallies.forEach(spoiled_tally ->  {
+        if (show) System.out.printf(" Spoiled tally %s %n", spoiled_tally.object_id);
         boolean ok = this.make_all_contest_verification(spoiled_tally.object_id, spoiled_tally.contests);
         valid.compareAndSet(true, ok); // AND
       });
@@ -192,17 +194,17 @@ public class DecryptionVerifier {
 
         // 9.A check if the response vi is in the set Zq
         if (!response.is_in_bounds()) {
-          System.out.printf("  9.A response not in Zq for missing_guardian %s%n", missing_guardian_id);
+          System.out.printf("  9.A response not in Zq for missing_guardian %s for %s%n", missing_guardian_id, this.id);
           error = true;
         }
 
         // 9.B check if the given ai, bi are both in set Zr_p
         if (!pad.is_valid_residue()) {
-          System.out.printf("  9.B ai not in Zr_p for missing_guardian %s%n", missing_guardian_id);
+          System.out.printf("  9.B ai not in Zr_p for missing_guardian %s for %s%n", missing_guardian_id, this.id);
           error = true;
         }
         if (!data.is_valid_residue()) {
-          System.out.printf("  9.B bi not in Zr_p for missing_guardian %s%n", missing_guardian_id);
+          System.out.printf("  9.B bi not in Zr_p for missing_guardian %s for %s%n", missing_guardian_id, this.id);
           error = true;
         }
 
@@ -210,19 +212,19 @@ public class DecryptionVerifier {
         ElementModQ challenge_computed = Hash.hash_elems(electionRecord.extendedHash(),
                 this.selection_pad, this.selection_data, pad, data, partial_decryption);
         if (!challenge_computed.equals(challenge)) {
-          System.out.printf("  9.C ci != H(Q-bar, (A,B), (ai, bi), M_i,l) for missing_guardian %s%n", missing_guardian_id);
+          System.out.printf("  9.C ci != H(Q-bar, (A,B), (ai, bi), M_i,l) for missing_guardian %s for %s%n", missing_guardian_id, this.id);
           error = true;
         }
 
         // 9.D g^vi mod p = ai * Ki^ci mod p
         if (!this.check_equation1(response, pad, challenge, recovery_key)) {
-          System.out.printf("  9.D g^vi mod p != ai * Ki^ci mod p for missing_guardian %s%n", missing_guardian_id);
+          System.out.printf("  9.D g^vi mod p != ai * Ki^ci mod p for missing_guardian %s for %s%n", missing_guardian_id, this.id);
           error = true;
         }
 
         // 9.E A^vi mod p = bi * M_i,l ^ ci mod p
         if (!this.check_equation2(response, data, challenge, partial_decryption)) {
-          System.out.printf("  9.E A^vi mod p = bi * M_i,l ^ ci mod p for missing_guardian %s%n", missing_guardian_id);
+          System.out.printf("  9.E A^vi mod p = bi * M_i,l ^ ci mod p for missing_guardian %s for %s%n", missing_guardian_id, this.id);
           error = true;
         }
       }
@@ -252,17 +254,17 @@ public class DecryptionVerifier {
 
       // 8.A check if the response vi is in the set Zq
       if (!response.is_in_bounds()) {
-        System.out.printf("  8.A response not in Zq for missing_guardian %s%n", guardian_id);
+        System.out.printf("  8.A response not in Zq for guardian %s for %s%n", guardian_id, this.id);
         error = true;
       }
 
       // 8.B check if the given ai, bi are both in set Zr_p
       if (!pad.is_valid_residue()) {
-        System.out.printf("  8.B ai not in Zr_p for missing_guardian %s%n", guardian_id);
+        System.out.printf("  8.B ai not in Zr_p for guardian %s for %s%n", guardian_id, this.id);
         error = true;
       }
       if (!data.is_valid_residue()) {
-        System.out.printf("  8.B bi not in Zr_p for missing_guardian %s%n", guardian_id);
+        System.out.printf("  8.B bi not in Zr_p for guardian %s for %s%n", guardian_id, this.id);
         error = true;
       }
 
@@ -270,19 +272,21 @@ public class DecryptionVerifier {
       ElementModQ challenge_computed = Hash.hash_elems(electionRecord.extendedHash(),
               this.selection_pad, this.selection_data, pad, data, partial_decryption);
       if (!challenge_computed.equals(challenge)) {
-        System.out.printf("  8.C ci != H(Q-bar, (A,B), (ai, bi), Mi) for missing_guardian %s%n", guardian_id);
+        System.out.printf("  8.C ci != H(Q-bar, (A,B), (ai, bi), Mi) for guardian %s for %s%n", guardian_id, this.id);
         error = true;
+      } else if (show) {
+        System.out.printf("  8.C ok for guardian %s for %s%n", guardian_id, this.id);
       }
 
       // 8.D g^vi mod p = ai * Ki^ci mod p
       if (!this.check_equation1(response, pad, challenge, public_key)) {
-        System.out.printf("  8.D g^vi mod p != ai * Ki^ci mod p for missing_guardian %s%n", guardian_id);
+        System.out.printf("  8.D g^vi mod p != ai * Ki^ci mod p for guardian %s for %s%n", guardian_id, this.id);
         error = true;
       }
 
       // 8.E A^vi mod p = bi * Mi ^ ci mod p
       if (!this.check_equation2(response, data, challenge, partial_decryption)) {
-        System.out.printf("  8.E A^vi mod p = bi * Mi ^ ci mod p for missing_guardian %s%n", guardian_id);
+        System.out.printf("  8.E A^vi mod p = bi * Mi ^ ci mod p for guardian %s for %s%n", guardian_id, this.id);
         error = true;
       }
 

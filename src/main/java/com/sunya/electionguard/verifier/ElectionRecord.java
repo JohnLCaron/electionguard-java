@@ -26,6 +26,9 @@ import java.util.Objects;
 /** The published election record for a collection of ballots, eg from a single encryption device. */
 @Immutable
 public class ElectionRecord {
+  public static final String currentVersion = "1.2.2";
+
+  public final String version;
   public final ElectionConstants constants;
   public final CiphertextElectionContext context;
   public final Manifest election;
@@ -40,7 +43,8 @@ public class ElectionRecord {
 
   private final ImmutableMap<String, Integer> contestVoteLimits;
 
-  public ElectionRecord(ElectionConstants constants,
+  public ElectionRecord(String version,
+                        ElectionConstants constants,
                         CiphertextElectionContext context,
                         Manifest election,
                         List<GuardianRecord> guardianRecords,
@@ -51,6 +55,7 @@ public class ElectionRecord {
                         @Nullable CloseableIterable<PlaintextBallot> spoiledBallots,
                         @Nullable CloseableIterable<PlaintextTally> spoiledTallies,
                         @Nullable List<AvailableGuardian> availableGuardians) {
+    this.version = version;
     this.constants = constants;
     this.context = context;
     this.election = election;
@@ -82,7 +87,8 @@ public class ElectionRecord {
   public ElectionRecord setBallots(CloseableIterable<SubmittedBallot> acceptedBallots,
                                    CloseableIterable<PlaintextBallot> spoiledBallots,
                                    CloseableIterable<PlaintextTally> spoiledBallotTallies) {
-    return new ElectionRecord(this.constants,
+    return new ElectionRecord(currentVersion,
+            this.constants,
             this.context,
             this.election,
             this.guardianRecords,
@@ -122,7 +128,7 @@ public class ElectionRecord {
 
   /** Manifest description crypto hash */
   public Group.ElementModQ description_hash() {
-    return this.context.description_hash;
+    return this.context.manifest_hash;
   }
 
   /** The extended base hash, Qbar in the spec. */

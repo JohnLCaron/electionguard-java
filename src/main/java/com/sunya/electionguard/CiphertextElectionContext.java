@@ -13,16 +13,17 @@ import static com.sunya.electionguard.Group.int_to_q_unchecked;
 
 /**
  * The cryptographic context of an election.
- *  * @see <a href="https://www.electionguard.vote/spec/0.95.0/3_Baseline_parameters/">Baseline Parameters</a>
- *  * for defintion of 𝑄.
+ * @see <a href="https://www.electionguard.vote/spec/0.95.0/3_Baseline_parameters/">Baseline Parameters</a>
+ * for definition of 𝑄.
  * @see <a href="https://www.electionguard.vote/spec/0.95.0/4_Key_generation/#details-of-key-generation">Key Generation</a>
- * for defintion of K, 𝑄, 𝑄'
+ * for defintion of K, 𝑄, 𝑄'.
  */
 @Immutable
 public class CiphertextElectionContext {
 
   /**
-   * Makes a CiphertextElectionContext object. python: election.make_ciphertext_election_context()
+   * Makes a CiphertextElectionContext object. python: election.make_ciphertext_election_context().
+   * python: make_ciphertext_election_context()
    * @param number_of_guardians The number of guardians necessary to generate the public key.
    * @param quorum The quorum of guardians necessary to decrypt an election.  Must be less than number_of_guardians.
    * @param joint_public_key the joint public key of the election, K.
@@ -62,7 +63,8 @@ public class CiphertextElectionContext {
             joint_public_key,
             description.crypto_hash(),
             crypto_base_hash,
-            crypto_extended_base_hash);
+            crypto_extended_base_hash,
+            commitment_hash);
   }
 
   public static Group.ElementModQ make_crypto_base_hash(int number_of_guardians, int quorum, Manifest election) {
@@ -78,9 +80,11 @@ public class CiphertextElectionContext {
   /** The quorum of guardians necessary to decrypt an election.  Must be less than number_of_guardians. */
   public final int quorum;
   /** The joint public key (K) in the ElectionGuard Spec. */
-  public final Group.ElementModP elgamal_public_key; // python: elgamal_public_key
+  public final Group.ElementModP elgamal_public_key;
+  /** Hash of all the public commitments for all the guardians = H(K 1,0 , K 1,1 , K 1,2 , ..., K n,k−1 ). */
+  public final Group.ElementModQ commitment_hash; // unused, here for compatibility with python.
   /** The Manifest.crypto_hash. */
-  public final Group.ElementModQ description_hash;
+  public final Group.ElementModQ manifest_hash;
   /** The base hash code (𝑄) in the ElectionGuard Spec. */
   public final Group.ElementModQ crypto_base_hash;
   /** The extended base hash code (𝑄') in the ElectionGuard Spec. */
@@ -88,14 +92,15 @@ public class CiphertextElectionContext {
 
   /** Do not use directly, use CiphertextElectionContext.create() */
   public CiphertextElectionContext(int number_of_guardians, int quorum, Group.ElementModP jointPublicKey,
-                                   Group.ElementModQ description_hash, Group.ElementModQ crypto_base_hash,
-                                   Group.ElementModQ crypto_extended_base_hash) {
+                                   Group.ElementModQ manifest_hash, Group.ElementModQ crypto_base_hash,
+                                   Group.ElementModQ crypto_extended_base_hash, Group.ElementModQ commitment_hash) {
     this.number_of_guardians = number_of_guardians;
     this.quorum = quorum;
     this.elgamal_public_key = Preconditions.checkNotNull(jointPublicKey);
-    this.description_hash = Preconditions.checkNotNull(description_hash);
+    this.manifest_hash = Preconditions.checkNotNull(manifest_hash);
     this.crypto_base_hash = Preconditions.checkNotNull(crypto_base_hash);
     this.crypto_extended_base_hash = Preconditions.checkNotNull(crypto_extended_base_hash);
+    this.commitment_hash = commitment_hash; // Preconditions.checkNotNull(commitment_hash);
   }
 
   @Override
@@ -106,14 +111,14 @@ public class CiphertextElectionContext {
     return number_of_guardians == that.number_of_guardians &&
             quorum == that.quorum &&
             elgamal_public_key.equals(that.elgamal_public_key) &&
-            description_hash.equals(that.description_hash) &&
+            manifest_hash.equals(that.manifest_hash) &&
             crypto_base_hash.equals(that.crypto_base_hash) &&
             crypto_extended_base_hash.equals(that.crypto_extended_base_hash);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(number_of_guardians, quorum, elgamal_public_key, description_hash, crypto_base_hash, crypto_extended_base_hash);
+    return Objects.hash(number_of_guardians, quorum, elgamal_public_key, manifest_hash, crypto_base_hash, crypto_extended_base_hash);
   }
 
   @Override

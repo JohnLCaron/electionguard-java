@@ -34,9 +34,7 @@ public class TestElectionRecordProtoRoundtrip {
     assertThat(consumer.availableGuardians()).hasSize(5);
 
     assertThat(consumer.acceptedBallots()).hasSize(6);
-    // assertThat(consumer.spoiledBallots()).hasSize(2);
-    // assertThat(consumer.inputBallots()).hasSize(7);
-    assertThat(consumer.spoiledTallies()).hasSize(2);
+    assertThat(consumer.spoiledTallies()).hasSize(3);
   }
 
   @Example

@@ -13,8 +13,8 @@ import java.util.stream.Stream;
 
 /**
  * This verifies specification "12B Correct Decryption of Spoiled Ballots".
- * An election verifier should also confirm that for each decrypted spoiled ballot, the selections
- * listed in text match the corresponding text in the ballot coding file.
+ * "An election verifier should also confirm that for each decrypted spoiled ballot, the selections
+ * listed in text match the corresponding text in the ballot coding file."
  * @see <a href="https://www.electionguard.vote/spec/0.95.0/9_Verifier_construction/#validation-of-correct-decryption-of-tallies">Tally decryption validation</a>
  */
 public class PlaintextBallotVerifier {
