@@ -65,6 +65,7 @@ public class DecryptWithShares {
       Optional<PlaintextTally.Contest> pc = decrypt_contest_with_decryption_shares(
               CiphertextContest.createFrom(tallyContest), shares, context.crypto_extended_base_hash);
       if (pc.isEmpty()) {
+        logger.atWarning().log("contest: %s failed to decrypt with shares", tallyContest.object_id);
         return Optional.empty();
       }
       contests.put(tallyContest.object_id, pc.get());
@@ -120,6 +121,7 @@ public class DecryptWithShares {
               shares,
               extended_base_hash);
       if (plaintext_contest.isEmpty()) {
+        logger.atWarning().log("contest: %s failed to decrypt with shares", ballotContest.object_id);
         return Optional.empty();
       }
       plaintext_contests.put(ballotContest.object_id, plaintext_contest.get());
@@ -183,6 +185,7 @@ public class DecryptWithShares {
       for (KeyAndSelection tuple : shares.values()) {
         // verify we have a proof or recovered parts
         if (!tuple.decryption.is_valid(selection.ciphertext(), tuple.public_key, extended_base_hash)) {
+          logger.atWarning().log("share: %s has invalid proof or recovered parts", tuple.decryption.object_id());
           return Optional.empty();
         }
       }

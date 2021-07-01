@@ -51,7 +51,7 @@ public class DecryptionMediator {
    * @param ballot_shares: Guardian's decryption shares of the ballots
    */
   public void announce(KeyCeremony.ElectionPublicKey guardian_key, DecryptionShare tally_share,
-                          Map<String, DecryptionShare> ballot_shares) {
+                          Map<String, Optional<DecryptionShare>> ballot_shares) {
     String guardian_id = guardian_key.owner_id();
 
     // Only allow a guardian to announce once
@@ -310,14 +310,14 @@ public class DecryptionMediator {
   }
 
   // Dict[BALLOT_ID, DecryptionShare]
-  void save_ballot_shares(String guardian_id, Map<String, DecryptionShare> guardians_ballot_shares) {
+  void save_ballot_shares(String guardian_id, Map<String, Optional<DecryptionShare>> guardians_ballot_shares) {
 
-    for (Map.Entry<String, DecryptionShare> entry : guardians_ballot_shares.entrySet()) {
+    for (Map.Entry<String, Optional<DecryptionShare>> entry : guardians_ballot_shares.entrySet()) {
       String ballot_id = entry.getKey();
-      DecryptionShare guardian_ballot_share = entry.getValue();
+      Optional<DecryptionShare> guardian_ballot_share = entry.getValue();
 
       Map<String, DecryptionShare> shares = this.ballot_shares.computeIfAbsent(ballot_id, k -> new HashMap<>());
-      shares.put(guardian_id, guardian_ballot_share);
+      guardian_ballot_share.ifPresent(share -> shares.put(guardian_id, share));
     }
   }
 

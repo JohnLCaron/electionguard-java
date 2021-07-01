@@ -26,6 +26,7 @@ import java.util.Random;
 
 /**
  * A command line program to encrypt a collection of ballots.
+ * Only needs the election public key, does not use local Guardians.
  * <p>
  * For command line help:
  * <strong>

@@ -62,8 +62,8 @@ public class Manifest implements Hash.CryptoHashable {
     this.crypto_hash = Hash.hash_elems(
             this.election_scope_id,
             this.type.name(),
-            this.start_date.toEpochSecond(), // to_ticks(self.start_date), number of seconds since the unix epoch
-            this.end_date.toEpochSecond(),
+            this.start_date.toString(), // python: to_iso_date_string, LOOK isnt all that well defined.
+            this.end_date.toString(),
             this.name,
             this.contact_information,
             this.geopolitical_units,

@@ -47,7 +47,7 @@ public class Publisher {
   static final String DEVICE_PREFIX = "device_";
   static final String AVAILABLE_GUARDIAN_PREFIX = "available_guardian_";
   static final String BALLOT_PREFIX = "ballot_";
-  static final String GUARDIAN_RECORD_PREFIX = "coefficient_validation_set_"; // LOOK
+  static final String GUARDIAN_RECORD_PREFIX = "guardian_";
 
   // json private
   static final String PRIVATE_PLAINTEXT_BALLOTS_DIR = "plaintext";

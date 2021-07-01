@@ -90,7 +90,7 @@ public class DecryptionHelper {
     for (Guardian available_guardian : available_guardians) {
       KeyCeremony.ElectionPublicKey guardian_key = available_guardian.share_election_public_key();
       DecryptionShare tally_share = available_guardian.compute_tally_share(ciphertext_tally, context).orElseThrow();
-      Map<String, DecryptionShare> ballot_shares = available_guardian.compute_ballot_shares(spoiled_ballots, context);
+      Map<String, Optional<DecryptionShare>> ballot_shares = available_guardian.compute_ballot_shares(spoiled_ballots, context);
       mediator.announce(guardian_key, tally_share, ballot_shares);
     }
 

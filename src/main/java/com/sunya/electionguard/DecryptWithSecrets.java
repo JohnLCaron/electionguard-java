@@ -35,12 +35,13 @@ class DecryptWithSecrets {
 
     if (!suppress_validity_check &&
             !selection.is_valid_encryption(description.crypto_hash(), public_key, crypto_extended_base_hash)) {
+      logger.atWarning().log("selection: %s failed secret validity check", selection.object_id);
       return Optional.empty();
     }
 
     Integer plaintext_vote = selection.ciphertext().decrypt(secret_key);
 
-    // TODO: ISSUE #47: handle decryption of the extradata field if needed
+    // TODO: ISSUE #47: handle decryption of the extra data field if needed
 
     return Optional.of(new PlaintextBallot.Selection(
             selection.object_id,
@@ -71,6 +72,7 @@ class DecryptWithSecrets {
 
     if (!suppress_validity_check &&
             !selection.is_valid_encryption(description.crypto_hash(), public_key, crypto_extended_base_hash)) {
+      logger.atWarning().log("selection: %s failed nonce validity check", selection.object_id);
       return Optional.empty();
     }
 
@@ -130,6 +132,7 @@ class DecryptWithSecrets {
 
     if (!suppress_validity_check &&
             !contest.is_valid_encryption(description.crypto_hash(), public_key, crypto_extended_base_hash)) {
+      logger.atWarning().log("contest: %s failed secret validity check", contest.object_id);
       return Optional.empty();
     }
     List<PlaintextBallot.Selection> plaintext_selections = new ArrayList<>();
@@ -182,6 +185,7 @@ class DecryptWithSecrets {
 
     if (!suppress_validity_check && !contest.is_valid_encryption(
             description.crypto_hash(), public_key, crypto_extended_base_hash)) {
+      logger.atWarning().log("contest: %s failed nonce validity check", contest.object_id);
       return Optional.empty();
     }
 
@@ -258,6 +262,7 @@ class DecryptWithSecrets {
 
     if (!suppress_validity_check && !ballot.is_valid_encryption(
             metadata.manifest.crypto_hash, public_key, crypto_extended_base_hash)) {
+      logger.atWarning().log("ballot: %s failed secret validity check", ballot.object_id);
       return Optional.empty();
     }
 
@@ -310,6 +315,7 @@ class DecryptWithSecrets {
 
     if (!suppress_validity_check && !ballot.is_valid_encryption(
             metadata.manifest.crypto_hash, public_key, crypto_extended_base_hash)) {
+      logger.atWarning().log("ballot: %s failed nonce validity check", ballot.object_id);
       return Optional.empty();
     }
 

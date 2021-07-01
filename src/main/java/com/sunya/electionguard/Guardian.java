@@ -364,7 +364,7 @@ public class Guardian {
   }
 
   /**
-   * Creates a joint election key from the public keys of all guardians.
+   * Create a joint election key from the public keys of all guardians.
    * @return Optional joint key for election
    */
   Optional<ElementModP> publish_joint_key() {
@@ -394,7 +394,7 @@ public class Guardian {
   // decrypting
 
   /**
-   * Compute the decryption share of tally
+   * Compute the decryption share of tally.
    * <p>
    * @param tally: Ciphertext tally to get share of
    * @param context: Election context
@@ -408,26 +408,26 @@ public class Guardian {
   }
 
   /**
-   * Compute the decryption shares of ballots
+   * Compute the decryption shares of ballots.
    *
    * @param ballots: List of ciphertext ballots to get shares of
    * @param context: Election context
-   * @return Map[BALLOT_ID, DecryptionShare] LOOK python Dict[BALLOT_ID, Optional[DecryptionShare]], skip None
+   * @return Map[BALLOT_ID, DecryptionShare]
    */
-  public Map<String, DecryptionShare> compute_ballot_shares(Iterable<SubmittedBallot> ballots, CiphertextElectionContext context) {
+  public Map<String, Optional<DecryptionShare>> compute_ballot_shares(Iterable<SubmittedBallot> ballots, CiphertextElectionContext context) {
 
-    Map<String, DecryptionShare> shares = new HashMap<>();
+    Map<String, Optional<DecryptionShare>> shares = new HashMap<>();
     for (SubmittedBallot ballot : ballots) {
       Optional<DecryptionShare> share = Decryptions.compute_decryption_share_for_ballot(
               this.election_keys,
               ballot,
               context);
-      share.ifPresent(s -> shares.put(ballot.object_id, s));
+      shares.put(ballot.object_id, share);
     }
     return shares;
   }
 
-  // Compute the compensated decryption share of a tally for a missing guardian
+  /** Compute the compensated decryption share of a tally for a missing guardian. */
   public Optional<DecryptionShare.CompensatedDecryptionShare> compute_compensated_tally_share(
           String missing_guardian_id,
           CiphertextTally tally,
@@ -451,7 +451,7 @@ public class Guardian {
             decryptor);
   }
 
-  // Compute the compensated decryption share of each ballots for a missing guardian
+  /** Compute the compensated decryption share of each ballots for a missing guardian. */
   public Map<String, Optional<DecryptionShare.CompensatedDecryptionShare>> compute_compensated_ballot_shares(
           String missing_guardian_id,
           List<SubmittedBallot> ballots,

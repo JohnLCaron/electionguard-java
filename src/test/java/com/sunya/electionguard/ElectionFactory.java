@@ -117,11 +117,7 @@ public class ElectionFactory {
   }
 
   public static Encrypt.EncryptionDevice get_fake_encryption_device(String polling_place) {
-    return new Encrypt.EncryptionDevice(
-            generate_device_uuid(),
-            "Session",
-            12345,
-            String.format("polling-place-%s", polling_place));
+    return Encrypt.EncryptionDevice.createForTest(String.format("polling-place-%s", polling_place));
   }
 
   /**

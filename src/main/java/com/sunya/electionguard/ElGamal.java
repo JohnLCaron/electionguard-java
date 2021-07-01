@@ -172,15 +172,19 @@ public class ElGamal {
    * @param message    Message to elgamal_encrypt; must be an integer in [0,Q).
    * @param nonce      Randomly chosen nonce in [1,Q).
    * @param public_key ElGamal public key.
-   * @return A ciphertext tuple.
+   * @return An ElGamal.Ciphertext.
    */
   static Optional<Ciphertext> elgamal_encrypt(int message, ElementModQ nonce, ElementModP public_key) {
     if (nonce.equals(ZERO_MOD_Q)) {
       logger.atSevere().log("ElGamal encryption requires a non-zero nonce");
       return Optional.empty();
     }
-    return int_to_q(BigInteger.valueOf(message)).map(bi ->
-            new Ciphertext(g_pow_p(nonce), mult_p(g_pow_p(bi), pow_p(public_key, nonce))));
+    Group.ElementModP pad = g_pow_p(nonce);
+    Group.ElementModP gpowp_m = g_pow_p(int_to_q_unchecked(BigInteger.valueOf(message)));
+    Group.ElementModP pubkey_pow_n = pow_p(public_key, nonce);
+    Group.ElementModP data = mult_p(gpowp_m, pubkey_pow_n);
+
+    return Optional.of(new Ciphertext(pad, data));
   }
 
   /**
