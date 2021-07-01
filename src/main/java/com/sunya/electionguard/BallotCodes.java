@@ -1,13 +1,18 @@
 package com.sunya.electionguard;
 
-/** Static methods for ballot coides, aka tracking codes. */
+/** Static methods for ballot codes, aka tracking codes. */
 public class BallotCodes {
 
   /**
    * Get starting hash for given device
+   *
+   * @param device_id   Unique identifier of device
+   * @param session_id  Unique identifier for the session
+   * @param launch_code A unique launch code for the election
+   * @param location    Location of device
    */
-  public static Group.ElementModQ get_hash_for_device(long uuid, String session_id, int launch_code, String location) {
-    return Hash.hash_elems(uuid, session_id, launch_code, location);
+  public static Group.ElementModQ get_hash_for_device(long device_id, int session_id, int launch_code, String location) {
+    return Hash.hash_elems(device_id, session_id, launch_code, location);
   }
 
   /**

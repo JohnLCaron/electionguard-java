@@ -22,33 +22,34 @@ public class Encrypt {
   /** The device that is doing the encryption. */
   @Immutable
   public static class EncryptionDevice {
+
+    public static EncryptionDevice createForTest(String location) {
+      Preconditions.checkNotNull(location);
+      return new EncryptionDevice(
+              location.hashCode(),
+              location.hashCode(),
+              12345,
+              location);
+    }
+
     /** Unique identifier for device. */
-    public final long uuid;
+    public final long device_id;
     /** Used to identify session and protect the timestamp. */
-    public final String session_id;
+    public final int session_id;
     /** Election initialization value. */
     public final int launch_code;
     /** Arbitrary string to designate the location of the device. */
     public final String location;
 
-    public EncryptionDevice(long uuid, String session_id, int launch_code, String location) {
-      this.uuid = uuid;
-      this.session_id = Preconditions.checkNotNull(session_id);
+    public EncryptionDevice(long device_id, int session_id, int launch_code, String location) {
+      this.device_id = device_id;
+      this.session_id = session_id;
       this.launch_code = launch_code;
       this.location = Preconditions.checkNotNull(location);
     }
 
-    public static EncryptionDevice createForTest(String location) {
-      Preconditions.checkNotNull(location);
-      return new EncryptionDevice(
-        location.hashCode(),
-        location,
-        12345,
-        location);
-    }
-
     public ElementModQ get_hash() {
-      return BallotCodes.get_hash_for_device(uuid, session_id, launch_code, location);
+      return BallotCodes.get_hash_for_device(device_id, session_id, launch_code, location);
     }
 
     @Override
@@ -56,15 +57,15 @@ public class Encrypt {
       if (this == o) return true;
       if (o == null || getClass() != o.getClass()) return false;
       EncryptionDevice that = (EncryptionDevice) o;
-      return uuid == that.uuid &&
+      return device_id == that.device_id &&
               launch_code == that.launch_code &&
-              session_id.equals(that.session_id) &&
+              session_id == that.session_id &&
               location.equals(that.location);
     }
 
     @Override
     public int hashCode() {
-      return Objects.hash(uuid, session_id, launch_code, location);
+      return Objects.hash(device_id, session_id, launch_code, location);
     }
   }
 

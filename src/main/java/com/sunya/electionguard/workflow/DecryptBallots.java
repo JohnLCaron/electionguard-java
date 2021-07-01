@@ -25,9 +25,10 @@ import java.lang.reflect.Constructor;
 import java.util.Formatter;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
- * A command line program to decrypt a collection of ballots.
+ * A command line program to decrypt a collection of ballots, using standard library and local Guardians.
  * <p>
  * For command line help:
  * <strong>
@@ -196,7 +197,7 @@ public class DecryptBallots {
       System.out.printf("Guardian Present: %s%n", guardian.object_id);
       KeyCeremony.ElectionPublicKey guardian_key = guardian.share_election_public_key();
       DecryptionShare tally_share = guardian.compute_tally_share(this.encryptedTally, electionRecord.context).orElseThrow();
-      Map<String, DecryptionShare> ballot_shares = guardian.compute_ballot_shares(electionRecord.acceptedBallots, electionRecord.context);
+      Map<String, Optional<DecryptionShare>> ballot_shares = guardian.compute_ballot_shares(electionRecord.acceptedBallots, electionRecord.context);
       mediator.announce(guardian_key, tally_share, ballot_shares);
 
       count++;

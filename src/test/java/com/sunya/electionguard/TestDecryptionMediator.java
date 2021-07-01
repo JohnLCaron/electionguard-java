@@ -154,7 +154,7 @@ public class TestDecryptionMediator extends TestProperties {
     KeyCeremony.ElectionPublicKey guardian_key = guardian.share_election_public_key();
 
     DecryptionShare tally_share = guardian.compute_tally_share(this.ciphertext_tally, this.context).orElseThrow();
-    Map<String, DecryptionShare> ballot_shares =  new HashMap<>();
+    Map<String, Optional<DecryptionShare>> ballot_shares =  new HashMap<>();
 
     mediator.announce(guardian_key, tally_share, ballot_shares);
     assertThat(mediator.get_available_guardians()).hasSize(1);

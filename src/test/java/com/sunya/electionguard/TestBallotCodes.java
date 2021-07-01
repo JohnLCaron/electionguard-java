@@ -17,7 +17,7 @@ public class TestBallotCodes {
     int timestamp_1 = 1000;
     int timestamp_2 = 2000;
 
-    ElementModQ device_hash = get_hash_for_device(device.uuid, device.session_id, device.launch_code, device.location);
+    ElementModQ device_hash = get_hash_for_device(device.device_id, device.session_id, device.launch_code, device.location);
     ElementModQ tracker_1_hash = get_rotating_ballot_code(device_hash, timestamp_1, ballot_hash_1);
     ElementModQ tracker_2_hash = get_rotating_ballot_code(device_hash, timestamp_2, ballot_hash_2);
 

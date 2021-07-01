@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-/** Conversion to/from POJOS utilities. */
+/** Static utilities for conversion to/from Pojos. */
 public class ConvertPojos {
 
   @Nullable

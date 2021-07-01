@@ -18,6 +18,7 @@ import java.util.Formatter;
 
 /**
  * A command line program to accumulate encrypted ballots.
+ * Uses homomorphic encryption, does not use local Guardians.
  * <p>
  * For command line help:
  * <strong>

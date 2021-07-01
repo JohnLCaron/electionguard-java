@@ -25,7 +25,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- * A command line program that performs the key ceremony to create the Guardians.
+ * A command line program that performs the key ceremony to create the Guardians, using standard library and local Guardians.
  * <p>
  * For command line help:
  * <strong>

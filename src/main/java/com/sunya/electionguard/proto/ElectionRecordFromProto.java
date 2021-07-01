@@ -89,7 +89,7 @@ public class ElectionRecordFromProto {
   }
 
   static Encrypt.EncryptionDevice convertDevice(ElectionRecordProto.EncryptionDevice device) {
-    return new Encrypt.EncryptionDevice(device.getUuid(), device.getSessionId(), device.getLaunchCode(), device.getLocation());
+    return new Encrypt.EncryptionDevice(device.getDeviceId(), device.getSessionId(), device.getLaunchCode(), device.getLocation());
   }
 
   static GuardianRecord convertGuardianRecord(ElectionRecordProto.GuardianRecord guardianRecord) {

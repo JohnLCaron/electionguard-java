@@ -41,9 +41,10 @@ message Constants {
   bytes generator = 4;   // generator or g
 }
 
+// Public info for Guardian.
 message GuardianRecord {
   string guardian_id = 1; // guardian id
-  uint32 sequence = 2;
+  uint32 sequence = 2;    // aka xCoordinate in the secret polynomial
   ElementModP election_public_key = 3;
   repeated ElementModP coefficient_commitments = 4;  // Kij, j=0...quorum-1
   repeated SchnorrProof coefficient_proofs = 5;
@@ -51,8 +52,10 @@ message GuardianRecord {
 
 // The device that does the encryption.
 message EncryptionDevice {
-  int64 uuid = 3;
-  string session_id = 4;
+  reserved 3; // int64 uuid
+  int64 device_id = 6;
+  reserved 4; // string session_id
+  int32 session_id = 7;
   int32 launch_code = 5;
   string location = 2;
 }
