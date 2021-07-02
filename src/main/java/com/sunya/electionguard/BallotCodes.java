@@ -11,7 +11,7 @@ public class BallotCodes {
    * @param launch_code A unique launch code for the election
    * @param location    Location of device
    */
-  public static Group.ElementModQ get_hash_for_device(long device_id, int session_id, int launch_code, String location) {
+  public static Group.ElementModQ get_hash_for_device(long device_id, long session_id, long launch_code, String location) {
     return Hash.hash_elems(device_id, session_id, launch_code, location);
   }
 

@@ -33,6 +33,8 @@ class GsonTypeAdapters {
 
   static Gson enhancedGson() {
     return new GsonBuilder().setPrettyPrinting().serializeNulls()
+            .registerTypeAdapter(BigInteger.class, new BigIntegerDeserializer())
+            .registerTypeAdapter(BigInteger.class, new BigIntegerSerializer())
             .registerTypeAdapter(Group.ElementModQ.class, new ModQDeserializer())
             .registerTypeAdapter(Group.ElementModQ.class, new ModQSerializer())
             .registerTypeAdapter(Group.ElementModP.class, new ModPDeserializer())
@@ -54,12 +56,21 @@ class GsonTypeAdapters {
             .create();
   }
 
+  private static class BigIntegerDeserializer implements JsonDeserializer<BigInteger> {
+    @Override
+    public BigInteger deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+            throws JsonParseException {
+      String content = json.getAsJsonPrimitive().getAsString();
+      return new BigInteger(content, 16);
+    }
+  }
+
   private static class ModQDeserializer implements JsonDeserializer<Group.ElementModQ> {
     @Override
     public Group.ElementModQ deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
             throws JsonParseException {
       String content = json.getAsJsonPrimitive().getAsString();
-      return Group.int_to_q(new BigInteger(content)).orElseThrow(RuntimeException::new);
+      return Group.int_to_q(new BigInteger(content, 16)).orElseThrow(RuntimeException::new);
     }
   }
 
@@ -68,21 +79,28 @@ class GsonTypeAdapters {
     public Group.ElementModP deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
             throws JsonParseException {
       String content = json.getAsJsonPrimitive().getAsString();
-      return Group.int_to_p(new BigInteger(content)).orElseThrow(RuntimeException::new);
+      return Group.int_to_p(new BigInteger(content, 16)).orElseThrow(RuntimeException::new);
+    }
+  }
+
+  private static class BigIntegerSerializer implements JsonSerializer<BigInteger> {
+    @Override
+    public JsonElement serialize(BigInteger src, Type typeOfSrc, JsonSerializationContext context) {
+      return new JsonPrimitive(Group.int_to_p_unchecked(src).to_hex());
     }
   }
 
   private static class ModQSerializer implements JsonSerializer<Group.ElementModQ> {
     @Override
     public JsonElement serialize(Group.ElementModQ src, Type typeOfSrc, JsonSerializationContext context) {
-      return new JsonPrimitive(src.getBigInt().toString());
+      return new JsonPrimitive(src.to_hex());
     }
   }
 
   private static class ModPSerializer implements JsonSerializer<Group.ElementModP> {
     @Override
     public JsonElement serialize(Group.ElementModP src, Type typeOfSrc, JsonSerializationContext context) {
-      return new JsonPrimitive(src.getBigInt().toString());
+      return new JsonPrimitive(src.to_hex());
     }
   }
 
@@ -190,21 +208,4 @@ class GsonTypeAdapters {
       return CiphertextTallyPojo.deserialize(json);
     }
   }
-
-  /*
-  @SuppressWarnings("UnstableApiUsage")
-  public static final class ImmutableListDeserializer implements JsonDeserializer<ImmutableList<?>> {
-    @Override
-    public ImmutableList<?> deserialize(final JsonElement json, final Type type, final JsonDeserializationContext context) throws JsonParseException {
-      final Type[] typeArguments = ((ParameterizedType) type).getActualTypeArguments();
-      final Type parameterizedType = listOf(typeArguments[0]).getType();
-      final List<?> list = context.deserialize(json, parameterizedType);
-      return ImmutableList.copyOf(list);
-    }
-
-    private <E> TypeToken<List<E>> listOf(final Type arg) {
-      return new TypeToken<List<E>>() {}
-              .where(new TypeParameter<>() {}, (TypeToken<E>) TypeToken.of(arg));
-    }
-  } */
 }

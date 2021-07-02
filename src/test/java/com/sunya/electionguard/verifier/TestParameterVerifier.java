@@ -8,10 +8,9 @@ import java.io.IOException;
 import static com.google.common.truth.Truth.assertThat;
 
 public class TestParameterVerifier {
-  public static final String topdirProto = "src/test/data/electionRecordProto/";
+  public static final String topdirProto = "src/test/data/workflow/decryptor/";
   public static final String topdirJson = "src/test/data/publishEndToEnd/";
-  public static final String topdirJsonPython = "src/test/data/python-trogdar/";
-
+  public static final String topdirJsonPython = "src/test/data/python-1.2.2/";
 
   @Example
   public void testElectionRecordJson() throws IOException {

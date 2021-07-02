@@ -14,7 +14,7 @@ public class TestElectionRecordVerifier {
     String topdir = TestParameterVerifier.topdirProto;
     Consumer consumer = new Consumer(topdir);
     System.out.printf(" VerifyElectionRecord read from %s%n", topdir);
-    boolean ok = VerifyElectionRecord.verifyElectionRecord(consumer.readElectionRecord());
+    boolean ok = VerifyElectionRecord.verifyElectionRecord(consumer.readElectionRecord(), false);
     assertThat(ok).isTrue();
   }
 
@@ -23,7 +23,7 @@ public class TestElectionRecordVerifier {
     String topdir = TestParameterVerifier.topdirJson;
     Consumer consumer = new Consumer(topdir);
     System.out.printf(" VerifyElectionRecord read from %s%n", topdir);
-    boolean ok = VerifyElectionRecord.verifyElectionRecord(consumer.readElectionRecord());
+    boolean ok = VerifyElectionRecord.verifyElectionRecord(consumer.readElectionRecord(), false);
     assertThat(ok).isTrue();
   }
 

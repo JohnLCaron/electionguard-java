@@ -25,6 +25,8 @@ message ElectionRecord {
 
   // The guardians present for decryption
   repeated AvailableGuardian available_guardians = 8;
+
+  string version = 9; // track the serialization version, generally same as python
 }
 
 message AvailableGuardian {
@@ -55,8 +57,8 @@ message EncryptionDevice {
   reserved 3; // int64 uuid
   int64 device_id = 6;
   reserved 4; // string session_id
-  int32 session_id = 7;
-  int32 launch_code = 5;
+  int64 session_id = 7;
+  int64 launch_code = 5;
   string location = 2;
 }
 
@@ -76,4 +78,7 @@ message ElectionContext {
 
   // the `extended base hash code (𝑄')` in the [ElectionGuard Spec]
   ElementModQ crypto_extended_base_hash = 6;
+
+  // Hash of all the public commitments for all the guardians = H(K 1,0 , K 1,1 , K 1,2 , ..., K n,k−1 ).
+  ElementModQ commitment_hash = 7;
 }

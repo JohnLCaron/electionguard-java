@@ -137,8 +137,7 @@ public class Group {
 
   /**
    * Given a hex string representing bytes, returns an ElementModQ.
-   * Returns `None` if the number is out of the allowed
-   * [0,Q) range.
+   * Returns `None` if the number is out of the allowed [0,Q) range.
    */
   public static Optional<ElementModQ> hex_to_q(String input) {
     BigInteger b = new BigInteger(input, 16);
@@ -147,6 +146,24 @@ public class Group {
     } else {
       return Optional.empty();
     }
+  }
+
+  /**
+   * Given a hex string representing bytes, returns an ElementModQ.
+   * Does not check if the number is out of the allowed [0,Q) range.
+   */
+  public static ElementModQ hex_to_q_unchecked(String input) {
+    BigInteger b = new BigInteger(input, 16);
+    return new ElementModQ(b);
+  }
+
+  /**
+   * Given a hex string representing bytes, returns an ElementModP.
+   * Does not check if the number is out of the allowed [0,P) range.
+   */
+  public static ElementModP hex_to_p_unchecked(String input) {
+    BigInteger b = new BigInteger(input, 16);
+    return new ElementModP(b);
   }
 
   /**
@@ -203,66 +220,66 @@ public class Group {
     return int_to_q_unchecked(t);
   }
 
-  /** Computes (a-b) mod q. */
+  /** Compute (a-b) mod q. */
   static ElementModQ a_minus_b_q(ElementModQ a, ElementModQ b) {
     return int_to_q_unchecked(a.elem.subtract(b.elem).mod(Q));
   }
 
-  /** Computes a/b mod p */
+  /** Compute a/b mod p. */
   public static ElementModP div_p(ElementMod a, ElementMod b) {
     BigInteger inverse = b.elem.modInverse(P);
     BigInteger product = a.elem.multiply(inverse);
     return int_to_p_unchecked(product.mod(P));
   }
 
-  /** Computes a/b mod q */
+  /** Compute a/b mod q. */
   static ElementModQ div_q(ElementMod a, ElementMod b) {
     BigInteger inverse = b.elem.modInverse(Q);
     BigInteger product = a.elem.multiply(inverse);
     return int_to_q_unchecked(product.mod(Q));
   }
 
-  /** Computes (Q - a) mod q. */
+  /** Compute (Q - a) mod q. */
   static ElementModQ negate_q(ElementModQ a) {
     return int_to_q_unchecked(Q.subtract(a.elem));
   }
 
-  /** Computes (a + b * c) mod q. */
+  /** Compute (a + b * c) mod q. */
   static ElementModQ a_plus_bc_q(ElementModQ a, ElementModQ b, ElementModQ c) {
     BigInteger product = b.elem.multiply(c.elem).mod(Q);
     BigInteger sum = a.elem.add(product);
     return int_to_q_unchecked(sum.mod(Q));
   }
 
-  /** Computes the multiplicative inverse mod p. */
+  /** Compute the multiplicative inverse mod p. */
   static ElementModP mult_inv_p(ElementMod elem) {
     return int_to_p_unchecked(elem.elem.modInverse(P));
   }
 
   // https://www.electionguard.vote/spec/0.95.0/9_Verifier_construction/#modular-exponentiation
-  /** Computes b^e mod p. */
+  /** Compute b^e mod p. */
   static ElementModP pow_p(ElementModP b, ElementModP e) {
     return int_to_p_unchecked(pow_pi(b.elem.mod(P), e.elem));
   }
 
-  /** Computes b^e mod p. */
+  /** Compute b^e mod p. */
   public static ElementModP pow_p(ElementMod b, ElementMod e) {
     return int_to_p_unchecked(pow_pi(b.elem.mod(P), e.elem));
   }
 
-  /** Computes b^e mod p. */
+  /** Compute b^e mod p. */
   static public BigInteger pow_pi(BigInteger b, BigInteger e) {
     return b.modPow(e, P);
   }
 
-  /** Computes b^e mod q. */
+  /** Compute b^e mod q. */
   public static ElementModQ pow_q(BigInteger b, BigInteger e) {
     return int_to_q_unchecked(b.modPow(e, Q));
   }
 
   // https://www.electionguard.vote/spec/0.95.0/9_Verifier_construction/#modular-multiplication
   /**
-   * Computes the product, mod p, of all elements.
+   * Compute the product, mod p, of all elements.
    * @param elems: Zero or more elements in [0,P).
    */
   public static ElementModP mult_p(Collection<ElementModP> elems) {
@@ -291,7 +308,7 @@ public class Group {
   }
 
   /**
-   * Computes the product, mod q, of all elements.
+   * Compute the product, mod q, of all elements.
    * @param elems Zero or more elements in [0,Q).
    */
   public static ElementModQ mult_q(ElementModQ... elems) {
@@ -302,22 +319,18 @@ public class Group {
     return int_to_q_unchecked(product);
   }
 
-  /** Computes g^e mod p. */
+  /** Compute g^e mod p. */
   public static ElementModP g_pow_p(ElementMod e) {
     return int_to_p_unchecked(pow_pi(G, e.elem));
   }
 
-  /**
-   * Generate random number between 0 and Q
-   */
+  /** Generate random number between 0 and Q. */
   public static ElementModQ rand_q() {
     BigInteger random = Utils.randbelow(Q);
     return int_to_q_unchecked(random);
   }
 
-  /**
-   * Generate random number between start and Q
-   */
+  /** Generate random number between start and Q. */
   static ElementModQ rand_range_q(ElementMod start) {
     BigInteger random = Utils.randbetween(start.getBigInt(), Q);
     return int_to_q_unchecked(random);
@@ -349,7 +362,7 @@ public class Group {
     return x.compareTo(b) < 0;
   }
 
-  /** check if a is a divisor of b. */
+  /** Check if a is a divisor of b. */
   public static boolean is_divisor(BigInteger a, BigInteger b) {
     return a.mod(b).equals(BigInteger.ZERO);
   }

@@ -6,7 +6,10 @@ import javax.annotation.concurrent.Immutable;
 import java.math.BigInteger;
 import java.util.Objects;
 
-/** The constants for mathematical functions used for this election. */
+/**
+ * The constants for mathematical functions used for this election.
+ * python: stores these as Group.ElementMod, so that their Json Serialization is in hex.
+ */
 @Immutable
 public class ElectionConstants {
   /** large prime or p. */
