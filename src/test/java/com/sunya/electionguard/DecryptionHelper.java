@@ -130,8 +130,7 @@ public class DecryptionHelper {
                context,
                Auxiliary.identity_auxiliary_decrypt);
 
-       assertThat(tally_share).isPresent();
-       mediator.receive_tally_compensation_share(tally_share.get());
+       tally_share.ifPresent(mediator::receive_tally_compensation_share);
 
        Map<String, Optional<DecryptionShare.CompensatedDecryptionShare>> ballot_shares = available_guardian.compute_compensated_ballot_shares(
                        missing_guardian.owner_id(),

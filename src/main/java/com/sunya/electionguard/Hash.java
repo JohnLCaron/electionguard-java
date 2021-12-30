@@ -28,6 +28,8 @@ public class Hash {
    * `str`, or `int`, anything implementing `CryptoHashable`, and lists
    * or optionals of any of those types.
    *
+   * TODO this does not agree with python
+   *
    * @param a Zero or more elements of any of the accepted types.
    * @return A cryptographic hash of these elements, concatenated.
    * <p>
@@ -40,6 +42,11 @@ public class Hash {
       digest.update("|".getBytes(StandardCharsets.UTF_8));
     } catch (NoSuchAlgorithmException e) {
       throw new RuntimeException(e);
+    }
+
+    if (a.length == 0) {
+      String hash_me = "null|";
+      digest.update(hash_me.getBytes(StandardCharsets.UTF_8));
     }
 
     for (Object x : a) {
@@ -66,7 +73,7 @@ public class Hash {
       } else if (x instanceof CryptoHashable) {
         hash_me = ((CryptoHashable)x).crypto_hash().to_hex();
       } else if (x instanceof String) {
-          // strings are iterable, so it 's important to handle them before the following check
+          // strings are iterable, so it 's important to handle them before list-like types
         hash_me = (String) x;
       } else if (x instanceof Iterable) {
           // The simplest way to deal with lists, tuples, and such are to crunch them recursively.
