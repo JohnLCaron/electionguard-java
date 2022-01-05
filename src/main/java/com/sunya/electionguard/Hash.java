@@ -10,6 +10,7 @@ import java.util.Optional;
 
 /** Create a cryptographic hash using SHA256.
  *  @see <a href="https://www.electionguard.vote/spec/0.95.0/9_Verifier_construction/#hash-computation">Hash computation</a>
+ *  TODO test agreement across implementations
  */
 public class Hash {
 
