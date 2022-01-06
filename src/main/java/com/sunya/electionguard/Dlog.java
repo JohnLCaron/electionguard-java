@@ -13,7 +13,7 @@ import static com.sunya.electionguard.Group.*;
  * Performance will degrade if it's much larger.
  */
 class Dlog {
-  private static final int MAX = 1000;
+  private static final int MAX = 1000; // max vote count - TODO should be settable
   private static final Cache<BigInteger, Integer> cache = CacheBuilder.newBuilder().build();
   static {
     cache.put(BigInteger.ONE, 0);

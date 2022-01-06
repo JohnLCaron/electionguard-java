@@ -7,6 +7,7 @@ import net.jqwik.api.Property;
 
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -25,6 +26,43 @@ public class TestHashProperties extends TestProperties {
     Group.ElementModQ h1 = Hash.hash_elems(q);
     Group.ElementModQ h2 = Hash.hash_elems(q2);
     assertThat(h1.equals(h2)).isEqualTo(q.equals(q2));
+  }
+
+  @Example
+  public void test_hash_for_zero_number_is_zero_string() {
+    assertThat(Hash.hash_elems(0)).isEqualTo(Hash.hash_elems("0"));
+  }
+
+  @Example
+  public void test_hash_for_non_zero_number_string_same_as_explicit_number() {
+    assertThat(Hash.hash_elems(1)).isEqualTo(Hash.hash_elems("1"));
+  }
+
+  @Example
+  public void test_different_strings_casing_not_the_same_hash() {
+    assertThat(Hash.hash_elems("Welcome To ElectionGuard")).isNotEqualTo(Hash.hash_elems("welcome To ElectionGuard"));
+  }
+
+  @Example
+  public void test_hash_for_none_same_as_null_string() {
+    assertThat(Hash.hash_elems(Optional.empty())).isEqualTo(Hash.hash_elems("null"));
+  }
+
+  @Example
+  public void test_hash_of_same_values_in_list_are_same_hash() {
+    assertThat(Hash.hash_elems(List.of("0", "0"))).isEqualTo(Hash.hash_elems(List.of("0", "0")));
+  }
+
+  // @Example fails
+  public void test_hash_null_equivalents() {
+    assertThat(Hash.hash_elems(List.of())).isEqualTo(Hash.hash_elems("null"));
+    assertThat(Hash.hash_elems(List.of())).isEqualTo(Hash.hash_elems(Optional.empty()));
+  }
+
+  @Example
+  public void test_hash_not_null_equivalents() {
+    assertThat(Hash.hash_elems(List.of())).isNotEqualTo(Hash.hash_elems(0));
+    assertThat(Hash.hash_elems(List.of())).isNotEqualTo(Hash.hash_elems(""));
   }
 
   @Example
