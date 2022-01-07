@@ -5,9 +5,6 @@ import com.google.common.base.Preconditions;
 import javax.annotation.concurrent.Immutable;
 import java.util.Objects;
 
-import static com.sunya.electionguard.Group.G;
-import static com.sunya.electionguard.Group.P;
-import static com.sunya.electionguard.Group.Q;
 import static com.sunya.electionguard.Group.int_to_p_unchecked;
 import static com.sunya.electionguard.Group.int_to_q_unchecked;
 
@@ -67,10 +64,12 @@ public class CiphertextElectionContext {
             commitment_hash);
   }
 
+  // TODO hash ElementModQ rather than BigInteger: whats the difference?
   public static Group.ElementModQ make_crypto_base_hash(int number_of_guardians, int quorum, Manifest election) {
-    return Hash.hash_elems(int_to_p_unchecked(P),
-                    int_to_q_unchecked(Q),
-                    int_to_p_unchecked(G),
+    ElectionConstants primes = Group.getPrimes();
+    return Hash.hash_elems(int_to_p_unchecked(primes.large_prime),
+                    int_to_q_unchecked(primes.small_prime),
+                    int_to_p_unchecked(primes.generator),
                     number_of_guardians, quorum, election.crypto_hash());
   }
 

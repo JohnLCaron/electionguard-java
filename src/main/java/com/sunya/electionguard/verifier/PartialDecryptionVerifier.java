@@ -17,7 +17,6 @@ import static com.sunya.electionguard.DecryptionShare.CiphertextCompensatedDecry
 import static com.sunya.electionguard.DecryptionShare.CiphertextDecryptionSelection;
 import static com.sunya.electionguard.Group.ElementModP;
 import static com.sunya.electionguard.Group.ElementModQ;
-import static com.sunya.electionguard.Group.Q;
 
 /**
  * This verifies specification section "10 Correctness of Construction of Replacement Partial Decryptions".
@@ -85,10 +84,10 @@ public class PartialDecryptionVerifier {
   //     (∏ j∈(U−{l}) j) mod q = (w_l ⋅ (∏ j∈(U−{l}) (j − l) )) mod q
   boolean verify_lagrange_coefficient(int coordinate, List<Integer> degrees, ElementModQ lagrange) {
     int product = degrees.stream().reduce(1, (a, b)  -> a * b);
-    ElementModQ numerator = Group.int_to_q_unchecked(BigInteger.valueOf(product).mod(Q));
+    ElementModQ numerator = Group.int_to_q_unchecked(BigInteger.valueOf(product).mod(Group.getPrimes().small_prime));
     List<Integer> diff = degrees.stream().map(degree -> degree - coordinate).collect(Collectors.toList());
     int productDiff = diff.stream().reduce(1, (a, b)  -> a * b);
-    ElementModQ denominator = Group.int_to_q_unchecked(BigInteger.valueOf(productDiff).mod(Q));
+    ElementModQ denominator = Group.int_to_q_unchecked(BigInteger.valueOf(productDiff).mod(Group.getPrimes().small_prime));
     return numerator.equals(Group.mult_q(lagrange, denominator));
   }
 

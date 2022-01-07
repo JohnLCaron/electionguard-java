@@ -115,7 +115,7 @@ public class TestGuardianRecordSerializing {
     publisher.writeKeyCeremonyJson(
             this.election,
             context,
-            new ElectionConstants(),
+            Group.getPrimes(),
             this.guardianRecords);
 
     // LOOK doesnt work: save private data for decrypting

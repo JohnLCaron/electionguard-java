@@ -186,8 +186,8 @@ public class ChaumPedersen {
               && in_bounds_c && in_bounds_v && in_bounds_q && same_c && consistent_gv && consistent_av;
 
       if (!success) {
-        logger.atWarning().log("found an invalid Chaum-Pedersen proof%n" +
-                String.format(" in_bounds_alpha %s%n", in_bounds_alpha) +
+        logger.atWarning().log("found an invalid Chaum-Pedersen proof " +
+                String.format("%n in_bounds_alpha %s%n", in_bounds_alpha) +
                 String.format(" in_bounds_beta %s%n", in_bounds_beta) +
                 String.format(" in_bounds_k %s%n", in_bounds_k) +
                 String.format(" in_bounds_m %s%n", in_bounds_m) +

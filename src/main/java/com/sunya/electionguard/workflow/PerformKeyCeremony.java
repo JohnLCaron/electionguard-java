@@ -280,7 +280,7 @@ public class PerformKeyCeremony {
     publisher.writeKeyCeremonyJson(
             this.election,
             this.context,
-            new ElectionConstants(),
+            Group.getPrimes(),
             this.guardian_records);
 
     // save private data for decrypting

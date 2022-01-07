@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import com.sunya.electionguard.CiphertextElectionContext;
 import com.sunya.electionguard.CiphertextTallyBuilder;
 import com.sunya.electionguard.ElectionConstants;
+import com.sunya.electionguard.Group;
 import com.sunya.electionguard.GuardianRecord;
 import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.InternalManifest;
@@ -57,7 +58,7 @@ public class TestPublish {
     publisher.writeElectionRecordJson(
             election,
             context,
-            new ElectionConstants(),
+            Group.getPrimes(),
             ImmutableList.of(),
             ImmutableList.of(),
             ciphertext_tally,

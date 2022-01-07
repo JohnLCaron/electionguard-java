@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 
 import static com.sunya.electionguard.Group.ElementModQ;
 import static com.sunya.electionguard.Group.ElementModP;
-import static com.sunya.electionguard.Group.Q;
 import static com.sunya.electionguard.Group.ZERO_MOD_Q;
 import static com.sunya.electionguard.Group.add_q;
 import static com.sunya.electionguard.Group.g_pow_p;
@@ -121,7 +120,7 @@ public class ElectionPolynomial {
    * @param polynomial:        A Guardian's polynomial
    */
   public static ElementModQ compute_polynomial_coordinate(BigInteger exponent_modifier, ElectionPolynomial polynomial) {
-    Preconditions.checkArgument(Group.between(BigInteger.ONE, exponent_modifier, Q), "exponent_modifier is out of range");
+    Preconditions.checkArgument(Group.between1andQ(exponent_modifier), "exponent_modifier is out of range");
 
     ElementModQ computed_value = ZERO_MOD_Q;
     int count = 0;
@@ -143,11 +142,11 @@ public class ElectionPolynomial {
    */
   public static ElementModQ compute_lagrange_coefficient(Integer coordinate, List<Integer> degrees) {
     int product = degrees.stream().reduce(1, (a, b)  -> a * b);
-    ElementModQ numerator = Group.int_to_q_unchecked(BigInteger.valueOf(product).mod(Q));
+    ElementModQ numerator = Group.int_to_q_unchecked(BigInteger.valueOf(product).mod(Group.getPrimes().small_prime));
     // denominator = mult_q(*[(degree - coordinate) for degree in degrees])
     List<Integer> diff = degrees.stream().map(degree -> degree - coordinate).collect(Collectors.toList());
     int productDiff = diff.stream().reduce(1, (a, b)  -> a * b);
-    ElementModQ denominator = Group.int_to_q_unchecked(BigInteger.valueOf(productDiff).mod(Q));
+    ElementModQ denominator = Group.int_to_q_unchecked(BigInteger.valueOf(productDiff).mod(Group.getPrimes().small_prime));
     return Group.div_q(numerator, denominator);
   }
 

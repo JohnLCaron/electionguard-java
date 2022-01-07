@@ -50,12 +50,21 @@ public class Consumer {
   }
 
   public ElectionRecord readElectionRecord() throws IOException {
+    ElectionRecord result;
     if (Files.exists(publisher.electionRecordProtoPath())) {
-      return readElectionRecordProto();
-    } if (Files.exists(publisher.constantsPath()))  {
-      return readElectionRecordJson();
+      result = readElectionRecordProto();
+    } else if (Files.exists(publisher.constantsPath()))  {
+      result = readElectionRecordJson();
+    } else {
+      throw new FileNotFoundException(String.format("No election record found in %s", publisher.publishPath()));
     }
-    throw new FileNotFoundException(String.format("No election record found in %s", publisher.publishPath()));
+
+    /* check constants
+    if (!result.constants.equals(Group.getPrimes())) {
+      System.out.printf("** Non-standard constants in %s%n", publisher.publishPath());
+      Group.setPrimes(result.constants);
+    } */
+    return result;
   }
 
   public Manifest readManifest() throws IOException {

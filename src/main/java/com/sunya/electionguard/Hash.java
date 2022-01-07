@@ -87,6 +87,7 @@ public class Hash {
     }
 
     // must be positive
-    return Group.int_to_q_unchecked(new BigInteger(1, digest.digest()).mod(Group.Q_MINUS_ONE));
+    // LOOK return Group.int_to_q_unchecked(new BigInteger(1, digest.digest()).mod(Group.Q_MINUS_ONE));
+    return Group.int_to_q_unchecked(new BigInteger(1, digest.digest()).mod(Group.getPrimes().small_prime));
   }
 }
