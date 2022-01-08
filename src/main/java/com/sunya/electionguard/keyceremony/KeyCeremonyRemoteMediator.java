@@ -275,7 +275,7 @@ public class KeyCeremonyRemoteMediator {
       publisher.writeKeyCeremonyProto(
               this.election,
               this.context,
-              new ElectionConstants(),
+              Group.getPrimes(),
               this.guardianRecords);
       return true;
     } catch (IOException e) {

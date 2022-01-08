@@ -227,7 +227,7 @@ public class TestEndToEndElectionIntegration {
     ElectionBuilder.DescriptionAndContext tuple = this.election_builder.build().orElseThrow();
     this.election = tuple.internalManifest.manifest;
     this.context = tuple.context;
-    this.constants = new ElectionConstants();
+    this.constants = Group.getPrimes();
     Group.ElementModQ crypto_base_hash = CiphertextElectionContext.make_crypto_base_hash(NUMBER_OF_GUARDIANS, QUORUM, election);
     assertThat(this.context.crypto_base_hash).isEqualTo(crypto_base_hash);
 

@@ -3,7 +3,6 @@ package com.sunya.electionguard;
 import java.math.BigInteger;
 import java.util.Random;
 
-import static com.google.common.truth.Truth.assertThat;
 import static com.sunya.electionguard.ChaumPedersen.make_chaum_pedersen;
 import static com.sunya.electionguard.Group.*;
 
@@ -35,22 +34,22 @@ public class TestUtils {
 
   /** Generates an arbitrary element from [1,Q). from electionguardtest.group. */
   static ElementModQ elements_mod_q_no_zero() {
-    return Group.int_to_q_unchecked(Utils.randbetween(BigInteger.ONE, Q));
+    return Group.int_to_q_unchecked(Utils.randbetween(BigInteger.ONE, Group.getPrimes().small_prime));
   }
 
   /** Generates an arbitrary element from [0,Q). from electionguardtest.group. */
   public static ElementModQ elements_mod_q() {
-    return Group.int_to_q_unchecked(Utils.randbelow(Q));
+    return Group.int_to_q_unchecked(Utils.randbelow(Group.getPrimes().small_prime));
   }
 
   /** Generates an arbitrary element from [1,P). from electionguardtest.group. */
   static ElementModP elements_mod_p_no_zero() {
-    return Group.int_to_p_unchecked(Utils.randbetween(BigInteger.ONE, P));
+    return Group.int_to_p_unchecked(Utils.randbetween(BigInteger.ONE, Group.getPrimes().large_prime));
   }
 
   /** Generates an arbitrary element from [0,Q). from electionguardtest.group. */
   public static ElementModP elements_mod_p() {
-    return Group.int_to_p_unchecked(Utils.randbelow(P));
+    return Group.int_to_p_unchecked(Utils.randbelow(Group.getPrimes().large_prime));
   }
 
   /** Generates a fake ChaumPedersenProof. */

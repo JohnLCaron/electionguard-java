@@ -32,6 +32,7 @@ class Dlog {
 
   // store all integer values up to dlog_max_elem, which increases as needed.
   private static synchronized Integer discrete_log_internal(BigInteger e) {
+    BigInteger G = getPrimes().generator;
     while (!e.equals(dlog_max_elem)) {
       dlog_max_exp = dlog_max_exp + 1;
       if (dlog_max_exp > MAX) {

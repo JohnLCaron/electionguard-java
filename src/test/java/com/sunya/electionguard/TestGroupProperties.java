@@ -10,7 +10,6 @@ import static com.sunya.electionguard.Group.*;
 import static org.junit.Assert.fail;
 
 public class TestGroupProperties extends TestProperties {
-  private static final ElementModQ ONE_Q = Group.int_to_q_unchecked(BigInteger.ONE);
 
   //// TestEquality
   @Property
@@ -18,7 +17,7 @@ public class TestGroupProperties extends TestProperties {
     ElementModP p = int_to_p_unchecked(q.getBigInt());
     ElementModP p2 = int_to_p_unchecked(q2.getBigInt());
 
-    // same value should imply they 're equal
+    // same value should imply they're equal
     assertThat(p).isEqualTo(q);
     assertThat(q).isEqualTo(p);
 
@@ -29,7 +28,7 @@ public class TestGroupProperties extends TestProperties {
       assertThat(q).isNotEqualTo(p2);
       assertThat(p).isNotEqualTo(q2);
 
-      // of course, we 're going to make sure that a number is equal to itself
+      // of course, we're going to make sure that a number is equal to itself
       assertThat(p).isEqualTo(p);
       assertThat(q).isEqualTo(q);
     }
@@ -103,17 +102,8 @@ public class TestGroupProperties extends TestProperties {
   }
 
   @Property
-  public void test_properties_for_constants() {
-    assertThat(G).isNotEqualTo(BigInteger.ONE);
-    assertThat((R.multiply(Q).mod(P))).isEqualTo(P.subtract(BigInteger.ONE));
-    assertThat(Q.compareTo(P) < 0).isTrue();
-    assertThat(G.compareTo(P) < 0).isTrue();
-    assertThat(R.compareTo(P) < 0).isTrue();
-  }
-
-  @Property
   public void test_simple_powers() {
-    ElementModP gp = int_to_p_unchecked(G);
+    ElementModP gp = int_to_p_unchecked(getPrimes().generator);
     assertThat(gp).isEqualTo(g_pow_p(ONE_MOD_Q));
     assertThat(ONE_MOD_P).isEqualTo(g_pow_p(ZERO_MOD_Q));
   }
@@ -121,8 +111,8 @@ public class TestGroupProperties extends TestProperties {
   @Property
   public void test_in_bounds_q(@ForAll("elements_mod_q") ElementModQ q) {
     assertThat(q.is_in_bounds()).isTrue();
-    BigInteger too_big = q.getBigInt().add(Q);
-    BigInteger too_small = q.getBigInt().subtract(Q);
+    BigInteger too_big = q.getBigInt().add(Group.getPrimes().small_prime);
+    BigInteger too_small = q.getBigInt().subtract(Group.getPrimes().small_prime);
     assertThat(int_to_q_unchecked(too_big).is_in_bounds()).isFalse();
     assertThat(int_to_q_unchecked(too_small).is_in_bounds()).isFalse();
     assertThat(int_to_q(too_big)).isEmpty();
@@ -132,8 +122,8 @@ public class TestGroupProperties extends TestProperties {
   @Property
   public void test_in_bounds_p(@ForAll("elements_mod_p") ElementModP p) {
     assertThat(p.is_in_bounds()).isTrue();
-    BigInteger too_big = p.getBigInt().add(P);
-    BigInteger too_small = p.getBigInt().subtract(P);
+    BigInteger too_big = p.getBigInt().add(Group.getPrimes().large_prime);
+    BigInteger too_small = p.getBigInt().subtract(Group.getPrimes().large_prime);
     assertThat(int_to_p_unchecked(too_big).is_in_bounds()).isFalse();
     assertThat(int_to_p_unchecked(too_small).is_in_bounds()).isFalse();
     assertThat(int_to_p(too_big)).isEmpty();
@@ -144,30 +134,30 @@ public class TestGroupProperties extends TestProperties {
   public void test_in_bounds_q_no_zero(@ForAll("elements_mod_q_no_zero") ElementModQ q_no_zero) {
     assertThat(is_in_bounds_no_zero(q_no_zero)).isTrue();
     assertThat(is_in_bounds_no_zero(ZERO_MOD_Q)).isFalse();
-    assertThat(is_in_bounds_no_zero(int_to_q_unchecked(q_no_zero.getBigInt().add(Q)))).isFalse();
-    assertThat(is_in_bounds_no_zero(int_to_q_unchecked(q_no_zero.getBigInt().subtract(Q)))).isFalse();
+    assertThat(is_in_bounds_no_zero(int_to_q_unchecked(q_no_zero.getBigInt().add(Group.getPrimes().small_prime)))).isFalse();
+    assertThat(is_in_bounds_no_zero(int_to_q_unchecked(q_no_zero.getBigInt().subtract(Group.getPrimes().small_prime)))).isFalse();
   }
 
   @Property
   public void test_in_bounds_p_no_zero(@ForAll("elements_mod_p_no_zero") ElementModP p_no_zero) {
     assertThat(is_in_bounds_no_zero(p_no_zero)).isTrue();
     assertThat(is_in_bounds_no_zero(ZERO_MOD_P)).isFalse();
-    assertThat(is_in_bounds_no_zero(int_to_p_unchecked(p_no_zero.getBigInt().add(P)))).isFalse();
-    assertThat(is_in_bounds_no_zero(int_to_p_unchecked(p_no_zero.getBigInt().subtract(P)))).isFalse();
+    assertThat(is_in_bounds_no_zero(int_to_p_unchecked(p_no_zero.getBigInt().add(Group.getPrimes().large_prime)))).isFalse();
+    assertThat(is_in_bounds_no_zero(int_to_p_unchecked(p_no_zero.getBigInt().subtract(Group.getPrimes().large_prime)))).isFalse();
   }
 
   @Property
   public void test_large_values_rejected_by_int_to_q(@ForAll("elements_mod_q") ElementModQ q) {
-    BigInteger oversize = q.elem.add(Q);
+    BigInteger oversize = q.elem.add(Group.getPrimes().small_prime);
     assertThat(int_to_q(oversize)).isEmpty();
   }
 
   private boolean is_in_bounds_no_zero(ElementModP p) {
-    return Group.between(BigInteger.ONE, p.elem, P);
+    return Group.between(BigInteger.ONE, p.elem, Group.getPrimes().large_prime);
   }
 
   private boolean is_in_bounds_no_zero(ElementModQ q) {
-    return Group.between(BigInteger.ONE, q.elem, Q);
+    return Group.between(BigInteger.ONE, q.elem, Group.getPrimes().small_prime);
   }
 
 }

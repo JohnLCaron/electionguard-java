@@ -51,6 +51,7 @@ public class DecryptingTrustee implements DecryptingTrusteeIF {
   /** All guardians' public coefficient commitments, keyed by guardian id. */
   public final ImmutableMap<String, ImmutableList<Group.ElementModP>> guardianCommittments;
 
+  // TODO id and sequence_order are not matching
   public DecryptingTrustee(String id, int sequence_order,
                            java.security.PrivateKey rsa_private_key,
                            ElGamal.KeyPair election_keypair,

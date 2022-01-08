@@ -1,5 +1,6 @@
 package com.sunya.electionguard.verifier;
 
+import com.sunya.electionguard.ElectionConstants;
 import com.sunya.electionguard.Group;
 
 import java.math.BigInteger;
@@ -19,23 +20,24 @@ public class ParameterVerifier {
   /** verify all parameters including p, q, r, g */
   public boolean verify_all_params() {
     boolean error = false;
+    ElectionConstants primes = Group.getPrimes();
 
     // check if p, q, g are the expected values
-    if (!electionRecord.largePrime().equals(Group.P)) {
+    if (!electionRecord.largePrime().equals(primes.large_prime)) {
       System.out.printf(" Large prime value not equal to P. %n");
       error = true;
     }
-    if (!electionRecord.smallPrime().equals(Group.Q)) {
+    if (!electionRecord.smallPrime().equals(primes.small_prime)) {
       error = true;
       System.out.printf(" Small prime value not equal to Q. %n");
     }
-    if (!electionRecord.generator().equals(Group.G)) {
+    if (!electionRecord.generator().equals(primes.generator)) {
       error = true;
       System.out.printf(" Generator value not equal to G. %n");
     }
-    if (!electionRecord.cofactor().equals(Group.R)) {
+    if (!electionRecord.cofactor().equals(primes.cofactor)) {
       error = true;
-      System.out.printf(" Generator value not equal to G. %n");
+      System.out.printf(" cofactor value not equal to R. %n");
     }
 
     // check equation p - 1 = q * r

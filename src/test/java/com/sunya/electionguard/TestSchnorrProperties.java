@@ -70,7 +70,7 @@ public class TestSchnorrProperties extends TestProperties {
           @ForAll("elements_mod_q") Group.ElementModQ nonce) {
     SchnorrProof proof = make_schnorr_proof(keypair, nonce);
     SchnorrProof proof2 = new SchnorrProof(ZERO_MOD_P, proof.commitment, proof.challenge, proof.response);
-    SchnorrProof proof3 = new SchnorrProof(int_to_p_unchecked(P), proof.commitment, proof.challenge, proof.response);
+    SchnorrProof proof3 = new SchnorrProof(int_to_p_unchecked(Group.getPrimes().large_prime), proof.commitment, proof.challenge, proof.response);
     assertThat(proof2.is_valid()).isFalse();
     assertThat(proof3.is_valid()).isFalse();
   }

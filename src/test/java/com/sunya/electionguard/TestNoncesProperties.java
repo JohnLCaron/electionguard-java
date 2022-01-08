@@ -8,7 +8,6 @@ import net.jqwik.api.constraints.Positive;
 import java.math.BigInteger;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.sunya.electionguard.Group.Q;
 import static org.junit.Assert.fail;
 
 public class TestNoncesProperties extends TestProperties {
@@ -16,7 +15,7 @@ public class TestNoncesProperties extends TestProperties {
   Nonces nonces;
 
   public TestNoncesProperties() {
-    seed = Group.int_to_q_unchecked(Utils.randbelow(Q));
+    seed = Group.int_to_q_unchecked(Utils.randbelow(Group.getPrimes().small_prime));
     nonces = new Nonces(seed);
   }
 

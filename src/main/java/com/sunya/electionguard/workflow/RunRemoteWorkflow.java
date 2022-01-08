@@ -22,7 +22,8 @@ import java.util.stream.Stream;
 
 /**
  * Runs the entire workflow from start to finish, using remote guardians.
- * Runs the components out of the fatJar, so be sure to build that first.
+ * Runs the components out of the fatJar, so be sure to build that first: "./gradlew clean assemble fatJar"
+ * Also be sure to keep RunStandardWorkflow.classpath synched with fatjar SHAPSHOT version.
  * <p>
  * For command line help:
  * <strong>
