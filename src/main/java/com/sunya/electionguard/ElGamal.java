@@ -169,7 +169,7 @@ public class ElGamal {
   /**
    * Encrypts a message with a given random nonce and an ElGamal public key.
    *
-   * @param message    Message to elgamal_encrypt; must be an integer in [0,Q).
+   * @param message    must be an integer in [0,Q).
    * @param nonce      Randomly chosen nonce in [1,Q).
    * @param public_key ElGamal public key.
    * @return An ElGamal.Ciphertext.

@@ -28,6 +28,7 @@ public class BallotInputBuilder {
 
   public class ContestBuilder {
     private String id;
+    private int seq = 1;
     private ArrayList<SelectionBuilder> selections = new ArrayList<>();
 
     ContestBuilder(String id) {
@@ -45,7 +46,7 @@ public class BallotInputBuilder {
     }
 
     PlaintextBallot.Contest build() {
-      return new PlaintextBallot.Contest(id, selections.stream().map(SelectionBuilder::build).collect(Collectors.toList()));
+      return new PlaintextBallot.Contest(id, seq++, selections.stream().map(SelectionBuilder::build).collect(Collectors.toList()));
     }
 
     public class SelectionBuilder {
@@ -58,7 +59,7 @@ public class BallotInputBuilder {
       }
 
       PlaintextBallot.Selection build() {
-        return new PlaintextBallot.Selection(id, vote, false, null);
+        return new PlaintextBallot.Selection(id, seq++, vote, false, null);
       }
     }
   }

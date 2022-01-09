@@ -1,5 +1,7 @@
 package com.sunya.electionguard;
 
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 
 import javax.annotation.concurrent.Immutable;
@@ -30,15 +32,20 @@ public class CiphertextTally extends ElectionObjectBase {
    * The object_id is the Manifest.ContestDescription.object_id.
    */
   @Immutable
-  public static class Contest extends ElectionObjectBase {
+  public static class Contest implements OrderedObjectBaseIF {
+    public final String object_id;
+    public final int sequence_order;
+
     /** The ContestDescription crypto_hash. */
     public final ElementModQ contestDescriptionHash;
 
     /** The collection of selections in the contest, keyed by selection.object_id. */
     public final ImmutableMap<String, Selection> selections; // Map(SELECTION_ID, CiphertextTallySelection)
 
-    public Contest(String object_id, ElementModQ contestDescriptionHash, Map<String, Selection> selections) {
-      super(object_id);
+    public Contest(String object_id, int sequence_order, ElementModQ contestDescriptionHash, Map<String, Selection> selections) {
+      Preconditions.checkArgument(!Strings.isNullOrEmpty(object_id));
+      this.object_id = object_id;
+      this.sequence_order = sequence_order;
       this.contestDescriptionHash = contestDescriptionHash;
       this.selections = ImmutableMap.copyOf(selections);
     }
@@ -65,6 +72,16 @@ public class CiphertextTally extends ElectionObjectBase {
               "\n contestDescriptionHash=" + contestDescriptionHash +
               '}';
     }
+
+    @Override
+    public String object_id() {
+      return object_id;
+    }
+
+    @Override
+    public int sequence_order() {
+      return sequence_order;
+    }
   }
 
   /**
@@ -73,8 +90,8 @@ public class CiphertextTally extends ElectionObjectBase {
    */
   @Immutable
   public static class Selection extends CiphertextSelection {
-    public Selection(String selectionDescriptionId, ElementModQ description_hash, ElGamal.Ciphertext ciphertext) {
-      super(selectionDescriptionId, description_hash, ciphertext, false);
+    public Selection(String selectionDescriptionId, int sequence_order, ElementModQ description_hash, ElGamal.Ciphertext ciphertext) {
+      super(selectionDescriptionId, sequence_order, description_hash, ciphertext, false);
     }
 
     @Override

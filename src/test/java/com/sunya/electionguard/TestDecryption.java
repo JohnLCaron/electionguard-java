@@ -287,7 +287,7 @@ public class TestDecryption extends TestProperties {
     System.out.printf("%nRECONSTRUCTED SHARE%s%n", reconstructed_share);
 
     DecryptionShare.CiphertextDecryptionSelection share_2 = DecryptionShare.create_ciphertext_decryption_selection(
-            first_selection.object_id,
+            first_selection.object_id(),
             this.guardians.get(2).object_id,
             reconstructed_share,
             Optional.empty(),

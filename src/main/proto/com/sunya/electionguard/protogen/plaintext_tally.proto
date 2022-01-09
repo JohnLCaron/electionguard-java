@@ -18,11 +18,13 @@ message PlaintextTallyContestMap {
 
 message PlaintextTallyContest {
   string object_id = 1;
+  int32 sequence_order = 3;
   map<string, PlaintextTallySelection> selections = 2;
 }
 
 message PlaintextTallySelection {
   string object_id = 1;
+  int32 sequence_order = 6;
   uint32 tally = 2;
   // g^tally or M in the spec.
   ElementModP value = 3;
@@ -32,6 +34,8 @@ message PlaintextTallySelection {
 
 message CiphertextDecryptionSelection {
   string object_id = 1;
+  int32 sequence_order = 7;
+
   // The Available Guardian that this share belongs to
   string guardian_id = 2;
 

@@ -85,12 +85,14 @@ public class PlaintextBallot extends ElectionObjectBase {
   public static class Contest {
     /** The ContestDescription.object_id. */
     public final String contest_id;
+    public final int sequence_order;
     /** The Collection of ballot selections. */
     public final ImmutableList<Selection> ballot_selections;
 
-    public Contest(String contest_id, List<Selection> ballot_selections) {
+    public Contest(String contest_id, int sequence_order, List<Selection> ballot_selections) {
       Preconditions.checkArgument(!Strings.isNullOrEmpty(contest_id));
       this.contest_id = contest_id;
+      this.sequence_order = sequence_order;
       this.ballot_selections = ImmutableList.copyOf(ballot_selections);
     }
 
@@ -174,6 +176,7 @@ public class PlaintextBallot extends ElectionObjectBase {
   public static class Selection {
     /** Matches the SelectionDescription.object_id. */
     public final String selection_id;
+    public final int sequence_order;
     /** The vote count. */
     public final int vote;
     /** Is this a placeholder? */
@@ -181,10 +184,11 @@ public class PlaintextBallot extends ElectionObjectBase {
     /** Optional write-in candidate. */
     public final Optional<ExtendedData> extended_data; // default None
 
-    public Selection(String selection_id, int vote, boolean is_placeholder_selection,
+    public Selection(String selection_id, int sequence_order, int vote, boolean is_placeholder_selection,
                      @Nullable ExtendedData extended_data) {
       Preconditions.checkArgument(!Strings.isNullOrEmpty(selection_id));
       this.selection_id = selection_id;
+      this.sequence_order = sequence_order;
       this.vote = vote;
       this.is_placeholder_selection = is_placeholder_selection;
       this.extended_data = Optional.ofNullable(extended_data);
@@ -276,10 +280,10 @@ public class PlaintextBallot extends ElectionObjectBase {
       for (CiphertextBallot.Selection cselection : ccontest.ballot_selections) {
         if (!cselection.is_placeholder_selection) {
           PlaintextTally.Selection tselection = tcontest.selections().get(cselection.object_id);
-          selections.add(new Selection(cselection.object_id, tselection.tally(), false, null));
+          selections.add(new Selection(cselection.object_id, tselection.sequence_order(), tselection.tally(), false, null));
         }
       }
-      contests.add(new Contest(ccontest.object_id, selections));
+      contests.add(new Contest(ccontest.object_id(), ccontest.sequence_order(), selections));
     }
     return new PlaintextBallot(cballot.object_id, cballot.style_id, contests);
   }

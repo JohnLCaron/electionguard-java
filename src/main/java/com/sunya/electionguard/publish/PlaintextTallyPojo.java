@@ -25,11 +25,13 @@ public class PlaintextTallyPojo {
 
   public static class PlaintextTallyContestPojo {
     public String object_id;
+    public int sequence_order;
     public Map<String, PlaintextTallySelectionPojo> selections;
   }
 
   public static class PlaintextTallySelectionPojo {
     public String object_id;
+    public int sequence_order;
     public Integer tally;
     public Group.ElementModP value;
     public ElGamal.Ciphertext message;
@@ -97,6 +99,7 @@ public class PlaintextTallyPojo {
   private static PlaintextTally.Selection translateSelection(PlaintextTallySelectionPojo pojo) {
     return PlaintextTally.Selection.create(
             pojo.object_id,
+            pojo.sequence_order,
             pojo.tally,
             pojo.value,
             pojo.message,
@@ -177,6 +180,7 @@ public class PlaintextTallyPojo {
   private static PlaintextTallySelectionPojo convertSelection(PlaintextTally.Selection org) {
     PlaintextTallySelectionPojo pojo = new PlaintextTallySelectionPojo();
     pojo.object_id = org.object_id();
+    pojo.sequence_order = org.sequence_order();
     pojo.tally = org.tally();
     pojo.value = org.value();
     pojo.message = org.message();

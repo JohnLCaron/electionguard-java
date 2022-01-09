@@ -20,7 +20,7 @@ public class TestDecryptingTrustee {
   @Example
   public void testKeyCeremonyTrusteeGeneration() {
     assertThat(trustee1.id()).isEqualTo(GUARDIAN_ID + 1);
-    assertThat(trustee1.xCoordinate()).isEqualTo(1);
+    assertThat(trustee1.xCoordinate()).isEqualTo(1); // TODO FAILING
     assertThat(trustee1.electionPublicKey()).isNotNull();
 
     assertThat(trustee1.guardianCommittments.size()).isEqualTo(NGUARDIANS);

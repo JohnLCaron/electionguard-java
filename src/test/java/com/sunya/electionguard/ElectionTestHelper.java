@@ -499,7 +499,7 @@ public class ElectionTestHelper {
       no_votes.stream().map(d -> Encrypt.selection_from(d, false, false))
               .forEach(voted_selections::add);
 
-      voted_contests.add(new PlaintextBallot.Contest(contest.object_id, voted_selections));
+      voted_contests.add(new PlaintextBallot.Contest(contest.object_id(), contest.sequence_order(), voted_selections));
     }
 
     return new PlaintextBallot(randomString("PlaintextBallot"), ballot_style.object_id, voted_contests);

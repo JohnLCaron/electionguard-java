@@ -102,28 +102,28 @@ public class Encrypt {
    * This function is useful for filling selections when a voter undervotes a ballot.
    * It is also used to create placeholder representations when generating the `ConstantChaumPedersenProof`
    *
-   * @param description:    The `SelectionDescription` which provides the relevant `object_id`
+   * @param mselection:    The `SelectionDescription` which provides the relevant `object_id`
    * @param is_placeholder: Mark this selection as a placeholder value
    * @param is_affirmative: Mark this selection as `yes`
    */
   // selection_from( description: SelectionDescription, is_placeholder: bool = False, is_affirmative: bool = False,
-  static PlaintextBallot.Selection selection_from(Manifest.SelectionDescription description, boolean is_placeholder, boolean is_affirmative) {
-    return new PlaintextBallot.Selection(description.object_id, is_affirmative ? 1 : 0, is_placeholder, null);
+  static PlaintextBallot.Selection selection_from(Manifest.SelectionDescription mselection, boolean is_placeholder, boolean is_affirmative) {
+    return new PlaintextBallot.Selection(mselection.object_id(), mselection.sequence_order(), is_affirmative ? 1 : 0, is_placeholder, null);
   }
 
   /**
    * Construct a `BallotContest` from a specific `ContestDescription` with all false fields.
    * This function is useful for filling contests and selections when a voter undervotes a ballot.
    *
-   * @param description: The `ContestDescription` used to derive the well-formed `BallotContest`
+   * @param mcontest: The `ContestDescription` used to derive the well-formed `BallotContest`
    */
-  static PlaintextBallot.Contest contest_from(Manifest.ContestDescription description) {
+  static PlaintextBallot.Contest contest_from(Manifest.ContestDescription mcontest) {
     List<PlaintextBallot.Selection> selections = new ArrayList<>();
 
-    for (Manifest.SelectionDescription selection_description : description.ballot_selections) {
+    for (Manifest.SelectionDescription selection_description : mcontest.ballot_selections) {
       selections.add(selection_from(selection_description, false, false));
     }
-    return new PlaintextBallot.Contest(description.object_id, selections);
+    return new PlaintextBallot.Contest(mcontest.object_id(), mcontest.sequence_order(), selections);
   }
 
   /**
@@ -174,6 +174,7 @@ public class Encrypt {
 
     CiphertextBallot.Selection encrypted_selection = CiphertextBallot.Selection.create(
             selection.selection_id,
+            selection.sequence_order,
             selection_description_hash,
             elgamal_encryption.get(),
             elgamal_public_key,
@@ -326,6 +327,7 @@ public class Encrypt {
 
     CiphertextBallot.Contest encrypted_contest = CiphertextBallot.Contest.create(
         contest.contest_id,
+        contest.sequence_order,
         contest_description_hash,
         encrypted_selections,
         elgamal_public_key,

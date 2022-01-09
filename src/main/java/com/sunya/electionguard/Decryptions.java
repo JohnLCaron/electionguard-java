@@ -174,7 +174,7 @@ class Decryptions {
       if (tuple.proof.is_valid(selection.ciphertext(), guardian_keys.key_pair().public_key,
               tuple.decryption, context.crypto_extended_base_hash)) {
         return Optional.of(DecryptionShare.create_ciphertext_decryption_selection(
-                selection.object_id,
+                selection.object_id(),
                 guardian_keys.owner_id(),
                 tuple.decryption,
                 Optional.of(tuple.proof),
@@ -658,7 +658,7 @@ class Decryptions {
         Group.ElementModP reconstructed_share = Group.mult_p(share_pow_p);
 
         selections.put(selection.object_id, create_ciphertext_decryption_selection(
-                selection.object_id,
+                selection.object_id(),
                 missing_guardian_id,
                 reconstructed_share,
                 Optional.empty(),

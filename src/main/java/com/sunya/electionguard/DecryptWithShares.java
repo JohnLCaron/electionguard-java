@@ -203,7 +203,8 @@ public class DecryptWithShares {
     // [share for (guardian_id, (public_key, share))in shares.items()],
     List<DecryptionShare.CiphertextDecryptionSelection> selections = shares.values().stream().map(t -> t.decryption).collect(Collectors.toList());
     return Optional.of( PlaintextTally.Selection.create(
-            selection.object_id,
+            selection.object_id(),
+            selection.sequence_order(),
             dlogM,
             decrypted_value,
             selection.ciphertext(),

@@ -58,12 +58,16 @@ public class FakeBallotProvider implements BallotProvider {
           selections.add(selection);
         }
       }
-      return new PlaintextBallot.Contest(contest.object_id, selections);
+      return new PlaintextBallot.Contest(
+              contest.object_id(),
+              contest.sequence_order(),
+              selections);
     }
 
     static PlaintextBallot.Selection get_random_selection_from(Manifest.SelectionDescription description) {
       boolean choice = random.nextBoolean();
-      return new PlaintextBallot.Selection(description.object_id, choice ? 1 : 0, false, null);
+      return new PlaintextBallot.Selection(description.object_id(), description.sequence_order(),
+              choice ? 1 : 0, false, null);
     }
 
   }

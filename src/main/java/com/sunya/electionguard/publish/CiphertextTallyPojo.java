@@ -18,12 +18,14 @@ public class CiphertextTallyPojo {
 
   public static class CiphertextTallyContestPojo {
     public String object_id;
+    public int sequence_order;
     public Group.ElementModQ description_hash;
     public Map<String, CiphertextTallySelectionPojo> selections;
   }
 
   public static class CiphertextTallySelectionPojo {
     public String object_id;
+    public int sequence_order;
     public Group.ElementModQ description_hash;
     public ElGamal.Ciphertext ciphertext;
   }
@@ -55,6 +57,7 @@ public class CiphertextTallyPojo {
     }
     return new CiphertextTally.Contest(
             pojo.object_id,
+            pojo.sequence_order,
             pojo.description_hash,
             selections);
   }
@@ -64,6 +67,7 @@ public class CiphertextTallyPojo {
     //     @Nullable ElGamal.Ciphertext ciphertext) {
     return new CiphertextTally.Selection(
             pojo.object_id,
+            pojo.sequence_order,
             pojo.description_hash,
             pojo.ciphertext);
   }
@@ -97,6 +101,7 @@ public class CiphertextTallyPojo {
     }
     CiphertextTallyContestPojo pojo = new CiphertextTallyContestPojo();
     pojo.object_id = org.object_id;
+    pojo.sequence_order = org.sequence_order;
     pojo.description_hash = org.contestDescriptionHash;
     pojo.selections = selections;
     return pojo;
@@ -105,6 +110,7 @@ public class CiphertextTallyPojo {
   private static CiphertextTallySelectionPojo convertSelection(CiphertextTally.Selection org) {
     CiphertextTallySelectionPojo pojo = new CiphertextTallySelectionPojo();
     pojo.object_id = org.object_id;
+    pojo.sequence_order = org.sequence_order;
     pojo.description_hash = org.description_hash;
     pojo.ciphertext = org.ciphertext();
     return pojo;

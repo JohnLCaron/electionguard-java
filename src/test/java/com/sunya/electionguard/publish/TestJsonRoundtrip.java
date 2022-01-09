@@ -128,6 +128,7 @@ public class TestJsonRoundtrip {
 
     CiphertextBallot.Contest contest = new CiphertextBallot.Contest(
             "testContestRoundtrip",
+            42,
             Group.ONE_MOD_Q,
             ImmutableList.of(),
             Group.ONE_MOD_Q,
