@@ -18,12 +18,14 @@ public class PlaintextBallotFromProto {
   static PlaintextBallot.Contest convertContest(PlaintextBallotProto.PlaintextBallotContest contest) {
     return new PlaintextBallot.Contest(
             contest.getContestId(),
+            contest.getSequenceOrder(),
             convertList(contest.getBallotSelectionsList(), PlaintextBallotFromProto::convertSelection));
   }
 
   static PlaintextBallot.Selection convertSelection(PlaintextBallotProto.PlaintextBallotSelection selection) {
     return new PlaintextBallot.Selection(
             selection.getSelectionId(),
+            selection.getSequenceOrder(),
             selection.getVote(),
             selection.getIsPlaceholderSelection(),
             selection.hasExtendedData() ? convertExtendedData(selection.getExtendedData()) : null);

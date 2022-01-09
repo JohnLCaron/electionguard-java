@@ -28,6 +28,7 @@ public class CiphertextTallyFromProto {
 
     return new CiphertextTally.Contest(
             proto.getObjectId(),
+            proto.getSequenceOrder(),
             convertElementModQ(proto.getDescriptionHash()),
             selections);
   }
@@ -36,6 +37,7 @@ public class CiphertextTallyFromProto {
 
     return new CiphertextTally.Selection(
             proto.getObjectId(),
+            proto.getSequenceOrder(),
             convertElementModQ(proto.getDescriptionHash()),
             convertCiphertext(proto.getCiphertext()));
   }

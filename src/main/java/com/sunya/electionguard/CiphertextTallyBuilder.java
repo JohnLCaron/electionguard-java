@@ -68,9 +68,9 @@ public class CiphertextTallyBuilder {
       Map<String, Selection> contest_selections = new HashMap<>();
       for (Manifest.SelectionDescription selection : contest.ballot_selections) {
         contest_selections.put(selection.object_id,
-                new Selection(selection.object_id, selection.crypto_hash()));
+                new Selection(selection.object_id, selection.sequence_order, selection.crypto_hash()));
       }
-      cast_collection.put(contest.object_id, new Contest(contest.object_id, contest.crypto_hash(), contest_selections));
+      cast_collection.put(contest.object_id, new Contest(contest.object_id, contest.sequence_order, contest.crypto_hash(), contest_selections));
     }
     return cast_collection;
   }
@@ -236,15 +236,19 @@ public class CiphertextTallyBuilder {
    * The Contest to be tallied for a specific Manifest.ContestDescription.
    * The object_id is the Manifest.ContestDescription.object_id.
    */
-  static class Contest extends ElectionObjectBase {
+  static class Contest implements OrderedObjectBaseIF {
+    public final String object_id;
+    public final int sequence_order;
+
     /** The ContestDescription hash. */
     final ElementModQ description_hash;
 
     /** A collection of CiphertextTallySelection mapped by SelectionDescription.object_id. */
     final Map<String, Selection> selections; // Map(SELECTION_ID, CiphertextTallySelection)
 
-    public Contest(String object_id, ElementModQ description_hash, Map<String, Selection> selections) {
-      super(object_id);
+    public Contest(String object_id, int sequence_order, ElementModQ description_hash, Map<String, Selection> selections) {
+      this.object_id = object_id;
+      this.sequence_order = sequence_order;
       this.description_hash = description_hash;
       this.selections = selections;
     }
@@ -292,6 +296,16 @@ public class CiphertextTallyBuilder {
       return true;
     }
 
+    @Override
+    public String object_id() {
+      return object_id;
+    }
+
+    @Override
+    public int sequence_order() {
+      return sequence_order;
+    }
+
     @Immutable
     private static class AccumSelectionsTuple {
       final String selection_id;
@@ -306,11 +320,13 @@ public class CiphertextTallyBuilder {
     @Immutable
     static class RunAccumulateSelections implements Callable<AccumSelectionsTuple> {
       final String selection_id;
+      final int sequence_order;
       final Selection selection_tally;
       final ImmutableList<CiphertextBallot.Selection> contest_selections;
 
       public RunAccumulateSelections(String id, Selection selection_tally, List<CiphertextBallot.Selection> contest_selections) {
         this.selection_id = id;
+        this.sequence_order = selection_tally.sequence_order();
         this.selection_tally = selection_tally;
         this.contest_selections = ImmutableList.copyOf(contest_selections);
       }
@@ -350,7 +366,7 @@ public class CiphertextTallyBuilder {
     CiphertextTally.Contest build() {
       // String object_id, ElementModQ description_hash, Map<String, CiphertextTallySelection> tally_selections
       return new CiphertextTally.Contest(
-              this.object_id, this.description_hash,
+              this.object_id, this.sequence_order, this.description_hash,
               this.selections.entrySet().stream().collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue().build())));
     }
   }
@@ -362,8 +378,8 @@ public class CiphertextTallyBuilder {
   static class Selection extends CiphertextSelection {
     private ElGamal.Ciphertext ciphertext_accumulate = new ElGamal.Ciphertext(ONE_MOD_P, ONE_MOD_P);
 
-    public Selection(String selectionDescriptionId, ElementModQ description_hash) {
-      super(selectionDescriptionId, description_hash, new ElGamal.Ciphertext(ONE_MOD_P, ONE_MOD_P), false);
+    public Selection(String selectionDescriptionId, int sequence_order, ElementModQ description_hash) {
+      super(selectionDescriptionId, sequence_order, description_hash, new ElGamal.Ciphertext(ONE_MOD_P, ONE_MOD_P), false);
     }
 
     @Override
@@ -382,7 +398,7 @@ public class CiphertextTallyBuilder {
 
     CiphertextTally.Selection build() {
       return new CiphertextTally.Selection(
-              this.object_id, this.description_hash, this.ciphertext_accumulate);
+              this.object_id, this.sequence_order, this.description_hash, this.ciphertext_accumulate);
     }
   }
 }

@@ -25,11 +25,13 @@ public class PlaintextBallotPojo {
 
   public static class PlaintextBallotContest {
     public String object_id;
+    public int sequence_order;
     public List<PlaintextBallotSelection> ballot_selections;
   }
 
   public static class PlaintextBallotSelection {
     public String object_id;
+    public int sequence_order;
     public int vote;
     public boolean is_placeholder_selection;
     // public String extra_data; // optional
@@ -80,6 +82,7 @@ public class PlaintextBallotPojo {
   private static PlaintextBallot.Contest convertPlaintextBallotContest(PlaintextBallotPojo.PlaintextBallotContest pojo) {
     return new PlaintextBallot.Contest(
             pojo.object_id,
+            pojo.sequence_order,
             convertList(pojo.ballot_selections, PlaintextBallotPojo::convertPlaintextBallotSelection));
   }
 
@@ -89,6 +92,7 @@ public class PlaintextBallotPojo {
 
     return new PlaintextBallot.Selection(
             pojo.object_id,
+            pojo.sequence_order,
             pojo.vote,
             pojo.is_placeholder_selection,
             null);
@@ -114,6 +118,7 @@ public class PlaintextBallotPojo {
   private static PlaintextBallotPojo.PlaintextBallotContest convertPlaintextBallotContest(PlaintextBallot.Contest src) {
     PlaintextBallotPojo.PlaintextBallotContest pojo = new PlaintextBallotPojo.PlaintextBallotContest ();
     pojo.object_id = src.contest_id;
+    pojo.sequence_order = src.sequence_order;
     pojo.ballot_selections = convertList(src.ballot_selections, PlaintextBallotPojo::convertPlaintextBallotSelection);
     return pojo;
   }
@@ -121,6 +126,7 @@ public class PlaintextBallotPojo {
   private static PlaintextBallotPojo.PlaintextBallotSelection convertPlaintextBallotSelection(PlaintextBallot.Selection src) {
     PlaintextBallotPojo.PlaintextBallotSelection pojo = new PlaintextBallotPojo.PlaintextBallotSelection ();
     pojo.object_id = src.selection_id;
+    pojo.sequence_order = src.sequence_order;
     pojo.vote = src.vote;
     pojo.is_placeholder_selection = src.is_placeholder_selection;
     // src.extended_data.ifPresent( data -> pojo.extra_data = data.value);

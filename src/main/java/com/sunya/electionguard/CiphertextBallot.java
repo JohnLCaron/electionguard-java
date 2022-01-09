@@ -8,6 +8,7 @@ import com.google.common.flogger.FluentLogger;
 
 import javax.annotation.concurrent.Immutable;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -81,8 +82,11 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
           Group.ElementModQ description_hash,
           List<CiphertextBallot.Contest> contests) {
 
-    // contest_hashes = [contest.crypto_hash for contest in contests]
-    List<Group.ElementModQ> contest_hashes = contests.stream().map(c -> c.crypto_hash).collect(Collectors.toList());
+    // contest_hashes = [contest.crypto_hash for contest in sequence_order_sort(contests)]
+    List<Group.ElementModQ> contest_hashes = contests.stream()
+            .sorted(Comparator.comparingInt(CiphertextBallot.Contest::sequence_order))
+            .map(c -> c.crypto_hash)
+            .collect(Collectors.toList());
     return Hash.hash_elems(ballot_id, description_hash, contest_hashes);
   }
 
@@ -137,10 +141,13 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
       return ZERO_MOD_Q;
     }
 
-    // selection_hashes = [selection.crypto_hash for selection in ballot_selections]
-    List<Group.ElementModQ> selection_hashes = ballot_selections.stream().map(s -> s.crypto_hash).collect(Collectors.toList());
+    // selection_hashes = [selection.crypto_hash for selection in sequence_order_sort(ballot_selections)
+    List<Group.ElementModQ> selection_hashes = ballot_selections.stream()
+            .sorted(Comparator.comparingInt(Selection::sequence_order))
+            .map(s -> s.crypto_hash)
+            .collect(Collectors.toList());
     Group.ElementModQ result = Hash.hash_elems(object_id, seed_hash, selection_hashes);
-    logger.atFine().log("%n%n _ciphertext_ballot_context_crypto_hash:%n %s%n %s%n %s%n%s%n", object_id, seed_hash, selection_hashes, result);
+    logger.atFine().log("%n%n ciphertext_ballot_context_crypto_hash:%n %s%n %s%n %s%n%s%n", object_id, seed_hash, selection_hashes, result);
     return result;
   }
 
@@ -315,6 +322,7 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
      */
     static Selection create(
             String object_id,
+            int sequence_order,
             Group.ElementModQ description_hash,
             ElGamal.Ciphertext ciphertext,
             Group.ElementModP elgamal_public_key,
@@ -346,6 +354,7 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
 
       return new Selection(
               object_id,
+              sequence_order,
               description_hash,
               ciphertext,
               crypto_hash.get(),
@@ -368,10 +377,10 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
     /** encryption of the write-in candidate. */
     public final Optional<ElGamal.Ciphertext> extended_data; // LOOK not used, see Encrypt line 177.
 
-    public Selection(String object_id, Group.ElementModQ description_hash, ElGamal.Ciphertext ciphertext,
+    public Selection(String object_id, int sequence_order, Group.ElementModQ description_hash, ElGamal.Ciphertext ciphertext,
                      Group.ElementModQ crypto_hash, boolean is_placeholder_selection, Optional<Group.ElementModQ> nonce,
                      Optional<ChaumPedersen.DisjunctiveChaumPedersenProof> proof, Optional<ElGamal.Ciphertext> extended_data) {
-      super(object_id, description_hash, ciphertext, is_placeholder_selection);
+      super(object_id, sequence_order, description_hash, ciphertext, is_placeholder_selection);
 
       this.crypto_hash = Preconditions.checkNotNull(crypto_hash);
       this.is_placeholder_selection = is_placeholder_selection;
@@ -382,7 +391,7 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
 
     /** Remove nonce and return new object without the nonce. */
     Selection removeNonce() {
-      return new Selection(this.object_id, this.description_hash, this.ciphertext(),
+      return new Selection(this.object_id, this.sequence_order, this.description_hash, this.ciphertext(),
               this.crypto_hash, this.is_placeholder_selection, Optional.empty(),
               this.proof, this.extended_data);
     }
@@ -438,12 +447,8 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
       if (this == o) return true;
       if (o == null || getClass() != o.getClass()) return false;
       if (!super.equals(o)) return false;
-      Selection that = (Selection) o;
-      return is_placeholder_selection == that.is_placeholder_selection &&
-              crypto_hash.equals(that.crypto_hash) &&
-              Objects.equals(nonce, that.nonce) &&
-              Objects.equals(proof, that.proof) &&
-              Objects.equals(extended_data, that.extended_data);
+      Selection selection = (Selection) o;
+      return is_placeholder_selection == selection.is_placeholder_selection && crypto_hash.equals(selection.crypto_hash) && nonce.equals(selection.nonce) && proof.equals(selection.proof) && extended_data.equals(selection.extended_data);
     }
 
     @Override
@@ -481,7 +486,7 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
    * then it is required in order to regenerate the proof.
    */
   @Immutable
-  public static class Contest extends ElectionObjectBase implements Hash.CryptoHashCheckable {
+  public static class Contest implements Hash.CryptoHashCheckable, OrderedObjectBaseIF {
 
     /**
      * Constructs a CiphertextBallotContest object. Computes a Chaum-Pedersen proof if the
@@ -490,6 +495,7 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
      */
     static Contest create(
             String object_id,
+            int sequence_order,
             Group.ElementModQ description_hash,
             List<Selection> ballot_selections,
             Group.ElementModP elgamal_public_key,
@@ -515,6 +521,7 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
 
       return new Contest(
               object_id,
+              sequence_order,
               description_hash,
               ballot_selections,
               crypto_hash,
@@ -524,6 +531,9 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    public final String object_id;
+    public final int sequence_order;
+
     /** The Manifest.ContestDescription.crypto_hash(). */
     public final Group.ElementModQ contest_hash;
     /** The collection of ballot selections. */
@@ -540,13 +550,16 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
     public final Optional<ChaumPedersen.ConstantChaumPedersenProof> proof;
 
     public Contest(String object_id,
+                   int sequence_order,
                    Group.ElementModQ contest_hash,
                    List<Selection> ballot_selections,
                    Group.ElementModQ crypto_hash,
                    ElGamal.Ciphertext encrypted_total,
                    Optional<Group.ElementModQ> nonce,
                    Optional<ChaumPedersen.ConstantChaumPedersenProof> proof) {
-      super(object_id);
+      Preconditions.checkArgument(!Strings.isNullOrEmpty(object_id));
+      this.object_id = object_id;
+      this.sequence_order = sequence_order;
       this.contest_hash = Preconditions.checkNotNull(contest_hash);
       this.ballot_selections = ImmutableList.copyOf(Preconditions.checkNotNull(ballot_selections));
       this.crypto_hash = Preconditions.checkNotNull(crypto_hash);
@@ -560,7 +573,7 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
       List<Selection> new_selections =
               this.ballot_selections.stream().map(s -> s.removeNonce()).collect(Collectors.toList());
 
-      return new Contest(this.object_id, this.contest_hash, new_selections, this.crypto_hash,
+      return new Contest(this.object_id, this.sequence_order, this.contest_hash, new_selections, this.crypto_hash,
               this.encrypted_total, Optional.empty(), this.proof);
     }
 
@@ -632,30 +645,36 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
     public boolean equals(Object o) {
       if (this == o) return true;
       if (o == null || getClass() != o.getClass()) return false;
-      if (!super.equals(o)) return false;
-      Contest that = (Contest) o;
-      return contest_hash.equals(that.contest_hash) &&
-              ballot_selections.equals(that.ballot_selections) &&
-              crypto_hash.equals(that.crypto_hash) &&
-              nonce.equals(that.nonce) &&
-              proof.equals(that.proof);
+      Contest contest = (Contest) o;
+      return sequence_order == contest.sequence_order && object_id.equals(contest.object_id) && contest_hash.equals(contest.contest_hash) && ballot_selections.equals(contest.ballot_selections) && crypto_hash.equals(contest.crypto_hash) && encrypted_total.equals(contest.encrypted_total) && nonce.equals(contest.nonce) && proof.equals(contest.proof);
     }
 
     @Override
     public int hashCode() {
-      return Objects.hash(super.hashCode(), contest_hash, ballot_selections, crypto_hash, nonce, proof);
+      return Objects.hash(object_id, sequence_order, contest_hash, ballot_selections, crypto_hash, encrypted_total, nonce, proof);
     }
 
     @Override
     public String toString() {
       return "Contest{" +
               "\n  object_id   ='" + object_id + '\'' +
+              "\n  sequence_order   ='" + sequence_order + '\'' +
               "\n  contest_hash=" + contest_hash +
               "\n  crypto_hash =" + crypto_hash +
               "\n  encrypted_total=" + encrypted_total +
               "\n  nonce       =" + nonce +
               "\n  proof       =" + proof +
               '}';
+    }
+
+    @Override
+    public String object_id() {
+      return object_id;
+    }
+
+    @Override
+    public int sequence_order() {
+      return sequence_order;
     }
   }
 }

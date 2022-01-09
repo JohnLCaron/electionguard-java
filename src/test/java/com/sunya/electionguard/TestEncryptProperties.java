@@ -62,14 +62,14 @@ public class TestEncryptProperties extends TestProperties {
     // tamper with the description_hash
     // CiphertextBallotSelection malformed_description_hash = result.toBuilder().setDescriptionHash(TWO_MOD_Q).build();
     CiphertextBallot.Selection malformed_description_hash = new CiphertextBallot.Selection(
-            result.object_id, TWO_MOD_Q, result.ciphertext(),
+            result.object_id(), result.sequence_order(), TWO_MOD_Q, result.ciphertext(),
             result.crypto_hash, result.is_placeholder_selection, result.nonce,
             result.proof, result.extended_data);
 
     // remove the proof
     // CiphertextBallotSelection missing_proof = result.toBuilder().clearProof().build();
     CiphertextBallot.Selection missing_proof = new CiphertextBallot.Selection(
-            result.object_id, result.description_hash, result.ciphertext(),
+            result.object_id(), result.sequence_order(), result.description_hash, result.ciphertext(),
             result.crypto_hash, result.is_placeholder_selection, result.nonce,
             Optional.empty(), result.extended_data);
 
@@ -106,7 +106,7 @@ public class TestEncryptProperties extends TestProperties {
     // tamper with the encryption
     Ciphertext malformed_message = new Ciphertext(mult_p(result.ciphertext().pad, TWO_MOD_P), result.ciphertext().data);
     CiphertextBallot.Selection malformed_encryption = new CiphertextBallot.Selection(
-            result.object_id, TWO_MOD_Q, malformed_message,
+            result.object_id(), result.sequence_order(), TWO_MOD_Q, malformed_message,
             result.crypto_hash, result.is_placeholder_selection, result.nonce,
             result.proof, result.extended_data);
 
@@ -125,7 +125,7 @@ public class TestEncryptProperties extends TestProperties {
             proof.proof_one_response
     );
     CiphertextBallot.Selection malformed_proof = new CiphertextBallot.Selection(
-            result.object_id, TWO_MOD_Q, malformed_message,
+            result.object_id(), result.sequence_order(), TWO_MOD_Q, malformed_message,
             result.crypto_hash, result.is_placeholder_selection, result.nonce,
             Optional.of(malformed_disjunctive), result.extended_data);
 
@@ -210,7 +210,7 @@ public class TestEncryptProperties extends TestProperties {
             altered_a, proof.data, proof.challenge, proof.response, proof.constant);
 
     CiphertextBallot.Contest malformed_proof = new CiphertextBallot.Contest(
-            result.object_id, result.contest_hash,
+            result.object_id(), result.sequence_order(), result.contest_hash,
             result.ballot_selections, result.crypto_hash,
             new ElGamal.Ciphertext(TWO_MOD_P, TWO_MOD_P),
             result.nonce,
@@ -219,7 +219,7 @@ public class TestEncryptProperties extends TestProperties {
 
     // remove the proof
     CiphertextBallot.Contest missing_proof = new CiphertextBallot.Contest(
-            result.object_id, result.contest_hash,
+            result.object_id(), result.sequence_order(), result.contest_hash,
             result.ballot_selections, result.crypto_hash,
             new ElGamal.Ciphertext(TWO_MOD_P, TWO_MOD_P),
             result.nonce, Optional.empty());

@@ -98,13 +98,17 @@ public class CompactPlaintextBallot {
       for (Manifest.SelectionDescription selection: sortedSelections) {
         selections.add(
                 new PlaintextBallot.Selection(
-                        selection.object_id,
+                        selection.object_id(),
+                        selection.sequence_order(),
                         compact_ballot.selections.get(index) ? YES_VOTE : NO_VOTE,
                         placeholder,
                         compact_ballot.extended_data.get(index)));
         index += 1;
       }
-      contests.add(new PlaintextBallot.Contest(manifest_contest.object_id, selections));
+      contests.add(new PlaintextBallot.Contest(
+              manifest_contest.object_id(),
+              manifest_contest.sequence_order(),
+              selections));
     }
     return contests;
   }

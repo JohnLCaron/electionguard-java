@@ -44,7 +44,8 @@ class DecryptWithSecrets {
     // TODO: ISSUE #47: handle decryption of the extra data field if needed
 
     return Optional.of(new PlaintextBallot.Selection(
-            selection.object_id,
+            selection.object_id(),
+            selection.sequence_order(),
             plaintext_vote,
             selection.is_placeholder_selection,
             null));
@@ -103,7 +104,8 @@ class DecryptWithSecrets {
     // TODO: ISSUE #35: encrypt/decrypt: handle decryption of the extradata field if needed
 
     return Optional.of(new PlaintextBallot.Selection(
-            selection.object_id,
+            selection.object_id(),
+            selection.sequence_order(),
             plaintext_vote,
             selection.is_placeholder_selection,
             null));
@@ -158,7 +160,10 @@ class DecryptWithSecrets {
       }
     }
 
-    return Optional.of(new PlaintextBallot.Contest(contest.object_id, plaintext_selections));
+    return Optional.of(new PlaintextBallot.Contest(
+            contest.object_id(),
+            contest.sequence_order(),
+            plaintext_selections));
   }
 
   /**
@@ -236,7 +241,10 @@ class DecryptWithSecrets {
       }
     }
 
-    return Optional.of(new PlaintextBallot.Contest(contest.object_id, plaintext_selections));
+    return Optional.of(new PlaintextBallot.Contest(
+            contest.object_id(),
+            contest.sequence_order(),
+            plaintext_selections));
   }
 
   /**

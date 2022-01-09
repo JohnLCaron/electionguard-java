@@ -35,6 +35,7 @@ public class SubmittedBallotPojo {
 
   public static class CiphertextBallotContestPojo {
     public String object_id;
+    public int sequence_order;
     public ElementModQ description_hash;
     public List<CiphertextBallotSelectionPojo> ballot_selections;
     public ElementModQ crypto_hash;
@@ -45,6 +46,7 @@ public class SubmittedBallotPojo {
 
   public static class CiphertextBallotSelectionPojo {
     public String object_id;
+    public int sequence_order;
     public ElementModQ description_hash;
     public ElGamalCiphertextPojo ciphertext;
     public ElementModQ crypto_hash;
@@ -110,6 +112,7 @@ public class SubmittedBallotPojo {
   private static CiphertextBallot.Contest translateContest(CiphertextBallotContestPojo contest) {
     return new CiphertextBallot.Contest(
             contest.object_id,
+            contest.sequence_order,
             contest.description_hash,
             convertList(contest.ballot_selections, SubmittedBallotPojo::translateSelection),
             contest.crypto_hash,
@@ -121,6 +124,7 @@ public class SubmittedBallotPojo {
   private static CiphertextBallot.Selection translateSelection(CiphertextBallotSelectionPojo selection) {
     return new CiphertextBallot.Selection(
             selection.object_id,
+            selection.sequence_order,
             selection.description_hash,
             translateCiphertext(selection.ciphertext),
             selection.crypto_hash,
@@ -197,7 +201,8 @@ public class SubmittedBallotPojo {
 
   private static CiphertextBallotContestPojo convertContest(CiphertextBallot.Contest contest) {
     CiphertextBallotContestPojo pojo = new CiphertextBallotContestPojo();
-    pojo.object_id = contest.object_id;
+    pojo.object_id = contest.object_id();
+    pojo.sequence_order = contest.sequence_order();
     pojo.description_hash = contest.contest_hash;
     pojo.ballot_selections = convertList(contest.ballot_selections, SubmittedBallotPojo::convertSelection);
     pojo.crypto_hash = contest.crypto_hash;
@@ -209,7 +214,8 @@ public class SubmittedBallotPojo {
 
   private static CiphertextBallotSelectionPojo convertSelection(CiphertextBallot.Selection selection) {
     CiphertextBallotSelectionPojo pojo = new CiphertextBallotSelectionPojo();
-    pojo.object_id = selection.object_id;
+    pojo.object_id = selection.object_id();
+    pojo.sequence_order = selection.sequence_order();
     pojo.description_hash = selection.description_hash;
     pojo.ciphertext = convertCiphertext(selection.ciphertext());
     pojo.crypto_hash = selection.crypto_hash;

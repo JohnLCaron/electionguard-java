@@ -899,7 +899,8 @@ public class Manifest implements Hash.CryptoHashable {
    * @see <a href="https://developers.google.com/elections-data/reference/ballot-selection">Civics Common Standard Data Specification</a>
    */
   @Immutable
-  public static class SelectionDescription extends ElectionObjectBase implements Hash.CryptoHashable {
+  public static class SelectionDescription implements OrderedObjectBaseIF, Hash.CryptoHashable {
+    public final String object_id;
     public final String candidate_id;
     /**
      * Used for ordering selections in a contest to ensure various encryption primitives are deterministic.
@@ -910,10 +911,11 @@ public class Manifest implements Hash.CryptoHashable {
     public final int sequence_order;
 
     public SelectionDescription(String object_id, String candidate_id, int sequence_order) {
-      super(object_id);
+      Preconditions.checkArgument(!Strings.isNullOrEmpty(object_id));
+      this.object_id = object_id;
+      this.sequence_order = sequence_order;
       Preconditions.checkArgument(!Strings.isNullOrEmpty(candidate_id));
       this.candidate_id = candidate_id;
-      this.sequence_order = sequence_order;
     }
 
     @Override
@@ -925,27 +927,33 @@ public class Manifest implements Hash.CryptoHashable {
     public boolean equals(Object o) {
       if (this == o) return true;
       if (o == null || getClass() != o.getClass()) return false;
-      if (!super.equals(o)) return false;
       SelectionDescription that = (SelectionDescription) o;
-      return sequence_order == that.sequence_order &&
-              candidate_id.equals(that.candidate_id);
+      return sequence_order == that.sequence_order && object_id.equals(that.object_id) && candidate_id.equals(that.candidate_id);
     }
 
     @Override
     public int hashCode() {
-      return Objects.hash(super.hashCode(), candidate_id, sequence_order);
+      return Objects.hash(object_id, candidate_id, sequence_order);
     }
 
     @Override
     public String toString() {
       return "SelectionDescription{" +
-              "\n object_id='" + object_id + '\'' +
-              "\n candidate_id='" + candidate_id + '\'' +
-              "\n sequence_order=" + sequence_order +
+              "object_id='" + object_id + '\'' +
+              ", candidate_id='" + candidate_id + '\'' +
+              ", sequence_order=" + sequence_order +
               '}';
     }
 
+    @Override
+    public String object_id() {
+      return object_id;
+    }
 
+    @Override
+    public int sequence_order() {
+      return sequence_order;
+    }
   }
 
   /**
@@ -953,9 +961,12 @@ public class Manifest implements Hash.CryptoHashable {
    * @see <a href="https://developers.google.com/elections-data/reference/contest">Civics Common Standard Data Specification</a>
    */
   @Immutable
-  public static class ContestDescription extends ElectionObjectBase implements Hash.CryptoHashable {
+  public static class ContestDescription implements OrderedObjectBaseIF, Hash.CryptoHashable {
+
+    public final String object_id;
 
     public final String electoral_district_id;
+
     /**
      * Used for ordering contests in a ballot to ensure various encryption primitives are deterministic.
      * The sequence order must be unique and should be representative of how the contests are represented
@@ -996,10 +1007,13 @@ public class Manifest implements Hash.CryptoHashable {
                               List<SelectionDescription> ballot_selections,
                               @Nullable InternationalizedText ballot_title,
                               @Nullable InternationalizedText ballot_subtitle) {
-      super(object_id);
-      Preconditions.checkArgument(!Strings.isNullOrEmpty(electoral_district_id));
 
+      Preconditions.checkArgument(!Strings.isNullOrEmpty(object_id));
+      this.object_id = object_id;
+
+      Preconditions.checkArgument(!Strings.isNullOrEmpty(electoral_district_id));
       this.electoral_district_id = electoral_district_id;
+
       this.sequence_order = sequence_order;
       this.vote_variation = Preconditions.checkNotNull(vote_variation);
       this.number_elected = number_elected;
@@ -1014,36 +1028,28 @@ public class Manifest implements Hash.CryptoHashable {
     public boolean equals(Object o) {
       if (this == o) return true;
       if (o == null || getClass() != o.getClass()) return false;
-      if (!super.equals(o)) return false;
       ContestDescription that = (ContestDescription) o;
-      return sequence_order == that.sequence_order &&
-              number_elected == that.number_elected &&
-              electoral_district_id.equals(that.electoral_district_id) &&
-              vote_variation == that.vote_variation &&
-              votes_allowed.equals(that.votes_allowed) &&
-              name.equals(that.name) &&
-              ballot_selections.equals(that.ballot_selections) &&
-              ballot_title.equals(that.ballot_title) &&
-              ballot_subtitle.equals(that.ballot_subtitle);
+      return sequence_order == that.sequence_order && number_elected == that.number_elected && object_id.equals(that.object_id) && electoral_district_id.equals(that.electoral_district_id) && vote_variation == that.vote_variation && votes_allowed.equals(that.votes_allowed) && name.equals(that.name) && ballot_selections.equals(that.ballot_selections) && ballot_title.equals(that.ballot_title) && ballot_subtitle.equals(that.ballot_subtitle);
     }
 
     @Override
     public int hashCode() {
-      return Objects.hash(super.hashCode(), electoral_district_id, sequence_order, vote_variation, number_elected, votes_allowed, name, ballot_selections, ballot_title, ballot_subtitle);
+      return Objects.hash(object_id, electoral_district_id, sequence_order, vote_variation, number_elected, votes_allowed, name, ballot_selections, ballot_title, ballot_subtitle);
     }
 
     @Override
     public String toString() {
       return "ContestDescription{" +
-              "\n object_id='" + object_id + '\'' +
-              "\n electoral_district_id='" + electoral_district_id + '\'' +
-              "\n sequence_order=" + sequence_order +
-              "\n vote_variation=" + vote_variation +
-              "\n number_elected=" + number_elected +
-              "\n votes_allowed=" + votes_allowed +
-              "\n name='" + name + '\'' +
-              "\n ballot_title=" + ballot_title +
-              "\n ballot_subtitle=" + ballot_subtitle +
+              "object_id='" + object_id + '\'' +
+              ", electoral_district_id='" + electoral_district_id + '\'' +
+              ", sequence_order=" + sequence_order +
+              ", vote_variation=" + vote_variation +
+              ", number_elected=" + number_elected +
+              ", votes_allowed=" + votes_allowed +
+              ", name='" + name + '\'' +
+              ", ballot_selections=" + ballot_selections +
+              ", ballot_title=" + ballot_title +
+              ", ballot_subtitle=" + ballot_subtitle +
               '}';
     }
 
@@ -1104,6 +1110,16 @@ public class Manifest implements Hash.CryptoHashable {
       }
 
       return success;
+    }
+
+    @Override
+    public String object_id() {
+      return object_id;
+    }
+
+    @Override
+    public int sequence_order() {
+      return sequence_order;
     }
   }
 

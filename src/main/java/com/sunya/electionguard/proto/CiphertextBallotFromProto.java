@@ -44,6 +44,7 @@ public class CiphertextBallotFromProto {
   static CiphertextBallot.Contest convertContest(CiphertextBallotProto.CiphertextBallotContest contest) {
     return new CiphertextBallot.Contest(
             contest.getObjectId(),
+            contest.getSequenceOrder(),
             convertElementModQ(contest.getDescriptionHash()),
             convertList(contest.getSelectionsList(), CiphertextBallotFromProto::convertSelection),
             convertElementModQ(contest.getCryptoHash()),
@@ -55,6 +56,7 @@ public class CiphertextBallotFromProto {
   static CiphertextBallot.Selection convertSelection(CiphertextBallotProto.CiphertextBallotSelection selection) {
     return new CiphertextBallot.Selection(
             selection.getObjectId(),
+            selection.getSequenceOrder(),
             convertElementModQ(selection.getDescriptionHash()),
             convertCiphertext(selection.getCiphertext()),
             convertElementModQ(selection.getCryptoHash()),

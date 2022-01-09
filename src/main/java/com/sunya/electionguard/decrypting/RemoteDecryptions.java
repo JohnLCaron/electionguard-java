@@ -66,7 +66,7 @@ public class RemoteDecryptions {
                 tuple.decryption, context.crypto_extended_base_hash)) {
 
           CiphertextDecryptionSelection share = DecryptionShare.create_ciphertext_decryption_selection(
-                  tallySelection.object_id,
+                  tallySelection.object_id(),
                   guardian.id(),
                   tuple.decryption,
                   Optional.of(tuple.proof),
@@ -140,7 +140,7 @@ public class RemoteDecryptions {
                 tuple.decryption, context.crypto_extended_base_hash)) {
 
           CiphertextDecryptionSelection share = DecryptionShare.create_ciphertext_decryption_selection(
-                  ballotSelection.object_id,
+                  ballotSelection.object_id(),
                   guardian.id(),
                   tuple.decryption,
                   Optional.of(tuple.proof),
@@ -423,7 +423,7 @@ public class RemoteDecryptions {
       Group.ElementModP reconstructed_share = Group.mult_p(share_pow_p);
 
       selections.put(selection.object_id, DecryptionShare.create_ciphertext_decryption_selection(
-              selection.object_id,
+              selection.object_id(),
               missing_guardian_id,
               reconstructed_share,
               Optional.empty(),

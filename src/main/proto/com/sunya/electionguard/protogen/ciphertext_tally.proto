@@ -15,6 +15,7 @@ message CiphertextTally {
 
 message CiphertextTallyContest {
   string object_id = 1;
+  int32 sequence_order = 4;
 
   // The ContestDescription hash.
   ElementModQ description_hash = 2;
@@ -26,6 +27,7 @@ message CiphertextTallyContest {
 // A homomorphic accumulation of CiphertextBallotSelections.
 message CiphertextTallySelection {
   string object_id = 1;
+  int32 sequence_order = 4;
   ElementModQ description_hash = 2;
   // accumulation over all the cast ballots
   ElGamalCiphertext ciphertext = 3;

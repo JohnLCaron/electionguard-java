@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.flogger.FluentLogger;
 
 import javax.annotation.concurrent.Immutable;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -46,7 +47,12 @@ public class SubmittedBallot extends CiphertextBallot {
       logger.atInfo().log("ciphertext ballot with no contest: %s", object_id);
     }
 
-    List<Group.ElementModQ> contest_hashes = contests.stream().map(c -> c.crypto_hash).collect(Collectors.toList());
+    // contest_hashes = [contest.crypto_hash for contest in sequence_order_sort(contests)]
+    List<Group.ElementModQ> contest_hashes = contests.stream()
+            .sorted(Comparator.comparingInt(CiphertextBallot.Contest::sequence_order))
+            .map(c -> c.crypto_hash)
+            .collect(Collectors.toList());
+
     Group.ElementModQ contest_hash = Hash.hash_elems(object_id, manifest_hash, contest_hashes);
 
     long timestamp = timestampO.orElse(System.currentTimeMillis());

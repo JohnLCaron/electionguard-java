@@ -66,7 +66,7 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
     ElGamal.Ciphertext malformed_message = new ElGamal.Ciphertext(mult_p(subject.ciphertext().pad, TWO_MOD_P),
             subject.ciphertext().data);
     CiphertextBallot.Selection malformed_encryption = new CiphertextBallot.Selection(
-            subject.object_id, TWO_MOD_Q, malformed_message,
+            subject.object_id(), subject.sequence_order(), TWO_MOD_Q, malformed_message,
             subject.crypto_hash, subject.is_placeholder_selection, subject.nonce,
             subject.proof, subject.extended_data);
 
@@ -86,7 +86,7 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
             proof.proof_one_response
     );
     CiphertextBallot.Selection malformed_proof = new CiphertextBallot.Selection(
-            subject.object_id, TWO_MOD_Q, malformed_message,
+            subject.object_id(), subject.sequence_order(), TWO_MOD_Q, malformed_message,
             subject.crypto_hash, subject.is_placeholder_selection, subject.nonce,
             Optional.of(malformed_disjunctive), subject.extended_data);
 
@@ -132,7 +132,7 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
 
     // Tamper with the nonce by setting it to an arbitrary value
     CiphertextBallot.Selection bad_subject = new CiphertextBallot.Selection(
-            subject.object_id, subject.description_hash, subject.ciphertext(),
+            subject.object_id(), subject.sequence_order(), subject.description_hash, subject.ciphertext(),
             subject.crypto_hash, subject.is_placeholder_selection, Optional.of(nonce_seed),
             subject.proof, subject.extended_data);
 
@@ -279,7 +279,7 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
 
     // tamper with the nonce
     CiphertextBallot.Contest bad_subject = new CiphertextBallot.Contest(
-            subject.object_id, subject.contest_hash,
+            subject.object_id(), subject.sequence_order(), subject.contest_hash,
             subject.ballot_selections, subject.crypto_hash,
             new ElGamal.Ciphertext(TWO_MOD_P, TWO_MOD_P),
             Optional.of(int_to_q_unchecked(BigInteger.ONE)), subject.proof);
@@ -305,7 +305,7 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
     // Tamper with the encryption
     CiphertextBallot.Selection org = subject.ballot_selections.get(0);
     CiphertextBallot.Selection bad_selection = new CiphertextBallot.Selection(
-            org.object_id, org.description_hash, new ElGamal.Ciphertext(TWO_MOD_P, TWO_MOD_P),
+            org.object_id(), org.sequence_order(), org.description_hash, new ElGamal.Ciphertext(TWO_MOD_P, TWO_MOD_P),
             org.crypto_hash, org.is_placeholder_selection, org.nonce,
             org.proof, org.extended_data);
 
@@ -313,7 +313,7 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
     bad_selections.set(0, bad_selection);
 
     CiphertextBallot.Contest bad_contest = new CiphertextBallot.Contest(
-            subject.object_id, subject.contest_hash,
+            subject.object_id(), subject.sequence_order(), subject.contest_hash,
             bad_selections, subject.crypto_hash, new ElGamal.Ciphertext(TWO_MOD_P, TWO_MOD_P),
             Optional.of(int_to_q_unchecked(BigInteger.ONE)), subject.proof);
 

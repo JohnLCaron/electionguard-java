@@ -35,6 +35,7 @@ public class CiphertextTallyInputBuilder {
 
   public class ContestBuilder {
     private String id;
+    private int seq = 1;
     private Group.ElementModQ hash;
     private ArrayList<SelectionBuilder> selections = new ArrayList<>();
 
@@ -54,11 +55,11 @@ public class CiphertextTallyInputBuilder {
     }
 
     CiphertextTally.Contest build() {
-      return new CiphertextTally.Contest(id, hash, selections.stream().collect(Collectors.toMap(s -> s.id, s -> s.build())));
+      return new CiphertextTally.Contest(id, seq++, hash, selections.stream().collect(Collectors.toMap(s -> s.id, s -> s.build())));
     }
 
     CiphertextTally.Contest buildBad() {
-      return new CiphertextTally.Contest(id, hash, selections.stream().collect(Collectors.toMap(s -> s.id + "bad", s -> s.build())));
+      return new CiphertextTally.Contest(id, seq++, hash, selections.stream().collect(Collectors.toMap(s -> s.id + "bad", s -> s.build())));
     }
 
     public class SelectionBuilder {
@@ -73,7 +74,7 @@ public class CiphertextTallyInputBuilder {
       }
 
       CiphertextTally.Selection build() {
-        return new CiphertextTally.Selection(id, hash, ciphertext);
+        return new CiphertextTally.Selection(id, seq++, hash, ciphertext);
       }
     }
   }

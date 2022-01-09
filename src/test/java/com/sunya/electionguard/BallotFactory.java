@@ -55,7 +55,7 @@ public class BallotFactory {
       }
     }
 
-    return new PlaintextBallot.Contest(description.object_id, selections);
+    return new PlaintextBallot.Contest(description.object_id(), description.sequence_order(), selections);
   }
 
   /** Get a single Fake Ballot object that is manually constructed with default values . */
@@ -79,6 +79,7 @@ public class BallotFactory {
   static PlaintextBallot.Selection get_selection_well_formed() {
     PlaintextBallot.ExtendedData extra_data = new PlaintextBallot.ExtendedData("random", 33);
     return new PlaintextBallot.Selection("selection-{draw(uuids)}",
+                42,
                 TestUtils.randomBool() ? 1 : 0,
                 false,
                 TestUtils.randomBool() ? extra_data : null);
@@ -87,6 +88,7 @@ public class BallotFactory {
   static PlaintextBallot.Selection get_selection_poorly_formed() {
     PlaintextBallot.ExtendedData extra_data = new PlaintextBallot.ExtendedData("random", 33);
     return new PlaintextBallot.Selection("selection-{draw(uuids)}",
+            43,
             TestUtils.randomBool() ? 2 : 3,
             TestUtils.randomBool(),
             TestUtils.randomBool() ? extra_data : null);

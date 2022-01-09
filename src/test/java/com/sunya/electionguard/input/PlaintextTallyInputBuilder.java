@@ -72,6 +72,7 @@ public class PlaintextTallyInputBuilder {
 
     public class SelectionBuilder {
       private String id;
+      private int seq = 1;
       // LOOK no hash private Group.ElementModQ hash;
       private ElGamal.Ciphertext message;
       List<DecryptionShare.CiphertextDecryptionSelection> shares = new ArrayList<>();
@@ -115,7 +116,7 @@ public class PlaintextTallyInputBuilder {
 
       PlaintextTally.Selection build() {
         Group.ElementModP tally = Group.int_to_p_unchecked(BigInteger.valueOf(1));
-        return PlaintextTally.Selection.create(id, 1, Group.g_pow_p(tally), message, shares);
+        return PlaintextTally.Selection.create(id, seq++, 1, Group.g_pow_p(tally), message, shares);
       }
     }
   }
