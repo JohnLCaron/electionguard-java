@@ -63,19 +63,14 @@ public class CompactSubmittedBallot {
             Encrypt.encrypt_ballot_contests(
                     plaintext_ballot, internal_manifest, context, nonce_seed).orElseThrow();
 
-    ElementModQ crypto_hash = CiphertextBallot.create_ballot_hash(
-            plaintext_ballot.object_id, internal_manifest.manifest.crypto_hash, contests);
-
-    return new SubmittedBallot(
+    return SubmittedBallot.create(
             plaintext_ballot.object_id,
             plaintext_ballot.style_id,
             internal_manifest.manifest.crypto_hash,
-            compact_ballot.code_seed,
+            Optional.of(compact_ballot.code_seed),
             contests,
             compact_ballot.code,
-            compact_ballot.timestamp,
-            crypto_hash,
-            Optional.of(compact_ballot.ballot_nonce),
+            Optional.of(compact_ballot.timestamp),
             compact_ballot.ballot_box_state);
   }
 

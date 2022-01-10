@@ -19,7 +19,7 @@ import com.sunya.electionguard.protogen.CiphertextBallotProto;
 public class CiphertextBallotFromProto {
 
   public static SubmittedBallot translateFromProto(CiphertextBallotProto.SubmittedBallot ballot) {
-    return new SubmittedBallot(
+    return SubmittedBallot.createFromCiphertextBallot(
             convertCiphertextBallot(ballot.getCiphertextBallot()),
             convertBallotBoxState(ballot.getState()));
   }
