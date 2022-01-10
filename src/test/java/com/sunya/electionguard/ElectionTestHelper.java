@@ -529,7 +529,7 @@ public class ElectionTestHelper {
                     1,
                     keypair.public_key,
                     election_description,
-                    rand_q()));
+                    rand_q(), Optional.empty()));
   }
 
   public static class EverythingTuple {

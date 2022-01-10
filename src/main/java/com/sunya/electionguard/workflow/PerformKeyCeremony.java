@@ -143,7 +143,7 @@ public class PerformKeyCeremony {
     }
 
     this.context = CiphertextElectionContext.create(this.numberOfGuardians, this.quorum,
-            this.jointKey.joint_public_key(), this.election, this.commitmentsHash);
+            this.jointKey.joint_public_key(), this.election, this.commitmentsHash, Optional.empty());
   }
 
   /**

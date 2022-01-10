@@ -88,7 +88,7 @@ public class KeyCeremonyRemoteMediator {
     }
 
     this.context = CiphertextElectionContext.create(this.trusteeProxies.size(), this.quorum,
-            this.jointKey, this.election, this.commitmentsHash);
+            this.jointKey, this.election, this.commitmentsHash, Optional.empty());
 
     System.out.printf("  Key Ceremony complete%n");
   }
