@@ -81,4 +81,6 @@ message ElectionContext {
 
   // Hash of all the public commitments for all the guardians = H(K 1,0 , K 1,1 , K 1,2 , ..., K n,k−1 ).
   ElementModQ commitment_hash = 7;
+
+  map<string, string> extended_data = 8;
 }

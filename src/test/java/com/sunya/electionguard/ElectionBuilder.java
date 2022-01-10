@@ -54,7 +54,8 @@ public class ElectionBuilder {
               this.quorum,
               this.election_joint_public_key.get(),
               this.description,
-              commitment_hash == null ? rand_q() : commitment_hash)));
+              commitment_hash == null ? rand_q() : commitment_hash,
+                    Optional.empty())));
   }
 
 }

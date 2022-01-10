@@ -21,6 +21,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -95,7 +96,8 @@ public class TestGuardianRecordSerializing {
             this.quorum,
             this.jointKey.joint_public_key(),
             this.election,
-            commitmentsHash);
+            commitmentsHash,
+            Optional.empty());
 
     this.publisher = new Publisher(outputDir, true, true);
     publish(context);

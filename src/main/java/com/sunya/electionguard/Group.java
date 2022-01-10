@@ -23,7 +23,7 @@ public class Group {
   public static ElectionConstants getPrimes() { return primes; }
   public static void setPrimes(ElectionConstants usePrimes) { primes = usePrimes; }
 
-  @Immutable
+   @Immutable
   static class ElementMod {
     final BigInteger elem;
 

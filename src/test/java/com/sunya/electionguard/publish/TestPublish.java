@@ -22,6 +22,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.sunya.electionguard.Group.*;
@@ -46,7 +47,7 @@ public class TestPublish {
             ImmutableList.of(), ImmutableList.of(), ImmutableList.of(), null, null);
     InternalManifest metadata = new InternalManifest(election);
 
-    CiphertextElectionContext context = CiphertextElectionContext.create(1, 1, ONE_MOD_P, election, rand_q());
+    CiphertextElectionContext context = CiphertextElectionContext.create(1, 1, ONE_MOD_P, election, rand_q(), Optional.empty());
     Guardian guardian = Guardian.createForTesting("GuardianId", 1, 1, 1, null);
     List<GuardianRecord> coefficients = ImmutableList.of(guardian.publish());
     PlaintextTally plaintext_tally = new PlaintextTally("PlaintextTallyId", ImmutableMap.of());

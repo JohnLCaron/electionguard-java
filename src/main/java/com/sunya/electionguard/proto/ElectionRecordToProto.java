@@ -86,6 +86,9 @@ public class ElectionRecordToProto {
     builder.setCryptoBaseHash(convertElementModQ(context.crypto_base_hash));
     builder.setCryptoExtendedBaseHash(convertElementModQ(context.crypto_extended_base_hash));
     builder.setCommitmentHash(convertElementModQ(context.commitment_hash));
+    if (context.extended_data != null && !context.extended_data.isEmpty()) {
+      builder.putAllExtendedData(context.extended_data);
+    }
     return builder.build();
   }
 
