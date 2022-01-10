@@ -12,6 +12,7 @@ import static com.sunya.electionguard.Group.*;
 
 /**
  * Implements the Chaum-Pedersen publicly verifiable secret sharing scheme.
+ * Uses unpublished Microsoft Note "Efficient Implementation of ElectionGuard Ballot Encryption and Proofs"
  * @see <a href="https://en.wikipedia.org/wiki/Publicly_Verifiable_Secret_Sharing#Chaum-Pedersen_Protocol">Chaum-Pedersen Protocol</a>
  */
 public class ChaumPedersen {
@@ -110,7 +111,7 @@ public class ChaumPedersen {
         f.format("  k %s%n", k.toShortString());
         f.format("  message %s%n", message);
         f.format("  qbar %s%n", qbar);
-        logger.atInfo().log(f.toString());
+        throw new IllegalStateException(f.toString());
       }
       return success;
     }
@@ -186,7 +187,7 @@ public class ChaumPedersen {
               && in_bounds_c && in_bounds_v && in_bounds_q && same_c && consistent_gv && consistent_av;
 
       if (!success) {
-        logger.atWarning().log("found an invalid Chaum-Pedersen proof " +
+        String err = "found an invalid Chaum-Pedersen proof " +
                 String.format("%n in_bounds_alpha %s%n", in_bounds_alpha) +
                 String.format(" in_bounds_beta %s%n", in_bounds_beta) +
                 String.format(" in_bounds_k %s%n", in_bounds_k) +
@@ -205,9 +206,8 @@ public class ChaumPedersen {
                 String.format(" response %s%n", this.response) +
                 String.format(" g_pow_p(v) %s%n", g_pow_p(v).toShortString()) +
                 String.format(" pow_p(k, c) %s%n", pow_p(k, c).toShortString()) +
-                String.format(" mult_p(a, pow_p(k, c)) %s%n", mult_p(a, pow_p(k, c)).toShortString())
-        );
-        // throw new IllegalStateException("found an invalid Chaum-Pedersen proof");
+                String.format(" mult_p(a, pow_p(k, c)) %s%n", mult_p(a, pow_p(k, c)).toShortString());
+        throw new IllegalStateException(err);
       }
       return success;
     }
@@ -303,8 +303,8 @@ public class ChaumPedersen {
       );
 
       if (!success) {
-        logger.atInfo().log("found an invalid Constant Chaum-Pedersen proof:%n%s",
-        String.format(" in_bounds_alpha %s%n" +
+        String err = String.format("found an invalid Constant Chaum-Pedersen proof:%n" +
+                        " in_bounds_alpha %s%n" +
                         " in_bounds_beta %s%n" +
                         " in_bounds_a %s%n" +
                         " in_bounds_b %s%n" +
@@ -316,7 +316,8 @@ public class ChaumPedersen {
                         " consistent_gv %s%n" +
                         " consistent_kv %s%n",
                 in_bounds_alpha, in_bounds_beta, in_bounds_a, in_bounds_b, in_bounds_c, in_bounds_v, in_bounds_constant,
-                sane_constant, same_c, consistent_gv, consistent_kv));
+                sane_constant, same_c, consistent_gv, consistent_kv);
+        throw new IllegalStateException(err);
       }
       return success;
     }
@@ -370,18 +371,19 @@ public class ChaumPedersen {
     // Pick three random numbers in Q.
     Nonces nonces = new Nonces(seed, "disjoint-chaum-pedersen-proof");
     ElementModQ c1 = nonces.get(0);
-    ElementModQ v1 = nonces.get(1);
+    ElementModQ v = nonces.get(1);
     ElementModQ u0 = nonces.get(2);
 
     // Compute the NIZKP
     ElementModP a0 = g_pow_p(u0);
     ElementModP b0 = pow_p(k, u0);
-    ElementModQ q_minus_c1 = negate_q(c1);
-    ElementModP a1 = mult_p(g_pow_p(v1), pow_p(alpha, q_minus_c1));
-    ElementModP b1 = mult_p(pow_p(k, v1), g_pow_p(c1), pow_p(beta, q_minus_c1));
+    ElementModP a1 = g_pow_p(v);
+    ElementModP b1 = mult_p(pow_p(k, v), g_pow_p(c1));
+
     ElementModQ c = Hash.hash_elems(qbar, alpha, beta, a0, b0, a1, b1);
     ElementModQ c0 = a_minus_b_q(c, c1);
     ElementModQ v0 = a_plus_bc_q(u0, c0, r);
+    ElementModQ v1 = a_plus_bc_q(v, c1, r);
 
     return new DisjunctiveChaumPedersenProof(a0, b0, a1, b1, c0, c1, c, v0, v1);
   }
@@ -408,18 +410,20 @@ public class ChaumPedersen {
 
     // Pick three random numbers in Q.
     Nonces nonces = new Nonces(seed, "disjoint-chaum-pedersen-proof");
-    ElementModQ c0 = nonces.get(0);
-    ElementModQ v0 = nonces.get(1);
+    ElementModQ w = nonces.get(0);
+    ElementModQ v = nonces.get(1);
     ElementModQ u1 = nonces.get(2);
 
     // Compute the NIZKP
-    ElementModQ q_minus_c0 = negate_q(c0);
-    ElementModP a0 = mult_p(g_pow_p(v0), pow_p(alpha, q_minus_c0));
-    ElementModP b0 = mult_p(pow_p(k, v0), pow_p(beta, q_minus_c0));
+    ElementModP a0 = g_pow_p(v);
+    ElementModP b0 = mult_p(pow_p(k, v), g_pow_p(w));
+
     ElementModP a1 = g_pow_p(u1);
     ElementModP b1 = pow_p(k, u1);
     ElementModQ c = Hash.hash_elems(qbar, alpha, beta, a0, b0, a1, b1);
-    ElementModQ c1 = a_minus_b_q(c, c0);
+    ElementModQ c0 = negate_q(w);
+    ElementModQ c1 = add_q(c, w);
+    ElementModQ v0 = a_plus_bc_q(v, c0, r);
     ElementModQ v1 = a_plus_bc_q(u1, c1, r);
 
     return new DisjunctiveChaumPedersenProof(a0, b0, a1, b1, c0, c1, c, v0, v1);
@@ -485,5 +489,98 @@ public class ChaumPedersen {
     ElementModQ v = a_plus_bc_q(u, c, r);
 
     return new ConstantChaumPedersenProof(a, b, c, v, constant);
+  }
+
+  /////////////////////////////////////////////////////////////////////
+
+  static DisjunctiveChaumPedersenProof make_disjunctive_chaum_pedersen_org(
+          ElGamal.Ciphertext message,
+          ElementModQ r,
+          ElementModP k,
+          ElementModQ q,
+          ElementModQ seed,
+          int plaintext) {
+
+    Preconditions.checkArgument(0 <= plaintext && plaintext <= 1, "make_disjunctive_chaum_pedersen only supports integers of 0 or 1");
+    return (plaintext == 0) ? make_disjunctive_chaum_pedersen_zero_org(message, r, k, q, seed) :
+            make_disjunctive_chaum_pedersen_one_org(message, r, k, q, seed);
+  }
+
+
+  /**
+   * Produces a "disjunctive" proof that an encryption of zero is either an encrypted zero or one.
+   * <p>
+   * @param message: An ElGamal ciphertext
+   * @param r: The nonce used creating the ElGamal ciphertext
+   * @param k: The ElGamal public key for the election
+   * @param qbar: A value used when generating the challenge, usually the election extended base hash (𝑄')
+   * @param seed: Used to generate other random values here
+   */
+  static DisjunctiveChaumPedersenProof make_disjunctive_chaum_pedersen_zero_org(
+          ElGamal.Ciphertext message,
+          ElementModQ r,
+          ElementModP k,
+          ElementModQ qbar,
+          ElementModQ seed) {
+
+    ElementModP alpha = message.pad;
+    ElementModP beta = message.data;
+
+    // Pick three random numbers in Q.
+    Nonces nonces = new Nonces(seed, "disjoint-chaum-pedersen-proof");
+    ElementModQ c1 = nonces.get(0);
+    ElementModQ v1 = nonces.get(1);
+    ElementModQ u0 = nonces.get(2);
+
+    // Compute the NIZKP
+    ElementModP a0 = g_pow_p(u0);
+    ElementModP b0 = pow_p(k, u0);
+    ElementModQ q_minus_c1 = negate_q(c1);
+    ElementModP a1 = mult_p(g_pow_p(v1), pow_p(alpha, q_minus_c1));
+    ElementModP b1 = mult_p(pow_p(k, v1), g_pow_p(c1), pow_p(beta, q_minus_c1));
+    ElementModQ c = Hash.hash_elems(qbar, alpha, beta, a0, b0, a1, b1);
+    ElementModQ c0 = a_minus_b_q(c, c1);
+    ElementModQ v0 = a_plus_bc_q(u0, c0, r);
+
+    return new DisjunctiveChaumPedersenProof(a0, b0, a1, b1, c0, c1, c, v0, v1);
+  }
+
+
+  /**
+   * Produces a "disjunctive" proof that an encryption of one is either an encrypted zero or one.
+   * <p>
+   * @param message: An ElGamal ciphertext
+   * @param r: The nonce used creating the ElGamal ciphertext
+   * @param k: The ElGamal public key for the election
+   * @param qbar: A value used when generating the challenge, usually the election extended base hash (𝑄')
+   * @param seed: Used to generate other random values here
+   */
+  static DisjunctiveChaumPedersenProof make_disjunctive_chaum_pedersen_one_org(
+          ElGamal.Ciphertext message,
+          ElementModQ r,
+          ElementModP k,
+          ElementModQ qbar,
+          ElementModQ seed) {
+
+    ElementModP alpha = message.pad;
+    ElementModP beta = message.data;
+
+    // Pick three random numbers in Q.
+    Nonces nonces = new Nonces(seed, "disjoint-chaum-pedersen-proof");
+    ElementModQ c0 = nonces.get(0);
+    ElementModQ v0 = nonces.get(1);
+    ElementModQ u1 = nonces.get(2);
+
+    // Compute the NIZKP
+    ElementModQ q_minus_c0 = negate_q(c0);
+    ElementModP a0 = mult_p(g_pow_p(v0), pow_p(alpha, q_minus_c0));
+    ElementModP b0 = mult_p(pow_p(k, v0), pow_p(beta, q_minus_c0));
+    ElementModP a1 = g_pow_p(u1);
+    ElementModP b1 = pow_p(k, u1);
+    ElementModQ c = Hash.hash_elems(qbar, alpha, beta, a0, b0, a1, b1);
+    ElementModQ c1 = a_minus_b_q(c, c0);
+    ElementModQ v1 = a_plus_bc_q(u1, c1, r);
+
+    return new DisjunctiveChaumPedersenProof(a0, b0, a1, b1, c0, c1, c, v0, v1);
   }
 }
