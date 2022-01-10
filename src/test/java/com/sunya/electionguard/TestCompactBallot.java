@@ -28,9 +28,7 @@ public class TestCompactBallot {
             Optional.empty(), true).orElseThrow();
     this.ballot_nonce = ciphertext_ballot.nonce.orElseThrow();
 
-    this.submitted_ballot = new SubmittedBallot(
-            ciphertext_ballot,
-            BallotBox.State.CAST);
+    this.submitted_ballot = SubmittedBallot.createFromCiphertextBallot(ciphertext_ballot, BallotBox.State.CAST);
   }
 
   @Example
@@ -53,11 +51,12 @@ public class TestCompactBallot {
     assertThat(compact_ballot).isNotNull();
     assertThat(this.submitted_ballot.object_id).isEqualTo(compact_ballot.compact_plaintext_ballot.object_id);
 
-    SubmittedBallot roundtrip = CompactSubmittedBallot.expand_compact_submitted_ballot(
+    SubmittedBallot expanded_ballot = CompactSubmittedBallot.expand_compact_submitted_ballot(
             compact_ballot, this.internal_manifest, this.context);
 
-    assertThat(roundtrip).isNotNull();
-    assertThat(roundtrip).isEqualTo(this.submitted_ballot);
+    assertThat(expanded_ballot).isNotNull();
+    assertThat(expanded_ballot.crypto_hash).isEqualTo(this.submitted_ballot.crypto_hash);
+    assertThat(expanded_ballot).isEqualTo(this.submitted_ballot);
   }
 
 

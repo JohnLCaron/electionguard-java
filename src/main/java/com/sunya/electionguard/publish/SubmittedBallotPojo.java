@@ -105,7 +105,6 @@ public class SubmittedBallotPojo {
             pojo.code,
             pojo.timestamp,
             pojo.crypto_hash,
-            Optional.empty(), // Optional.ofNullable(pojo.nonce),
             pojo.state);
   }
 

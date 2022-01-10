@@ -145,7 +145,6 @@ public class TestJsonRoundtrip {
             Group.ONE_MOD_Q,
             1234L,
             Group.ONE_MOD_Q,
-            Optional.empty(), // LOOK we took out the nonce in SubmittedBallotPojo, since we cant read None
             BallotBox.State.CAST);
 
     // write json

@@ -19,6 +19,12 @@ import java.util.stream.Collectors;
 public class SubmittedBallot extends CiphertextBallot {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
+  // python: from_ciphertext_ballot
+  public static SubmittedBallot createFromCiphertextBallot(CiphertextBallot ballot, BallotBox.State state) {
+    return create(ballot.object_id, ballot.style_id, ballot.manifest_hash, Optional.of(ballot.code_seed),
+            ballot.contests, ballot.code, Optional.of(ballot.timestamp), state);
+  }
+
   /**
    * Makes a `SubmittedBallot`, ensuring that no nonces are part of the contests.
    * python: make_ciphertext_submitted_ballot()
@@ -70,7 +76,6 @@ public class SubmittedBallot extends CiphertextBallot {
             ballot_code,
             timestamp,
             contest_hash,
-            Optional.empty(),
             state);
   }
 
@@ -78,12 +83,7 @@ public class SubmittedBallot extends CiphertextBallot {
   /** The accepted state: CAST or SPOILED. */
   public final BallotBox.State state;
 
-  public SubmittedBallot(CiphertextBallot ballot, BallotBox.State state) {
-    super(ballot.object_id, ballot.style_id, ballot.manifest_hash, ballot.code_seed, ballot.contests,
-            ballot.code, ballot.timestamp, ballot.crypto_hash, ballot.nonce);
-    this.state = Preconditions.checkNotNull(state);
-  }
-
+  // public to allow proto serialization; use SubmittedBallot.create()
   public SubmittedBallot(String object_id,
                          String style_id,
                          Group.ElementModQ manifest_hash,
@@ -92,9 +92,8 @@ public class SubmittedBallot extends CiphertextBallot {
                          Group.ElementModQ code,
                          long timestamp,
                          Group.ElementModQ crypto_hash,
-                         Optional<Group.ElementModQ> nonce,
                          BallotBox.State state) {
-    super(object_id, style_id, manifest_hash, code_seed, contests, code, timestamp, crypto_hash, nonce);
+    super(object_id, style_id, manifest_hash, code_seed, contests, code, timestamp, crypto_hash, Optional.empty());
     this.state = state;
   }
 
