@@ -8,7 +8,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 import static com.sunya.electionguard.ChaumPedersen.*;
 import static com.sunya.electionguard.Group.*;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 
 public class TestChaumPedersen {
 
@@ -26,14 +26,14 @@ public class TestChaumPedersen {
     DisjunctiveChaumPedersenProof proof0bad = make_disjunctive_chaum_pedersen(message0, nonce, keypair.public_key, ONE_MOD_Q, seed, 1);
     
     assertThat(proof0.is_valid(message0, keypair.public_key, ONE_MOD_Q)).isTrue();
-    assertThat(proof0bad.is_valid(message0, keypair.public_key, ONE_MOD_Q)).isFalse();
+    assertThrows(IllegalStateException.class, () -> proof0bad.is_valid(message0, keypair.public_key, ONE_MOD_Q));
 
     ElGamal.Ciphertext message1 = ElGamal.elgamal_encrypt(1, nonce, keypair.public_key).orElseThrow();
     DisjunctiveChaumPedersenProof proof1 = make_disjunctive_chaum_pedersen(message1, nonce, keypair.public_key, ONE_MOD_Q, seed, 1);
     DisjunctiveChaumPedersenProof proof1bad = make_disjunctive_chaum_pedersen(message1, nonce, keypair.public_key, ONE_MOD_Q, seed, 0);
 
     assertThat(proof1.is_valid(message1, keypair.public_key, ONE_MOD_Q)).isTrue();
-    assertThat(proof1bad.is_valid(message1, keypair.public_key, ONE_MOD_Q)).isFalse();
+    assertThrows(IllegalStateException.class, () -> proof1bad.is_valid(message1, keypair.public_key, ONE_MOD_Q));
   }
 
   @Example
@@ -45,12 +45,7 @@ public class TestChaumPedersen {
     Optional<ElGamal.Ciphertext> message0 = ElGamal.elgamal_encrypt(0, nonce, keypair.orElseThrow().public_key);
     assertThat(message0).isPresent();
 
-    try {
-      make_disjunctive_chaum_pedersen(message0.get(), nonce, keypair.get().public_key, seed, seed, 3);
-      fail();
-    } catch (Exception e) {
-      // correct
-    }
+    assertThrows(IllegalArgumentException.class, () -> make_disjunctive_chaum_pedersen(message0.get(), nonce, keypair.get().public_key, seed, seed, 3));
   }
 
   //// TestChaumPedersen
@@ -66,7 +61,7 @@ public class TestChaumPedersen {
     ChaumPedersenProof bad_proof = make_chaum_pedersen(message, keypair.secret_key, TWO_MOD_P, seed, ONE_MOD_Q);
 
     assertThat(proof.is_valid(message, keypair.public_key, decryption, ONE_MOD_Q)).isTrue();
-    assertThat(bad_proof.is_valid(message, keypair.public_key, decryption, ONE_MOD_Q)).isFalse();
+    assertThrows(IllegalStateException.class, () -> bad_proof.is_valid(message, keypair.public_key, decryption, ONE_MOD_Q));
   }
 
   // TestConstantChaumPedersen
@@ -83,7 +78,7 @@ public class TestChaumPedersen {
     ConstantChaumPedersenProof bad_proof = make_constant_chaum_pedersen(message, 1, nonce, keypair.public_key, seed, ONE_MOD_Q);
 
     assertThat(proof.is_valid(message, keypair.public_key, ONE_MOD_Q)).isTrue();
-    assertThat(bad_proof.is_valid(message, keypair.public_key, ONE_MOD_Q)).isFalse();
+    assertThrows(IllegalStateException.class, () -> bad_proof.is_valid(message, keypair.public_key, ONE_MOD_Q));
   }
 
   @Example
@@ -98,7 +93,7 @@ public class TestChaumPedersen {
     ConstantChaumPedersenProof bad_proof = make_constant_chaum_pedersen(message, 0, nonce, keypair.public_key, seed, ONE_MOD_Q);
 
     assertThat(proof.is_valid(message, keypair.public_key, ONE_MOD_Q)).isTrue();
-    assertThat(bad_proof.is_valid(message, keypair.public_key, ONE_MOD_Q)).isFalse();
+    assertThrows(IllegalStateException.class, () -> bad_proof.is_valid(message, keypair.public_key, ONE_MOD_Q));
   }
 
 }

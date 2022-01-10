@@ -9,6 +9,7 @@ import java.math.BigInteger;
 import static com.google.common.truth.Truth.assertThat;
 import static com.sunya.electionguard.ChaumPedersen.*;
 import static com.sunya.electionguard.Group.*;
+import static org.junit.Assert.assertThrows;
 
 public class TestChaumPedersenProperties extends TestProperties {
 
@@ -26,7 +27,7 @@ public class TestChaumPedersenProperties extends TestProperties {
     DisjunctiveChaumPedersenProof proof_bad = make_disjunctive_chaum_pedersen_one(message, nonce, keypair.public_key, ONE_MOD_Q, seed);
 
     assertThat(proof.is_valid(message, keypair.public_key, ONE_MOD_Q)).isTrue();
-    assertThat(proof_bad.is_valid(message, keypair.public_key, ONE_MOD_Q)).isFalse();
+    assertThrows(IllegalStateException.class, () -> proof_bad.is_valid(message, keypair.public_key, ONE_MOD_Q));
   }
 
   @Property
@@ -41,7 +42,7 @@ public class TestChaumPedersenProperties extends TestProperties {
     DisjunctiveChaumPedersenProof proof_bad = make_disjunctive_chaum_pedersen_zero(message, nonce, keypair.public_key, ONE_MOD_Q, seed);
 
     assertThat(proof.is_valid(message, keypair.public_key, ONE_MOD_Q)).isTrue();
-    assertThat(proof_bad.is_valid(message, keypair.public_key, ONE_MOD_Q)).isFalse();
+    assertThrows(IllegalStateException.class, () -> proof_bad.is_valid(message, keypair.public_key, ONE_MOD_Q));
   }
 
   @Property
@@ -57,8 +58,8 @@ public class TestChaumPedersenProperties extends TestProperties {
     DisjunctiveChaumPedersenProof proof = make_disjunctive_chaum_pedersen_zero(message, nonce, keypair.public_key, ONE_MOD_Q, seed);
     DisjunctiveChaumPedersenProof proof_bad = make_disjunctive_chaum_pedersen_zero(message_bad, nonce, keypair.public_key, ONE_MOD_Q, seed);
 
-    assertThat(proof_bad.is_valid(message_bad, keypair.public_key, ONE_MOD_Q)).isFalse();
-    assertThat(proof.is_valid(message_bad, keypair.public_key, ONE_MOD_Q)).isFalse();
+    assertThrows(IllegalStateException.class, () -> proof_bad.is_valid(message_bad, keypair.public_key, ONE_MOD_Q));
+    assertThrows(IllegalStateException.class, () -> proof.is_valid(message_bad, keypair.public_key, ONE_MOD_Q));
   }
 
   //// TestChaumPedersen
@@ -82,7 +83,7 @@ public class TestChaumPedersenProperties extends TestProperties {
     ChaumPedersenProof bad_proof = make_chaum_pedersen(message, keypair.secret_key, badP, seed, ONE_MOD_Q);
 
     assertThat(proof.is_valid(message, keypair.public_key, decryption, ONE_MOD_Q)).isTrue();
-    assertThat(bad_proof.is_valid(message, keypair.public_key, decryption, ONE_MOD_Q)).isFalse();
+    assertThrows(IllegalStateException.class, () -> bad_proof.is_valid(message, keypair.public_key, decryption, ONE_MOD_Q));
   }
 
   // TestConstantChaumPedersen
@@ -105,13 +106,30 @@ public class TestChaumPedersenProperties extends TestProperties {
     assertThat(proof.is_valid(message, keypair.public_key, ONE_MOD_Q)).isTrue();
 
     ConstantChaumPedersenProof proof_bad1 = make_constant_chaum_pedersen(message_bad, constant, nonce, keypair.public_key, seed, ONE_MOD_Q);
-    assertThat(proof_bad1.is_valid(message_bad, keypair.public_key, ONE_MOD_Q)).isFalse();
+    assertThrows(IllegalStateException.class, () -> proof_bad1.is_valid(message_bad, keypair.public_key, ONE_MOD_Q));
 
     ConstantChaumPedersenProof proof_bad2 = make_constant_chaum_pedersen(message, bad_constant, nonce, keypair.public_key, seed, ONE_MOD_Q);
-    assertThat(proof_bad2.is_valid(message, keypair.public_key, ONE_MOD_Q)).isFalse();
+    assertThrows(IllegalStateException.class, () -> proof_bad2.is_valid(message, keypair.public_key, ONE_MOD_Q));
 
     ConstantChaumPedersenProof proof_bad3 = new ConstantChaumPedersenProof(proof.pad, proof.data, proof.challenge, proof.response, -1);
-    assertThat(proof_bad3.is_valid(message, keypair.public_key, ONE_MOD_Q)).isFalse();
+    assertThrows(IllegalStateException.class, () -> proof_bad3.is_valid(message, keypair.public_key, ONE_MOD_Q));
+  }
+
+  //// Test DisjunctiveChaumPedersen new computations
+
+  @Property(tries = 1000)
+  public void test_new_djcpp(
+          @ForAll("elgamal_keypairs") ElGamal.KeyPair keypair,
+          @ForAll("elements_mod_q_no_zero") ElementModQ nonce,
+          @ForAll("elements_mod_q") ElementModQ seed,
+          @ForAll @IntRange(min = 0, max = 100) int constant
+  ) {
+
+    ElGamal.Ciphertext message = ElGamal.elgamal_encrypt(constant, nonce, keypair.public_key).orElseThrow();
+    Group.ElementModQ  randomHash = Hash.hash_elems("random hash", Utils.randbelow(getPrimes().small_prime));
+    DisjunctiveChaumPedersenProof proof = make_disjunctive_chaum_pedersen(message, nonce, keypair.public_key, randomHash, seed, 0);
+    DisjunctiveChaumPedersenProof proofOrg = make_disjunctive_chaum_pedersen_org(message, nonce, keypair.public_key, randomHash, seed, 0);
+    assertThat(proof).isEqualTo(proofOrg);
   }
 
 }
