@@ -12,6 +12,10 @@ import com.sunya.electionguard.KeyCeremony;
 import com.sunya.electionguard.SchnorrProof;
 
 import java.lang.reflect.Type;
+import java.security.KeyFactory;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.List;
 
@@ -19,6 +23,7 @@ import java.util.List;
  * Conversion between GuardianRecordPrivate and Json, using python's object model.
  * This is present for compatibility with python serialization. Prefer using
  * com.sunya.electionguard.decrypting, in particular DecryptingTrustee.
+ * see "https://stackoverflow.com/questions/46809528/how-to-save-and-re-use-keypairs-in-java-asymmetric-encryption"
  */
 public class GuardianRecordPrivatePojo {
   public ElectionKeyPairPojo election_keys;
@@ -31,7 +36,7 @@ public class GuardianRecordPrivatePojo {
 
   public static class ElectionKeyPairPojo {
     public String owner_id;
-    public int sequence_order;
+    public Integer sequence_order;
     public ElGamal.KeyPair key_pair;
     public ElectionPolynomialPojo polynomial;
   }
@@ -45,20 +50,20 @@ public class GuardianRecordPrivatePojo {
 
   public static class AuxilaryKeyPairPojo {
     public String owner_id;
-    public int sequence_order;
+    public Integer sequence_order;
     public String secret_key; // LOOK
     public String public_key; // LOOK
   }
 
   public static class AuxilaryPublicKeyPojo {
     public String owner_id;
-    public int sequence_order;
+    public Integer sequence_order;
     public String key; // LOOK
   }
 
   public static class ElectionPublicKeyPojo {
     public String owner_id;
-    public int sequence_order;
+    public Integer sequence_order;
     public Group.ElementModP key;
     public List<Group.ElementModP> coefficient_commitments;
     public List<SchnorrProof> coefficient_proofs;
@@ -67,7 +72,7 @@ public class GuardianRecordPrivatePojo {
   public static class ElectionPartialKeyBackupPojo {
     public String owner_id;
     public String designated_id;
-    public int designated_sequence_order;
+    public Integer designated_sequence_order;
     public String encrypted_value;
   }
 
@@ -75,7 +80,7 @@ public class GuardianRecordPrivatePojo {
     public String owner_id;
     public String designated_id;
     public String verifier_id;
-    public boolean verified;
+    public Boolean verified = Boolean.FALSE;
   }
 
   ////////////////////////////////////////////////////////////////////////////
@@ -118,17 +123,37 @@ public class GuardianRecordPrivatePojo {
     return new Auxiliary.KeyPair(
             pojo.owner_id,
             pojo.sequence_order,
-            // LOOK https://crypto.stackexchange.com/questions/46893/is-there-a-specification-for-the-begin-rsa-private-key-format
-            null, null);
-            //pojo.secret_key, // java.security.PrivateKey
-            //pojo.public_key); // java.security.PublicKey
+            convertPrivateKey(pojo.secret_key),
+            convertPublicKey(pojo.public_key));
+  }
+
+  private static java.security.PublicKey convertPublicKey(String publicKey) {
+    try {
+      byte[] publicKeyBytes = Base64.getDecoder().decode(publicKey);
+      KeyFactory kf = KeyFactory.getInstance("RSA");
+      X509EncodedKeySpec spec = new X509EncodedKeySpec(publicKeyBytes);
+      return kf.generatePublic(spec);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private static java.security.PrivateKey convertPrivateKey(String privateKey) {
+    try {
+      byte[] privateKeyBytes = Base64.getDecoder().decode(privateKey);
+      KeyFactory kf = KeyFactory.getInstance("RSA");
+      PKCS8EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(privateKeyBytes);
+      return kf.generatePrivate(privateKeySpec);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 
   private static Auxiliary.PublicKey translateAuxilaryPublicKey(AuxilaryPublicKeyPojo pojo) {
     return new Auxiliary.PublicKey(
             pojo.owner_id,
             pojo.sequence_order,
-            null); // java.security.PublicKey
+            convertPublicKey(pojo.key));
   }
 
   private static KeyCeremony.ElectionPublicKey translateElectionPublicKey(ElectionPublicKeyPojo pojo) {
@@ -209,16 +234,24 @@ public class GuardianRecordPrivatePojo {
     AuxilaryKeyPairPojo pojo = new AuxilaryKeyPairPojo();
     pojo.owner_id = org.owner_id;
     pojo.sequence_order = org.sequence_order;
-    // LOOK pojo.secret_key = org.secret_key;
-    // LOOK pojo.public_key = org.public_key;
+    pojo.secret_key = convertPrivateKey(org.secret_key);
+    pojo.public_key = convertPublicKey(org.public_key);
     return pojo;
+  }
+
+  private static String convertPublicKey(java.security.PublicKey publicKey) {
+    return Base64.getEncoder().encodeToString(publicKey.getEncoded());
+  }
+
+  private static String convertPrivateKey(java.security.PrivateKey privateKey) {
+    return Base64.getEncoder().encodeToString(privateKey.getEncoded());
   }
 
   private static AuxilaryPublicKeyPojo convertAuxiliaryPublicKey(Auxiliary.PublicKey org) {
     AuxilaryPublicKeyPojo pojo = new AuxilaryPublicKeyPojo();
     pojo.owner_id = org.owner_id;
     pojo.sequence_order = org.sequence_order;
-    // LOOK pojo.key = org.key;
+    pojo.key = convertPublicKey(org.key);
     return pojo;
   }
 

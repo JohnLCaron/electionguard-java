@@ -1,4 +1,5 @@
 1. python-1.2.2 is the output of test_end_to_end_election.py from python 1.2.2 on 7/1/2021 HEAD.
+1.1 python-1.4.0 is the output of test_end_to_end_election.py from python 1.4.0 on 1/15/2022 HEAD.
 
 2. publishEndToEnd is the output of TestEndToEndElectionIntegration.java from 7/1/2021 HEAD. This
      uses the main library code, serializing to json.

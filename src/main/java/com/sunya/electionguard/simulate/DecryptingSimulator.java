@@ -11,7 +11,6 @@ import com.sunya.electionguard.CiphertextTallyBuilder;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.InternalManifest;
 import com.sunya.electionguard.Manifest;
-import com.sunya.electionguard.PlaintextBallot;
 import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.Scheduler;
 import com.sunya.electionguard.SpoiledBallotAndTally;
@@ -156,7 +155,6 @@ public class DecryptingSimulator {
   Iterable<DecryptingTrustee> guardians;
   CiphertextTally encryptedTally;
   PlaintextTally decryptedTally;
-  List<PlaintextBallot> spoiledDecryptedBallots;
   List<PlaintextTally> spoiledDecryptedTallies;
   List<AvailableGuardian> availableGuardians;
   int quorum;
@@ -214,7 +212,6 @@ public class DecryptingSimulator {
     this.decryptedTally = mediator.get_plaintext_tally().orElseThrow();
     List<SpoiledBallotAndTally> spoiledTallyAndBallot =
             mediator.decrypt_spoiled_ballots().orElseThrow();
-    this.spoiledDecryptedBallots = spoiledTallyAndBallot.stream().map(e -> e.ballot).collect(Collectors.toList());
     this.spoiledDecryptedTallies = spoiledTallyAndBallot.stream().map(e -> e.tally).collect(Collectors.toList());
     this.availableGuardians = mediator.getAvailableGuardians();
     System.out.printf("Done decrypting tally%n%n%s%n", this.decryptedTally);
@@ -226,7 +223,6 @@ public class DecryptingSimulator {
             this.electionRecord,
             this.encryptedTally,
             this.decryptedTally,
-            this.spoiledDecryptedBallots,
             this.spoiledDecryptedTallies,
             availableGuardians);
 

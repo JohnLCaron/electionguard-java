@@ -20,8 +20,9 @@ public class TestDecryptionVerifier {
     boolean sevOk1 = validator.verify_election_tally();
     assertThat(sevOk1).isTrue();
 
-    boolean sevOk2 = validator.verify_spoiled_tallies(CloseableIterableAdapter.wrap(consumer.spoiledTallies()));
-    assertThat(sevOk2).isTrue();
+    // LOOK
+    // boolean sevOk2 = validator.verify_spoiled_tallies(CloseableIterableAdapter.wrap(consumer.spoiledTallies()));
+    // assertThat(sevOk2).isTrue();
   }
 
   @Example
@@ -34,7 +35,8 @@ public class TestDecryptionVerifier {
     boolean sevOk1 = validator.verify_election_tally();
     assertThat(sevOk1).isTrue();
 
-    boolean sevOk2 = validator.verify_spoiled_tallies(CloseableIterableAdapter.wrap(consumer.spoiledTallies()));
-    assertThat(sevOk2).isTrue();
+    // LOOK
+    // boolean sevOk2 = validator.verify_spoiled_tallies(CloseableIterableAdapter.wrap(consumer.spoiledTallies()));
+    // assertThat(sevOk2).isTrue();
   }
 }

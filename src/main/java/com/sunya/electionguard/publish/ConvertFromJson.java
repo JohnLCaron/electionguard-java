@@ -16,7 +16,17 @@ public class ConvertFromJson {
       Reader reader = new InputStreamReader(is);
       return enhancedGson.fromJson(reader, AvailableGuardian.class);
     } catch (Exception ioe) {
-      logger.atSevere().log("Failed reading file '%s'", pathname);
+      logger.atSevere().log("Failed readAvailableGuardian file '%s'", pathname);
+      throw ioe;
+    }
+  }
+
+  public static Coefficients readCoefficients(String pathname) throws IOException {
+    try (InputStream is = new FileInputStream(pathname)) {
+      Reader reader = new InputStreamReader(is);
+      return enhancedGson.fromJson(reader, Coefficients.class);
+    } catch (Exception ioe) {
+      logger.atSevere().log("Failed readCoefficients file '%s'", pathname);
       throw ioe;
     }
   }
@@ -26,7 +36,7 @@ public class ConvertFromJson {
       Reader reader = new InputStreamReader(is);
       return enhancedGson.fromJson(reader, CiphertextTally.class);
     } catch (Exception ioe) {
-      logger.atSevere().log("Failed reading file '%s'", pathname);
+      logger.atSevere().log("Failed readCiphertextTally file '%s'", pathname);
       throw ioe;
     }
   }
@@ -36,7 +46,7 @@ public class ConvertFromJson {
       Reader reader = new InputStreamReader(is);
       return enhancedGson.fromJson(reader, GuardianRecord.class);
     } catch (Exception ioe) {
-      logger.atSevere().log("Failed reading file '%s'", pathname);
+      logger.atSevere().log("Failed readGuardianRecord file '%s'", pathname);
       throw ioe;
     }
   }
@@ -46,7 +56,7 @@ public class ConvertFromJson {
       Reader reader = new InputStreamReader(is);
       return enhancedGson.fromJson(reader, GuardianRecordPrivate.class);
     } catch (Exception ioe) {
-      logger.atSevere().log("Failed reading file '%s'", pathname);
+      logger.atSevere().log("Failed readGuardianRecordPrivate file '%s'", pathname);
       throw ioe;
     }
   }
@@ -56,7 +66,7 @@ public class ConvertFromJson {
       Reader reader = new InputStreamReader(is);
       return enhancedGson.fromJson(reader, ElectionConstants.class);
     } catch (Exception ioe) {
-      logger.atSevere().log("Failed reading file '%s'", pathname);
+      logger.atSevere().log("Failed readConstants file '%s'", pathname);
       throw ioe;
     }
   }
@@ -66,7 +76,7 @@ public class ConvertFromJson {
       Reader reader = new InputStreamReader(is);
       return enhancedGson.fromJson(reader, CiphertextElectionContext.class);
     } catch (Exception ioe) {
-      logger.atSevere().log("Failed reading file '%s'", pathname);
+      logger.atSevere().log("Failed readContext file '%s'", pathname);
       ioe.printStackTrace();
       throw ioe;
     }
@@ -77,7 +87,7 @@ public class ConvertFromJson {
       Reader reader = new InputStreamReader(is);
       return enhancedGson.fromJson(reader, Manifest.class);
     } catch (Exception ioe) {
-      logger.atSevere().log("Failed reading file '%s'", pathname);
+      logger.atSevere().log("Failed readElection file '%s'", pathname);
       throw ioe;
     }
   }
@@ -87,7 +97,7 @@ public class ConvertFromJson {
       Reader reader = new InputStreamReader(is);
       return enhancedGson.fromJson(reader, Encrypt.EncryptionDevice.class);
     } catch (Exception ioe) {
-      logger.atSevere().log("Failed reading file '%s'", pathname);
+      logger.atSevere().log("Failed readDevice file '%s'", pathname);
       throw ioe;
     }
   }
@@ -97,7 +107,7 @@ public class ConvertFromJson {
       Reader reader = new InputStreamReader(is);
       return enhancedGson.fromJson(reader, PlaintextBallot.class);
     } catch (Exception ioe) {
-      logger.atSevere().log("Failed reading file '%s'", pathname);
+      logger.atSevere().log("Failed readPlaintextBallot file '%s'", pathname);
       throw new IOException(String.format("Failed readPlaintextBallot %s", pathname), ioe);
     }
   }
@@ -107,7 +117,7 @@ public class ConvertFromJson {
       Reader reader = new InputStreamReader(is);
       return enhancedGson.fromJson(reader, PlaintextTally.class);
     } catch (Exception ioe) {
-      logger.atSevere().log("Failed reading file '%s'", pathname);
+      logger.atSevere().log("Failed readPlaintextTally file '%s'", pathname);
       throw ioe;
     }
   }
@@ -117,7 +127,7 @@ public class ConvertFromJson {
       Reader reader = new InputStreamReader(is);
       return enhancedGson.fromJson(reader, SubmittedBallot.class);
     } catch (Exception ioe) {
-      logger.atSevere().log("Failed reading file '%s'", pathname);
+      logger.atSevere().log("Failed readSubmittedBallot file '%s'", pathname);
       throw ioe;
     }
   }

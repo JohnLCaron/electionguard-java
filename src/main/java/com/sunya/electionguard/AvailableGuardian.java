@@ -11,7 +11,7 @@ public class AvailableGuardian {
   /** The guardian id. */
   public final String guardian_id;
   /** The guardian x coordinate value. */
-  public final int sequence;
+  public final Integer sequence;
   /** Its lagrange coordinate when decrypting. */
   public final Group.ElementModQ lagrangeCoordinate;
 
@@ -26,7 +26,7 @@ public class AvailableGuardian {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     AvailableGuardian that = (AvailableGuardian) o;
-    return sequence == that.sequence &&
+    return sequence.equals(that.sequence) &&
             guardian_id.equals(that.guardian_id) &&
             lagrangeCoordinate.equals(that.lagrangeCoordinate);
   }

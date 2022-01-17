@@ -12,7 +12,6 @@ import com.sunya.electionguard.ElectionConstants;
 import com.sunya.electionguard.Encrypt;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.CiphertextTally;
-import com.sunya.electionguard.PlaintextBallot;
 import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.publish.CloseableIterable;
 import com.sunya.electionguard.publish.CloseableIterableAdapter;
@@ -37,8 +36,7 @@ public class ElectionRecord {
   public final CloseableIterable<SubmittedBallot> acceptedBallots; // All ballots, not just cast! // may be empty
   @Nullable public final CiphertextTally encryptedTally;
   @Nullable public final PlaintextTally decryptedTally;
-  public final CloseableIterable<PlaintextBallot> spoiledBallots; // may be empty
-  public final CloseableIterable<PlaintextTally> spoiledTallies; // may be empty
+  public final CloseableIterable<PlaintextTally> spoiledBallots; // may be empty
   public final ImmutableList<AvailableGuardian> availableGuardians; // may be empty
 
   private final ImmutableMap<String, Integer> contestVoteLimits;
@@ -52,8 +50,7 @@ public class ElectionRecord {
                         @Nullable CiphertextTally encryptedTally,
                         @Nullable PlaintextTally decryptedTally,
                         @Nullable CloseableIterable<SubmittedBallot> acceptedBallots,
-                        @Nullable CloseableIterable<PlaintextBallot> spoiledBallots,
-                        @Nullable CloseableIterable<PlaintextTally> spoiledTallies,
+                        @Nullable CloseableIterable<PlaintextTally> spoiledBallots,
                         @Nullable List<AvailableGuardian> availableGuardians) {
     this.version = version;
     this.constants = constants;
@@ -65,14 +62,13 @@ public class ElectionRecord {
     this.encryptedTally = encryptedTally;
     this.decryptedTally = decryptedTally;
     this.spoiledBallots = spoiledBallots == null ? CloseableIterableAdapter.empty() : spoiledBallots;
-    this.spoiledTallies = spoiledTallies == null ? CloseableIterableAdapter.empty() : spoiledTallies;
     this.availableGuardians = availableGuardians == null ? ImmutableList.of() : ImmutableList.copyOf(availableGuardians);
 
-    int num_guardians = context.number_of_guardians;
+    /* int num_guardians = context.number_of_guardians;
     if (num_guardians != this.guardianRecords.size()) {
       throw new IllegalStateException(String.format("Number of guardians (%d) does not match number of coefficients (%d)",
               num_guardians, this.guardianRecords.size()));
-    }
+    } */
 
     ImmutableMap.Builder<String, Integer> builder = ImmutableMap.builder();
     for (Manifest.ContestDescription contest : election.contests) {
@@ -85,8 +81,7 @@ public class ElectionRecord {
   }
 
   public ElectionRecord setBallots(CloseableIterable<SubmittedBallot> acceptedBallots,
-                                   CloseableIterable<PlaintextBallot> spoiledBallots,
-                                   CloseableIterable<PlaintextTally> spoiledBallotTallies) {
+                                   CloseableIterable<PlaintextTally> spoiledBallots) {
     return new ElectionRecord(currentVersion,
             this.constants,
             this.context,
@@ -97,7 +92,6 @@ public class ElectionRecord {
             this.decryptedTally,
             acceptedBallots,
             spoiledBallots,
-            spoiledBallotTallies,
             this.availableGuardians);
   }
 
@@ -190,12 +184,11 @@ public class ElectionRecord {
             Objects.equals(decryptedTally, that.decryptedTally) &&
             Objects.equals(guardianRecords, that.guardianRecords) &&
             Objects.equals(spoiledBallots, that.spoiledBallots) &&
-            Objects.equals(spoiledTallies, that.spoiledTallies) &&
             Objects.equals(contestVoteLimits, that.contestVoteLimits);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(constants, context, election, devices, acceptedBallots, encryptedTally, decryptedTally, guardianRecords, spoiledBallots, spoiledTallies, contestVoteLimits);
+    return Objects.hash(constants, context, election, devices, acceptedBallots, encryptedTally, decryptedTally, guardianRecords, spoiledBallots, contestVoteLimits);
   }
 }

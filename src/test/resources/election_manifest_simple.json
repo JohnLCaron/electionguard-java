@@ -1,14 +1,12 @@
 {
+    "spec_version": "v0.95",
     "geopolitical_units": [
         {
             "object_id": "jefferson-county",
             "name": "Jefferson County",
             "type": "county",
             "contact_information": {
-                "address_line": [
-                    "1234 Samuel Adams Way",
-                    "Jefferson, Hamilton 999999"
-                ],
+                "address_line": ["1234 Samuel Adams Way", "Jefferson, Hamilton 999999"],
                 "name": "Jefferson County Clerk",
                 "email": [
                     {
@@ -29,10 +27,7 @@
             "name": "Harrison Township",
             "type": "township",
             "contact_information": {
-                "address_line": [
-                    "1234 Thorton Drive",
-                    "Harrison, Hamilton 999999"
-                ],
+                "address_line": ["1234 Thorton Drive", "Harrison, Hamilton 999999"],
                 "name": "Harrison Town Hall",
                 "email": [
                     {
@@ -53,10 +48,7 @@
             "name": "Harrison Township Precinct",
             "type": "township",
             "contact_information": {
-                "address_line": [
-                    "1234 Thorton Drive",
-                    "Harrison, Hamilton 999999"
-                ],
+                "address_line": ["1234 Thorton Drive", "Harrison, Hamilton 999999"],
                 "name": "Harrison Town Hall",
                 "email": [
                     {
@@ -77,10 +69,7 @@
             "name": "Rutledge Elementary School district",
             "type": "school",
             "contact_information": {
-                "address_line": [
-                    "1234 Wolcott Parkway",
-                    "Harrison, Hamilton 999999"
-                ],
+                "address_line": ["1234 Wolcott Parkway", "Harrison, Hamilton 999999"],
                 "name": "Rutledge Elementary School",
                 "email": [
                     {
@@ -219,7 +208,6 @@
     ],
     "contests": [
         {
-            "@type": "CandidateContest",
             "object_id": "justice-supreme-court",
             "sequence_order": 0,
             "ballot_selections": [
@@ -271,15 +259,10 @@
             "vote_variation": "n_of_m",
             "electoral_district_id": "jefferson-county",
             "name": "Justice of the Supreme Court",
-            "primary_party_ids": [
-                "whig",
-                "federalist"
-            ],
             "number_elected": 2,
             "votes_allowed": 2
         },
         {
-            "@type": "ReferendumContest",
             "object_id": "referendum-pineapple",
             "sequence_order": 1,
             "ballot_selections": [
@@ -328,16 +311,11 @@
     "ballot_styles": [
         {
             "object_id": "jefferson-county-ballot-style",
-            "geopolitical_unit_ids": [
-                "jefferson-county"
-            ]
+            "geopolitical_unit_ids": ["jefferson-county"]
         },
         {
             "object_id": "harrison-township-ballot-style",
-            "geopolitical_unit_ids": [
-                "jefferson-county",
-                "harrison-township"
-            ]
+            "geopolitical_unit_ids": ["jefferson-county", "harrison-township"]
         },
         {
             "object_id": "harrison-township-precinct-east-ballot-style",
@@ -370,10 +348,7 @@
         ]
     },
     "contact_information": {
-        "address_line": [
-            "1234 Paul Revere Run",
-            "Jefferson, Hamilton 999999"
-        ],
+        "address_line": ["1234 Paul Revere Run", "Jefferson, Hamilton 999999"],
         "name": "Hamilton State Election Commission",
         "email": [
             {

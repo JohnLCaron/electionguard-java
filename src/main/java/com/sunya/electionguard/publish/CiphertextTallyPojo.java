@@ -18,14 +18,14 @@ public class CiphertextTallyPojo {
 
   public static class CiphertextTallyContestPojo {
     public String object_id;
-    public int sequence_order;
+    public Integer sequence_order;
     public Group.ElementModQ description_hash;
     public Map<String, CiphertextTallySelectionPojo> selections;
   }
 
   public static class CiphertextTallySelectionPojo {
     public String object_id;
-    public int sequence_order;
+    public Integer sequence_order;
     public Group.ElementModQ description_hash;
     public ElGamal.Ciphertext ciphertext;
   }

@@ -38,8 +38,12 @@ public class BallotAggregationVerifier {
     SelectionAggregator agg = new SelectionAggregator(electionRecord.acceptedBallots);
     Preconditions.checkNotNull(decryptedTally);
 
+    int ncontests = 0;
+    int nselections = 0;
     for (PlaintextTally.Contest contest : decryptedTally.contests.values()) {
+      ncontests++;
       for (PlaintextTally.Selection selection : contest.selections().values()) {
+        nselections++;
         String key = contest.object_id() + "." + selection.object_id();
         List<ElGamal.Ciphertext> encryptions = agg.selectionEncryptions.get(key);
         // LOOK its possible no ballots voted one way or another
@@ -58,17 +62,19 @@ public class BallotAggregationVerifier {
     if (error) {
       System.out.printf(" ***Ballot Aggregation Validation failed.%n");
     } else {
-      System.out.printf(" Ballot Aggregation Validation success.%n");
+      System.out.printf(" Ballot Aggregation Validation success on %d cast ballots and %d contests and %d selections.%n",
+              agg.nballotsCast, ncontests, nselections);
     }
     return !error;
   }
 
   private static class SelectionAggregator {
     ListMultimap<String, ElGamal.Ciphertext> selectionEncryptions = ArrayListMultimap.create();
-
+    int nballotsCast = 0;
     SelectionAggregator(Iterable<SubmittedBallot> ballots) {
       for (SubmittedBallot ballot : ballots) {
         if (ballot.state == BallotBox.State.CAST) {
+          nballotsCast++;
           for (CiphertextBallot.Contest contest : ballot.contests) {
             for (CiphertextBallot.Selection selection : contest.ballot_selections) {
               String key = contest.object_id + "." + selection.object_id;

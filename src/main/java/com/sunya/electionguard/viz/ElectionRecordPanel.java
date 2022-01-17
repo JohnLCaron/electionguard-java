@@ -45,7 +45,7 @@ class ElectionRecordPanel extends JPanel {
   PlaintextTallyTable electionTallyTable;
   CiphertextTallyTable ciphertextTallyTable;
   PlaintextTallyTable spoiledTallyTable;
-  PlaintextBallotsTable spoiledBallotsTable;
+  SpoiledBallotPanel spoiledBallotsTable;
 
   ElectionRecordPanel(PreferencesExt prefs, JFrame frame) {
     this.prefs = prefs;
@@ -110,7 +110,7 @@ class ElectionRecordPanel extends JPanel {
     this.ciphertextTallyTable = new CiphertextTallyTable((PreferencesExt) prefs.node("CiphertextTally"));
     this.electionTallyTable = new PlaintextTallyTable((PreferencesExt) prefs.node("ElectionTally"));
     this.spoiledTallyTable = new PlaintextTallyTable((PreferencesExt) prefs.node("SpoiledTallies"));
-    this.spoiledBallotsTable = new PlaintextBallotsTable((PreferencesExt) prefs.node("SpoiledBallots"));
+    this.spoiledBallotsTable = new SpoiledBallotPanel((PreferencesExt) prefs.node("SpoiledBallots"), frame);
 
     // layout
     this.topPanel = new JPanel(new BorderLayout());
@@ -151,11 +151,8 @@ class ElectionRecordPanel extends JPanel {
       if (record.decryptedTally != null) {
         electionTallyTable.setPlaintextTallies(CloseableIterableAdapter.wrap(ImmutableList.of(record.decryptedTally)));
       }
-      if (record.spoiledTallies != null) {
-        spoiledTallyTable.setPlaintextTallies(record.spoiledTallies);
-      }
       if (record.spoiledBallots != null) {
-        spoiledBallotsTable.setBallots(record.spoiledBallots);
+        spoiledBallotsTable.setSpoiledBallots(record.spoiledBallots);
       }
     } catch (Exception e) {
       e.printStackTrace();
@@ -192,7 +189,7 @@ class ElectionRecordPanel extends JPanel {
         f.format("    %d session=%d launch=%d location=%s%n", device.device_id, device.session_id, device.launch_code, device.location);
       }
 
-      f.format("%n  Guardian Records Validation Sets%n");
+      f.format("%n  Guardian Records id, sequence%n");
       for (GuardianRecord gr : record.guardianRecords) {
         f.format("    %s %d%n", gr.guardian_id(), gr.sequence_order());
       }

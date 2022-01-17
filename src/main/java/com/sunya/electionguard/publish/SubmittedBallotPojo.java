@@ -17,8 +17,6 @@ import static com.sunya.electionguard.Group.ElementModQ;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /** Conversion between SubmittedBallot and Json, using python's object model. */
 public class SubmittedBallotPojo {
@@ -28,30 +26,30 @@ public class SubmittedBallotPojo {
   public ElementModQ code;
   public ElementModQ code_seed;
   public List<CiphertextBallotContestPojo> contests;
-  public long timestamp;
+  public Long timestamp;
   public ElementModQ crypto_hash;
-  // public ElementModQ nonce; LOOK temporary kludge until Optional serialization gets fixed
+  public ElementModQ nonce; // LOOK nonce always must be null, so can omit?
   public BallotBox.State state;
 
   public static class CiphertextBallotContestPojo {
     public String object_id;
-    public int sequence_order;
+    public Integer sequence_order;
     public ElementModQ description_hash;
     public List<CiphertextBallotSelectionPojo> ballot_selections;
     public ElementModQ crypto_hash;
     public ElGamalCiphertextPojo ciphertext_accumulation;
-    public ElementModQ nonce;
+    public ElementModQ nonce; // LOOK nonce always must be null, so can omit?
     public ConstantChaumPedersenProofPojo proof;
   }
 
   public static class CiphertextBallotSelectionPojo {
     public String object_id;
-    public int sequence_order;
+    public Integer sequence_order;
     public ElementModQ description_hash;
     public ElGamalCiphertextPojo ciphertext;
     public ElementModQ crypto_hash;
-    public boolean is_placeholder_selection;
-    public ElementModQ nonce;
+    public Boolean is_placeholder_selection = Boolean.FALSE;
+    public ElementModQ nonce; // LOOK nonce always must be null, so can omit?
     public DisjunctiveChaumPedersenProofPojo proof;
     public ElGamalCiphertextPojo extended_data;
   }
@@ -61,7 +59,7 @@ public class SubmittedBallotPojo {
     public ElementModP data;
     public ElementModQ challenge;
     public ElementModQ response;
-    public int constant;
+    public Integer constant;
   }
 
   public static class DisjunctiveChaumPedersenProofPojo {
@@ -81,11 +79,6 @@ public class SubmittedBallotPojo {
     public ElementModP data;
   }
 
-  @Nullable
-  private static <T, U> List<U> convertList(@Nullable List<T> from, Function<T, U> converter) {
-    return from == null ? null : from.stream().map(converter).collect(Collectors.toList());
-  }
-
   ////////////////////////////////////////////////////////////////////////////
   // deserialize
 
@@ -101,7 +94,7 @@ public class SubmittedBallotPojo {
             pojo.style_id,
             pojo.manifest_hash,
             pojo.code_seed,
-            convertList(pojo.contests, SubmittedBallotPojo::translateContest),
+            ConvertPojos.convertList(pojo.contests, SubmittedBallotPojo::translateContest),
             pojo.code,
             pojo.timestamp,
             pojo.crypto_hash,
@@ -113,7 +106,7 @@ public class SubmittedBallotPojo {
             contest.object_id,
             contest.sequence_order,
             contest.description_hash,
-            convertList(contest.ballot_selections, SubmittedBallotPojo::translateSelection),
+            ConvertPojos.convertList(contest.ballot_selections, SubmittedBallotPojo::translateSelection),
             contest.crypto_hash,
             translateCiphertext(contest.ciphertext_accumulation),
             Optional.ofNullable(contest.nonce),
@@ -178,22 +171,22 @@ public class SubmittedBallotPojo {
 
   public static JsonElement serialize(SubmittedBallot src) {
     Gson gson = GsonTypeAdapters.enhancedGson();
-    SubmittedBallotPojo pojo = convertAcceptedBallot(src);
+    SubmittedBallotPojo pojo = convertSubmittedBallot(src);
     Type typeOfSrc = new TypeToken<SubmittedBallotPojo>() {}.getType();
     return gson.toJsonTree(pojo, typeOfSrc);
   }
 
-  private static SubmittedBallotPojo convertAcceptedBallot(SubmittedBallot org) {
+  private static SubmittedBallotPojo convertSubmittedBallot(SubmittedBallot org) {
     SubmittedBallotPojo pojo = new SubmittedBallotPojo();
     pojo.object_id = org.object_id;
     pojo.style_id = org.style_id;
     pojo.manifest_hash = org.manifest_hash;
     pojo.code_seed = org.code_seed;
-    pojo.contests = convertList(org.contests, SubmittedBallotPojo::convertContest);
+    pojo.contests = ConvertPojos.convertList(org.contests, SubmittedBallotPojo::convertContest);
     pojo.code = org.code;
     pojo.timestamp = org.timestamp;
     pojo.crypto_hash = org.crypto_hash;
-    // pojo.nonce = org.nonce.orElse(null);
+    pojo.nonce = org.nonce.orElse(null);
     pojo.state = org.state;
     return pojo;
   }
@@ -203,7 +196,7 @@ public class SubmittedBallotPojo {
     pojo.object_id = contest.object_id();
     pojo.sequence_order = contest.sequence_order();
     pojo.description_hash = contest.contest_hash;
-    pojo.ballot_selections = convertList(contest.ballot_selections, SubmittedBallotPojo::convertSelection);
+    pojo.ballot_selections = ConvertPojos.convertList(contest.ballot_selections, SubmittedBallotPojo::convertSelection);
     pojo.crypto_hash = contest.crypto_hash;
     pojo.ciphertext_accumulation = convertCiphertext(contest.encrypted_total);
     pojo.nonce = contest.nonce.orElse(null);

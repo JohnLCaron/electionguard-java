@@ -6,6 +6,7 @@ import com.sunya.electionguard.proto.CiphertextBallotToProto;
 import com.sunya.electionguard.proto.ElectionRecordToProto;
 import com.sunya.electionguard.proto.PlaintextBallotToProto;
 import com.sunya.electionguard.proto.PlaintextTallyToProto;
+import com.sunya.electionguard.protogen.PlaintextTallyProto;
 import com.sunya.electionguard.verifier.ElectionRecord;
 
 import javax.annotation.Nullable;
@@ -20,70 +21,65 @@ import java.util.Formatter;
 import com.sunya.electionguard.protogen.CiphertextBallotProto;
 import com.sunya.electionguard.protogen.ElectionRecordProto;
 import com.sunya.electionguard.protogen.PlaintextBallotProto;
-import com.sunya.electionguard.protogen.PlaintextTallyProto;
 import com.sunya.electionguard.protogen.TrusteeProto;
 
 /** Publishes the Manifest Record to Json or protobuf files. */
 public class Publisher {
   static final String PRIVATE_DIR = "private";
 
-  // json
+  //// json
   static final String SUFFIX = ".json";
 
-  static final String DEVICES_DIR = "devices";
-  // static final String COEFFICIENTS_DIR = "coefficients";
-  static final String BALLOTS_DIR = "encrypted_ballots";
-  static final String SPOILED_BALLOT_DIR = "plaintext_ballots";
-  static final String SPOILED_TALLY_DIR = "spoiled_ballots";
+  static final String DEVICES_DIR = "encryption_devices";
   static final String GUARDIANS_DIR = "guardians";
-  static final String AVAILABLE_GUARDIANS_DIR = "lagrange_coordinates";
+  static final String SUBMITTED_BALLOTS_DIR = "submitted_ballots"; // encrypted
+  static final String SPOILED_BALLOTS_DIR = "spoiled_ballots"; // plaintext
 
   static final String MANIFEST_FILE_NAME = "manifest" + SUFFIX;
   static final String CONTEXT_FILE_NAME = "context" + SUFFIX;
   static final String CONSTANTS_FILE_NAME = "constants" + SUFFIX;
+  static final String COEFFICIENTS_FILE_NAME = "coefficients" + SUFFIX;
   static final String ENCRYPTED_TALLY_FILE_NAME = "encrypted_tally" + SUFFIX;
   static final String TALLY_FILE_NAME = "tally" + SUFFIX;
 
   static final String DEVICE_PREFIX = "device_";
+  static final String GUARDIAN_PREFIX = "guardian_";
+  static final String SPOILED_BALLOT_PREFIX = "spoiled_ballot_";
+  static final String SUBMITTED_BALLOT_PREFIX = "submitted_ballot_";
+
   static final String AVAILABLE_GUARDIAN_PREFIX = "available_guardian_";
-  static final String BALLOT_PREFIX = "ballot_";
-  static final String GUARDIAN_RECORD_PREFIX = "guardian_";
 
-  // json private
-  static final String PRIVATE_PLAINTEXT_BALLOTS_DIR = "plaintext";
-  static final String PRIVATE_ENCRYPTED_BALLOTS_DIR = "encrypted";
+  // JSON Private
+  static final String PRIVATE_DATA_DIR = "election_private_data";
+  static final String PRIVATE_GUARDIANS_DIR = "private_guardians";
+  static final String PRIVATE_BALLOT_DIR = "plaintext_ballots";
   static final String PLAINTEXT_BALLOT_PREFIX = "plaintext_ballot_";
-  static final String GUARDIAN_PRIVATE_PREFIX = "guardian_";
+  static final String CIPHERTEXT_BALLOT_PREFIX = "ciphertext_ballot_";
+  static final String PRIVATE_GUARDIAN_PREFIX = "private_guardian_";
 
-  // proto
+  //// proto
   static final String PROTO_SUFFIX = ".protobuf";
   static final String ELECTION_RECORD_FILE_NAME = "electionRecord" + PROTO_SUFFIX;
   static final String GUARDIANS_FILE = "guardians" + PROTO_SUFFIX;
   static final String SUBMITTED_BALLOT_PROTO = "submittedBallot" + PROTO_SUFFIX;
-  static final String SPOILED_BALLOT_FILE = "spoiledPlaintextBallot" + PROTO_SUFFIX;
-  static final String SPOILED_TALLY_FILE = "spoiledPlaintextTally" + PROTO_SUFFIX;
+  static final String SPOILED_BALLOT_FILE = "spoiledBallotTally" + PROTO_SUFFIX;
   static final String TRUSTEES_FILE = "trustees" + PROTO_SUFFIX;
 
   private final Path publishDirectory;
   private final Path devicesDirPath;
-  // private final Path coefficientsDirPath;
   private final Path ballotsDirPath;
   private final Path spoiledBallotDirPath;
-  private final Path spoiledTallyDirPath;
-  private final Path privateDirPath;
   private final Path guardianDirPath;
-  private final Path availableGuardianDirPath;
+  private final Path privateDirPath;
 
   public Publisher(String where, boolean removeAllFiles, boolean createDirs) throws IOException {
     this.publishDirectory = Path.of(where);
     this.devicesDirPath = publishDirectory.resolve(DEVICES_DIR);
-    // this.coefficientsDirPath = publishDirectory.resolve(COEFFICIENTS_DIR);
-    this.ballotsDirPath = publishDirectory.resolve(BALLOTS_DIR);
-    this.spoiledBallotDirPath = publishDirectory.resolve(SPOILED_BALLOT_DIR);
-    this.spoiledTallyDirPath = publishDirectory.resolve(SPOILED_TALLY_DIR);
-    this.privateDirPath = publishDirectory.resolve(PRIVATE_DIR);
+    this.ballotsDirPath = publishDirectory.resolve(SUBMITTED_BALLOTS_DIR);
     this.guardianDirPath = publishDirectory.resolve(GUARDIANS_DIR);
-    this.availableGuardianDirPath = publishDirectory.resolve(AVAILABLE_GUARDIANS_DIR);
+    this.spoiledBallotDirPath = publishDirectory.resolve(SPOILED_BALLOTS_DIR);
+    this.privateDirPath = publishDirectory.resolve(PRIVATE_DATA_DIR);
+    // this.availableGuardianDirPath = publishDirectory.resolve(AVAILABLE_GUARDIANS_DIR);
 
     if (removeAllFiles) {
       removeAllFiles();
@@ -115,12 +111,10 @@ public class Publisher {
   }
 
   private void createDirs() throws IOException {
-    Files.createDirectories(spoiledTallyDirPath);
-    Files.createDirectories(spoiledBallotDirPath);
-    Files.createDirectories(ballotsDirPath);
     Files.createDirectories(devicesDirPath);
     Files.createDirectories(guardianDirPath);
-    Files.createDirectories(availableGuardianDirPath);
+    Files.createDirectories(ballotsDirPath);
+    Files.createDirectories(spoiledBallotDirPath);
   }
 
   /** Delete everything in the output directory, but leave that directory. */
@@ -148,6 +142,10 @@ public class Publisher {
     return publishDirectory.resolve(CONSTANTS_FILE_NAME).toAbsolutePath();
   }
 
+  public Path coefficientsPath() {
+    return publishDirectory.resolve(COEFFICIENTS_FILE_NAME).toAbsolutePath();
+  }
+
   public Path publishPath() {
     return publishDirectory.toAbsolutePath();
   }
@@ -165,17 +163,19 @@ public class Publisher {
   }
 
   public Path devicePath(String id) {
-    String fileName = DEVICE_PREFIX + id + SUFFIX;
-    return devicesDirPath.resolve(fileName);
-  }
-
-  public Path guardiansPrivatePath(String id) {
-    String fileName = id + SUFFIX;
-    return privateDirPath.resolve(fileName);
+    return devicesDirPath.resolve(DEVICE_PREFIX + id + SUFFIX);
   }
 
   public Path trusteesPath() {
     return privateDirPath.resolve(TRUSTEES_FILE);
+  }
+
+  public Path privateGuardiansPath() {
+    return privateDirPath.resolve(PRIVATE_GUARDIANS_DIR);
+  }
+
+  public Path privateBallotsPath() {
+    return privateDirPath.resolve(PRIVATE_BALLOT_DIR);
   }
 
   public File[] deviceFiles() {
@@ -186,7 +186,7 @@ public class Publisher {
   }
 
   public Path guardianRecordsPath(String id) {
-    String fileName = GUARDIAN_RECORD_PREFIX + id + SUFFIX;
+    String fileName = GUARDIAN_PREFIX + id + SUFFIX;
     return guardianDirPath.resolve(fileName);
   }
 
@@ -197,21 +197,20 @@ public class Publisher {
     return guardianDirPath.toFile().listFiles();
   }
 
-  /*
-  public Path guardianRecordPrivatePath(String id) {
-    String fileName = COEFFICIENT_PREFIX + id + SUFFIX;
-    return coefficientsDirPath.resolve(fileName);
-  } */
+  public Path guardiansPrivatePath(String id) {
+    String fileName = id + SUFFIX;
+    return privateDirPath.resolve(fileName);
+  }
 
   public File[] guardianRecordPrivateFiles() {
-    if (!Files.exists(privateDirPath) || !Files.isDirectory(privateDirPath)) {
+    if (!Files.exists(privateGuardiansPath()) || !Files.isDirectory(privateGuardiansPath())) {
       return new File[0];
     }
-    return privateDirPath.toFile().listFiles();
+    return privateGuardiansPath().toFile().listFiles();
   }
 
   public Path ballotPath(String id) {
-    String fileName = BALLOT_PREFIX + id + SUFFIX;
+    String fileName = SUBMITTED_BALLOT_PREFIX + id + SUFFIX;
     return ballotsDirPath.resolve(fileName);
   }
 
@@ -223,7 +222,7 @@ public class Publisher {
   }
 
   public Path spoiledBallotPath(String id) {
-    String fileName = BALLOT_PREFIX + id + SUFFIX;
+    String fileName = SPOILED_BALLOT_PREFIX + id + SUFFIX;
     return spoiledBallotDirPath.resolve(fileName);
   }
 
@@ -232,30 +231,6 @@ public class Publisher {
       return new File[0];
     }
     return spoiledBallotDirPath.toFile().listFiles();
-  }
-
-  public Path spoiledTallyPath(String id) {
-    String fileName = BALLOT_PREFIX + id + SUFFIX;
-    return spoiledTallyDirPath.resolve(fileName);
-  }
-
-  public File[] spoiledTallyFiles() {
-    if (!Files.exists(spoiledTallyDirPath) || !Files.isDirectory(spoiledTallyDirPath)) {
-      return new File[0];
-    }
-    return spoiledTallyDirPath.toFile().listFiles();
-  }
-
-  public Path availableGuardianPath(String id) {
-    String fileName = AVAILABLE_GUARDIAN_PREFIX + id + SUFFIX;
-    return availableGuardianDirPath.resolve(fileName);
-  }
-
-  public File[] availableGuardianFiles() {
-    if (!Files.exists(availableGuardianDirPath) || !Files.isDirectory(availableGuardianDirPath)) {
-      return new File[0];
-    }
-    return availableGuardianDirPath.toFile().listFiles();
   }
 
   ////////////////////
@@ -270,10 +245,6 @@ public class Publisher {
 
   public Path spoiledBallotProtoPath() {
     return publishDirectory.resolve(SPOILED_BALLOT_FILE).toAbsolutePath();
-  }
-
-  public Path spoiledTallyProtoPath() {
-    return publishDirectory.resolve(SPOILED_TALLY_FILE).toAbsolutePath();
   }
 
   //////////////////////////////////////////////////////////////////
@@ -298,33 +269,25 @@ public class Publisher {
           ElectionRecord election,
           CiphertextTally encryptedTally,
           PlaintextTally decryptedTally,
-          Iterable<PlaintextBallot> spoiledBallots,
-          Iterable<PlaintextTally> spoiledDecryptedTallies,
+          Iterable<PlaintextTally> spoiledBallots,
           Iterable<AvailableGuardian> availableGuardians) throws IOException {
 
     ConvertToJson.writeElection(election.election, this.manifestPath());
     ConvertToJson.writeContext(election.context, this.contextPath());
     ConvertToJson.writeConstants(election.constants, this.constantsPath());
+    // TODO election.devices
 
     ConvertToJson.writeCiphertextTally(encryptedTally, encryptedTallyPath());
     ConvertToJson.writePlaintextTally(decryptedTally, tallyPath());
 
     if (spoiledBallots != null) {
-      for (PlaintextBallot ballot : spoiledBallots) {
-        ConvertToJson.writePlaintextBallot(ballot, this.spoiledBallotPath(ballot.object_id));
-      }
-    }
-
-    if (spoiledDecryptedTallies != null) {
-      for (PlaintextTally tally : spoiledDecryptedTallies) {
-        ConvertToJson.writePlaintextTally(tally, this.spoiledTallyPath(tally.object_id));
+      for (PlaintextTally ballot : spoiledBallots) {
+        ConvertToJson.writePlaintextTally(ballot, this.spoiledBallotPath(ballot.object_id));
       }
     }
 
     if (availableGuardians != null) {
-      for (AvailableGuardian guardian : availableGuardians) {
-        ConvertToJson.writeAvailableGuardian(guardian, this.availableGuardianPath(guardian.guardian_id));
-      }
+      ConvertToJson.writeCoefficients(availableGuardians, this.coefficientsPath());
     }
   }
 
@@ -338,8 +301,7 @@ public class Publisher {
           CiphertextTally ciphertext_tally,
           PlaintextTally decryptedTally,
           @Nullable Iterable<GuardianRecord> guardianRecords,
-          @Nullable Iterable<PlaintextBallot> spoiledBallots,
-          @Nullable Iterable<PlaintextTally> spoiledTallies,
+          @Nullable Iterable<PlaintextTally> spoiledBallots,
           @Nullable Iterable<AvailableGuardian> availableGuardians) throws IOException {
 
     ConvertToJson.writeElection(manifest, this.manifestPath());
@@ -364,21 +326,13 @@ public class Publisher {
     }
 
     if (spoiledBallots != null) {
-      for (PlaintextBallot ballot : spoiledBallots) {
-        ConvertToJson.writePlaintextBallot(ballot, this.spoiledBallotPath(ballot.object_id));
-      }
-    }
-
-    if (spoiledTallies != null) {
-      for (PlaintextTally tally : spoiledTallies) {
-        ConvertToJson.writePlaintextTally(tally, this.spoiledTallyPath(tally.object_id));
+      for (PlaintextTally ballot : spoiledBallots) {
+        ConvertToJson.writePlaintextTally(ballot, this.spoiledBallotPath(ballot.object_id));
       }
     }
 
     if (availableGuardians != null) {
-      for (AvailableGuardian guardian : availableGuardians) {
-        ConvertToJson.writeAvailableGuardian(guardian, this.availableGuardianPath(guardian.guardian_id));
-      }
+      ConvertToJson.writeCoefficients(availableGuardians, this.coefficientsPath());
     }
   }
 
@@ -482,31 +436,20 @@ public class Publisher {
     }
   }
 
-  /** Publishes the ballot and tally Decryptions part election record as proto. */
+  /** Publishes the ballot and tally Decryptions election record as proto. */
   public void writeDecryptionResultsProto(
           ElectionRecord electionRecord,
           CiphertextTally encryptedTally,
           PlaintextTally decryptedTally,
-          Iterable<PlaintextBallot> spoiledBallots,
-          Iterable<PlaintextTally> spoiledDecryptedTallies,
+          Iterable<PlaintextTally> spoiledBallots,
           Iterable<AvailableGuardian> availableGuardians) throws IOException {
 
     if (spoiledBallots != null) {
       // the spoiledBallots are written into their own file
       try (FileOutputStream out = new FileOutputStream(spoiledBallotProtoPath().toFile())) {
-        for (PlaintextBallot ballot : spoiledBallots) {
-          PlaintextBallotProto.PlaintextBallot ballotProto = PlaintextBallotToProto.translateToProto(ballot);
+        for (PlaintextTally ballot : spoiledBallots) {
+          PlaintextTallyProto.PlaintextTally ballotProto = PlaintextTallyToProto.translateToProto(ballot);
           ballotProto.writeDelimitedTo(out);
-        }
-      }
-    }
-
-    if (spoiledDecryptedTallies != null) {
-      // the spoiledDecryptedTallies are written into their own file
-      try (FileOutputStream out = new FileOutputStream(spoiledTallyProtoPath().toFile())) {
-        for (PlaintextTally tally : spoiledDecryptedTallies) {
-          PlaintextTallyProto.PlaintextTally tallyProto = PlaintextTallyToProto.translateToProto(tally);
-          tallyProto.writeDelimitedTo(out);
         }
       }
     }
@@ -533,8 +476,7 @@ public class Publisher {
           Iterable<SubmittedBallot> accepted_ballots,
           CiphertextTally ciphertext_tally,
           PlaintextTally decryptedTally,
-          @Nullable Iterable<PlaintextBallot> spoiledBallots,
-          @Nullable Iterable<PlaintextTally> spoiledTallies,
+          @Nullable Iterable<PlaintextTally> spoiledBallots,
           Iterable<AvailableGuardian> availableGuardians) throws IOException {
 
 
@@ -549,19 +491,9 @@ public class Publisher {
     if (spoiledBallots != null) {
       // the spoiledBallots are written into their own file
       try (FileOutputStream out = new FileOutputStream(spoiledBallotProtoPath().toFile())) {
-        for (PlaintextBallot ballot : spoiledBallots) {
-          PlaintextBallotProto.PlaintextBallot ballotProto = PlaintextBallotToProto.translateToProto(ballot);
+        for (PlaintextTally ballot : spoiledBallots) {
+          PlaintextTallyProto.PlaintextTally ballotProto = PlaintextTallyToProto.translateToProto(ballot);
           ballotProto.writeDelimitedTo(out);
-        }
-      }
-    }
-
-    if (spoiledTallies != null) {
-      // the spoiledTallies are written into their own file
-      try (FileOutputStream out = new FileOutputStream(spoiledTallyProtoPath().toFile())) {
-        for (PlaintextTally tally : spoiledTallies) {
-          PlaintextTallyProto.PlaintextTally tallyProto = PlaintextTallyToProto.translateToProto(tally);
-          tallyProto.writeDelimitedTo(out);
         }
       }
     }
@@ -577,7 +509,6 @@ public class Publisher {
       ElectionRecordProto.writeDelimitedTo(out);
     }
   }
-
 
   /** Copy accepted ballots file from the inputDir to this election record. */
   public void copyAcceptedBallots(String inputDir) throws IOException {
@@ -603,27 +534,30 @@ public class Publisher {
    */
   public void publish_private_data(
           @Nullable Iterable<PlaintextBallot> original_ballots,
-          @Nullable Iterable<Guardian> guardians) throws IOException {
+          @Nullable Iterable<GuardianRecordPrivate> guardians) throws IOException {
 
     Files.createDirectories(privateDirPath);
 
     if (guardians != null) {
-      for (Guardian guardian : guardians) {
-        String guardian_name = GUARDIAN_PRIVATE_PREFIX + guardian.object_id;
-        ConvertToJson.writeGuardian(guardian, privateDirPath.resolve(guardian_name));
+      Files.createDirectories(privateGuardiansPath());
+      for (GuardianRecordPrivate guardian : guardians) {
+        String guardian_name = PRIVATE_GUARDIAN_PREFIX + guardian.guardian_id() + SUFFIX;
+        ConvertToJson.writeGuardianRecordPrivate(guardian, privateGuardiansPath().resolve(guardian_name));
       }
     }
 
     if (original_ballots != null) {
-      Path ballotsDirPath = privateDirPath.resolve(PRIVATE_PLAINTEXT_BALLOTS_DIR);
-      Files.createDirectories(ballotsDirPath);
+      Files.createDirectories(privateBallotsPath());
       for (PlaintextBallot plaintext_ballot : original_ballots) {
         String ballot_name = PLAINTEXT_BALLOT_PREFIX + plaintext_ballot.object_id + SUFFIX;
-        ConvertToJson.writePlaintextBallot(plaintext_ballot, ballotsDirPath.resolve(ballot_name));
+        ConvertToJson.writePlaintextBallot(plaintext_ballot, privateBallotsPath().resolve(ballot_name));
       }
     }
+
+    // TODO CIPHERTEXT_BALLOT_PREFIX?
   }
 
+  // These are input ballots that did not validate (not spoiled ballots). put them somewhere to be examined later.
   public void publish_invalid_ballots(String directory, Iterable<PlaintextBallot> invalid_ballots) throws IOException {
     Path invalidBallotsPath = publishDirectory.resolve(directory);
     Files.createDirectories(invalidBallotsPath);

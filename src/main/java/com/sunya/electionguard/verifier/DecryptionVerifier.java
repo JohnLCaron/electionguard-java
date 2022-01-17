@@ -37,17 +37,6 @@ public class DecryptionVerifier {
     this.decryptedTally = decryptedTally;
   }
 
-  /** Verify 8,9 for the election tally. */
-  boolean verify_election_tally() {
-    boolean error = !this.make_all_contest_verification(this.decryptedTally.object_id, this.decryptedTally.contests);
-    if (error) {
-      System.out.printf(" ***Decryptions of cast ballots failure. %n");
-    } else {
-      System.out.printf(" Decryptions of cast ballots success. %n");
-    }
-    return !error;
-  }
-
   /**
    * Verify spoiled ballot tallies.
    * 12. An election verifier should confirm the correct decryption of each spoiled ballot using the same
@@ -68,6 +57,18 @@ public class DecryptionVerifier {
       System.out.printf(" 12.A Spoiled ballot decryption success. %n");
     }
     return valid.get();
+  }
+
+
+  /** Verify 8,9 for the election tally. */
+  boolean verify_election_tally() {
+    boolean error = !this.make_all_contest_verification(this.decryptedTally.object_id, this.decryptedTally.contests);
+    if (error) {
+      System.out.printf(" ***Decryptions of cast ballots failure. %n");
+    } else {
+      System.out.printf(" Decryptions of cast ballots success. %n");
+    }
+    return !error;
   }
 
   private boolean make_all_contest_verification(String name, Map<String, PlaintextTally.Contest> contests) {

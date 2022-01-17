@@ -23,8 +23,8 @@ public class TestConsumer {
     assertThat(record.guardianRecords).hasSize(7);
     assertThat(record.availableGuardians).hasSize(5);
 
-    assertThat(record.acceptedBallots).isNotNull();
-    assertThat(record.spoiledTallies).isNotNull();
+    assertThat(record.acceptedBallots).hasSize(6);
+    assertThat(record.spoiledBallots).hasSize(3);
   }
 
   @Example
@@ -40,7 +40,7 @@ public class TestConsumer {
     assertThat(record.guardianRecords).hasSize(5);
 
     assertThat(record.acceptedBallots).hasSize(6);
-    assertThat(record.spoiledTallies).hasSize(3);
+    assertThat(record.spoiledBallots).hasSize(5);
   }
 
   @Example
@@ -57,8 +57,7 @@ public class TestConsumer {
     assertThat(record.availableGuardians).hasSize(2);
 
     assertThat(record.acceptedBallots).hasSize(11);
-    assertThat(record.spoiledBallots).hasSize(6);
-    assertThat(record.spoiledTallies).hasSize(6);
+    assertThat(record.spoiledBallots).hasSize(5);
   }
 
 }

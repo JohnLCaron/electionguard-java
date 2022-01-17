@@ -2,7 +2,7 @@ package com.sunya.electionguard.verifier;
 
 import com.google.common.flogger.FluentLogger;
 import com.sunya.electionguard.Manifest;
-import com.sunya.electionguard.PlaintextBallot;
+import com.sunya.electionguard.PlaintextTally;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -17,14 +17,14 @@ import java.util.stream.Stream;
  * listed in text match the corresponding text in the ballot coding file."
  * @see <a href="https://www.electionguard.vote/spec/0.95.0/9_Verifier_construction/#validation-of-correct-decryption-of-tallies">Tally decryption validation</a>
  */
-public class PlaintextBallotVerifier {
+public class SpoiledBallotVerifier {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   final ElectionRecord electionRecord;
   // Map<CONTEST_ID, SET<SELECTION_ID>>
   final Map<String, Set<String>> names = new HashMap<>();
 
-  PlaintextBallotVerifier(ElectionRecord electionRecord) {
+  SpoiledBallotVerifier(ElectionRecord electionRecord) {
     this.electionRecord = electionRecord;
     for (Manifest.ContestDescription contest : electionRecord.election.contests) {
       HashSet<String> selectionNames = new HashSet<>();
@@ -38,21 +38,18 @@ public class PlaintextBallotVerifier {
   boolean verify_plaintext_ballot() {
     AtomicBoolean valid = new AtomicBoolean(true);
 
-    try (Stream<PlaintextBallot> ballots = electionRecord.spoiledBallots.iterator().stream()) {
+    try (Stream<PlaintextTally> ballots = electionRecord.spoiledBallots.iterator().stream()) {
       ballots.forEach(ballot -> {
-        for (PlaintextBallot.Contest contest : ballot.contests) {
-          Set<String> selectionNames = names.get(contest.contest_id);
+        for (PlaintextTally.Contest contest : ballot.contests.values()) {
+          Set<String> selectionNames = names.get(contest.object_id());
           if (selectionNames == null) {
-            System.out.printf(" ***Ballot Contest id (%s) not contained in ballot coding file.%n", contest.contest_id);
+            System.out.printf(" ***Ballot Contest id (%s) not contained in ballot coding file.%n", contest.object_id());
             valid.set(false);
             continue;
           }
-          for (PlaintextBallot.Selection selection : contest.ballot_selections) {
-            if (selection.is_placeholder_selection) {
-              continue;
-            }
-            if (!selectionNames.contains(selection.selection_id)) {
-              System.out.printf(" ***Ballot Selection id (%s) not contained in contest (%s).%n", selection.selection_id, contest.contest_id);
+          for (PlaintextTally.Selection selection : contest.selections().values()) {
+            if (!selectionNames.contains(selection.object_id())) {
+              System.out.printf(" ***Ballot Selection id (%s) not contained in contest (%s).%n", selection.object_id(), contest.object_id());
               valid.set(false);
             }
           }
@@ -61,9 +58,9 @@ public class PlaintextBallotVerifier {
     }
 
     if (!valid.get()) {
-      System.out.printf(" ***12.B Spoiled PlaintextBallot Names Validation failed.%n");
+      System.out.printf(" ***12.B Spoiled PlaintextTally Names Validation failed.%n");
     } else {
-      System.out.printf(" 12.B Spoiled PlaintextBallot Names Validation success.%n");
+      System.out.printf(" 12.B Spoiled PlaintextTally Names Validation success.%n");
     }
     return valid.get();
   }

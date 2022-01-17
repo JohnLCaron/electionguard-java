@@ -7,7 +7,7 @@ import com.google.common.base.Strings;
 import javax.annotation.Nullable;
 import java.util.List;
 
-/** Published record per Guardian used in verification processes. Replaces CoefficientValidationSet. */
+/** Published record per Guardian used in verification processes. */
 @AutoValue
 public abstract class GuardianRecord {
 

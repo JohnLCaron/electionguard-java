@@ -18,7 +18,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.sunya.electionguard.proto.CommonConvert.convertElementModP;
@@ -58,7 +57,7 @@ public class ElectionRecordFromProto {
 
 
     return new ElectionRecord(version, constants, context, description, guardianRecords,
-            devices, ciphertextTally, decryptedTally, null, null, null, guardians);
+            devices, ciphertextTally, decryptedTally, null, null, guardians);
   }
 
   static AvailableGuardian convertAvailableGuardian(ElectionRecordProto.AvailableGuardian proto) {
@@ -89,7 +88,7 @@ public class ElectionRecordFromProto {
             convertElementModQ(context.getCryptoBaseHash()),
             convertElementModQ(context.getCryptoExtendedBaseHash()),
             convertElementModQ(context.getCommitmentHash()),
-            context.getExtendedDataCount() > 0 ? Optional.of(context.getExtendedDataMap()) : Optional.empty());
+            context.getExtendedDataMap());
   }
 
   static Encrypt.EncryptionDevice convertDevice(ElectionRecordProto.EncryptionDevice device) {

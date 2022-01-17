@@ -211,25 +211,28 @@ public class PlaintextBallot extends ElectionObjectBase {
     public boolean equals(Object o) {
       if (this == o) return true;
       if (o == null || getClass() != o.getClass()) return false;
-      Selection that = (Selection) o;
-      return vote == that.vote &&
-              is_placeholder_selection == that.is_placeholder_selection &&
-              selection_id.equals(that.selection_id) &&
-              extended_data.equals(that.extended_data);
+      Selection selection = (Selection) o;
+      return sequence_order == selection.sequence_order &&
+              vote == selection.vote &&
+              is_placeholder_selection == selection.is_placeholder_selection &&
+              selection_id.equals(selection.selection_id) &&
+              extended_data.equals(selection.extended_data);
     }
 
     @Override
     public int hashCode() {
-      return Objects.hash(selection_id, vote, is_placeholder_selection, extended_data);
+      return Objects.hash(selection_id, sequence_order, vote, is_placeholder_selection, extended_data);
     }
+
 
     @Override
     public String toString() {
       return "Selection{" +
-              "\n selection_id='" + selection_id + '\'' +
-              "\n vote=" + vote +
-              "\n is_placeholder_selection=" + is_placeholder_selection +
-              "\n extended_data=" + extended_data +
+              "selection_id='" + selection_id + '\'' +
+              ", sequence_order=" + sequence_order +
+              ", vote=" + vote +
+              ", is_placeholder_selection=" + is_placeholder_selection +
+              ", extended_data=" + extended_data +
               '}';
     }
   }
@@ -271,6 +274,7 @@ public class PlaintextBallot extends ElectionObjectBase {
   /**
    * Create a PlaintextBallot from a CiphertextBallot and its decrypted tally.
    * Need CiphertextBallot for the style_id.
+   * LOOK not needed I think
    */
   static PlaintextBallot from(CiphertextBallot cballot, PlaintextTally tally) {
     List<Contest> contests = new ArrayList<>();
@@ -280,7 +284,7 @@ public class PlaintextBallot extends ElectionObjectBase {
       for (CiphertextBallot.Selection cselection : ccontest.ballot_selections) {
         if (!cselection.is_placeholder_selection) {
           PlaintextTally.Selection tselection = tcontest.selections().get(cselection.object_id);
-          selections.add(new Selection(cselection.object_id, tselection.sequence_order(), tselection.tally(), false, null));
+          selections.add(new Selection(cselection.object_id, -1, tselection.tally(), false, null));
         }
       }
       contests.add(new Contest(ccontest.object_id(), ccontest.sequence_order(), selections));

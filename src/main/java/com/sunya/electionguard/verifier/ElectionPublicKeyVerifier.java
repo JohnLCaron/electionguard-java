@@ -50,7 +50,7 @@ public class ElectionPublicKeyVerifier {
       System.out.printf(" ***3.A. extended hash does not match expected.%n");
       return false;
     }
-    System.out.printf(" Public key validation success.%n");
+    System.out.printf(" Manifest public key validation for %d guardians success.%n", this.electionRecord.guardianRecords.size());
     return true;
   }
 

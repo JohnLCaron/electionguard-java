@@ -14,7 +14,7 @@ public class TestContestVoteLimitsVerifier {
     Consumer consumer = new Consumer(topdir);
     ContestVoteLimitsVerifier validator = new ContestVoteLimitsVerifier(consumer.readElectionRecordProto());
 
-    boolean sevOk = validator.verify_all_contests();
+    boolean sevOk = validator.verify_all_accepted_ballots();
     assertThat(sevOk).isTrue();
   }
 
@@ -26,7 +26,7 @@ public class TestContestVoteLimitsVerifier {
     Consumer consumer = new Consumer(topdir);
     ContestVoteLimitsVerifier validator = new ContestVoteLimitsVerifier(consumer.readElectionRecordJson());
 
-    boolean sevOk = validator.verify_all_contests();
+    boolean sevOk = validator.verify_all_accepted_ballots();
     assertThat(sevOk).isTrue();
   }
 

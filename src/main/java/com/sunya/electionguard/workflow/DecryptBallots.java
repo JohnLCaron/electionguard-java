@@ -11,7 +11,6 @@ import com.sunya.electionguard.KeyCeremony;
 import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.InternalManifest;
 import com.sunya.electionguard.Guardian;
-import com.sunya.electionguard.PlaintextBallot;
 import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.CiphertextTally;
 import com.sunya.electionguard.Scheduler;
@@ -22,6 +21,7 @@ import com.sunya.electionguard.verifier.ElectionRecord;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.util.Collection;
 import java.util.Formatter;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +29,8 @@ import java.util.Optional;
 
 /**
  * A command line program to decrypt a collection of ballots, using standard library and local Guardians.
+ * Used in RunStandardWorkflow.
+ * DO NOT USE IN PRODUCTION, as Guardian is inherently unsafe.
  * <p>
  * For command line help:
  * <strong>
@@ -156,7 +158,7 @@ public class DecryptBallots {
   Iterable<Guardian> guardians;
   CiphertextTally encryptedTally;
   PlaintextTally decryptedTally;
-  List<PlaintextBallot> spoiledDecryptedBallots;
+  Collection<PlaintextTally> spoiledDecryptedBallots;
   Map<String, PlaintextTally> spoiledDecryptedTallies;
   List<AvailableGuardian> availableGuardians;
   int quorum;
@@ -215,9 +217,8 @@ public class DecryptBallots {
     this.spoiledDecryptedTallies = mediator.get_plaintext_ballots(electionRecord.spoiledBallots()).orElseThrow();
     System.out.printf("Spoiled Ballot Tallies Decrypted%n");
 
-    // LOOK
-    // this.spoiledDecryptedBallots = spoiledTallyAndBallot.stream().map(e -> e.ballot).col    // Generate a Homomorphically Accumulated Tally of the ballots
-    // this.availableGuardians = mediator.getAvailableGuardians();
+    this.spoiledDecryptedBallots = this.spoiledDecryptedTallies.values();
+    // this.availableGuardians = mediator.getAvailableGuardians(); LOOK WRONG
 
     System.out.printf("Done decrypting tally%n%n%s%n", this.decryptedTally);
   }
@@ -229,7 +230,6 @@ public class DecryptBallots {
             this.encryptedTally,
             this.decryptedTally,
             this.spoiledDecryptedBallots,
-            this.spoiledDecryptedTallies.values(),
             this.availableGuardians);
 
     publisher.copyAcceptedBallots(inputDir);

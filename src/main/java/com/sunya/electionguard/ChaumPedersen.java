@@ -46,6 +46,21 @@ public class ChaumPedersen {
       this.proof_one_response = Preconditions.checkNotNull(proof_one_response);
     }
 
+    @Override
+    public String toString() {
+      return "DisjunctiveChaumPedersenProof{" +
+              "proof_zero_pad=" + proof_zero_pad +
+              ", proof_zero_data=" + proof_zero_data +
+              ", proof_one_pad=" + proof_one_pad +
+              ", proof_one_data=" + proof_one_data +
+              ", proof_zero_challenge=" + proof_zero_challenge +
+              ", proof_one_challenge=" + proof_one_challenge +
+              ", challenge=" + challenge +
+              ", proof_zero_response=" + proof_zero_response +
+              ", proof_one_response=" + proof_one_response +
+              '}';
+    }
+
     /**
      * Validates a "disjunctive" Chaum-Pedersen (zero or one) proof.
      * <p>

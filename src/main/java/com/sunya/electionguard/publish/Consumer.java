@@ -1,5 +1,6 @@
 package com.sunya.electionguard.publish;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.AbstractIterator;
 import com.sunya.electionguard.*;
 import com.sunya.electionguard.proto.CiphertextBallotFromProto;
@@ -14,6 +15,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Formatter;
 import java.util.List;
 import java.util.function.Predicate;
@@ -89,7 +91,6 @@ public class Consumer {
             this.decryptedTally(),
             CloseableIterableAdapter.wrap(this.acceptedBallots()),
             CloseableIterableAdapter.wrap(this.spoiledBallots()),
-            CloseableIterableAdapter.wrap(this.spoiledTallies()),
             this.availableGuardians());
   }
 
@@ -132,20 +133,30 @@ public class Consumer {
   }
 
   public List<AvailableGuardian> availableGuardians() throws IOException {
+    // TODO are these guarenteed to be in order ?
+    List<GuardianRecord> grs = new ArrayList<>(guardianRecords());
+    grs.sort(Comparator.comparingInt(GuardianRecord::sequence_order));
+    Coefficients pojo = ConvertFromJson.readCoefficients(publisher.coefficientsPath().toString());
+    // Preconditions.checkArgument(grs.size() == pojo.coefficients.size());
     List<AvailableGuardian> result = new ArrayList<>();
-    for (File file : publisher.availableGuardianFiles()) {
-      AvailableGuardian fromPython = ConvertFromJson.readAvailableGuardian(file.getAbsolutePath());
-      result.add(fromPython);
+    for (int i = 0; i < pojo.coefficients.size(); i++) {
+      GuardianRecord gr = grs.get(i);
+      AvailableGuardian avail = new AvailableGuardian(gr.guardian_id(), gr.sequence_order(), pojo.coefficients.get(i));
+      result.add(avail);
     }
     return result;
   }
 
   // Decrypted, spoiled ballots
-  public List<PlaintextBallot> spoiledBallots() throws IOException {
-    List<PlaintextBallot> result = new ArrayList<>();
+  public List<PlaintextTally> spoiledBallots() throws IOException {
+    List<PlaintextTally> result = new ArrayList<>();
     for (File file : publisher.spoiledBallotFiles()) {
-      PlaintextBallot fromPython = ConvertFromJson.readPlaintextBallot(file.getAbsolutePath());
-      result.add(fromPython);
+      try {
+        PlaintextTally fromPython = ConvertFromJson.readPlaintextTally(file.getAbsolutePath());
+        result.add(fromPython);
+      } catch (Exception e) {
+        // System.out.printf("Exception %s on %s%n", e.getMessage(), file.getAbsolutePath());
+      }
     }
     return result;
   }
@@ -163,19 +174,6 @@ public class Consumer {
     } else {
       return new ArrayList<>();
     }
-  }
-
-  // Decrypted, spoiled tallies
-  // LOOK python has not yet committed PR#305, which removes spoiled_ballots from PlaintextTally.
-  //   we have already done so, and publish as json in "spoiled_tallies" directory, which they may not.
-  //   for now, we will wait to see what they do, at the cost of not getting spoiledTallies from python.
-  public List<PlaintextTally> spoiledTallies() throws IOException {
-    List<PlaintextTally> result = new ArrayList<>();
-    for (File file : publisher.spoiledTallyFiles()) {
-      PlaintextTally fromPython = ConvertFromJson.readPlaintextTally(file.getAbsolutePath());
-      result.add(fromPython);
-    }
-    return result;
   }
 
   public List<GuardianRecord> guardianRecords() throws IOException {
@@ -200,7 +198,7 @@ public class Consumer {
 
   public ElectionRecord readElectionRecordProto() throws IOException {
     ElectionRecord fromProto = ElectionRecordFromProto.read(publisher.electionRecordProtoPath().toString());
-    return fromProto.setBallots(acceptedBallotsProto(), decryptedSpoiledBallotsProto(), decryptedSpoiledTalliesProto());
+    return fromProto.setBallots(acceptedBallotsProto(), decryptedSpoiledBallotsProto());
   }
 
   public CloseableIterable<SubmittedBallot> acceptedBallotsProto() {
@@ -220,17 +218,9 @@ public class Consumer {
     }
   }
 
-  public CloseableIterable<PlaintextBallot> decryptedSpoiledBallotsProto() {
+  public CloseableIterable<PlaintextTally> decryptedSpoiledBallotsProto() {
     if (Files.exists(publisher.spoiledBallotProtoPath())) {
-      return () -> new PlaintextBallotIterator(publisher.spoiledBallotProtoPath().toString());
-    } else {
-      return CloseableIterableAdapter.empty();
-    }
-  }
-
-  public CloseableIterable<PlaintextTally> decryptedSpoiledTalliesProto() {
-    if (Files.exists(publisher.spoiledTallyProtoPath())) {
-      return () -> new PlaintextTallyIterator(publisher.spoiledTallyProtoPath().toString());
+      return () -> new PlaintextTallyIterator(publisher.spoiledBallotProtoPath().toString());
     } else {
       return CloseableIterableAdapter.empty();
     }
@@ -242,11 +232,9 @@ public class Consumer {
   private static class SubmittedBallotIterator extends AbstractIterator<SubmittedBallot>
                                      implements CloseableIterator<SubmittedBallot> {
     private final String filename;
-    private final Predicate<CiphertextBallotProto.SubmittedBallot
-> filter;
+    private final Predicate<CiphertextBallotProto.SubmittedBallot> filter;
     private FileInputStream input;
-    SubmittedBallotIterator(String filename, Predicate<CiphertextBallotProto.SubmittedBallot
-> filter) {
+    SubmittedBallotIterator(String filename, Predicate<CiphertextBallotProto.SubmittedBallot> filter) {
       this.filename = filename;
       this.filter = filter;
     }
@@ -257,9 +245,7 @@ public class Consumer {
         if (input == null) {
           this.input = new FileInputStream(filename);
         }
-        CiphertextBallotProto.SubmittedBallot
- ballotProto = CiphertextBallotProto.SubmittedBallot
-.parseDelimitedFrom(input);
+        CiphertextBallotProto.SubmittedBallot ballotProto = CiphertextBallotProto.SubmittedBallot.parseDelimitedFrom(input);
         if (ballotProto == null) {
           input.close();
           return endOfData();

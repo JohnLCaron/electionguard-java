@@ -9,6 +9,8 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
+import com.sunya.electionguard.BallotBox;
+import com.sunya.electionguard.Encrypt;
 import com.sunya.electionguard.GuardianRecord;
 import com.sunya.electionguard.GuardianRecordPrivate;
 import com.sunya.electionguard.Manifest;
@@ -22,7 +24,7 @@ import java.lang.reflect.Type;
 import java.math.BigInteger;
 
 /**
- * LOOK: why do we need custom serializers?
+ * When do we need custom serializers?
  *    1. target must have no-arg constructors. But it may be private. AutoValue requires custom serializer.
  *    2. no circular references
  *    3. missing objects are set to their default (null, zero, false)
@@ -53,6 +55,18 @@ class GsonTypeAdapters {
             .registerTypeAdapter(PlaintextTally.class, new PlaintextTallyDeserializer())
             .registerTypeAdapter(CiphertextTally.class, new CiphertextTallySerializer())
             .registerTypeAdapter(CiphertextTally.class, new CiphertextTallyDeserializer())
+            .registerTypeAdapter(Encrypt.EncryptionDevice.class, new EncryptionDeviceSerializer())
+            .registerTypeAdapter(Encrypt.EncryptionDevice.class, new EncryptionDeviceDeserializer())
+            .registerTypeAdapter(BallotBox.State.class, new BallotBoxStateSerializer())
+            .registerTypeAdapter(BallotBox.State.class, new BallotBoxStateDeserializer())
+            .registerTypeAdapter(Boolean.class, new BooleanSerializer())
+            .registerTypeAdapter(Boolean.class, new BooleanDeserializer())
+            .registerTypeAdapter(Coefficients.class, new CoefficientsSerializer())
+            .registerTypeAdapter(Coefficients.class, new CoefficientsDeserializer())
+            .registerTypeAdapter(Integer.class, new IntegerSerializer())
+            .registerTypeAdapter(Integer.class, new IntegerDeserializer())
+            .registerTypeAdapter(Long.class, new LongSerializer())
+            .registerTypeAdapter(Long.class, new LongDeserializer())
             .create();
   }
 
@@ -206,6 +220,116 @@ class GsonTypeAdapters {
     public CiphertextTally deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
             throws JsonParseException {
       return CiphertextTallyPojo.deserialize(json);
+    }
+  }
+
+  private static class EncryptionDeviceSerializer implements JsonSerializer<Encrypt.EncryptionDevice> {
+    @Override
+    public JsonElement serialize(Encrypt.EncryptionDevice src, Type typeOfSrc, JsonSerializationContext context) {
+      return EncryptionDevicePojo.serialize(src);
+    }
+  }
+
+  private static class EncryptionDeviceDeserializer implements JsonDeserializer<Encrypt.EncryptionDevice> {
+    @Override
+    public Encrypt.EncryptionDevice deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+            throws JsonParseException {
+      return EncryptionDevicePojo.deserialize(json);
+    }
+  }
+
+  private static class CoefficientsSerializer implements JsonSerializer<Coefficients> {
+    @Override
+    public JsonElement serialize(Coefficients src, Type typeOfSrc, JsonSerializationContext context) {
+      return Coefficients.serialize(src);
+    }
+  }
+
+  private static class CoefficientsDeserializer implements JsonDeserializer<Coefficients> {
+    @Override
+    public Coefficients deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+            throws JsonParseException {
+      return Coefficients.deserialize(json);
+    }
+  }
+
+  private static class IntegerSerializer implements JsonSerializer<Integer> {
+    @Override
+    public JsonElement serialize(Integer src, Type typeOfSrc, JsonSerializationContext context) {
+      return new JsonPrimitive(Integer.toHexString(src));
+    }
+  }
+
+  private static class IntegerDeserializer implements JsonDeserializer<Integer> {
+    @Override
+    public Integer deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+            throws JsonParseException {
+      String content = json.getAsJsonPrimitive().getAsString();
+      return Integer.parseInt(content, 16); // LOOK should it be unsigned?
+    }
+  }
+
+  private static class LongSerializer implements JsonSerializer<Long> {
+    @Override
+    public JsonElement serialize(Long src, Type typeOfSrc, JsonSerializationContext context) {
+      return new JsonPrimitive(Long.toHexString(src));
+    }
+  }
+
+  private static class LongDeserializer implements JsonDeserializer<Long> {
+    @Override
+    public Long deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+            throws JsonParseException {
+      String content = json.getAsJsonPrimitive().getAsString();
+      return Long.parseUnsignedLong(content, 16);
+    }
+  }
+
+  private static class BooleanSerializer implements JsonSerializer<Boolean> {
+    @Override
+    public JsonElement serialize(Boolean src, Type typeOfSrc, JsonSerializationContext context) {
+      return new JsonPrimitive(src ? "01" : "00");
+    }
+  }
+
+  private static class BooleanDeserializer implements JsonDeserializer<Boolean> {
+    @Override
+    public Boolean deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+            throws JsonParseException {
+      String content = json.getAsJsonPrimitive().getAsString();
+      switch (content) {
+        case "00": return false;
+        case "false": return false;
+        case "01": return true;
+        case "true": return true;
+      }
+      throw new IllegalStateException("Unknown boolean encoding " + content);
+    }
+  }
+
+  private static class BallotBoxStateSerializer implements JsonSerializer<BallotBox.State> {
+    @Override
+    public JsonElement serialize(BallotBox.State state, Type typeOfSrc, JsonSerializationContext context) {
+      int content = 3;
+      switch (state) {
+        case CAST: content =  1; break;
+        case SPOILED: content =  2; break;
+      }
+      return new JsonPrimitive(content);
+    }
+  }
+
+  private static class BallotBoxStateDeserializer implements JsonDeserializer<BallotBox.State> {
+    @Override
+    public BallotBox.State deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+            throws JsonParseException {
+      int content = json.getAsJsonPrimitive().getAsNumber().intValue();
+      switch (content) {
+        case 1: return BallotBox.State.CAST;
+        case 2: return BallotBox.State.SPOILED;
+        case 3: return BallotBox.State.UNKNOWN;
+      }
+      throw new IllegalStateException("Unknown BallotBox.State encoding " + content);
     }
   }
 }

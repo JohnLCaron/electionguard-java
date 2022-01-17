@@ -1,6 +1,5 @@
 package com.sunya.electionguard;
 
-import com.google.common.base.Preconditions;
 import com.google.common.flogger.FluentLogger;
 
 import javax.annotation.concurrent.Immutable;
@@ -123,7 +122,6 @@ public class SubmittedBallot extends CiphertextBallot {
             "\n tracking_hash=" + code +
             "\n timestamp    =" + timestamp +
             "\n crypto_hash  =" + crypto_hash +
-            "\n nonce        =" + nonce +
             '}';
   }
 }

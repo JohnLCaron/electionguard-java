@@ -19,9 +19,15 @@ public class SelectionEncryptionVerifier {
   boolean verify_all_selections() {
     boolean error = false;
 
+    int nballots  = 0;
+    int ncontests  = 0;
+    int nselections  = 0;
     for (SubmittedBallot ballot : electionRecord.acceptedBallots) {
+      nballots++;
       for (CiphertextBallot.Contest contest : ballot.contests) {
+        ncontests++;
         for (CiphertextBallot.Selection selection : contest.ballot_selections) {
+          nselections++;
           SelectionVerifier sv = new SelectionVerifier(selection);
           // check validity of a selection
           if (!sv.verifySelection()) {
@@ -34,7 +40,8 @@ public class SelectionEncryptionVerifier {
     if (error) {
       System.out.printf(" ***Selection Encryptions failure.%n");
     } else {
-      System.out.printf(" All Selection Encryptions validate: success.%n");
+      System.out.printf(" All Selection Encryptions validate for %d ballots, %d contests, %d selections: success.%n",
+              nballots, ncontests, nselections);
     }
     return !error;
   }
