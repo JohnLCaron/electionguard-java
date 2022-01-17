@@ -142,7 +142,7 @@ public class TestAttackTallyDecryptionVerifyier {
 
   private PlaintextTally.Selection messTally(PlaintextTally.Selection org) {
     System.out.printf("---messTally with %s%n", org.object_id());
-    return PlaintextTally.Selection.create(org.object_id(), org.sequence_order(), org.tally() + 1, org.value(), org.message(), org.shares());
+    return PlaintextTally.Selection.create(org.object_id(), org.tally() + 1, org.value(), org.message(), org.shares());
   }
 
   private PlaintextTally.Selection messTallyAndValue(PlaintextTally.Selection org) {
@@ -150,7 +150,7 @@ public class TestAttackTallyDecryptionVerifyier {
     int tally = org.tally() + 1;
     Group.ElementModP t = Group.int_to_p_unchecked(BigInteger.valueOf(tally));
     Group.ElementModP value = Group.g_pow_p(t);
-    return PlaintextTally.Selection.create(org.object_id(), org.sequence_order(), tally, value, org.message(), org.shares());
+    return PlaintextTally.Selection.create(org.object_id(), tally, value, org.message(), org.shares());
   }
 
   // Try to cheat by increasing the tally by one. Jigger the CiphertextDecryptionSelection to pass spec #11
@@ -190,7 +190,7 @@ public class TestAttackTallyDecryptionVerifyier {
     }
 
     // Group.ElementModP productMi = Group.mult_p(partialDecryptions);
-    return PlaintextTally.Selection.create(org.object_id(), org.sequence_order(), tally, M, org.message(), shares);
+    return PlaintextTally.Selection.create(org.object_id(), tally, M, org.message(), shares);
   }
 
   boolean publish(String inputDir, String publishDir, ElectionRecord electionRecord, PlaintextTally decryptedTally) throws IOException {

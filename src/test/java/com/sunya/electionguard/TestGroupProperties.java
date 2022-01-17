@@ -35,40 +35,12 @@ public class TestGroupProperties extends TestProperties {
   }
 
   //// TestModularArithmetic
-  /* @Property
+  @Property
   public void test_add_q(@ForAll("elements_mod_q") ElementModQ q) {
-    ElementModQ as_int = add_qi(q.elem, BigInteger.ONE);
-    ElementModQ as_elem = add_q(q, ONE_Q);
-    assertThat(as_int).isEqualTo(as_elem);
+    BigInteger as_int = q.elem.add(BigInteger.ONE);
+    ElementModQ as_elem = add_q(q, ONE_MOD_Q);
+    assertThat(as_int).isEqualTo(as_elem.elem);
   }
-
-  @Property
-  public void test_a_plus_bc_q(@ForAll("elements_mod_q") ElementModQ q) {
-    ElementModQ as_int = a_plus_bc_q(q.elem, BigInteger.ONE, BigInteger.ONE);
-    ElementModQ as_elem = a_plus_bc_q(q, ONE_Q, ONE_Q);
-    assertThat(as_int).isEqualTo(as_elem);
-  }
-
-  @Property
-  public void test_a_minus_b_q(@ForAll("elements_mod_q") ElementModQ q) {
-    ElementModQ as_int = a_minus_b_q(q.elem, BigInteger.ONE);
-    ElementModQ as_elem = a_minus_b_q(q, ONE_Q);
-    assertThat(as_int).isEqualTo(as_elem);
-  }
-
-  @Property
-  public void test_div_q(@ForAll("elements_mod_q") ElementModQ q) {
-    ElementModQ as_int = div_q(q.elem, BigInteger.ONE);
-    ElementModQ as_elem = div_q(q, ONE_Q);
-    assertThat(as_int).isEqualTo(as_elem);
-  }
-
-  @Property
-  public void test_div_p(@ForAll("elements_mod_p") ElementModP p) {
-    ElementModP as_int = div_p(p.elem, BigInteger.ONE);
-    ElementModP as_elem = div_p(p, ONE_Q);
-    assertThat(as_int).isEqualTo(as_elem);
-  } */
 
   @Property
   public void test_no_mult_inv_of_zero() {

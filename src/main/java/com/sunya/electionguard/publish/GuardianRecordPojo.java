@@ -13,7 +13,7 @@ import java.util.List;
 /** Conversion between GuardianRecord and Json, using python's object model. */
 public class GuardianRecordPojo {
   public String guardian_id;
-  public int sequence_order;
+  public Integer sequence_order;
   public Group.ElementModP election_public_key;
   public List<Group.ElementModP> election_commitments;
   public List<SchnorrProofPojo> election_proofs;

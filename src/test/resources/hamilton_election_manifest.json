@@ -1,4 +1,5 @@
 {
+    "spec_version": "v0.95",
     "name": {
         "text": [
             {
@@ -12,10 +13,7 @@
         ]
     },
     "contact_information": {
-        "address_line": [
-            "1234 Paul Revere Run",
-            "Hamilton, Ozark 99999"
-        ],
+        "address_line": ["1234 Paul Revere Run", "Hamilton, Ozark 99999"],
         "name": "Hamilton State Election Commission",
         "email": [
             {
@@ -48,10 +46,7 @@
             "name": "Hamilton County",
             "type": "county",
             "contact_information": {
-                "address_line": [
-                    "1234 Samuel Adams Way",
-                    "Hamilton, Ozark 99999"
-                ],
+                "address_line": ["1234 Samuel Adams Way", "Hamilton, Ozark 99999"],
                 "name": "Hamilton County Clerk",
                 "email": [
                     {
@@ -72,10 +67,7 @@
             "name": "Congressional District 5",
             "type": "congressional",
             "contact_information": {
-                "address_line": [
-                    "1234 Somerville Gateway",
-                    "Medford, Ozark 999999"
-                ],
+                "address_line": ["1234 Somerville Gateway", "Medford, Ozark 999999"],
                 "name": "Medford Town Hall",
                 "email": [
                     {
@@ -96,10 +88,7 @@
             "name": "Congressional District 7",
             "type": "congressional",
             "contact_information": {
-                "address_line": [
-                    "1234 Somerville Gateway",
-                    "Arlington, Ozark 999999"
-                ],
+                "address_line": ["1234 Somerville Gateway", "Arlington, Ozark 999999"],
                 "name": "Arlington Town Hall",
                 "email": [
                     {
@@ -120,10 +109,7 @@
             "name": "LaCroix Township Precinct 1",
             "type": "precinct",
             "contact_information": {
-                "address_line": [
-                    "1234 Thorton Drive",
-                    "LaCroix, Ozark 99999"
-                ],
+                "address_line": ["1234 Thorton Drive", "LaCroix, Ozark 99999"],
                 "name": "LaCroix Town Hall",
                 "email": [
                     {
@@ -144,10 +130,7 @@
             "name": "Exeter Utility District",
             "type": "utility",
             "contact_information": {
-                "address_line": [
-                    "1234 Watt Drive",
-                    "LaCroix, Ozark 99999"
-                ],
+                "address_line": ["1234 Watt Drive", "LaCroix, Ozark 99999"],
                 "name": "Exeter Utility District coordinator",
                 "email": [
                     {
@@ -168,10 +151,7 @@
             "name": "Arlington Township Precinct 1",
             "type": "precinct",
             "contact_information": {
-                "address_line": [
-                    "1234 Pahk Avenue",
-                    "Arlinton, Ozark 99999"
-                ],
+                "address_line": ["1234 Pahk Avenue", "Arlinton, Ozark 99999"],
                 "name": "Arlington Town Hall",
                 "email": [
                     {
@@ -216,10 +196,7 @@
             "name": "Somerset School District",
             "type": "school",
             "contact_information": {
-                "address_line": [
-                    "1234 Somerset Avenue",
-                    "Arlinton, Ozark 99999"
-                ],
+                "address_line": ["1234 Somerset Avenue", "Arlinton, Ozark 99999"],
                 "name": "Someset Elementary",
                 "email": [
                     {
@@ -240,10 +217,7 @@
             "name": "Harris Township",
             "type": "township",
             "contact_information": {
-                "address_line": [
-                    "1234 Pahk Avenue",
-                    "Harris, Ozark 99999"
-                ],
+                "address_line": ["1234 Pahk Avenue", "Harris, Ozark 99999"],
                 "name": "harris Town Hall",
                 "email": [
                     {
@@ -1021,54 +995,6 @@
             }
         },
         {
-            "object_id": "write-in-1",
-            "name": {
-                "text": [
-                    {
-                        "value": "Write In Candidate",
-                        "language": "en"
-                    },
-                    {
-                        "value": "Escribir en la candidata",
-                        "language": "es"
-                    }
-                ]
-            },
-            "isWriteIn": true
-        },
-        {
-            "object_id": "write-in-2",
-            "name": {
-                "text": [
-                    {
-                        "value": "Write In Candidate",
-                        "language": "en"
-                    },
-                    {
-                        "value": "Escribir en la candidata",
-                        "language": "es"
-                    }
-                ]
-            },
-            "isWriteIn": true
-        },
-        {
-            "object_id": "write-in-3",
-            "name": {
-                "text": [
-                    {
-                        "value": "Write In Candidate",
-                        "language": "en"
-                    },
-                    {
-                        "value": "Escribir en la candidata",
-                        "language": "es"
-                    }
-                ]
-            },
-            "isWriteIn": true
-        },
-        {
             "object_id": "ozark-chief-justice-retain-demergue-affirmative",
             "name": {
                 "text": [
@@ -1123,7 +1049,6 @@
     ],
     "contests": [
         {
-            "@type": "CandidateContest",
             "object_id": "president-vice-president-contest",
             "vote_variation": "one_of_m",
             "electoral_district_id": "hamilton-county",
@@ -1194,7 +1119,6 @@
             ]
         },
         {
-            "@type": "CandidateContest",
             "object_id": "ozark-governor",
             "vote_variation": "one_of_m",
             "electoral_district_id": "hamilton-county",
@@ -1365,7 +1289,6 @@
             ]
         },
         {
-            "@type": "CandidateContest",
             "object_id": "congress-district-5-contest",
             "vote_variation": "one_of_m",
             "electoral_district_id": "congress-district-5",
@@ -1431,7 +1354,6 @@
             ]
         },
         {
-            "@type": "CandidateContest",
             "object_id": "congress-district-7-contest",
             "vote_variation": "one_of_m",
             "electoral_district_id": "congress-district-7",
@@ -1497,7 +1419,6 @@
             ]
         },
         {
-            "@type": "CandidateContest",
             "object_id": "pismo-beach-school-board-contest",
             "vote_variation": "n_of_m",
             "electoral_district_id": "pismo-beach-school-district-precinct-1",
@@ -1583,7 +1504,6 @@
             ]
         },
         {
-            "@type": "CandidateContest",
             "object_id": "somerset-school-board-contest",
             "vote_variation": "n_of_m",
             "electoral_district_id": "somerset-school-district-precinct-1",
@@ -1659,7 +1579,6 @@
             ]
         },
         {
-            "@type": "ReferendumContest",
             "object_id": "arlington-chief-justice-retain-demergue",
             "sequence_order": 6,
             "vote_variation": "one_of_m",
@@ -1705,7 +1624,6 @@
             ]
         },
         {
-            "@type": "ReferendumContest",
             "object_id": "exeter-utility-district-referendum-contest",
             "sequence_order": 7,
             "vote_variation": "one_of_m",
@@ -1748,28 +1666,13 @@
                         "language": "es"
                     }
                 ]
-            },
-            "ballotDescription": {
-                "text": [
-                    {
-                        "value": "The Executive Board of the Exeter Utility district adopted Ordinance No. 970 concerning voter approval of its regular property tax levy. This proposition would maintain police, fire, park and mandated community services by increasing the regular property tax levy rate above the limit factor by $0.20/$1,000 assessed value to a maximum rate of $0.83712/$1,000 assessed valuation for collection in 2020, set a 5% limit factor for each year 2021-2025, use the 2025 levy amount as the base to compute subsequent levy limits, and exempt low income seniors and disabled; as set forth in Ordinance No. 970.",
-                        "language": "en"
-                    },
-                    {
-                        "value": "La Junta Ejecutiva del distrito de Servicios Públicos de Exeter adoptó la Ordenanza No. 970 sobre la aprobación de los votantes de su recaudación de impuestos de propiedad regulatoria. Esta propuesta mantendría a la policía, los bomberos, los parques y los servicios comunitarios obligatorios al aumentar la tasa de recaudación del impuesto a la propiedad regular de por encima del factor límite en un valor tasado de $ 0.20 / $ 1,000 a una tasa máxima de $ 0.83712 / $ 1,000 de tasación tasada para cobrar en 2020, establecer un 5% factor límite para cada año 2021-2025, use el monto del impuesto 2025 como base para calcular los límites de impuestos posteriores, y exima a las personas de la tercera edad de bajos ingresos y discapacitadas; como se establece en la Ordenanza No. 970.",
-                        "language": "es"
-                    }
-                ]
             }
         }
     ],
     "ballot_styles": [
         {
             "object_id": "congress-district-7-hamilton-county",
-            "geopolitical_unit_ids": [
-                "hamilton-county",
-                "congress-district-7"
-            ]
+            "geopolitical_unit_ids": ["hamilton-county", "congress-district-7"]
         },
         {
             "object_id": "congress-district-7-lacroix",
@@ -1816,10 +1719,7 @@
         },
         {
             "object_id": "congress-district-5-hamilton-county",
-            "geopolitical_unit_ids": [
-                "hamilton-county",
-                "congress-district-5"
-            ]
+            "geopolitical_unit_ids": ["hamilton-county", "congress-district-5"]
         },
         {
             "object_id": "congress-district-5-lacroix",

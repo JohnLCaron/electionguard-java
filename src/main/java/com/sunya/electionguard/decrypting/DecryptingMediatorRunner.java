@@ -203,7 +203,6 @@ class DecryptingMediatorRunner {
 
   CiphertextTally encryptedTally;
   PlaintextTally decryptedTally;
-  List<PlaintextBallot> spoiledDecryptedBallots;
   List<PlaintextTally> spoiledDecryptedTallies;
   List<AvailableGuardian> availableGuardians;
 
@@ -299,7 +298,6 @@ class DecryptingMediatorRunner {
     // Here's where the spoiled ballots are decrypted.
     List<SpoiledBallotAndTally> spoiledTallyAndBallot = mediator.decrypt_spoiled_ballots().orElseThrow();
     System.out.printf("SpoiledBallotAndTally = %d%n", spoiledTallyAndBallot.size());
-    this.spoiledDecryptedBallots = spoiledTallyAndBallot.stream().map(e -> e.ballot).collect(Collectors.toList());
     this.spoiledDecryptedTallies = spoiledTallyAndBallot.stream().map(e -> e.tally).collect(Collectors.toList());
 
     this.availableGuardians = mediator.getAvailableGuardians();
@@ -334,7 +332,6 @@ class DecryptingMediatorRunner {
             this.electionRecord,
             this.encryptedTally,
             this.decryptedTally,
-            this.spoiledDecryptedBallots,
             this.spoiledDecryptedTallies,
             this.availableGuardians);
 

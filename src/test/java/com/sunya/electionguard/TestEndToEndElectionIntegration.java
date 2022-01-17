@@ -24,7 +24,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 
 /**
- * Test a complete simple example of executing an End-to-End encrypted election.
+ * Test a complete simple example of executing an End-to-End encrypted election, using Python-ported classes.
  * Publishing to JSON.
  */
 public class TestEndToEndElectionIntegration {
@@ -66,7 +66,6 @@ public class TestEndToEndElectionIntegration {
   DecryptionMediator decryption_mediator;
   CiphertextTally publishedTally;
   PlaintextTally decryptedTally;
-  List<PlaintextBallot> spoiledDecryptedBallots;
   Collection<PlaintextTally> spoiledDecryptedTallies;
 
   // Step 5 - Publish
@@ -295,13 +294,15 @@ public class TestEndToEndElectionIntegration {
     DecryptionHelper.perform_compensated_decryption_setup(this.guardians, QUORUM, this.decryption_mediator, this.context,
             this.publishedTally, spoiled_ballots);
 
-    // Get the plaintext Tally
-    Optional<PlaintextTally>  decryptedTallyO = this.decryption_mediator.get_plaintext_tally(this.publishedTally);
+    // Decrypt the Tally
+    Optional<PlaintextTally> decryptedTallyO = this.decryption_mediator.get_plaintext_tally(this.publishedTally);
     assertThat(decryptedTallyO).isPresent();
     this.decryptedTally = decryptedTallyO.get();
     System.out.printf("Tally Decrypted%n");
 
-    // Get the plaintext Spoiled Ballots
+    // Decrypt the Spoiled Ballots.
+    // Note we use the old decryption_mediator, not the new Optional<List<SpoiledBallotAndTally>> decrypt_spoiled_ballots()
+    // Note this returns a PlaintextTally, not a PlaintextBallot (!)
     Optional<Map<String, PlaintextTally>> spoiledDecryptedBallotsO =
             this.decryption_mediator.get_plaintext_ballots(this.ballot_box.getSpoiledBallots());
     assertThat(spoiledDecryptedBallotsO).isPresent();
@@ -349,7 +350,7 @@ public class TestEndToEndElectionIntegration {
     }
   }
 
-  // Compare the decrypted spolied tally to original ballot
+  // Compare the decrypted spoiled tally to original ballot
   void compare_spoiled_tallies() {
     Map<String, PlaintextTally> plaintextTalliesMap = this.spoiledDecryptedTallies.stream().collect(Collectors.toMap(t -> t.object_id, t -> t));
 
@@ -380,7 +381,6 @@ public class TestEndToEndElectionIntegration {
             this.publishedTally,
             this.decryptedTally,
             this.guardian_records,
-            this.spoiledDecryptedBallots,
             this.spoiledDecryptedTallies,
             this.decryption_mediator.availableGuardians());
 
@@ -430,7 +430,7 @@ public class TestEndToEndElectionIntegration {
 
     Map<String, PlaintextBallot> originalMap = this.originalPlaintextBallots.stream()
             .collect(Collectors.toMap(b->b.object_id, b -> b));
-    try (Stream<PlaintextBallot> ballots = roundtrip.spoiledBallots.iterator().stream()) {
+    try (Stream<PlaintextTally> ballots = roundtrip.spoiledBallots.iterator().stream()) {
       ballots.forEach(ballot -> {
         PlaintextBallot expected = originalMap.get(ballot.object_id);
         assertThat(expected).isNotNull();

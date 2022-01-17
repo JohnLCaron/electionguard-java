@@ -16,7 +16,10 @@ import static com.sunya.electionguard.Group.ElementModP;
 import static com.sunya.electionguard.Group.ElementModQ;
 import static com.sunya.electionguard.Group.rand_q;
 
-/** Builder of Guardians for an election. */
+/**
+ * Builder of Guardians for an election.
+ * DO NOT USE IN PRODUCTION, as Guardian is inherently unsafe.
+ */
 public class Guardian {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 

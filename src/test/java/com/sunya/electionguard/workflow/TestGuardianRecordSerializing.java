@@ -97,7 +97,7 @@ public class TestGuardianRecordSerializing {
             this.jointKey.joint_public_key(),
             this.election,
             commitmentsHash,
-            Optional.empty());
+            null);
 
     this.publisher = new Publisher(outputDir, true, true);
     publish(context);

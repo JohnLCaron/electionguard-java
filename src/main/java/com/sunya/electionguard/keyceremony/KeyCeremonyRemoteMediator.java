@@ -2,7 +2,6 @@ package com.sunya.electionguard.keyceremony;
 
 import com.google.common.flogger.FluentLogger;
 import com.sunya.electionguard.CiphertextElectionContext;
-import com.sunya.electionguard.ElectionConstants;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.GuardianRecord;
 import com.sunya.electionguard.Hash;
@@ -88,7 +87,7 @@ public class KeyCeremonyRemoteMediator {
     }
 
     this.context = CiphertextElectionContext.create(this.trusteeProxies.size(), this.quorum,
-            this.jointKey, this.election, this.commitmentsHash, Optional.empty());
+            this.jointKey, this.election, this.commitmentsHash, null);
 
     System.out.printf("  Key Ceremony complete%n");
   }

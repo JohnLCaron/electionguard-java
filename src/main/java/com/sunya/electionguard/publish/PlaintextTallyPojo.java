@@ -15,23 +15,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
-/** Conversion between Tally.PlaintextTally and Json, using python's object model. */
+/** Conversion between PlaintextTally and Json, using python's object model. */
 public class PlaintextTallyPojo {
   public String object_id;
   public Map<String, PlaintextTallyContestPojo> contests;
 
   public static class PlaintextTallyContestPojo {
     public String object_id;
-    public int sequence_order;
     public Map<String, PlaintextTallySelectionPojo> selections;
   }
 
   public static class PlaintextTallySelectionPojo {
     public String object_id;
-    public int sequence_order;
     public Integer tally;
     public Group.ElementModP value;
     public ElGamal.Ciphertext message;
@@ -60,11 +57,6 @@ public class PlaintextTallyPojo {
     public Group.ElementModP data;
     public Group.ElementModQ challenge;
     public Group.ElementModQ response;
-  }
-
-  @Nullable
-  private static <T, U> List<U> convertList(@Nullable List<T> from, Function<T, U> converter) {
-    return from == null ? null : from.stream().map(converter).collect(Collectors.toList());
   }
 
   ////////////////////////////////////////////////////////////////////////////
@@ -99,11 +91,10 @@ public class PlaintextTallyPojo {
   private static PlaintextTally.Selection translateSelection(PlaintextTallySelectionPojo pojo) {
     return PlaintextTally.Selection.create(
             pojo.object_id,
-            pojo.sequence_order,
             pojo.tally,
             pojo.value,
             pojo.message,
-            convertList(pojo.shares, PlaintextTallyPojo::translateShare));
+            ConvertPojos.convertList(pojo.shares, PlaintextTallyPojo::translateShare));
   }
 
   private static DecryptionShare.CiphertextDecryptionSelection translateShare(CiphertextDecryptionSelectionPojo pojo) {
@@ -180,11 +171,10 @@ public class PlaintextTallyPojo {
   private static PlaintextTallySelectionPojo convertSelection(PlaintextTally.Selection org) {
     PlaintextTallySelectionPojo pojo = new PlaintextTallySelectionPojo();
     pojo.object_id = org.object_id();
-    pojo.sequence_order = org.sequence_order();
     pojo.tally = org.tally();
     pojo.value = org.value();
     pojo.message = org.message();
-    pojo.shares = convertList(org.shares(), PlaintextTallyPojo::convertShare);
+    pojo.shares = ConvertPojos.convertList(org.shares(), PlaintextTallyPojo::convertShare);
     return pojo;
   }
 

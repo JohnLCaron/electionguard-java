@@ -15,6 +15,7 @@ import static com.sunya.electionguard.KeyCeremonyMediator.GuardianPair;
 /**
  * The Decryption Mediator composes partial decryptions from each Guardian
  * to form a decrypted representation of an election tally.
+ * Used in RunStandardWorkflow.
  */
 public class DecryptionMediator {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();

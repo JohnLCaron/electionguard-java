@@ -4,7 +4,6 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.sunya.electionguard.CiphertextElectionContext;
-import com.sunya.electionguard.ElectionConstants;
 import com.sunya.electionguard.GuardianRecord;
 import com.sunya.electionguard.GuardianRecordPrivate;
 import com.sunya.electionguard.Manifest;
@@ -26,6 +25,7 @@ import java.util.stream.Collectors;
 
 /**
  * A command line program that performs the key ceremony to create the Guardians, using standard library and local Guardians.
+ * DO NOT USE IN PRODUCTION, as Guardian is inherently unsafe.
  * <p>
  * For command line help:
  * <strong>
@@ -143,7 +143,7 @@ public class PerformKeyCeremony {
     }
 
     this.context = CiphertextElectionContext.create(this.numberOfGuardians, this.quorum,
-            this.jointKey.joint_public_key(), this.election, this.commitmentsHash, Optional.empty());
+            this.jointKey.joint_public_key(), this.election, this.commitmentsHash, null);
   }
 
   /**

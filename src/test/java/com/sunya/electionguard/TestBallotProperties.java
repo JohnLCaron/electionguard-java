@@ -10,10 +10,17 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
 
 public class TestBallotProperties extends TestProperties {
   static BallotFactory factory = new BallotFactory();
+
+  @Example
+  public void test_ballots_is_valid() throws IOException {
+    List<PlaintextBallot> originalPlaintextBallots = new BallotFactory().get_simple_ballots_from_file();
+    assertThat(originalPlaintextBallots).isNotNull();
+    assertThat(originalPlaintextBallots).isNotEmpty();
+    assertThat(originalPlaintextBallots).hasSize(6);
+  }
 
   @Example
   public void test_ballot_is_valid() throws IOException {

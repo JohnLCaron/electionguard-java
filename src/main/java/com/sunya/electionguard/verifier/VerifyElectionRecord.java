@@ -3,7 +3,7 @@ package com.sunya.electionguard.verifier;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
-import com.sunya.electionguard.input.CiphertextTallyInputValidation;
+import com.sunya.electionguard.Group;
 import com.sunya.electionguard.input.ElectionInputValidation;
 import com.sunya.electionguard.input.PlaintextTallyInputValidation;
 import com.sunya.electionguard.publish.Consumer;
@@ -35,6 +35,9 @@ public class VerifyElectionRecord {
 
     @Parameter(names = {"-skip10"}, order = 2, description = "Skip Box 10 validation")
     boolean skip10 = false;
+
+    @Parameter(names = {"-usePrimes"}, order = 2, description = "use constants as primes")
+    boolean usePrimes = false;
 
     @Parameter(names = {"-h", "--help"}, order = 2, description = "Display this help and exit", help = true)
     boolean help = false;
@@ -76,8 +79,11 @@ public class VerifyElectionRecord {
         System.out.printf("*** ElectionInputValidation FAILED on %s%n%s", cmdLine.inputDir, errors);
         System.exit(1);
       }
-
       System.out.printf(" VerifyElectionRecord read from %s%n", cmdLine.inputDir);
+      if (cmdLine.usePrimes) {
+        Group.setPrimes(electionRecord.constants);
+        System.out.printf(" Use primes from electionRecord = %s%n", electionRecord.constants);
+      }
       boolean ok = verifyElectionRecord(electionRecord, cmdLine.skip10);
       System.exit(ok ? 0 : 1);
     } catch (Throwable t) {
@@ -106,7 +112,7 @@ public class VerifyElectionRecord {
 
     System.out.println("------------ [box 5] Contest Vote Limits Validation ------------");
     ContestVoteLimitsVerifier cvlv = new ContestVoteLimitsVerifier(electionRecord);
-    boolean cvlvOk = cvlv.verify_all_contests();
+    boolean cvlvOk = cvlv.verify_all_accepted_ballots();
 
     System.out.println("------------ [box 6] Ballot Chaining Validation ------------");
     BallotChainingVerifier bcv = new BallotChainingVerifier(electionRecord);
@@ -147,11 +153,11 @@ public class VerifyElectionRecord {
     TallyDecryptionVerifier tdv = new TallyDecryptionVerifier(electionRecord.election, electionRecord.decryptedTally);
     boolean tdvOk = tdv.verify_tally_decryption();
 
-    System.out.println("------------ [box 12] Correct Decryption of Spoiled Tallies ------------");
-    boolean dvsOk = dv.verify_spoiled_tallies(electionRecord.spoiledTallies);
+    System.out.println("------------ [box 12] Correct Decryption of Spoiled Ballots ------------");
+    boolean dvsOk = dv.verify_spoiled_tallies(electionRecord.spoiledBallots);
 
     // 12B
-    PlaintextBallotVerifier pbv = new PlaintextBallotVerifier(electionRecord);
+    SpoiledBallotVerifier pbv = new SpoiledBallotVerifier(electionRecord);
     boolean pbvOk = pbv.verify_plaintext_ballot();
 
     boolean allOk = (blvOk && gpkvOk && epkvOk && sevOk && cvlvOk && bcvOk && bavOk && dvOk && ptiValid &&

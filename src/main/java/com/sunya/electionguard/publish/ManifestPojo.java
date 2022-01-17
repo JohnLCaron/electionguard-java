@@ -10,8 +10,6 @@ import javax.annotation.Nullable;
 import java.lang.reflect.Type;
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /** Helper class for conversion of Manifest description to/from Json, using python's object model. */
 public class ManifestPojo {
@@ -43,15 +41,15 @@ public class ManifestPojo {
     public InternationalizedText name;
     public String party_id;
     public String image_uri;
-    public Boolean is_write_in;
+    public Boolean is_write_in = Boolean.FALSE;
   }
 
   public static class ContestDescription extends ElectionObjectBase {
     public String electoral_district_id;
-    public int sequence_order;
+    public Integer sequence_order;
     public String vote_variation;
-    public int number_elected;
-    public int votes_allowed;
+    public Integer number_elected;
+    public Integer votes_allowed;
     public String name;
     public List<SelectionDescription> ballot_selections;
     public InternationalizedText ballot_title;
@@ -93,12 +91,7 @@ public class ManifestPojo {
 
   public static class SelectionDescription extends ElectionObjectBase {
     public String candidate_id;
-    public int sequence_order;
-  }
-
-  @Nullable
-  private static <T, U> List<U> convertList(@Nullable List<T> from, Function<T, U> converter) {
-    return from == null || from.isEmpty() ? null : from.stream().map(converter).collect(Collectors.toList());
+    public Integer sequence_order;
   }
 
   ////////////////////////////////////////////////////////////////////////////
@@ -120,11 +113,11 @@ public class ManifestPojo {
             Manifest.ElectionType.valueOf(pojo.type),
             startLocalDate,
             endLocalDate,
-            convertList(pojo.geopolitical_units, ManifestPojo::convertGeopoliticalUnit),
-            convertList(pojo.parties, ManifestPojo::convertParty),
-            convertList(pojo.candidates, ManifestPojo::convertCandidate),
-            convertList(pojo.contests, ManifestPojo::convertContestDescription),
-            convertList(pojo.ballot_styles, ManifestPojo::convertBallotStyle),
+            ConvertPojos.convertList(pojo.geopolitical_units, ManifestPojo::convertGeopoliticalUnit),
+            ConvertPojos.convertList(pojo.parties, ManifestPojo::convertParty),
+            ConvertPojos.convertList(pojo.candidates, ManifestPojo::convertCandidate),
+            ConvertPojos.convertList(pojo.contests, ManifestPojo::convertContestDescription),
+            ConvertPojos.convertList(pojo.ballot_styles, ManifestPojo::convertBallotStyle),
             convertInternationalizedText(pojo.name),
             convertContactInformation(pojo.contact_information)
     );
@@ -147,8 +140,8 @@ public class ManifestPojo {
       return null;
     }
     return new Manifest.BallotStyle(pojo.object_id,
-            convertList(pojo.geopolitical_unit_ids, Strings::nullToEmpty),
-            convertList(pojo.party_ids, Strings::nullToEmpty),
+            ConvertPojos.convertList(pojo.geopolitical_unit_ids, Strings::nullToEmpty),
+            ConvertPojos.convertList(pojo.party_ids, Strings::nullToEmpty),
             Strings.emptyToNull(pojo.image_uri));
   }
 
@@ -167,9 +160,9 @@ public class ManifestPojo {
       return null;
     }
     return new Manifest.ContactInformation(
-            convertList(pojo.address_line, Strings::nullToEmpty),
-            convertList(pojo.email, ManifestPojo::convertAnnotatedString),
-            convertList(pojo.phone, ManifestPojo::convertAnnotatedString),
+            ConvertPojos.convertList(pojo.address_line, Strings::nullToEmpty),
+            ConvertPojos.convertList(pojo.email, ManifestPojo::convertAnnotatedString),
+            ConvertPojos.convertList(pojo.phone, ManifestPojo::convertAnnotatedString),
             pojo.name);
   }
 
@@ -186,7 +179,7 @@ public class ManifestPojo {
             pojo.number_elected,
             pojo.votes_allowed,
             pojo.name,
-            convertList(pojo.ballot_selections, ManifestPojo::convertSelectionDescription),
+            ConvertPojos.convertList(pojo.ballot_selections, ManifestPojo::convertSelectionDescription),
             convertInternationalizedText(pojo.ballot_title),
             convertInternationalizedText(pojo.ballot_subtitle));
   }
@@ -208,7 +201,7 @@ public class ManifestPojo {
     if (pojo == null) {
       return null;
     }
-    return new Manifest.InternationalizedText(convertList(pojo.text, ManifestPojo::convertLanguage));
+    return new Manifest.InternationalizedText(ConvertPojos.convertList(pojo.text, ManifestPojo::convertLanguage));
   }
 
   @Nullable
@@ -261,11 +254,11 @@ public class ManifestPojo {
     pojo.type = org.type.name();
     pojo.start_date = org.start_date.toString();
     pojo.end_date = org.end_date.toString();
-    pojo.geopolitical_units = convertList(org.geopolitical_units, ManifestPojo::convertGeopoliticalUnit);
-    pojo.parties = convertList(org.parties, ManifestPojo::convertParty);
-    pojo.candidates = convertList(org.candidates, ManifestPojo::convertCandidate);
-    pojo.contests = convertList(org.contests, ManifestPojo::convertContestDescription);
-    pojo.ballot_styles = convertList(org.ballot_styles, ManifestPojo::convertBallotStyle);
+    pojo.geopolitical_units = ConvertPojos.convertList(org.geopolitical_units, ManifestPojo::convertGeopoliticalUnit);
+    pojo.parties = ConvertPojos.convertList(org.parties, ManifestPojo::convertParty);
+    pojo.candidates = ConvertPojos.convertList(org.candidates, ManifestPojo::convertCandidate);
+    pojo.contests = ConvertPojos.convertList(org.contests, ManifestPojo::convertContestDescription);
+    pojo.ballot_styles = ConvertPojos.convertList(org.ballot_styles, ManifestPojo::convertBallotStyle);
     pojo.name = convertInternationalizedText(org.name.orElse(null));
     pojo.contact_information = convertContactInformation(org.contact_information.orElse(null));
 
@@ -291,8 +284,8 @@ public class ManifestPojo {
     ManifestPojo.BallotStyle pojo = new ManifestPojo.BallotStyle();
 
     pojo.object_id = org.object_id;
-    pojo.geopolitical_unit_ids = convertList(org.geopolitical_unit_ids, Strings::nullToEmpty);
-    pojo.party_ids = convertList(org.party_ids, Strings::nullToEmpty);
+    pojo.geopolitical_unit_ids = ConvertPojos.convertList(org.geopolitical_unit_ids, Strings::nullToEmpty);
+    pojo.party_ids = ConvertPojos.convertList(org.party_ids, Strings::nullToEmpty);
     pojo.image_uri = org.image_uri.orElse(null);
     return pojo;
   }
@@ -317,9 +310,9 @@ public class ManifestPojo {
       return null;
     }
     ManifestPojo.ContactInformation pojo = new ManifestPojo.ContactInformation();
-    pojo.address_line = convertList(org.address_line, Strings::nullToEmpty);
-    pojo.email = convertList(org.email, ManifestPojo::convertAnnotatedString);
-    pojo.phone = convertList(org.phone, ManifestPojo::convertAnnotatedString);
+    pojo.address_line = ConvertPojos.convertList(org.address_line, Strings::nullToEmpty);
+    pojo.email = ConvertPojos.convertList(org.email, ManifestPojo::convertAnnotatedString);
+    pojo.phone = ConvertPojos.convertList(org.phone, ManifestPojo::convertAnnotatedString);
     pojo.name = org.name.orElse(null);
     return pojo;
   }
@@ -337,7 +330,7 @@ public class ManifestPojo {
     pojo.number_elected = org.number_elected;
     pojo.votes_allowed = org.votes_allowed.orElse(null);
     pojo.name = org.name;
-    pojo.ballot_selections = convertList(org.ballot_selections, ManifestPojo::convertSelectionDescription);
+    pojo.ballot_selections = ConvertPojos.convertList(org.ballot_selections, ManifestPojo::convertSelectionDescription);
     pojo.ballot_title = convertInternationalizedText(org.ballot_title.orElse(null));
     pojo.ballot_subtitle = convertInternationalizedText(org.ballot_subtitle.orElse(null));
     return pojo;
@@ -362,7 +355,7 @@ public class ManifestPojo {
       return null;
     }
     ManifestPojo.InternationalizedText pojo = new ManifestPojo.InternationalizedText();
-    pojo.text = convertList(org.text, ManifestPojo::convertLanguage);
+    pojo.text = ConvertPojos.convertList(org.text, ManifestPojo::convertLanguage);
     return pojo;
   }
 

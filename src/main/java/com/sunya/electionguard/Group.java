@@ -21,7 +21,9 @@ public class Group {
 
   private static ElectionConstants primes = ElectionConstants.get(ElectionConstants.PrimeOption.Standard);
   public static ElectionConstants getPrimes() { return primes; }
-  public static void setPrimes(ElectionConstants usePrimes) { primes = usePrimes; }
+  public static void setPrimes(ElectionConstants usePrimes) {
+    primes = usePrimes;
+  }
 
    @Immutable
   static class ElementMod {

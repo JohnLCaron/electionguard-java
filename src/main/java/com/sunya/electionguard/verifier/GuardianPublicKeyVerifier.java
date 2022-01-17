@@ -26,8 +26,8 @@ public class GuardianPublicKeyVerifier {
     boolean error = false;
 
     int count = 0;
-    for (GuardianRecord coeff : this.electionRecord.guardianRecords) {
-      boolean res = this.verify_one_guardian(coeff);
+    for (GuardianRecord gr : this.electionRecord.guardianRecords) {
+      boolean res = this.verify_one_guardian(gr);
       if (!res) {
         error = true;
         System.out.printf(" Guardian %d key generation verification failure. %n", count);
@@ -36,7 +36,8 @@ public class GuardianPublicKeyVerifier {
     }
 
     if (!error) {
-      System.out.printf(" All guardians: key generation verification success. %n");
+      System.out.printf(" Guardians (%d) key generation verification success. %n",
+              this.electionRecord.guardianRecords.size());
     }
     return !error;
   }

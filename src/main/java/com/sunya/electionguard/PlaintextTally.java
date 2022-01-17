@@ -42,6 +42,14 @@ public class PlaintextTally {
     return Objects.hash(object_id, contests);
   }
 
+  @Override
+  public String toString() {
+    return "PlaintextTally{" +
+            "object_id='" + object_id + '\'' +
+            ", contests=" + contests +
+            '}';
+  }
+
   /**
    * The plaintext representation of the counts of one contest in the election.
    * The object_id is the same as the Manifest.ContestDescription.object_id or PlaintextBallotContest object_id.
@@ -57,8 +65,7 @@ public class PlaintextTally {
               ImmutableMap.copyOf(Preconditions.checkNotNull(selections)));
     }
 
-    @Override
-    public String toString() {
+    public String toStringOld() {
       Formatter out = new Formatter();
       out.format("Contest %s%n", object_id());
       int sum = selections().values().stream().mapToInt(s -> s.tally()).sum();
@@ -70,10 +77,9 @@ public class PlaintextTally {
   /**
    * The plaintext representation of the counts of one selection of one contest in the election.
    * The object_id is the same as the encrypted selection (Ballot.CiphertextSelection) object_id.
-   * TODO: Does CiphertextTallySelection really need to be ordered?
    */
   @AutoValue
-  public static abstract class Selection implements OrderedObjectBaseIF {
+  public static abstract class Selection implements ElectionObjectBaseIF {
     /** The actual count. */
     public abstract Integer tally();
     /** g^tally or M in the spec. */
@@ -84,11 +90,10 @@ public class PlaintextTally {
     /** The Guardians' shares of the decryption of a selection. `M_i` in the spec. Must be nguardians of them. */
     public abstract ImmutableList<DecryptionShare.CiphertextDecryptionSelection> shares();
 
-    public static Selection create(String object_id, int sequence_order, Integer tally, ElementModP value, ElGamal.Ciphertext message,
+    public static Selection create(String object_id, Integer tally, ElementModP value, ElGamal.Ciphertext message,
                                    List<DecryptionShare.CiphertextDecryptionSelection> shares) {
       return new AutoValue_PlaintextTally_Selection(
               Preconditions.checkNotNull(object_id),
-              sequence_order,
               Preconditions.checkNotNull(tally),
               Preconditions.checkNotNull(value),
               Preconditions.checkNotNull(message),
@@ -98,8 +103,8 @@ public class PlaintextTally {
     @Override
     public String toString() {
       Formatter f = new Formatter();
-      f.format("Selection{%n object_id= '%s'%n sequence_order = %d%n tally    = %d%n value    = %s%n message  = %s%n shares=%n",
-              object_id(), sequence_order(), tally(), value().toShortString(), message());
+      f.format("Selection{%n object_id= '%s'%n tally    = %d%n value    = %s%n message  = %s%n shares=%n",
+              object_id(), tally(), value().toShortString(), message());
       for (DecryptionShare.CiphertextDecryptionSelection sel : shares()) {
         f.format("   %s share = %s", sel.guardian_id(), sel.share().toShortString());
         if (sel.proof().isPresent()) {

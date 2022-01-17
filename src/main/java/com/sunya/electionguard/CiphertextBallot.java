@@ -291,11 +291,6 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
             nonce.equals(that.nonce);
   }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(super.hashCode(), style_id, manifest_hash, code_seed, contests, code, timestamp, crypto_hash, nonce);
-  }
-
   /**
    * An encrypted selection for a particular contest.
    * <p>
@@ -458,6 +453,20 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
 
     @Override
     public String toString() {
+      return "Selection{" +
+              "crypto_hash=" + crypto_hash +
+              ", is_placeholder_selection=" + is_placeholder_selection +
+              ", nonce=" + nonce +
+              ", proof=" + proof +
+              ", extended_data=" + extended_data +
+              ", object_id='" + object_id + '\'' +
+              ", sequence_order=" + sequence_order +
+              ", description_hash=" + description_hash +
+              ", is_placeholder=" + is_placeholder +
+              '}';
+    }
+
+    public String toString2() {
       return "Selection{" +
               "\n object_id       ='" + object_id + '\'' +
               "\n crypto_hash     =" + crypto_hash +

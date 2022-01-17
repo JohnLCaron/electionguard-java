@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
-/** Static covers for Python library methods. */
+/** Static replacements for Python library methods. */
 class Utils {
   private static final List<String> truthy = ImmutableList.of("y", "yes", "t", "true", "on", "1");
   private static final List<String> falsey = ImmutableList.of("n", "no", "f", "false", "off", "0");

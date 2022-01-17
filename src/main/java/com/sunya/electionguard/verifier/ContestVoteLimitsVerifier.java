@@ -26,12 +26,18 @@ public class ContestVoteLimitsVerifier {
     this.electionRecord = electionRecord;
   }
 
-  boolean verify_all_contests() {
+  boolean verify_all_accepted_ballots() {
     boolean error = false;
 
+    int nballots  = 0;
+    int ncontests  = 0;
+    int nselections  = 0;
     for (SubmittedBallot ballot : electionRecord.acceptedBallots) {
-      System.out.printf("Ballot %s.%n", ballot.object_id);
+      nballots++;
+      if (show) System.out.printf("Ballot %s.%n", ballot.object_id);
       for (Contest contest : ballot.contests) {
+        ncontests++;
+        nselections += contest.ballot_selections.size();
         if (show) System.out.printf(" Contest %s.%n", contest.object_id);
         ContestVerifier cv = new ContestVerifier(contest);
         if (!cv.verifyContest()) {
@@ -43,7 +49,8 @@ public class ContestVoteLimitsVerifier {
     if (error) {
       System.out.printf(" ***Adherence to Vote Limits failure.%n");
     } else {
-      System.out.printf(" Adherence to Vote Limits success.%n");
+      System.out.printf(" Adherence to Vote Limits for %d ballots, %d contests, %d selections: success.%n",
+              nballots, ncontests, nselections);
     }
     return !error;
   }

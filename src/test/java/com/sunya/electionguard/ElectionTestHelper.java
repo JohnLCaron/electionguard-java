@@ -124,7 +124,7 @@ public class ElectionTestHelper {
 
   private final Random random;
 
-  ElectionTestHelper(Random random) {
+  public ElectionTestHelper(Random random) {
     this.random = random;
   }
 
@@ -459,7 +459,7 @@ public class ElectionTestHelper {
             contact_infos());
   }
 
-  List<PlaintextBallot> plaintext_voted_ballots(InternalManifest metadata, int count) {
+  public List<PlaintextBallot> plaintext_voted_ballots(InternalManifest metadata, int count) {
     // ballots: List[PlaintextBallot] = [] for i in range(count):ballots.append(draw(plaintext_voted_ballot(metadata)))
     List<PlaintextBallot> ballots = new ArrayList<>();
     for (int i = 0; i < count; i++) {
@@ -529,7 +529,7 @@ public class ElectionTestHelper {
                     1,
                     keypair.public_key,
                     election_description,
-                    rand_q(), Optional.empty()));
+                    rand_q(), null));
   }
 
   public static class EverythingTuple {

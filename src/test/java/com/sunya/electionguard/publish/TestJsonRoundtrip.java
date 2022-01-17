@@ -6,7 +6,9 @@ import net.jqwik.api.Example;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -42,6 +44,32 @@ public class TestJsonRoundtrip {
     ConvertToJson.writeGuardianRecord(org, file.toPath());
     // read it back
     GuardianRecord fromFile = ConvertFromJson.readGuardianRecord(outputFile);
+    assertThat(fromFile).isEqualTo(org);
+  }
+
+  @Example
+  public void testCoefficientsRoundtrip() throws IOException {
+    File file = File.createTempFile("temp", null);
+    file.deleteOnExit();
+    String outputFile = file.getAbsolutePath();
+
+    int n = 17;
+    List<Group.ElementModQ> coeffs = new ArrayList<>();
+    for (int i=0; i<n; i++) {
+      coeffs.add(Group.rand_q());
+    }
+
+    List<AvailableGuardian> ags = new ArrayList<>();
+    for (int i=0; i<n; i++) {
+      ags.add(new AvailableGuardian("test"+i+1, i, coeffs.get(i)));
+    }
+
+    // original
+    Coefficients org = new Coefficients(coeffs);
+    // write json
+    ConvertToJson.writeCoefficients(ags, file.toPath());
+    // read it back
+    Coefficients fromFile = ConvertFromJson.readCoefficients(outputFile);
     assertThat(fromFile).isEqualTo(org);
   }
 
@@ -121,16 +149,30 @@ public class TestJsonRoundtrip {
   }
 
   @Example
-  public void testBallotRoundtrip() throws IOException {
+  public void testCyphertextBallotRoundtrip() throws IOException {
     File file = File.createTempFile("temp", null);
     file.deleteOnExit();
     String outputFile = file.getAbsolutePath();
+
+    // String object_id, int sequence_order, Group.ElementModQ description_hash, ElGamal.Ciphertext ciphertext,
+    //                     Group.ElementModQ crypto_hash, boolean is_placeholder_selection, Optional<Group.ElementModQ> nonce,
+    //                     Optional<ChaumPedersen.DisjunctiveChaumPedersenProof> proof, Optional<ElGamal.Ciphertext> extended_data
+    CiphertextBallot.Selection selection = new CiphertextBallot.Selection(
+            "testSelectiontRoundtrip",
+            43,
+            Group.rand_q(),
+            new ElGamal.Ciphertext(Group.TWO_MOD_P, Group.TWO_MOD_P),
+            Group.rand_q(),
+            false,
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty());
 
     CiphertextBallot.Contest contest = new CiphertextBallot.Contest(
             "testContestRoundtrip",
             42,
             Group.ONE_MOD_Q,
-            ImmutableList.of(),
+            ImmutableList.of(selection),
             Group.ONE_MOD_Q,
             new ElGamal.Ciphertext(Group.TWO_MOD_P, Group.TWO_MOD_P),
             Optional.of(Group.ONE_MOD_Q),
@@ -151,6 +193,38 @@ public class TestJsonRoundtrip {
     ConvertToJson.writeSubmittedBallot(org, file.toPath());
     // read it back
     SubmittedBallot fromFile = ConvertFromJson.readSubmittedBallot(outputFile);
+    assertThat(fromFile).isEqualTo(org);
+  }
+
+  @Example
+  public void testPlaintextBallotRoundtrip() throws IOException {
+    File file = File.createTempFile("temp", null);
+    file.deleteOnExit();
+    String outputFile = file.getAbsolutePath();
+
+    // String selection_id, int sequence_order, int vote, boolean is_placeholder_selection,
+    //                     @Nullable ExtendedData extended_data
+    PlaintextBallot.Selection selection = new PlaintextBallot.Selection(
+            "testSelectiontRoundtrip",
+            43,
+            1,
+            false,
+            new PlaintextBallot.ExtendedData("stuff", 42));
+
+    PlaintextBallot.Contest contest = new PlaintextBallot.Contest(
+            "testContestRoundtrip",
+            42,
+            ImmutableList.of(selection));
+
+    PlaintextBallot org = new PlaintextBallot(
+            "testBallotRoundtrip",
+            "ballotStyle",
+            ImmutableList.of(contest));
+
+    // write json
+    ConvertToJson.writePlaintextBallot(org, file.toPath());
+    // read it back
+    PlaintextBallot fromFile = ConvertFromJson.readPlaintextBallot(outputFile);
     assertThat(fromFile).isEqualTo(org);
   }
 

@@ -8,8 +8,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.file.Path;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
-// LOOK, match python json, remove private fields
 /** Static helper methods for writing serialized classes to json files. */
 @SuppressWarnings("UnstableApiUsage")
 class ConvertToJson {
@@ -19,6 +20,15 @@ class ConvertToJson {
     Type type = new TypeToken<AvailableGuardian>(){}.getType();
     try (FileWriter writer = new FileWriter(where.toFile())) {
       enhancedGson.toJson(object, type, writer);
+    }
+  }
+
+  static void writeCoefficients(Iterable<AvailableGuardian> object, Path where) throws IOException {
+    Coefficients coefs = new Coefficients(
+            StreamSupport.stream(object.spliterator(), false)
+            .map(g -> g.lagrangeCoordinate).collect(Collectors.toList()));
+    try (FileWriter writer = new FileWriter(where.toFile())) {
+      enhancedGson.toJson(coefs, Coefficients.class, writer);
     }
   }
 

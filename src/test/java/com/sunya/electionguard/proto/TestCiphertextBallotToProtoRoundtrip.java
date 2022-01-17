@@ -1,5 +1,6 @@
 package com.sunya.electionguard.proto;
 
+import com.sunya.electionguard.CiphertextBallot;
 import com.sunya.electionguard.SubmittedBallot;
 import com.sunya.electionguard.protogen.CiphertextBallotProto;
 import com.sunya.electionguard.publish.ConvertFromJson;
@@ -28,6 +29,18 @@ public class TestCiphertextBallotToProtoRoundtrip {
       assertThat(fromPython).isNotNull();
       CiphertextBallotProto.SubmittedBallot proto = CiphertextBallotToProto.translateToProto(fromPython);
       SubmittedBallot roundtrip = CiphertextBallotFromProto.translateFromProto(proto);
+      int contestIdx = 0;
+      for (CiphertextBallot.Contest contest : roundtrip.contests) {
+        CiphertextBallot.Contest pcontest = fromPython.contests.get(contestIdx);
+        int selectionIdx = 0;
+        for (CiphertextBallot.Selection selection : contest.ballot_selections) {
+          CiphertextBallot.Selection pselection = pcontest.ballot_selections.get(selectionIdx);
+          assertThat(selection).isEqualTo(pselection);
+          selectionIdx++;
+        }
+        contestIdx++;
+      }
+      assertThat(roundtrip.contests).isEqualTo(fromPython.contests);
       assertThat(roundtrip).isEqualTo(fromPython);
     }
   }

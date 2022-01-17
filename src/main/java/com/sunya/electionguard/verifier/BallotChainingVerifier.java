@@ -26,7 +26,9 @@ public class BallotChainingVerifier {
     Set<ElementModQ> curr_hashes = new HashSet<>();
 
     // LOOK this assumes that the ballots are in the correct order. Why would they be?
+    int nballots = 0;
     for (SubmittedBallot ballot : electionRecord.acceptedBallots) {
+      nballots++;
         // 6.B For each ballot Bi , Hi = H(Hi−1, D, T, Bi) is satisfied. // LOOK what is D? is B_i == crypto_hash?
         ElementModQ crypto_hash = ballot.crypto_hash;
         ElementModQ prev_hash = ballot.code_seed;
@@ -46,7 +48,7 @@ public class BallotChainingVerifier {
     if (error) {
       System.out.printf(" ***Ballot Chaining failed on %d ballots.%n", countFail);
     } else {
-      System.out.printf(" Ballot Chaining success.%n");
+      System.out.printf(" Ballot Chaining success for %d ballots.%n", nballots);
     }
     return !error;
   }

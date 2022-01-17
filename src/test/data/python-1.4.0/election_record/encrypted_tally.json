@@ -1,0 +1,73 @@
+{
+    "object_id": "election-results",
+    "contests": {
+        "justice-supreme-court": {
+            "object_id": "justice-supreme-court",
+            "sequence_order": "00",
+            "description_hash": "6654",
+            "selections": {
+                "john-adams-selection": {
+                    "object_id": "john-adams-selection",
+                    "sequence_order": "00",
+                    "description_hash": "2DFF",
+                    "ciphertext": {
+                        "pad": "33F46DB4D39E6D7E",
+                        "data": "41623D55BCAE279D"
+                    }
+                },
+                "benjamin-franklin-selection": {
+                    "object_id": "benjamin-franklin-selection",
+                    "sequence_order": "01",
+                    "description_hash": "C9D7",
+                    "ciphertext": {
+                        "pad": "D76F4A18AC3F0AE5",
+                        "data": "75B5010A9A718F5E"
+                    }
+                },
+                "john-hancock-selection": {
+                    "object_id": "john-hancock-selection",
+                    "sequence_order": "02",
+                    "description_hash": "041E",
+                    "ciphertext": {
+                        "pad": "EEC89FE8A4865C7E",
+                        "data": "42881EB17B457510"
+                    }
+                },
+                "write-in-selection": {
+                    "object_id": "write-in-selection",
+                    "sequence_order": "03",
+                    "description_hash": "C6AF",
+                    "ciphertext": {
+                        "pad": "C086BCD0A6D34434",
+                        "data": "BE22BF1D00B5D6B1"
+                    }
+                }
+            }
+        },
+        "referendum-pineapple": {
+            "object_id": "referendum-pineapple",
+            "sequence_order": "01",
+            "description_hash": "B576",
+            "selections": {
+                "referendum-pineapple-affirmative-selection": {
+                    "object_id": "referendum-pineapple-affirmative-selection",
+                    "sequence_order": "00",
+                    "description_hash": "D961",
+                    "ciphertext": {
+                        "pad": "78832C94658ED55B",
+                        "data": "3BCD837CD3DB3CA4"
+                    }
+                },
+                "referendum-pineapple-negative-selection": {
+                    "object_id": "referendum-pineapple-negative-selection",
+                    "sequence_order": "01",
+                    "description_hash": "05ED",
+                    "ciphertext": {
+                        "pad": "7559276420D56257",
+                        "data": "0B22E68D9EE1EB7F"
+                    }
+                }
+            }
+        }
+    }
+}

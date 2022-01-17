@@ -43,7 +43,6 @@ public class PlaintextTallyFromProto {
 
     return PlaintextTally.Selection.create(
             proto.getObjectId(),
-            proto.getSequenceOrder(),
             proto.getTally(),
             convertElementModP(proto.getValue()),
             convertCiphertext(proto.getMessage()),

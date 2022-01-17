@@ -34,7 +34,6 @@ public class TestElectionRecordProtoRoundtrip {
     assertThat(consumer.availableGuardians()).hasSize(5);
 
     assertThat(consumer.acceptedBallots()).isNotNull();
-    assertThat(consumer.spoiledTallies()).isNotNull();
   }
 
   @Example
@@ -71,7 +70,6 @@ public class TestElectionRecordProtoRoundtrip {
             consumer.ciphertextTally(),
             consumer.decryptedTally(),
             consumer.spoiledBallots(),
-            consumer.spoiledTallies(),
             consumer.availableGuardians());
 
     Consumer consumer2 = new Consumer(publisher);

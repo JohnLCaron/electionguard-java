@@ -20,11 +20,18 @@ public class CiphertextTally extends ElectionObjectBase {
     this.contests = ImmutableMap.copyOf(contests);
   }
 
-  @Override
-  public String toString() {
+  public String toStringOld() {
     return "CiphertextTally{" +
             "object_id='" + object_id + '\'' +
             "} ";
+  }
+
+  @Override
+  public String toString() {
+    return "CiphertextTally{" +
+            "contests=" + contests +
+            ", object_id='" + object_id + '\'' +
+            '}';
   }
 
   /**

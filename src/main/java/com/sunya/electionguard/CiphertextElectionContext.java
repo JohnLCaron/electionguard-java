@@ -3,10 +3,10 @@ package com.sunya.electionguard;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 
+import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 
 import static com.sunya.electionguard.Group.int_to_p_unchecked;
 import static com.sunya.electionguard.Group.int_to_q_unchecked;
@@ -37,7 +37,7 @@ public class CiphertextElectionContext {
           Group.ElementModP joint_public_key,
           Manifest description,
           Group.ElementModQ commitment_hash,
-          Optional<Map<String, String>> extended_data) {
+          @Nullable Map<String, String> extended_data) {
 
     // What's a crypto_base_hash?
     // The metadata of this object are hashed together with the
@@ -80,9 +80,9 @@ public class CiphertextElectionContext {
 
   /////////////////////////////////////////////////////////////////////////////////////////////////
   /** The number of guardians necessary to generate the public key. */
-  public final int number_of_guardians;
+  public final Integer number_of_guardians;
   /** The quorum of guardians necessary to decrypt an election.  Must be less than number_of_guardians. */
-  public final int quorum;
+  public final Integer quorum;
   /** The joint public key (K) in the ElectionGuard Spec. */
   public final Group.ElementModP elgamal_public_key;
   /** Hash of all the public commitments for all the guardians = H(K 1,0 , K 1,1 , K 1,2 , ..., K n,k−1 ). */
@@ -95,13 +95,14 @@ public class CiphertextElectionContext {
   public final Group.ElementModQ crypto_extended_base_hash;
 
   /** Data to allow extending the context for special cases. */
+  @Nullable
   public final Map<String, String> extended_data;
 
   /** Do not use directly, use CiphertextElectionContext.create() */
   public CiphertextElectionContext(int number_of_guardians, int quorum, Group.ElementModP jointPublicKey,
                                    Group.ElementModQ manifest_hash, Group.ElementModQ crypto_base_hash,
                                    Group.ElementModQ crypto_extended_base_hash, Group.ElementModQ commitment_hash,
-                                   Optional<Map<String, String>> extended_data) {
+                                   @Nullable Map<String, String> extended_data) {
     this.number_of_guardians = number_of_guardians;
     this.quorum = quorum;
     this.elgamal_public_key = Preconditions.checkNotNull(jointPublicKey);
@@ -109,7 +110,7 @@ public class CiphertextElectionContext {
     this.crypto_base_hash = Preconditions.checkNotNull(crypto_base_hash);
     this.crypto_extended_base_hash = Preconditions.checkNotNull(crypto_extended_base_hash);
     this.commitment_hash = commitment_hash; // Preconditions.checkNotNull(commitment_hash);
-    this.extended_data = extended_data.map(ImmutableMap::copyOf).orElse(ImmutableMap.of());
+    this.extended_data = extended_data == null ? null : ImmutableMap.copyOf(extended_data);
   }
 
   @Override
@@ -130,11 +131,24 @@ public class CiphertextElectionContext {
     return Objects.hash(number_of_guardians, quorum, elgamal_public_key, manifest_hash, crypto_base_hash, crypto_extended_base_hash);
   }
 
+  public String toStringOld() {
+    return "CiphertextElectionContext{" +
+            "number_of_guardians=" + number_of_guardians +
+            ", quorum=" + quorum +
+            '}';
+  }
+
   @Override
   public String toString() {
     return "CiphertextElectionContext{" +
             "number_of_guardians=" + number_of_guardians +
             ", quorum=" + quorum +
+            ", elgamal_public_key=" + elgamal_public_key +
+            ", commitment_hash=" + commitment_hash +
+            ", manifest_hash=" + manifest_hash +
+            ", crypto_base_hash=" + crypto_base_hash +
+            ", crypto_extended_base_hash=" + crypto_extended_base_hash +
+            ", extended_data=" + extended_data +
             '}';
   }
 }
