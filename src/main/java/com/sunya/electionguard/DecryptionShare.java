@@ -238,7 +238,7 @@ public class DecryptionShare {
   } // CiphertextCompensatedDecryptionSelection
 
   @Immutable
-  static class KeyAndSelection {
+  public static class KeyAndSelection {
     final ElementModP public_key;
     final CiphertextDecryptionSelection decryption;
 

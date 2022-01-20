@@ -121,7 +121,7 @@ public class Manifest implements Hash.CryptoHashable {
   /**
    * Verifies the dataset to ensure it is well-formed.
    */
-  boolean is_valid() {
+  public boolean is_valid() {
     HashSet<String> gp_unit_ids = new HashSet<>();
     HashSet<String> ballot_style_ids = new HashSet<>();
     HashSet<String> party_ids = new HashSet<>();

@@ -1,0 +1,307 @@
+{
+    "guardian_id": "4",
+    "election_keys": {
+        "owner_id": "4",
+        "sequence_order": "04",
+        "key_pair": {
+            "secret_key": "51E0",
+            "public_key": "0C3A905B04592B4B"
+        },
+        "polynomial": {
+            "coefficients": [
+                {
+                    "value": "51E0",
+                    "commitment": "0C3A905B04592B4B",
+                    "proof": {
+                        "public_key": "0C3A905B04592B4B",
+                        "commitment": "6052314575107630",
+                        "challenge": "A9B2",
+                        "response": "9671",
+                        "usage": "Prove knowledge of secret value"
+                    }
+                },
+                {
+                    "value": "E81E",
+                    "commitment": "0BDA88B38C873882",
+                    "proof": {
+                        "public_key": "0BDA88B38C873882",
+                        "commitment": "6AA8EC647A8BFE10",
+                        "challenge": "B177",
+                        "response": "C847",
+                        "usage": "Prove knowledge of secret value"
+                    }
+                },
+                {
+                    "value": "85A0",
+                    "commitment": "52F9E6304A7B331E",
+                    "proof": {
+                        "public_key": "52F9E6304A7B331E",
+                        "commitment": "41A246A182DEFEFD",
+                        "challenge": "69CD",
+                        "response": "857C",
+                        "usage": "Prove knowledge of secret value"
+                    }
+                }
+            ]
+        }
+    },
+    "auxiliary_keys": {
+        "owner_id": "4",
+        "sequence_order": "04",
+        "secret_key": "-----BEGIN RSA PRIVATE KEY-----\n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\n-----END RSA PRIVATE KEY-----\n",
+        "public_key": "-----BEGIN PUBLIC KEY-----\nMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAxOP4ZEKhCEUMT7Hd9a0p\nfXB3XiXLGZZeMw1qdZfzklpfl/2UJq7bYIJaJa4fKFB4p237U27Kl/1bIsTYsfC0\nT3uRCTpOUqNOSFsT9d/kzXSW0k00xXD9oCPmCXV4AGYy5FemBL5rx0ZoyMcNDrJP\nKZfr1xEXcDAsljiWtdTI300bQb2FWFT/N7IJ78ON/y71Ew8bzGF5wNv0iWa/8akB\nA/K3tKMqCViUgC3BoY2g5Qfgpk/Okrvpq/oKNT4LLJebaZNTM6z6PP+qbaXnhug/\nVi6fkDtRiI+Y+lG3u/Yu7Vr7zNw3VZ8h5nuSk42fwQl7WDWDTi+SFZeSNSysnM8k\nnLDFi6Sy2la2tCwpo8McZcUPyzPgNp2fVESefYC+2b/4pW7I7OFu/4HXNmMTHHlX\n8UB5Ff2ibDNcDGnsYNooZcmY6yDJB3BsN8vS2Ag8Ux0Uq63YlClmrhuRKpj5T78J\n4GdN+JqD5TdSGn0al4/Vi/C8hZRqgL03aUgbFK1fzkfv/KFsIAP2nHLoB39sybEU\nJeiGw4JXEdSNNYc1yLDaeFtkRCS+0IOX9KlqdfjZ2df5fU4KkXdWYsyVFU6y9FyO\ndgs0paULcAxynbBdG+f+2WcUI5PHoU+TqzJ3tBEPJ1ik0BqTtHZ6O5oFpStx9UZr\nSoFH8MITT99rGieuu8bnU3UCAwEAAQ==\n-----END PUBLIC KEY-----\n"
+    },
+    "backups_to_share": {
+        "4": {
+            "owner_id": "4",
+            "designated_id": "4",
+            "designated_sequence_order": "04",
+            "encrypted_value": "4D0C"
+        },
+        "1": {
+            "owner_id": "4",
+            "designated_id": "1",
+            "designated_sequence_order": "01",
+            "encrypted_value": "BFAD"
+        },
+        "2": {
+            "owner_id": "4",
+            "designated_id": "2",
+            "designated_sequence_order": "02",
+            "encrypted_value": "38D8"
+        },
+        "3": {
+            "owner_id": "4",
+            "designated_id": "3",
+            "designated_sequence_order": "03",
+            "encrypted_value": "BD43"
+        },
+        "5": {
+            "owner_id": "4",
+            "designated_id": "5",
+            "designated_sequence_order": "05",
+            "encrypted_value": "E815"
+        }
+    },
+    "guardian_auxiliary_public_keys": {
+        "4": {
+            "owner_id": "4",
+            "sequence_order": "04",
+            "key": "-----BEGIN PUBLIC KEY-----\nMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAxOP4ZEKhCEUMT7Hd9a0p\nfXB3XiXLGZZeMw1qdZfzklpfl/2UJq7bYIJaJa4fKFB4p237U27Kl/1bIsTYsfC0\nT3uRCTpOUqNOSFsT9d/kzXSW0k00xXD9oCPmCXV4AGYy5FemBL5rx0ZoyMcNDrJP\nKZfr1xEXcDAsljiWtdTI300bQb2FWFT/N7IJ78ON/y71Ew8bzGF5wNv0iWa/8akB\nA/K3tKMqCViUgC3BoY2g5Qfgpk/Okrvpq/oKNT4LLJebaZNTM6z6PP+qbaXnhug/\nVi6fkDtRiI+Y+lG3u/Yu7Vr7zNw3VZ8h5nuSk42fwQl7WDWDTi+SFZeSNSysnM8k\nnLDFi6Sy2la2tCwpo8McZcUPyzPgNp2fVESefYC+2b/4pW7I7OFu/4HXNmMTHHlX\n8UB5Ff2ibDNcDGnsYNooZcmY6yDJB3BsN8vS2Ag8Ux0Uq63YlClmrhuRKpj5T78J\n4GdN+JqD5TdSGn0al4/Vi/C8hZRqgL03aUgbFK1fzkfv/KFsIAP2nHLoB39sybEU\nJeiGw4JXEdSNNYc1yLDaeFtkRCS+0IOX9KlqdfjZ2df5fU4KkXdWYsyVFU6y9FyO\ndgs0paULcAxynbBdG+f+2WcUI5PHoU+TqzJ3tBEPJ1ik0BqTtHZ6O5oFpStx9UZr\nSoFH8MITT99rGieuu8bnU3UCAwEAAQ==\n-----END PUBLIC KEY-----\n"
+        },
+        "1": {
+            "owner_id": "1",
+            "sequence_order": "01",
+            "key": "-----BEGIN PUBLIC KEY-----\nMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAs2AXncp3JTzJkQEB0daC\noGmUz9oZg81FhDn5O8M4Tr9xa9VKpvxgSPXVPggW+/nnRYt7buXYNuxDVq6LZlX/\nSdVEaxMYxZ1NpF1qB3b7lJ8CBQpNCY/myg7jDvmW547S4ACXtmfwyNB2geZ4xFmL\n5hHF4d4ZMQBicQGuno6P3QQsYXuovMDV+3SZ2H8kEMIgn+kbzPHg08abABe6tKxP\nETKyWvyEdnHNuHJ8MvvwBsp3AigvY26NoswnlDWmeN44qUCOt2LoHiZNotNx+ZAp\nvkWGZu6Xe7SYyhuS81ZB/xhmRWMEPyylZSzKMpsWKL588oa3IIPI/O5ai9ByvETc\n5YLTBHybt5PUv2lFdh/simyGZt9LS6FVo3YWIBkgLY1EjTmOK5O5SA/wz1zwuniF\n08LT5h+4l8434LjSIEtkHRnwbMrBn24uZBzq8o4brutJ6oVb5ur2ZPixapSpR2fX\ne6MSmOJfZ/9u3t8Zo5wWYnzo92I+rUkPPNDUCE8BFBBK5r7lrbKES4DGueKDamTy\neENKKR89J/UDEOeqxgwpJ/E318vBmbx8OeH8/ngTvOGXK1DrBPwTYu+4At1ci49C\nyIBR7yZP/K3cao70bkyfNhraD+trIkmK53Mt4dgyBSoJzb9XFYZwpr1HFaucXBIj\n41cKbo2TBInDa/E3aumlQ28CAwEAAQ==\n-----END PUBLIC KEY-----\n"
+        },
+        "2": {
+            "owner_id": "2",
+            "sequence_order": "02",
+            "key": "-----BEGIN PUBLIC KEY-----\nMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAy0/WBUPZk22k55lKLQc4\nworswrFgmy6zmx68Ena1XE9u2k/31JfOeC3NwzExoA8hdqUx+vAyt7RX1i0GWvHF\nc084iwqG45Ol18R+WUoNqepg/BkWZZVBRtcxDSJ0a1BTUkSxoD8bxo2JOGnIlPMV\na2K1axCOfoqkJ0bcaJYbqHxD6LciWElf5DyPswqegCM1pXvIpYrawBoGzCngjZqz\np86eAqkDG4SzVRkPaOJlCo9FCx+lsWIdJMPLS5oUAT7uz8sETgEjN/r/LKaJ2ssF\n7EGOit0cyl8NCf81H4eL1K4XJBtYPpTwEmqdUhXEy9MyrJmhK1kdejCMnt3EwDRG\nm+QH7LUk1Ol6XPvXt/lRWiKGhMAAOhpaGUpnDq73bLSxoSsWA9vLBRoGbiX7GX6P\njjcuejcaL59laMOq77YkedrSPlVstt9Pk8X9B1nHFFTRDiVtiGyFMaNX0WLTTNIG\nceRri7DOnL1u8Orf0pS4hiQk10//pfnveDEGywIueyz83RUn6kkprsdPCLZWNYAX\nZzLL7fcHsalK7HP6aBWcBKXwrdhSpFG1lF3wbVPwSIFDRMOLtdEgv8MytCnNEmZR\nt43oNGg5LghHM1Dm8z4c4AFEoPzlkTOXwtvsaeTVa47mWlc0wswpyxyfMYFJGmyg\nbQk9st5Qzcuc9qq59NijJKECAwEAAQ==\n-----END PUBLIC KEY-----\n"
+        },
+        "3": {
+            "owner_id": "3",
+            "sequence_order": "03",
+            "key": "-----BEGIN PUBLIC KEY-----\nMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAuZrcWHaiQaqIMOP2tSZs\nqhWulNN9G2UEwocoL8qhaL3wCYrBTXxaqgWZAvvweJJ96G100a6CY5L+xlhGn71o\nCzwpLpvCVRbH/aKAswbET9xTAhG8+86R0ZsLMdDZCFHSxPncWMlBVEkkJZ80qC0U\nqLmwRG44vGXkTGrDy/ErUt8mw5zDxn1RhFf+lo6umhzQZFsR6pvaZ80TjmvR9W/V\nK84K0FCBnr+ZjhU2VpeRVOg17qmMtWgF72IkzOdxwWQFsAcTlGo8mclMCJnnTjor\nwI/fZwLEBaV9lWqFt90sD5j7woJJl+IlP9vpeQBaxvVPvh+GwKiSEhEuMETXNIXO\nXRPauoX8dBPjN2fgzyxcsKHrN/5pcY6RO8nFpfQN1a9iFsMbCX1ovkqBa1R6nvz7\nxSclBRNqGtu6CW65FV71VMhitzPoPQT8GmV9cp4t0XfZ2iS2yvhnfTR9hfRAMiFj\nzMydap/pFjVan1f0Jl6vglz8YQyvNfBqjezoVGaL5PmIPdzij7uh5pz9XolrI7hd\nqxlhfIgUjxhp1zxE1o3rvMFjghWQr4rEKGkBRQtYAgALYRCz0k16mpnK58uUCTXc\nOYxlR6FAiQ3ywHVMHbRjKHR01VuKPCtop2AvTtPv7Dfcm4nydFsLOxklE4pTBxMR\nf8DkLk1X6uf9PAjRgGqlzvkCAwEAAQ==\n-----END PUBLIC KEY-----\n"
+        },
+        "5": {
+            "owner_id": "5",
+            "sequence_order": "05",
+            "key": "-----BEGIN PUBLIC KEY-----\nMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAzV9pMdId3FXMVfYDElxz\nSdswXc5Eh4KYbEuEtGShA3/oI99JK9yMforLSyTSP4bprXeTLamT9kFiQ+hr0JgA\naGkZXWlBfUHOQWphbcbUnyM+xO7PP4V1+EyIPFEzgRo901d+N/KoO/XiAgcCWJ97\nSt4jZImrIuqAJgWVOdbiw3RDagrXDbFavQgKWlxij5mv3twsddHA7daJZku2A5ga\nvUv5gmKJozUtn8ZMCWJtGJ/QuXNus8YAwlFpp3WtklGtfqhjn7p1+lJW/hYrBmg+\ndfGy1KXHjbkHCSVH11gIZnHUeQed00DDGarkhWgpGnJqZlhZuUx2PeehTV8MGDRP\njEK0jamIhrovWQRH5RXbLol8/NOw99bdGPux8WHCmzsRQIkJgTd9GL3K3P7FCZX3\no3QEiqUXsDpxs7HypD03prB6s9CFQ8p9CjTb9wS9YncK9xQYaf2++l7EeB8TThTu\nWqlrNQsFm0bVk85EFLrh4wU+1TUZg4fH45Np+ip8vT2zj5HDM0zY2YMiue7Ywzq2\nr/sZvW+lq+w4r8isd7eU9TiEIsh0+hZAaA03kdq8JA3PtCDIMwI9HwmL9IlENBIP\nEjERiZut1kUJkaguYDeKFk0WKnqgAmBUQOrgIpzgFXc2k+3AgExWjNoDrBiP73pV\n8UoUnMC3nPPMjjfuXL4cxVUCAwEAAQ==\n-----END PUBLIC KEY-----\n"
+        }
+    },
+    "guardian_election_public_keys": {
+        "4": {
+            "owner_id": "4",
+            "sequence_order": "04",
+            "key": "0C3A905B04592B4B",
+            "coefficient_commitments": [
+                "0C3A905B04592B4B",
+                "0BDA88B38C873882",
+                "52F9E6304A7B331E"
+            ],
+            "coefficient_proofs": [
+                {
+                    "public_key": "0C3A905B04592B4B",
+                    "commitment": "6052314575107630",
+                    "challenge": "A9B2",
+                    "response": "9671",
+                    "usage": "Prove knowledge of secret value"
+                },
+                {
+                    "public_key": "0BDA88B38C873882",
+                    "commitment": "6AA8EC647A8BFE10",
+                    "challenge": "B177",
+                    "response": "C847",
+                    "usage": "Prove knowledge of secret value"
+                },
+                {
+                    "public_key": "52F9E6304A7B331E",
+                    "commitment": "41A246A182DEFEFD",
+                    "challenge": "69CD",
+                    "response": "857C",
+                    "usage": "Prove knowledge of secret value"
+                }
+            ]
+        },
+        "1": {
+            "owner_id": "1",
+            "sequence_order": "01",
+            "key": "AFAAFC2F0E303F5F",
+            "coefficient_commitments": [
+                "AFAAFC2F0E303F5F",
+                "A0856AD1FF464FF8",
+                "B21E1ECCE46CB9AA"
+            ],
+            "coefficient_proofs": [
+                {
+                    "public_key": "AFAAFC2F0E303F5F",
+                    "commitment": "937CC819C9CE7E25",
+                    "challenge": "72F2",
+                    "response": "C733",
+                    "usage": "Prove knowledge of secret value"
+                },
+                {
+                    "public_key": "A0856AD1FF464FF8",
+                    "commitment": "10D2B6C6B02284E2",
+                    "challenge": "9C72",
+                    "response": "0845",
+                    "usage": "Prove knowledge of secret value"
+                },
+                {
+                    "public_key": "B21E1ECCE46CB9AA",
+                    "commitment": "180A3A21F37611FB",
+                    "challenge": "CD11",
+                    "response": "EBD6",
+                    "usage": "Prove knowledge of secret value"
+                }
+            ]
+        },
+        "2": {
+            "owner_id": "2",
+            "sequence_order": "02",
+            "key": "F7157CA1D27C5A85",
+            "coefficient_commitments": [
+                "F7157CA1D27C5A85",
+                "62D1E5AF61CFCE83",
+                "A1F95E9A90505A20"
+            ],
+            "coefficient_proofs": [
+                {
+                    "public_key": "F7157CA1D27C5A85",
+                    "commitment": "ED5E4DA72680E5D1",
+                    "challenge": "1A39",
+                    "response": "36B5",
+                    "usage": "Prove knowledge of secret value"
+                },
+                {
+                    "public_key": "62D1E5AF61CFCE83",
+                    "commitment": "1199F8E758A52490",
+                    "challenge": "557B",
+                    "response": "DD6A",
+                    "usage": "Prove knowledge of secret value"
+                },
+                {
+                    "public_key": "A1F95E9A90505A20",
+                    "commitment": "AB5298532116619D",
+                    "challenge": "885F",
+                    "response": "A936",
+                    "usage": "Prove knowledge of secret value"
+                }
+            ]
+        },
+        "3": {
+            "owner_id": "3",
+            "sequence_order": "03",
+            "key": "B67F542519B21E10",
+            "coefficient_commitments": [
+                "B67F542519B21E10",
+                "A22249813AAD33BE",
+                "5D22059CDC4A7E48"
+            ],
+            "coefficient_proofs": [
+                {
+                    "public_key": "B67F542519B21E10",
+                    "commitment": "22B1B2C0364344C2",
+                    "challenge": "1A78",
+                    "response": "9F86",
+                    "usage": "Prove knowledge of secret value"
+                },
+                {
+                    "public_key": "A22249813AAD33BE",
+                    "commitment": "EB578F7B21C39935",
+                    "challenge": "A75C",
+                    "response": "3A7F",
+                    "usage": "Prove knowledge of secret value"
+                },
+                {
+                    "public_key": "5D22059CDC4A7E48",
+                    "commitment": "B6E72F214E38E80C",
+                    "challenge": "0452",
+                    "response": "4623",
+                    "usage": "Prove knowledge of secret value"
+                }
+            ]
+        },
+        "5": {
+            "owner_id": "5",
+            "sequence_order": "05",
+            "key": "F0E9F0D8E9A0FE4B",
+            "coefficient_commitments": [
+                "F0E9F0D8E9A0FE4B",
+                "B9F098FA3C04E115",
+                "687D31E454E8FF91"
+            ],
+            "coefficient_proofs": [
+                {
+                    "public_key": "F0E9F0D8E9A0FE4B",
+                    "commitment": "B1CF81F47D040EDE",
+                    "challenge": "0D73",
+                    "response": "A51B",
+                    "usage": "Prove knowledge of secret value"
+                },
+                {
+                    "public_key": "B9F098FA3C04E115",
+                    "commitment": "B8157C975B3C995A",
+                    "challenge": "3CAE",
+                    "response": "1387",
+                    "usage": "Prove knowledge of secret value"
+                },
+                {
+                    "public_key": "687D31E454E8FF91",
+                    "commitment": "5EF33EC6BF68E794",
+                    "challenge": "9FA8",
+                    "response": "3DE8",
+                    "usage": "Prove knowledge of secret value"
+                }
+            ]
+        }
+    },
+    "guardian_election_partial_key_backups": {
+        "1": {
+            "owner_id": "1",
+            "designated_id": "4",
+            "designated_sequence_order": "04",
+            "encrypted_value": "01EB"
+        },
+        "2": {
+            "owner_id": "2",
+            "designated_id": "4",
+            "designated_sequence_order": "04",
+            "encrypted_value": "D9DA"
+        },
+        "3": {
+            "owner_id": "3",
+            "designated_id": "4",
+            "designated_sequence_order": "04",
+            "encrypted_value": "458D"
+        },
+        "5": {
+            "owner_id": "5",
+            "designated_id": "4",
+            "designated_sequence_order": "04",
+            "encrypted_value": "4503"
+        }
+    },
+    "guardian_election_partial_key_verifications": {}
+}

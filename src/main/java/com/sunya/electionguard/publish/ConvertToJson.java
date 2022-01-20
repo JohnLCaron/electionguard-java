@@ -13,7 +13,7 @@ import java.util.stream.StreamSupport;
 
 /** Static helper methods for writing serialized classes to json files. */
 @SuppressWarnings("UnstableApiUsage")
-class ConvertToJson {
+public class ConvertToJson {
   private static final Gson enhancedGson = GsonTypeAdapters.enhancedGson();
 
   static void writeAvailableGuardian(AvailableGuardian object, Path where) throws IOException {
@@ -48,13 +48,6 @@ class ConvertToJson {
 
   static void writeCiphertextTally(CiphertextTally object, Path where) throws IOException {
     Type type = new TypeToken<CiphertextTally>(){}.getType();
-    try (FileWriter writer = new FileWriter(where.toFile())) {
-      enhancedGson.toJson(object, type, writer);
-    }
-  }
-
-  static void writeGuardianRecord(GuardianRecord object, Path where) throws IOException {
-    Type type = new TypeToken<GuardianRecord>(){}.getType();
     try (FileWriter writer = new FileWriter(where.toFile())) {
       enhancedGson.toJson(object, type, writer);
     }
@@ -98,14 +91,22 @@ class ConvertToJson {
 
   /////////////////////////////////////////////////////////////////////////
 
-  static void writeGuardian(Guardian guardian, Path where) throws IOException {
+  /* static void writeGuardian(Guardian guardian, Path where) throws IOException {
     Type type = new TypeToken<Guardian>(){}.getType();
     try (FileWriter writer = new FileWriter(where.toFile())) {
       enhancedGson.toJson(guardian, type, writer);
     }
+  } */
+
+
+  public static void writeGuardianRecord(GuardianRecord object, Path where) throws IOException {
+    Type type = new TypeToken<GuardianRecord>() {}.getType();
+    try (FileWriter writer = new FileWriter(where.toFile())) {
+      enhancedGson.toJson(object, type, writer);
+    }
   }
 
-  static void writeGuardianRecordPrivate(GuardianRecordPrivate object, Path where) throws IOException {
+  public static void writeGuardianRecordPrivate(GuardianRecordPrivate object, Path where) throws IOException {
     Type type = new TypeToken<GuardianRecordPrivate>(){}.getType();
     try (FileWriter writer = new FileWriter(where.toFile())) {
       enhancedGson.toJson(object, type, writer);

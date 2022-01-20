@@ -4,7 +4,6 @@ import com.google.common.collect.Iterables;
 import com.sunya.electionguard.*;
 import com.sunya.electionguard.proto.CiphertextBallotToProto;
 import com.sunya.electionguard.proto.ElectionRecordToProto;
-import com.sunya.electionguard.proto.PlaintextBallotToProto;
 import com.sunya.electionguard.proto.PlaintextTallyToProto;
 import com.sunya.electionguard.protogen.PlaintextTallyProto;
 import com.sunya.electionguard.verifier.ElectionRecord;
@@ -20,12 +19,16 @@ import java.util.Formatter;
 
 import com.sunya.electionguard.protogen.CiphertextBallotProto;
 import com.sunya.electionguard.protogen.ElectionRecordProto;
-import com.sunya.electionguard.protogen.PlaintextBallotProto;
-import com.sunya.electionguard.protogen.TrusteeProto;
 
 /** Publishes the Manifest Record to Json or protobuf files. */
 public class Publisher {
-  static final String PRIVATE_DIR = "private";
+  public enum Mode {readonly,
+                    writeonly, // write new files, but do not create directories
+                    createIfMissing, // create directories if not already exist
+                    createNew // create clean directories
+  }
+
+  static final String ELECTION_RECORD_DIR = "election_record";
 
   //// json
   static final String SUFFIX = ".json";
@@ -34,6 +37,7 @@ public class Publisher {
   static final String GUARDIANS_DIR = "guardians";
   static final String SUBMITTED_BALLOTS_DIR = "submitted_ballots"; // encrypted
   static final String SPOILED_BALLOTS_DIR = "spoiled_ballots"; // plaintext
+  static final String INVALID_BALLOTS_DIR = "invalid_ballots"; // plaintext
 
   static final String MANIFEST_FILE_NAME = "manifest" + SUFFIX;
   static final String CONTEXT_FILE_NAME = "context" + SUFFIX;
@@ -46,16 +50,9 @@ public class Publisher {
   static final String GUARDIAN_PREFIX = "guardian_";
   static final String SPOILED_BALLOT_PREFIX = "spoiled_ballot_";
   static final String SUBMITTED_BALLOT_PREFIX = "submitted_ballot_";
+  static final String PLAINTEXT_BALLOT_PREFIX = "plaintext_ballot_";
 
   static final String AVAILABLE_GUARDIAN_PREFIX = "available_guardian_";
-
-  // JSON Private
-  static final String PRIVATE_DATA_DIR = "election_private_data";
-  static final String PRIVATE_GUARDIANS_DIR = "private_guardians";
-  static final String PRIVATE_BALLOT_DIR = "plaintext_ballots";
-  static final String PLAINTEXT_BALLOT_PREFIX = "plaintext_ballot_";
-  static final String CIPHERTEXT_BALLOT_PREFIX = "ciphertext_ballot_";
-  static final String PRIVATE_GUARDIAN_PREFIX = "private_guardian_";
 
   //// proto
   static final String PROTO_SUFFIX = ".protobuf";
@@ -65,49 +62,45 @@ public class Publisher {
   static final String SPOILED_BALLOT_FILE = "spoiledBallotTally" + PROTO_SUFFIX;
   static final String TRUSTEES_FILE = "trustees" + PROTO_SUFFIX;
 
-  private final Path publishDirectory;
+  private final String topdir;
+  private final Mode createMode;
+  private final Path electionRecordDir;
   private final Path devicesDirPath;
   private final Path ballotsDirPath;
   private final Path spoiledBallotDirPath;
   private final Path guardianDirPath;
-  private final Path privateDirPath;
 
-  public Publisher(String where, boolean removeAllFiles, boolean createDirs) throws IOException {
-    this.publishDirectory = Path.of(where);
-    this.devicesDirPath = publishDirectory.resolve(DEVICES_DIR);
-    this.ballotsDirPath = publishDirectory.resolve(SUBMITTED_BALLOTS_DIR);
-    this.guardianDirPath = publishDirectory.resolve(GUARDIANS_DIR);
-    this.spoiledBallotDirPath = publishDirectory.resolve(SPOILED_BALLOTS_DIR);
-    this.privateDirPath = publishDirectory.resolve(PRIVATE_DATA_DIR);
+  public Publisher(String where, Mode createMode, boolean isJsonOutput) throws IOException {
+    this.topdir = where;
+    this.createMode = createMode;
+    this.electionRecordDir = Path.of(where).resolve(ELECTION_RECORD_DIR);
+    this.devicesDirPath = electionRecordDir.resolve(DEVICES_DIR);
+    this.ballotsDirPath = electionRecordDir.resolve(SUBMITTED_BALLOTS_DIR);
+    this.guardianDirPath = electionRecordDir.resolve(GUARDIANS_DIR);
+    this.spoiledBallotDirPath = electionRecordDir.resolve(SPOILED_BALLOTS_DIR);
     // this.availableGuardianDirPath = publishDirectory.resolve(AVAILABLE_GUARDIANS_DIR);
 
-    if (removeAllFiles) {
-      removeAllFiles();
+    if (createMode == Mode.createNew) {
+      if (!Files.exists(electionRecordDir)) {
+        Files.createDirectories(electionRecordDir);
+      } else {
+        removeAllFiles();
+      }
+      if (isJsonOutput) {
+        createDirs();
+      }
+    } else if (createMode == Mode.createIfMissing) {
+      if (!Files.exists(electionRecordDir)) {
+        Files.createDirectories(electionRecordDir);
+      }
+      if (isJsonOutput) {
+        createDirs();
+      }
+    } else {
+      if (!Files.exists(electionRecordDir)) {
+        throw new IllegalStateException("Non existing election directory " + electionRecordDir);
+      }
     }
-    if (createDirs) {
-      createDirs();
-    }
-  }
-
-  /** Make sure output dir exists and is writeable. */
-  public boolean validateOutputDir(Formatter error) {
-    if (!Files.exists(publishDirectory)) {
-      error.format(" Output directory '%s' does not exist%n", publishDirectory);
-      return false;
-    }
-    if (!Files.isDirectory(publishDirectory)) {
-      error.format(" Output directory '%s' is not a directory%n", publishDirectory);
-      return false;
-    }
-    if (!Files.isWritable(publishDirectory)) {
-      error.format(" Output directory '%s' is not writeable%n", publishDirectory);
-      return false;
-    }
-    if (!Files.isExecutable(publishDirectory)) {
-      error.format(" Output directory '%s' is not executable%n", publishDirectory);
-      return false;
-    }
-    return true;
   }
 
   private void createDirs() throws IOException {
@@ -119,63 +112,77 @@ public class Publisher {
 
   /** Delete everything in the output directory, but leave that directory. */
   private void removeAllFiles() throws IOException {
-    String filename = publishDirectory.getFileName().toString();
-    if (!(filename.startsWith("publish") || filename.startsWith("encryptor") || filename.startsWith("decryptor"))) {
-      throw new RuntimeException(String.format("Publish directory '%s' should start with 'publish'", filename));
+    if (!electionRecordDir.toFile().exists()) {
+      return;
     }
-    Files.walk(publishDirectory)
-            .filter(p -> !p.equals(publishDirectory))
+
+    String filename = electionRecordDir.getFileName().toString();
+    if (!filename.startsWith("election_record")) {
+      throw new RuntimeException(String.format("Publish directory '%s' should start with 'election_record'", filename));
+    }
+    Files.walk(electionRecordDir)
+            .filter(p -> !p.equals(electionRecordDir))
             .map(Path::toFile)
             .sorted((o1, o2) -> -o1.compareTo(o2))
             .forEach( f-> f.delete());
   }
 
+  /** Make sure output dir exists and is writeable. */
+  public boolean validateOutputDir(Formatter error) {
+    if (!Files.exists(electionRecordDir)) {
+      error.format(" Output directory '%s' does not exist%n", electionRecordDir);
+      return false;
+    }
+    if (!Files.isDirectory(electionRecordDir)) {
+      error.format(" Output directory '%s' is not a directory%n", electionRecordDir);
+      return false;
+    }
+    if (!Files.isWritable(electionRecordDir)) {
+      error.format(" Output directory '%s' is not writeable%n", electionRecordDir);
+      return false;
+    }
+    if (!Files.isExecutable(electionRecordDir)) {
+      error.format(" Output directory '%s' is not executable%n", electionRecordDir);
+      return false;
+    }
+    return true;
+  }
+
+
+  public PrivateData makePrivateData(boolean removeAllFiles, boolean createDirs) throws IOException {
+    return new PrivateData(this.topdir, removeAllFiles, createDirs);
+  }
+
   public Path manifestPath() {
-    return publishDirectory.resolve(MANIFEST_FILE_NAME).toAbsolutePath();
+    return electionRecordDir.resolve(MANIFEST_FILE_NAME).toAbsolutePath();
   }
 
   public Path contextPath() {
-    return publishDirectory.resolve(CONTEXT_FILE_NAME).toAbsolutePath();
+    return electionRecordDir.resolve(CONTEXT_FILE_NAME).toAbsolutePath();
   }
 
   public Path constantsPath() {
-    return publishDirectory.resolve(CONSTANTS_FILE_NAME).toAbsolutePath();
+    return electionRecordDir.resolve(CONSTANTS_FILE_NAME).toAbsolutePath();
   }
 
   public Path coefficientsPath() {
-    return publishDirectory.resolve(COEFFICIENTS_FILE_NAME).toAbsolutePath();
+    return electionRecordDir.resolve(COEFFICIENTS_FILE_NAME).toAbsolutePath();
   }
 
   public Path publishPath() {
-    return publishDirectory.toAbsolutePath();
-  }
-
-  public Path privateDirPath() {
-    return privateDirPath.toAbsolutePath();
+    return electionRecordDir.toAbsolutePath();
   }
 
   public Path tallyPath() {
-    return publishDirectory.resolve(TALLY_FILE_NAME).toAbsolutePath();
+    return electionRecordDir.resolve(TALLY_FILE_NAME).toAbsolutePath();
   }
 
   public Path encryptedTallyPath() {
-    return publishDirectory.resolve(ENCRYPTED_TALLY_FILE_NAME).toAbsolutePath();
+    return electionRecordDir.resolve(ENCRYPTED_TALLY_FILE_NAME).toAbsolutePath();
   }
 
   public Path devicePath(String id) {
     return devicesDirPath.resolve(DEVICE_PREFIX + id + SUFFIX);
-  }
-
-  public Path trusteesPath() {
-    return privateDirPath.resolve(TRUSTEES_FILE);
-  }
-
-  public Path privateGuardiansPath() {
-    return privateDirPath.resolve(PRIVATE_GUARDIANS_DIR);
-  }
-
-  public Path privateBallotsPath() {
-    return privateDirPath.resolve(PRIVATE_BALLOT_DIR);
   }
 
   public File[] deviceFiles() {
@@ -195,18 +202,6 @@ public class Publisher {
       return new File[0];
     }
     return guardianDirPath.toFile().listFiles();
-  }
-
-  public Path guardiansPrivatePath(String id) {
-    String fileName = id + SUFFIX;
-    return privateDirPath.resolve(fileName);
-  }
-
-  public File[] guardianRecordPrivateFiles() {
-    if (!Files.exists(privateGuardiansPath()) || !Files.isDirectory(privateGuardiansPath())) {
-      return new File[0];
-    }
-    return privateGuardiansPath().toFile().listFiles();
   }
 
   public Path ballotPath(String id) {
@@ -236,15 +231,15 @@ public class Publisher {
   ////////////////////
 
   public Path electionRecordProtoPath() {
-    return publishDirectory.resolve(ELECTION_RECORD_FILE_NAME).toAbsolutePath();
+    return electionRecordDir.resolve(ELECTION_RECORD_FILE_NAME).toAbsolutePath();
   }
 
   public Path ciphertextBallotProtoPath() {
-    return publishDirectory.resolve(SUBMITTED_BALLOT_PROTO).toAbsolutePath();
+    return electionRecordDir.resolve(SUBMITTED_BALLOT_PROTO).toAbsolutePath();
   }
 
   public Path spoiledBallotProtoPath() {
-    return publishDirectory.resolve(SPOILED_BALLOT_FILE).toAbsolutePath();
+    return electionRecordDir.resolve(SPOILED_BALLOT_FILE).toAbsolutePath();
   }
 
   //////////////////////////////////////////////////////////////////
@@ -255,6 +250,10 @@ public class Publisher {
           CiphertextElectionContext context,
           ElectionConstants constants,
           Iterable<GuardianRecord> guardianRecords) throws IOException {
+
+    if (createMode == Mode.readonly) {
+      throw new UnsupportedOperationException("Trying to write to readonly election record");
+    }
 
     ConvertToJson.writeElection(manifest, this.manifestPath());
     ConvertToJson.writeContext(context, this.contextPath());
@@ -271,6 +270,10 @@ public class Publisher {
           PlaintextTally decryptedTally,
           Iterable<PlaintextTally> spoiledBallots,
           Iterable<AvailableGuardian> availableGuardians) throws IOException {
+
+    if (createMode == Mode.readonly) {
+      throw new UnsupportedOperationException("Trying to write to readonly election record");
+    }
 
     ConvertToJson.writeElection(election.election, this.manifestPath());
     ConvertToJson.writeContext(election.context, this.contextPath());
@@ -303,6 +306,10 @@ public class Publisher {
           @Nullable Iterable<GuardianRecord> guardianRecords,
           @Nullable Iterable<PlaintextTally> spoiledBallots,
           @Nullable Iterable<AvailableGuardian> availableGuardians) throws IOException {
+
+    if (createMode == Mode.readonly) {
+      throw new UnsupportedOperationException("Trying to write to readonly election record");
+    }
 
     ConvertToJson.writeElection(manifest, this.manifestPath());
     ConvertToJson.writeContext(context, this.contextPath());
@@ -339,31 +346,16 @@ public class Publisher {
   //////////////////////////////////////////////////////////////////
   // Proto
 
-  public void writeTrusteesProto(TrusteeProto.DecryptingTrustees trusteesProto) throws IOException {
-    Files.createDirectories(privateDirPath);
-
-    try (FileOutputStream out = new FileOutputStream(trusteesPath().toFile())) {
-      trusteesProto.writeDelimitedTo(out);
-    }
-  }
-
-
-  public static void overwriteTrusteeProto(String outputDir, TrusteeProto.DecryptingTrustee trusteeProto) throws IOException {
-    Path outputPath = Path.of(outputDir + "/" + trusteeProto.getGuardianId() + PROTO_SUFFIX);
-    if (Files.exists(outputPath)) {
-      Files.delete(outputPath);
-    }
-    try (FileOutputStream out = new FileOutputStream(outputPath.toFile())) {
-      trusteeProto.writeDelimitedTo(out);
-    }
-  }
-
   /** Publishes the KeyCeremony part of the election record as proto. */
   public void writeKeyCeremonyProto(
           Manifest description,
           CiphertextElectionContext context,
           ElectionConstants constants,
           Iterable<GuardianRecord> guardianRecords) throws IOException {
+
+    if (createMode == Mode.readonly) {
+      throw new UnsupportedOperationException("Trying to write to readonly election record");
+    }
 
     if (context.number_of_guardians != Iterables.size(guardianRecords)) {
       throw new IllegalStateException(String.format("Number of guardians (%d) does not match number of coefficients (%d)",
@@ -384,6 +376,9 @@ public class Publisher {
           Iterable<Encrypt.EncryptionDevice> devices,
           Iterable<SubmittedBallot> submittedBallots) throws IOException {
 
+    if (createMode == Mode.readonly) {
+      throw new UnsupportedOperationException("Trying to write to readonly election record");
+    }
 
     // the accepted ballots are written into their own file
     try (FileOutputStream out = new FileOutputStream(ciphertextBallotProtoPath().toFile())) {
@@ -409,6 +404,10 @@ public class Publisher {
   public void writeEncryptedTallyProto(ElectionRecord electionRecord,
                                        CiphertextTally encryptedTally) throws IOException {
 
+    if (createMode == Mode.readonly) {
+      throw new UnsupportedOperationException("Trying to write to readonly election record");
+    }
+
     ElectionRecordProto.ElectionRecord ElectionRecordProto = ElectionRecordToProto.buildElectionRecord(
             electionRecord.election, electionRecord.context, electionRecord.constants,
             electionRecord.guardianRecords,
@@ -423,6 +422,10 @@ public class Publisher {
 
   public void writeDecryptedTallyProto(ElectionRecord electionRecord,
                                        PlaintextTally decryptedTally) throws IOException {
+
+    if (createMode == Mode.readonly) {
+      throw new UnsupportedOperationException("Trying to write to readonly election record");
+    }
 
     ElectionRecordProto.ElectionRecord ElectionRecordProto = ElectionRecordToProto.buildElectionRecord(
             electionRecord.election, electionRecord.context, electionRecord.constants,
@@ -443,6 +446,10 @@ public class Publisher {
           PlaintextTally decryptedTally,
           Iterable<PlaintextTally> spoiledBallots,
           Iterable<AvailableGuardian> availableGuardians) throws IOException {
+
+    if (createMode == Mode.readonly) {
+      throw new UnsupportedOperationException("Trying to write to readonly election record");
+    }
 
     if (spoiledBallots != null) {
       // the spoiledBallots are written into their own file
@@ -479,6 +486,9 @@ public class Publisher {
           @Nullable Iterable<PlaintextTally> spoiledBallots,
           Iterable<AvailableGuardian> availableGuardians) throws IOException {
 
+    if (createMode == Mode.readonly) {
+      throw new UnsupportedOperationException("Trying to write to readonly election record");
+    }
 
     // the accepted ballots are written into their own file
     try (FileOutputStream out = new FileOutputStream(ciphertextBallotProtoPath().toFile())) {
@@ -512,54 +522,22 @@ public class Publisher {
 
   /** Copy accepted ballots file from the inputDir to this election record. */
   public void copyAcceptedBallots(String inputDir) throws IOException {
-    Path source = new Publisher(inputDir, false, false).ciphertextBallotProtoPath();
+    if (createMode == Mode.readonly) {
+      throw new UnsupportedOperationException("Trying to write to readonly election record");
+    }
+
+    Path source = new Publisher(inputDir, Mode.writeonly, false).ciphertextBallotProtoPath();
     Path dest = ciphertextBallotProtoPath();
     Files.copy(source, dest, StandardCopyOption.COPY_ATTRIBUTES);
   }
 
-  ////////////////////////////////////////////////////////////////////////////////
-  // private, probably not needed
-
-  public void writeGuardiansJson(Iterable<GuardianRecordPrivate> guardianRecords) throws IOException {
-    Files.createDirectories(privateDirPath);
-    for (GuardianRecordPrivate guardianRecord : guardianRecords) {
-      ConvertToJson.writeGuardianRecordPrivate(guardianRecord, this.guardiansPrivatePath(guardianRecord.guardian_id()));
-    }
-  }
-
-  /**
-   * Publish the private data for an election.
-   * Useful for generating sample data sets.
-   * Do not use this in a production application.
-   */
-  public void publish_private_data(
-          @Nullable Iterable<PlaintextBallot> original_ballots,
-          @Nullable Iterable<GuardianRecordPrivate> guardians) throws IOException {
-
-    Files.createDirectories(privateDirPath);
-
-    if (guardians != null) {
-      Files.createDirectories(privateGuardiansPath());
-      for (GuardianRecordPrivate guardian : guardians) {
-        String guardian_name = PRIVATE_GUARDIAN_PREFIX + guardian.guardian_id() + SUFFIX;
-        ConvertToJson.writeGuardianRecordPrivate(guardian, privateGuardiansPath().resolve(guardian_name));
-      }
-    }
-
-    if (original_ballots != null) {
-      Files.createDirectories(privateBallotsPath());
-      for (PlaintextBallot plaintext_ballot : original_ballots) {
-        String ballot_name = PLAINTEXT_BALLOT_PREFIX + plaintext_ballot.object_id + SUFFIX;
-        ConvertToJson.writePlaintextBallot(plaintext_ballot, privateBallotsPath().resolve(ballot_name));
-      }
-    }
-
-    // TODO CIPHERTEXT_BALLOT_PREFIX?
-  }
-
   // These are input ballots that did not validate (not spoiled ballots). put them somewhere to be examined later.
   public void publish_invalid_ballots(String directory, Iterable<PlaintextBallot> invalid_ballots) throws IOException {
-    Path invalidBallotsPath = publishDirectory.resolve(directory);
+    if (createMode == Mode.readonly) {
+      throw new UnsupportedOperationException("Trying to write to readonly election record");
+    }
+
+    Path invalidBallotsPath = electionRecordDir.resolve(directory);
     Files.createDirectories(invalidBallotsPath);
 
     for (PlaintextBallot plaintext_ballot : invalid_ballots) {

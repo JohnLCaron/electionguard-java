@@ -72,7 +72,7 @@ public abstract class GuardianRecordPrivate {
     return new AutoValue_GuardianRecordPrivate(
             election_keys,
             auxiliary_keys,
-            backups_to_share.stream().collect(Collectors.toMap(o -> o.owner_id(), o -> o)),
+            backups_to_share.stream().collect(Collectors.toMap(o -> o.designated_id(), o -> o)),
             guardian_auxiliary_public_keys.stream().collect(Collectors.toMap(o -> o.owner_id, o -> o)),
             guardian_election_public_keys.stream().collect(Collectors.toMap(o -> o.owner_id(), o -> o)),
             guardian_election_partial_key_backups.stream().collect(Collectors.toMap(o -> o.owner_id(), o -> o)),

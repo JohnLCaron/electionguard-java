@@ -16,7 +16,7 @@ public class TestReadPythonJson {
 
   @BeforeContainer
   public static void setup() throws IOException {
-    publisher = new Publisher(pythonPublish, false, false);
+    publisher = new Publisher(pythonPublish, Publisher.Mode.readonly, true);
     System.out.printf("TestReadPythonJson from %s%n", publisher.publishPath());
   }
 

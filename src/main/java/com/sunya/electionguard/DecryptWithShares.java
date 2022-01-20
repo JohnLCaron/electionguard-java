@@ -1,5 +1,6 @@
 package com.sunya.electionguard;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.flogger.FluentLogger;
 
@@ -108,7 +109,7 @@ public class DecryptWithShares {
   }
 
   /** Decrypt a single ciphertext ballot into a decrypted plaintext ballot. */
-  static Optional<PlaintextTally> decrypt_ballot(
+  public static Optional<PlaintextTally> decrypt_ballot(
           SubmittedBallot ballot,
           Map<String, DecryptionShare> shares,
           ElementModQ extended_base_hash) {
@@ -174,7 +175,8 @@ public class DecryptWithShares {
    * @param suppress_validity_check: do not validate the encryption prior to decrypting (default false)
    * @return the decrypted selection
    */
-  static Optional<PlaintextTally.Selection> decrypt_selection_with_decryption_shares(
+  @VisibleForTesting
+  public static Optional<PlaintextTally.Selection> decrypt_selection_with_decryption_shares(
           CiphertextSelection selection,
           Map<String, KeyAndSelection> shares, // Map(AVAILABLE_GUARDIAN_ID, KeyAndSelection)
           ElementModQ extended_base_hash,

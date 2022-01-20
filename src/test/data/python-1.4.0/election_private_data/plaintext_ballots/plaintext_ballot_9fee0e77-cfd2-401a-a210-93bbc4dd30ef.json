@@ -1,0 +1,42 @@
+{
+    "object_id": "9fee0e77-cfd2-401a-a210-93bbc4dd30ef",
+    "style_id": "harrison-township-ballot-style",
+    "contests": [
+        {
+            "object_id": "justice-supreme-court",
+            "sequence_order": "00",
+            "ballot_selections": [
+                {
+                    "object_id": "john-adams-selection",
+                    "sequence_order": "00",
+                    "vote": "01",
+                    "is_placeholder_selection": "00",
+                    "extended_data": null
+                },
+                {
+                    "object_id": "write-in-selection",
+                    "sequence_order": "03",
+                    "vote": "01",
+                    "is_placeholder_selection": "00",
+                    "extended_data": {
+                        "value": "Susan B. Anthony",
+                        "length": "10"
+                    }
+                }
+            ]
+        },
+        {
+            "object_id": "referendum-pineapple",
+            "sequence_order": "01",
+            "ballot_selections": [
+                {
+                    "object_id": "referendum-pineapple-negative-selection",
+                    "sequence_order": "01",
+                    "vote": "01",
+                    "is_placeholder_selection": "00",
+                    "extended_data": null
+                }
+            ]
+        }
+    ]
+}

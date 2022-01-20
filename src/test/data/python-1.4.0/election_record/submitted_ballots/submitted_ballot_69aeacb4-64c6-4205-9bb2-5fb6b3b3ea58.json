@@ -2,7 +2,7 @@
     "object_id": "69aeacb4-64c6-4205-9bb2-5fb6b3b3ea58",
     "style_id": "harrison-township-ballot-style",
     "manifest_hash": "26F5",
-    "code_seed": "B19F",
+    "code_seed": "B401",
     "contests": [
         {
             "object_id": "justice-supreme-court",
@@ -14,22 +14,22 @@
                     "sequence_order": "00",
                     "description_hash": "2DFF",
                     "ciphertext": {
-                        "pad": "CC6D32BFB5DE1179",
-                        "data": "89F50BF183E44D40"
+                        "pad": "5E5CE51253DC7765",
+                        "data": "F1D7D308FDDAB646"
                     },
-                    "crypto_hash": "9590",
+                    "crypto_hash": "40F4",
                     "is_placeholder_selection": "00",
                     "nonce": null,
                     "proof": {
-                        "proof_zero_pad": "8770AE879668060F",
-                        "proof_zero_data": "FF44AD09C455FE78",
-                        "proof_one_pad": "642C0462C9704A37",
-                        "proof_one_data": "7699EC83FB868C1C",
-                        "proof_zero_challenge": "5E8C",
-                        "proof_one_challenge": "FAF1",
-                        "challenge": "598C",
-                        "proof_zero_response": "5DE5",
-                        "proof_one_response": "3DBF",
+                        "proof_zero_pad": "2439A89E19FEBD69",
+                        "proof_zero_data": "22B4566DD754A6CD",
+                        "proof_one_pad": "11E2E90356764553",
+                        "proof_one_data": "6EBBA0E0C1C5C8FA",
+                        "proof_zero_challenge": "3095",
+                        "proof_one_challenge": "6F94",
+                        "challenge": "A029",
+                        "proof_zero_response": "3F69",
+                        "proof_one_response": "3791",
                         "usage": "Prove selection's value (0 or 1)"
                     },
                     "extended_data": null
@@ -39,22 +39,22 @@
                     "sequence_order": "01",
                     "description_hash": "C9D7",
                     "ciphertext": {
-                        "pad": "B58856FF59AE5822",
-                        "data": "433C99DE31800D86"
+                        "pad": "1ECE89A6F3ABD26A",
+                        "data": "C818B08491ACBC77"
                     },
-                    "crypto_hash": "F82C",
+                    "crypto_hash": "CCA3",
                     "is_placeholder_selection": "00",
                     "nonce": null,
                     "proof": {
-                        "proof_zero_pad": "0AF404493C7E2C15",
-                        "proof_zero_data": "20674AE30B0169A5",
-                        "proof_one_pad": "661CB577B59B29D0",
-                        "proof_one_data": "5259A5834B888AA7",
-                        "proof_zero_challenge": "676D",
-                        "proof_one_challenge": "2EB2",
-                        "challenge": "961F",
-                        "proof_zero_response": "F02B",
-                        "proof_one_response": "9F07",
+                        "proof_zero_pad": "961225533B0EBE8A",
+                        "proof_zero_data": "58DE466F789947AB",
+                        "proof_one_pad": "5C812307A180A516",
+                        "proof_one_data": "217196504CAAF569",
+                        "proof_zero_challenge": "3841",
+                        "proof_one_challenge": "4486",
+                        "challenge": "7CC7",
+                        "proof_zero_response": "1573",
+                        "proof_one_response": "0A79",
                         "usage": "Prove selection's value (0 or 1)"
                     },
                     "extended_data": null
@@ -64,22 +64,22 @@
                     "sequence_order": "02",
                     "description_hash": "041E",
                     "ciphertext": {
-                        "pad": "F15F59D6DBFBFCE5",
-                        "data": "1DCE0608128A4DD1"
+                        "pad": "61FF93BFE102AE0B",
+                        "data": "7D3FDCB64D6AC854"
                     },
-                    "crypto_hash": "1EA8",
+                    "crypto_hash": "4EB8",
                     "is_placeholder_selection": "00",
                     "nonce": null,
                     "proof": {
-                        "proof_zero_pad": "AD79550CF34BC315",
-                        "proof_zero_data": "ED61A7A9A3FA59AB",
-                        "proof_one_pad": "310D8F1F361180F4",
-                        "proof_one_data": "3D6A6A11BC48DDD3",
-                        "proof_zero_challenge": "E7D9",
-                        "proof_one_challenge": "025C",
-                        "challenge": "EA35",
-                        "proof_zero_response": "3490",
-                        "proof_one_response": "6D64",
+                        "proof_zero_pad": "902C0393F44088FB",
+                        "proof_zero_data": "1FCC0F35114602DB",
+                        "proof_one_pad": "4AF0EE8FD07FF90F",
+                        "proof_one_data": "A5A6455C1D69064B",
+                        "proof_zero_challenge": "76D8",
+                        "proof_one_challenge": "0552",
+                        "challenge": "7C2A",
+                        "proof_zero_response": "BD83",
+                        "proof_one_response": "2F3B",
                         "usage": "Prove selection's value (0 or 1)"
                     },
                     "extended_data": null
@@ -89,22 +89,22 @@
                     "sequence_order": "03",
                     "description_hash": "C6AF",
                     "ciphertext": {
-                        "pad": "740093B61D22A7A2",
-                        "data": "4FBC7B150DB3DC6B"
+                        "pad": "4324DB5FC4B34C61",
+                        "data": "F9EDF4F011408003"
                     },
-                    "crypto_hash": "632C",
+                    "crypto_hash": "69F3",
                     "is_placeholder_selection": "00",
                     "nonce": null,
                     "proof": {
-                        "proof_zero_pad": "4D13B7A1DAC90083",
-                        "proof_zero_data": "1DFE293EB5E87D1B",
-                        "proof_one_pad": "C288E48BDD27E096",
-                        "proof_one_data": "D54DC30ED16BC9B3",
-                        "proof_zero_challenge": "E3E0",
-                        "proof_one_challenge": "4A58",
-                        "challenge": "2E47",
-                        "proof_zero_response": "4FF2",
-                        "proof_one_response": "0C4A",
+                        "proof_zero_pad": "2205258B31945BF9",
+                        "proof_zero_data": "39CB90426EB138DD",
+                        "proof_one_pad": "40405E69089BB3BA",
+                        "proof_one_data": "96237455E8D8FAC1",
+                        "proof_zero_challenge": "EB56",
+                        "proof_one_challenge": "B131",
+                        "challenge": "9C96",
+                        "proof_zero_response": "0442",
+                        "proof_one_response": "4E34",
                         "usage": "Prove selection's value (0 or 1)"
                     },
                     "extended_data": null
@@ -114,22 +114,22 @@
                     "sequence_order": "04",
                     "description_hash": "A191",
                     "ciphertext": {
-                        "pad": "76190B6249F1E452",
-                        "data": "11780E19B8FAFED8"
+                        "pad": "476C526480DD82BC",
+                        "data": "837C136A6120BCEF"
                     },
-                    "crypto_hash": "A057",
+                    "crypto_hash": "21FC",
                     "is_placeholder_selection": "01",
                     "nonce": null,
                     "proof": {
-                        "proof_zero_pad": "6B3981AA15016F6E",
-                        "proof_zero_data": "33143C85562EE72E",
-                        "proof_one_pad": "423830DB6D965B3F",
-                        "proof_one_data": "93D820EBB0BC05E9",
-                        "proof_zero_challenge": "D9F6",
-                        "proof_one_challenge": "5D1C",
-                        "challenge": "3721",
-                        "proof_zero_response": "5639",
-                        "proof_one_response": "FDDB",
+                        "proof_zero_pad": "DDB03FA96BEB4B1B",
+                        "proof_zero_data": "35E83489DF8BB6C2",
+                        "proof_one_pad": "54389F2E8CFC6DC4",
+                        "proof_one_data": "99BD169C0DC0AD0F",
+                        "proof_zero_challenge": "6F40",
+                        "proof_one_challenge": "20C6",
+                        "challenge": "9006",
+                        "proof_zero_response": "0529",
+                        "proof_one_response": "33FA",
                         "usage": "Prove selection's value (0 or 1)"
                     },
                     "extended_data": null
@@ -139,38 +139,38 @@
                     "sequence_order": "05",
                     "description_hash": "F10A",
                     "ciphertext": {
-                        "pad": "E8049B52E416C2C3",
-                        "data": "B0E6D1B9BB81179F"
+                        "pad": "CFE7C515598DB1E1",
+                        "data": "EBA6970F65B8CCDA"
                     },
-                    "crypto_hash": "5465",
+                    "crypto_hash": "DD00",
                     "is_placeholder_selection": "01",
                     "nonce": null,
                     "proof": {
-                        "proof_zero_pad": "58989AE039851550",
-                        "proof_zero_data": "3C897744B02184E5",
-                        "proof_one_pad": "69DFDE43A621DF13",
-                        "proof_one_data": "930BCF5C249080DC",
-                        "proof_zero_challenge": "F90B",
-                        "proof_one_challenge": "6120",
-                        "challenge": "5A3A",
-                        "proof_zero_response": "FF6A",
-                        "proof_one_response": "99ED",
+                        "proof_zero_pad": "6DFFA4695CA4A78D",
+                        "proof_zero_data": "563C50CF0DDFCFBD",
+                        "proof_one_pad": "6AAA65400ECE47BA",
+                        "proof_one_data": "7F8BBCE258C18F4E",
+                        "proof_zero_challenge": "FED9",
+                        "proof_one_challenge": "36C7",
+                        "challenge": "35AF",
+                        "proof_zero_response": "5916",
+                        "proof_one_response": "952E",
                         "usage": "Prove selection's value (0 or 1)"
                     },
                     "extended_data": null
                 }
             ],
             "ciphertext_accumulation": {
-                "pad": "5FC45F80E606CFD1",
-                "data": "05B31E4B920A91A9"
+                "pad": "0D2D89BAADBA21C8",
+                "data": "54EC3F5A82FC3F45"
             },
-            "crypto_hash": "2658",
+            "crypto_hash": "2921",
             "nonce": null,
             "proof": {
-                "pad": "20071E8303B46DFE",
-                "data": "B4E7D0DDB3F36618",
-                "challenge": "AE37",
-                "response": "B672",
+                "pad": "E48BED84250C2908",
+                "data": "7B9290C0F03DB4DA",
+                "challenge": "0CCC",
+                "response": "7CE4",
                 "constant": "02",
                 "usage": "Prove value within selection's limit"
             }
@@ -185,22 +185,22 @@
                     "sequence_order": "00",
                     "description_hash": "D961",
                     "ciphertext": {
-                        "pad": "FFF75FB8FC7E8697",
-                        "data": "035FA37E63469070"
+                        "pad": "90801773873878FD",
+                        "data": "AE48BBBBAAF4C238"
                     },
-                    "crypto_hash": "EB42",
+                    "crypto_hash": "9775",
                     "is_placeholder_selection": "00",
                     "nonce": null,
                     "proof": {
-                        "proof_zero_pad": "971578EB3655B2D6",
-                        "proof_zero_data": "9BA8293E9F5C8481",
-                        "proof_one_pad": "73F66CA58ADFD3ED",
-                        "proof_one_data": "7802D01AD8DF5FF8",
-                        "proof_zero_challenge": "3D37",
-                        "proof_one_challenge": "D69B",
-                        "challenge": "13E1",
-                        "proof_zero_response": "EB4C",
-                        "proof_one_response": "6197",
+                        "proof_zero_pad": "695913FE77EAF077",
+                        "proof_zero_data": "74F68D102733DBBA",
+                        "proof_one_pad": "1C86412B5B2D333D",
+                        "proof_one_data": "A11B634CF3FDFCE7",
+                        "proof_zero_challenge": "11F0",
+                        "proof_one_challenge": "0683",
+                        "challenge": "1873",
+                        "proof_zero_response": "0F92",
+                        "proof_one_response": "0491",
                         "usage": "Prove selection's value (0 or 1)"
                     },
                     "extended_data": null
@@ -210,22 +210,22 @@
                     "sequence_order": "01",
                     "description_hash": "05ED",
                     "ciphertext": {
-                        "pad": "67D32335B62FE741",
-                        "data": "AFB2D9BB77B9E37C"
+                        "pad": "67C7CD7871856012",
+                        "data": "A86EB1BB3B274A61"
                     },
-                    "crypto_hash": "B30D",
+                    "crypto_hash": "5FAB",
                     "is_placeholder_selection": "00",
                     "nonce": null,
                     "proof": {
-                        "proof_zero_pad": "D5B85AC1CAF9874A",
-                        "proof_zero_data": "EE54EA3BD0E58A68",
-                        "proof_one_pad": "3A2E271265957235",
-                        "proof_one_data": "EA955316C3FAF2C8",
-                        "proof_zero_challenge": "F50D",
-                        "proof_one_challenge": "D32C",
-                        "challenge": "C848",
-                        "proof_zero_response": "B0A8",
-                        "proof_one_response": "A58A",
+                        "proof_zero_pad": "2E8A22DB1BCFBF0E",
+                        "proof_zero_data": "B3AD425F11C9662D",
+                        "proof_one_pad": "1F05D4F64418F635",
+                        "proof_one_data": "6A6617C6604E547F",
+                        "proof_zero_challenge": "B91A",
+                        "proof_one_challenge": "8F39",
+                        "challenge": "4862",
+                        "proof_zero_response": "6003",
+                        "proof_one_response": "AC5C",
                         "usage": "Prove selection's value (0 or 1)"
                     },
                     "extended_data": null
@@ -235,46 +235,46 @@
                     "sequence_order": "02",
                     "description_hash": "E8B9",
                     "ciphertext": {
-                        "pad": "0F01E1062F8D33E2",
-                        "data": "19884B83A01DD651"
+                        "pad": "59E6CEAF4FB9A893",
+                        "data": "E2C75F827EC0A4DA"
                     },
-                    "crypto_hash": "D5F6",
+                    "crypto_hash": "40A6",
                     "is_placeholder_selection": "01",
                     "nonce": null,
                     "proof": {
-                        "proof_zero_pad": "73A24DE25CC68102",
-                        "proof_zero_data": "59379384911A425B",
-                        "proof_one_pad": "1C3E83BA9EA7B619",
-                        "proof_one_data": "97361FB9B7A18F7D",
-                        "proof_zero_challenge": "17C3",
-                        "proof_one_challenge": "2E30",
-                        "challenge": "45F3",
-                        "proof_zero_response": "C119",
-                        "proof_one_response": "6DAF",
+                        "proof_zero_pad": "50E9F13FE9D34A04",
+                        "proof_zero_data": "9E19227AC1B1D38E",
+                        "proof_one_pad": "3E365ACFDFEDCAC5",
+                        "proof_one_data": "DE08478E2A8D7E49",
+                        "proof_zero_challenge": "E02E",
+                        "proof_one_challenge": "E3C7",
+                        "challenge": "C404",
+                        "proof_zero_response": "E6EA",
+                        "proof_one_response": "AD83",
                         "usage": "Prove selection's value (0 or 1)"
                     },
                     "extended_data": null
                 }
             ],
             "ciphertext_accumulation": {
-                "pad": "CD018507CC8BCAFE",
-                "data": "611466831B582D10"
+                "pad": "BA65DF5182EC54BA",
+                "data": "9A43634E0860086F"
             },
-            "crypto_hash": "E0AC",
+            "crypto_hash": "8709",
             "nonce": null,
             "proof": {
-                "pad": "50B84D0AE98E02DF",
-                "data": "258C7CAD6FE35DD5",
-                "challenge": "E04F",
-                "response": "7756",
+                "pad": "7467ABED275C806C",
+                "data": "184E65F485A834A0",
+                "challenge": "6C08",
+                "response": "B2B4",
                 "constant": "01",
                 "usage": "Prove value within selection's limit"
             }
         }
     ],
-    "code": "5BAD",
-    "timestamp": "61E20B96",
-    "crypto_hash": "84B4",
+    "code": "5F38",
+    "timestamp": "61E5EC1E",
+    "crypto_hash": "EB07",
     "nonce": null,
-    "state": 2
+    "state": 1
 }

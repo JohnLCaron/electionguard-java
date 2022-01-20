@@ -9,19 +9,19 @@
                     "tally": "01",
                     "value": "D6982759F3D5107E",
                     "message": {
-                        "pad": "DFE60AD070512A19",
-                        "data": "E9D6E0EA01076113"
+                        "pad": "0CBE7D6C56C69493",
+                        "data": "B8AF2F30AB3E6012"
                     },
                     "shares": [
                         {
                             "object_id": "john-adams-selection",
                             "guardian_id": "1",
-                            "share": "2D8FF2C7DA49F475",
+                            "share": "E26EF8A0841A930E",
                             "proof": {
-                                "pad": "A9F9BF4A40E4457C",
-                                "data": "49EC1C52EE7CE532",
-                                "challenge": "647F",
-                                "response": "09E7",
+                                "pad": "2C2E742A8E8BEC5E",
+                                "data": "C8A67F9E812829B9",
+                                "challenge": "16FA",
+                                "response": "513D",
                                 "usage": "Prove knowledge of secret value"
                             },
                             "recovered_parts": null
@@ -29,12 +29,12 @@
                         {
                             "object_id": "john-adams-selection",
                             "guardian_id": "2",
-                            "share": "25FE7CA0E3711810",
+                            "share": "626BAF496C173A24",
                             "proof": {
-                                "pad": "04ED2807ECFD34C9",
-                                "data": "BA1A8200819DAB99",
-                                "challenge": "8A5D",
-                                "response": "D04B",
+                                "pad": "BB4EA7F12CC788D5",
+                                "data": "04DB90FCBDCCBDF7",
+                                "challenge": "6CCF",
+                                "response": "F10A",
                                 "usage": "Prove knowledge of secret value"
                             },
                             "recovered_parts": null
@@ -42,12 +42,12 @@
                         {
                             "object_id": "john-adams-selection",
                             "guardian_id": "3",
-                            "share": "DDDA4C885744BFEC",
+                            "share": "FEFEE59AE338DBEF",
                             "proof": {
-                                "pad": "67AADB0931557A19",
-                                "data": "A48B6B0622152606",
-                                "challenge": "D1B9",
-                                "response": "7882",
+                                "pad": "7C83544956BBF6F1",
+                                "data": "9FA392EAF4A48B8E",
+                                "challenge": "5F36",
+                                "response": "7626",
                                 "usage": "Prove knowledge of secret value"
                             },
                             "recovered_parts": null
@@ -55,12 +55,12 @@
                         {
                             "object_id": "john-adams-selection",
                             "guardian_id": "4",
-                            "share": "D85005C2F8EEB628",
+                            "share": "D1A0AEE06FC1861F",
                             "proof": {
-                                "pad": "6BFAE005A3300169",
-                                "data": "7F1356AF463CDDAA",
-                                "challenge": "9E4F",
-                                "response": "33CE",
+                                "pad": "CA208042E2931C32",
+                                "data": "B18A2895E2ADAFE8",
+                                "challenge": "319A",
+                                "response": "6DFA",
                                 "usage": "Prove knowledge of secret value"
                             },
                             "recovered_parts": null
@@ -68,12 +68,12 @@
                         {
                             "object_id": "john-adams-selection",
                             "guardian_id": "5",
-                            "share": "70DCB2C88B29F067",
+                            "share": "98D4448F3982C80E",
                             "proof": {
-                                "pad": "157347DD416ED4EE",
-                                "data": "84CAB65AF4AF7499",
-                                "challenge": "658E",
-                                "response": "38E4",
+                                "pad": "B9AEC3B8CB59DCC7",
+                                "data": "3B06048DEBA24033",
+                                "challenge": "9FA2",
+                                "response": "4A85",
                                 "usage": "Prove knowledge of secret value"
                             },
                             "recovered_parts": null
@@ -85,19 +85,19 @@
                     "tally": "00",
                     "value": "01",
                     "message": {
-                        "pad": "313094A381961A",
-                        "data": "2207E17E9161F842"
+                        "pad": "C93095016D107577",
+                        "data": "A8BA60B736550B0A"
                     },
                     "shares": [
                         {
                             "object_id": "benjamin-franklin-selection",
                             "guardian_id": "1",
-                            "share": "6EED501CF37C33D1",
+                            "share": "C17D009ED6B0EB19",
                             "proof": {
-                                "pad": "F8DBA22967583541",
-                                "data": "02EDA645676D1C71",
-                                "challenge": "9AC0",
-                                "response": "2F91",
+                                "pad": "A6B98601CB15AF50",
+                                "data": "7BA6950D15BAB8EB",
+                                "challenge": "D3F6",
+                                "response": "E741",
                                 "usage": "Prove knowledge of secret value"
                             },
                             "recovered_parts": null
@@ -105,12 +105,12 @@
                         {
                             "object_id": "benjamin-franklin-selection",
                             "guardian_id": "2",
-                            "share": "69CF74D0FA33AE9D",
+                            "share": "2E14A2BFF34F44CA",
                             "proof": {
-                                "pad": "7489BB8BD2D828D9",
-                                "data": "14B12E4958D4E5BA",
-                                "challenge": "8C60",
-                                "response": "402F",
+                                "pad": "95E6D7FB1B1BB720",
+                                "data": "9BE26DEC07FD7183",
+                                "challenge": "F25E",
+                                "response": "1EE6",
                                 "usage": "Prove knowledge of secret value"
                             },
                             "recovered_parts": null
@@ -118,12 +118,12 @@
                         {
                             "object_id": "benjamin-franklin-selection",
                             "guardian_id": "3",
-                            "share": "F2DF936AC0019FAA",
+                            "share": "A8A36B2142BABBB5",
                             "proof": {
-                                "pad": "72A514A13169F701",
-                                "data": "2D7FFAB11B334942",
-                                "challenge": "FA14",
-                                "response": "93CB",
+                                "pad": "33495074F0989846",
+                                "data": "E18865EA0AE57BA7",
+                                "challenge": "E784",
+                                "response": "E009",
                                 "usage": "Prove knowledge of secret value"
                             },
                             "recovered_parts": null
@@ -131,12 +131,12 @@
                         {
                             "object_id": "benjamin-franklin-selection",
                             "guardian_id": "4",
-                            "share": "F368F384195CD3FA",
+                            "share": "F745D312F43300E9",
                             "proof": {
-                                "pad": "7EDE3A9CFAB71F0F",
-                                "data": "699541148B480457",
-                                "challenge": "FDC3",
-                                "response": "B8F9",
+                                "pad": "88ED90CAF35FDE2A",
+                                "data": "A91565077F935E9D",
+                                "challenge": "F0E7",
+                                "response": "106E",
                                 "usage": "Prove knowledge of secret value"
                             },
                             "recovered_parts": null
@@ -144,12 +144,12 @@
                         {
                             "object_id": "benjamin-franklin-selection",
                             "guardian_id": "5",
-                            "share": "C47C08A86124A8D8",
+                            "share": "29A5DAAA0AC79B91",
                             "proof": {
-                                "pad": "375ED4E57F4052DB",
-                                "data": "EF89B34827641F08",
-                                "challenge": "A884",
-                                "response": "2666",
+                                "pad": "AC6F0C038DDAA3A3",
+                                "data": "31EF43FD00EB7AA8",
+                                "challenge": "87A8",
+                                "response": "33B6",
                                 "usage": "Prove knowledge of secret value"
                             },
                             "recovered_parts": null
@@ -161,19 +161,19 @@
                     "tally": "00",
                     "value": "01",
                     "message": {
-                        "pad": "D566B51B367F1B70",
-                        "data": "DCDB755E90C10CED"
+                        "pad": "B963276E76027BA6",
+                        "data": "706434830A23B06B"
                     },
                     "shares": [
                         {
                             "object_id": "john-hancock-selection",
                             "guardian_id": "1",
-                            "share": "5B2EFFD40E70DFB9",
+                            "share": "897A92AC168BF676",
                             "proof": {
-                                "pad": "5275446B680AF2",
-                                "data": "A7A452D62F3BDEF2",
-                                "challenge": "16AB",
-                                "response": "36EB",
+                                "pad": "D6ACEBA718CF5807",
+                                "data": "10AE137A01A357AB",
+                                "challenge": "3A6A",
+                                "response": "940B",
                                 "usage": "Prove knowledge of secret value"
                             },
                             "recovered_parts": null
@@ -181,12 +181,12 @@
                         {
                             "object_id": "john-hancock-selection",
                             "guardian_id": "2",
-                            "share": "E4F5E021B46DB055",
+                            "share": "314191A65DB813ED",
                             "proof": {
-                                "pad": "2ADF6E20798577E1",
-                                "data": "98C597D5C54E7D3E",
-                                "challenge": "B0FD",
-                                "response": "5BFB",
+                                "pad": "2522CBE7FC63DEFA",
+                                "data": "40DB5477EB7F1392",
+                                "challenge": "32BF",
+                                "response": "5871",
                                 "usage": "Prove knowledge of secret value"
                             },
                             "recovered_parts": null
@@ -194,12 +194,12 @@
                         {
                             "object_id": "john-hancock-selection",
                             "guardian_id": "3",
-                            "share": "BDA92FE53C5F4E05",
+                            "share": "3A7995EBFFF80FAF",
                             "proof": {
-                                "pad": "B3BC03B89B93FEA7",
-                                "data": "712C971391FB6512",
-                                "challenge": "2461",
-                                "response": "DB73",
+                                "pad": "0CC065A5B58622AB",
+                                "data": "9F5E0D3A838A43BD",
+                                "challenge": "98CB",
+                                "response": "D470",
                                 "usage": "Prove knowledge of secret value"
                             },
                             "recovered_parts": null
@@ -207,12 +207,12 @@
                         {
                             "object_id": "john-hancock-selection",
                             "guardian_id": "4",
-                            "share": "25FDD6BA4186D1CE",
+                            "share": "1B06E92BE85347B9",
                             "proof": {
-                                "pad": "DE1CBE807F766E7A",
-                                "data": "B8044A8E747B7A92",
-                                "challenge": "4919",
-                                "response": "CDC6",
+                                "pad": "FAD2A45FB48DDAD9",
+                                "data": "D4BBCCF8C5C28619",
+                                "challenge": "6F42",
+                                "response": "FF6D",
                                 "usage": "Prove knowledge of secret value"
                             },
                             "recovered_parts": null
@@ -220,12 +220,12 @@
                         {
                             "object_id": "john-hancock-selection",
                             "guardian_id": "5",
-                            "share": "517FD0EB50EC1EB4",
+                            "share": "E1E8099CE061B2EA",
                             "proof": {
-                                "pad": "B87CA961824159",
-                                "data": "A540B51E9F9F5BE8",
-                                "challenge": "5739",
-                                "response": "4105",
+                                "pad": "1A904DC57E2E54E5",
+                                "data": "7347C64710EF96D4",
+                                "challenge": "6FAE",
+                                "response": "858C",
                                 "usage": "Prove knowledge of secret value"
                             },
                             "recovered_parts": null
@@ -237,19 +237,19 @@
                     "tally": "01",
                     "value": "D6982759F3D5107E",
                     "message": {
-                        "pad": "151B7641CAA1628E",
-                        "data": "7DAEBA7CA7897F91"
+                        "pad": "89B232C26700A971",
+                        "data": "DA64E9C78DA487FC"
                     },
                     "shares": [
                         {
                             "object_id": "write-in-selection",
                             "guardian_id": "1",
-                            "share": "2225737747622F94",
+                            "share": "6DCB4FC60B81C3A9",
                             "proof": {
-                                "pad": "1A4DC23627EF951E",
-                                "data": "F9E599CDE9DD26F7",
-                                "challenge": "8943",
-                                "response": "48AB",
+                                "pad": "24AD6BAE06599EEC",
+                                "data": "0CB3A6EAE3EC8112",
+                                "challenge": "F78B",
+                                "response": "B981",
                                 "usage": "Prove knowledge of secret value"
                             },
                             "recovered_parts": null
@@ -257,12 +257,12 @@
                         {
                             "object_id": "write-in-selection",
                             "guardian_id": "2",
-                            "share": "63C0F5D206573EDE",
+                            "share": "4021EC14105B5B26",
                             "proof": {
-                                "pad": "CFA1F9B3240D9A31",
-                                "data": "FA358EFED381A43A",
-                                "challenge": "E00C",
-                                "response": "2D2C",
+                                "pad": "EC751A52DD2A42AB",
+                                "data": "1E339773DB987ABF",
+                                "challenge": "FA3C",
+                                "response": "90D9",
                                 "usage": "Prove knowledge of secret value"
                             },
                             "recovered_parts": null
@@ -270,12 +270,12 @@
                         {
                             "object_id": "write-in-selection",
                             "guardian_id": "3",
-                            "share": "76C00814C23554E6",
+                            "share": "EE763FFF541910D0",
                             "proof": {
-                                "pad": "686C5E2E70F346AE",
-                                "data": "CBF485C8AF08D23C",
-                                "challenge": "FAD6",
-                                "response": "40AA",
+                                "pad": "05EECEA8C89CB8DA",
+                                "data": "69AB0190CE5E3CEC",
+                                "challenge": "445F",
+                                "response": "C34F",
                                 "usage": "Prove knowledge of secret value"
                             },
                             "recovered_parts": null
@@ -283,12 +283,12 @@
                         {
                             "object_id": "write-in-selection",
                             "guardian_id": "4",
-                            "share": "6BC3797873DB5F09",
+                            "share": "ADA7C13F1F0A1831",
                             "proof": {
-                                "pad": "FDAD3109E594C770",
-                                "data": "C377B856E110E8C7",
-                                "challenge": "091A",
-                                "response": "24C4",
+                                "pad": "2626B3C8364864EC",
+                                "data": "DBE6E51777CEAA92",
+                                "challenge": "0D43",
+                                "response": "7D2A",
                                 "usage": "Prove knowledge of secret value"
                             },
                             "recovered_parts": null
@@ -296,12 +296,12 @@
                         {
                             "object_id": "write-in-selection",
                             "guardian_id": "5",
-                            "share": "0F72AF395F6A07CA",
+                            "share": "62ADB778F072B0B2",
                             "proof": {
-                                "pad": "84994A2BEE9062DC",
-                                "data": "5DB98A503F1E9F7C",
-                                "challenge": "DF7A",
-                                "response": "DEA5",
+                                "pad": "1D2F869F1534AA13",
+                                "data": "C368BA6BC16DAD42",
+                                "challenge": "DE96",
+                                "response": "4B98",
                                 "usage": "Prove knowledge of secret value"
                             },
                             "recovered_parts": null
@@ -313,19 +313,19 @@
                     "tally": "00",
                     "value": "01",
                     "message": {
-                        "pad": "635A4997A4AB08B4",
-                        "data": "36A17D3FED596778"
+                        "pad": "423B5C1E1CACC638",
+                        "data": "B4CBD08F8831379C"
                     },
                     "shares": [
                         {
                             "object_id": "justice-supreme-court-4-placeholder",
                             "guardian_id": "1",
-                            "share": "1E87F769C3326234",
+                            "share": "58E3F2B05495DB5F",
                             "proof": {
-                                "pad": "1D28DBDD24F423CE",
-                                "data": "7E4699E65FF0336E",
-                                "challenge": "44DA",
-                                "response": "A0A7",
+                                "pad": "53D03AFE8712B3C7",
+                                "data": "EF2CD681E78A5A66",
+                                "challenge": "09FC",
+                                "response": "5696",
                                 "usage": "Prove knowledge of secret value"
                             },
                             "recovered_parts": null
@@ -333,12 +333,12 @@
                         {
                             "object_id": "justice-supreme-court-4-placeholder",
                             "guardian_id": "2",
-                            "share": "A7B567F192FFF83D",
+                            "share": "C68E0357FF55F875",
                             "proof": {
-                                "pad": "ED1846FA13E1C4EE",
-                                "data": "AEA42476B2B308B3",
-                                "challenge": "2B6C",
-                                "response": "C380",
+                                "pad": "3717157289935E08",
+                                "data": "6E0B4B307DC78DE3",
+                                "challenge": "AB1E",
+                                "response": "D670",
                                 "usage": "Prove knowledge of secret value"
                             },
                             "recovered_parts": null
@@ -346,12 +346,12 @@
                         {
                             "object_id": "justice-supreme-court-4-placeholder",
                             "guardian_id": "3",
-                            "share": "B9A50DE6C1D46B4A",
+                            "share": "D1D887F707D460E2",
                             "proof": {
-                                "pad": "46375747A19BCCC8",
-                                "data": "C8D994A3D22EF812",
-                                "challenge": "2BD3",
-                                "response": "4E37",
+                                "pad": "7E29C56501E9513D",
+                                "data": "BCA4F0441C3A49AD",
+                                "challenge": "7EC4",
+                                "response": "2B65",
                                 "usage": "Prove knowledge of secret value"
                             },
                             "recovered_parts": null
@@ -359,12 +359,12 @@
                         {
                             "object_id": "justice-supreme-court-4-placeholder",
                             "guardian_id": "4",
-                            "share": "119BA0C02A5CDE2C",
+                            "share": "BE6AD208C3154270",
                             "proof": {
-                                "pad": "304DF4722210F6D7",
-                                "data": "06ACA5DF769F1FE9",
-                                "challenge": "6A0C",
-                                "response": "462B",
+                                "pad": "99A9E156522D5B18",
+                                "data": "C8E8E7BB084F30F8",
+                                "challenge": "6FCB",
+                                "response": "7860",
                                 "usage": "Prove knowledge of secret value"
                             },
                             "recovered_parts": null
@@ -372,12 +372,12 @@
                         {
                             "object_id": "justice-supreme-court-4-placeholder",
                             "guardian_id": "5",
-                            "share": "9C6602D31358D148",
+                            "share": "22C491A8E87400F1",
                             "proof": {
-                                "pad": "F90CD79D9CD8B206",
-                                "data": "20E1CEAF0A355974",
-                                "challenge": "5830",
-                                "response": "5EA9",
+                                "pad": "0249623BFD23ED5C",
+                                "data": "F44F855D84AEA8A4",
+                                "challenge": "0FF0",
+                                "response": "0A3F",
                                 "usage": "Prove knowledge of secret value"
                             },
                             "recovered_parts": null
@@ -389,19 +389,19 @@
                     "tally": "00",
                     "value": "01",
                     "message": {
-                        "pad": "A67ABE1DACB57353",
-                        "data": "6F8E3D00D2057FD8"
+                        "pad": "8DD9B52A379D63FD",
+                        "data": "213F84D6254C45F0"
                     },
                     "shares": [
                         {
                             "object_id": "justice-supreme-court-5-placeholder",
                             "guardian_id": "1",
-                            "share": "218B5A3F93C28BFE",
+                            "share": "12C911E21C321B44",
                             "proof": {
-                                "pad": "59BF305F0DD22DF2",
-                                "data": "15DB0BA77CAD7A7B",
-                                "challenge": "0570",
-                                "response": "0A84",
+                                "pad": "9ECB777EBEF3670D",
+                                "data": "45A5F7A1527D1B8F",
+                                "challenge": "B5AD",
+                                "response": "E1EB",
                                 "usage": "Prove knowledge of secret value"
                             },
                             "recovered_parts": null
@@ -409,12 +409,12 @@
                         {
                             "object_id": "justice-supreme-court-5-placeholder",
                             "guardian_id": "2",
-                            "share": "3476440A2FFE94BC",
+                            "share": "B374B08FAD5813A1",
                             "proof": {
-                                "pad": "1C1B2D7AA0CE3836",
-                                "data": "3F15D459E0ABFB6D",
-                                "challenge": "E010",
-                                "response": "C781",
+                                "pad": "D71D36BDCE886F73",
+                                "data": "CBD3529937B9C98F",
+                                "challenge": "893D",
+                                "response": "6240",
                                 "usage": "Prove knowledge of secret value"
                             },
                             "recovered_parts": null
@@ -422,12 +422,12 @@
                         {
                             "object_id": "justice-supreme-court-5-placeholder",
                             "guardian_id": "3",
-                            "share": "33BCE2BA079C96B8",
+                            "share": "470C2A4607D4EE39",
                             "proof": {
-                                "pad": "08E3F4237D6D8D62",
-                                "data": "57A5D3E8DE62D289",
-                                "challenge": "2089",
-                                "response": "FFB2",
+                                "pad": "DAD9BB8C2A2C6979",
+                                "data": "E9E28CAC3F753935",
+                                "challenge": "88EC",
+                                "response": "84A8",
                                 "usage": "Prove knowledge of secret value"
                             },
                             "recovered_parts": null
@@ -435,12 +435,12 @@
                         {
                             "object_id": "justice-supreme-court-5-placeholder",
                             "guardian_id": "4",
-                            "share": "603F9123991E14E4",
+                            "share": "984E5AE6AE929DB3",
                             "proof": {
-                                "pad": "34E9F869B523E39E",
-                                "data": "DEBE592E321DA88C",
-                                "challenge": "3476",
-                                "response": "03BE",
+                                "pad": "6BAB969E7E0B4F58",
+                                "data": "7A20DEA947E6D4D1",
+                                "challenge": "0B0C",
+                                "response": "C2EE",
                                 "usage": "Prove knowledge of secret value"
                             },
                             "recovered_parts": null
@@ -448,12 +448,12 @@
                         {
                             "object_id": "justice-supreme-court-5-placeholder",
                             "guardian_id": "5",
-                            "share": "670F3626BBED6831",
+                            "share": "6365B19719130B18",
                             "proof": {
-                                "pad": "DBA0BB76828D3BE2",
-                                "data": "D39A09EED3AA1A6F",
-                                "challenge": "FF81",
-                                "response": "ABED",
+                                "pad": "E555808E522B25BD",
+                                "data": "16647B5C2C532BE7",
+                                "challenge": "5805",
+                                "response": "8783",
                                 "usage": "Prove knowledge of secret value"
                             },
                             "recovered_parts": null

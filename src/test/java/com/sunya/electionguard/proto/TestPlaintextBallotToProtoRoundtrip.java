@@ -1,7 +1,10 @@
 package com.sunya.electionguard.proto;
 
-import com.sunya.electionguard.publish.Publisher;
+import com.sunya.electionguard.PlaintextTally;
+import com.sunya.electionguard.protogen.PlaintextTallyProto;
+import com.sunya.electionguard.publish.Consumer;
 import com.sunya.electionguard.verifier.TestParameterVerifier;
+import net.jqwik.api.Example;
 import net.jqwik.api.lifecycle.BeforeContainer;
 
 import java.io.IOException;
@@ -9,22 +12,19 @@ import java.io.IOException;
 import static com.google.common.truth.Truth.assertThat;
 
 public class TestPlaintextBallotToProtoRoundtrip {
-  private static Publisher publisher;
+  private static Consumer consumer;
 
   @BeforeContainer
   public static void setup() throws IOException {
-    publisher = new Publisher(TestParameterVerifier.topdirJson, false, false);
+    consumer = new Consumer(TestParameterVerifier.topdirJson);
   }
 
-  /* LOOK spoiled
   @Example
   public void testSpoiledBallotsRoundtrip() throws IOException {
-    for (File file : publisher.spoiledFiles()) {
-      Ballot.PlaintextBallot fromPython = ConvertFromJson.readPlaintextBallot(file.getAbsolutePath());
-      assertThat(fromPython).isNotNull();
-      PlaintextBallotProto.PlaintextBallot proto = PlaintextBallotToProto.translateToProto(fromPython);
-      Ballot.PlaintextBallot roundtrip = PlaintextBallotFromProto.translateFromProto(proto);
-      assertThat(roundtrip).isEqualTo(fromPython);
+    for (PlaintextTally tally : consumer.spoiledBallots()) {
+      PlaintextTallyProto.PlaintextTally proto = PlaintextTallyToProto.translateToProto(tally);
+      PlaintextTally roundtrip = PlaintextTallyFromProto.translateFromProto(proto);
+      assertThat(roundtrip).isEqualTo(tally);
     }
-  } */
+  }
 }

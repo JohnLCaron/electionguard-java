@@ -1,32 +1,32 @@
 {
     "guardian_id": "4",
     "sequence_order": "04",
-    "election_public_key": "BC4D4F41EFB86940",
+    "election_public_key": "0C3A905B04592B4B",
     "election_commitments": [
-        "BC4D4F41EFB86940",
-        "AA5DEA758A2949D1",
-        "14C90F2BD424C3BF"
+        "0C3A905B04592B4B",
+        "0BDA88B38C873882",
+        "52F9E6304A7B331E"
     ],
     "election_proofs": [
         {
-            "public_key": "BC4D4F41EFB86940",
-            "commitment": "9C7FA0D7A6687A44",
-            "challenge": "EE3C",
-            "response": "C61E",
+            "public_key": "0C3A905B04592B4B",
+            "commitment": "6052314575107630",
+            "challenge": "A9B2",
+            "response": "9671",
             "usage": "Prove knowledge of secret value"
         },
         {
-            "public_key": "AA5DEA758A2949D1",
-            "commitment": "059CF47A3684A8AC",
-            "challenge": "1839",
-            "response": "8A64",
+            "public_key": "0BDA88B38C873882",
+            "commitment": "6AA8EC647A8BFE10",
+            "challenge": "B177",
+            "response": "C847",
             "usage": "Prove knowledge of secret value"
         },
         {
-            "public_key": "14C90F2BD424C3BF",
-            "commitment": "A1C9E3F3ACDE41F7",
-            "challenge": "6A59",
-            "response": "D2EC",
+            "public_key": "52F9E6304A7B331E",
+            "commitment": "41A246A182DEFEFD",
+            "challenge": "69CD",
+            "response": "857C",
             "usage": "Prove knowledge of secret value"
         }
     ]

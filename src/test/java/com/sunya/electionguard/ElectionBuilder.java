@@ -29,17 +29,17 @@ public class ElectionBuilder {
     this.description = description;
   }
 
-  ElectionBuilder set_public_key(Group.ElementModP election_joint_public_key) {
+  public ElectionBuilder set_public_key(Group.ElementModP election_joint_public_key) {
     this.election_joint_public_key = Optional.of(election_joint_public_key);
     return this;
   }
 
-  ElectionBuilder set_commitment_hash(Group.ElementModQ commitment_hash) {
+  public ElectionBuilder set_commitment_hash(Group.ElementModQ commitment_hash) {
     this.commitment_hash = commitment_hash;
     return this;
   }
 
-  Optional<DescriptionAndContext> build() {
+  public Optional<DescriptionAndContext> build() {
     if (!this.description.is_valid()) {
       return Optional.empty();
     }

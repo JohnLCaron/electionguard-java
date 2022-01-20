@@ -61,7 +61,7 @@ public class TestChaumPedersen {
     ChaumPedersenProof bad_proof = make_chaum_pedersen(message, keypair.secret_key, TWO_MOD_P, seed, ONE_MOD_Q);
 
     assertThat(proof.is_valid(message, keypair.public_key, decryption, ONE_MOD_Q)).isTrue();
-    assertThrows(IllegalStateException.class, () -> bad_proof.is_valid(message, keypair.public_key, decryption, ONE_MOD_Q));
+    assertThat(bad_proof.is_valid(message, keypair.public_key, decryption, ONE_MOD_Q)).isFalse();
   }
 
   // TestConstantChaumPedersen

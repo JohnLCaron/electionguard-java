@@ -120,6 +120,11 @@ public class Auxiliary {
     }
 
     @Override
+    public String toString() {
+      return new String(bytes, UTF_8);
+    }
+
+    @Override
     public boolean equals(Object o) {
       if (this == o) return true;
       if (o == null || getClass() != o.getClass()) return false;

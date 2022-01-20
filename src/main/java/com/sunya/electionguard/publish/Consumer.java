@@ -32,7 +32,7 @@ public class Consumer {
   }
 
   public Consumer(String topDir) throws IOException {
-    publisher = new Publisher(topDir, false, false);
+    publisher = new Publisher(topDir, Publisher.Mode.readonly, false);
   }
 
   public String location() {
@@ -161,34 +161,10 @@ public class Consumer {
     return result;
   }
 
-  // Input ballot files for debugging. Not part of the election record.
-  public List<PlaintextBallot> inputBallots(String ballotDir) throws IOException {
-    File ballotDirFile = new File(ballotDir);
-    if (Files.exists(ballotDirFile.toPath()) && ballotDirFile.listFiles() != null) {
-      List<PlaintextBallot> result = new ArrayList<>();
-      for (File file : ballotDirFile.listFiles()) {
-        PlaintextBallot fromJson = ConvertFromJson.readPlaintextBallot(file.getAbsolutePath());
-        result.add(fromJson);
-      }
-      return result;
-    } else {
-      return new ArrayList<>();
-    }
-  }
-
   public List<GuardianRecord> guardianRecords() throws IOException {
     List<GuardianRecord> result = new ArrayList<>();
     for (File file : publisher.guardianRecordsFiles()) {
       GuardianRecord fromPython = ConvertFromJson.readGuardianRecord(file.getAbsolutePath());
-      result.add(fromPython);
-    }
-    return result;
-  }
-
-  public List<GuardianRecordPrivate> readGuardianPrivateJson() throws IOException {
-    List<GuardianRecordPrivate> result = new ArrayList<>();
-    for (File file : publisher.guardianRecordPrivateFiles()) {
-      GuardianRecordPrivate fromPython = ConvertFromJson.readGuardianRecordPrivate(file.getAbsolutePath());
       result.add(fromPython);
     }
     return result;

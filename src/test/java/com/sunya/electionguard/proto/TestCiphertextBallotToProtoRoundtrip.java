@@ -19,7 +19,7 @@ public class TestCiphertextBallotToProtoRoundtrip {
 
   @BeforeContainer
   public static void setup() throws IOException {
-    publisher = new Publisher(TestParameterVerifier.topdirJson, false, false);
+    publisher = new Publisher(TestParameterVerifier.topdirJson, Publisher.Mode.readonly, false);
   }
 
   @Example

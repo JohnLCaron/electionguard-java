@@ -1,4 +1,4 @@
 /**
- * Public interface for electionguard command line programs.
+ * Public interface for running electionguard remote workflow.
  */
 package com.sunya.electionguard.workflow;

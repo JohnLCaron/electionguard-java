@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.*;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
@@ -69,15 +70,11 @@ public class TestKeyCeremonyRemoteTrustee {
   }
 
   @Example
-  public void makeRemoteNoDirectory() throws IOException {
+  public void makeRemoteNoDirectory() {
     int xCoordinate = 1;
-    try {
+    assertThrows(IllegalStateException.class, () ->
       new KeyCeremonyRemoteTrustee("KeyCeremonyRemoteTrustee" + xCoordinate, xCoordinate, QUORUM,
-              "/home/snake/tmp/electionguard/testKeyCeremonyRemoteTrusteeUnknownDirectory");
-      fail();
-    } catch (Exception e) {
-      assertThat(e.getMessage()).contains("does not exist");
-    }
+              "/home/snake/tmp/electionguard/testKeyCeremonyRemoteTrusteeUnownDirectory"));
   }
 
   @Example

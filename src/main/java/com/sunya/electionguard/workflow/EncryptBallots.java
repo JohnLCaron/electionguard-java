@@ -13,6 +13,7 @@ import com.sunya.electionguard.Encrypt;
 import com.sunya.electionguard.PlaintextBallot;
 import com.sunya.electionguard.input.ElectionInputValidation;
 import com.sunya.electionguard.publish.Consumer;
+import com.sunya.electionguard.publish.PrivateData;
 import com.sunya.electionguard.publish.Publisher;
 import com.sunya.electionguard.verifier.ElectionRecord;
 
@@ -228,7 +229,7 @@ public class EncryptBallots {
     System.out.printf("%nPublish cast = %d spoiled = %d failed = %d total = %d%n%n",
             ncast, nspoiled, failed, originalBallotsCount);
 
-    Publisher publisher = new Publisher(publishDir, false, false);
+    Publisher publisher = new Publisher(publishDir, Publisher.Mode.createIfMissing, false);
     publisher.writeEncryptionResultsProto(
             electionRecord,
             ImmutableList.of(this.device), // add the device
@@ -238,8 +239,9 @@ public class EncryptBallots {
   }
 
   void saveOriginalBallots(Publisher publisher, List<PlaintextBallot> ballots) throws IOException {
-    publisher.publish_private_data(ballots, null);
-    System.out.printf("Save original ballot in %s%n", publisher.privateDirPath());
+    PrivateData pdata = publisher.makePrivateData(false, false);
+    pdata.publish_private_data(ballots, null);
+    System.out.printf("Save original ballots in %s%n", pdata.privateDirectory());
   }
 
   void saveInvalidBallots(Publisher publisher, List<PlaintextBallot> ballots) throws IOException {

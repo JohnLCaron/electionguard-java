@@ -14,6 +14,7 @@ import com.sunya.electionguard.protogen.RemoteKeyCeremonyTrusteeProto;
 import com.sunya.electionguard.protogen.RemoteKeyCeremonyTrusteeServiceGrpc;
 import com.sunya.electionguard.protogen.TrusteeProto;
 import com.sunya.electionguard.proto.TrusteeToProto;
+import com.sunya.electionguard.publish.PrivateData;
 import com.sunya.electionguard.publish.Publisher;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
@@ -183,7 +184,7 @@ class KeyCeremonyRemoteTrustee extends RemoteKeyCeremonyTrusteeServiceGrpc.Remot
     this.outputDir = outputDir;
 
     // fail fast on bad output directory
-    Publisher publisher = new Publisher(outputDir, false, false);
+    Publisher publisher = new Publisher(outputDir, Publisher.Mode.writeonly, false);
     Formatter errors = new Formatter();
     if (!publisher.validateOutputDir(errors)) {
       System.out.printf("*** Publisher validateOutputDir FAILED on %s%n%s", outputDir, errors);
@@ -348,7 +349,7 @@ class KeyCeremonyRemoteTrustee extends RemoteKeyCeremonyTrusteeServiceGrpc.Remot
     CommonProto.ErrorResponse.Builder response = CommonProto.ErrorResponse.newBuilder();
     try {
       TrusteeProto.DecryptingTrustee trusteeProto = TrusteeToProto.convertTrustee(this.delegate);
-      Publisher.overwriteTrusteeProto(this.outputDir, trusteeProto);
+      PrivateData.overwriteTrusteeProto(this.outputDir, trusteeProto);
       logger.atInfo().log("KeyCeremonyRemoteTrustee saveState %s", delegate.id);
 
     } catch (Throwable t) {
