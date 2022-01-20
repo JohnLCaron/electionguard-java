@@ -93,12 +93,12 @@ public class BallotBox {
   }
 
   /** Return the SubmittedBallot with the given key, or empty if not exist. */
-  Optional<SubmittedBallot> get(String key) {
+  public Optional<SubmittedBallot> get(String key) {
     return store.get(key);
   }
 
   /** Get all the ballots as a CloseableIterable. */
-  CloseableIterable<SubmittedBallot> getAcceptedBallotsAsCloseableIterable() {
+  public CloseableIterable<SubmittedBallot> getAcceptedBallotsAsCloseableIterable() {
     return CloseableIterableAdapter.wrap(store);
   }
 

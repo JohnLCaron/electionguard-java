@@ -64,7 +64,7 @@ public class TestElectionRecordProtoRoundtrip {
     Path tmp = Files.createTempDirectory("publish");
     tmp.toFile().deleteOnExit();
     String protoDir = tmp.toAbsolutePath().toString();
-    Publisher publisher = new Publisher(protoDir, true, false);
+    Publisher publisher = new Publisher(protoDir, Publisher.Mode.createNew, false);
     publisher.writeDecryptionResultsProto(
             consumer.readElectionRecord(),
             consumer.ciphertextTally(),

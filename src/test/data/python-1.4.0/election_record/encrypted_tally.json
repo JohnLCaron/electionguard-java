@@ -11,8 +11,8 @@
                     "sequence_order": "00",
                     "description_hash": "2DFF",
                     "ciphertext": {
-                        "pad": "33F46DB4D39E6D7E",
-                        "data": "41623D55BCAE279D"
+                        "pad": "44A2D1D5A35CAE5C",
+                        "data": "EAC1CCC69EF29DF5"
                     }
                 },
                 "benjamin-franklin-selection": {
@@ -20,8 +20,8 @@
                     "sequence_order": "01",
                     "description_hash": "C9D7",
                     "ciphertext": {
-                        "pad": "D76F4A18AC3F0AE5",
-                        "data": "75B5010A9A718F5E"
+                        "pad": "3E8CCBCAAC754ABE",
+                        "data": "7FC98D20F144D665"
                     }
                 },
                 "john-hancock-selection": {
@@ -29,8 +29,8 @@
                     "sequence_order": "02",
                     "description_hash": "041E",
                     "ciphertext": {
-                        "pad": "EEC89FE8A4865C7E",
-                        "data": "42881EB17B457510"
+                        "pad": "DC44876F003E5D6C",
+                        "data": "CAD6E25A1008E79B"
                     }
                 },
                 "write-in-selection": {
@@ -38,8 +38,8 @@
                     "sequence_order": "03",
                     "description_hash": "C6AF",
                     "ciphertext": {
-                        "pad": "C086BCD0A6D34434",
-                        "data": "BE22BF1D00B5D6B1"
+                        "pad": "6FD8BA350ABDE487",
+                        "data": "D57FC5F900530032"
                     }
                 }
             }
@@ -54,8 +54,8 @@
                     "sequence_order": "00",
                     "description_hash": "D961",
                     "ciphertext": {
-                        "pad": "78832C94658ED55B",
-                        "data": "3BCD837CD3DB3CA4"
+                        "pad": "90801773873878FD",
+                        "data": "AE48BBBBAAF4C238"
                     }
                 },
                 "referendum-pineapple-negative-selection": {
@@ -63,8 +63,8 @@
                     "sequence_order": "01",
                     "description_hash": "05ED",
                     "ciphertext": {
-                        "pad": "7559276420D56257",
-                        "data": "0B22E68D9EE1EB7F"
+                        "pad": "67C7CD7871856012",
+                        "data": "A86EB1BB3B274A61"
                     }
                 }
             }

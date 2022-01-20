@@ -83,7 +83,7 @@ public class TestChaumPedersenProperties extends TestProperties {
     ChaumPedersenProof bad_proof = make_chaum_pedersen(message, keypair.secret_key, badP, seed, ONE_MOD_Q);
 
     assertThat(proof.is_valid(message, keypair.public_key, decryption, ONE_MOD_Q)).isTrue();
-    assertThrows(IllegalStateException.class, () -> bad_proof.is_valid(message, keypair.public_key, decryption, ONE_MOD_Q));
+    assertThat(bad_proof.is_valid(message, keypair.public_key, decryption, ONE_MOD_Q)).isFalse();
   }
 
   // TestConstantChaumPedersen

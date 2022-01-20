@@ -59,7 +59,7 @@ public class BallotFactory {
   }
 
   /** Get a single Fake Ballot object that is manually constructed with default values . */
-  PlaintextBallot get_fake_ballot(
+  public PlaintextBallot get_fake_ballot(
           InternalManifest metadata,
           String ballot_id,
           boolean with_trues) { // default true
@@ -96,7 +96,7 @@ public class BallotFactory {
 
   //////////////////////////////////////////////////////////////////////////////////////
 
-  List<PlaintextBallot> get_simple_ballots_from_file() throws IOException {
+  public List<PlaintextBallot> get_simple_ballots_from_file() throws IOException {
     String current = new java.io.File("./src/test/resources/").getCanonicalPath();
     return get_ballots_from_file(current + "/" + simple_ballots_filename);
   }

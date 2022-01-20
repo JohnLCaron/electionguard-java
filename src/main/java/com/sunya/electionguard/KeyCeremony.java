@@ -59,7 +59,7 @@ public class KeyCeremony {
     }
 
    /** Share the election public key and associated data. */
-    ElectionPublicKey share() {
+    public ElectionPublicKey share() {
       return ElectionPublicKey.create(
               this.owner_id(),
               this.sequence_order(),
@@ -110,8 +110,8 @@ public class KeyCeremony {
   /** Details of key ceremony: number of guardians and quorum size. */
   @AutoValue
   public abstract static class CeremonyDetails {
-    abstract int number_of_guardians();
-    abstract int quorum();
+    public abstract int number_of_guardians();
+    public abstract int quorum();
 
     public static CeremonyDetails create(int number_of_guardians, int quorum) {
       return new AutoValue_KeyCeremony_CeremonyDetails(number_of_guardians, quorum);
@@ -145,12 +145,12 @@ public class KeyCeremony {
   /** Challenge of election partial key used in key sharing. */
   @AutoValue
   public abstract static class ElectionPartialKeyChallenge {
-    abstract String owner_id();
-    abstract String designated_id();
-    abstract int designated_sequence_order(); // The sequence order of the designated guardian
-    abstract ElementModQ value();
-    abstract ImmutableList<ElementModP> coefficient_commitments();
-    abstract ImmutableList<SchnorrProof> coefficient_proofs();
+    public abstract String owner_id();
+    public abstract String designated_id();
+    public abstract int designated_sequence_order(); // The sequence order of the designated guardian
+    public abstract ElementModQ value();
+    public abstract ImmutableList<ElementModP> coefficient_commitments();
+    public abstract ImmutableList<SchnorrProof> coefficient_proofs();
 
     public static ElectionPartialKeyChallenge create(String owner_id, String designated_id, int designated_sequence_order,
            ElementModQ value, List<ElementModP> coefficient_commitments, List<SchnorrProof> coefficient_proofs) {
@@ -200,7 +200,7 @@ public class KeyCeremony {
   // LOOK generate_elgamal_auxiliary_key_pair
 
   /** Generate auxiliary key pair using RSA . */
-  static Auxiliary.KeyPair generate_rsa_auxiliary_key_pair(String owner_id, int sequence_order) {
+  public static Auxiliary.KeyPair generate_rsa_auxiliary_key_pair(String owner_id, int sequence_order) {
     KeyPair rsa_key_pair = Rsa.rsa_keypair();
     return new Auxiliary.KeyPair(owner_id, sequence_order, rsa_key_pair.getPrivate(), rsa_key_pair.getPublic());
   }
@@ -210,7 +210,7 @@ public class KeyCeremony {
    * @param quorum: Quorum of guardians needed to decrypt
    * @param nonce: Optional nonce for determinism, use null when generating in production.
    */
-  static ElectionKeyPair generate_election_key_pair(String owner_id, int sequence_order, int quorum, @Nullable ElementModQ nonce) {
+  public static ElectionKeyPair generate_election_key_pair(String owner_id, int sequence_order, int quorum, @Nullable ElementModQ nonce) {
     ElectionPolynomial polynomial = ElectionPolynomial.generate_polynomial(quorum, nonce);
     // the 0th coefficient is the secret s for the ith Guardian
     // the 0th commitment is the public key = g^s mod p

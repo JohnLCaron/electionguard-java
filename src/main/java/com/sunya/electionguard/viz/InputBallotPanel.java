@@ -1,7 +1,7 @@
 package com.sunya.electionguard.viz;
 
 import com.sunya.electionguard.publish.CloseableIterableAdapter;
-import com.sunya.electionguard.publish.Consumer;
+import com.sunya.electionguard.publish.PrivateData;
 import ucar.ui.prefs.ComboBox;
 import ucar.ui.widget.BAMutil;
 import ucar.ui.widget.FileManager;
@@ -27,7 +27,6 @@ class InputBallotPanel extends JPanel {
 
   boolean eventOk = true;
   String inputBallotDir = "none";
-  Consumer consumer;
 
   InputBallotPanel(PreferencesExt prefs, JFrame frame) {
     this.prefs = prefs;
@@ -93,8 +92,8 @@ class InputBallotPanel extends JPanel {
 
   boolean setInputBallots(String electionRecord) {
     try {
-      this.consumer = new Consumer(electionRecord);
-      inputBallotsTable.setBallots(CloseableIterableAdapter.wrap(consumer.inputBallots(inputBallotDir)));
+      PrivateData pdata = new PrivateData(electionRecord, false, false);
+      inputBallotsTable.setBallots(CloseableIterableAdapter.wrap(pdata.inputBallots()));
     } catch (IOException e) {
       e.printStackTrace();
       return false;

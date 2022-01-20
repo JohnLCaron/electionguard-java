@@ -24,6 +24,7 @@ import java.util.List;
  * This is present for compatibility with python serialization. Prefer using
  * com.sunya.electionguard.decrypting, in particular DecryptingTrustee.
  * see "https://stackoverflow.com/questions/46809528/how-to-save-and-re-use-keypairs-in-java-asymmetric-encryption"
+ * TODO Probably doenst match python JSON, eg Auxilary.ByteString
  */
 public class GuardianRecordPrivatePojo {
   public ElectionKeyPairPojo election_keys;

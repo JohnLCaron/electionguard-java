@@ -117,14 +117,14 @@ public class AccumulateTally {
   void accumulateTally() {
     System.out.printf("%nAccumulate tally%n");
     InternalManifest manifest = new InternalManifest(electionRecord.election);
-    CiphertextTallyBuilder ciphertextTally = new CiphertextTallyBuilder("DecryptBallots", manifest, electionRecord.context);
+    CiphertextTallyBuilder ciphertextTally = new CiphertextTallyBuilder("accumulateTally", manifest, electionRecord.context);
     int nballots = ciphertextTally.batch_append(electionRecord.acceptedBallots);
     this.encryptedTally = ciphertextTally.build();
     System.out.printf(" done accumulating %d ballots in the tally%n", nballots);
   }
 
   boolean publish(String inputDir, String publishDir) throws IOException {
-    Publisher publisher = new Publisher(publishDir, false, false);
+    Publisher publisher = new Publisher(publishDir, Publisher.Mode.createIfMissing, false);
     publisher.writeEncryptedTallyProto(this.electionRecord, this.encryptedTally);
     publisher.copyAcceptedBallots(inputDir);
     return true;

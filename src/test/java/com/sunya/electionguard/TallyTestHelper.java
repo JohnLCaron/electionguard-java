@@ -18,7 +18,7 @@ public class TallyTestHelper {
    * @param ballots: a list of plaintext ballots
    * @return a map from PlaintextBallotSelection.selection_id's to integer totals
    */
-  static Map<String, Integer> accumulate_plaintext_ballots(List<PlaintextBallot> ballots) {
+  public static Map<String, Integer> accumulate_plaintext_ballots(List<PlaintextBallot> ballots) {
 
     Map<String, Integer> result = new HashMap<>();
     for (PlaintextBallot ballot : ballots) {

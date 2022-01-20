@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.verify;
 
 /** Test DecryptingRemoteTrustee. Needs one to be running on 17771. */

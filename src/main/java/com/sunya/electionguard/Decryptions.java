@@ -23,7 +23,7 @@ import static com.sunya.electionguard.DecryptionShare.CompensatedDecryptionShare
 import static com.sunya.electionguard.DecryptionShare.create_ciphertext_decryption_selection;
 
 /** Static methods for decryption. */
-class Decryptions {
+public class Decryptions {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   ////////////////////////////////////////////////////////////////////////////
@@ -36,7 +36,7 @@ class Decryptions {
    * @param tally: The election tally to decrypt
    * @param context: The public election encryption context
    */
-  static Optional<DecryptionShare> compute_decryption_share(
+  public static Optional<DecryptionShare> compute_decryption_share(
           KeyCeremony.ElectionKeyPair guardian_keys,
           CiphertextTally tally,
           CiphertextElectionContext context) {
@@ -81,7 +81,7 @@ class Decryptions {
   }
 
   /** Compute the DecryptionShare for a single ballot for a guardian. */
-  static Optional<DecryptionShare> compute_decryption_share_for_ballot(
+  public static Optional<DecryptionShare> compute_decryption_share_for_ballot(
           KeyCeremony.ElectionKeyPair guardian_keys,
           SubmittedBallot ballot,
           CiphertextElectionContext context) {
@@ -162,7 +162,7 @@ class Decryptions {
    * @return a `CiphertextDecryptionSelection` or `None` if there is an error
    */
   @VisibleForTesting
-  static Optional<CiphertextDecryptionSelection> compute_decryption_share_for_selection(
+  public static Optional<CiphertextDecryptionSelection> compute_decryption_share_for_selection(
           KeyCeremony.ElectionKeyPair guardian_keys,
           CiphertextSelection selection,
           CiphertextElectionContext context) {
@@ -204,7 +204,7 @@ class Decryptions {
    * @param context: The public election encryption context
    * @return guardian's compensated decryption share of tally for the missing guardian
    */
-  static Optional<CompensatedDecryptionShare> compute_compensated_decryption_share(
+  public static Optional<CompensatedDecryptionShare> compute_compensated_decryption_share(
           KeyCeremony.ElectionPublicKey guardian_key,
           Auxiliary.KeyPair guardian_auxiliary_keys,
           KeyCeremony.ElectionPublicKey missing_guardian_key,
@@ -317,8 +317,7 @@ class Decryptions {
   }
 
   /** Compute the compensated decryption for a single ballot. */
-  @VisibleForTesting
-  static Optional<CompensatedDecryptionShare> compute_compensated_decryption_share_for_ballot(
+  public static Optional<CompensatedDecryptionShare> compute_compensated_decryption_share_for_ballot(
           KeyCeremony.ElectionPublicKey guardian_key,
           Auxiliary.KeyPair guardian_auxiliary_keys,
           KeyCeremony.ElectionPublicKey missing_guardian_key,
@@ -402,7 +401,7 @@ class Decryptions {
    * @return a `CiphertextCompensatedDecryptionSelection` or `None` if there is an error
    */
   @VisibleForTesting
-  static Optional<CiphertextCompensatedDecryptionSelection> compute_compensated_decryption_share_for_selection(
+  public static Optional<CiphertextCompensatedDecryptionSelection> compute_compensated_decryption_share_for_selection(
           KeyCeremony.ElectionPublicKey guardian_key,
           Auxiliary.KeyPair guardian_auxiliary_keys,
           KeyCeremony.ElectionPublicKey missing_guardian_key,
@@ -451,8 +450,7 @@ class Decryptions {
   ////////////////////////////////////////////////////////////////////////////////////////////////
 
   /** Produce all Lagrange coefficients for a collection of available Guardians, used when reconstructing a missing share. */
-  @VisibleForTesting
-  static Map<String, Group.ElementModQ> compute_lagrange_coefficients_for_guardians(
+  public static Map<String, Group.ElementModQ> compute_lagrange_coefficients_for_guardians(
           List<KeyCeremony.ElectionPublicKey> available_guardians_keys) {
 
     Map<String, Group.ElementModQ> result = new HashMap<>();
@@ -572,7 +570,8 @@ class Decryptions {
    * corresponding to the secret share Pi(l)
    * K_ij^(l^j) for j in 0..k-1.  K_ij is coefficients[j].public_key
    */
-  static Group.ElementModP compute_recovery_public_key(
+  @VisibleForTesting
+  public static Group.ElementModP compute_recovery_public_key(
           KeyCeremony.ElectionPublicKey guardian_key,
           KeyCeremony.ElectionPublicKey missing_guardian_key) {
 
@@ -594,7 +593,7 @@ class Decryptions {
    * Reconstruct the missing Decryption Share for a missing guardian
    * from the collection of compensated decryption shares.
    */
-  static DecryptionShare reconstruct_decryption_share(
+  public static DecryptionShare reconstruct_decryption_share(
           KeyCeremony.ElectionPublicKey missing_guardian_key,
           CiphertextTally tally,
           Map<String, CompensatedDecryptionShare> shares, // Map(GUARDIAN_ID, CompensatedDecryptionShare)
@@ -707,8 +706,7 @@ class Decryptions {
    * @param shares                the collection of `CompensatedDecryptionShare` for the missing guardian, each keyed by the ID of the guardian that produced it
    * @param lagrange_coefficients the lagrange coefficients for the available guardians that provided shares
    */
-  @VisibleForTesting
-  static DecryptionShare reconstruct_decryption_share_for_ballot(
+  public static DecryptionShare reconstruct_decryption_share_for_ballot(
           KeyCeremony.ElectionPublicKey public_key,
           SubmittedBallot ballot,
           Map<String, CompensatedDecryptionShare> shares, // Dict[AVAILABLE_GUARDIAN_ID, CompensatedBallotDecryptionShare]

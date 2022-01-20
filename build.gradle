@@ -8,7 +8,6 @@ buildscript {
     }
 }
 
-// What is "plugin"? They are just java classes, which implement Plugin interface.
 plugins {
     id 'java'
     id "com.google.protobuf" version "0.8.14"
@@ -17,7 +16,7 @@ plugins {
 }
 
 group 'com.sunya.electionguard'
-version '0.9.4-SNAPSHOT'
+version '0.9.4'
 
 repositories {
     mavenLocal()
@@ -29,7 +28,7 @@ ext.junitPlatformVersion = '1.7.0'
 ext.junitJupiterVersion = '5.7.0'
 ext.jqwikVersion = '1.3.10'
 ext.grpcVersion = '1.42.1'
-ext.protobufVersion = '3.19.1'
+ext.protobufVersion = '3.19.2'
 
 compileTestJava {
     // To enable argument names in reporting and debugging

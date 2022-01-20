@@ -9,6 +9,7 @@ import com.sunya.electionguard.TestProperties;
 import com.sunya.electionguard.proto.TrusteeFromProto;
 import com.sunya.electionguard.publish.CloseableIterable;
 import com.sunya.electionguard.publish.Consumer;
+import com.sunya.electionguard.publish.PrivateData;
 import com.sunya.electionguard.verifier.ElectionRecord;
 import net.jqwik.api.Example;
 
@@ -24,10 +25,10 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 
 public class TestDecryptingMediator extends TestProperties {
-  //public static final String DECRYPTING_DATA_DIR = "src/test/data/workflow/encryptor/";
-  //public static final String TRUSTEE_DATA_DIR = "src/test/data/workflow/keyCeremony/";
-  public static final String DECRYPTING_DATA_DIR = "/home/snake/tmp/electionguard/remoteWorkflow/encryptor/";
-  public static final String TRUSTEE_DATA_DIR = "/home/snake/tmp/electionguard/remoteWorkflow/keyCeremony/";
+  public static final String DECRYPTING_DATA_DIR = "src/test/data/workflow/encryptor/";
+  public static final String TRUSTEE_DATA_DIR = "src/test/data/workflow/keyCeremony/";
+  // public static final String DECRYPTING_DATA_DIR = "/home/snake/tmp/electionguard/remoteWorkflow/encryptor/";
+  // public static final String TRUSTEE_DATA_DIR = "/home/snake/tmp/electionguard/remoteWorkflow/keyCeremony/";
 
   List<DecryptingTrusteeIF> trustees = new ArrayList<>();
   Consumer consumer;
@@ -53,10 +54,10 @@ public class TestDecryptingMediator extends TestProperties {
     expectedTally = new HashMap<>();
     expectedTally.put("referendum-pineapple:referendum-pineapple-affirmative-selection", 0);
     expectedTally.put("referendum-pineapple:referendum-pineapple-negative-selection", 0);
-    expectedTally.put("justice-supreme-court:benjamin-franklin-selection", 1);
-    expectedTally.put("justice-supreme-court:john-adams-selection", 1);
-    expectedTally.put("justice-supreme-court:john-hancock-selection", 3);
-    expectedTally.put("justice-supreme-court:write-in-selection", 1);
+    expectedTally.put("justice-supreme-court:benjamin-franklin-selection", 2);
+    expectedTally.put("justice-supreme-court:john-adams-selection", 3);
+    expectedTally.put("justice-supreme-court:john-hancock-selection", 2);
+    expectedTally.put("justice-supreme-court:write-in-selection", 3);
 
     this.spoiledBallots =  consumer.spoiledBallotsProto();
   }
@@ -144,7 +145,8 @@ public class TestDecryptingMediator extends TestProperties {
   }
 
   private void checkDecrypted(List<SpoiledBallotAndTally> decrypteds) throws IOException {
-    List<PlaintextBallot> inputBallots = this.consumer.inputBallots(DECRYPTING_DATA_DIR + "/private/plaintext");
+    PrivateData pdata = new PrivateData(DECRYPTING_DATA_DIR, false, false);
+    List<PlaintextBallot> inputBallots = pdata.inputBallots();
     Map<String, PlaintextBallot> inputBallotsMap = inputBallots.stream().collect(Collectors.toMap(e -> e.object_id, e -> e));
     for (SpoiledBallotAndTally decrypted : decrypteds) {
       PlaintextBallot decrypted_ballot = decrypted.ballot;

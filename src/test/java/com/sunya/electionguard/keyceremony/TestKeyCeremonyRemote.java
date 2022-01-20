@@ -7,6 +7,7 @@ import net.jqwik.api.Example;
 import java.io.IOException;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 
 public class TestKeyCeremonyRemote {
@@ -33,16 +34,6 @@ public class TestKeyCeremonyRemote {
   private KeyCeremonyRemote makeRemote() throws IOException {
     // Manifest manifest, int nguardians, int quorum, Publisher publisher
     return new KeyCeremonyRemote(this.manifest, NGUARDIANS, QUORUM, "/home/snake/tmp/electionguard/publishKeyCeremonyRemote");
-  }
-
-  @Example
-  public void makeRemoteNoDirectory() throws IOException {
-    try {
-      new KeyCeremonyRemote(this.manifest, NGUARDIANS, QUORUM, "/home/snake/tmp/electionguard/publishNotExist");
-      fail();
-    } catch (Exception e) {
-      assertThat(e.getMessage()).contains("does not exist");
-    }
   }
 
   @Example

@@ -11,6 +11,7 @@ import com.sunya.electionguard.keyceremony.KeyCeremonyRemoteMediator;
 import com.sunya.electionguard.protogen.TrusteeProto;
 import com.sunya.electionguard.proto.TrusteeToProto;
 import com.sunya.electionguard.publish.Consumer;
+import com.sunya.electionguard.publish.PrivateData;
 import com.sunya.electionguard.publish.Publisher;
 
 import java.io.IOException;
@@ -25,7 +26,7 @@ import java.util.stream.Collectors;
  * For command line help:
  * <strong>
  * <pre>
- *  java -classpath electionguard-java-all.jar com.sunya.electionguard.workflow.PerformKeyCeremony --help
+ *  java -classpath electionguard-java-all.jar com.sunya.electionguard.standard.KeyCeremonySimulator --help
  * </pre>
  * </strong>
  *
@@ -91,7 +92,7 @@ public class KeyCeremonySimulator {
         System.exit(1);
       }
 
-      Publisher publisher = new Publisher(cmdLine.outputDir, false, false);
+      Publisher publisher = new Publisher(cmdLine.outputDir, Publisher.Mode.createNew, false);
       KeyCeremonySimulator keyCeremony = new KeyCeremonySimulator(election, cmdLine.nguardians, cmdLine.quorum, publisher);
 
       keyCeremony.runKeyCeremony();
@@ -139,7 +140,8 @@ public class KeyCeremonySimulator {
     TrusteeProto.DecryptingTrustees trusteesProto = TrusteeToProto.convertTrustees(trustees);
     boolean okt;
     try {
-      publisher.writeTrusteesProto(trusteesProto);
+      PrivateData pdata = publisher.makePrivateData(false, false);
+      pdata.writeTrusteesProto(trusteesProto);
       okt = true;
     } catch (IOException e) {
       e.printStackTrace();

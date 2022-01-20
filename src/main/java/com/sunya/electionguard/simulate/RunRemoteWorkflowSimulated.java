@@ -4,7 +4,7 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.google.common.base.Stopwatch;
-import com.sunya.electionguard.workflow.RunStandardWorkflow;
+import com.sunya.electionguard.standard.RunStandardWorkflow;
 
 import java.io.BufferedReader;
 import java.io.IOException;

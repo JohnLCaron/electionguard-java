@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
  * For command line help:
  * <strong>
  * <pre>
- *  java -classpath electionguard-java-all.jar com.sunya.electionguard.workflow.DecryptBallots --help
+ *  java -classpath electionguard-java-all.jar com.sunya.electionguard.workflow.DecryptingSimulator --help
  * </pre>
  * </strong>
  *
@@ -110,11 +110,11 @@ public class DecryptingSimulator {
 
       decryptor.decryptTally();
       boolean ok = decryptor.publish(cmdLine.encryptDir, cmdLine.outputDir);
-      System.out.printf("*** DecryptBallots %s%n", ok ? "SUCCESS" : "FAILURE");
+      System.out.printf("*** DecryptingSimulator %s%n", ok ? "SUCCESS" : "FAILURE");
       System.exit(ok ? 0 : 1);
 
     } catch (Throwable t) {
-      System.out.printf("*** DecryptBallots FAILURE%n");
+      System.out.printf("*** DecryptingSimulator FAILURE%n");
       t.printStackTrace();
       System.exit(4);
 
@@ -178,7 +178,7 @@ public class DecryptingSimulator {
   void accumulateTally() {
     System.out.printf("%nAccumulate tally%n");
     InternalManifest metadata = new InternalManifest(this.election);
-    CiphertextTallyBuilder ciphertextTally = new CiphertextTallyBuilder("DecryptBallots", metadata, electionRecord.context);
+    CiphertextTallyBuilder ciphertextTally = new CiphertextTallyBuilder("DecryptingSimulator", metadata, electionRecord.context);
     int nballots = ciphertextTally.batch_append(electionRecord.acceptedBallots);
     this.encryptedTally = ciphertextTally.build();
     System.out.printf(" done accumulating %d ballots in the tally%n", nballots);
@@ -218,7 +218,7 @@ public class DecryptingSimulator {
   }
 
   boolean publish(String inputDir, String publishDir) throws IOException {
-    Publisher publisher = new Publisher(publishDir, true, false);
+    Publisher publisher = new Publisher(publishDir, Publisher.Mode.createIfMissing, false);
     publisher.writeDecryptionResultsProto(
             this.electionRecord,
             this.encryptedTally,
