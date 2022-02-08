@@ -9,7 +9,6 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
-import com.sunya.electionguard.standard.RunStandardWorkflow;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,7 +33,7 @@ import java.util.stream.Stream;
  * </strong>
  */
 public class RunRemoteWorkflow {
-  private static final String classpath = RunStandardWorkflow.classpath;
+  public static final String classpath = "build/libs/electionguard-java-0.9.5-SNAPSHOT-all.jar";
   private static final String REMOTE_TRUSTEE = "remoteTrustee";
   private static final String CMD_OUTPUT = "/home/snake/tmp/runRemoteWorkflow/";
 
