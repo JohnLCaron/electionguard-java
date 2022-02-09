@@ -138,7 +138,7 @@ public class TestEncryptHypothesisProperties extends TestProperties {
     for (CiphertextBallot ballot : ballots) {
       for (CiphertextBallot.Contest contest : ballot.contests) {
         for (CiphertextBallot.Selection selection : contest.ballot_selections) {
-          String desc_id = (selection.object_id); // this should be the same as in the PlaintextBallot!
+          String desc_id = selection.object_id(); // this should be the same as in the PlaintextBallot!
           if (!tally.containsKey(desc_id)) {
             tally.put(desc_id, encrypted_zero);
           }

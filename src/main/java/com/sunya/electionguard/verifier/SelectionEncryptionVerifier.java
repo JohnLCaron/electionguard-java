@@ -65,7 +65,7 @@ public class SelectionEncryptionVerifier {
       ElGamal.Ciphertext cipher = this.selection.ciphertext();
 
       // get values
-      String selection_id = this.selection.object_id;
+      String selection_id = this.selection.object_id();
       ElementModP a0 = proof.proof_zero_pad; // a0
       ElementModP a1 = proof.proof_one_pad; // a1
       ElementModP b0 = proof.proof_zero_data; // b0

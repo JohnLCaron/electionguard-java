@@ -20,9 +20,9 @@ public class ElectionInputValidation {
 
   public ElectionInputValidation(Manifest election) {
     this.election = election;
-    this.gpUnits = election.geopolitical_units.stream().map(gp -> gp.object_id).collect(Collectors.toSet());
-    this.candidates = election.candidates.stream().map(c -> c.object_id).collect(Collectors.toSet());
-    this.parties = election.parties.stream().map(p -> p.object_id).collect(Collectors.toSet());
+    this.gpUnits = election.geopolitical_units.stream().map(gp -> gp.object_id()).collect(Collectors.toSet());
+    this.candidates = election.candidates.stream().map(c -> c.object_id()).collect(Collectors.toSet());
+    this.parties = election.parties.stream().map(p -> p.object_id()).collect(Collectors.toSet());
   }
 
   /** Determine if a ballot is valid and well-formed for the given election. */
@@ -33,7 +33,8 @@ public class ElectionInputValidation {
     for (Manifest.BallotStyle ballotStyle : election.ballot_styles) {
       for (String gpunit : ballotStyle.geopolitical_unit_ids) {
         if (!gpUnits.contains(gpunit)) {
-          String msg = String.format("Manifest.A.1 BallotStyle '%s' has geopolitical_unit_id '%s' that does not exist in election's geopolitical_units", ballotStyle.object_id, gpunit);
+          String msg = String.format("Manifest.A.1 BallotStyle '%s' has geopolitical_unit_id '%s' that does not exist in election's geopolitical_units",
+                  ballotStyle.object_id(), gpunit);
           ballotMesses.add(msg);
           logger.atWarning().log(msg);
         }
@@ -44,7 +45,8 @@ public class ElectionInputValidation {
     for (Manifest.Candidate candidate : election.candidates) {
       candidate.party_id.ifPresent(pid -> {
         if (!parties.contains(pid)) {
-          String msg = String.format("Manifest.A.2 Candidate '%s' party_id '%s' does not exist in election's Parties", candidate.object_id, pid);
+          String msg = String.format("Manifest.A.2 Candidate '%s' party_id '%s' does not exist in election's Parties",
+                  candidate.object_id(), pid);
           ballotMesses.add(msg);
           logger.atWarning().log(msg);
         }

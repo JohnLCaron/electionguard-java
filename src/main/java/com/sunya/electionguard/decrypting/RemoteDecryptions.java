@@ -2,12 +2,12 @@ package com.sunya.electionguard.decrypting;
 
 import com.google.common.base.Preconditions;
 import com.google.common.flogger.FluentLogger;
+import com.sunya.electionguard.BallotBox;
 import com.sunya.electionguard.CiphertextBallot;
 import com.sunya.electionguard.CiphertextContest;
 import com.sunya.electionguard.CiphertextElectionContext;
 import com.sunya.electionguard.CiphertextSelection;
 import com.sunya.electionguard.CiphertextTally;
-import com.sunya.electionguard.DecryptionProofTuple;
 import com.sunya.electionguard.DecryptionShare;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.Group;
@@ -52,7 +52,7 @@ public class RemoteDecryptions {
         texts.add(selection.ciphertext());
       }
     }
-    List<DecryptionProofTuple> results = guardian.partialDecrypt(texts, context.crypto_extended_base_hash, null);
+    List<BallotBox.DecryptionProofTuple> results = guardian.partialDecrypt(texts, context.crypto_extended_base_hash, null);
 
     // Create the guardian's DecryptionShare for the tally
     int count = 0;
@@ -61,7 +61,7 @@ public class RemoteDecryptions {
 
       Map<String, CiphertextDecryptionSelection> selections = new HashMap<>();
       for (CiphertextSelection tallySelection : tallyContest.selections.values()) {
-        DecryptionProofTuple tuple = results.get(count);
+        BallotBox.DecryptionProofTuple tuple = results.get(count);
         if (tuple.proof.is_valid(tallySelection.ciphertext(), guardian.electionPublicKey(),
                 tuple.decryption, context.crypto_extended_base_hash)) {
 
@@ -71,7 +71,7 @@ public class RemoteDecryptions {
                   tuple.decryption,
                   Optional.of(tuple.proof),
                   Optional.empty());
-          selections.put(tallySelection.object_id, share);
+          selections.put(tallySelection.object_id(), share);
           count++;
         } else {
           // LOOK?
@@ -79,12 +79,12 @@ public class RemoteDecryptions {
       }
 
       CiphertextDecryptionContest contest = CiphertextDecryptionContest.create(
-              tallyContest.object_id, guardian.id(), tallyContest.contestDescriptionHash, selections);
-      contests.put(tallyContest.object_id, contest);
+              tallyContest.object_id(), guardian.id(), tallyContest.contestDescriptionHash, selections);
+      contests.put(tallyContest.object_id(), contest);
     }
 
     return new DecryptionShare(
-            tally.object_id,
+            tally.object_id(),
             guardian.id(),
             guardian.electionPublicKey(),
             contests);
@@ -99,7 +99,7 @@ public class RemoteDecryptions {
     Map<String, DecryptionShare> shares = new HashMap<>();
     for (SubmittedBallot ballot : ballots) {
       DecryptionShare ballot_share = computeDecryptionShareForBallot(guardian, ballot, context);
-      shares.put(ballot.object_id, ballot_share);
+      shares.put(ballot.object_id(), ballot_share);
     }
 
     return Optional.of(shares);
@@ -126,7 +126,7 @@ public class RemoteDecryptions {
         texts.add(ballotSelection.ciphertext());
       }
     }
-    List<DecryptionProofTuple> results = guardian.partialDecrypt(texts, context.crypto_extended_base_hash, null);
+    List<BallotBox.DecryptionProofTuple> results = guardian.partialDecrypt(texts, context.crypto_extended_base_hash, null);
 
     // Create the guardian's DecryptionShare for the ballot
     int count = 0;
@@ -135,7 +135,7 @@ public class RemoteDecryptions {
 
       Map<String, CiphertextDecryptionSelection> selections = new HashMap<>();
       for (CiphertextBallot.Selection ballotSelection : ballotContest.ballot_selections) {
-        DecryptionProofTuple tuple = results.get(count);
+        BallotBox.DecryptionProofTuple tuple = results.get(count);
         if (tuple.proof.is_valid(ballotSelection.ciphertext(), guardian.electionPublicKey(),
                 tuple.decryption, context.crypto_extended_base_hash)) {
 
@@ -145,7 +145,7 @@ public class RemoteDecryptions {
                   tuple.decryption,
                   Optional.of(tuple.proof),
                   Optional.empty());
-          selections.put(ballotSelection.object_id, share);
+          selections.put(ballotSelection.object_id(), share);
           count++;
         } else {
           // LOOK?
@@ -158,7 +158,7 @@ public class RemoteDecryptions {
     }
 
     return new DecryptionShare(
-            ballot.object_id,
+            ballot.object_id(),
             guardian.id(),
             guardian.electionPublicKey(),
             contests);
@@ -211,14 +211,14 @@ public class RemoteDecryptions {
                 context.crypto_extended_base_hash)) {
 
           CiphertextCompensatedDecryptionSelection share = CiphertextCompensatedDecryptionSelection.create(
-                  tallySelection.object_id,
+                  tallySelection.object_id(),
                   guardian.id(),
                   missing_guardian_id,
                   tuple.decryption,
                   tuple.recoveryPublicKey,
                   tuple.proof);
 
-          selections.put(tallySelection.object_id, share);
+          selections.put(tallySelection.object_id(), share);
           count++;
         } else {
           // LOOK?
@@ -226,16 +226,16 @@ public class RemoteDecryptions {
       }
 
       CiphertextCompensatedDecryptionContest contest = CiphertextCompensatedDecryptionContest.create(
-              tallyContest.object_id,
+              tallyContest.object_id(),
               guardian.id(),
               missing_guardian_id,
               tallyContest.contestDescriptionHash,
               selections);
-      contests.put(tallyContest.object_id, contest);
+      contests.put(tallyContest.object_id(), contest);
     }
 
     return new CompensatedDecryptionShare(
-            tally.object_id,
+            tally.object_id(),
             guardian.id(),
             missing_guardian_id,
             guardian.electionPublicKey(),
@@ -285,14 +285,14 @@ public class RemoteDecryptions {
                 context.crypto_extended_base_hash)) {
 
           CiphertextCompensatedDecryptionSelection share = CiphertextCompensatedDecryptionSelection.create(
-                  selection.object_id,
+                  selection.object_id(),
                   guardian.id(),
                   missing_guardian_id,
                   tuple.decryption,
                   tuple.recoveryPublicKey,
                   tuple.proof);
 
-          selections.put(selection.object_id, share);
+          selections.put(selection.object_id(), share);
           count++;
         } else {
           // LOOK?
@@ -309,7 +309,7 @@ public class RemoteDecryptions {
     }
 
     return new CompensatedDecryptionShare(
-            ballot.object_id,
+            ballot.object_id(),
             guardian.id(),
             missing_guardian_id,
             guardian.electionPublicKey(),
@@ -337,10 +337,10 @@ public class RemoteDecryptions {
               CiphertextContest.createFrom(contest),
               shares,
               lagrange_coefficients);
-      contests.put(contest.object_id, dcontest);
+      contests.put(contest.object_id(), dcontest);
     }
 
-    return new DecryptionShare(tally.object_id, missing_guardian_id, missing_public_key, contests);
+    return new DecryptionShare(tally.object_id(), missing_guardian_id, missing_public_key, contests);
   }
 
   /**
@@ -370,7 +370,7 @@ public class RemoteDecryptions {
     }
 
     return new DecryptionShare(
-            ballot.object_id,
+            ballot.object_id(),
             missing_guardian_id,
             missing_public_key,
             contests);
@@ -406,8 +406,8 @@ public class RemoteDecryptions {
       for (Map.Entry<String, CiphertextCompensatedDecryptionContest> entry4 : contest_shares.entrySet()) {
         String available_guardian_id = entry4.getKey();
         CiphertextCompensatedDecryptionContest compensated_contest = entry4.getValue();
-        Preconditions.checkArgument(compensated_contest.selections().containsKey(selection.object_id));
-        compensated_selection_shares.put(available_guardian_id, compensated_contest.selections().get(selection.object_id));
+        Preconditions.checkArgument(compensated_contest.selections().containsKey(selection.object_id()));
+        compensated_selection_shares.put(available_guardian_id, compensated_contest.selections().get(selection.object_id()));
       }
 
       List<Group.ElementModP> share_pow_p = new ArrayList<>();
@@ -422,7 +422,7 @@ public class RemoteDecryptions {
       // product M_il^w_l
       Group.ElementModP reconstructed_share = Group.mult_p(share_pow_p);
 
-      selections.put(selection.object_id, DecryptionShare.create_ciphertext_decryption_selection(
+      selections.put(selection.object_id(), DecryptionShare.create_ciphertext_decryption_selection(
               selection.object_id(),
               missing_guardian_id,
               reconstructed_share,

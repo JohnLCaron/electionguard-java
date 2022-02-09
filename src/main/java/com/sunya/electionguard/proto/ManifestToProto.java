@@ -37,7 +37,7 @@ public class ManifestToProto {
 
   static ManifestProto.BallotStyle convertBallotStyle(Manifest.BallotStyle style) {
     ManifestProto.BallotStyle.Builder builder = ManifestProto.BallotStyle.newBuilder();
-    builder.setObjectId(style.object_id);
+    builder.setObjectId(style.object_id());
     builder.addAllGeopoliticalUnitIds(style.geopolitical_unit_ids);
     builder.addAllPartyIds(style.party_ids);
     style.image_uri.ifPresent(builder::setImageUrl);
@@ -46,7 +46,7 @@ public class ManifestToProto {
 
   static ManifestProto.Candidate convertCandidate(Manifest.Candidate candidate) {
     ManifestProto.Candidate.Builder builder = ManifestProto.Candidate.newBuilder();
-    builder.setObjectId(candidate.object_id);
+    builder.setObjectId(candidate.object_id());
     builder.setName(convertInternationalizedText(candidate.name));
     candidate.party_id.ifPresent(builder::setPartyId);
     candidate.image_uri.ifPresent(builder::setImageUrl);
@@ -93,7 +93,7 @@ public class ManifestToProto {
 
   static ManifestProto.GeopoliticalUnit convertGeopoliticalUnit(Manifest.GeopoliticalUnit geoUnit) {
     ManifestProto.GeopoliticalUnit.Builder builder = ManifestProto.GeopoliticalUnit.newBuilder();
-    builder.setObjectId(geoUnit.object_id);
+    builder.setObjectId(geoUnit.object_id());
     builder.setName(geoUnit.name);
     builder.setType(convertReportingUnitType(geoUnit.type));
     geoUnit.contact_information.ifPresent(value -> builder.setContactInformation(convertContactInformation(value)));
@@ -117,7 +117,7 @@ public class ManifestToProto {
 
   static ManifestProto.Party convertParty(Manifest.Party party) {
     ManifestProto.Party.Builder builder = ManifestProto.Party.newBuilder();
-    builder.setObjectId(party.object_id);
+    builder.setObjectId(party.object_id());
     if (party.name.text != null) {
       builder.setName(convertInternationalizedText(party.name));
     }

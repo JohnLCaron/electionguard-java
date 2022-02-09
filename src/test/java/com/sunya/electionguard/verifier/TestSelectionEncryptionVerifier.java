@@ -124,7 +124,7 @@ public class TestSelectionEncryptionVerifier {
       ElGamal.Ciphertext cipher = selection.ciphertext();
 
       // get values
-      String selection_id = selection.object_id;
+      String selection_id = selection.object_id();
       ElementModP zero_pad = proof.proof_zero_pad; // a0
       ElementModP one_pad = proof.proof_one_pad; // a1
       ElementModP zero_data = proof.proof_zero_data; // b0

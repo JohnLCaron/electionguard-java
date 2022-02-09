@@ -80,7 +80,7 @@ public class PlaintextBallotsTable extends JPanel {
       while (iter.hasNext()) {
         PlaintextBallot ballot = iter.next();
         beanList.add(new BallotBean(ballot));
-        System.out.printf(" BallotBean %s%n", ballot.object_id);
+        System.out.printf(" BallotBean %s%n", ballot.object_id());
       }
       ballotTable.setBeans(beanList);
       if (beanList.size() > 0) {
@@ -132,7 +132,7 @@ public class PlaintextBallotsTable extends JPanel {
     }
 
     public String getId() {
-      return ballot.object_id;
+      return ballot.object_id();
     }
 
     public String getStyle() {

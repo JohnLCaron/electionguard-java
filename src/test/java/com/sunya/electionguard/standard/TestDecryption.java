@@ -12,7 +12,6 @@ import com.sunya.electionguard.CiphertextTally;
 import com.sunya.electionguard.CiphertextTallyBuilder;
 import com.sunya.electionguard.DecryptWithShares;
 import com.sunya.electionguard.DecryptionShare;
-import com.sunya.electionguard.Decryptions;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.ElectionBuilder;
 import com.sunya.electionguard.ElectionFactory;
@@ -34,7 +33,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 
 import static com.sunya.electionguard.Group.*;
-import static com.sunya.electionguard.KeyCeremony.*;
+import static com.sunya.electionguard.standard.KeyCeremony.*;
 
 // LOOK why is this so slow?
 public class TestDecryption extends TestProperties {
@@ -102,8 +101,8 @@ public class TestDecryption extends TestProperties {
               ballot_factory.get_fake_ballot(this.metadata, "some-unique-ballot-id-spoiled" + i, true));
     }
 
-    assertThat(this.fake_cast_ballot.is_valid(this.election.ballot_styles.get(0).object_id)).isTrue();
-    assertThat(this.fake_spoiled_ballot.is_valid(this.election.ballot_styles.get(0).object_id)).isTrue();
+    assertThat(this.fake_cast_ballot.is_valid(this.election.ballot_styles.get(0).object_id())).isTrue();
+    assertThat(this.fake_spoiled_ballot.is_valid(this.election.ballot_styles.get(0).object_id())).isTrue();
     ArrayList<PlaintextBallot> all = new ArrayList<>(more_fake_ballots);
     all.add(this.fake_cast_ballot);
     this.expected_plaintext_tally = TallyTestHelper.accumulate_plaintext_ballots(all);
@@ -336,7 +335,7 @@ public class TestDecryption extends TestProperties {
     System.out.printf("%s%n", result);
 
     assertThat(result).isPresent();
-    Integer expected = this.expected_plaintext_tally.get(first_selection.object_id);
+    Integer expected = this.expected_plaintext_tally.get(first_selection.object_id());
     Integer actual = result.get().tally();
     assertThat(actual).isEqualTo(expected);
   }

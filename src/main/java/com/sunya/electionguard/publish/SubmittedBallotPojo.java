@@ -178,7 +178,7 @@ public class SubmittedBallotPojo {
 
   private static SubmittedBallotPojo convertSubmittedBallot(SubmittedBallot org) {
     SubmittedBallotPojo pojo = new SubmittedBallotPojo();
-    pojo.object_id = org.object_id;
+    pojo.object_id = org.object_id();
     pojo.style_id = org.style_id;
     pojo.manifest_hash = org.manifest_hash;
     pojo.code_seed = org.code_seed;
@@ -208,7 +208,7 @@ public class SubmittedBallotPojo {
     CiphertextBallotSelectionPojo pojo = new CiphertextBallotSelectionPojo();
     pojo.object_id = selection.object_id();
     pojo.sequence_order = selection.sequence_order();
-    pojo.description_hash = selection.description_hash;
+    pojo.description_hash = selection.description_hash();
     pojo.ciphertext = convertCiphertext(selection.ciphertext());
     pojo.crypto_hash = selection.crypto_hash;
     pojo.is_placeholder_selection = selection.is_placeholder_selection;

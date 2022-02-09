@@ -1,9 +1,24 @@
-package com.sunya.electionguard;
+package com.sunya.electionguard.standard;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Streams;
 import com.google.common.flogger.FluentLogger;
+import com.sunya.electionguard.Auxiliary;
+import com.sunya.electionguard.BallotBox;
+import com.sunya.electionguard.ChaumPedersen;
+import com.sunya.electionguard.CiphertextBallot;
+import com.sunya.electionguard.CiphertextContest;
+import com.sunya.electionguard.CiphertextElectionContext;
+import com.sunya.electionguard.CiphertextSelection;
+import com.sunya.electionguard.CiphertextTally;
+import com.sunya.electionguard.DecryptionShare;
+import com.sunya.electionguard.ElGamal;
+import com.sunya.electionguard.ElectionPolynomial;
+import com.sunya.electionguard.Group;
+import com.sunya.electionguard.Rsa;
+import com.sunya.electionguard.Scheduler;
+import com.sunya.electionguard.SubmittedBallot;
 
 import javax.annotation.Nullable;
 import java.math.BigInteger;
@@ -50,11 +65,11 @@ public class Decryptions {
       if (contest_share.isEmpty()) {
         return Optional.empty();
       }
-      contests.put(tallyContest.object_id, contest_share.get());
+      contests.put(tallyContest.object_id(), contest_share.get());
     }
 
     return Optional.of(new DecryptionShare(
-            tally.object_id,
+            tally.object_id(),
             guardian_keys.owner_id(),
             guardian_keys.share().key(),
             contests));
@@ -74,7 +89,7 @@ public class Decryptions {
       if (ballot_share.isEmpty()) {
         return Optional.empty();
       }
-      shares.put(ballot.object_id, ballot_share.get());
+      shares.put(ballot.object_id(), ballot_share.get());
     }
 
     return Optional.of(shares);
@@ -102,7 +117,7 @@ public class Decryptions {
         contests.put(contest.object_id, contest_share.get());
     }
     return Optional.of(new DecryptionShare(
-            ballot.object_id,
+            ballot.object_id(),
             guardian_keys.owner_id(),
             guardian_keys.key_pair().public_key,
             contests));
@@ -168,7 +183,7 @@ public class Decryptions {
           CiphertextElectionContext context) {
 
     try {
-      DecryptionProofTuple tuple =
+      BallotBox.DecryptionProofTuple tuple =
               partially_decrypt(guardian_keys, selection.ciphertext(), context.crypto_extended_base_hash, null);
 
       if (tuple.proof.is_valid(selection.ciphertext(), guardian_keys.key_pair().public_key,
@@ -181,7 +196,7 @@ public class Decryptions {
                 Optional.empty()));
       } else {
         logger.atWarning().log("compute decryption share proof failed for %s %s with invalid proof",
-                guardian_keys.owner_id(), selection.object_id);
+                guardian_keys.owner_id(), selection.object_id());
         return Optional.empty();
       }
     } catch (Throwable t) {
@@ -227,11 +242,11 @@ public class Decryptions {
       if (dcontest.isEmpty()) {
         return Optional.empty();
       }
-      contests.put(contest.object_id, dcontest.get());
+      contests.put(contest.object_id(), dcontest.get());
     }
 
     return Optional.of(new CompensatedDecryptionShare(
-            tally.object_id,
+            tally.object_id(),
             guardian_key.owner_id(),
             missing_guardian_key.owner_id(),
             guardian_key.key(),
@@ -307,7 +322,7 @@ public class Decryptions {
               decrypt);
 
       if (compensated_ballot.isPresent()) {
-        decrypted_ballots.put(spoiled_ballot.object_id, compensated_ballot.get());
+        decrypted_ballots.put(spoiled_ballot.object_id(), compensated_ballot.get());
       } else {
         return Optional.empty();
       }
@@ -347,7 +362,7 @@ public class Decryptions {
     }
 
     return Optional.of(new CompensatedDecryptionShare(
-            ballot.object_id,
+            ballot.object_id(),
             guardian_key.owner_id(),
             missing_guardian_key.owner_id(),
             guardian_key.key(),
@@ -410,7 +425,7 @@ public class Decryptions {
           CiphertextElectionContext context,
           @Nullable Auxiliary.Decryptor decryptor) {
 
-    Optional<DecryptionProofTuple> compensated = compensate_decrypt(
+    Optional<BallotBox.DecryptionProofTuple> compensated = compensate_decrypt(
             guardian_auxiliary_keys,
             missing_guardian_backup,
             selection.ciphertext(),
@@ -419,10 +434,10 @@ public class Decryptions {
             decryptor);
     if (compensated.isEmpty()) {
       logger.atWarning().log("compute compensated decryption share failed for %s missing: %s %s",
-              guardian_key.owner_id(), missing_guardian_key.owner_id(), selection.object_id);
+              guardian_key.owner_id(), missing_guardian_key.owner_id(), selection.object_id());
       return Optional.empty();
     }
-    DecryptionProofTuple tuple = compensated.get();
+    BallotBox.DecryptionProofTuple tuple = compensated.get();
 
     Group.ElementModP recovery_public_key = compute_recovery_public_key(guardian_key, missing_guardian_key);
 
@@ -433,7 +448,7 @@ public class Decryptions {
             context.crypto_extended_base_hash)) {
 
       CiphertextCompensatedDecryptionSelection share = CiphertextCompensatedDecryptionSelection.create(
-              selection.object_id,
+              selection.object_id(),
               guardian_key.owner_id(),
               missing_guardian_key.owner_id(),
               tuple.decryption,
@@ -442,7 +457,7 @@ public class Decryptions {
       return Optional.of(share);
     } else {
       logger.atWarning().log("compute compensated decryption share proof failed for %s missing: %s %s",
-              guardian_key.owner_id(), missing_guardian_key.owner_id(), selection.object_id);
+              guardian_key.owner_id(), missing_guardian_key.owner_id(), selection.object_id());
       return Optional.empty();
     }
   }
@@ -481,7 +496,7 @@ public class Decryptions {
    * @param nonce_seed: an optional value used to generate the `ChaumPedersenProof` if no value is provided, a random number will be used.
    * @return: a `Tuple[ElementModP, ChaumPedersenProof]` of the decryption and its proof
    */
-  static DecryptionProofTuple partially_decrypt(
+  static BallotBox.DecryptionProofTuple partially_decrypt(
           KeyCeremony.ElectionKeyPair guardian_keys,
           ElGamal.Ciphertext elgamal,
           Group.ElementModQ extended_base_hash,
@@ -505,7 +520,7 @@ public class Decryptions {
             extended_base_hash
             );
 
-    return new DecryptionProofTuple(partial_decryption, proof);
+    return new BallotBox.DecryptionProofTuple(partial_decryption, proof);
   }
 
 
@@ -520,7 +535,7 @@ public class Decryptions {
    * @param decryptor               a function to decrypt the missing guardian private key backup
    * @return a `Tuple[ElementModP, ChaumPedersenProof]` of the decryption and its proof
    */
-  static Optional<DecryptionProofTuple> compensate_decrypt(
+  static Optional<BallotBox.DecryptionProofTuple> compensate_decrypt(
           Auxiliary.KeyPair guardian_auxiliary_keys,
           KeyCeremony.ElectionPartialKeyBackup missing_guardian_backup,
           ElGamal.Ciphertext ciphertext,
@@ -562,7 +577,7 @@ public class Decryptions {
                     partial_decryption,
                     extended_base_hash)); */
 
-    return Optional.of(new DecryptionProofTuple(partial_decryption, proof));
+    return Optional.of(new BallotBox.DecryptionProofTuple(partial_decryption, proof));
   }
 
   /**
@@ -606,10 +621,10 @@ public class Decryptions {
               CiphertextContest.createFrom(contest),
               shares,
               lagrange_coefficients);
-      contests.put(contest.object_id, dcontest);
+      contests.put(contest.object_id(), dcontest);
     }
 
-    return new DecryptionShare(tally.object_id, missing_guardian_key.owner_id(), missing_guardian_key.key(), contests);
+    return new DecryptionShare(tally.object_id(), missing_guardian_key.owner_id(), missing_guardian_key.key(), contests);
   }
 
   /**
@@ -642,21 +657,22 @@ public class Decryptions {
         for (Map.Entry<String, CiphertextCompensatedDecryptionContest> entry4 : contest_shares.entrySet()) {
           String available_guardian_id = entry4.getKey();
           CiphertextCompensatedDecryptionContest compensated_contest = entry4.getValue();
-          Preconditions.checkArgument(compensated_contest.selections().containsKey(selection.object_id));
-          compensated_selection_shares.put(available_guardian_id, compensated_contest.selections().get(selection.object_id));
+          Preconditions.checkArgument(compensated_contest.selections().containsKey(selection.object_id()));
+          compensated_selection_shares.put(available_guardian_id, compensated_contest.selections().get(selection.object_id()));
         }
 
         List<Group.ElementModP> share_pow_p = new ArrayList<>();
         for (Map.Entry<String, CiphertextCompensatedDecryptionSelection> entry5 : compensated_selection_shares.entrySet()) {
           String available_guardian_id = entry5.getKey();
           CiphertextCompensatedDecryptionSelection share = entry5.getValue();
-          share_pow_p.add(Group.pow_p(share.share(), lagrange_coefficients.get(available_guardian_id)));
+          Group.ElementModQ c = lagrange_coefficients.get(available_guardian_id);
+          share_pow_p.add(Group.pow_p(share.share(), c));
         }
 
         // product M_il^w_l
         Group.ElementModP reconstructed_share = Group.mult_p(share_pow_p);
 
-        selections.put(selection.object_id, create_ciphertext_decryption_selection(
+        selections.put(selection.object_id(), create_ciphertext_decryption_selection(
                 selection.object_id(),
                 missing_guardian_id,
                 reconstructed_share,
@@ -687,13 +703,13 @@ public class Decryptions {
 
     Map<String, DecryptionShare> result = new HashMap<>();
     for (SubmittedBallot ballot : ballots) {
-      Preconditions.checkArgument(shares.containsKey(ballot.object_id));
+      Preconditions.checkArgument(shares.containsKey(ballot.object_id()));
       DecryptionShare ballot_share = reconstruct_decryption_share_for_ballot(
               public_key,
               ballot,
-              shares.get(ballot.object_id),
+              shares.get(ballot.object_id()),
               lagrange_coefficients);
-      result.put(ballot.object_id, ballot_share);
+      result.put(ballot.object_id(), ballot_share);
     }
     return result;
   }
@@ -723,7 +739,7 @@ public class Decryptions {
     }
 
     return new DecryptionShare(
-            ballot.object_id,
+            ballot.object_id(),
             public_key.owner_id(),
             public_key.key(),
             contests);

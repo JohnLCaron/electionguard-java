@@ -1,12 +1,12 @@
 # 🗳 ElectionGuard Java
-_last changed: May 18, 2021_
+_last changed: 02/08/2022_
 
 This is a port of https://github.com/microsoft/electionguard-python/ to Java.
 
 Also see:
  * [ElectionGuard official site](https://www.electionguard.vote/) 
  * [ElectionGuard Discussions](https://github.com/microsoft/electionguard/)
- * [ElectionGuard Specification](https://www.electionguard.vote/spec/0.95.0/1_Overview/)
+ * [ElectionGuard Specification](https://www.electionguard.vote/spec/)
 
 ## Election Verification
 

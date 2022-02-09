@@ -7,8 +7,8 @@ import com.sunya.electionguard.Auxiliary;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.ElectionPolynomial;
 import com.sunya.electionguard.Group;
-import com.sunya.electionguard.GuardianRecordPrivate;
-import com.sunya.electionguard.KeyCeremony;
+import com.sunya.electionguard.standard.GuardianRecordPrivate;
+import com.sunya.electionguard.standard.KeyCeremony;
 import com.sunya.electionguard.SchnorrProof;
 
 import java.lang.reflect.Type;

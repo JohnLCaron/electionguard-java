@@ -638,7 +638,8 @@ public class Manifest implements Hash.CryptoHashable {
    * @see <a href="https://developers.google.com/elections-data/reference/gp-unit">Civics Common Standard Data Specification</a>
    */
   @Immutable
-  public static class GeopoliticalUnit extends ElectionObjectBase implements Hash.CryptoHashable {
+  public static class GeopoliticalUnit implements ElectionObjectBaseIF, Hash.CryptoHashable {
+    private final String object_id;
     public final String name;
     public final ReportingUnitType type;
     public final Optional<ContactInformation> contact_information;
@@ -647,10 +648,16 @@ public class Manifest implements Hash.CryptoHashable {
                             String name,
                             ReportingUnitType type,
                             @Nullable ContactInformation contact_information) {
-      super(object_id);
+      Preconditions.checkArgument(!Strings.isNullOrEmpty(object_id));
+      this.object_id = object_id;
       this.name = Preconditions.checkNotNull(name);
       this.type = Preconditions.checkNotNull(type);
       this.contact_information = Optional.ofNullable(contact_information);
+    }
+
+    @Override
+    public String object_id() {
+      return this.object_id;
     }
 
     @Override
@@ -662,16 +669,16 @@ public class Manifest implements Hash.CryptoHashable {
     public boolean equals(Object o) {
       if (this == o) return true;
       if (o == null || getClass() != o.getClass()) return false;
-      if (!super.equals(o)) return false;
       GeopoliticalUnit that = (GeopoliticalUnit) o;
-      return name.equals(that.name) &&
+      return object_id.equals(that.object_id) &&
+              name.equals(that.name) &&
               type == that.type &&
               contact_information.equals(that.contact_information);
     }
 
     @Override
     public int hashCode() {
-      return Objects.hash(super.hashCode(), name, type, contact_information);
+      return Objects.hash(object_id, name, type, contact_information);
     }
 
     @Override
@@ -687,7 +694,8 @@ public class Manifest implements Hash.CryptoHashable {
 
   /** Classifies a set of contests by their set of parties and geopolitical units */
   @Immutable
-  public static class BallotStyle extends ElectionObjectBase implements Hash.CryptoHashable {
+  public static class BallotStyle implements ElectionObjectBaseIF, Hash.CryptoHashable {
+    private final String object_id;
     public final ImmutableList<String> geopolitical_unit_ids; // matches GeoPoliticalUnit.object_id; may be empty
     public final ImmutableList<String> party_ids; // matches Party.object_id; may be empty
     public final Optional<String> image_uri;
@@ -703,10 +711,16 @@ public class Manifest implements Hash.CryptoHashable {
                        @Nullable List<String> geopolitical_unit_ids,
                        @Nullable List<String> party_ids,
                        @Nullable String image_uri) {
-      super(object_id);
+      Preconditions.checkArgument(!Strings.isNullOrEmpty(object_id));
+      this.object_id = object_id;
       this.geopolitical_unit_ids = toImmutableListEmpty(geopolitical_unit_ids);
       this.party_ids = toImmutableListEmpty(party_ids);
       this.image_uri = Optional.ofNullable(Strings.emptyToNull(image_uri));
+    }
+
+    @Override
+    public String object_id() {
+      return this.object_id;
     }
 
     @Override
@@ -719,16 +733,16 @@ public class Manifest implements Hash.CryptoHashable {
     public boolean equals(Object o) {
       if (this == o) return true;
       if (o == null || getClass() != o.getClass()) return false;
-      if (!super.equals(o)) return false;
       BallotStyle that = (BallotStyle) o;
-      return geopolitical_unit_ids.equals(that.geopolitical_unit_ids) &&
+      return object_id.equals(that.object_id) &&
+              geopolitical_unit_ids.equals(that.geopolitical_unit_ids) &&
               party_ids.equals(that.party_ids) &&
               image_uri.equals(that.image_uri);
     }
 
     @Override
     public int hashCode() {
-      return Objects.hash(super.hashCode(), geopolitical_unit_ids, party_ids, image_uri);
+      return Objects.hash(object_id, geopolitical_unit_ids, party_ids, image_uri);
     }
 
     @Override
@@ -747,7 +761,8 @@ public class Manifest implements Hash.CryptoHashable {
    * @see <a href="https://developers.google.com/elections-data/reference/party">Civics Common Standard Data Specification</a>
    */
   @Immutable
-  public static class Party extends ElectionObjectBase implements Hash.CryptoHashable {
+  public static class Party implements ElectionObjectBaseIF, Hash.CryptoHashable {
+    private final String object_id;
     public final InternationalizedText name;
     public final Optional<String> abbreviation;
     public final Optional<String> color;
@@ -755,7 +770,8 @@ public class Manifest implements Hash.CryptoHashable {
 
     /** A Party with only an object_id. */
     public Party(String object_id) {
-      super(object_id);
+      Preconditions.checkArgument(!Strings.isNullOrEmpty(object_id));
+      this.object_id = object_id;
       this.name = new InternationalizedText(ImmutableList.of());
       this.abbreviation = Optional.empty();
       this.color = Optional.empty();
@@ -768,11 +784,16 @@ public class Manifest implements Hash.CryptoHashable {
                  @Nullable String abbreviation,
                  @Nullable String color,
                  @Nullable String logo_uri) {
-      super(object_id);
+      this.object_id = object_id;
       this.name = name != null ? name : new InternationalizedText(ImmutableList.of());
       this.abbreviation = Optional.ofNullable(Strings.emptyToNull(abbreviation));
       this.color = Optional.ofNullable(Strings.emptyToNull(color));
       this.logo_uri = Optional.ofNullable(Strings.emptyToNull(logo_uri));
+    }
+
+    @Override
+    public String object_id() {
+      return this.object_id;
     }
 
     String get_party_id() {
@@ -793,9 +814,9 @@ public class Manifest implements Hash.CryptoHashable {
     public boolean equals(Object o) {
       if (this == o) return true;
       if (o == null || getClass() != o.getClass()) return false;
-      if (!super.equals(o)) return false;
       Party party = (Party) o;
-      return name.equals(party.name) &&
+      return object_id.equals(party.object_id) &&
+              name.equals(party.name) &&
               abbreviation.equals(party.abbreviation) &&
               color.equals(party.color) &&
               logo_uri.equals(party.logo_uri);
@@ -803,7 +824,7 @@ public class Manifest implements Hash.CryptoHashable {
 
     @Override
     public int hashCode() {
-      return Objects.hash(super.hashCode(), name, abbreviation, color, logo_uri);
+      return Objects.hash(object_id, name, abbreviation, color, logo_uri);
     }
 
     @Override
@@ -826,7 +847,8 @@ public class Manifest implements Hash.CryptoHashable {
    * @see <a href="https://developers.google.com/elections-data/reference/candidate">Civics Common Standard Data Specification</a>
    */
   @Immutable
-  public static class Candidate extends ElectionObjectBase implements Hash.CryptoHashable {
+  public static class Candidate implements ElectionObjectBaseIF,  Hash.CryptoHashable {
+    private final String object_id;
     public final InternationalizedText name;
     public final Optional<String> party_id;
     public final Optional<String> image_uri;
@@ -834,7 +856,8 @@ public class Manifest implements Hash.CryptoHashable {
 
     /** A Candidate with only an object_id. */
     public Candidate(String object_id) {
-      super(object_id);
+      Preconditions.checkArgument(!Strings.isNullOrEmpty(object_id));
+      this.object_id = object_id;
       this.name = new InternationalizedText(ImmutableList.of());
       this.party_id = Optional.empty();
       this.image_uri = Optional.empty();
@@ -847,11 +870,16 @@ public class Manifest implements Hash.CryptoHashable {
                      @Nullable String party_id,
                      @Nullable String image_uri,
                      @Nullable Boolean is_write_in) {
-      super(object_id);
+      this.object_id = object_id;
       this.name = Preconditions.checkNotNull(name);
       this.party_id = Optional.ofNullable(Strings.emptyToNull(party_id));
       this.image_uri = Optional.ofNullable(Strings.emptyToNull(image_uri));
       this.is_write_in = is_write_in != null ? is_write_in :  false;
+    }
+
+    @Override
+    public String object_id() {
+      return this.object_id;
     }
 
     /** Get the "candidate ID" for this Candidate. */
@@ -869,9 +897,9 @@ public class Manifest implements Hash.CryptoHashable {
     public boolean equals(Object o) {
       if (this == o) return true;
       if (o == null || getClass() != o.getClass()) return false;
-      if (!super.equals(o)) return false;
       Candidate candidate = (Candidate) o;
       return is_write_in == candidate.is_write_in &&
+              object_id.equals(candidate.object_id) &&
               name.equals(candidate.name) &&
               party_id.equals(candidate.party_id) &&
               image_uri.equals(candidate.image_uri);
@@ -879,7 +907,7 @@ public class Manifest implements Hash.CryptoHashable {
 
     @Override
     public int hashCode() {
-      return Objects.hash(super.hashCode(), name, party_id, image_uri, is_write_in);
+      return Objects.hash(object_id, name, party_id, image_uri, is_write_in);
     }
 
     @Override
@@ -928,7 +956,9 @@ public class Manifest implements Hash.CryptoHashable {
       if (this == o) return true;
       if (o == null || getClass() != o.getClass()) return false;
       SelectionDescription that = (SelectionDescription) o;
-      return sequence_order == that.sequence_order && object_id.equals(that.object_id) && candidate_id.equals(that.candidate_id);
+      return sequence_order == that.sequence_order &&
+              object_id.equals(that.object_id) &&
+              candidate_id.equals(that.candidate_id);
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.sunya.electionguard;
 
 import com.google.auto.value.AutoValue;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
@@ -60,17 +61,10 @@ public class PlaintextTally {
     public abstract ImmutableMap<String, Selection> selections(); // Map(SELECTION_ID, PlaintextTallySelection)
 
     public static Contest create(String object_id, Map<String, Selection> selections) {
+      Preconditions.checkArgument(!Strings.isNullOrEmpty(object_id));
       return new AutoValue_PlaintextTally_Contest(
-              Preconditions.checkNotNull(object_id),
+              object_id,
               ImmutableMap.copyOf(Preconditions.checkNotNull(selections)));
-    }
-
-    public String toStringOld() {
-      Formatter out = new Formatter();
-      out.format("Contest %s%n", object_id());
-      int sum = selections().values().stream().mapToInt(s -> s.tally()).sum();
-      out.format("   %-40s = %d%n", "Total votes", sum);
-      return out.toString();
     }
   }
 
@@ -92,8 +86,9 @@ public class PlaintextTally {
 
     public static Selection create(String object_id, Integer tally, ElementModP value, ElGamal.Ciphertext message,
                                    List<DecryptionShare.CiphertextDecryptionSelection> shares) {
+      Preconditions.checkArgument(!Strings.isNullOrEmpty(object_id));
       return new AutoValue_PlaintextTally_Selection(
-              Preconditions.checkNotNull(object_id),
+              object_id,
               Preconditions.checkNotNull(tally),
               Preconditions.checkNotNull(value),
               Preconditions.checkNotNull(message),

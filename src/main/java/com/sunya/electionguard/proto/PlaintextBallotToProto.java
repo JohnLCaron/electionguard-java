@@ -8,7 +8,7 @@ public class PlaintextBallotToProto {
 
   public static PlaintextBallotProto.PlaintextBallot translateToProto(PlaintextBallot ballot) {
     PlaintextBallotProto.PlaintextBallot.Builder builder = PlaintextBallotProto.PlaintextBallot.newBuilder();
-    builder.setObjectId(ballot.object_id);
+    builder.setObjectId(ballot.object_id());
     builder.setStyleId(ballot.style_id);
     ballot.contests.forEach(value -> builder.addContests(convertContest(value)));
     return builder.build();

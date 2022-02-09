@@ -144,7 +144,7 @@ public class EncryptBallots {
           }
           originalBallots.add(ballot);
         } else {
-          System.out.printf("Ballot %s failed validation%n   %s%n", ballot.object_id, problems.toString());
+          System.out.printf("Ballot %s failed validation%n   %s%n", ballot.object_id(), problems.toString());
           invalidBallots.add(ballot);
         }
       }

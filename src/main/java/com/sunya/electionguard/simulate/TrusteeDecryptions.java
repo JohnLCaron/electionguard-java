@@ -4,12 +4,12 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.flogger.FluentLogger;
+import com.sunya.electionguard.BallotBox;
 import com.sunya.electionguard.CiphertextBallot;
 import com.sunya.electionguard.CiphertextContest;
 import com.sunya.electionguard.CiphertextElectionContext;
 import com.sunya.electionguard.CiphertextSelection;
 import com.sunya.electionguard.CiphertextTally;
-import com.sunya.electionguard.DecryptionProofTuple;
 import com.sunya.electionguard.DecryptionShare;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.SubmittedBallot;
@@ -55,11 +55,11 @@ public class TrusteeDecryptions {
       if (contest.isEmpty()) {
         return Optional.empty();
       }
-      contests.put(tallyContest.object_id, contest.get());
+      contests.put(tallyContest.object_id(), contest.get());
     }
 
     return Optional.of(new DecryptionShare(
-            tally.object_id,
+            tally.object_id(),
             guardian.id(),
             guardian.electionPublicKey(),
             contests));
@@ -79,7 +79,7 @@ public class TrusteeDecryptions {
       if (ballot_share.isEmpty()) {
         return Optional.empty();
       }
-      shares.put(ballot.object_id, ballot_share.get());
+      shares.put(ballot.object_id(), ballot_share.get());
     }
 
     return Optional.of(shares);
@@ -107,7 +107,7 @@ public class TrusteeDecryptions {
         contests.put(contest.object_id, contest_share.get());
     }
     return Optional.of(new DecryptionShare(
-            ballot.object_id,
+            ballot.object_id(),
             guardian.id(),
             guardian.electionPublicKey(),
             contests));
@@ -157,13 +157,13 @@ public class TrusteeDecryptions {
           CiphertextElectionContext context) {
 
     try {
-      List<DecryptionProofTuple> results = guardian.partialDecrypt(ImmutableList.of(selection.ciphertext()), context.crypto_extended_base_hash, null);
+      List<BallotBox.DecryptionProofTuple> results = guardian.partialDecrypt(ImmutableList.of(selection.ciphertext()), context.crypto_extended_base_hash, null);
       if (results.isEmpty()) {
         logger.atWarning().log("compute_decryption_share_for_selection guardian.partialDecrypt failed",
-                guardian.id(), selection.object_id);
+                guardian.id(), selection.object_id());
         return Optional.empty();
       }
-      DecryptionProofTuple tuple = results.get(0);
+      BallotBox.DecryptionProofTuple tuple = results.get(0);
       if (tuple.proof.is_valid(selection.ciphertext(), guardian.electionPublicKey(),
               tuple.decryption, context.crypto_extended_base_hash)) {
         return Optional.of(DecryptionShare.create_ciphertext_decryption_selection(
@@ -174,7 +174,7 @@ public class TrusteeDecryptions {
                 Optional.empty()));
       } else {
         logger.atWarning().log("compute decryption share proof failed for %s %s with invalid proof",
-                guardian.id(), selection.object_id);
+                guardian.id(), selection.object_id());
         return Optional.empty();
       }
     } catch (Throwable t) {
@@ -209,11 +209,11 @@ public class TrusteeDecryptions {
       if (dcontest.isEmpty()) {
         return Optional.empty();
       }
-      contests.put(contest.object_id, dcontest.get());
+      contests.put(contest.object_id(), dcontest.get());
     }
 
     return Optional.of(new CompensatedDecryptionShare(
-            tally.object_id,
+            tally.object_id(),
             guardian.id(),
             missing_guardian_id,
             guardian.electionPublicKey(),
@@ -280,7 +280,7 @@ public class TrusteeDecryptions {
     }
 
     return Optional.of(new CompensatedDecryptionShare(
-            ballot.object_id,
+            ballot.object_id(),
             guardian.id(),
             missing_guardian_id,
             guardian.electionPublicKey(),
@@ -312,7 +312,7 @@ public class TrusteeDecryptions {
 
     if (compensated.isEmpty()) {
       logger.atWarning().log("compute compensated decryption share failed for %s missing: %s %s",
-              guardian.id(), missing_guardian_id, selection.object_id);
+              guardian.id(), missing_guardian_id, selection.object_id());
       return Optional.empty();
     }
     DecryptionProofRecovery tuple = compensated.get(0);
@@ -324,7 +324,7 @@ public class TrusteeDecryptions {
             context.crypto_extended_base_hash)) {
 
       CiphertextCompensatedDecryptionSelection share = CiphertextCompensatedDecryptionSelection.create(
-              selection.object_id,
+              selection.object_id(),
               guardian.id(),
               missing_guardian_id,
               tuple.decryption,
@@ -333,7 +333,7 @@ public class TrusteeDecryptions {
       return Optional.of(share);
     } else {
       logger.atWarning().log("compute compensated decryption share proof failed for %s missing: %s %s",
-              guardian.id(), missing_guardian_id, selection.object_id);
+              guardian.id(), missing_guardian_id, selection.object_id());
       return Optional.empty();
     }
   }
@@ -359,10 +359,10 @@ public class TrusteeDecryptions {
               CiphertextContest.createFrom(contest),
               shares,
               lagrange_coefficients);
-      contests.put(contest.object_id, dcontest);
+      contests.put(contest.object_id(), dcontest);
     }
 
-    return new DecryptionShare(tally.object_id, missing_guardian_id, missing_public_key, contests);
+    return new DecryptionShare(tally.object_id(), missing_guardian_id, missing_public_key, contests);
   }
 
   /**
@@ -395,8 +395,8 @@ public class TrusteeDecryptions {
         for (Map.Entry<String, CiphertextCompensatedDecryptionContest> entry4 : contest_shares.entrySet()) {
           String available_guardian_id = entry4.getKey();
           CiphertextCompensatedDecryptionContest compensated_contest = entry4.getValue();
-          Preconditions.checkArgument(compensated_contest.selections().containsKey(selection.object_id));
-          compensated_selection_shares.put(available_guardian_id, compensated_contest.selections().get(selection.object_id));
+          Preconditions.checkArgument(compensated_contest.selections().containsKey(selection.object_id()));
+          compensated_selection_shares.put(available_guardian_id, compensated_contest.selections().get(selection.object_id()));
         }
 
         List<Group.ElementModP> share_pow_p = new ArrayList<>();
@@ -411,7 +411,7 @@ public class TrusteeDecryptions {
         // product M_il^w_l
         Group.ElementModP reconstructed_share = Group.mult_p(share_pow_p);
 
-        selections.put(selection.object_id, DecryptionShare.create_ciphertext_decryption_selection(
+        selections.put(selection.object_id(), DecryptionShare.create_ciphertext_decryption_selection(
                 selection.object_id(),
                 missing_guardian_id,
                 reconstructed_share,
@@ -452,7 +452,7 @@ public class TrusteeDecryptions {
     }
 
     return new DecryptionShare(
-            ballot.object_id,
+            ballot.object_id(),
             missing_guardian_id,
             missing_public_key,
             contests);

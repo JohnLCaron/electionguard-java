@@ -20,7 +20,7 @@ public class SubmittedBallot extends CiphertextBallot {
 
   // python: from_ciphertext_ballot
   public static SubmittedBallot createFromCiphertextBallot(CiphertextBallot ballot, BallotBox.State state) {
-    return create(ballot.object_id, ballot.style_id, ballot.manifest_hash, Optional.of(ballot.code_seed),
+    return create(ballot.object_id(), ballot.style_id, ballot.manifest_hash, Optional.of(ballot.code_seed),
             ballot.contests, ballot.code, Optional.of(ballot.timestamp), state);
   }
 
@@ -113,7 +113,7 @@ public class SubmittedBallot extends CiphertextBallot {
   @Override
   public String toString() {
     return "SubmittedBallot{" +
-            "\n object_id    ='" + object_id + '\'' +
+            "\n object_id    ='" + object_id() + '\'' +
             "\n state        =" + state +
             "\n style_id     ='" + style_id + '\'' +
             "\n manifest_hash=" + manifest_hash +

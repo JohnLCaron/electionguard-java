@@ -35,7 +35,7 @@ public class CompactPlaintextBallot {
   static CompactPlaintextBallot compress_plaintext_ballot(PlaintextBallot ballot) {
     List<Boolean> selections = get_compact_selections(ballot);
     Map<Integer, PlaintextBallot.ExtendedData> extended_data = get_compact_extended_data(ballot);
-    return new CompactPlaintextBallot(ballot.object_id, ballot.style_id, selections, extended_data);
+    return new CompactPlaintextBallot(ballot.object_id(), ballot.style_id, selections, extended_data);
   }
 
   private static List<Boolean> get_compact_selections(PlaintextBallot ballot) {

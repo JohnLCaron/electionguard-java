@@ -7,7 +7,7 @@ import com.sunya.electionguard.CiphertextTally;
 import com.sunya.electionguard.ElectionConstants;
 import com.sunya.electionguard.Encrypt;
 import com.sunya.electionguard.GuardianRecord;
-import com.sunya.electionguard.GuardianRecordPrivate;
+import com.sunya.electionguard.standard.GuardianRecordPrivate;
 import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.PlaintextBallot;
 import com.sunya.electionguard.PlaintextTally;
@@ -354,7 +354,7 @@ public class PrivateData {
     if (original_ballots != null) {
       Files.createDirectories(privateBallotsPath());
       for (PlaintextBallot plaintext_ballot : original_ballots) {
-        String ballot_name = PLAINTEXT_BALLOT_PREFIX + plaintext_ballot.object_id + SUFFIX;
+        String ballot_name = PLAINTEXT_BALLOT_PREFIX + plaintext_ballot.object_id() + SUFFIX;
         ConvertToJson.writePlaintextBallot(plaintext_ballot, privateBallotsPath().resolve(ballot_name));
       }
     }
@@ -368,7 +368,7 @@ public class PrivateData {
     Files.createDirectories(invalidBallotsPath);
 
     for (PlaintextBallot plaintext_ballot : invalid_ballots) {
-      String ballot_name = PLAINTEXT_BALLOT_PREFIX + plaintext_ballot.object_id + SUFFIX;
+      String ballot_name = PLAINTEXT_BALLOT_PREFIX + plaintext_ballot.object_id() + SUFFIX;
       ConvertToJson.writePlaintextBallot(plaintext_ballot, invalidBallotsPath.resolve(ballot_name));
     }
 

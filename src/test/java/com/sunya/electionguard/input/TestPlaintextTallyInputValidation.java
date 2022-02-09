@@ -53,13 +53,13 @@ public class TestPlaintextTallyInputValidation {
 
     PlaintextTallyInputBuilder tbuilder = new PlaintextTallyInputBuilder("ctally");
     for (CiphertextTally.Contest contest : ctally.contests.values()) {
-      PlaintextTallyInputBuilder.ContestBuilder cbuilder = tbuilder.addContest(contest.object_id);
+      PlaintextTallyInputBuilder.ContestBuilder cbuilder = tbuilder.addContest(contest.object_id());
       for (CiphertextTally.Selection selection : contest.selections.values()) {
-        cbuilder.addSelection(selection.object_id, selection.ciphertext())
-                .addShare(selection.object_id, "guardian1", null)
-                .addShare(selection.object_id, "guardian2", null)
-                .addShare(selection.object_id, "guardian3", null)
-                .addShare(selection.object_id, "guardian4", null);
+        cbuilder.addSelection(selection.object_id(), selection.ciphertext())
+                .addShare(selection.object_id(), "guardian1", null)
+                .addShare(selection.object_id(), "guardian2", null)
+                .addShare(selection.object_id(), "guardian3", null)
+                .addShare(selection.object_id(), "guardian4", null);
       }
     }
 
@@ -105,11 +105,11 @@ public class TestPlaintextTallyInputValidation {
     for (CiphertextTally.Contest contest : tallies.ctally.contests.values()) {
       PlaintextTallyInputBuilder.ContestBuilder cbuilder = tbuilder.addContest("bad_contest_id");
       for (CiphertextTally.Selection selection : contest.selections.values()) {
-        cbuilder.addSelection(selection.object_id, selection.ciphertext())
-                .addShare(selection.object_id, "guardian1", null)
-                .addShare(selection.object_id, "guardian2", null)
-                .addShare(selection.object_id, "guardian3", null)
-                .addShare(selection.object_id, "guardian4", null);
+        cbuilder.addSelection(selection.object_id(), selection.ciphertext())
+                .addShare(selection.object_id(), "guardian1", null)
+                .addShare(selection.object_id(), "guardian2", null)
+                .addShare(selection.object_id(), "guardian3", null)
+                .addShare(selection.object_id(), "guardian4", null);
       }
     }
 
@@ -123,13 +123,13 @@ public class TestPlaintextTallyInputValidation {
 
     PlaintextTallyInputBuilder tbuilder = new PlaintextTallyInputBuilder("ctally");
     for (CiphertextTally.Contest contest : tallies.ctally.contests.values()) {
-      PlaintextTallyInputBuilder.ContestBuilder cbuilder = tbuilder.addContest(contest.object_id);
+      PlaintextTallyInputBuilder.ContestBuilder cbuilder = tbuilder.addContest(contest.object_id());
       for (CiphertextTally.Selection selection : contest.selections.values()) {
-        cbuilder.addSelection(selection.object_id + "bad", selection.ciphertext())
-                .addShare(selection.object_id, "guardian1", null)
-                .addShare(selection.object_id, "guardian2", null)
-                .addShare(selection.object_id, "guardian3", null)
-                .addShare(selection.object_id, "guardian4", null);
+        cbuilder.addSelection(selection.object_id() + "bad", selection.ciphertext())
+                .addShare(selection.object_id(), "guardian1", null)
+                .addShare(selection.object_id(), "guardian2", null)
+                .addShare(selection.object_id(), "guardian3", null)
+                .addShare(selection.object_id(), "guardian4", null);
       }
     }
 
@@ -143,13 +143,13 @@ public class TestPlaintextTallyInputValidation {
 
     PlaintextTallyInputBuilder tbuilder = new PlaintextTallyInputBuilder("ctally");
     for (CiphertextTally.Contest contest : tallies.ctally.contests.values()) {
-      PlaintextTallyInputBuilder.ContestBuilder cbuilder = tbuilder.addContest(contest.object_id);
+      PlaintextTallyInputBuilder.ContestBuilder cbuilder = tbuilder.addContest(contest.object_id());
       for (CiphertextTally.Selection selection : contest.selections.values()) {
-        cbuilder.addSelection(selection.object_id, elgamal_ciphertext())
-                .addShare(selection.object_id, "guardian1", null)
-                .addShare(selection.object_id, "guardian2", null)
-                .addShare(selection.object_id, "guardian3", null)
-                .addShare(selection.object_id, "guardian4", null);
+        cbuilder.addSelection(selection.object_id(), elgamal_ciphertext())
+                .addShare(selection.object_id(), "guardian1", null)
+                .addShare(selection.object_id(), "guardian2", null)
+                .addShare(selection.object_id(), "guardian3", null)
+                .addShare(selection.object_id(), "guardian4", null);
       }
     }
 
@@ -162,13 +162,13 @@ public class TestPlaintextTallyInputValidation {
 
     PlaintextTallyInputBuilder tbuilder = new PlaintextTallyInputBuilder("ctally");
     for (CiphertextTally.Contest contest : tallies.ctally.contests.values()) {
-      PlaintextTallyInputBuilder.ContestBuilder cbuilder = tbuilder.addContest(contest.object_id);
+      PlaintextTallyInputBuilder.ContestBuilder cbuilder = tbuilder.addContest(contest.object_id());
       for (CiphertextTally.Selection selection : contest.selections.values()) {
-        cbuilder.addSelection(selection.object_id, selection.ciphertext())
-                .addShare(selection.object_id, "guardian1", null)
-                .addShare(selection.object_id, "guardian2", null)
-                .addShare(selection.object_id, "guardian3", null)
-                .addShare(selection.object_id, "guardian4", null);
+        cbuilder.addSelection(selection.object_id(), selection.ciphertext())
+                .addShare(selection.object_id(), "guardian1", null)
+                .addShare(selection.object_id(), "guardian2", null)
+                .addShare(selection.object_id(), "guardian3", null)
+                .addShare(selection.object_id(), "guardian4", null);
       }
     }
 
@@ -181,13 +181,13 @@ public class TestPlaintextTallyInputValidation {
 
     PlaintextTallyInputBuilder tbuilder = new PlaintextTallyInputBuilder("ctally");
     for (CiphertextTally.Contest contest : tallies.ctally.contests.values()) {
-      PlaintextTallyInputBuilder.ContestBuilder cbuilder = tbuilder.addContest(contest.object_id);
+      PlaintextTallyInputBuilder.ContestBuilder cbuilder = tbuilder.addContest(contest.object_id());
       for (CiphertextTally.Selection selection : contest.selections.values()) {
-        cbuilder.addSelection(selection.object_id, selection.ciphertext())
-                .addShare(selection.object_id, "guardian1", null)
-                .addShare(selection.object_id, "guardian2", null)
-                .addShare(selection.object_id, "guardian3", null)
-                .addShare(selection.object_id, "guardian4", null);
+        cbuilder.addSelection(selection.object_id(), selection.ciphertext())
+                .addShare(selection.object_id(), "guardian1", null)
+                .addShare(selection.object_id(), "guardian2", null)
+                .addShare(selection.object_id(), "guardian3", null)
+                .addShare(selection.object_id(), "guardian4", null);
       }
     }
 
@@ -200,13 +200,13 @@ public class TestPlaintextTallyInputValidation {
 
     PlaintextTallyInputBuilder tbuilder = new PlaintextTallyInputBuilder("ctally");
     for (CiphertextTally.Contest contest : tallies.ctally.contests.values()) {
-      PlaintextTallyInputBuilder.ContestBuilder cbuilder = tbuilder.addContest(contest.object_id);
+      PlaintextTallyInputBuilder.ContestBuilder cbuilder = tbuilder.addContest(contest.object_id());
       for (CiphertextTally.Selection selection : contest.selections.values()) {
-        cbuilder.addSelection(selection.object_id, selection.ciphertext())
-                .addShare(selection.object_id + "bad", "guardian1", null)
-                .addShare(selection.object_id, "guardian2", null)
-                .addShare(selection.object_id, "guardian3", null)
-                .addShare(selection.object_id, "guardian4", null);
+        cbuilder.addSelection(selection.object_id(), selection.ciphertext())
+                .addShare(selection.object_id() + "bad", "guardian1", null)
+                .addShare(selection.object_id(), "guardian2", null)
+                .addShare(selection.object_id(), "guardian3", null)
+                .addShare(selection.object_id(), "guardian4", null);
       }
     }
 
@@ -219,13 +219,13 @@ public class TestPlaintextTallyInputValidation {
 
     PlaintextTallyInputBuilder tbuilder = new PlaintextTallyInputBuilder("ctally");
     for (CiphertextTally.Contest contest : tallies.ctally.contests.values()) {
-      PlaintextTallyInputBuilder.ContestBuilder cbuilder = tbuilder.addContest(contest.object_id);
+      PlaintextTallyInputBuilder.ContestBuilder cbuilder = tbuilder.addContest(contest.object_id());
       for (CiphertextTally.Selection selection : contest.selections.values()) {
-        cbuilder.addSelection(selection.object_id, selection.ciphertext())
-                .addShare(selection.object_id, "guardian1", null)
-                .addShare(selection.object_id, "guardian2", null)
-                .addShare(selection.object_id, "guardian3", null)
-                .addShare(selection.object_id, "guardian1", null);
+        cbuilder.addSelection(selection.object_id(), selection.ciphertext())
+                .addShare(selection.object_id(), "guardian1", null)
+                .addShare(selection.object_id(), "guardian2", null)
+                .addShare(selection.object_id(), "guardian3", null)
+                .addShare(selection.object_id(), "guardian1", null);
       }
     }
 
@@ -238,12 +238,12 @@ public class TestPlaintextTallyInputValidation {
 
     PlaintextTallyInputBuilder tbuilder = new PlaintextTallyInputBuilder("ctally");
     for (CiphertextTally.Contest contest : tallies.ctally.contests.values()) {
-      PlaintextTallyInputBuilder.ContestBuilder cbuilder = tbuilder.addContest(contest.object_id);
+      PlaintextTallyInputBuilder.ContestBuilder cbuilder = tbuilder.addContest(contest.object_id());
       for (CiphertextTally.Selection selection : contest.selections.values()) {
-        cbuilder.addSelection(selection.object_id, selection.ciphertext())
-                .addShare(selection.object_id, "guardian1", null)
-                .addShare(selection.object_id, "guardian2", null)
-                .addShare(selection.object_id, "guardian3", null);
+        cbuilder.addSelection(selection.object_id(), selection.ciphertext())
+                .addShare(selection.object_id(), "guardian1", null)
+                .addShare(selection.object_id(), "guardian2", null)
+                .addShare(selection.object_id(), "guardian3", null);
       }
     }
 
@@ -273,13 +273,13 @@ public class TestPlaintextTallyInputValidation {
 
     PlaintextTallyInputBuilder tbuilder = new PlaintextTallyInputBuilder("ctally");
     for (CiphertextTally.Contest contest : tallies.ctally.contests.values()) {
-      PlaintextTallyInputBuilder.ContestBuilder cbuilder = tbuilder.addContest(contest.object_id);
+      PlaintextTallyInputBuilder.ContestBuilder cbuilder = tbuilder.addContest(contest.object_id());
       for (CiphertextTally.Selection selection : contest.selections.values()) {
-        cbuilder.addSelection(selection.object_id, selection.ciphertext())
-                .addShare(selection.object_id, "guardian1", null)
-                .addShare(selection.object_id, "guardian2", null)
-                .addShare(selection.object_id, "guardian3", null)
-                .addShare(selection.object_id, "guardian4", null, makeParts(selection.object_id, "guardian4", NAVAILABLE, false));
+        cbuilder.addSelection(selection.object_id(), selection.ciphertext())
+                .addShare(selection.object_id(), "guardian1", null)
+                .addShare(selection.object_id(), "guardian2", null)
+                .addShare(selection.object_id(), "guardian3", null)
+                .addShare(selection.object_id(), "guardian4", null, makeParts(selection.object_id(), "guardian4", NAVAILABLE, false));
       }
     }
 
@@ -292,13 +292,13 @@ public class TestPlaintextTallyInputValidation {
 
     PlaintextTallyInputBuilder tbuilder = new PlaintextTallyInputBuilder("ctally");
     for (CiphertextTally.Contest contest : tallies.ctally.contests.values()) {
-      PlaintextTallyInputBuilder.ContestBuilder cbuilder = tbuilder.addContest(contest.object_id);
+      PlaintextTallyInputBuilder.ContestBuilder cbuilder = tbuilder.addContest(contest.object_id());
       for (CiphertextTally.Selection selection : contest.selections.values()) {
-        cbuilder.addSelection(selection.object_id, selection.ciphertext())
-                .addShare(selection.object_id, "guardian1", null)
-                .addShare(selection.object_id, "guardian2", null)
-                .addShare(selection.object_id, "guardian3", null)
-                .addShare(selection.object_id, "guardian4", null, makeParts("badid", "guardian4", NAVAILABLE, false));
+        cbuilder.addSelection(selection.object_id(), selection.ciphertext())
+                .addShare(selection.object_id(), "guardian1", null)
+                .addShare(selection.object_id(), "guardian2", null)
+                .addShare(selection.object_id(), "guardian3", null)
+                .addShare(selection.object_id(), "guardian4", null, makeParts("badid", "guardian4", NAVAILABLE, false));
       }
     }
 
@@ -312,13 +312,13 @@ public class TestPlaintextTallyInputValidation {
 
     PlaintextTallyInputBuilder tbuilder = new PlaintextTallyInputBuilder("ctally");
     for (CiphertextTally.Contest contest : tallies.ctally.contests.values()) {
-      PlaintextTallyInputBuilder.ContestBuilder cbuilder = tbuilder.addContest(contest.object_id);
+      PlaintextTallyInputBuilder.ContestBuilder cbuilder = tbuilder.addContest(contest.object_id());
       for (CiphertextTally.Selection selection : contest.selections.values()) {
-        cbuilder.addSelection(selection.object_id, selection.ciphertext())
-                .addShare(selection.object_id, "guardian1", null)
-                .addShare(selection.object_id, "guardian2", null)
-                .addShare(selection.object_id, "guardian3", null)
-                .addShare(selection.object_id, "guardian4", null, makeParts("badid", "guardian4", NAVAILABLE, true));
+        cbuilder.addSelection(selection.object_id(), selection.ciphertext())
+                .addShare(selection.object_id(), "guardian1", null)
+                .addShare(selection.object_id(), "guardian2", null)
+                .addShare(selection.object_id(), "guardian3", null)
+                .addShare(selection.object_id(), "guardian4", null, makeParts("badid", "guardian4", NAVAILABLE, true));
       }
     }
 
@@ -331,13 +331,13 @@ public class TestPlaintextTallyInputValidation {
 
     PlaintextTallyInputBuilder tbuilder = new PlaintextTallyInputBuilder("ctally");
     for (CiphertextTally.Contest contest : tallies.ctally.contests.values()) {
-      PlaintextTallyInputBuilder.ContestBuilder cbuilder = tbuilder.addContest(contest.object_id);
+      PlaintextTallyInputBuilder.ContestBuilder cbuilder = tbuilder.addContest(contest.object_id());
       for (CiphertextTally.Selection selection : contest.selections.values()) {
-        cbuilder.addSelection(selection.object_id, selection.ciphertext())
-                .addShare(selection.object_id, "guardian1", null)
-                .addShare(selection.object_id, "guardian2", null)
-                .addShare(selection.object_id, "guardian3", null)
-                .addShare(selection.object_id, "guardian4", null, makeParts(selection.object_id, "guardian4", QUORUM, false));
+        cbuilder.addSelection(selection.object_id(), selection.ciphertext())
+                .addShare(selection.object_id(), "guardian1", null)
+                .addShare(selection.object_id(), "guardian2", null)
+                .addShare(selection.object_id(), "guardian3", null)
+                .addShare(selection.object_id(), "guardian4", null, makeParts(selection.object_id(), "guardian4", QUORUM, false));
       }
     }
 
@@ -351,13 +351,13 @@ public class TestPlaintextTallyInputValidation {
 
     PlaintextTallyInputBuilder tbuilder = new PlaintextTallyInputBuilder("ctally");
     for (CiphertextTally.Contest contest : tallies.ctally.contests.values()) {
-      PlaintextTallyInputBuilder.ContestBuilder cbuilder = tbuilder.addContest(contest.object_id);
+      PlaintextTallyInputBuilder.ContestBuilder cbuilder = tbuilder.addContest(contest.object_id());
       for (CiphertextTally.Selection selection : contest.selections.values()) {
-        cbuilder.addSelection(selection.object_id, selection.ciphertext())
-                .addShare(selection.object_id, "guardian1", null)
-                .addShare(selection.object_id, "guardian2", null)
-                .addShare(selection.object_id, "guardian3", null)
-                .addShare(selection.object_id, "guardian4", null, makeParts(selection.object_id, "guardian3", NAVAILABLE, false));
+        cbuilder.addSelection(selection.object_id(), selection.ciphertext())
+                .addShare(selection.object_id(), "guardian1", null)
+                .addShare(selection.object_id(), "guardian2", null)
+                .addShare(selection.object_id(), "guardian3", null)
+                .addShare(selection.object_id(), "guardian4", null, makeParts(selection.object_id(), "guardian3", NAVAILABLE, false));
       }
     }
 
@@ -373,13 +373,13 @@ public class TestPlaintextTallyInputValidation {
 
     PlaintextTallyInputBuilder tbuilder = new PlaintextTallyInputBuilder("ctally");
     for (CiphertextTally.Contest contest : tallies.ctally.contests.values()) {
-      PlaintextTallyInputBuilder.ContestBuilder cbuilder = tbuilder.addContest(contest.object_id);
+      PlaintextTallyInputBuilder.ContestBuilder cbuilder = tbuilder.addContest(contest.object_id());
       for (CiphertextTally.Selection selection : contest.selections.values()) {
-        cbuilder.addSelection(selection.object_id, selection.ciphertext())
-                .addShare(selection.object_id, "guardian1", null)
-                .addShare(selection.object_id, "guardian2", null)
-                .addShare(selection.object_id, "guardian3", null)
-                .addShare(selection.object_id, "guardian4", null);
+        cbuilder.addSelection(selection.object_id(), selection.ciphertext())
+                .addShare(selection.object_id(), "guardian1", null)
+                .addShare(selection.object_id(), "guardian2", null)
+                .addShare(selection.object_id(), "guardian3", null)
+                .addShare(selection.object_id(), "guardian4", null);
       }
     }
 

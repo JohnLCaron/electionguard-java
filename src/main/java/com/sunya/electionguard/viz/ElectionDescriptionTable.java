@@ -162,7 +162,7 @@ public class ElectionDescriptionTable extends JPanel {
     }
 
     public String getId() {
-      return org.object_id;
+      return org.object_id();
     }
     public String getAbbreviation() {
       return org.abbreviation.orElse("");
@@ -188,7 +188,7 @@ public class ElectionDescriptionTable extends JPanel {
     }
 
     public String getId() {
-      return org.object_id;
+      return org.object_id();
     }
     public String getPartyId() {
       return org.party_id.orElse("");
@@ -214,7 +214,7 @@ public class ElectionDescriptionTable extends JPanel {
     }
 
     public String getId() {
-      return gpunit.object_id;
+      return gpunit.object_id();
     }
     public String getType() {
       return gpunit.type.toString();
@@ -237,7 +237,7 @@ public class ElectionDescriptionTable extends JPanel {
     }
 
     public String getBallotStyle() {
-      return style.object_id;
+      return style.object_id();
     }
     public String getGeopolitical() {
       return style.geopolitical_unit_ids.toString();

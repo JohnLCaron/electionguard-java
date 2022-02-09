@@ -3,6 +3,7 @@ package com.sunya.electionguard.publish;
 import com.google.common.flogger.FluentLogger;
 import com.google.gson.*;
 import com.sunya.electionguard.*;
+import com.sunya.electionguard.standard.GuardianRecordPrivate;
 
 import java.io.*;
 

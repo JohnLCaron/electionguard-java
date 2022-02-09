@@ -1,8 +1,8 @@
 package com.sunya.electionguard.decrypting;
 
 import com.google.common.collect.ImmutableList;
+import com.sunya.electionguard.BallotBox;
 import com.sunya.electionguard.CiphertextTally;
-import com.sunya.electionguard.DecryptionProofTuple;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.proto.TrusteeFromProto;
@@ -64,7 +64,7 @@ public class TestDecryptingRemoteTrusteeProxy {
     } catch (InterruptedException e) {
       e.printStackTrace();
     }
-    List<DecryptionProofTuple> result = proxy.partialDecrypt(
+    List<BallotBox.DecryptionProofTuple> result = proxy.partialDecrypt(
             ImmutableList.of(new ElGamal.Ciphertext(Group.TWO_MOD_P, Group.TWO_MOD_P)),
             Group.rand_q(),
             null);

@@ -200,7 +200,7 @@ public class Encrypt {
     if (encrypted_selection.is_valid_encryption(selection_description_hash, elgamal_public_key, crypto_extended_base_hash)) {
       return Optional.of(encrypted_selection);
     } else {
-      logger.atWarning().log("Failed selection proof for selection: %s", encrypted_selection.object_id);
+      logger.atWarning().log("Failed selection proof for selection: %s", encrypted_selection.object_id());
       return Optional.empty();
     }
   }
@@ -394,7 +394,7 @@ public class Encrypt {
     }
 
     // Validate Input LOOK could just call BallotInputValidation? Or rely on it being done externally.
-    if (!ballot.is_valid(style.get().object_id)) {
+    if (!ballot.is_valid(style.get().object_id())) {
       return Optional.empty();
     }
 
@@ -403,7 +403,7 @@ public class Encrypt {
 
     // Include a representation of the election and the ballot Id in the nonce's used
     // to derive other nonce values on the ballot
-    ElementModQ nonce_seed = CiphertextBallot.nonce_seed(internal_manifest.manifest.crypto_hash, ballot.object_id, random_master_nonce);
+    ElementModQ nonce_seed = CiphertextBallot.nonce_seed(internal_manifest.manifest.crypto_hash, ballot.object_id(), random_master_nonce);
 
     Optional<List<CiphertextBallot.Contest>> encrypted_contests = encrypt_ballot_contests(
             ballot, internal_manifest, context, nonce_seed);
@@ -413,7 +413,7 @@ public class Encrypt {
 
     // Create the return object
     CiphertextBallot encrypted_ballot = CiphertextBallot.create(
-          ballot.object_id,
+          ballot.object_id(),
           ballot.style_id,
           internal_manifest.manifest.crypto_hash,
           previous_tracking_hash, // python uses Optional

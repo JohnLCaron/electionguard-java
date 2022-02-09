@@ -29,7 +29,7 @@ import static com.sunya.electionguard.Group.add_q;
  * The field object_id is a unique Ballot ID that is relevant to the external system
  */
 @Immutable
-public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoHashCheckable {
+public class CiphertextBallot implements ElectionObjectBaseIF, Hash.CryptoHashCheckable {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   /**
@@ -91,6 +91,8 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
   }
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  /** Unique internal identifier used by other elements to reference this element. */
+  private final String object_id;
   /** The object_id of the Manifest.BallotStyle. */
   public final String style_id;
   /** The Manifest crypto_hash. */
@@ -113,7 +115,8 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
                           Group.ElementModQ code_seed, List<Contest> contests,
                           Group.ElementModQ code, long timestamp, Group.ElementModQ crypto_hash,
                           Optional<Group.ElementModQ> nonce) {
-    super(object_id);
+    Preconditions.checkArgument(!Strings.isNullOrEmpty(object_id));
+    this.object_id = object_id;
     Preconditions.checkArgument(!Strings.isNullOrEmpty(style_id));
     this.style_id = style_id;
     this.manifest_hash = Preconditions.checkNotNull(manifest_hash);
@@ -123,6 +126,11 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
     this.timestamp = timestamp;
     this.crypto_hash = Preconditions.checkNotNull(crypto_hash);
     this.nonce = Preconditions.checkNotNull(nonce);
+  }
+
+  @Override
+  public String object_id() {
+    return object_id;
   }
 
   private static ElGamal.Ciphertext ciphertext_ballot_elgamal_accumulate(List<Selection> ballot_selections) {
@@ -252,7 +260,7 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
     boolean valid = true;
     for (Contest contest : this.contests) {
       for (Selection selection : contest.ballot_selections) {
-        valid &= selection.is_valid_encryption(selection.description_hash, elgamal_public_key, crypto_extended_base_hash);
+        valid &= selection.is_valid_encryption(selection.description_hash(), elgamal_public_key, crypto_extended_base_hash);
       }
       valid &= contest.is_valid_encryption(contest.contest_hash, elgamal_public_key, crypto_extended_base_hash);
     }
@@ -260,28 +268,12 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
   }
 
   @Override
-  public String toString() {
-    return "CiphertextBallot{" +
-            "style_id='" + style_id + '\'' +
-            ", manifest_hash=" + manifest_hash +
-            ", code=" + code +
-            ", previous_code=" + code_seed +
-            ", contests=" + contests +
-            ", tracking_hash=" + code +
-            ", timestamp=" + timestamp +
-            ", crypto_hash=" + crypto_hash +
-            ", nonce=" + nonce +
-            ", object_id='" + object_id + '\'' +
-            '}';
-  }
-
-  @Override
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-    if (!super.equals(o)) return false;
     CiphertextBallot that = (CiphertextBallot) o;
     return timestamp == that.timestamp &&
+            object_id.equals(that.object_id) &&
             style_id.equals(that.style_id) &&
             manifest_hash.equals(that.manifest_hash) &&
             code_seed.equals(that.code_seed) &&
@@ -289,6 +281,26 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
             code.equals(that.code) &&
             crypto_hash.equals(that.crypto_hash) &&
             nonce.equals(that.nonce);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(object_id, style_id, manifest_hash, code_seed, contests, code, timestamp, crypto_hash, nonce);
+  }
+
+  @Override
+  public String toString() {
+    return "CiphertextBallot{" +
+            "object_id='" + object_id + '\'' +
+            ", style_id='" + style_id + '\'' +
+            ", manifest_hash=" + manifest_hash +
+            ", code_seed=" + code_seed +
+            ", contests=" + contests +
+            ", code=" + code +
+            ", timestamp=" + timestamp +
+            ", crypto_hash=" + crypto_hash +
+            ", nonce=" + nonce +
+            '}';
   }
 
   /**
@@ -386,7 +398,7 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
 
     /** Remove nonce and return new object without the nonce. */
     Selection removeNonce() {
-      return new Selection(this.object_id, this.sequence_order, this.description_hash, this.ciphertext(),
+      return new Selection(this.object_id(), this.sequence_order(), this.description_hash(), this.ciphertext(),
               this.crypto_hash, this.is_placeholder_selection, Optional.empty(),
               this.proof, this.extended_data);
     }
@@ -403,21 +415,21 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
      * @param cryptoExtendedBaseHash crypto_extended_base_hash for the election (Qbar)
      */
     boolean is_valid_encryption(Group.ElementModQ seed_hash, Group.ElementModP elgamelPublicKey, Group.ElementModQ cryptoExtendedBaseHash) {
-      if (!seed_hash.equals(this.description_hash)) {
+      if (!seed_hash.equals(this.description_hash())) {
         logger.atInfo().log("mismatching selection hash: %s expected(%s), actual(%s)",
-                this.object_id, seed_hash, this.description_hash);
+                this.object_id(), seed_hash, this.description_hash());
         return false;
       }
 
       Group.ElementModQ recalculated_crypto_hash = crypto_hash_with(seed_hash);
       if (!recalculated_crypto_hash.equals(this.crypto_hash)) {
         logger.atInfo().log("mismatching crypto hash: %s expected(%s), actual(%s)",
-                this.object_id, recalculated_crypto_hash, this.crypto_hash);
+                this.object_id(), recalculated_crypto_hash, this.crypto_hash);
         return false;
       }
 
       if (this.proof.isEmpty()) {
-        logger.atInfo().log("no proof exists for: %s", this.object_id);
+        logger.atInfo().log("no proof exists for: %s", this.object_id());
         return false;
       }
 
@@ -434,7 +446,7 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
      */
     Group.ElementModQ crypto_hash_with(Group.ElementModQ seedHash) {
       // python: _ciphertext_ballot_selection_crypto_hash_with
-      return Hash.hash_elems(this.object_id, seedHash, this.ciphertext().crypto_hash());
+      return Hash.hash_elems(this.object_id(), seedHash, this.ciphertext().crypto_hash());
     }
 
     @Override
@@ -459,22 +471,10 @@ public class CiphertextBallot extends ElectionObjectBase implements Hash.CryptoH
               ", nonce=" + nonce +
               ", proof=" + proof +
               ", extended_data=" + extended_data +
-              ", object_id='" + object_id + '\'' +
-              ", sequence_order=" + sequence_order +
-              ", description_hash=" + description_hash +
+              ", object_id='" + object_id() + '\'' +
+              ", sequence_order=" + sequence_order() +
+              ", description_hash=" + description_hash() +
               ", is_placeholder=" + is_placeholder +
-              '}';
-    }
-
-    public String toString2() {
-      return "Selection{" +
-              "\n object_id       ='" + object_id + '\'' +
-              "\n crypto_hash     =" + crypto_hash +
-              "\n is_placeholder  =" + is_placeholder_selection +
-              "\n nonce           =" + nonce +
-              "\n proof           =" + proof +
-              "\n extended_data   =" + extended_data +
-              "\n description_hash=" + description_hash +
               '}';
     }
   }

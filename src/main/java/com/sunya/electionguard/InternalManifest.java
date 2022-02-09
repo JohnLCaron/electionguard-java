@@ -106,7 +106,7 @@ public class InternalManifest {
 
   /** Find the ballot style for a specified style_id */
   public Optional<Manifest.BallotStyle> get_ballot_style(String style_id) {
-    return manifest.ballot_styles.stream().filter(bs -> bs.object_id.equals(style_id)).findFirst();
+    return manifest.ballot_styles.stream().filter(bs -> bs.object_id().equals(style_id)).findFirst();
   }
 
   /** Get contests whose electoral_district_id is in the given ballot style's geopolitical_unit_ids. */

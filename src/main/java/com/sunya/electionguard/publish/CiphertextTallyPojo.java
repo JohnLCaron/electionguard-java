@@ -89,7 +89,7 @@ public class CiphertextTallyPojo {
     }
 
     CiphertextTallyPojo pojo = new CiphertextTallyPojo();
-    pojo.object_id = org.object_id;
+    pojo.object_id = org.object_id();
     pojo.contests = contests;
     return pojo;
   }
@@ -100,8 +100,8 @@ public class CiphertextTallyPojo {
       selections.put(entry.getKey(), convertSelection(entry.getValue()));
     }
     CiphertextTallyContestPojo pojo = new CiphertextTallyContestPojo();
-    pojo.object_id = org.object_id;
-    pojo.sequence_order = org.sequence_order;
+    pojo.object_id = org.object_id();
+    pojo.sequence_order = org.sequence_order();
     pojo.description_hash = org.contestDescriptionHash;
     pojo.selections = selections;
     return pojo;
@@ -109,9 +109,9 @@ public class CiphertextTallyPojo {
 
   private static CiphertextTallySelectionPojo convertSelection(CiphertextTally.Selection org) {
     CiphertextTallySelectionPojo pojo = new CiphertextTallySelectionPojo();
-    pojo.object_id = org.object_id;
-    pojo.sequence_order = org.sequence_order;
-    pojo.description_hash = org.description_hash;
+    pojo.object_id = org.object_id();
+    pojo.sequence_order = org.sequence_order();
+    pojo.description_hash = org.description_hash();
     pojo.ciphertext = org.ciphertext();
     return pojo;
   }

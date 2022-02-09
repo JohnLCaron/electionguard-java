@@ -6,7 +6,6 @@ import com.beust.jcommander.ParameterException;
 import com.sunya.electionguard.AvailableGuardian;
 import com.sunya.electionguard.CiphertextTallyBuilder;
 import com.sunya.electionguard.DecryptionShare;
-import com.sunya.electionguard.KeyCeremony;
 import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.InternalManifest;
 import com.sunya.electionguard.PlaintextTally;

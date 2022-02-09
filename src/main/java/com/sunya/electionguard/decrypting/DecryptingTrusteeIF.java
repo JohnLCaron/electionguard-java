@@ -1,6 +1,6 @@
 package com.sunya.electionguard.decrypting;
 
-import com.sunya.electionguard.DecryptionProofTuple;
+import com.sunya.electionguard.BallotBox;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.Group;
 
@@ -21,7 +21,7 @@ public interface DecryptingTrusteeIF {
           Group.ElementModQ extended_base_hash,
           @Nullable Group.ElementModQ nonce_seed);
 
-  List<DecryptionProofTuple> partialDecrypt(
+  List<BallotBox.DecryptionProofTuple> partialDecrypt(
           List<ElGamal.Ciphertext> texts,
           Group.ElementModQ extended_base_hash,
           @Nullable Group.ElementModQ nonce_seed);

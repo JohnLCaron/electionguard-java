@@ -283,7 +283,7 @@ public class ManifestPojo {
     }
     ManifestPojo.BallotStyle pojo = new ManifestPojo.BallotStyle();
 
-    pojo.object_id = org.object_id;
+    pojo.object_id = org.object_id();
     pojo.geopolitical_unit_ids = ConvertPojos.convertList(org.geopolitical_unit_ids, Strings::nullToEmpty);
     pojo.party_ids = ConvertPojos.convertList(org.party_ids, Strings::nullToEmpty);
     pojo.image_uri = org.image_uri.orElse(null);
@@ -296,7 +296,7 @@ public class ManifestPojo {
       return null;
     }
     ManifestPojo.Candidate pojo = new ManifestPojo.Candidate();
-    pojo.object_id = org.object_id;
+    pojo.object_id = org.object_id();
     pojo.name = convertInternationalizedText(org.name);
     pojo.party_id = org.party_id.orElse(null);
     pojo.image_uri = org.image_uri.orElse(null);
@@ -342,7 +342,7 @@ public class ManifestPojo {
       return null;
     }
     ManifestPojo.GeopoliticalUnit pojo = new ManifestPojo.GeopoliticalUnit();
-    pojo.object_id = org.object_id;
+    pojo.object_id = org.object_id();
     pojo.name = org.name;
     pojo.type = org.type.name();
     pojo.contact_information = convertContactInformation(org.contact_information.orElse(null));
@@ -376,7 +376,7 @@ public class ManifestPojo {
       return null;
     }
     ManifestPojo.Party pojo = new ManifestPojo.Party();
-    pojo.object_id = org.object_id;
+    pojo.object_id = org.object_id();
     pojo.ballot_name = convertInternationalizedText(org.name);
     pojo.abbreviation = org.abbreviation.orElse(null);
     pojo.color = org.color.orElse(null);

@@ -12,7 +12,7 @@ import com.google.gson.JsonSerializer;
 import com.sunya.electionguard.BallotBox;
 import com.sunya.electionguard.Encrypt;
 import com.sunya.electionguard.GuardianRecord;
-import com.sunya.electionguard.GuardianRecordPrivate;
+import com.sunya.electionguard.standard.GuardianRecordPrivate;
 import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.SubmittedBallot;
 import com.sunya.electionguard.Group;

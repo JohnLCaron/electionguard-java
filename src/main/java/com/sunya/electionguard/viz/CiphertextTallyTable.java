@@ -128,7 +128,7 @@ public class CiphertextTallyTable extends JPanel {
     }
 
     public String getId() {
-      return tally.object_id;
+      return tally.object_id();
     }
   }
 
@@ -141,7 +141,7 @@ public class CiphertextTallyTable extends JPanel {
       this.contest = contest;
     }
     public String getContestId() {
-      return contest.object_id;
+      return contest.object_id();
     }
     public String getContestDescriptionHash() {
       return contest.contestDescriptionHash.toString();
@@ -158,11 +158,11 @@ public class CiphertextTallyTable extends JPanel {
     }
 
     public String getSelectionId() {
-      return selection.object_id;
+      return selection.object_id();
     }
 
     public String getDescriptionHash() {
-      return selection.description_hash.toString();
+      return selection.description_hash().toString();
     }
 
     public String getCiphertextPad() {

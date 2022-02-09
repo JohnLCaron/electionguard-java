@@ -1,6 +1,7 @@
-package com.sunya.electionguard;
+package com.sunya.electionguard.standard;
 
 import com.google.auto.value.AutoValue;
+import com.sunya.electionguard.Auxiliary;
 
 import java.util.Collection;
 import java.util.Map;

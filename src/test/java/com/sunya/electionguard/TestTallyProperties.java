@@ -82,7 +82,7 @@ public class TestTallyProperties extends TestProperties {
           @ForAll("elections_and_ballots") ElectionTestHelper.EverythingTuple everything) {
 
     // encrypt each ballot
-    DataStore store = new DataStore();
+    // DataStore store = new DataStore();
     Group.ElementModQ seed_hash = Encrypt.EncryptionDevice.createForTest("Location").get_hash();
     SubmittedBallot[] acceptedBallots = new SubmittedBallot[3];
     int count = 0;
@@ -95,7 +95,7 @@ public class TestTallyProperties extends TestProperties {
       // vary the state
       BallotBox.State state = (count % 3 == 0) ? BallotBox.State.UNKNOWN : (count % 3 == 1) ? BallotBox.State.CAST : BallotBox.State.SPOILED;
       SubmittedBallot acceptedBallot = encrypted_ballot.acceptWithState(state);
-      store.put(encrypted_ballot.object_id, acceptedBallot);
+      // store.put(encrypted_ballot.object_id, acceptedBallot);
       acceptedBallots[count % 3] = acceptedBallot;
       count++;
     }

@@ -3,6 +3,7 @@ package com.sunya.electionguard.publish;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.*;
 import com.sunya.electionguard.*;
+import com.sunya.electionguard.standard.GuardianRecordPrivate;
 
 import java.io.FileWriter;
 import java.io.IOException;

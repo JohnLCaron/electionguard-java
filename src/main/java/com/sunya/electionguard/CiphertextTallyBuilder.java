@@ -85,17 +85,17 @@ public class CiphertextTallyBuilder {
     // Find all the ballots for each selection.
     AtomicInteger count = new AtomicInteger();
     try (Stream<SubmittedBallot> ballots = ballotsIterable.iterator().stream()) {
-      ballots.filter(b -> b.state == State.CAST && !cast_ballot_ids.contains(b.object_id) &&
+      ballots.filter(b -> b.state == State.CAST && !cast_ballot_ids.contains(b.object_id()) &&
                     BallotValidations.ballot_is_valid_for_election(b, this.manifest, this.context))
               .forEach(ballot -> {
         // collect the selections so they can be accumulated in parallel
         for (CiphertextBallot.Contest contest : ballot.contests) {
           for (CiphertextBallot.Selection selection : contest.ballot_selections) {
-            Map<String, ElGamal.Ciphertext> map2 = cast_ballot_selections.computeIfAbsent(selection.object_id, map1 -> new HashMap<>());
-            map2.put(ballot.object_id, selection.ciphertext());
+            Map<String, ElGamal.Ciphertext> map2 = cast_ballot_selections.computeIfAbsent(selection.object_id(), map1 -> new HashMap<>());
+            map2.put(ballot.object_id(), selection.ciphertext());
           }
         }
-        this.cast_ballot_ids.add(ballot.object_id);
+        this.cast_ballot_ids.add(ballot.object_id());
         count.incrementAndGet();
       });
     }
@@ -108,12 +108,12 @@ public class CiphertextTallyBuilder {
   /** Append a ballot to the tally. Potentially parellizable over this ballot's selections. */
   public boolean append(SubmittedBallot ballot) {
     if (ballot.state == State.UNKNOWN) {
-      logger.atWarning().log("append cannot add %s with invalid state", ballot.object_id);
+      logger.atWarning().log("append cannot add %s with invalid state", ballot.object_id());
       return false;
     }
 
-    if (this.cast_ballot_ids.contains(ballot.object_id) || this.spoiled_ballot_ids.contains(ballot.object_id)) {
-      logger.atWarning().log("append cannot add %s, already tallied", ballot.object_id);
+    if (this.cast_ballot_ids.contains(ballot.object_id()) || this.spoiled_ballot_ids.contains(ballot.object_id())) {
+      logger.atWarning().log("append cannot add %s, already tallied", ballot.object_id());
       return false;
     }
 
@@ -126,7 +126,7 @@ public class CiphertextTallyBuilder {
     }
 
     if (ballot.state == State.SPOILED) {
-      this.spoiled_ballot_ids.add(ballot.object_id);
+      this.spoiled_ballot_ids.add(ballot.object_id());
 
       return true;
     }
@@ -153,7 +153,7 @@ public class CiphertextTallyBuilder {
       }
       this.contests.put(contest.object_id, use_contest);
     }
-    this.cast_ballot_ids.add(ballot.object_id);
+    this.cast_ballot_ids.add(ballot.object_id());
     return true;
   }
 
@@ -264,7 +264,7 @@ public class CiphertextTallyBuilder {
       // to the valid selection id's for this tally contest
       Set<String> selection_ids = contest_selections.stream()
               .filter(s -> !s.is_placeholder_selection)
-              .map(s -> s.object_id)
+              .map(s -> s.object_id())
               .collect(Collectors.toSet());
 
       // if (any(set(this.tally_selections).difference(selection_ids))) {
@@ -334,7 +334,7 @@ public class CiphertextTallyBuilder {
       @Override
       public AccumSelectionsTuple call() {
         Optional<CiphertextBallot.Selection> use_selection = contest_selections.stream()
-                .filter(s -> selection_id.equals(s.object_id)).findFirst();
+                .filter(s -> selection_id.equals(s.object_id())).findFirst();
 
         // a selection on the ballot that is required was not found
         // this should never happen when using the `CiphertextTally`, but sanity check anyway
@@ -398,7 +398,7 @@ public class CiphertextTallyBuilder {
 
     CiphertextTally.Selection build() {
       return new CiphertextTally.Selection(
-              this.object_id, this.sequence_order, this.description_hash, this.ciphertext_accumulate);
+              this.object_id(), this.sequence_order(), this.description_hash(), this.ciphertext_accumulate);
     }
   }
 }
