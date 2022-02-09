@@ -69,7 +69,7 @@ public class TestEncryptProperties extends TestProperties {
     // remove the proof
     // CiphertextBallotSelection missing_proof = result.toBuilder().clearProof().build();
     CiphertextBallot.Selection missing_proof = new CiphertextBallot.Selection(
-            result.object_id(), result.sequence_order(), result.description_hash, result.ciphertext(),
+            result.object_id(), result.sequence_order(), result.description_hash(), result.ciphertext(),
             result.crypto_hash, result.is_placeholder_selection, result.nonce,
             Optional.empty(), result.extended_data);
 
@@ -343,7 +343,7 @@ public class TestEncryptProperties extends TestProperties {
     CiphertextElectionContext context = tuple.context;
 
     PlaintextBallot subject = ElectionFactory.get_fake_ballot(election, null);
-    assertThat(subject.is_valid(election.ballot_styles.get(0).object_id)).isTrue();
+    assertThat(subject.is_valid(election.ballot_styles.get(0).object_id())).isTrue();
 
     Optional<CiphertextBallot> resultO = encrypt_ballot(subject, tuple.internalManifest, context, SEED_HASH, Optional.empty(), true);
     assertThat(resultO).isPresent();
@@ -374,7 +374,7 @@ public class TestEncryptProperties extends TestProperties {
     CiphertextElectionContext context = tuple.context;
 
     PlaintextBallot data = ElectionFactory.get_fake_ballot(election, null);
-    assertThat(data.is_valid(election.ballot_styles.get(0).object_id)).isTrue();
+    assertThat(data.is_valid(election.ballot_styles.get(0).object_id())).isTrue();
 
     EncryptionDevice device = EncryptionDevice.createForTest("Location");
     EncryptionMediator subject = new EncryptionMediator(tuple.internalManifest, context, device);
@@ -392,14 +392,14 @@ public class TestEncryptProperties extends TestProperties {
     CiphertextElectionContext context = tuple.context;
 
     PlaintextBallot data = ballot_factory.get_simple_ballot_from_file();
-    assertThat(data.is_valid(election.ballot_styles.get(0).object_id)).isTrue();
+    assertThat(data.is_valid(election.ballot_styles.get(0).object_id())).isTrue();
 
     EncryptionDevice device = EncryptionDevice.createForTest("Location");
     EncryptionMediator subject = new EncryptionMediator(tuple.internalManifest, context, device);
 
     Optional<CiphertextBallot> result = subject.encrypt(data);
     assertThat(result).isPresent();
-    assertThat(data.object_id).isEqualTo(result.get().object_id);
+    assertThat(data.object_id()).isEqualTo(result.get().object_id());
     assertThat(result.get().is_valid_encryption(election.crypto_hash, keypair.public_key, context.crypto_extended_base_hash)).isTrue();
   }
 
@@ -415,7 +415,7 @@ public class TestEncryptProperties extends TestProperties {
      CiphertextElectionContext context = tuple.context;
 
      PlaintextBallot data = ballot_factory.get_simple_ballot_from_file();
-     assertThat(data.is_valid(election.ballot_styles.get(0).object_id)).isTrue();
+     assertThat(data.is_valid(election.ballot_styles.get(0).object_id())).isTrue();
 
      EncryptionDevice device = EncryptionDevice.createForTest("Location");
      EncryptionMediator subject = new EncryptionMediator(tuple.internalManifest, context, device);

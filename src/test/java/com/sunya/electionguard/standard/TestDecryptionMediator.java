@@ -14,7 +14,6 @@ import com.sunya.electionguard.ElectionTestHelper;
 import com.sunya.electionguard.Encrypt;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.InternalManifest;
-import com.sunya.electionguard.KeyCeremony;
 import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.PlaintextBallot;
 import com.sunya.electionguard.PlaintextTally;
@@ -36,7 +35,7 @@ import java.util.stream.Collectors;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
-import static com.sunya.electionguard.KeyCeremony.CeremonyDetails;
+import static com.sunya.electionguard.standard.KeyCeremony.CeremonyDetails;
 
 public class TestDecryptionMediator extends TestProperties {
   private static final int NUMBER_OF_GUARDIANS = 3;
@@ -105,8 +104,8 @@ public class TestDecryptionMediator extends TestProperties {
               ballot_factory.get_fake_ballot(this.metadata, "some-unique-ballot-id-spoiled" + i, true));
     }
 
-    assertThat(this.fake_cast_ballot.is_valid(this.election.ballot_styles.get(0).object_id)).isTrue();
-    assertThat(this.fake_spoiled_ballot.is_valid(this.election.ballot_styles.get(0).object_id)).isTrue();
+    assertThat(this.fake_cast_ballot.is_valid(this.election.ballot_styles.get(0).object_id())).isTrue();
+    assertThat(this.fake_spoiled_ballot.is_valid(this.election.ballot_styles.get(0).object_id())).isTrue();
     ArrayList<PlaintextBallot> all = new ArrayList<>(more_fake_ballots);
     all.add(this.fake_cast_ballot);
 

@@ -283,10 +283,10 @@ public class DecryptingMediator {
     // If guardians are missing, for each ballot compute compensated ballot_shares, add to this.ballot_shares
     if (this.available_guardians.size() < this.context.number_of_guardians) {
       for (SubmittedBallot ballot : this.ciphertext_ballots) { // LOOK running through ballots
-        if (this.count_ballot_shares(ballot.object_id) < this.context.number_of_guardians) {
+        if (this.count_ballot_shares(ballot.object_id()) < this.context.number_of_guardians) {
           this.compute_missing_shares_for_ballot(ballot);
         }
-        if (this.count_ballot_shares(ballot.object_id) != this.context.number_of_guardians) {
+        if (this.count_ballot_shares(ballot.object_id()) != this.context.number_of_guardians) {
           logger.atWarning().log("decrypt_spoiled_ballots failed with share length mismatch");
           return false;
         }
@@ -329,9 +329,9 @@ public class DecryptingMediator {
 
       // LOOK ballot_shares now include missing_ballots
       Map<String, DecryptionShare> guardian_shares = this.ballot_shares.computeIfAbsent(missing_guardian_id, k -> new HashMap<>());
-      guardian_shares.put(ballot.object_id, missing_decryption_share);
+      guardian_shares.put(ballot.object_id(), missing_decryption_share);
 
-      this.ballot_shares.get(missing_guardian_id).put(ballot.object_id, missing_decryption_share);
+      this.ballot_shares.get(missing_guardian_id).put(ballot.object_id(), missing_decryption_share);
     }
   }
 

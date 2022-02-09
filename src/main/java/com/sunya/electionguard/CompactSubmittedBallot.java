@@ -64,7 +64,7 @@ public class CompactSubmittedBallot {
                     plaintext_ballot, internal_manifest, context, nonce_seed).orElseThrow();
 
     return SubmittedBallot.create(
-            plaintext_ballot.object_id,
+            plaintext_ballot.object_id(),
             plaintext_ballot.style_id,
             internal_manifest.manifest.crypto_hash,
             Optional.of(compact_ballot.code_seed),

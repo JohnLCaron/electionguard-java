@@ -11,10 +11,10 @@ import java.util.Objects;
  */
 @Immutable
 public class CiphertextSelection implements OrderedObjectBaseIF {
-  public final String object_id;
-  public final int sequence_order;
+  private final String object_id;
+  private final int sequence_order;
   /** Manifest.SelectionDescription.crypto_hash(). */
-  public final Group.ElementModQ description_hash;
+  private final Group.ElementModQ description_hash;
   private final ElGamal.Ciphertext ciphertext; // only accessed through ciphertext(), so subclass can override
   public final boolean is_placeholder;
 
@@ -33,12 +33,27 @@ public class CiphertextSelection implements OrderedObjectBaseIF {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     CiphertextSelection that = (CiphertextSelection) o;
-    return sequence_order == that.sequence_order && is_placeholder == that.is_placeholder && object_id.equals(that.object_id) && description_hash.equals(that.description_hash) && ciphertext.equals(that.ciphertext);
+    return sequence_order == that.sequence_order &&
+            is_placeholder == that.is_placeholder &&
+            object_id.equals(that.object_id) &&
+            description_hash.equals(that.description_hash) &&
+            ciphertext.equals(that.ciphertext);
   }
 
   @Override
   public int hashCode() {
     return Objects.hash(object_id, sequence_order, description_hash, ciphertext, is_placeholder);
+  }
+
+  @Override
+  public String toString() {
+    return "CiphertextSelection{" +
+            "object_id='" + object_id + '\'' +
+            ", sequence_order=" + sequence_order +
+            ", description_hash=" + description_hash +
+            ", ciphertext=" + ciphertext +
+            ", is_placeholder=" + is_placeholder +
+            '}';
   }
 
   /** The encrypted vote count. */
@@ -54,5 +69,9 @@ public class CiphertextSelection implements OrderedObjectBaseIF {
   @Override
   public int sequence_order() {
     return sequence_order;
+  }
+
+  public Group.ElementModQ description_hash() {
+    return description_hash;
   }
 }

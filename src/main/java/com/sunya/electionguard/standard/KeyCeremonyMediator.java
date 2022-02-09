@@ -3,12 +3,11 @@ package com.sunya.electionguard.standard;
 import com.google.auto.value.AutoValue;
 import com.google.common.flogger.FluentLogger;
 import com.sunya.electionguard.Auxiliary;
-import com.sunya.electionguard.KeyCeremony;
 
 import javax.annotation.Nullable;
 import java.util.*;
 
-import static com.sunya.electionguard.KeyCeremony.*;
+import static com.sunya.electionguard.standard.KeyCeremony.*;
 
 /** Orchestrates the Key Ceremony between the guardians. Mutable. */
 class KeyCeremonyMediator {

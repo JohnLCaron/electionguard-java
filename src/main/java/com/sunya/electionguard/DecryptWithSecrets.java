@@ -35,7 +35,7 @@ class DecryptWithSecrets {
 
     if (!suppress_validity_check &&
             !selection.is_valid_encryption(description.crypto_hash(), public_key, crypto_extended_base_hash)) {
-      logger.atWarning().log("selection: %s failed secret validity check", selection.object_id);
+      logger.atWarning().log("selection: %s failed secret validity check", selection.object_id());
       return Optional.empty();
     }
 
@@ -73,7 +73,7 @@ class DecryptWithSecrets {
 
     if (!suppress_validity_check &&
             !selection.is_valid_encryption(description.crypto_hash(), public_key, crypto_extended_base_hash)) {
-      logger.atWarning().log("selection: %s failed nonce validity check", selection.object_id);
+      logger.atWarning().log("selection: %s failed nonce validity check", selection.object_id());
       return Optional.empty();
     }
 
@@ -89,13 +89,13 @@ class DecryptWithSecrets {
 
     if (nonce.isEmpty()) {
       logger.atWarning().log("missing nonce value.  decrypt could not derive a nonce value for selection %s}",
-              selection.object_id);
+              selection.object_id());
       return Optional.empty();
     }
 
     if (selection.nonce.isPresent() && !nonce.get().equals(selection.nonce.get())) {
       logger.atWarning().log("decrypt could not verify a nonce value for selection %s}",
-              selection.object_id);
+              selection.object_id());
       return Optional.empty();
     }
 
@@ -140,7 +140,7 @@ class DecryptWithSecrets {
     List<PlaintextBallot.Selection> plaintext_selections = new ArrayList<>();
     for (CiphertextBallot.Selection selection : contest.ballot_selections) {
       Manifest.SelectionDescription selection_description =
-              description.getSelectionById(selection.object_id).orElseThrow(IllegalStateException::new);
+              description.getSelectionById(selection.object_id()).orElseThrow(IllegalStateException::new);
       Optional<PlaintextBallot.Selection> plaintext_selection = decrypt_selection_with_secret(
               selection,
               selection_description,
@@ -155,7 +155,7 @@ class DecryptWithSecrets {
       } else {
         logger.atWarning().log(
                 "decryption with secret failed for contest: %s selection: %s",
-                contest.object_id, selection.object_id);
+                contest.object_id, selection.object_id());
         return Optional.empty();
       }
     }
@@ -221,7 +221,7 @@ class DecryptWithSecrets {
     List<PlaintextBallot.Selection> plaintext_selections = new ArrayList<>();
     for (CiphertextBallot.Selection selection : contest.ballot_selections) {
       Manifest.SelectionDescription selection_description =
-              description.getSelectionById(selection.object_id).orElseThrow(IllegalStateException::new);
+              description.getSelectionById(selection.object_id()).orElseThrow(IllegalStateException::new);
       Optional<PlaintextBallot.Selection> plaintext_selection = decrypt_selection_with_nonce(
               selection,
               selection_description,
@@ -236,7 +236,7 @@ class DecryptWithSecrets {
         }
       } else {
         logger.atWarning().log("decryption with nonce failed for contest: %s selection: %s",
-                contest.object_id, selection.object_id);
+                contest.object_id, selection.object_id());
         return Optional.empty();
       }
     }
@@ -270,7 +270,7 @@ class DecryptWithSecrets {
 
     if (!suppress_validity_check && !ballot.is_valid_encryption(
             metadata.manifest.crypto_hash, public_key, crypto_extended_base_hash)) {
-      logger.atWarning().log("ballot: %s failed secret validity check", ballot.object_id);
+      logger.atWarning().log("ballot: %s failed secret validity check", ballot.object_id());
       return Optional.empty();
     }
 
@@ -292,12 +292,12 @@ class DecryptWithSecrets {
         plaintext_contests.add(plaintext_contest.get());
       } else {
         logger.atWarning().log("decryption with nonce failed for ballot: %s selection: %s",
-                ballot.object_id, contest.object_id);
+                ballot.object_id(), contest.object_id);
         return Optional.empty();
       }
     }
 
-    return Optional.of(new PlaintextBallot(ballot.object_id, ballot.style_id, plaintext_contests));
+    return Optional.of(new PlaintextBallot(ballot.object_id(), ballot.style_id, plaintext_contests));
   }
 
   /**
@@ -323,17 +323,17 @@ class DecryptWithSecrets {
 
     if (!suppress_validity_check && !ballot.is_valid_encryption(
             metadata.manifest.crypto_hash, public_key, crypto_extended_base_hash)) {
-      logger.atWarning().log("ballot: %s failed nonce validity check", ballot.object_id);
+      logger.atWarning().log("ballot: %s failed nonce validity check", ballot.object_id());
       return Optional.empty();
     }
 
     // Use the hashed representation included in the ballot or override with the provided values
     Optional<ElementModQ> nonce_seed = nonce.isEmpty() ? ballot.hashed_ballot_nonce() :
-            Optional.of(CiphertextBallot.nonce_seed(metadata.manifest.crypto_hash, ballot.object_id, nonce.get()));
+            Optional.of(CiphertextBallot.nonce_seed(metadata.manifest.crypto_hash, ballot.object_id(), nonce.get()));
 
     if (nonce_seed.isEmpty()) {
       logger.atWarning().log(
-              "missing nonce_seed value. decrypt could not derive a nonce value for ballot %s", ballot.object_id);
+              "missing nonce_seed value. decrypt could not derive a nonce value for ballot %s", ballot.object_id());
       return Optional.empty();
     }
 
@@ -355,11 +355,11 @@ class DecryptWithSecrets {
         plaintext_contests.add(plaintext_contest.get());
       } else {
         logger.atWarning().log(
-                "decryption with nonce failed for ballot: %s selection: %s", ballot.object_id, contest.object_id);
+                "decryption with nonce failed for ballot: %s selection: %s", ballot.object_id(), contest.object_id);
         return Optional.empty();
       }
     }
-    return Optional.of(new PlaintextBallot(ballot.object_id, ballot.style_id, plaintext_contests));
+    return Optional.of(new PlaintextBallot(ballot.object_id(), ballot.style_id, plaintext_contests));
   }
 
 }

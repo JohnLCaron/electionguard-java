@@ -8,7 +8,6 @@ import com.sunya.electionguard.ElectionFactory;
 import com.sunya.electionguard.ElectionTestHelper;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.GuardianRecord;
-import com.sunya.electionguard.GuardianRecordPrivate;
 import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.InternalManifest;
 import com.sunya.electionguard.CiphertextTally;

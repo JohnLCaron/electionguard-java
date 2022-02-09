@@ -6,9 +6,7 @@ import com.sunya.electionguard.CiphertextElectionContext;
 import com.sunya.electionguard.CiphertextTally;
 import com.sunya.electionguard.DecryptWithShares;
 import com.sunya.electionguard.DecryptionShare;
-import com.sunya.electionguard.Decryptions;
 import com.sunya.electionguard.Group;
-import com.sunya.electionguard.KeyCeremony;
 import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.SubmittedBallot;
 
@@ -233,7 +231,7 @@ class DecryptionMediator {
             new ArrayList<>(available_guardians.values()));
 
     for (SubmittedBallot ciphertext_ballot : ciphertext_ballots) {
-      String ballot_id = ciphertext_ballot.object_id;
+      String ballot_id = ciphertext_ballot.object_id();
       Map<String, DecryptionShare> ballot_shares = this.ballot_shares.computeIfAbsent(ballot_id, m -> new HashMap<>());
 
       for (Map.Entry<String, KeyCeremony.ElectionPublicKey> entry : this.missing_guardians.entrySet()) {
@@ -298,7 +296,7 @@ class DecryptionMediator {
 
     Map<String, PlaintextTally> ballots = new HashMap<>();
     for (SubmittedBallot ciphertext_ballot : ciphertext_ballots) {
-      Map<String, DecryptionShare> ballot_shares = this.ballot_shares.get(ciphertext_ballot.object_id);
+      Map<String, DecryptionShare> ballot_shares = this.ballot_shares.get(ciphertext_ballot.object_id());
       if (ballot_shares == null || !this.ready_to_decrypt(ballot_shares)) {
         // Skip ballot if not ready to decrypt LOOK silent failure
         continue;

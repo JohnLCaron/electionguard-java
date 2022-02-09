@@ -112,7 +112,7 @@ public class PlaintextBallotPojo {
 
   private static PlaintextBallotPojo convertPlaintextBallot(PlaintextBallot src) {
      PlaintextBallotPojo pojo = new PlaintextBallotPojo();
-    pojo.object_id = src.object_id;
+    pojo.object_id = src.object_id();
     pojo.style_id = src.style_id;
     pojo.contests = ConvertPojos.convertList(src.contests, PlaintextBallotPojo::convertPlaintextBallotContest);
     return pojo;

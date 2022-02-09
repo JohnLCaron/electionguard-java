@@ -1,5 +1,6 @@
 package com.sunya.electionguard.proto;
 
+import com.sunya.electionguard.CiphertextTally;
 import com.sunya.electionguard.protogen.ElectionRecordProto;
 import com.sunya.electionguard.verifier.ElectionRecord;
 import com.sunya.electionguard.publish.Consumer;
@@ -53,7 +54,8 @@ public class TestElectionRecordProtoRoundtrip {
     assertThat(roundtrip.context).isEqualTo(consumer.context());
     assertThat(roundtrip.constants).isEqualTo(consumer.constants());
     assertThat(roundtrip.devices).isEqualTo(consumer.devices());
-    assertThat(roundtrip.encryptedTally).isEqualTo(consumer.ciphertextTally());
+    CiphertextTally expected = consumer.ciphertextTally();
+    assertThat(roundtrip.encryptedTally).isEqualTo(expected);
     assertThat(roundtrip.decryptedTally).isEqualTo(consumer.decryptedTally());
     assertThat(roundtrip.guardianRecords).isEqualTo(consumer.guardianRecords());
     assertThat(roundtrip.availableGuardians).isEqualTo(consumer.availableGuardians());

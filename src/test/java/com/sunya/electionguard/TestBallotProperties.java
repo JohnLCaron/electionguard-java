@@ -26,8 +26,8 @@ public class TestBallotProperties extends TestProperties {
   public void test_ballot_is_valid() throws IOException {
     PlaintextBallot subject = factory.get_simple_ballot_from_file();
 
-    assertThat(subject.object_id).isNotNull();
-    assertThat(subject.object_id).isEqualTo("some-external-id-string-123");
+    assertThat(subject.object_id()).isNotNull();
+    assertThat(subject.object_id()).isEqualTo("some-external-id-string-123");
     assertThat(subject.is_valid("jefferson-county-ballot-style")).isTrue();
 
     PlaintextBallot.Contest first_contest = subject.contests.get(0);
@@ -39,7 +39,7 @@ public class TestBallotProperties extends TestProperties {
   public void test_ballots_are_valid() throws IOException {
     List<PlaintextBallot> ballots = factory.get_simple_ballots_from_file();
     for (PlaintextBallot subject : ballots) {
-      assertThat(subject.object_id).isNotNull();
+      assertThat(subject.object_id()).isNotNull();
       assertThat(subject.style_id).isAnyOf("jefferson-county-ballot-style", "harrison-township-ballot-style");
 
       for (PlaintextBallot.Contest contest : subject.contests) {

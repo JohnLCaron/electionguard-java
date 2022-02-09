@@ -31,8 +31,8 @@ public class DecryptWithShares {
       HashMap<String, DecryptionShare> ballot_shares = new HashMap<>();
       for (Map.Entry<String, Map<String, DecryptionShare>> entry : shares.entrySet()) {
         Map<String, DecryptionShare> map2 = entry.getValue();
-        Preconditions.checkArgument(map2.containsKey(ballot.object_id));
-        ballot_shares.put(entry.getKey(), map2.get(ballot.object_id));
+        Preconditions.checkArgument(map2.containsKey(ballot.object_id()));
+        ballot_shares.put(entry.getKey(), map2.get(ballot.object_id()));
       }
 
       Optional<PlaintextTally> decrypted_tally =
@@ -66,16 +66,16 @@ public class DecryptWithShares {
       Optional<PlaintextTally.Contest> pc = decrypt_contest_with_decryption_shares(
               CiphertextContest.createFrom(tallyContest), shares, context.crypto_extended_base_hash);
       if (pc.isEmpty()) {
-        logger.atWarning().log("contest: %s failed to decrypt with shares", tallyContest.object_id);
+        logger.atWarning().log("contest: %s failed to decrypt with shares", tallyContest.object_id());
         return Optional.empty();
       }
-      contests.put(tallyContest.object_id, pc.get());
+      contests.put(tallyContest.object_id(), pc.get());
     }
 
     if (contests.isEmpty()) {
       return Optional.empty();
     } else {
-      return Optional.of(new PlaintextTally(tally.object_id, contests));
+      return Optional.of(new PlaintextTally(tally.object_id(), contests));
     }
   }
 
@@ -94,7 +94,7 @@ public class DecryptWithShares {
       HashMap<String, DecryptionShare> ballot_shares = new HashMap<>();
       for (Map.Entry<String, Map<String, DecryptionShare>> entry : shares.entrySet()) {
         Map<String, DecryptionShare> map2 = entry.getValue();
-        ballot_shares.put(entry.getKey(), map2.get(ballot.object_id));
+        ballot_shares.put(entry.getKey(), map2.get(ballot.object_id()));
       }
 
       Optional<PlaintextTally> decrypted_tally =
@@ -102,7 +102,7 @@ public class DecryptWithShares {
       if (decrypted_tally.isEmpty()) {
          return Optional.empty();
       }
-      result.put(ballot.object_id, decrypted_tally.get());
+      result.put(ballot.object_id(), decrypted_tally.get());
     }
 
     return Optional.of(result);
@@ -128,7 +128,7 @@ public class DecryptWithShares {
       plaintext_contests.put(ballotContest.object_id, plaintext_contest.get());
     }
 
-    return Optional.of(new PlaintextTally(ballot.object_id, plaintext_contests));
+    return Optional.of(new PlaintextTally(ballot.object_id(), plaintext_contests));
   }
 
   /**
@@ -152,7 +152,7 @@ public class DecryptWithShares {
         }
         // Map(AVAILABLE_GUARDIAN_ID, KeyAndSelection)
         Map<String, KeyAndSelection> tally_shares =
-                DecryptionShare.get_tally_shares_for_selection2(selection.object_id, shares);
+                DecryptionShare.get_tally_shares_for_selection2(selection.object_id(), shares);
         Optional<PlaintextTally.Selection> plaintext_selectionO = decrypt_selection_with_decryption_shares(
                 selection, tally_shares, extended_base_hash, false);
         if (plaintext_selectionO.isEmpty()) {

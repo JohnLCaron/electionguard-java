@@ -147,10 +147,10 @@ public class TestDecryptingMediator extends TestProperties {
   private void checkDecrypted(List<SpoiledBallotAndTally> decrypteds) throws IOException {
     PrivateData pdata = new PrivateData(DECRYPTING_DATA_DIR, false, false);
     List<PlaintextBallot> inputBallots = pdata.inputBallots();
-    Map<String, PlaintextBallot> inputBallotsMap = inputBallots.stream().collect(Collectors.toMap(e -> e.object_id, e -> e));
+    Map<String, PlaintextBallot> inputBallotsMap = inputBallots.stream().collect(Collectors.toMap(e -> e.object_id(), e -> e));
     for (SpoiledBallotAndTally decrypted : decrypteds) {
       PlaintextBallot decrypted_ballot = decrypted.ballot;
-      PlaintextBallot input_ballot = inputBallotsMap.get(decrypted_ballot.object_id);
+      PlaintextBallot input_ballot = inputBallotsMap.get(decrypted_ballot.object_id());
       assertThat(input_ballot).isNotNull();
       if (!decrypted_ballot.equals(input_ballot)) {
         System.out.printf("HEY");

@@ -3,7 +3,7 @@ package com.sunya.electionguard.decrypting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.flogger.FluentLogger;
-import com.sunya.electionguard.DecryptionProofTuple;
+import com.sunya.electionguard.BallotBox;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.proto.CommonConvert;
@@ -75,7 +75,7 @@ class DecryptingRemoteTrusteeProxy implements DecryptingTrusteeIF  {
   }
 
   @Override
-  public List<DecryptionProofTuple> partialDecrypt(
+  public List<BallotBox.DecryptionProofTuple> partialDecrypt(
           List<ElGamal.Ciphertext> text,
           Group.ElementModQ extended_base_hash,
           @Nullable Group.ElementModQ nonce_seed) { // LOOK currently ignoring
@@ -100,8 +100,8 @@ class DecryptingRemoteTrusteeProxy implements DecryptingTrusteeIF  {
     }
   }
 
-  private DecryptionProofTuple convertDecryptionProofTuple(  DecryptingTrusteeProto.PartialDecryptionResult proto) {
-    return new DecryptionProofTuple(
+  private BallotBox.DecryptionProofTuple convertDecryptionProofTuple(DecryptingTrusteeProto.PartialDecryptionResult proto) {
+    return new BallotBox.DecryptionProofTuple(
             CommonConvert.convertElementModP(proto.getDecryption()),
             CommonConvert.convertChaumPedersenProof(proto.getProof()));
   }

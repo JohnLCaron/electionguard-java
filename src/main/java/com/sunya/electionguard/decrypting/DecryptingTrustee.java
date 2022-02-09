@@ -4,8 +4,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.flogger.FluentLogger;
+import com.sunya.electionguard.BallotBox;
 import com.sunya.electionguard.ChaumPedersen;
-import com.sunya.electionguard.DecryptionProofTuple;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.Rsa;
@@ -176,7 +176,7 @@ public class DecryptingTrustee implements DecryptingTrusteeIF {
    *                            if no value is provided, a random number will be used.
    * @return a DecryptionProofTuple of the decryption and its proof
    */
-  public List<DecryptionProofTuple> partialDecrypt(
+  public List<BallotBox.DecryptionProofTuple> partialDecrypt(
           List<ElGamal.Ciphertext> texts,
           Group.ElementModQ extended_base_hash,
           @Nullable Group.ElementModQ nonce_seed) {
@@ -185,7 +185,7 @@ public class DecryptingTrustee implements DecryptingTrusteeIF {
       nonce_seed = rand_q();
     }
 
-    List<DecryptionProofTuple> results = new ArrayList<>();
+    List<BallotBox.DecryptionProofTuple> results = new ArrayList<>();
     for (ElGamal.Ciphertext text : texts) {
       // 𝑀_i = 𝐴^𝑠𝑖 mod 𝑝
       Group.ElementModP partial_decryption = text.partial_decrypt(this.election_keypair.secret_key);
@@ -208,7 +208,7 @@ public class DecryptingTrustee implements DecryptingTrusteeIF {
         );
         throw new IllegalArgumentException(String.format("PartialDecrypt invalid proof for %s", this.id));
       }
-      results.add(new DecryptionProofTuple(partial_decryption, proof));
+      results.add(new BallotBox.DecryptionProofTuple(partial_decryption, proof));
     }
     return results;
   }

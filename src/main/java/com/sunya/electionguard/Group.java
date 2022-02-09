@@ -25,7 +25,7 @@ public class Group {
     primes = usePrimes;
   }
 
-   @Immutable
+  @Immutable
   static class ElementMod {
     final BigInteger elem;
 

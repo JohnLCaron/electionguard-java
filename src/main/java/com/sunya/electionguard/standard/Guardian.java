@@ -3,16 +3,13 @@ package com.sunya.electionguard.standard;
 import com.google.common.base.Preconditions;
 import com.google.common.flogger.FluentLogger;
 import com.sunya.electionguard.Auxiliary;
+import com.sunya.electionguard.BallotBox;
 import com.sunya.electionguard.ChaumPedersen;
 import com.sunya.electionguard.CiphertextElectionContext;
 import com.sunya.electionguard.CiphertextTally;
-import com.sunya.electionguard.DecryptionProofTuple;
 import com.sunya.electionguard.DecryptionShare;
-import com.sunya.electionguard.Decryptions;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.GuardianRecord;
-import com.sunya.electionguard.GuardianRecordPrivate;
-import com.sunya.electionguard.KeyCeremony;
 import com.sunya.electionguard.SubmittedBallot;
 
 import javax.annotation.Nullable;
@@ -437,7 +434,7 @@ class Guardian {
               this.election_keys,
               ballot,
               context);
-      shares.put(ballot.object_id, share);
+      shares.put(ballot.object_id(), share);
     }
     return shares;
   }
@@ -491,7 +488,7 @@ class Guardian {
               ballot,
               context,
               decryptor);
-      shares.put(ballot.object_id, share);
+      shares.put(ballot.object_id(), share);
     }
     return shares;
   }
@@ -506,7 +503,7 @@ class Guardian {
    *                            if no value is provided, a random number will be used.
    * @return a `Tuple[ElementModP, ChaumPedersenProof]` of the decryption and its proof
    */
-  DecryptionProofTuple partially_decrypt(
+  BallotBox.DecryptionProofTuple partially_decrypt(
           ElGamal.Ciphertext elgamal,
           ElementModQ extended_base_hash,
           @Nullable ElementModQ nonce_seed) {
@@ -528,7 +525,7 @@ class Guardian {
             nonce_seed,
             extended_base_hash);
 
-    return new DecryptionProofTuple(partial_decryption, proof);
+    return new BallotBox.DecryptionProofTuple(partial_decryption, proof);
   }
 
 }

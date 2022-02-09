@@ -26,7 +26,7 @@ public class CiphertextBallotToProto {
 
   static CiphertextBallotProto.CiphertextBallot convertCiphertextBallot(CiphertextBallot ballot) {
     CiphertextBallotProto.CiphertextBallot.Builder builder = CiphertextBallotProto.CiphertextBallot.newBuilder();
-    builder.setObjectId(ballot.object_id);
+    builder.setObjectId(ballot.object_id());
     builder.setBallotStyleId(ballot.style_id);
     builder.setDescriptionHash(convertElementModQ(ballot.manifest_hash));
     builder.setTrackingHash(convertElementModQ(ballot.code));
@@ -53,9 +53,9 @@ public class CiphertextBallotToProto {
 
   static CiphertextBallotProto.CiphertextBallotSelection convertSelection(CiphertextBallot.Selection selection) {
     CiphertextBallotProto.CiphertextBallotSelection.Builder builder = CiphertextBallotProto.CiphertextBallotSelection.newBuilder();
-    builder.setObjectId(selection.object_id);
+    builder.setObjectId(selection.object_id());
     builder.setSequenceOrder(selection.sequence_order());
-    builder.setDescriptionHash(convertElementModQ(selection.description_hash));
+    builder.setDescriptionHash(convertElementModQ(selection.description_hash()));
     builder.setCiphertext(convertCiphertext(selection.ciphertext()));
     builder.setCryptoHash(convertElementModQ(selection.crypto_hash));
     builder.setIsPlaceholderSelection(selection.is_placeholder_selection);

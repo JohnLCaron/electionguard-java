@@ -132,7 +132,7 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
 
     // Tamper with the nonce by setting it to an arbitrary value
     CiphertextBallot.Selection bad_subject = new CiphertextBallot.Selection(
-            subject.object_id(), subject.sequence_order(), subject.description_hash, subject.ciphertext(),
+            subject.object_id(), subject.sequence_order(), subject.description_hash(), subject.ciphertext(),
             subject.crypto_hash, subject.is_placeholder_selection, Optional.of(nonce_seed),
             subject.proof, subject.extended_data);
 
@@ -305,7 +305,7 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
     // Tamper with the encryption
     CiphertextBallot.Selection org = subject.ballot_selections.get(0);
     CiphertextBallot.Selection bad_selection = new CiphertextBallot.Selection(
-            org.object_id(), org.sequence_order(), org.description_hash, new ElGamal.Ciphertext(TWO_MOD_P, TWO_MOD_P),
+            org.object_id(), org.sequence_order(), org.description_hash(), new ElGamal.Ciphertext(TWO_MOD_P, TWO_MOD_P),
             org.crypto_hash, org.is_placeholder_selection, org.nonce,
             org.proof, org.extended_data);
 
@@ -395,10 +395,10 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
     assertThat(result_from_key).isPresent();
     assertThat(result_from_nonce).isPresent();
     assertThat(result_from_nonce_seed).isPresent();
-    assertThat(data.object_id).isEqualTo(subject.object_id);
-    assertThat(data.object_id).isEqualTo(result_from_key.get().object_id);
-    assertThat(data.object_id).isEqualTo(result_from_nonce.get().object_id);
-    assertThat(data.object_id).isEqualTo(result_from_nonce_seed.get().object_id);
+    assertThat(data.object_id()).isEqualTo(subject.object_id());
+    assertThat(data.object_id()).isEqualTo(result_from_key.get().object_id());
+    assertThat(data.object_id()).isEqualTo(result_from_nonce.get().object_id());
+    assertThat(data.object_id()).isEqualTo(result_from_nonce_seed.get().object_id());
 
     for (ContestWithPlaceholders description : metadata.get_contests_for_style(data.style_id)) {
       int expected_entries = description.ballot_selections.size() + description.number_elected;
@@ -496,7 +496,7 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
 
     // munge
     CiphertextBallot bad_subject = new CiphertextBallot(
-            subject.object_id, subject.style_id, subject.manifest_hash,
+            subject.object_id(), subject.style_id, subject.manifest_hash,
             subject.code_seed, subject.contests,
             subject.code, subject.timestamp, subject.crypto_hash,
             Optional.empty());

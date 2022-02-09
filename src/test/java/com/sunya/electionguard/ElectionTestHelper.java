@@ -201,7 +201,7 @@ public class ElectionTestHelper {
    * @param geo_units: a list of `GeopoliticalUnit` objects to be used in this ballot style
    */
   Manifest.BallotStyle ballot_styles(List<Manifest.Party> parties, List<Manifest.GeopoliticalUnit> geo_units) {
-    List<String> geopolitical_unit_ids = geo_units.stream().map(g -> g.object_id).collect(Collectors.toList());
+    List<String> geopolitical_unit_ids = geo_units.stream().map(g -> g.object_id()).collect(Collectors.toList());
     List<String> party_ids = parties.stream().map(p -> p.get_party_id()).collect(Collectors.toList());
     return new Manifest.BallotStyle(randomString("BallotStyle"), geopolitical_unit_ids, party_ids, urls());
   }
@@ -268,7 +268,7 @@ public class ElectionTestHelper {
    */
   private Manifest.SelectionDescription candidate_to_selection_description(Manifest.Candidate candidate, int sequence_order) {
     return new Manifest.SelectionDescription(
-            String.format("c-%s", candidate.object_id), candidate.get_candidate_id(), sequence_order);
+            String.format("c-%s", candidate.object_id()), candidate.get_candidate_id(), sequence_order);
   }
 
   public static class CandidateTuple {
@@ -324,7 +324,7 @@ public class ElectionTestHelper {
             contest_candidates,
             new Manifest.CandidateContestDescription(
                     randomString("CandidateContestDescription"),
-                    drawList(geo_units).object_id,
+                    drawList(geo_units).object_id(),
                     sequence_order,
                     vote_variation,
                     n,
@@ -387,7 +387,7 @@ public class ElectionTestHelper {
             contest_candidates,
             new Manifest.ReferendumContestDescription(
                     randomString("CandidateContestDescription"),
-                    drawList(geo_units).object_id,
+                    drawList(geo_units).object_id(),
                     sequence_order,
                     Manifest.VoteVariationType.one_of_m,
                     1,
@@ -476,7 +476,7 @@ public class ElectionTestHelper {
           // pick a ballot style at random
     Manifest.BallotStyle ballot_style = drawList(metadata.manifest.ballot_styles);
 
-    List<ContestWithPlaceholders> contests = metadata.get_contests_for_style(ballot_style.object_id);
+    List<ContestWithPlaceholders> contests = metadata.get_contests_for_style(ballot_style.object_id());
     assertWithMessage("invalid ballot style with no contests in it").that(contests.size() > 0).isTrue();
 
     List<PlaintextBallot.Contest> voted_contests = new ArrayList<>();
@@ -502,7 +502,7 @@ public class ElectionTestHelper {
       voted_contests.add(new PlaintextBallot.Contest(contest.object_id(), contest.sequence_order(), voted_selections));
     }
 
-    return new PlaintextBallot(randomString("PlaintextBallot"), ballot_style.object_id, voted_contests);
+    return new PlaintextBallot(randomString("PlaintextBallot"), ballot_style.object_id(), voted_contests);
   }
 
   static class CIPHERTEXT_ELECTIONS_TUPLE_TYPE {

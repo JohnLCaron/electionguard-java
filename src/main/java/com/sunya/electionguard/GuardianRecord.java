@@ -53,21 +53,4 @@ public abstract class GuardianRecord {
             election_proofs);
   }
 
-
-  /**
-   * Published record containing all required information per Guardian
-   * for Election record used in verification processes
-   *
-   * @param election_public_key: Guardian's election public key
-   */
-  public static GuardianRecord publish_guardian_record(KeyCeremony.ElectionPublicKey election_public_key) {
-    return GuardianRecord.create(
-            election_public_key.owner_id(),
-            election_public_key.sequence_order(),
-            election_public_key.key(),
-            election_public_key.coefficient_commitments(),
-            election_public_key.coefficient_proofs()
-            );
-  }
-
 }

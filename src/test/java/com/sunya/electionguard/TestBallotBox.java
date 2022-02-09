@@ -30,7 +30,7 @@ public class TestBallotBox {
 
     source = ElectionFactory.get_fake_ballot(election, null);
     assertThat(election.ballot_styles.isEmpty()).isFalse();
-    assertThat(source.is_valid(election.ballot_styles.get(0).object_id)).isTrue();
+    assertThat(source.is_valid(election.ballot_styles.get(0).object_id())).isTrue();
 
     Optional<CiphertextBallot> dataO = Encrypt.encrypt_ballot(source, tuple.internalManifest, context, SEED_HASH, Optional.empty(), true);
     assertThat(dataO).isPresent();
@@ -46,11 +46,11 @@ public class TestBallotBox {
     assertThat(resultO).isPresent();
     SubmittedBallot result = resultO.get();
 
-    SubmittedBallot expected = ballotBox.get(source.object_id).orElse(null);
+    SubmittedBallot expected = ballotBox.get(source.object_id()).orElse(null);
     assertThat(expected).isNotNull();
     assertThat(expected.state).isEqualTo(BallotBox.State.CAST);
     assertThat(result.state).isEqualTo(BallotBox.State.CAST);
-    assertThat(expected.object_id).isEqualTo(result.object_id);
+    assertThat(expected.object_id()).isEqualTo(result.object_id());
 
     // Test failure modes
     assertThat(ballotBox.cast(data)).isEmpty();  // cannot cast again
@@ -63,12 +63,12 @@ public class TestBallotBox {
     assertThat(resultO).isPresent();
     SubmittedBallot result = resultO.get();
 
-    SubmittedBallot expected = ballotBox.get(source.object_id).orElse(null);
+    SubmittedBallot expected = ballotBox.get(source.object_id()).orElse(null);
     assertThat(expected).isNotNull();
 
     assertThat(expected.state).isEqualTo(BallotBox.State.SPOILED);
     assertThat(result.state).isEqualTo(BallotBox.State.SPOILED);
-    assertThat(expected.object_id).isEqualTo(result.object_id);
+    assertThat(expected.object_id()).isEqualTo(result.object_id());
 
     //Test failure modes
     assertThat(ballotBox.spoil(data)).isEmpty();  //cannot spoil again
@@ -80,11 +80,11 @@ public class TestBallotBox {
     SubmittedBallot result = ballotBox.accept_ballot(data, BallotBox.State.CAST).orElse(null);
     assertThat(result).isNotNull();
 
-    SubmittedBallot expected = ballotBox.get(source.object_id).orElse(null);
+    SubmittedBallot expected = ballotBox.get(source.object_id()).orElse(null);
     assertThat(expected).isNotNull();
     assertThat(expected.state).isEqualTo(BallotBox.State.CAST);
     assertThat(result.state).isEqualTo(BallotBox.State.CAST);
-    assertThat(expected.object_id).isEqualTo(result.object_id);
+    assertThat(expected.object_id()).isEqualTo(result.object_id());
 
     //Test failure modes
     assertThat(ballotBox.accept_ballot(data, BallotBox.State.CAST)).isEmpty();  //cannot cast again
@@ -96,11 +96,11 @@ public class TestBallotBox {
     SubmittedBallot result = ballotBox.accept_ballot(data, BallotBox.State.SPOILED).orElse(null);
     assertThat(result).isNotNull();
 
-    SubmittedBallot expected = ballotBox.get(source.object_id).orElse(null);
+    SubmittedBallot expected = ballotBox.get(source.object_id()).orElse(null);
     assertThat(expected).isNotNull();
     assertThat(expected.state).isEqualTo(BallotBox.State.SPOILED);
     assertThat(result.state).isEqualTo(BallotBox.State.SPOILED);
-    assertThat(expected.object_id).isEqualTo(result.object_id);
+    assertThat(expected.object_id()).isEqualTo(result.object_id());
 
     //Test failure modes
     assertThat(ballotBox.accept_ballot(data, BallotBox.State.CAST)).isEmpty();  //cannot cast again

@@ -34,7 +34,7 @@ public class ContestVoteLimitsVerifier {
     int nselections  = 0;
     for (SubmittedBallot ballot : electionRecord.acceptedBallots) {
       nballots++;
-      if (show) System.out.printf("Ballot %s.%n", ballot.object_id);
+      if (show) System.out.printf("Ballot %s.%n", ballot.object_id());
       for (Contest contest : ballot.contests) {
         ncontests++;
         nselections += contest.ballot_selections.size();
@@ -88,7 +88,7 @@ public class ContestVoteLimitsVerifier {
       ElementModP selection_beta_product = Group.ONE_MOD_P;
 
       for (Selection selection : contest.ballot_selections) {
-        if (show) System.out.printf("   Selection %s.%n", selection.object_id);
+        if (show) System.out.printf("   Selection %s.%n", selection.object_id());
         ElementModP alpha = selection.ciphertext().pad;
         ElementModP beta = selection.ciphertext().data;
 
@@ -104,11 +104,11 @@ public class ContestVoteLimitsVerifier {
 
         // 5.D The given values a and b are each in Zr_p.
         if (!alpha.is_valid_residue()) {
-          System.out.printf(" 5.D alpha not in Zr_p for selection %s.%n", selection.object_id);
+          System.out.printf(" 5.D alpha not in Zr_p for selection %s.%n", selection.object_id());
           limit_error = true;
         }
         if (!beta.is_valid_residue()) {
-          System.out.printf(" 5.D beta not in Zr_p for selection %s.%n", selection.object_id);
+          System.out.printf(" 5.D beta not in Zr_p for selection %s.%n", selection.object_id());
           limit_error = true;
         }
 

@@ -1,31 +1,12 @@
 package com.sunya.electionguard.standard;
 
-import com.google.common.collect.ImmutableList;
-import com.sunya.electionguard.AvailableGuardian;
-import com.sunya.electionguard.BallotBox;
-import com.sunya.electionguard.CiphertextBallot;
-import com.sunya.electionguard.CiphertextTally;
-import com.sunya.electionguard.ElGamal;
-import com.sunya.electionguard.ElectionFactory;
-import com.sunya.electionguard.Encrypt;
-import com.sunya.electionguard.Group;
 import com.sunya.electionguard.GuardianRecord;
-import com.sunya.electionguard.GuardianRecordPrivate;
-import com.sunya.electionguard.Manifest;
-import com.sunya.electionguard.PlaintextBallot;
-import com.sunya.electionguard.PlaintextTally;
-import com.sunya.electionguard.SubmittedBallot;
-import com.sunya.electionguard.publish.Coefficients;
 import com.sunya.electionguard.publish.ConvertFromJson;
 import com.sunya.electionguard.publish.ConvertToJson;
 import net.jqwik.api.Example;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
 

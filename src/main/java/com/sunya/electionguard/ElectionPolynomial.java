@@ -63,27 +63,6 @@ public class ElectionPolynomial {
   }
 
   /**
-   * Generates a polynomial when the coefficients are already chosen
-   *
-   * @param coefficients:           the k coefficients of the polynomial
-   * @return Polynomial used to share election keys
-   */
-  static ElectionPolynomial generate_polynomial(List<Group.ElementModQ> coefficients) {
-    ArrayList<Group.ElementModP> commitments = new ArrayList<>();
-    ArrayList<SchnorrProof> proofs = new ArrayList<>();
-
-    for (Group.ElementModQ coefficient : coefficients) {
-      Group.ElementModP commitment = g_pow_p(coefficient);
-      // TODO Alternate schnorr proof method that doesn't need KeyPair
-      SchnorrProof proof = SchnorrProof.make_schnorr_proof(new ElGamal.KeyPair(coefficient, commitment), rand_q());
-      commitments.add(commitment);
-      proofs.add(proof);
-    }
-
-    return new ElectionPolynomial(coefficients, commitments, proofs);
-  }
-
-  /**
    * Generates a polynomial for sharing election keys.
    *
    * @param number_of_coefficients Number of coefficients of polynomial = the quorum, k.

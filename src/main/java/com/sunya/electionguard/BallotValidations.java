@@ -27,7 +27,7 @@ class BallotValidations {
             manifest.manifest.crypto_hash,
             context.elgamal_public_key,
             context.crypto_extended_base_hash)) {
-      logger.atInfo().log("ballot_is_valid_for_election: mismatching ballot encryption %s", ballot.object_id);
+      logger.atInfo().log("ballot_is_valid_for_election: mismatching ballot encryption %s", ballot.object_id());
       return false;
     }
     return true;
@@ -37,9 +37,9 @@ class BallotValidations {
   static boolean selection_is_valid_for_style(
           CiphertextBallot.Selection selection, Manifest.SelectionDescription description) {
 
-    if (!selection.description_hash.equals(description.crypto_hash())) {
+    if (!selection.description_hash().equals(description.crypto_hash())) {
       logger.atInfo().log("ballot is not valid for style: mismatched selection description hash %s for selection %s hash %s",
-              selection.description_hash, description.object_id, description.crypto_hash());
+              selection.description_hash(), description.object_id, description.crypto_hash());
       return false;
     }
 
@@ -89,7 +89,7 @@ class BallotValidations {
       for (Manifest.SelectionDescription selection_description : contestManifest.ballot_selections) {
         CiphertextBallot.Selection use_selection = null;
         for (CiphertextBallot.Selection selection : use_contest.ballot_selections) {
-          if (selection_description.object_id.equals(selection.object_id)) {
+          if (selection_description.object_id.equals(selection.object_id())) {
             use_selection = selection;
             break;
           }

@@ -13,7 +13,7 @@ public class CiphertextTallyToProto {
 
   public static CiphertextTallyProto.CiphertextTally translateToProto(CiphertextTally tally) {
     CiphertextTallyProto.CiphertextTally.Builder builder = CiphertextTallyProto.CiphertextTally.newBuilder();
-    builder.setObjectId(tally.object_id);
+    builder.setObjectId(tally.object_id());
     for (Map.Entry<String, CiphertextTally.Contest> contest : tally.contests.entrySet()) {
       builder.putContests(contest.getKey(), convertContest(contest.getValue()));
     }
@@ -22,7 +22,8 @@ public class CiphertextTallyToProto {
 
   static CiphertextTallyProto.CiphertextTallyContest convertContest(CiphertextTally.Contest contest) {
     CiphertextTallyProto.CiphertextTallyContest.Builder builder = CiphertextTallyProto.CiphertextTallyContest.newBuilder();
-    builder.setObjectId(contest.object_id);
+    builder.setObjectId(contest.object_id());
+    builder.setSequenceOrder(contest.sequence_order());
     builder.setDescriptionHash(convertElementModQ(contest.contestDescriptionHash));
     for (Map.Entry<String, CiphertextTally.Selection> selection : contest.selections.entrySet()) {
       builder.putTallySelections(selection.getKey(), convertSelection(selection.getValue()));
@@ -32,8 +33,9 @@ public class CiphertextTallyToProto {
 
   static CiphertextTallyProto.CiphertextTallySelection convertSelection(CiphertextTally.Selection selection) {
     CiphertextTallyProto.CiphertextTallySelection.Builder builder = CiphertextTallyProto.CiphertextTallySelection.newBuilder();
-    builder.setObjectId(selection.object_id);
-    builder.setDescriptionHash(convertElementModQ(selection.description_hash));
+    builder.setObjectId(selection.object_id());
+    builder.setSequenceOrder(selection.sequence_order());
+    builder.setDescriptionHash(convertElementModQ(selection.description_hash()));
     builder.setCiphertext(convertCiphertext(selection.ciphertext()));
     return builder.build();
   }

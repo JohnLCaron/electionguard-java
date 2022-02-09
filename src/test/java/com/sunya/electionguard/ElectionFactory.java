@@ -104,7 +104,7 @@ public class ElectionFactory {
 
     return new PlaintextBallot(
             ballot_id,
-            election.ballot_styles.get(0).object_id,
+            election.ballot_styles.get(0).object_id(),
             ImmutableList.of(Encrypt.contest_from(election.contests.get(0)),
                     Encrypt.contest_from(election.contests.get(1)))
     );

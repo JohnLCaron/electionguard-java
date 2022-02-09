@@ -18,7 +18,6 @@ import com.sunya.electionguard.Group;
 import com.sunya.electionguard.GuardianRecord;
 import com.sunya.electionguard.Hash;
 import com.sunya.electionguard.InternalManifest;
-import com.sunya.electionguard.KeyCeremony;
 import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.PlaintextBallot;
 import com.sunya.electionguard.PlaintextTally;
@@ -272,7 +271,7 @@ public class TestEndToEndElectionIntegration {
     // Encrypt the Ballots
     for (PlaintextBallot plaintext_ballot : this.originalPlaintextBallots) {
       Optional<CiphertextBallot> encrypted_ballot = this.encrypter.encrypt(plaintext_ballot);
-      System.out.printf("Ballot Id: %s%n", plaintext_ballot.object_id);
+      System.out.printf("Ballot Id: %s%n", plaintext_ballot.object_id());
       assertThat(encrypted_ballot).isPresent();
       this.ciphertext_ballots.add(encrypted_ballot.get());
     }
@@ -292,7 +291,7 @@ public class TestEndToEndElectionIntegration {
         accepted_ballot = this.ballot_box.spoil(ballot);
       }
       assertThat(accepted_ballot).isPresent();
-      System.out.printf("Accepted Ballot Id: %s state = %s%n", ballot.object_id, accepted_ballot.get().state);
+      System.out.printf("Accepted Ballot Id: %s state = %s%n", ballot.object_id(), accepted_ballot.get().state);
     }
   }
 
@@ -347,7 +346,7 @@ public class TestEndToEndElectionIntegration {
 
     // Tally the expected values from the loaded ballots
     for (PlaintextBallot ballot : this.originalPlaintextBallots) {
-      if (this.ballot_box.get(ballot.object_id).orElseThrow().state == BallotBox.State.CAST) {
+      if (this.ballot_box.get(ballot.object_id()).orElseThrow().state == BallotBox.State.CAST) {
         for (PlaintextBallot.Contest contest : ballot.contests) {
           for (PlaintextBallot.Selection selection : contest.ballot_selections) {
             Integer value = expected_plaintext_tally.get(selection.selection_id);
@@ -375,12 +374,12 @@ public class TestEndToEndElectionIntegration {
     Map<String, PlaintextTally> plaintextTalliesMap = this.spoiledDecryptedTallies.stream().collect(Collectors.toMap(t -> t.object_id, t -> t));
 
     for (SubmittedBallot accepted_ballot : this.ballot_box.getSpoiledBallots()) {
-      String ballot_id = accepted_ballot.object_id;
+      String ballot_id = accepted_ballot.object_id();
       assertThat(accepted_ballot.state).isEqualTo(BallotBox.State.SPOILED);
       for (PlaintextBallot orgBallot : this.originalPlaintextBallots) {
-        if (ballot_id.equals(orgBallot.object_id)) {
+        if (ballot_id.equals(orgBallot.object_id())) {
           System.out.printf("%nSpoiled Ballot: %s%n", ballot_id);
-          PlaintextTally plaintextTally = plaintextTalliesMap.get(orgBallot.object_id);
+          PlaintextTally plaintextTally = plaintextTalliesMap.get(orgBallot.object_id());
           // LOOK TimeIntegrationSteps.compare_spoiled_tally(orgBallot, plaintextTally);
         }
       }
@@ -444,12 +443,12 @@ public class TestEndToEndElectionIntegration {
     assertThat(roundtrip.extendedHash()).isEqualTo(expectedExtendedHash);
 
     for (SubmittedBallot ballot : roundtrip.acceptedBallots) {
-      SubmittedBallot expected = this.ballot_box.get(ballot.object_id).orElseThrow();
-      assertWithMessage(ballot.object_id).that(ballot).isEqualTo(expected);
+      SubmittedBallot expected = this.ballot_box.get(ballot.object_id()).orElseThrow();
+      assertWithMessage(ballot.object_id()).that(ballot).isEqualTo(expected);
     }
 
     Map<String, PlaintextBallot> originalMap = this.originalPlaintextBallots.stream()
-            .collect(Collectors.toMap(b->b.object_id, b -> b));
+            .collect(Collectors.toMap(b->b.object_id(), b -> b));
     try (Stream<PlaintextTally> ballots = roundtrip.spoiledBallots.iterator().stream()) {
       ballots.forEach(ballot -> {
         PlaintextBallot expected = originalMap.get(ballot.object_id);

@@ -23,12 +23,12 @@ public class BallotInputValidation {
   public BallotInputValidation(Manifest election) {
     this.election = election;
     this.contestMap = election.contests.stream().collect(Collectors.toMap(c -> c.object_id, ElectionContest::new));
-    this.styles = election.ballot_styles.stream().collect(Collectors.toMap(bs -> bs.object_id, bs -> bs));
+    this.styles = election.ballot_styles.stream().collect(Collectors.toMap(bs -> bs.object_id(), bs -> bs));
   }
 
   /** Determine if a ballot is valid and well-formed for the given election. */
   public boolean validateBallot(PlaintextBallot ballot, Formatter problems) {
-    BallotMessenger ballotMesses = new BallotMessenger(ballot.object_id);
+    BallotMessenger ballotMesses = new BallotMessenger(ballot.object_id());
     Manifest.BallotStyle ballotStyle = styles.get(ballot.style_id);
     // Referential integrity of ballot's BallotStyle id
     if (ballotStyle == null) {

@@ -17,7 +17,7 @@ public class CiphertextContest {
   }
 
   public static CiphertextContest createFrom(CiphertextTally.Contest tallyContest) {
-    return new CiphertextContest(tallyContest.object_id, tallyContest.contestDescriptionHash,
+    return new CiphertextContest(tallyContest.object_id(), tallyContest.contestDescriptionHash,
             new ArrayList<>(tallyContest.selections.values()));
   }
 

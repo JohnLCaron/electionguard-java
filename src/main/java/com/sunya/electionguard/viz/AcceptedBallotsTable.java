@@ -133,7 +133,7 @@ public class AcceptedBallotsTable extends JPanel {
     }
 
     public String getId() {
-      return ballot.object_id;
+      return ballot.object_id();
     }
 
     public String getTracking() {
@@ -195,7 +195,7 @@ public class AcceptedBallotsTable extends JPanel {
     }
 
     public String getSelectionId() {
-      return selection.object_id;
+      return selection.object_id();
     }
 
     public String getCryptoHash() {

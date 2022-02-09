@@ -77,7 +77,7 @@ public class BallotAggregationVerifier {
           nballotsCast++;
           for (CiphertextBallot.Contest contest : ballot.contests) {
             for (CiphertextBallot.Selection selection : contest.ballot_selections) {
-              String key = contest.object_id + "." + selection.object_id;
+              String key = contest.object_id + "." + selection.object_id();
               selectionEncryptions.put(key, selection.ciphertext());
             }
           }

@@ -23,26 +23,28 @@ public class CiphertextTallyInputValidation {
 
   /** Determine if a tally is valid and well-formed for the given election manifest. */
   public boolean validateTally(CiphertextTally tally, Formatter problems) {
-    Messenger messes = new Messenger(tally.object_id);
+    Messenger messes = new Messenger(tally.object_id());
 
     for (Map.Entry<String, CiphertextTally.Contest> entry : tally.contests.entrySet()) {
-      if (!entry.getKey().equals(entry.getValue().object_id)) {
-        String msg = String.format("CiphertextTally.B.1 Contest id key '%s' doesnt match value '%s'", entry.getKey(), entry.getValue().object_id);
+      if (!entry.getKey().equals(entry.getValue().object_id())) {
+        String msg = String.format("CiphertextTally.B.1 Contest id key '%s' doesnt match value '%s'", entry.getKey(),
+                entry.getValue().object_id());
         messes.add(msg);
         logger.atWarning().log(msg);
         break;
       }
 
       CiphertextTally.Contest tallyContest = entry.getValue();
-      ElectionContest manifestContest = contestMap.get(tallyContest.object_id);
+      ElectionContest manifestContest = contestMap.get(tallyContest.object_id());
       // Referential integrity of tallyContest id and cryptoHash
       if (manifestContest == null) {
-        String msg = String.format("CiphertextTally.A.1 Tally Contest '%s' does not exist in manifest", tallyContest.object_id);
+        String msg = String.format("CiphertextTally.A.1 Tally Contest '%s' does not exist in manifest", tallyContest.object_id());
         messes.add(msg);
         logger.atWarning().log(msg);
       } else {
         if (!manifestContest.cryptoHash.equals(tallyContest.contestDescriptionHash)) {
-          String msg = String.format("CiphertextTally.A.1.1 Tally Contest '%s' crypto_hash does not match manifest contest", tallyContest.object_id);
+          String msg = String.format("CiphertextTally.A.1.1 Tally Contest '%s' crypto_hash does not match manifest contest",
+                  tallyContest.object_id());
           messes.add(msg);
           logger.atWarning().log(msg);
         }
@@ -54,31 +56,32 @@ public class CiphertextTallyInputValidation {
 
   /** Determine if contest is valid. */
   void validateContest(CiphertextTally.Contest tallyContest, ElectionContest manifestContest, Messenger messes) {
-    Messenger contestMesses = messes.nested(tallyContest.object_id);
+    Messenger contestMesses = messes.nested(tallyContest.object_id());
 
     for (Map.Entry<String, CiphertextTally.Selection> entry : tallyContest.selections.entrySet()) {
-      if (!entry.getKey().equals(entry.getValue().object_id)) {
-        String msg = String.format("CiphertextTally.B.2 Selection id key '%s' doesnt match value '%s'", entry.getKey(), entry.getValue().object_id);
+      if (!entry.getKey().equals(entry.getValue().object_id())) {
+        String msg = String.format("CiphertextTally.B.2 Selection id key '%s' doesnt match value '%s'", entry.getKey(),
+                entry.getValue().object_id());
         messes.add(msg);
         logger.atWarning().log(msg);
         break;
       }
       CiphertextTally.Selection tallySelection = entry.getValue();
 
-      Manifest.SelectionDescription manifestSelection = manifestContest.selectionMap.get(tallySelection.object_id);
+      Manifest.SelectionDescription manifestSelection = manifestContest.selectionMap.get(tallySelection.object_id());
       // Referential integrity of tallySelection id
       if (manifestSelection == null) {
         String msg = String.format("CiphertextBallot.A.2 Tally Selection '%s' does not exist in contest '%s'",
-                tallySelection.object_id, tallyContest.object_id);
+                tallySelection.object_id(), tallyContest.object_id());
         contestMesses.add(msg);
         logger.atWarning().log(msg);
         break;
       }
 
       // Referential integrity of tallySelection cryptoHash
-      if (!manifestSelection.crypto_hash().equals(tallySelection.description_hash)) {
+      if (!manifestSelection.crypto_hash().equals(tallySelection.description_hash())) {
         String msg = String.format("CiphertextTally.A.2.1 Tally Selection '%s-%s' crypto_hash does not match manifest selection",
-                tallyContest.object_id, tallySelection.object_id);
+                tallyContest.object_id(), tallySelection.object_id());
         messes.add(msg);
         logger.atWarning().log(msg);
       }

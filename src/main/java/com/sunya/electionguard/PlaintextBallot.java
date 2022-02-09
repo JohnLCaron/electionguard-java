@@ -18,18 +18,27 @@ import java.util.Optional;
  * This is used both as input, and for the roundtrip: input -&gt; encrypt -&gt; decrypt -&gt; output.
  */
 @Immutable
-public class PlaintextBallot extends ElectionObjectBase {
+public class PlaintextBallot implements ElectionObjectBaseIF {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
+
+  /** Unique internal identifier used by other elements to reference this element. */
+  private final String object_id;
   /** The object_id of the Manifest.BallotStyle. */
   public final String style_id;
   /** The list of contests for this ballot. */
   public final ImmutableList<Contest> contests;
 
   public PlaintextBallot(String object_id, String style_id, List<Contest> contests) {
-    super(object_id);
+    Preconditions.checkArgument(!Strings.isNullOrEmpty(object_id));
+    this.object_id = object_id;
     Preconditions.checkArgument(!Strings.isNullOrEmpty(style_id));
     this.style_id = style_id;
     this.contests = ImmutableList.copyOf(contests);
+  }
+
+  @Override
+  public String object_id() {
+    return object_id;
   }
 
   /**
@@ -58,15 +67,15 @@ public class PlaintextBallot extends ElectionObjectBase {
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-    if (!super.equals(o)) return false;
     PlaintextBallot that = (PlaintextBallot) o;
-    return style_id.equals(that.style_id) &&
+    return object_id.equals(that.object_id) &&
+            style_id.equals(that.style_id) &&
             contests.equals(that.contests);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(super.hashCode(), style_id, contests);
+    return Objects.hash(object_id, style_id, contests);
   }
 
   /**
@@ -283,13 +292,13 @@ public class PlaintextBallot extends ElectionObjectBase {
       List<Selection> selections = new ArrayList<>();
       for (CiphertextBallot.Selection cselection : ccontest.ballot_selections) {
         if (!cselection.is_placeholder_selection) {
-          PlaintextTally.Selection tselection = tcontest.selections().get(cselection.object_id);
-          selections.add(new Selection(cselection.object_id, -1, tselection.tally(), false, null));
+          PlaintextTally.Selection tselection = tcontest.selections().get(cselection.object_id());
+          selections.add(new Selection(cselection.object_id(), -1, tselection.tally(), false, null));
         }
       }
       contests.add(new Contest(ccontest.object_id(), ccontest.sequence_order(), selections));
     }
-    return new PlaintextBallot(cballot.object_id, cballot.style_id, contests);
+    return new PlaintextBallot(cballot.object_id(), cballot.style_id, contests);
   }
 
   /* experimental: get ballot from tally alone.

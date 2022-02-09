@@ -5,11 +5,9 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.sunya.electionguard.CiphertextElectionContext;
 import com.sunya.electionguard.GuardianRecord;
-import com.sunya.electionguard.GuardianRecordPrivate;
 import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.Hash;
-import com.sunya.electionguard.KeyCeremony;
 import com.sunya.electionguard.input.ElectionInputValidation;
 import com.sunya.electionguard.publish.Consumer;
 import com.sunya.electionguard.publish.PrivateData;
@@ -152,8 +150,8 @@ public class PerformKeyCeremony {
    */
   boolean keyCeremony() {
     // Setup Mediator
-    com.sunya.electionguard.KeyCeremony.CeremonyDetails details =
-            com.sunya.electionguard.KeyCeremony.CeremonyDetails.create(this.numberOfGuardians, this.quorum);
+    KeyCeremony.CeremonyDetails details =
+            KeyCeremony.CeremonyDetails.create(this.numberOfGuardians, this.quorum);
     KeyCeremonyMediator keyCeremony = new KeyCeremonyMediator("PerformKeyCeremony", details);
 
     // ROUND 1: Public Key Sharing

@@ -1,9 +1,17 @@
-package com.sunya.electionguard;
+package com.sunya.electionguard.standard;
 
 import com.google.auto.value.AutoValue;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
+import com.sunya.electionguard.Auxiliary;
+import com.sunya.electionguard.ElGamal;
+import com.sunya.electionguard.ElectionPolynomial;
+import com.sunya.electionguard.Group;
+import com.sunya.electionguard.GuardianRecord;
+import com.sunya.electionguard.Hash;
+import com.sunya.electionguard.Rsa;
+import com.sunya.electionguard.SchnorrProof;
 
 import javax.annotation.Nullable;
 import java.math.BigInteger;
@@ -29,16 +37,26 @@ public class KeyCeremony {
     /** The guardian's ElGamal.KeyPair public key. */
     public abstract ElementModP key();
     /** The public keys `K_ij` generated from secret coefficients.*/
-    public abstract ImmutableList<Group.ElementModP> coefficient_commitments();
+    public abstract ImmutableList<ElementModP> coefficient_commitments();
     /** A proof of possession of the private key for each secret coefficient. */
     public abstract ImmutableList<SchnorrProof> coefficient_proofs();
 
     public static ElectionPublicKey create(String owner_id, int sequence_order, ElementModP key,
-         List<Group.ElementModP> coefficient_commitments, List<SchnorrProof> coefficient_proofs) {
+                                           List<ElementModP> coefficient_commitments, List<SchnorrProof> coefficient_proofs) {
       return new AutoValue_KeyCeremony_ElectionPublicKey(
               owner_id, sequence_order, key,
               ImmutableList.copyOf(coefficient_commitments),
               ImmutableList.copyOf(coefficient_proofs));
+    }
+
+    public GuardianRecord publish_guardian_record() {
+      return GuardianRecord.create(
+              this.owner_id(),
+              this.sequence_order(),
+              this.key(),
+              this.coefficient_commitments(),
+              this.coefficient_proofs()
+      );
     }
   }
 
@@ -73,10 +91,10 @@ public class KeyCeremony {
   @AutoValue
   public abstract static class ElectionJointKey {
     /** The product of the guardian public keys K = ∏ ni=1 Ki mod p. */
-    public abstract Group.ElementModP joint_public_key();
+    public abstract ElementModP joint_public_key();
 
     /** The hash of the commitments that the guardians make to each other: H = H(K 1,0 , K 2,0 ... , K n,0 ). */
-    public abstract Group.ElementModQ commitment_hash();
+    public abstract ElementModQ commitment_hash();
 
     public static ElectionJointKey create(ElementModP joint_public_key, ElementModQ commitment_hash) {
       return new AutoValue_KeyCeremony_ElectionJointKey(joint_public_key, commitment_hash);
@@ -188,10 +206,31 @@ public class KeyCeremony {
 
     // This is what the Guardian needs.
     public ElectionKeyPair generate_election_key_pair() {
-      ElectionPolynomial polynomial = ElectionPolynomial.generate_polynomial(coefficients());
+      ElectionPolynomial polynomial = generate_polynomial(coefficients());
       ElGamal.KeyPair key_pair = new ElGamal.KeyPair(
               polynomial.coefficients.get(0), polynomial.coefficient_commitments.get(0));
       return ElectionKeyPair.create(guardianId(), guardianSequence(), key_pair, polynomial);
+    }
+
+    /**
+     * Generates a polynomial when the coefficients are already chosen
+     *
+     * @param coefficients:           the k coefficients of the polynomial
+     * @return Polynomial used to share election keys
+     */
+    private ElectionPolynomial generate_polynomial(List<Group.ElementModQ> coefficients) {
+      ArrayList<Group.ElementModP> commitments = new ArrayList<>();
+      ArrayList<SchnorrProof> proofs = new ArrayList<>();
+
+      for (Group.ElementModQ coefficient : coefficients) {
+        Group.ElementModP commitment = g_pow_p(coefficient);
+        // TODO Alternate schnorr proof method that doesn't need KeyPair
+        SchnorrProof proof = SchnorrProof.make_schnorr_proof(new ElGamal.KeyPair(coefficient, commitment), rand_q());
+        commitments.add(commitment);
+        proofs.add(proof);
+      }
+
+      return new ElectionPolynomial(coefficients, commitments, proofs);
     }
   }
 

@@ -4,7 +4,7 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.google.common.flogger.FluentLogger;
-import com.sunya.electionguard.DecryptionProofTuple;
+import com.sunya.electionguard.BallotBox;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.proto.CommonConvert;
 import com.sunya.electionguard.protogen.CommonProto;
@@ -212,7 +212,7 @@ class DecryptingRemoteTrustee extends DecryptingTrusteeServiceGrpc.DecryptingTru
     DecryptingTrusteeProto.PartialDecryptionResponse.Builder response = DecryptingTrusteeProto.PartialDecryptionResponse.newBuilder();
     try {
       List<ElGamal.Ciphertext > texts = request.getTextList().stream().map(CommonConvert::convertCiphertext).collect(Collectors.toList());
-      List<DecryptionProofTuple> tuples = delegate.partialDecrypt(
+      List<BallotBox.DecryptionProofTuple> tuples = delegate.partialDecrypt(
               texts,
               CommonConvert.convertElementModQ(request.getExtendedBaseHash()),
               null);
@@ -230,7 +230,7 @@ class DecryptingRemoteTrustee extends DecryptingTrusteeServiceGrpc.DecryptingTru
     responseObserver.onCompleted();
   }
 
-  private DecryptingTrusteeProto.PartialDecryptionResult convertDecryptionProofTuple(DecryptionProofTuple tuple) {
+  private DecryptingTrusteeProto.PartialDecryptionResult convertDecryptionProofTuple(BallotBox.DecryptionProofTuple tuple) {
     return DecryptingTrusteeProto.PartialDecryptionResult.newBuilder()
             .setDecryption(CommonConvert.convertElementModP(tuple.decryption))
             .setProof(CommonConvert.convertChaumPedersenProof(tuple.proof))

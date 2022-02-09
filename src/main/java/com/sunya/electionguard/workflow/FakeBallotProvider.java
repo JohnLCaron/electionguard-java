@@ -40,7 +40,7 @@ public class FakeBallotProvider implements BallotProvider {
   private static class BallotFactory {
     PlaintextBallot get_fake_ballot(InternalManifest metadata, String ballot_id) {
       Preconditions.checkNotNull(ballot_id);
-      String ballotStyleId = metadata.manifest.ballot_styles.get(0).object_id;
+      String ballotStyleId = metadata.manifest.ballot_styles.get(0).object_id();
       List<PlaintextBallot.Contest> contests = new ArrayList<>();
       for (ContestWithPlaceholders contest : metadata.get_contests_for_style(ballotStyleId)) {
         contests.add(this.get_random_contest_from(contest));

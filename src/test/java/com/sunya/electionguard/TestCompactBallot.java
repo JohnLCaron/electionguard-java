@@ -36,7 +36,7 @@ public class TestCompactBallot {
     CompactPlaintextBallot compact_ballot = CompactPlaintextBallot.compress_plaintext_ballot(this.plaintext_ballot);
 
     assertThat(compact_ballot).isNotNull();
-    assertThat(this.plaintext_ballot.object_id).isEqualTo(compact_ballot.object_id);
+    assertThat(this.plaintext_ballot.object_id()).isEqualTo(compact_ballot.object_id);
 
     PlaintextBallot expanded_ballot = CompactPlaintextBallot.expand_compact_plaintext_ballot(compact_ballot, this.internal_manifest);
     assertThat(expanded_ballot).isNotNull();
@@ -49,7 +49,7 @@ public class TestCompactBallot {
             this.submitted_ballot, this.plaintext_ballot, this.ballot_nonce);
 
     assertThat(compact_ballot).isNotNull();
-    assertThat(this.submitted_ballot.object_id).isEqualTo(compact_ballot.compact_plaintext_ballot.object_id);
+    assertThat(this.submitted_ballot.object_id()).isEqualTo(compact_ballot.compact_plaintext_ballot.object_id);
 
     SubmittedBallot expanded_ballot = CompactSubmittedBallot.expand_compact_submitted_ballot(
             compact_ballot, this.internal_manifest, this.context);

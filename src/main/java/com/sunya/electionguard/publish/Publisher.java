@@ -320,7 +320,7 @@ public class Publisher {
     }
 
     for (SubmittedBallot ballot : ciphertext_ballots) {
-      ConvertToJson.writeSubmittedBallot(ballot, this.ballotPath(ballot.object_id));
+      ConvertToJson.writeSubmittedBallot(ballot, this.ballotPath(ballot.object_id()));
     }
 
     ConvertToJson.writeCiphertextTally(ciphertext_tally, encryptedTallyPath());
@@ -541,7 +541,7 @@ public class Publisher {
     Files.createDirectories(invalidBallotsPath);
 
     for (PlaintextBallot plaintext_ballot : invalid_ballots) {
-      String ballot_name = PLAINTEXT_BALLOT_PREFIX + plaintext_ballot.object_id + SUFFIX;
+      String ballot_name = PLAINTEXT_BALLOT_PREFIX + plaintext_ballot.object_id() + SUFFIX;
       ConvertToJson.writePlaintextBallot(plaintext_ballot, invalidBallotsPath.resolve(ballot_name));
     }
 

@@ -10,7 +10,7 @@ import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
-import static com.sunya.electionguard.KeyCeremony.*;
+import static com.sunya.electionguard.standard.KeyCeremony.*;
 
 public class TestKeyCeremony {
   private static final String SENDER_GUARDIAN_ID = "Test Guardian 1";
