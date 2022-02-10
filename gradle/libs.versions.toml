@@ -1,0 +1,73 @@
+[versions]
+autoValue = "1.8.2"
+autoValueAnnotations = "1.8.2"
+flogger = "0.5.1"
+grpc = "1.42.1"
+gson = "2.8.6"
+guava = "31.0.1-jre"
+jcommander = "1.81"
+jdom2 = "2.0.6"
+jgoodies = "1.6.0"
+jqwik = "1.6.3"
+jsr305 = "3.0.2"
+junitJupiter = "5.7.0"
+mockito = "3.9.0"
+protobuf = "3.19.3"
+slf4j = "1.7.32"
+tomcatAnnotationsApi = "6.0.53"
+truth = "1.1"
+
+###################
+# plugin versions #
+###################
+
+execforkPlugin = "0.1.15"
+owaspDepCheckPlugin = "6.5.1"
+protobufPlugin = "0.8.18"
+
+[libraries]
+autoValue = { group = "com.google.auto.value", name = "auto-value", version.ref = "autoValue" }
+autoValueAnnotations = { group = "com.google.auto.value", name = "auto-value-annotations", version.ref = "autoValueAnnotations" }
+
+grpcBom = { group = "io.grpc", name = "grpc-bom", version.ref = "grpc" }
+grpcProtobuf = { group = "io.grpc", name = "grpc-protobuf" }
+grpcNettyShaded = { group = "io.grpc", name = "grpc-netty-shaded" }
+grpcStub =  { group = "io.grpc", name = "grpc-stub" }
+grpcTesting =  { group = "io.grpc", name = "grpc-testing" }
+# @javax.annotation.Generated TODO remove when possible
+tomcatAnnotationsApi = { group = "org.apache.tomcat", name = "annotations-api", version.ref = "tomcatAnnotationsApi" }
+
+gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
+guava = { group = "com.google.guava", name = "guava", version.ref = "guava" }
+
+# viz
+jcommander = { group = "com.beust", name = "jcommander", version.ref = "jcommander" }
+jdom2 = { group = "org.jdom", name = "jdom2", version.ref = "jdom2" }
+
+# Annotations: Nullable
+jsr305 = { group = "com.google.code.findbugs", name = "jsr305", version.ref = "jsr305" }
+
+# control protobuf artifact versions using the protobuf-bom
+protobufBom = { group = "com.google.protobuf", name = "protobuf-bom", version.ref = "protobuf" }
+protobufJava = { group = "com.google.protobuf", name = "protobuf-java" }
+
+# logging
+flogger = { group = "com.google.flogger", name = "flogger", version.ref = "flogger" }
+floggerBackend = { group = "com.google.flogger", name = "flogger-system-backend", version.ref = "flogger" }
+slf4j = { group = "org.slf4j", name = "slf4j-api", version.ref = "slf4j" }
+slf4jJdk14 = { group = "org.slf4j", name = "slf4j-jdk14", version.ref = "slf4j" }
+
+##########################
+# test only dependencies #
+##########################
+
+mockitoCore = { group = "org.mockito", name = "mockito-core", version.ref = "mockito" }
+jqwik = { group = "net.jqwik", name = "jqwik", version.ref = "jqwik" }
+junitJupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.ref = "junitJupiter" }
+truth = { group = "com.google.truth", name = "truth", version.ref = "truth" }
+truthJava8Extension = { group = "com.google.truth.extensions", name = "truth-java8-extension", version.ref = "truth" }
+
+[plugins]
+execforkPlugin = { id = "com.github.psxpaul.execfork", version.ref = "execforkPlugin" }
+owaspDepCheckPlugin = { id = "org.owasp.dependencycheck", version.ref = "owaspDepCheckPlugin" }
+protobufPlugin = { id = "com.google.protobuf", version.ref = "protobufPlugin" }

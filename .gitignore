@@ -16,9 +16,12 @@ atlassian-ide-plugin.xml
 */*/out/
 
 # Ignore the Gradle cache directory.
-.gradle/
+#.gradle/
 # Ignore the output that Gradle generates in the "build/" directories...
 build/
+
+# dependency check NVD files
+project-files/owasp-dependency-check/nvd
 
 # OS generated files 
 .DS_Store*
