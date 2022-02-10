@@ -1,5 +1,6 @@
 package com.sunya.electionguard;
 
+import net.jqwik.api.Example;
 import net.jqwik.api.ForAll;
 import net.jqwik.api.Property;
 
@@ -9,7 +10,7 @@ import static com.sunya.electionguard.SchnorrProof.*;
 
 public class TestSchnorrProperties extends TestProperties {
 
-  @Property
+  @Example
   public void test_schnorr_proofs_simple() {
     // doesn't get any simpler than this
     ElGamal.KeyPair keypair = ElGamal.elgamal_keypair_from_secret(TWO_MOD_Q).orElseThrow();
