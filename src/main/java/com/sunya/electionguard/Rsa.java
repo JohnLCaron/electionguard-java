@@ -7,6 +7,7 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
 import java.security.KeyPairGenerator;
@@ -18,7 +19,7 @@ import java.security.spec.RSAPrivateKeySpec;
 import java.security.spec.RSAPublicKeySpec;
 import java.util.Optional;
 
-/** Wrapper for Java RSA encryption. */
+/** Wrapper for Java RSA encryption. Not currently used. */
 public class Rsa {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
   private static final int KEY_SIZE = 4096;
@@ -26,9 +27,9 @@ public class Rsa {
   private Rsa() {}
 
   // python: rsa_encrypt
-  public static Optional<Auxiliary.ByteString> encrypt(String message, java.security.PublicKey public_key) {
+  public static Optional<String> encrypt(String message, java.security.PublicKey public_key) {
     try {
-      return Optional.of(new Auxiliary.ByteString(rsa_encrypt(message, public_key)));
+      return Optional.of(new String(rsa_encrypt(message, public_key), StandardCharsets.UTF_8));
     } catch (Exception e) {
       logger.atWarning().withCause(e).log("rsa_encrypt failed");
       return Optional.empty();
@@ -36,7 +37,7 @@ public class Rsa {
   }
 
   // rsa_decrypt
-  public static Optional<String> decrypt(Auxiliary.ByteString encrypted_message, java.security.PrivateKey secret_key) {
+  public static Optional<String> decrypt(String encrypted_message, java.security.PrivateKey secret_key) {
     try {
       return Optional.of(rsa_decrypt(encrypted_message.getBytes(), secret_key));
     } catch (Exception e) {

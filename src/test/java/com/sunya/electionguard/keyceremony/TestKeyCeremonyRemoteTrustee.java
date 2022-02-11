@@ -12,6 +12,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +21,6 @@ import java.util.Random;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.*;
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.fail;
 
 public class TestKeyCeremonyRemoteTrustee {
   private static final Random random = new Random();
@@ -72,7 +72,7 @@ public class TestKeyCeremonyRemoteTrustee {
   @Example
   public void makeRemoteNoDirectory() {
     int xCoordinate = 1;
-    assertThrows(IllegalStateException.class, () ->
+    assertThrows(FileNotFoundException.class, () ->
       new KeyCeremonyRemoteTrustee("KeyCeremonyRemoteTrustee" + xCoordinate, xCoordinate, QUORUM,
               "/home/snake/tmp/electionguard/testKeyCeremonyRemoteTrusteeUnownDirectory"));
   }
@@ -107,7 +107,6 @@ public class TestKeyCeremonyRemoteTrustee {
     RemoteKeyCeremonyTrusteeProto.PublicKeySet validPublicKey = RemoteKeyCeremonyTrusteeProto.PublicKeySet.newBuilder()
             .setOwnerId("whatEVER")
             .setGuardianXCoordinate(2)
-            .setAuxiliaryPublicKey(responseSend.getAuxiliaryPublicKey())
             .addAllCoefficientProofs(responseSend.getCoefficientProofsList())
             .build();
 
@@ -156,7 +155,6 @@ public class TestKeyCeremonyRemoteTrustee {
     RemoteKeyCeremonyTrusteeProto.PublicKeySet invalidPublicKey = RemoteKeyCeremonyTrusteeProto.PublicKeySet.newBuilder()
             .setOwnerId("whatEVER")
             .setGuardianXCoordinate(2)
-            .setAuxiliaryPublicKey(responseSend.getAuxiliaryPublicKey())
             .addAllCoefficientProofs(munge(responseSend.getCoefficientProofsList()))
             .build();
 
@@ -292,7 +290,7 @@ public class TestKeyCeremonyRemoteTrustee {
     RemoteKeyCeremonyTrusteeProto.PartialKeyVerification responseVerification= capturePartialKeyVerification.getValue();
 
     assertThat(responseVerification).isNotNull();
-    assertThat(responseVerification.getError()).contains("Rsa.decrypt failed");
+    assertThat(responseVerification.getError()).contains("trustee does not have public key for 'who?' trustee");
   }
 
   @Example

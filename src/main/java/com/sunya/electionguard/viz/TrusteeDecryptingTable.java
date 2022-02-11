@@ -103,9 +103,6 @@ public class TrusteeDecryptingTable extends JPanel {
     public String getElectionPublicKey() {
       return object.election_keypair.public_key.toShortString();
     }
-    public String getRsaPrivateKey() {
-      return object.rsa_private_key.toString();
-    }
     public int getCommitmentSize() {
       return object.guardianCommittments.size();
     }

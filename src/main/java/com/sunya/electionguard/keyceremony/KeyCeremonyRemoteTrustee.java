@@ -13,7 +13,6 @@ import com.sunya.electionguard.protogen.RemoteKeyCeremonyTrusteeServiceGrpc;
 import com.sunya.electionguard.protogen.TrusteeProto;
 import com.sunya.electionguard.proto.TrusteeToProto;
 import com.sunya.electionguard.publish.PrivateData;
-import com.sunya.electionguard.publish.Publisher;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.stub.StreamObserver;
@@ -183,7 +182,7 @@ class KeyCeremonyRemoteTrustee extends RemoteKeyCeremonyTrusteeServiceGrpc.Remot
     this.outputDir = outputDir;
 
     // fail fast on bad output directory
-    publisher = new PrivateData(outputDir, false, true);
+    publisher = new PrivateData(outputDir, false, false);
     Formatter errors = new Formatter();
     if (!publisher.validateOutputDir(errors)) {
       System.out.printf("*** Publisher validateOutputDir FAILED on %s%n%s", outputDir, errors);
@@ -199,8 +198,7 @@ class KeyCeremonyRemoteTrustee extends RemoteKeyCeremonyTrusteeServiceGrpc.Remot
     try {
       KeyCeremony2.PublicKeySet keyset = delegate.sharePublicKeys();
       response.setOwnerId(keyset.ownerId())
-              .setGuardianXCoordinate(keyset.guardianXCoordinate())
-              .setAuxiliaryPublicKey(CommonConvert.convertJavaPublicKey(keyset.auxiliaryPublicKey()));
+              .setGuardianXCoordinate(keyset.guardianXCoordinate());
       keyset.coefficientProofs().forEach(p -> response.addCoefficientProofs(CommonConvert.convertSchnorrProof(p)));
       logger.atInfo().log("KeyCeremonyRemoteTrustee %s sendPublicKeys", delegate.id);
     } catch (Throwable t) {
@@ -223,7 +221,6 @@ class KeyCeremonyRemoteTrustee extends RemoteKeyCeremonyTrusteeServiceGrpc.Remot
       KeyCeremony2.PublicKeySet keyset = KeyCeremony2.PublicKeySet.create(
               proto.getOwnerId(),
               proto.getGuardianXCoordinate(),
-              CommonConvert.convertJavaPublicKey(proto.getAuxiliaryPublicKey()),
               proofs);
       String error = delegate.receivePublicKeys(keyset);
       response.setError(error);

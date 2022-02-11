@@ -36,9 +36,6 @@ public class DecryptingTrustee implements DecryptingTrusteeIF {
   /** A unique number in [1, 256) that is the polynomial x value for this guardian. aka sequence_order. */
   private final int xCoordinate;
 
-  /** The auxiliary private key */
-  public final java.security.PrivateKey rsa_private_key;
-
   /** The election (ElGamal) secret key */
   public final ElGamal.KeyPair election_keypair;
 
@@ -50,14 +47,12 @@ public class DecryptingTrustee implements DecryptingTrusteeIF {
 
   // TODO id and sequence_order are not matching
   public DecryptingTrustee(String id, int sequence_order,
-                           java.security.PrivateKey rsa_private_key,
                            ElGamal.KeyPair election_keypair,
                            Map<String, KeyCeremony2.PartialKeyBackup> otherGuardianPartialKeyBackups,
                            Map<String, ImmutableList<Group.ElementModP>> guardianCommittments) {
     this.id = Preconditions.checkNotNull(id);
     Preconditions.checkArgument(sequence_order > 0);
     this.xCoordinate = sequence_order;
-    this.rsa_private_key = Preconditions.checkNotNull(rsa_private_key);
     this.election_keypair = Preconditions.checkNotNull(election_keypair);
 
     Preconditions.checkArgument(otherGuardianPartialKeyBackups.size() > 0);

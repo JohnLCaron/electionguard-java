@@ -28,7 +28,7 @@ public class TestDecryptingMediator extends TestProperties {
   // public static final String DECRYPTING_DATA_DIR = "src/test/data/workflow/encryptor/";
   // public static final String TRUSTEE_DATA_DIR = "src/test/data/workflow/keyCeremony/";
   public static final String DECRYPTING_DATA_DIR = "/home/snake/tmp/electionguard/remoteWorkflow/encryptor/";
-  public static final String TRUSTEE_DATA_DIR = "/home/snake/tmp/electionguard/remoteWorkflow/keyCeremony/";
+  public static final String TRUSTEE_DATA_DIR = "/home/snake/tmp/electionguard/remoteWorkflow/keyCeremony/election_private_data/";
 
   List<DecryptingTrusteeIF> trustees = new ArrayList<>();
   Consumer consumer;
@@ -54,10 +54,10 @@ public class TestDecryptingMediator extends TestProperties {
     expectedTally = new HashMap<>();
     expectedTally.put("referendum-pineapple:referendum-pineapple-affirmative-selection", 0);
     expectedTally.put("referendum-pineapple:referendum-pineapple-negative-selection", 0);
-    expectedTally.put("justice-supreme-court:benjamin-franklin-selection", 2);
+    expectedTally.put("justice-supreme-court:benjamin-franklin-selection", 3);
     expectedTally.put("justice-supreme-court:john-adams-selection", 3);
-    expectedTally.put("justice-supreme-court:john-hancock-selection", 2);
-    expectedTally.put("justice-supreme-court:write-in-selection", 3);
+    expectedTally.put("justice-supreme-court:john-hancock-selection", 1);
+    expectedTally.put("justice-supreme-court:write-in-selection", 1);
 
     this.spoiledBallots =  consumer.submittedSpoiledBallotsProto();
   }
@@ -153,7 +153,7 @@ public class TestDecryptingMediator extends TestProperties {
       PlaintextBallot input_ballot = inputBallotsMap.get(decrypted_ballot.object_id());
       assertThat(input_ballot).isNotNull();
       if (!decrypted_ballot.equals(input_ballot)) {
-        System.out.printf("HEY");
+        System.out.printf("HEY not equal");
       }
       // assertThat(decrypted_ballot).isEqualTo(input_ballot); LOOK
       checkTallyAgainstBallot(decrypted.tally, input_ballot);

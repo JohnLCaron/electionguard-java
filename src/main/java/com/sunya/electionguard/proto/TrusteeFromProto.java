@@ -47,7 +47,6 @@ public class TrusteeFromProto {
 
     String guardian_id = proto.getGuardianId();
     int sequence_order = proto.getGuardianXCoordinate();
-    java.security.PrivateKey rsa_private_key = CommonConvert.convertJavaPrivateKey(proto.getRsaPrivateKey());
     ElGamal.KeyPair election_keypair = convertElgamalKeypair(proto.getElectionKeyPair());
 
     Map<String, KeyCeremony2.PartialKeyBackup> otherGuardianPartialKeyBackups =
@@ -58,7 +57,7 @@ public class TrusteeFromProto {
             proto.getGuardianCommitmentsList().stream()
                     .collect(Collectors.toMap(p -> p.getGuardianId(), p -> convertCoefficients(p)));
 
-    return new DecryptingTrustee(guardian_id, sequence_order, rsa_private_key, election_keypair,
+    return new DecryptingTrustee(guardian_id, sequence_order, election_keypair,
             otherGuardianPartialKeyBackups, commitments);
   }
 

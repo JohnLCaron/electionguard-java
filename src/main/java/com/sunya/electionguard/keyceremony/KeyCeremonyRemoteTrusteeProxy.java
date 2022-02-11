@@ -47,7 +47,6 @@ class KeyCeremonyRemoteTrusteeProxy implements KeyCeremonyTrusteeIF {
       return Optional.of(KeyCeremony2.PublicKeySet.create(
               response.getOwnerId(),
               response.getGuardianXCoordinate(),
-              CommonConvert.convertJavaPublicKey(response.getAuxiliaryPublicKey()),
               proofs));
 
     } catch (StatusRuntimeException e) {
@@ -62,8 +61,7 @@ class KeyCeremonyRemoteTrusteeProxy implements KeyCeremonyTrusteeIF {
       logger.atInfo().log("%s receivePublicKeys from %s", id(), keyset.ownerId());
       RemoteKeyCeremonyTrusteeProto.PublicKeySet.Builder request = RemoteKeyCeremonyTrusteeProto.PublicKeySet.newBuilder();
       request.setOwnerId(keyset.ownerId())
-              .setGuardianXCoordinate(keyset.guardianXCoordinate())
-              .setAuxiliaryPublicKey(CommonConvert.convertJavaPublicKey(keyset.auxiliaryPublicKey()));
+              .setGuardianXCoordinate(keyset.guardianXCoordinate());
       keyset.coefficientProofs().forEach(p -> request.addCoefficientProofs(CommonConvert.convertSchnorrProof(p)));
 
       CommonProto.ErrorResponse response = blockingStub.receivePublicKeys(request.build());

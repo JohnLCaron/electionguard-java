@@ -174,14 +174,14 @@ public class Consumer {
   // reads everything
   public ElectionRecord readElectionRecordProto() throws IOException {
     ElectionRecord fromProto = ElectionRecordFromProto.read(publisher.electionRecordProtoPath().toString());
-    return fromProto.setBallots(submittedCastBallotsProto(), decryptedSpoiledBallotsProto());
+    return fromProto.setBallots(submittedAllBallotsProto(), decryptedSpoiledBallotsProto());
   }
 
   // all submitted ballots cast
-  public CloseableIterable<SubmittedBallot> submittedCastBallotsProto() {
+  public CloseableIterable<SubmittedBallot> submittedAllBallotsProto() {
     if (Files.exists(publisher.submittedBallotProtoPath())) {
       return () -> new SubmittedBallotIterator(publisher.submittedBallotProtoPath().toString(),
-              b -> b.getState() == CiphertextBallotProto.SubmittedBallot.BallotBoxState.CAST);
+              b -> true);
     } else {
       return CloseableIterableAdapter.empty();
     }

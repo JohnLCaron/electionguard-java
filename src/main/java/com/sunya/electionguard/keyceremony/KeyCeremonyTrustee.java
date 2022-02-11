@@ -77,7 +77,6 @@ public class KeyCeremonyTrustee {
     return KeyCeremony2.PublicKeySet.create(
             this.id,
             this.xCoordinate,
-            this.guardianSecrets.rsa_keypair.getPublic(),
             polynomial.coefficient_proofs);
   }
 
@@ -223,14 +222,11 @@ public class KeyCeremonyTrustee {
     public final ElGamal.KeyPair election_key_pair;
     /** The proof of knowledge of possession of the associated private key. (not secret) */
     public final SchnorrProof proof;
-    /** The auxiliary keypair */
-    public final java.security.KeyPair rsa_keypair;
 
     private GuardianSecrets(ElGamal.KeyPair key_pair, SchnorrProof proof, ElectionPolynomial polynomial, java.security.KeyPair rsa_keypair) {
       this.election_key_pair = key_pair;
       this.proof = proof;
       this.polynomial = polynomial;
-      this.rsa_keypair = rsa_keypair;
     }
 
     static GuardianSecrets generate(int quorum, @Nullable ElementModQ nonce) {

@@ -24,11 +24,6 @@ public class TestKeyCeremonyTrustee {
     assertThat(trustee.allGuardianPublicKeys).hasSize(1);
     assertThat(trustee.otherGuardianPartialKeyBackups).isEmpty();
 
-    java.security.KeyPair rsa_key_pair = trustee.secrets().rsa_keypair;
-    assertThat(rsa_key_pair).isNotNull();
-    assertThat(rsa_key_pair.getPrivate()).isNotNull();
-    assertThat(rsa_key_pair.getPublic()).isNotNull();
-
     ElGamal.KeyPair election_key_pair = trustee.secrets().election_key_pair;
     assertThat(election_key_pair).isNotNull();
     assertThat(election_key_pair.public_key).isNotNull();
@@ -48,7 +43,6 @@ public class TestKeyCeremonyTrustee {
 
     assertThat(public_keys.ownerId()).isEqualTo(GUARDIAN_ID);
     assertThat(public_keys.guardianXCoordinate()).isEqualTo(GUARDIAN_X_COORDINATE);
-    assertThat(public_keys.auxiliaryPublicKey()).isEqualTo(rsa_key_pair.getPublic());
     int count = 0;
     for (Group.ElementModP key : public_keys.coefficientCommitments()) {
       assertThat(key).isEqualTo(polynomial.coefficient_commitments.get(count++));
