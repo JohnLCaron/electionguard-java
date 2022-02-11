@@ -26,7 +26,6 @@ public class TrusteeToProto {
     builder.setGuardianId(trustee.id);
     builder.setGuardianXCoordinate(trustee.xCoordinate);
     builder.setElectionKeyPair(convertElgamalKeypair(trustee.secrets().election_key_pair));
-    builder.setRsaPrivateKey(CommonConvert.convertJavaPrivateKey(trustee.secrets().rsa_keypair.getPrivate()));
     trustee.otherGuardianPartialKeyBackups.values().forEach(k -> builder.addOtherGuardianBackups(convertElectionPartialKeyBackup(k)));
     trustee.allGuardianPublicKeys.values().forEach(k -> builder.addGuardianCommitments(convertCoefficients(k)));
     return builder.build();

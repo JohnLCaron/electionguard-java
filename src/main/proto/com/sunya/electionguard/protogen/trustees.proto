@@ -13,7 +13,7 @@ message DecryptingTrustee {
   string guardian_id = 1;
   uint32 guardian_x_coordinate = 2;     // the x coefficient (sequence_order), must be > 0
   ElGamalKeyPair election_key_pair = 3;
-  RSAPrivateKey rsa_private_key = 4;    // auxiliary private key
+  reserved 4;    // auxiliary private key
   // Other guardians' partial key backups shared with this guardian
   repeated ElectionPartialKeyBackup2 other_guardian_backups = 5;
   // The commitments {"public keys K_ij") generated from the election polynomial coefficients.

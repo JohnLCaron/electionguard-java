@@ -23,7 +23,7 @@ message PublicKeySetRequest {
 message PublicKeySet {
   string owner_id = 2; // the Trustee's id
   uint32 guardian_x_coordinate = 3; // the Trustee's xcoordinate
-  RSAPublicKey auxiliary_public_key = 4; // the Trustee's RSA public key
+  reserved 4; // the Trustee's RSA public key
   repeated SchnorrProof coefficient_proofs = 5; // The polynomial coefficients commitments and proofs
   string error = 6; // if not empty, an error has occurred.
 }

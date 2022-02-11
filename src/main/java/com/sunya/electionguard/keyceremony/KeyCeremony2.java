@@ -1,7 +1,6 @@
 package com.sunya.electionguard.keyceremony;
 
 import com.google.auto.value.AutoValue;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.sunya.electionguard.ElectionPolynomial;
 import com.sunya.electionguard.Group;
@@ -23,16 +22,13 @@ public class KeyCeremony2 {
     public abstract String ownerId();
     /** guardian x coordinate (aka sequence_order). */
     public abstract int guardianXCoordinate();
-    /** Auxiliary public key. */
-    public abstract java.security.PublicKey auxiliaryPublicKey();
     /** The election polynomial coefficients commitments and proofs. */
     public abstract ImmutableList<SchnorrProof> coefficientProofs();
 
-    public static PublicKeySet create(String owner_id, int sequence_order, java.security.PublicKey auxiliary_public_key,
+    public static PublicKeySet create(String owner_id, int sequence_order,
                                       List<SchnorrProof> coefficient_proofs) {
-      Preconditions.checkNotNull(auxiliary_public_key);
       return new AutoValue_KeyCeremony2_PublicKeySet(
-              owner_id, sequence_order, auxiliary_public_key,
+              owner_id, sequence_order,
               ImmutableList.copyOf(coefficient_proofs));
     }
 

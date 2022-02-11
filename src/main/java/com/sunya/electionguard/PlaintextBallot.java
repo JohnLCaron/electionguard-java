@@ -221,7 +221,7 @@ public class PlaintextBallot implements ElectionObjectBaseIF {
       if (this == o) return true;
       if (o == null || getClass() != o.getClass()) return false;
       Selection selection = (Selection) o;
-      return sequence_order == selection.sequence_order &&
+      return // sequence_order == selection.sequence_order &&
               vote == selection.vote &&
               is_placeholder_selection == selection.is_placeholder_selection &&
               selection_id.equals(selection.selection_id) &&
