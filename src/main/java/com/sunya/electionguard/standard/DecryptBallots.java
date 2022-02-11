@@ -194,7 +194,7 @@ public class DecryptBallots {
     int count = 0;
     for (Guardian guardian : this.guardians) {
       System.out.printf("Guardian Present: %s%n", guardian.object_id);
-      KeyCeremony.ElectionPublicKey guardian_key = guardian.share_election_public_key();
+      KeyCeremony.ElectionPublicKey guardian_key = guardian.share_key();
       DecryptionShare tally_share = guardian.compute_tally_share(this.encryptedTally, electionRecord.context).orElseThrow();
       Map<String, Optional<DecryptionShare>> ballot_shares = guardian.compute_ballot_shares(electionRecord.acceptedBallots, electionRecord.context);
       mediator.announce(guardian_key, tally_share, ballot_shares);

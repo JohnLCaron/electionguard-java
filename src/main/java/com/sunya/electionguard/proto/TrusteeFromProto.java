@@ -1,7 +1,6 @@
 package com.sunya.electionguard.proto;
 
 import com.google.common.collect.ImmutableList;
-import com.sunya.electionguard.Auxiliary;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.decrypting.DecryptingTrustee;
@@ -64,13 +63,11 @@ public class TrusteeFromProto {
   }
 
   private static KeyCeremony2.PartialKeyBackup convertElectionPartialKeyBackup(TrusteeProto.ElectionPartialKeyBackup2 proto) {
-    Auxiliary.ByteString evalue = proto.getEncryptedCoordinate().isEmpty() ? null :
-            new Auxiliary.ByteString(proto.getEncryptedCoordinate().toByteArray());
     return KeyCeremony2.PartialKeyBackup.create(
             proto.getGeneratingGuardianId(),
             proto.getDesignatedGuardianId(),
             proto.getDesignatedGuardianXCoordinate(),
-            evalue,
+            CommonConvert.convertElementModQ(proto.getCoordinate()),
             proto.getError());
   }
 

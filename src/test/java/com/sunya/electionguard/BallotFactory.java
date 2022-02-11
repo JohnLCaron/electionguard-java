@@ -14,7 +14,7 @@ public class BallotFactory {
   private static final String simple_ballot_filename = "ballot_in_simple.json";
   private static final String simple_ballots_filename = "plaintext_ballots_simple.json";
 
-  static PlaintextBallot.Selection get_random_selection_from(Manifest.SelectionDescription description) {
+  public static PlaintextBallot.Selection get_random_selection_from(Manifest.SelectionDescription description) {
     return Encrypt.selection_from(description, false, TestUtils.randomBool());
   }
 
@@ -22,7 +22,7 @@ public class BallotFactory {
    * Get a randomly filled contest for the given description that
    * may be undervoted and may include explicitly false votes.
    */
-  PlaintextBallot.Contest get_random_contest_from(
+  public PlaintextBallot.Contest get_random_contest_from(
           Manifest.ContestDescription description,
           boolean suppress_validity_check, boolean with_trues) { // default false, false
 
@@ -105,7 +105,7 @@ public class BallotFactory {
     return PlaintextBallotPojo.get_ballots_from_file(filename);
   }
 
-  PlaintextBallot get_simple_ballot_from_file() throws IOException {
+  public PlaintextBallot get_simple_ballot_from_file() throws IOException {
     String current = new java.io.File("./src/test/resources/").getCanonicalPath();
     return get_ballot_from_file(current + "/" + simple_ballot_filename);
   }

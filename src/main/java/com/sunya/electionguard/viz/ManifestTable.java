@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.stream.Collectors;
 
-public class ElectionDescriptionTable extends JPanel {
+public class ManifestTable extends JPanel {
   private final PreferencesExt prefs;
 
   private final BeanTable<BallotStyleBean> styleTable;
@@ -36,7 +36,7 @@ public class ElectionDescriptionTable extends JPanel {
 
   private Manifest election;
 
-  public ElectionDescriptionTable(PreferencesExt prefs) {
+  public ManifestTable(PreferencesExt prefs) {
     this.prefs = prefs;
     infoWindow = new IndependentWindow("Extra Information", BAMutil.getImage("electionguard-logo.png"), infoTA);
     infoWindow.setBounds((Rectangle) prefs.getBean("InfoWindowBounds", new Rectangle(300, 300, 800, 100)));
@@ -97,7 +97,7 @@ public class ElectionDescriptionTable extends JPanel {
     add(split5, BorderLayout.CENTER);
   }
 
-  ElectionDescriptionTable addActions(JPanel buttPanel) {
+  ManifestTable addActions(JPanel buttPanel) {
     AbstractAction valAction = new AbstractAction() {
       public void actionPerformed(ActionEvent e) {
         validateElection();
@@ -108,7 +108,7 @@ public class ElectionDescriptionTable extends JPanel {
     return this;
   }
 
-  void setElectionDescription(Manifest election) {
+  void setElectionManifest(Manifest election) {
     this.election = election;
     candidateTable.setBeans(election.candidates.stream().map(CandidateBean::new).collect(Collectors.toList()));
     partyTable.setBeans(election.parties.stream().map(PartyBean::new).collect(Collectors.toList()));

@@ -194,7 +194,7 @@ public class CiphertextBallot implements ElectionObjectBaseIF, Hash.CryptoHashCh
    * Make a hash of the election, the external object_id and nonce, used
    * to derive other nonce values on the ballot.
    */
-  static Group.ElementModQ nonce_seed(Group.ElementModQ manifest_hash, String object_id, Group.ElementModQ nonce) {
+  public static Group.ElementModQ nonce_seed(Group.ElementModQ manifest_hash, String object_id, Group.ElementModQ nonce) {
     return Hash.hash_elems(manifest_hash, object_id, nonce);
   }
 
@@ -202,7 +202,7 @@ public class CiphertextBallot implements ElectionObjectBaseIF, Hash.CryptoHashCh
    * @return a hash value derived from the description hash, the object id, and the nonce value
    * suitable for deriving other nonce values on the ballot
    */
-  Optional<Group.ElementModQ> hashed_ballot_nonce() {
+  public Optional<Group.ElementModQ> hashed_ballot_nonce() {
     if (this.nonce.isEmpty()) {
       logger.atWarning().log("missing nonce for ballot %s could not derive from null nonce", this.object_id);
       return Optional.empty();
@@ -414,7 +414,7 @@ public class CiphertextBallot implements ElectionObjectBaseIF, Hash.CryptoHashCh
      * @param elgamelPublicKey:      The election key
      * @param cryptoExtendedBaseHash crypto_extended_base_hash for the election (Qbar)
      */
-    boolean is_valid_encryption(Group.ElementModQ seed_hash, Group.ElementModP elgamelPublicKey, Group.ElementModQ cryptoExtendedBaseHash) {
+    public boolean is_valid_encryption(Group.ElementModQ seed_hash, Group.ElementModP elgamelPublicKey, Group.ElementModQ cryptoExtendedBaseHash) {
       if (!seed_hash.equals(this.description_hash())) {
         logger.atInfo().log("mismatching selection hash: %s expected(%s), actual(%s)",
                 this.object_id(), seed_hash, this.description_hash());
@@ -614,7 +614,7 @@ public class CiphertextBallot implements ElectionObjectBaseIF, Hash.CryptoHashCh
      * Specifically, the seed hash in this context is the hash of the ContestDescription,
      * or whatever `ElementModQ` was used to populate the `description_hash` field.
      */
-    boolean is_valid_encryption(
+    public boolean is_valid_encryption(
             Group.ElementModQ seed_hash,
             Group.ElementModP elgamal_public_key,
             Group.ElementModQ crypto_extended_base_hash) {

@@ -3,10 +3,8 @@ package com.sunya.electionguard.keyceremony;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.flogger.FluentLogger;
-import com.sunya.electionguard.Auxiliary;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.ElectionPolynomial;
-import com.sunya.electionguard.Group;
 import com.sunya.electionguard.Rsa;
 import com.sunya.electionguard.SchnorrProof;
 
@@ -16,7 +14,6 @@ import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.sunya.electionguard.Group.ElementModP;
@@ -135,22 +132,11 @@ public class KeyCeremonyTrustee {
     ElementModQ value = ElectionPolynomial.compute_polynomial_coordinate(
             BigInteger.valueOf(otherKeys.guardianXCoordinate()), this.guardianSecrets.polynomial);
 
-    // Encrypt the value with the other guardian's public auxiliary key.
-    Optional<Auxiliary.ByteString> encrypted_value = Rsa.encrypt(value.to_hex(), otherKeys.auxiliaryPublicKey());
-    if (encrypted_value.isEmpty()) {
-      return KeyCeremony2.PartialKeyBackup.create(
-              this.id,
-              otherGuardian,
-              0,
-              null,
-              String.format("Trustee '%s', Rsa.encrypt key for '%s' failed", this.id, otherGuardian));
-    }
-
     return KeyCeremony2.PartialKeyBackup.create(
             this.id,
             otherGuardian,
             otherKeys.guardianXCoordinate(),
-            encrypted_value.get(),
+            value,
             null);
   }
 
@@ -165,18 +151,6 @@ public class KeyCeremonyTrustee {
 
     this.otherGuardianPartialKeyBackups.put(backup.generatingGuardianId(), backup);
 
-    // decrypt the coordinate with my private key.
-    Optional<String> decryptedCoordinate = Rsa.decrypt(backup.encryptedCoordinate(), this.guardianSecrets.rsa_keypair.getPrivate());
-    if (decryptedCoordinate.isEmpty()) {
-      return KeyCeremony2.PartialKeyVerification.create(backup.generatingGuardianId(), backup.designatedGuardianId(),"Rsa.decrypt failed");
-    }
-    Optional<ElementModQ> valueO = Group.hex_to_q(decryptedCoordinate.get());
-    if (valueO.isEmpty()) {
-      return KeyCeremony2.PartialKeyVerification.create(backup.generatingGuardianId(), backup.designatedGuardianId(),
-              "Convert decrypted coordinate to ElementModQ failed");
-    }
-    ElementModQ value = valueO.get();
-
     // Is that value consistent with the generating guardian's commitments?
     KeyCeremony2.PublicKeySet generatingKeys = allGuardianPublicKeys.get(backup.generatingGuardianId());
     if (generatingKeys == null) {
@@ -185,7 +159,7 @@ public class KeyCeremonyTrustee {
               backup.designatedGuardianId(),
               String.format("'%s' trustee does not have public key for '%s' trustee", this.id, backup.generatingGuardianId()));
     }
-    boolean verify = ElectionPolynomial.verify_polynomial_coordinate(value, BigInteger.valueOf(backup.designatedGuardianXCoordinate()),
+    boolean verify = ElectionPolynomial.verify_polynomial_coordinate(backup.coordinate(), BigInteger.valueOf(backup.designatedGuardianXCoordinate()),
             generatingKeys.coefficientCommitments());
 
     return KeyCeremony2.PartialKeyVerification.create(

@@ -170,7 +170,7 @@ public class TestDecryptionMediator extends TestProperties {
   public void test_announce() {
     DecryptionMediator mediator = new DecryptionMediator("mediator-id", this.context);
     Guardian guardian = this.guardians.get(0);
-    KeyCeremony.ElectionPublicKey guardian_key = guardian.share_election_public_key();
+    KeyCeremony.ElectionPublicKey guardian_key = guardian.share_key();
 
     DecryptionShare tally_share = guardian.compute_tally_share(this.ciphertext_tally, this.context).orElseThrow();
     Map<String, Optional<DecryptionShare>> ballot_shares =  new HashMap<>();
@@ -217,7 +217,7 @@ public class TestDecryptionMediator extends TestProperties {
     DecryptionMediator mediator = new DecryptionMediator("mediator-id", this.context);
 
     List<Guardian> available_guardians = this.guardians.subList(0, 2);
-    List<KeyCeremony.ElectionPublicKey> all_guardian_keys = this.guardians.stream().map(Guardian::share_election_public_key).collect(Collectors.toList());
+    List<KeyCeremony.ElectionPublicKey> all_guardian_keys = this.guardians.stream().map(Guardian::share_key).collect(Collectors.toList());
 
     DecryptionHelper.perform_compensated_decryption_setup(
             available_guardians,

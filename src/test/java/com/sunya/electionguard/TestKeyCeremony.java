@@ -6,10 +6,8 @@ import net.jqwik.api.Example;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
 import static com.sunya.electionguard.standard.KeyCeremony.*;
 
 public class TestKeyCeremony {
@@ -38,39 +36,28 @@ public class TestKeyCeremony {
   @Example
   public void test_generate_election_partial_key_backup() {
     ElectionKeyPair election_key_pair = generate_election_key_pair("owner", 42, QUORUM, null);
-    Auxiliary.KeyPair auxiliary_key_pair = generate_rsa_auxiliary_key_pair("owner", 42);
-    Auxiliary.PublicKey auxiliary_public_key = new Auxiliary.PublicKey(
+    ElectionKeyPair sender_election_key_pair = generate_election_key_pair(SENDER_GUARDIAN_ID, SENDER_SEQUENCE_ORDER, QUORUM, null);
+
+    ElectionPublicKey designated_guardian_key = ElectionPublicKey.create(
             RECIPIENT_GUARDIAN_ID,
             RECIPIENT_SEQUENCE_ORDER,
-            auxiliary_key_pair.public_key);
+            sender_election_key_pair.key_pair().public_key,
+            new ArrayList<>(),
+            new ArrayList<>());
 
-    Optional<ElectionPartialKeyBackup> backupO = generate_election_partial_key_backup(
+    ElectionPartialKeyBackup backup = generate_election_partial_key_backup(
             SENDER_GUARDIAN_ID,
             election_key_pair.polynomial(),
-            auxiliary_public_key,
-            Auxiliary.identity_auxiliary_encrypt);
-    assertThat(backupO).isPresent();
-    ElectionPartialKeyBackup backup = backupO.get();
+            designated_guardian_key);
 
     assertThat(backup.designated_id()).isEqualTo(RECIPIENT_GUARDIAN_ID);
     assertThat(backup.designated_sequence_order()).isEqualTo(RECIPIENT_SEQUENCE_ORDER);
-    assertThat(backup.encrypted_value()).isNotNull();
+    assertThat(backup.value()).isNotNull();
   }
 
   @Example
   public void test_verify_election_partial_key_backup() {
-    Auxiliary.KeyPair recipient_auxiliary_key_pair = generate_rsa_auxiliary_key_pair(RECIPIENT_GUARDIAN_ID, RECIPIENT_SEQUENCE_ORDER);
     ElectionKeyPair sender_election_key_pair = generate_election_key_pair(SENDER_GUARDIAN_ID, SENDER_SEQUENCE_ORDER, QUORUM, null);
-    Auxiliary.PublicKey recipient_auxiliary_public_key = new Auxiliary.PublicKey(
-            RECIPIENT_GUARDIAN_ID,
-            RECIPIENT_SEQUENCE_ORDER,
-            recipient_auxiliary_key_pair.public_key);
-
-    Optional<ElectionPartialKeyBackup> partial_key_backup = generate_election_partial_key_backup(
-            SENDER_GUARDIAN_ID,
-            sender_election_key_pair.polynomial(),
-            recipient_auxiliary_public_key,
-            Auxiliary.identity_auxiliary_encrypt);
 
     ElectionPublicKey publicKey = ElectionPublicKey.create(
             RECIPIENT_GUARDIAN_ID,
@@ -79,12 +66,15 @@ public class TestKeyCeremony {
             new ArrayList<>(),
             new ArrayList<>());
 
+    ElectionPartialKeyBackup partial_key_backup = generate_election_partial_key_backup(
+            SENDER_GUARDIAN_ID,
+            sender_election_key_pair.polynomial(),
+            publicKey);
+
     ElectionPartialKeyVerification verification = verify_election_partial_key_backup(
             RECIPIENT_GUARDIAN_ID,
-            partial_key_backup.orElseThrow(),
-            sender_election_key_pair.share(),
-            recipient_auxiliary_key_pair,
-            Auxiliary.identity_auxiliary_decrypt);
+            partial_key_backup,
+            sender_election_key_pair.share());
 
     assertThat(verification).isNotNull();
     assertThat(verification.owner_id()).isEqualTo(SENDER_GUARDIAN_ID);
@@ -95,20 +85,20 @@ public class TestKeyCeremony {
 
   @Example
   public void test_generate_election_partial_key_challenge() {
-    Auxiliary.KeyPair recipient_auxiliary_key_pair = generate_rsa_auxiliary_key_pair(RECIPIENT_GUARDIAN_ID, RECIPIENT_SEQUENCE_ORDER);
     ElectionKeyPair sender_election_key_pair = generate_election_key_pair(SENDER_GUARDIAN_ID, 2, QUORUM, null);
-    Auxiliary.PublicKey recipient_auxiliary_public_key = new Auxiliary.PublicKey(
+    ElectionPublicKey publicKey = ElectionPublicKey.create(
             RECIPIENT_GUARDIAN_ID,
             RECIPIENT_SEQUENCE_ORDER,
-            recipient_auxiliary_key_pair.public_key);
-    Optional<ElectionPartialKeyBackup> partial_key_backup = generate_election_partial_key_backup(
+            sender_election_key_pair.key_pair().public_key,
+            new ArrayList<>(),
+            new ArrayList<>());
+    ElectionPartialKeyBackup partial_key_backup = generate_election_partial_key_backup(
             SENDER_GUARDIAN_ID,
             sender_election_key_pair.polynomial(),
-            recipient_auxiliary_public_key,
-            Auxiliary.identity_auxiliary_encrypt);
+            publicKey);
 
     ElectionPartialKeyChallenge challenge = generate_election_partial_key_challenge(
-            partial_key_backup.orElseThrow(), sender_election_key_pair.polynomial());
+            partial_key_backup, sender_election_key_pair.polynomial());
 
     assertThat(challenge).isNotNull();
     assertThat(challenge.designated_id()).isEqualTo(RECIPIENT_GUARDIAN_ID);
@@ -123,20 +113,20 @@ public class TestKeyCeremony {
 
   @Example
   public void test_verify_election_partial_key_challenge() {
-    Auxiliary.KeyPair recipient_auxiliary_key_pair = generate_rsa_auxiliary_key_pair(RECIPIENT_GUARDIAN_ID, RECIPIENT_SEQUENCE_ORDER);
     ElectionKeyPair sender_election_key_pair = generate_election_key_pair(SENDER_GUARDIAN_ID, 2, QUORUM, null);
-    Auxiliary.PublicKey recipient_auxiliary_public_key = new Auxiliary.PublicKey(
+    ElectionPublicKey publicKey = ElectionPublicKey.create(
             RECIPIENT_GUARDIAN_ID,
             RECIPIENT_SEQUENCE_ORDER,
-            recipient_auxiliary_key_pair.public_key);
-    Optional<ElectionPartialKeyBackup> partial_key_backup = generate_election_partial_key_backup(
+            sender_election_key_pair.key_pair().public_key,
+            new ArrayList<>(),
+            new ArrayList<>());
+    ElectionPartialKeyBackup partial_key_backup = generate_election_partial_key_backup(
             SENDER_GUARDIAN_ID,
             sender_election_key_pair.polynomial(),
-            recipient_auxiliary_public_key,
-            Auxiliary.identity_auxiliary_encrypt);
+            publicKey);
 
     ElectionPartialKeyChallenge challenge = generate_election_partial_key_challenge(
-            partial_key_backup.orElseThrow(), sender_election_key_pair.polynomial());
+            partial_key_backup, sender_election_key_pair.polynomial());
 
     ElectionPartialKeyVerification verification = verify_election_partial_key_challenge(ALTERNATE_VERIFIER_GUARDIAN_ID, challenge);
 

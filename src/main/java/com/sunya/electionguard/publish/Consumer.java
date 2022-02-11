@@ -1,6 +1,5 @@
 package com.sunya.electionguard.publish;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.AbstractIterator;
 import com.sunya.electionguard.*;
 import com.sunya.electionguard.proto.CiphertextBallotFromProto;
@@ -172,22 +171,25 @@ public class Consumer {
 
   ///////////////////////////////////////////// Proto
 
+  // reads everything
   public ElectionRecord readElectionRecordProto() throws IOException {
     ElectionRecord fromProto = ElectionRecordFromProto.read(publisher.electionRecordProtoPath().toString());
-    return fromProto.setBallots(acceptedBallotsProto(), decryptedSpoiledBallotsProto());
+    return fromProto.setBallots(submittedCastBallotsProto(), decryptedSpoiledBallotsProto());
   }
 
-  public CloseableIterable<SubmittedBallot> acceptedBallotsProto() {
-    if (Files.exists(publisher.ciphertextBallotProtoPath())) {
-      return () -> new SubmittedBallotIterator(publisher.ciphertextBallotProtoPath().toString(), b -> true);
+  // all submitted ballots cast
+  public CloseableIterable<SubmittedBallot> submittedCastBallotsProto() {
+    if (Files.exists(publisher.submittedBallotProtoPath())) {
+      return () -> new SubmittedBallotIterator(publisher.submittedBallotProtoPath().toString(),
+              b -> b.getState() == CiphertextBallotProto.SubmittedBallot.BallotBoxState.CAST);
     } else {
       return CloseableIterableAdapter.empty();
     }
   }
 
-  public CloseableIterable<SubmittedBallot> spoiledBallotsProto() {
-    if (Files.exists(publisher.ciphertextBallotProtoPath())) {
-      return () -> new SubmittedBallotIterator(publisher.ciphertextBallotProtoPath().toString(),
+  public CloseableIterable<SubmittedBallot> submittedSpoiledBallotsProto() {
+    if (Files.exists(publisher.submittedBallotProtoPath())) {
+      return () -> new SubmittedBallotIterator(publisher.submittedBallotProtoPath().toString(),
               b -> b.getState() == CiphertextBallotProto.SubmittedBallot.BallotBoxState.SPOILED);
     } else {
       return CloseableIterableAdapter.empty();

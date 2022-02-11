@@ -109,7 +109,7 @@ public class PlaintextBallot implements ElectionObjectBaseIF {
      * Are all of the selections valid?
      * Note: because this class supports partial representations, undervotes are considered a valid state.
      */
-    boolean is_valid(
+    public boolean is_valid(
             String expected_contest_id,
             int expected_number_selections,
             int expected_number_elected,
@@ -203,7 +203,7 @@ public class PlaintextBallot implements ElectionObjectBaseIF {
       this.extended_data = Optional.ofNullable(extended_data);
     }
 
-    boolean is_valid(String expected_selection_id) {
+    public boolean is_valid(String expected_selection_id) {
       if (!expected_selection_id.equals(selection_id)) {
         logger.atWarning().log("invalid selection_id: expected %s actual %s",
                 expected_selection_id, this.selection_id);

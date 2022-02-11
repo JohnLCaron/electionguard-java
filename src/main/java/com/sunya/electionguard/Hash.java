@@ -29,8 +29,6 @@ public class Hash {
    * `str`, or `int`, anything implementing `CryptoHashable`, and lists
    * or optionals of any of those types.
    *
-   * TODO this does not agree with python
-   *
    * @param a Zero or more elements of any of the accepted types.
    * @return A cryptographic hash of these elements, concatenated.
    * <p>

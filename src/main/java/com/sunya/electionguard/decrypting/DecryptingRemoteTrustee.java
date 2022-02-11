@@ -28,8 +28,8 @@ class DecryptingRemoteTrustee extends DecryptingTrusteeServiceGrpc.DecryptingTru
   private static final Random random = new Random();
 
   private static class CommandLine {
-    @Parameter(names = {"-guardianFile"}, order = 1, description = "location of serialized guardian file", required = true)
-    String guardianFile;
+    @Parameter(names = {"-trusteeFile"}, order = 1, description = "location of serialized trustee file", required = true)
+    String trusteeFile;
 
     @Parameter(names = {"-port"}, order = 2, description = "This DecryptingRemoteTrustee port")
     int port = 0;
@@ -79,11 +79,11 @@ class DecryptingRemoteTrustee extends DecryptingTrusteeServiceGrpc.DecryptingTru
     }
     String url = "localhost:"+port;
     String serverUrl = "localhost:" + cmdLine.serverPort;
-    System.out.printf("*** DecryptingRemoteTrustee from file %s url %s server %s%n", cmdLine.guardianFile, url, serverUrl);
+    System.out.printf("*** DecryptingRemoteTrustee from file %s url %s server %s%n", cmdLine.trusteeFile, url, serverUrl);
 
     // Now start up our own 'DecryptingRemoteTrustee' Service
     try {
-      DecryptingRemoteTrustee trustee = new DecryptingRemoteTrustee(cmdLine.guardianFile);
+      DecryptingRemoteTrustee trustee = new DecryptingRemoteTrustee(cmdLine.trusteeFile);
 
       if (cmdLine.serverPort != 0) {
         // register with the DecryptingRemote "server".
@@ -162,8 +162,8 @@ class DecryptingRemoteTrustee extends DecryptingTrusteeServiceGrpc.DecryptingTru
   ////////////////////////////////////////////////////////////////////////////////
   private final DecryptingTrustee delegate;
 
-  DecryptingRemoteTrustee(String guardianFile) throws IOException {
-    this.delegate = TrusteeFromProto.readTrustee(guardianFile);
+  DecryptingRemoteTrustee(String trusteeFile) throws IOException {
+    this.delegate = TrusteeFromProto.readTrustee(trusteeFile);
   }
 
   String id() {

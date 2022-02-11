@@ -10,14 +10,14 @@ import java.util.Arrays;
  * "headers" can be included in the seed at construction time.
  * This is useful to avoid various kinds of subtle cryptographic attacks.
  */
-class Nonces {
+public class Nonces {
   private final Group.ElementModQ seed;
 
-  Nonces(Group.ElementModQ seed, Object... headers) {
+  public Nonces(Group.ElementModQ seed, Object... headers) {
     this.seed = (headers.length > 0) ? Hash.hash_elems(seed, Arrays.asList(headers)) : seed;
   }
 
-  Group.ElementModQ get(int index) {
+  public Group.ElementModQ get(int index) {
     Preconditions.checkArgument(index >= 0, "Nonces do not support negative indices.");
     return Hash.hash_elems(seed, index);
   }

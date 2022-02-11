@@ -25,10 +25,10 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 
 public class TestDecryptingMediator extends TestProperties {
-  public static final String DECRYPTING_DATA_DIR = "src/test/data/workflow/encryptor/";
-  public static final String TRUSTEE_DATA_DIR = "src/test/data/workflow/keyCeremony/";
-  // public static final String DECRYPTING_DATA_DIR = "/home/snake/tmp/electionguard/remoteWorkflow/encryptor/";
-  // public static final String TRUSTEE_DATA_DIR = "/home/snake/tmp/electionguard/remoteWorkflow/keyCeremony/";
+  // public static final String DECRYPTING_DATA_DIR = "src/test/data/workflow/encryptor/";
+  // public static final String TRUSTEE_DATA_DIR = "src/test/data/workflow/keyCeremony/";
+  public static final String DECRYPTING_DATA_DIR = "/home/snake/tmp/electionguard/remoteWorkflow/encryptor/";
+  public static final String TRUSTEE_DATA_DIR = "/home/snake/tmp/electionguard/remoteWorkflow/keyCeremony/";
 
   List<DecryptingTrusteeIF> trustees = new ArrayList<>();
   Consumer consumer;
@@ -59,7 +59,7 @@ public class TestDecryptingMediator extends TestProperties {
     expectedTally.put("justice-supreme-court:john-hancock-selection", 2);
     expectedTally.put("justice-supreme-court:write-in-selection", 3);
 
-    this.spoiledBallots =  consumer.spoiledBallotsProto();
+    this.spoiledBallots =  consumer.submittedSpoiledBallotsProto();
   }
 
   DecryptingMediator makeDecryptingMediator() {

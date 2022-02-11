@@ -1,6 +1,7 @@
 package com.sunya.electionguard.viz;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.sunya.electionguard.AvailableGuardian;
 import com.sunya.electionguard.CiphertextElectionContext;
 import com.sunya.electionguard.ElectionConstants;
@@ -40,12 +41,11 @@ class ElectionRecordPanel extends JPanel {
   Consumer consumer;
   ElectionRecord record;
 
-  ElectionDescriptionTable electionDescriptionTable;
-  AcceptedBallotsTable acceptedBallotsTable;
-  PlaintextTallyTable electionTallyTable;
+  ManifestTable manifestTable;
+  SubmittedBallotsTable submittedBallotsTable;
+  PlaintextTallyTable plaintextTallyTable;
   CiphertextTallyTable ciphertextTallyTable;
-  PlaintextTallyTable spoiledTallyTable;
-  SpoiledBallotPanel spoiledBallotsTable;
+  PlaintextTallyTable spoiledBallotsTable;
 
   ElectionRecordPanel(PreferencesExt prefs, JFrame frame) {
     this.prefs = prefs;
@@ -89,7 +89,7 @@ class ElectionRecordPanel extends JPanel {
         infoWindow.show();
       }
     };
-    BAMutil.setActionProperties(infoAction, "Information", "info on current Manifest Record", false, 'I', -1);
+    BAMutil.setActionProperties(infoAction, "Information", "info on Election Record", false, 'I', -1);
     BAMutil.addActionToContainer(buttPanel, infoAction);
 
     AbstractAction verifyAction = new AbstractAction() {
@@ -104,13 +104,12 @@ class ElectionRecordPanel extends JPanel {
     BAMutil.addActionToContainer(buttPanel, verifyAction);
 
     // components
-    this.electionDescriptionTable = new ElectionDescriptionTable((PreferencesExt) prefs.node("Manifest"))
+    this.manifestTable = new ManifestTable((PreferencesExt) prefs.node("Manifest"))
             .addActions(buttPanel);
-    this.acceptedBallotsTable = new AcceptedBallotsTable((PreferencesExt) prefs.node("SubmittedBallots"));
+    this.submittedBallotsTable = new SubmittedBallotsTable((PreferencesExt) prefs.node("CastBallots"));
     this.ciphertextTallyTable = new CiphertextTallyTable((PreferencesExt) prefs.node("CiphertextTally"));
-    this.electionTallyTable = new PlaintextTallyTable((PreferencesExt) prefs.node("ElectionTally"));
-    this.spoiledTallyTable = new PlaintextTallyTable((PreferencesExt) prefs.node("SpoiledTallies"));
-    this.spoiledBallotsTable = new SpoiledBallotPanel((PreferencesExt) prefs.node("SpoiledBallots"), frame);
+    this.plaintextTallyTable = new PlaintextTallyTable((PreferencesExt) prefs.node("PlaintextTally"));
+    this.spoiledBallotsTable = new PlaintextTallyTable((PreferencesExt) prefs.node("SpoiledBallots"));
 
     // layout
     this.topPanel = new JPanel(new BorderLayout());
@@ -121,11 +120,10 @@ class ElectionRecordPanel extends JPanel {
     add(topPanel, BorderLayout.NORTH);
 
     JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
-    tabbedPane.addTab("Manifest", this.electionDescriptionTable);
-    tabbedPane.addTab("SubmittedBallots", this.acceptedBallotsTable);
+    tabbedPane.addTab("Manifest", this.manifestTable);
+    tabbedPane.addTab("SubmittedBallots", this.submittedBallotsTable);
     tabbedPane.addTab("CiphertextTally", this.ciphertextTallyTable);
-    tabbedPane.addTab("ElectionTally", this.electionTallyTable);
-    tabbedPane.addTab("SpoiledTallies", this.spoiledTallyTable);
+    tabbedPane.addTab("ElectionTally", this.plaintextTallyTable);
     tabbedPane.addTab("SpoiledBallots", this.spoiledBallotsTable);
     tabbedPane.setSelectedIndex(0);
     add(tabbedPane, BorderLayout.CENTER);
@@ -140,19 +138,19 @@ class ElectionRecordPanel extends JPanel {
         return false;
       }
       this.record = consumer.readElectionRecord();
-      electionDescriptionTable.setElectionDescription(record.election);
+      manifestTable.setElectionManifest(record.election);
 
       if (record.acceptedBallots != null) {
-        acceptedBallotsTable.setAcceptedBallots(record.acceptedBallots);
+        submittedBallotsTable.setAcceptedBallots(record.acceptedBallots);
       }
       if (record.encryptedTally != null) {
         ciphertextTallyTable.setCiphertextTally(record.encryptedTally);
       }
       if (record.decryptedTally != null) {
-        electionTallyTable.setPlaintextTallies(CloseableIterableAdapter.wrap(ImmutableList.of(record.decryptedTally)));
+        plaintextTallyTable.setPlaintextTallies(CloseableIterableAdapter.wrap(ImmutableList.of(record.decryptedTally)));
       }
       if (record.spoiledBallots != null) {
-        spoiledBallotsTable.setSpoiledBallots(record.spoiledBallots);
+        spoiledBallotsTable.setPlaintextTallies(record.spoiledBallots);
       }
     } catch (Exception e) {
       e.printStackTrace();
@@ -205,6 +203,12 @@ class ElectionRecordPanel extends JPanel {
       for (AvailableGuardian guardian : record.availableGuardians) {
         f.format("    %20s %d %s%n", guardian.guardian_id, guardian.sequence, guardian.lagrangeCoordinate);
       }
+
+      f.format("%nAcceptedBallots %d%n", Iterables.size(record.acceptedBallots));
+      f.format("SpoiledBallots %d%n", Iterables.size(record.spoiledBallots));
+      f.format("EncryptedTally present = %s%n", record.encryptedTally != null);
+      f.format("DecryptedTally present = %s%n", record.decryptedTally != null);
+
     }
   }
 
@@ -222,11 +226,10 @@ class ElectionRecordPanel extends JPanel {
     fileChooser.save();
     electionRecordDirCB.save();
 
-    electionDescriptionTable.save();
-    acceptedBallotsTable.save();
-    electionTallyTable.save();
+    manifestTable.save();
+    submittedBallotsTable.save();
+    plaintextTallyTable.save();
     ciphertextTallyTable.save();
-    spoiledTallyTable.save();
     spoiledBallotsTable.save();
 
     if (infoWindow != null) {

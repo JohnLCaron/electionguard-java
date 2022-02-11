@@ -14,7 +14,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- * The Manifest Manifest: defines the candidates, contests, and associated information for a specific election.
+ * The Manifest: defines the candidates, contests, and associated information for a specific election.
  * @see <a href="https://developers.google.com/elections-data/reference/election">Civics Common Standard Data Specification</a>
  */
 @Immutable

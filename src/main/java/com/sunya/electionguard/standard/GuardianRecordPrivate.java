@@ -1,7 +1,6 @@
 package com.sunya.electionguard.standard;
 
 import com.google.auto.value.AutoValue;
-import com.sunya.electionguard.Auxiliary;
 
 import java.util.Collection;
 import java.util.Map;
@@ -19,19 +18,9 @@ public abstract class GuardianRecordPrivate {
   public abstract KeyCeremony.ElectionKeyPair election_keys();
 
   /**
-   * Private auxiliary key pair of this guardian.
-   */
-  public abstract Auxiliary.KeyPair auxiliary_keys();
-
-  /**
    * This guardian's partial key backups that will be shared to other guardians.
    */
   public abstract Map<String, KeyCeremony.ElectionPartialKeyBackup> backups_to_share();
-
-  /**
-   * Received auxiliary public keys that are shared with this guardian.
-   */
-  public abstract Map<String, Auxiliary.PublicKey> guardian_auxiliary_public_keys();
 
   /**
    * Received election public keys that are shared with this guardian.
@@ -50,31 +39,25 @@ public abstract class GuardianRecordPrivate {
 
   public static GuardianRecordPrivate create(
           KeyCeremony.ElectionKeyPair election_keys,
-          Auxiliary.KeyPair auxiliary_keys,
           Map<String, KeyCeremony.ElectionPartialKeyBackup> backups_to_share,
-          Map<String, Auxiliary.PublicKey> guardian_auxiliary_public_keys,
           Map<String, KeyCeremony.ElectionPublicKey> guardian_election_public_keys,
           Map<String, KeyCeremony.ElectionPartialKeyBackup> guardian_election_partial_key_backups,
           Map<String, KeyCeremony.ElectionPartialKeyVerification> guardian_election_partial_key_verifications) {
 
-    return new AutoValue_GuardianRecordPrivate(election_keys, auxiliary_keys, backups_to_share, guardian_auxiliary_public_keys,
+    return new AutoValue_GuardianRecordPrivate(election_keys, backups_to_share,
             guardian_election_public_keys, guardian_election_partial_key_backups, guardian_election_partial_key_verifications);
   }
 
   public static GuardianRecordPrivate create(
           KeyCeremony.ElectionKeyPair election_keys,
-          Auxiliary.KeyPair auxiliary_keys,
           Collection<KeyCeremony.ElectionPartialKeyBackup> backups_to_share,
-          Collection<Auxiliary.PublicKey> guardian_auxiliary_public_keys,
           Collection<KeyCeremony.ElectionPublicKey> guardian_election_public_keys,
           Collection<KeyCeremony.ElectionPartialKeyBackup> guardian_election_partial_key_backups,
           Collection<KeyCeremony.ElectionPartialKeyVerification> guardian_election_partial_key_verifications) {
 
     return new AutoValue_GuardianRecordPrivate(
             election_keys,
-            auxiliary_keys,
             backups_to_share.stream().collect(Collectors.toMap(o -> o.designated_id(), o -> o)),
-            guardian_auxiliary_public_keys.stream().collect(Collectors.toMap(o -> o.owner_id, o -> o)),
             guardian_election_public_keys.stream().collect(Collectors.toMap(o -> o.owner_id(), o -> o)),
             guardian_election_partial_key_backups.stream().collect(Collectors.toMap(o -> o.owner_id(), o -> o)),
             guardian_election_partial_key_verifications.stream().collect(Collectors.toMap(o -> o.owner_id(), o -> o)));

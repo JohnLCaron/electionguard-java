@@ -1,8 +1,6 @@
 package com.sunya.electionguard.keyceremony;
 
 import com.google.common.flogger.FluentLogger;
-import com.google.protobuf.ByteString;
-import com.sunya.electionguard.Auxiliary;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.SchnorrProof;
 import com.sunya.electionguard.proto.CommonConvert;
@@ -89,7 +87,7 @@ class KeyCeremonyRemoteTrusteeProxy implements KeyCeremonyTrusteeIF {
               response.getGeneratingGuardianId(),
               response.getDesignatedGuardianId(),
               response.getDesignatedGuardianXCoordinate(),
-              new Auxiliary.ByteString(response.getEncryptedCoordinate().toByteArray()),
+              CommonConvert.convertElementModQ(response.getCoordinate()),
               response.getError()));
 
     } catch (StatusRuntimeException e) {
@@ -105,7 +103,7 @@ class KeyCeremonyRemoteTrusteeProxy implements KeyCeremonyTrusteeIF {
       request.setGeneratingGuardianId(backup.generatingGuardianId())
               .setDesignatedGuardianId(backup.designatedGuardianId())
               .setDesignatedGuardianXCoordinate(backup.designatedGuardianXCoordinate())
-              .setEncryptedCoordinate(ByteString.copyFrom(backup.encryptedCoordinate().getBytes()));
+              .setCoordinate(CommonConvert.convertElementModQ(backup.coordinate()));
 
       RemoteKeyCeremonyTrusteeProto.PartialKeyVerification response = blockingStub.verifyPartialKeyBackup(request.build());
       return Optional.of(KeyCeremony2.PartialKeyVerification.create(

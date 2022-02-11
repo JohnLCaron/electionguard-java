@@ -2,7 +2,6 @@ package com.sunya.electionguard.standard;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
-import com.sunya.electionguard.Auxiliary;
 import net.jqwik.api.Example;
 
 import java.util.List;
@@ -25,11 +24,11 @@ public class TestKeyCeremonyMediator {
   private static final List<Guardian> GUARDIANS = ImmutableList.of(GUARDIAN_1, GUARDIAN_2);
 
   static {
-    GUARDIAN_1.save_guardian_public_keys(GUARDIAN_2.share_public_keys());
-    GUARDIAN_2.save_guardian_public_keys(GUARDIAN_1.share_public_keys());
-    VERIFIER.save_guardian_public_keys(GUARDIAN_2.share_public_keys());
-    GUARDIAN_1.generate_election_partial_key_backups(Auxiliary.identity_auxiliary_encrypt);
-    GUARDIAN_2.generate_election_partial_key_backups(Auxiliary.identity_auxiliary_encrypt);
+    GUARDIAN_1.save_guardian_key(GUARDIAN_2.share_key());
+    GUARDIAN_2.save_guardian_key(GUARDIAN_1.share_key());
+    VERIFIER.save_guardian_key(GUARDIAN_2.share_key());
+    GUARDIAN_1.generate_election_partial_key_backups();
+    GUARDIAN_2.generate_election_partial_key_backups();
   }
 
   // Round 1: Mediator takes attendance and guardians announce
@@ -37,13 +36,13 @@ public class TestKeyCeremonyMediator {
   public void test_take_attendance() {
     KeyCeremonyMediator mediator = new KeyCeremonyMediator("mediator_attendance", CEREMONY_DETAILS);
 
-    mediator.announce(GUARDIAN_1.share_public_keys());
+    mediator.announce(GUARDIAN_1.share_key());
     assertThat(mediator.all_guardians_announced()).isFalse();
 
-    mediator.announce(GUARDIAN_2.share_public_keys());
+    mediator.announce(GUARDIAN_2.share_key());
     assertThat(mediator.all_guardians_announced()).isTrue();
 
-    Optional<List<PublicKeySet>> guardian_keys = mediator.share_announced(null);
+    Optional<List<ElectionPublicKey>> guardian_keys = mediator.share_announced(null);
     assertThat(guardian_keys).isPresent();
     assertThat(Iterables.size(guardian_keys.get())).isEqualTo(NUMBER_OF_GUARDIANS);
   }
@@ -55,8 +54,8 @@ public class TestKeyCeremonyMediator {
     KeyCeremonyHelper.perform_round_1(GUARDIANS, mediator);
 
     // Round 2 - Guardians Only
-    GUARDIAN_1.generate_election_partial_key_backups(null);
-    GUARDIAN_2.generate_election_partial_key_backups(null);
+    GUARDIAN_1.generate_election_partial_key_backups();
+    GUARDIAN_2.generate_election_partial_key_backups();
     ElectionPartialKeyBackup backup_from_1_for_2 = GUARDIAN_1.share_election_partial_key_backup(GUARDIAN_2_ID).orElseThrow();
     ElectionPartialKeyBackup backup_from_2_for_1 = GUARDIAN_2.share_election_partial_key_backup(GUARDIAN_1_ID).orElseThrow();
 
@@ -83,9 +82,9 @@ public class TestKeyCeremonyMediator {
 
     // Round 3 - Guardians Only
     ElectionPartialKeyVerification verification1 =
-            GUARDIAN_1.verify_election_partial_key_backup(GUARDIAN_2_ID, Auxiliary.identity_auxiliary_decrypt).orElseThrow();
+            GUARDIAN_1.verify_election_partial_key_backup(GUARDIAN_2_ID).orElseThrow();
     ElectionPartialKeyVerification verification2 =
-            GUARDIAN_2.verify_election_partial_key_backup(GUARDIAN_1_ID, Auxiliary.identity_auxiliary_decrypt).orElseThrow();
+            GUARDIAN_2.verify_election_partial_key_backup(GUARDIAN_1_ID).orElseThrow();
 
     mediator.receive_backup_verifications(ImmutableList.of(verification1));
     assertThat(mediator.get_verification_state().all_sent()).isFalse();
@@ -110,7 +109,7 @@ public class TestKeyCeremonyMediator {
 
     // Round 3 - Guardians Only
     ElectionPartialKeyVerification verification1 =
-            GUARDIAN_1.verify_election_partial_key_backup(GUARDIAN_2_ID, Auxiliary.identity_auxiliary_decrypt).orElseThrow();
+            GUARDIAN_1.verify_election_partial_key_backup(GUARDIAN_2_ID).orElseThrow();
 
     ElectionPartialKeyVerification failed_verification2 = ElectionPartialKeyVerification.create(
             GUARDIAN_1_ID,

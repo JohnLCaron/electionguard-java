@@ -9,6 +9,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
+import com.sunya.electionguard.publish.PrivateData;
 
 import java.io.File;
 import java.io.IOException;
@@ -223,12 +224,18 @@ public class RunRemoteWorkflow {
       System.exit(1);
     }
 
+    PrivateData privatePublisher = null;
+    try {
+      privatePublisher = new PrivateData(cmdLine.trusteeDir, false, false);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
     for (int i=1; i <= cmdLine.quorum; i++) {
       RunCommand command = new RunCommand("DecryptingRemoteTrustee" + i, service,
               "java",
               "-classpath", classpath,
               "com.sunya.electionguard.decrypting.DecryptingRemoteTrustee",
-              "-guardianFile", cmdLine.trusteeDir + "/" + REMOTE_TRUSTEE + i + ".protobuf");
+              "-trusteeFile", privatePublisher.trusteePath(REMOTE_TRUSTEE + i).toString() );
       running.add(command);
     }
 

@@ -533,11 +533,11 @@ public class ElectionTestHelper {
   }
 
   public static class EverythingTuple {
-    Manifest election_description;
-    InternalManifest metadata;
-    List<PlaintextBallot> ballots;
-    ElementModQ secret_key;
-    CiphertextElectionContext context;
+    public final Manifest election_description;
+    public final InternalManifest metadata;
+    public final List<PlaintextBallot> ballots;
+    public final ElementModQ secret_key;
+    public final CiphertextElectionContext context;
 
     public EverythingTuple(
                  Manifest election_description,

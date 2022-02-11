@@ -193,7 +193,7 @@ public class DecryptingSimulator {
 
     DecryptingTrusteeMediator mediator = new DecryptingTrusteeMediator(electionRecord.context,
             this.encryptedTally,
-            consumer.spoiledBallotsProto(),
+            consumer.submittedSpoiledBallotsProto(),
             guardianPublicKeys);
 
     int count = 0;

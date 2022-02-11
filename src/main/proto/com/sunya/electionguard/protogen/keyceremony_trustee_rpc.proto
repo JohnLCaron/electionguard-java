@@ -36,7 +36,7 @@ message PartialKeyBackup {
   string generating_guardian_id = 2; // The Id of the Trustee that generated this backup.
   string designated_guardian_id = 3; // The Id of the Trustee to receive this backup.
   uint32 designated_guardian_x_coordinate = 4; // The x coefficient of the designated guardian.
-  bytes encrypted_coordinate = 5; // The encrypted coordinate of the designated guardian.
+  ElementModQ coordinate = 7; // The coordinate of the designated guardian.
   string error = 6; // if not empty, an error has occurred.
 }
 

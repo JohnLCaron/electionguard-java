@@ -1,6 +1,5 @@
 package com.sunya.electionguard.proto;
 
-import com.google.protobuf.ByteString;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.SchnorrProof;
 import com.sunya.electionguard.keyceremony.KeyCeremony2;
@@ -38,8 +37,8 @@ public class TrusteeToProto {
     builder.setGeneratingGuardianId(org.generatingGuardianId());
     builder.setDesignatedGuardianId(org.designatedGuardianId());
     builder.setDesignatedGuardianXCoordinate(org.designatedGuardianXCoordinate());
-    if (org.encryptedCoordinate() != null) {
-      builder.setEncryptedCoordinate(ByteString.copyFrom(org.encryptedCoordinate().getBytes()));
+    if (org.coordinate() != null) {
+      builder.setCoordinate(CommonConvert.convertElementModQ(org.coordinate()));
     }
     builder.setError(org.error());
     return builder.build();

@@ -3,7 +3,6 @@ package com.sunya.electionguard.standard;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import com.sunya.electionguard.Auxiliary;
 import com.sunya.electionguard.BallotBox;
 import com.sunya.electionguard.BallotFactory;
 import com.sunya.electionguard.CiphertextBallot;
@@ -157,15 +156,15 @@ public class TestEndToEndElectionIntegration {
     // ROUND 1: Public Key Sharing
     // Announce
     for (Guardian guardian : this.guardians) {
-      this.mediator.announce(guardian.share_public_keys());
+      this.mediator.announce(guardian.share_key());
     }
 
     // Share Keys
     for (Guardian guardian : this.guardians) {
-      List<KeyCeremony.PublicKeySet> announced_keys = this.mediator.share_announced(null).orElseThrow();
-      for (KeyCeremony.PublicKeySet key_set : announced_keys) {
-        if (!guardian.object_id.equals(key_set.election().owner_id())) {
-          guardian.save_guardian_public_keys(key_set);
+      List<KeyCeremony.ElectionPublicKey> announced_keys = this.mediator.share_announced(null).orElseThrow();
+      for (KeyCeremony.ElectionPublicKey key_set : announced_keys) {
+        if (!guardian.object_id.equals(key_set.owner_id())) {
+          guardian.save_guardian_key(key_set);
         }
       }
     }
@@ -176,7 +175,7 @@ public class TestEndToEndElectionIntegration {
     // ROUND 2: Election Partial Key Backup Sharing
     //Share Backups
     for (Guardian sending_guardian : this.guardians) {
-      sending_guardian.generate_election_partial_key_backups(Auxiliary.identity_auxiliary_encrypt);
+      sending_guardian.generate_election_partial_key_backups();
       List<KeyCeremony.ElectionPartialKeyBackup> backups = new ArrayList<>();
       for (Guardian designated_guardian : this.guardians) {
         if (!designated_guardian.object_id.equals(sending_guardian.object_id)) {
@@ -207,8 +206,7 @@ public class TestEndToEndElectionIntegration {
       for (Guardian backup_owner : this.guardians) {
         if (!designated_guardian.object_id.equals(backup_owner.object_id)) {
           KeyCeremony.ElectionPartialKeyVerification verification =
-                  designated_guardian.verify_election_partial_key_backup(
-                          backup_owner.object_id, Auxiliary.identity_auxiliary_decrypt).orElseThrow();
+                  designated_guardian.verify_election_partial_key_backup(backup_owner.object_id).orElseThrow();
           verifications.add(verification);
         }
       }
