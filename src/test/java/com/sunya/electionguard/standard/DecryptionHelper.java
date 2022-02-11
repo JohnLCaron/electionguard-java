@@ -1,6 +1,5 @@
 package com.sunya.electionguard.standard;
 
-import com.sunya.electionguard.Auxiliary;
 import com.sunya.electionguard.CiphertextElectionContext;
 import com.sunya.electionguard.CiphertextTally;
 import com.sunya.electionguard.DecryptionShare;
@@ -12,8 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import static com.google.common.truth.Truth8.assertThat;
 
 /**
  * Helper to assist in the decryption process particularly for testing.
@@ -30,7 +27,7 @@ public class DecryptionHelper {
 
     announcement(
             available_guardians,
-            available_guardians.stream().map(g -> g.share_election_public_key()).collect(Collectors.toList()),
+            available_guardians.stream().map(g -> g.share_key()).collect(Collectors.toList()),
             mediator,
             context,
             ciphertext_tally,
@@ -48,7 +45,7 @@ public class DecryptionHelper {
 
     announcement(
             all_guardians.subList(0, quorum),
-            all_guardians.stream().map(g -> g.share_election_public_key()).collect(Collectors.toList()),
+            all_guardians.stream().map(g -> g.share_key()).collect(Collectors.toList()),
             mediator,
             context,
             ciphertext_tally,
@@ -94,7 +91,7 @@ public class DecryptionHelper {
 
     // Announce available guardians
     for (Guardian available_guardian : available_guardians) {
-      KeyCeremony.ElectionPublicKey guardian_key = available_guardian.share_election_public_key();
+      KeyCeremony.ElectionPublicKey guardian_key = available_guardian.share_key();
       DecryptionShare tally_share = available_guardian.compute_tally_share(ciphertext_tally, context).orElseThrow();
       Map<String, Optional<DecryptionShare>> ballot_shares = available_guardian.compute_ballot_shares(spoiled_ballots, context);
       mediator.announce(guardian_key, tally_share, ballot_shares);
@@ -133,16 +130,14 @@ public class DecryptionHelper {
        Optional<DecryptionShare.CompensatedDecryptionShare>  tally_share = available_guardian.compute_compensated_tally_share(
                missing_guardian.owner_id(),
                ciphertext_tally,
-               context,
-               Auxiliary.identity_auxiliary_decrypt);
+               context);
 
        tally_share.ifPresent(mediator::receive_tally_compensation_share);
 
        Map<String, Optional<DecryptionShare.CompensatedDecryptionShare>> ballot_shares = available_guardian.compute_compensated_ballot_shares(
                        missing_guardian.owner_id(),
                        spoiled_ballots,
-                       context,
-               Auxiliary.identity_auxiliary_decrypt);
+                       context);
 
        Map<String, DecryptionShare.CompensatedDecryptionShare> valid_ballot_shares = get_valid_ballot_shares(ballot_shares);
 

@@ -4,8 +4,6 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.google.common.flogger.FluentLogger;
-import com.google.protobuf.ByteString;
-import com.sunya.electionguard.Auxiliary;
 import com.sunya.electionguard.SchnorrProof;
 import com.sunya.electionguard.proto.CommonConvert;
 import com.sunya.electionguard.protogen.CommonProto;
@@ -175,6 +173,7 @@ class KeyCeremonyRemoteTrustee extends RemoteKeyCeremonyTrusteeServiceGrpc.Remot
   ////////////////////////////////////////////////////////////////////////////////
   final KeyCeremonyTrustee delegate;
   final String outputDir;
+  final PrivateData publisher;
 
   KeyCeremonyRemoteTrustee(String id,
                             int xCoordinate,
@@ -184,7 +183,7 @@ class KeyCeremonyRemoteTrustee extends RemoteKeyCeremonyTrusteeServiceGrpc.Remot
     this.outputDir = outputDir;
 
     // fail fast on bad output directory
-    Publisher publisher = new Publisher(outputDir, Publisher.Mode.writeonly, false);
+    publisher = new PrivateData(outputDir, false, true);
     Formatter errors = new Formatter();
     if (!publisher.validateOutputDir(errors)) {
       System.out.printf("*** Publisher validateOutputDir FAILED on %s%n%s", outputDir, errors);
@@ -252,8 +251,8 @@ class KeyCeremonyRemoteTrustee extends RemoteKeyCeremonyTrusteeServiceGrpc.Remot
               .setDesignatedGuardianId(backup.designatedGuardianId())
               .setDesignatedGuardianXCoordinate(backup.designatedGuardianXCoordinate())
               .setError(backup.error());
-      if (backup.encryptedCoordinate() != null) {
-        response.setEncryptedCoordinate(ByteString.copyFrom(backup.encryptedCoordinate().getBytes()));
+      if (backup.coordinate() != null) {
+        response.setCoordinate(CommonConvert.convertElementModQ(backup.coordinate()));
       }
       logger.atInfo().log("KeyCeremonyRemoteTrustee sendPartialKeyBackup %s", request.getGuardianId());
 
@@ -277,7 +276,7 @@ class KeyCeremonyRemoteTrustee extends RemoteKeyCeremonyTrusteeServiceGrpc.Remot
               proto.getGeneratingGuardianId(),
               proto.getDesignatedGuardianId(),
               proto.getDesignatedGuardianXCoordinate(),
-              new Auxiliary.ByteString(proto.getEncryptedCoordinate().toByteArray()),
+              CommonConvert.convertElementModQ(proto.getCoordinate()),
               null);
 
       KeyCeremony2.PartialKeyVerification verify = delegate.verifyPartialKeyBackup(backup);
@@ -349,7 +348,7 @@ class KeyCeremonyRemoteTrustee extends RemoteKeyCeremonyTrusteeServiceGrpc.Remot
     CommonProto.ErrorResponse.Builder response = CommonProto.ErrorResponse.newBuilder();
     try {
       TrusteeProto.DecryptingTrustee trusteeProto = TrusteeToProto.convertTrustee(this.delegate);
-      PrivateData.overwriteTrusteeProto(this.outputDir, trusteeProto);
+      publisher.overwriteTrusteeProto(trusteeProto);
       logger.atInfo().log("KeyCeremonyRemoteTrustee saveState %s", delegate.id);
 
     } catch (Throwable t) {

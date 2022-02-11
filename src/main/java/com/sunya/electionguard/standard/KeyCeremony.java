@@ -4,23 +4,19 @@ import com.google.auto.value.AutoValue;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
-import com.sunya.electionguard.Auxiliary;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.ElectionPolynomial;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.GuardianRecord;
 import com.sunya.electionguard.Hash;
-import com.sunya.electionguard.Rsa;
 import com.sunya.electionguard.SchnorrProof;
 
 import javax.annotation.Nullable;
 import java.math.BigInteger;
-import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.sunya.electionguard.Group.*;
@@ -110,18 +106,18 @@ public class KeyCeremony {
     public abstract String designated_id();
     /** The sequence order of the designated guardian. */
     public abstract int designated_sequence_order();
-    /** The encrypted coordinate corresponding to a secret election polynomial. */
-    public abstract Auxiliary.ByteString encrypted_value();
+    /** The coordinate corresponding to a secret election polynomial. */
+    public abstract ElementModQ value();
 
     public static ElectionPartialKeyBackup create(String owner_id,
                                                   String designated_id,
                                                   int designated_sequence_order,
-                                                  Auxiliary.ByteString encrypted_value) {
+                                                  ElementModQ value) {
       return new AutoValue_KeyCeremony_ElectionPartialKeyBackup(
               owner_id,
               designated_id,
               designated_sequence_order,
-              encrypted_value);
+              value);
     }
   }
 
@@ -133,17 +129,6 @@ public class KeyCeremony {
 
     public static CeremonyDetails create(int number_of_guardians, int quorum) {
       return new AutoValue_KeyCeremony_CeremonyDetails(number_of_guardians, quorum);
-    }
-  }
-
-  /** A Guardian's public key set of auxiliary and election keys and proofs. */
-  @AutoValue
-  public abstract static class PublicKeySet {
-    public abstract ElectionPublicKey election();
-    public abstract Auxiliary.PublicKey auxiliary();
-
-    public static PublicKeySet create(ElectionPublicKey election, Auxiliary.PublicKey auxiliary) {
-      return new AutoValue_KeyCeremony_PublicKeySet(election, auxiliary);
     }
   }
 
@@ -236,14 +221,6 @@ public class KeyCeremony {
 
   /////////////////////////////
 
-  // LOOK generate_elgamal_auxiliary_key_pair
-
-  /** Generate auxiliary key pair using RSA . */
-  public static Auxiliary.KeyPair generate_rsa_auxiliary_key_pair(String owner_id, int sequence_order) {
-    KeyPair rsa_key_pair = Rsa.rsa_keypair();
-    return new Auxiliary.KeyPair(owner_id, sequence_order, rsa_key_pair.getPrivate(), rsa_key_pair.getPublic());
-  }
-
   /**
    * Generate election key pair, proof, and polynomial.
    * @param quorum: Quorum of guardians needed to decrypt
@@ -263,30 +240,21 @@ public class KeyCeremony {
    * Generate election partial key backup for sharing.
    * @param owner_id: Owner of election key
    * @param polynomial: The owner's Manifest polynomial
-   * @param auxiliary_public_key: The Auxiliary public key
-   * @param encryptor Function to encrypt using auxiliary key
-   * @return Election partial key backup, or null if polynomial_coordinate encryption fails.
+   * @param designated_guardian_key: The Guardian's public key
+   * @return Election partial key backup
    */
-  public static Optional<ElectionPartialKeyBackup> generate_election_partial_key_backup(
+  public static ElectionPartialKeyBackup generate_election_partial_key_backup(
           String owner_id,
           ElectionPolynomial polynomial,
-          Auxiliary.PublicKey auxiliary_public_key,
-          @Nullable Auxiliary.Encryptor encryptor) {
-    if (encryptor == null) {
-      encryptor = Rsa::encrypt;
-    }
+          ElectionPublicKey designated_guardian_key) {
 
     ElementModQ value = ElectionPolynomial.compute_polynomial_coordinate(
-            BigInteger.valueOf(auxiliary_public_key.sequence_order), polynomial);
-    Optional<Auxiliary.ByteString> encrypted_value = encryptor.encrypt(value.to_hex(), auxiliary_public_key.key);
-    if (encrypted_value.isEmpty()) {
-      return Optional.empty();
-    }
-    return Optional.of(ElectionPartialKeyBackup.create(
+            BigInteger.valueOf(designated_guardian_key.sequence_order()), polynomial);
+    return ElectionPartialKeyBackup.create(
             owner_id,
-            auxiliary_public_key.owner_id,
-            auxiliary_public_key.sequence_order,
-            encrypted_value.get()));
+            designated_guardian_key.owner_id(),
+            designated_guardian_key.sequence_order(),
+            value);
   }
 
   /**
@@ -294,29 +262,17 @@ public class KeyCeremony {
    * @param verifier_id: Verifier of the partial key backup
    * @param backup: Manifest partial key backup
    * @param election_public_key: Other guardian's election public key
-   * @param auxiliary_key_pair: Auxiliary key pair
-   * @param decryptor Decryption function using auxiliary key, or null for default.
    */
   public static ElectionPartialKeyVerification verify_election_partial_key_backup(
           String verifier_id,
           ElectionPartialKeyBackup backup,
-          ElectionPublicKey election_public_key,
-          Auxiliary.KeyPair auxiliary_key_pair,
-          @Nullable Auxiliary.Decryptor decryptor) {
-    if (decryptor == null) {
-      decryptor = Rsa::decrypt;
-    }
+          ElectionPublicKey election_public_key) {
 
-    Optional<String> decrypted_value = decryptor.decrypt(backup.encrypted_value(), auxiliary_key_pair.secret_key);
-    if (decrypted_value.isEmpty()) {
-      return ElectionPartialKeyVerification.create(backup.owner_id(), backup.designated_id(), verifier_id, false);
-    }
-    ElementModQ value = Group.hex_to_q(decrypted_value.get()).orElseThrow(IllegalStateException::new);
     return ElectionPartialKeyVerification.create(
             backup.owner_id(),
             backup.designated_id(),
             verifier_id,
-            ElectionPolynomial.verify_polynomial_coordinate(value, BigInteger.valueOf(backup.designated_sequence_order()),
+            ElectionPolynomial.verify_polynomial_coordinate(backup.value(), BigInteger.valueOf(backup.designated_sequence_order()),
                     election_public_key.coefficient_commitments()));
   }
 

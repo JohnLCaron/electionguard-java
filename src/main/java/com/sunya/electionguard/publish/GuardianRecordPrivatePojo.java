@@ -3,7 +3,6 @@ package com.sunya.electionguard.publish;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
-import com.sunya.electionguard.Auxiliary;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.ElectionPolynomial;
 import com.sunya.electionguard.Group;
@@ -24,13 +23,11 @@ import java.util.List;
  * This is present for compatibility with python serialization. Prefer using
  * com.sunya.electionguard.decrypting, in particular DecryptingTrustee.
  * see "https://stackoverflow.com/questions/46809528/how-to-save-and-re-use-keypairs-in-java-asymmetric-encryption"
- * TODO Probably doenst match python JSON, eg Auxilary.ByteString
+ * TODO Test if match python JSON
  */
 public class GuardianRecordPrivatePojo {
   public ElectionKeyPairPojo election_keys;
-  public AuxilaryKeyPairPojo auxiliary_keys;
   public Collection<ElectionPartialKeyBackupPojo> backups_to_share;
-  public Collection<AuxilaryPublicKeyPojo> guardian_auxiliary_public_keys;
   public Collection<ElectionPublicKeyPojo> guardian_election_public_keys;
   public Collection<ElectionPartialKeyBackupPojo> guardian_election_partial_key_backups;
   public Collection<ElectionPartialKeyVerificationPojo> guardian_election_partial_key_verifications;
@@ -74,7 +71,7 @@ public class GuardianRecordPrivatePojo {
     public String owner_id;
     public String designated_id;
     public Integer designated_sequence_order;
-    public String encrypted_value;
+    public Group.ElementModQ value;
   }
 
   public static class ElectionPartialKeyVerificationPojo {
@@ -97,9 +94,7 @@ public class GuardianRecordPrivatePojo {
 
     return GuardianRecordPrivate.create(
             translateElectionKeyPair(pojo.election_keys),
-            translateAuxilaryKeyPair(pojo.auxiliary_keys),
             ConvertPojos.convertCollection(pojo.backups_to_share, GuardianRecordPrivatePojo::translateElectionPartialKeyBackup),
-            ConvertPojos.convertCollection(pojo.guardian_auxiliary_public_keys, GuardianRecordPrivatePojo::translateAuxilaryPublicKey),
             ConvertPojos.convertCollection(pojo.guardian_election_public_keys, GuardianRecordPrivatePojo::translateElectionPublicKey),
             ConvertPojos.convertCollection(pojo.guardian_election_partial_key_backups, GuardianRecordPrivatePojo::translateElectionPartialKeyBackup),
             ConvertPojos.convertCollection(pojo.guardian_election_partial_key_verifications, GuardianRecordPrivatePojo::translateElectionPartialKeyVerification));
@@ -118,14 +113,6 @@ public class GuardianRecordPrivatePojo {
             pojo.coefficients,
             pojo.coefficient_commitments,
             pojo.coefficient_proofs);
-  }
-
-  private static Auxiliary.KeyPair translateAuxilaryKeyPair(AuxilaryKeyPairPojo pojo) {
-    return new Auxiliary.KeyPair(
-            pojo.owner_id,
-            pojo.sequence_order,
-            convertPrivateKey(pojo.secret_key),
-            convertPublicKey(pojo.public_key));
   }
 
   private static java.security.PublicKey convertPublicKey(String publicKey) {
@@ -150,13 +137,6 @@ public class GuardianRecordPrivatePojo {
     }
   }
 
-  private static Auxiliary.PublicKey translateAuxilaryPublicKey(AuxilaryPublicKeyPojo pojo) {
-    return new Auxiliary.PublicKey(
-            pojo.owner_id,
-            pojo.sequence_order,
-            convertPublicKey(pojo.key));
-  }
-
   private static KeyCeremony.ElectionPublicKey translateElectionPublicKey(ElectionPublicKeyPojo pojo) {
     return KeyCeremony.ElectionPublicKey.create(
             pojo.owner_id,
@@ -171,7 +151,7 @@ public class GuardianRecordPrivatePojo {
             pojo.owner_id,
             pojo.designated_id,
             pojo.designated_sequence_order,
-            new Auxiliary.ByteString(pojo.encrypted_value));
+            pojo.value);
   }
 
   private static KeyCeremony.ElectionPartialKeyVerification translateElectionPartialKeyVerification(ElectionPartialKeyVerificationPojo pojo) {
@@ -195,13 +175,9 @@ public class GuardianRecordPrivatePojo {
   private static GuardianRecordPrivatePojo convertGuardianRecordPrivate(GuardianRecordPrivate org) {
     GuardianRecordPrivatePojo pojo = new GuardianRecordPrivatePojo();
     pojo.election_keys = convertElectionKeyPair(org.election_keys());
-    pojo.auxiliary_keys = convertAuxilaryKeyPair(org.auxiliary_keys());
     pojo.backups_to_share = ConvertPojos.convertCollection(
             org.backups_to_share().values(),
             GuardianRecordPrivatePojo::convertElectionPartialKeyBackup);
-    pojo.guardian_auxiliary_public_keys = ConvertPojos.convertCollection(
-            org.guardian_auxiliary_public_keys().values(),
-            GuardianRecordPrivatePojo::convertAuxiliaryPublicKey);
     pojo.guardian_election_public_keys = ConvertPojos.convertCollection(
             org.guardian_election_public_keys().values(),
             GuardianRecordPrivatePojo::convertElectionPublicKey);
@@ -231,29 +207,8 @@ public class GuardianRecordPrivatePojo {
     return pojo;
   }
 
-  private static AuxilaryKeyPairPojo  convertAuxilaryKeyPair(Auxiliary.KeyPair org) {
-    AuxilaryKeyPairPojo pojo = new AuxilaryKeyPairPojo();
-    pojo.owner_id = org.owner_id;
-    pojo.sequence_order = org.sequence_order;
-    pojo.secret_key = convertPrivateKey(org.secret_key);
-    pojo.public_key = convertPublicKey(org.public_key);
-    return pojo;
-  }
-
   private static String convertPublicKey(java.security.PublicKey publicKey) {
     return Base64.getEncoder().encodeToString(publicKey.getEncoded());
-  }
-
-  private static String convertPrivateKey(java.security.PrivateKey privateKey) {
-    return Base64.getEncoder().encodeToString(privateKey.getEncoded());
-  }
-
-  private static AuxilaryPublicKeyPojo convertAuxiliaryPublicKey(Auxiliary.PublicKey org) {
-    AuxilaryPublicKeyPojo pojo = new AuxilaryPublicKeyPojo();
-    pojo.owner_id = org.owner_id;
-    pojo.sequence_order = org.sequence_order;
-    pojo.key = convertPublicKey(org.key);
-    return pojo;
   }
 
   private static ElectionPublicKeyPojo convertElectionPublicKey(KeyCeremony.ElectionPublicKey org) {
@@ -271,7 +226,7 @@ public class GuardianRecordPrivatePojo {
     pojo.owner_id = org.owner_id();
     pojo.designated_id = org.designated_id();
     pojo.designated_sequence_order = org.designated_sequence_order();
-    pojo.encrypted_value = org.encrypted_value().toString();
+    pojo.value = org.value();
     return pojo;
   }
 

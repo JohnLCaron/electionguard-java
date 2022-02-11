@@ -2,7 +2,6 @@ package com.sunya.electionguard.standard;
 
 import com.google.auto.value.AutoValue;
 import com.google.common.flogger.FluentLogger;
-import com.sunya.electionguard.Auxiliary;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -38,7 +37,6 @@ class KeyCeremonyMediator {
 
   private final String id;
   private final CeremonyDetails ceremony_details;
-  private final Map<String, Auxiliary.PublicKey> auxiliary_public_keys; // Map(GUARDIAN_ID, Auxiliary.PublicKey)
   private final Map<String, ElectionPublicKey> election_public_keys;  // Map(GUARDIAN_ID, ElectionPublicKey)
   private final Map<GuardianPair, ElectionPartialKeyBackup> election_partial_key_backups;
   private final Map<GuardianPair, ElectionPartialKeyVerification> election_partial_key_verifications;
@@ -46,7 +44,6 @@ class KeyCeremonyMediator {
   public KeyCeremonyMediator(String id, CeremonyDetails ceremony_details) {
     this.id = id;
     this.ceremony_details = ceremony_details;
-    this.auxiliary_public_keys = new HashMap<>();
     this.election_public_keys = new HashMap<>();
     this.election_partial_key_backups = new HashMap<>();
     this.election_partial_key_verifications = new HashMap<>();
@@ -55,9 +52,8 @@ class KeyCeremonyMediator {
   /////// ROUND 1: Announce guardians with public keys
 
   /** Announce the guardian as present and participating the Key Ceremony. */
-  public void announce(PublicKeySet public_key_set) {
-    this.receive_election_public_key(public_key_set.election());
-    this.receive_auxiliary_public_key(public_key_set.auxiliary());
+  public void announce(ElectionPublicKey key) {
+    this.receive_election_public_key(key);
    }
 
   /**
@@ -65,20 +61,18 @@ class KeyCeremonyMediator {
    * @return True if all guardians in attendance
    */
   public boolean all_guardians_announced() {
-    return this.all_auxiliary_public_keys_available() && this.all_election_public_keys_available();
+    return this.election_public_keys.size() == this.ceremony_details.number_of_guardians();
   }
 
   /** When all guardians have announced, share their public keys indicating their announcement. */
-  public Optional<List<PublicKeySet>> share_announced(@Nullable String requesting_guardian_id) {
+  public Optional<List<ElectionPublicKey>> share_announced(@Nullable String requesting_guardian_id) {
     if (!this.all_guardians_announced()) {
       return Optional.empty();
     }
-    List<PublicKeySet> result = new ArrayList<>();
-    for (String guardian_id : this.get_announced_guardians()) {
+    List<ElectionPublicKey> result = new ArrayList<>();
+    for (String guardian_id : this.get_announced_guardians_ids()) {
       if (!guardian_id.equals(requesting_guardian_id)) {
-          result.add(PublicKeySet.create(
-                  this.election_public_keys.get(guardian_id),
-                  this.auxiliary_public_keys.get(guardian_id)));
+          result.add(this.election_public_keys.get(guardian_id));
         }
     }
     return Optional.of(result);
@@ -157,30 +151,6 @@ class KeyCeremonyMediator {
   }
 
   /**
-   * Receive auxiliary public key from guardian.
-   * @param public_key: Auxiliary public key
-   */
-  void receive_auxiliary_public_key(Auxiliary.PublicKey public_key) {
-    this.auxiliary_public_keys.put(public_key.owner_id, public_key);
-  }
-
-  /**
-   * True if all auxiliary public key for all guardians available.
-   * @return All auxiliary public backups for all guardians available
-   */
-  boolean all_auxiliary_public_keys_available() {
-    return this.auxiliary_public_keys.size() == this.ceremony_details.number_of_guardians();
-  }
-
-  /**
-   * Share all currently stored auxiliary public keys for all guardians.
-   * @return list of auxiliary public keys
-   *
-  Iterable<Auxiliary.PublicKey> share_auxiliary_public_keys() {
-    return this.auxiliary_public_keys.values();
-  } */
-
-  /**
    * Receive election public key from guardian.
    * @param public_key election public key
    */
@@ -188,16 +158,11 @@ class KeyCeremonyMediator {
     this.election_public_keys.put(public_key.owner_id(), public_key);
   }
 
-  /** True if all election public keys for all guardians available. */
-  boolean all_election_public_keys_available() {
-    return this.election_public_keys.size() == this.ceremony_details.number_of_guardians();
-  }
-
   /**
-   * Share all currently stored election public keys for all guardians.
-   * @return list of election public keys
+   * Share all currently announced guardian ids.
+   * @return list of announced guardian ids
    */
-  Iterable<String> get_announced_guardians() {
+  Iterable<String> get_announced_guardians_ids() {
     return this.election_public_keys.keySet();
   }
 
@@ -228,7 +193,7 @@ class KeyCeremonyMediator {
    */
   List<ElectionPartialKeyBackup> share_election_partial_key_backups_to_guardian(String guardian_id) {
     List<ElectionPartialKeyBackup> backups = new ArrayList<>();
-    for (String current_guardian_id : this.get_announced_guardians()) {
+    for (String current_guardian_id : this.get_announced_guardians_ids()) {
       if (!guardian_id.equals(current_guardian_id)) {
         ElectionPartialKeyBackup backup = this.election_partial_key_backups.get(
                 GuardianPair.create(current_guardian_id, guardian_id));

@@ -33,7 +33,7 @@ public class InternalManifest {
     this.contests = builder.build();
   }
 
-  static ContestWithPlaceholders contest_description_with_placeholders_from(
+  public static ContestWithPlaceholders contest_description_with_placeholders_from(
           Manifest.ContestDescription contest, List<Manifest.SelectionDescription> placeholders) {
 
     return new ContestWithPlaceholders(
@@ -57,7 +57,7 @@ public class InternalManifest {
    * @param count: optionally specify a number of placeholders to generate
    * @return a collection of `SelectionDescription` objects, which may be empty
    */
-  static List<Manifest.SelectionDescription> generate_placeholder_selections_from(Manifest.ContestDescription contest, int count) {
+  public static List<Manifest.SelectionDescription> generate_placeholder_selections_from(Manifest.ContestDescription contest, int count) {
     //  max_sequence_order = max([selection.sequence_order for selection in contest.ballot_selections]);
     int max_sequence_order = contest.ballot_selections.stream().map(s -> s.sequence_order).max(Integer::compare).orElse(0);
     List<Manifest.SelectionDescription> selections = new ArrayList<>();
@@ -127,7 +127,7 @@ public class InternalManifest {
    */
   @Immutable
   public static class ContestWithPlaceholders extends Manifest.ContestDescription {
-    final ImmutableList<Manifest.SelectionDescription> placeholder_selections;
+    public final ImmutableList<Manifest.SelectionDescription> placeholder_selections;
 
     public ContestWithPlaceholders(String object_id,
                                    String electoral_district_id,
@@ -146,7 +146,7 @@ public class InternalManifest {
       this.placeholder_selections = toImmutableListEmpty(placeholder_selections);
     }
 
-    boolean is_valid() {
+    public boolean is_valid() {
       boolean contest_description_validates = super.is_valid();
       return contest_description_validates && this.placeholder_selections.size() == this.number_elected;
     }

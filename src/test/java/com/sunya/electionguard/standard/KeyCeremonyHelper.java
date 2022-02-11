@@ -1,7 +1,5 @@
 package com.sunya.electionguard.standard;
 
-import com.sunya.electionguard.Auxiliary;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,15 +15,14 @@ public class KeyCeremonyHelper {
 
   /** Perform Round 1 including announcing guardians and sharing public keys. */
   public static void perform_round_1(List<Guardian> guardians, KeyCeremonyMediator mediator) {
-
     for (Guardian guardian : guardians) {
-      mediator.announce(guardian.share_public_keys());
+      mediator.announce(guardian.share_key());
     }
 
     for (Guardian guardian : guardians) {
-      List<KeyCeremony.PublicKeySet> other_guardian_keys = mediator.share_announced(guardian.object_id).orElseThrow();
-      for (KeyCeremony.PublicKeySet guardian_public_keys : other_guardian_keys) {
-        guardian.save_guardian_public_keys(guardian_public_keys);
+      List<KeyCeremony.ElectionPublicKey> other_guardian_keys = mediator.share_announced(guardian.object_id).orElseThrow();
+      for (KeyCeremony.ElectionPublicKey guardian_public_keys : other_guardian_keys) {
+        guardian.save_guardian_key(guardian_public_keys);
       }
     }
   }
@@ -34,7 +31,7 @@ public class KeyCeremonyHelper {
   public static void perform_round_2(List<Guardian> guardians, KeyCeremonyMediator mediator) {
 
     for (Guardian guardian : guardians) {
-      guardian.generate_election_partial_key_backups(Auxiliary.identity_auxiliary_encrypt);
+      guardian.generate_election_partial_key_backups();
       mediator.receive_backups(guardian.share_election_partial_key_backups());
     }
 
@@ -54,8 +51,7 @@ public class KeyCeremonyHelper {
         List<KeyCeremony.ElectionPartialKeyVerification> verifications = new ArrayList<>();
         if (!guardian.object_id.equals(other_guardian.object_id)) {
           verifications.add(
-                  guardian.verify_election_partial_key_backup(
-                          other_guardian.object_id, Auxiliary.identity_auxiliary_decrypt).orElseThrow());
+                  guardian.verify_election_partial_key_backup(other_guardian.object_id).orElseThrow());
           mediator.receive_backup_verifications(verifications);
         }
       }

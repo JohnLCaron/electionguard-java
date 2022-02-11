@@ -8,7 +8,6 @@ import com.sunya.electionguard.BallotBox;
 import com.sunya.electionguard.ChaumPedersen;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.Group;
-import com.sunya.electionguard.Rsa;
 import com.sunya.electionguard.keyceremony.KeyCeremony2;
 
 import javax.annotation.Nullable;
@@ -17,10 +16,8 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static com.sunya.electionguard.Group.ONE_MOD_P;
-import static com.sunya.electionguard.Group.hex_to_q;
 import static com.sunya.electionguard.Group.mult_p;
 import static com.sunya.electionguard.Group.pow_p;
 import static com.sunya.electionguard.Group.rand_q;
@@ -115,33 +112,18 @@ public class DecryptingTrustee implements DecryptingTrusteeIF {
       logger.atInfo().log(mess);
       throw new IllegalStateException(mess);
     }
-    Optional<String> decrypted_value = Rsa.decrypt(backup.encryptedCoordinate(), this.rsa_private_key);
-    if (decrypted_value.isEmpty()) {
-      String mess = String.format("compensate decrypt guardian %s failed decryption for %s",
-              this.id, missing_guardian_id);
-      logger.atInfo().log(mess);
-      throw new IllegalStateException(mess);
-    }
-    Optional<Group.ElementModQ> partialSecretKeyO = hex_to_q(decrypted_value.get());
-    if (partialSecretKeyO.isEmpty()) {
-      String mess = String.format("compensate hex_to_q guardian %s failed decryption for %s",
-              this.id, missing_guardian_id);
-      logger.atInfo().log(mess);
-      throw new IllegalStateException(mess);
-    }
-    Group.ElementModQ partialSecretKey = partialSecretKeyO.get();
 
     Group.ElementModP recovered = recoverPublicKey(missing_guardian_id);
 
     List<DecryptionProofRecovery> results = new ArrayList<>();
     for (ElGamal.Ciphertext text : texts) {
       // 𝑀_{𝑖,l} = 𝐴^P𝑖_{l}
-      Group.ElementModP partial_decryption = text.partial_decrypt(partialSecretKey);
+      Group.ElementModP partial_decryption = text.partial_decrypt(backup.coordinate());
 
       // 𝑀_{𝑖,l} = 𝐴^𝑠𝑖 mod 𝑝 and 𝐾𝑖 = 𝑔^𝑠𝑖 mod 𝑝
       ChaumPedersen.ChaumPedersenProof proof = ChaumPedersen.make_chaum_pedersen(
               text,
-              partialSecretKey,
+              backup.coordinate(),
               partial_decryption,
               nonce_seed,
               extended_base_hash);

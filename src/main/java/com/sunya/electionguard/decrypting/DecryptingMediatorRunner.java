@@ -11,7 +11,6 @@ import com.sunya.electionguard.CiphertextTally;
 import com.sunya.electionguard.CiphertextTallyBuilder;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.InternalManifest;
-import com.sunya.electionguard.PlaintextBallot;
 import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.Scheduler;
 import com.sunya.electionguard.SpoiledBallotAndTally;
@@ -281,7 +280,7 @@ class DecryptingMediatorRunner {
 
     DecryptingMediator mediator = new DecryptingMediator(electionRecord.context,
             this.encryptedTally,
-            consumer.spoiledBallotsProto(),
+            consumer.submittedSpoiledBallotsProto(),
             guardianPublicKeys);
 
     int count = 0;

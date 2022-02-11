@@ -3,7 +3,6 @@ package com.sunya.electionguard.standard;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
-import com.sunya.electionguard.Auxiliary;
 import com.sunya.electionguard.BallotBox;
 import com.sunya.electionguard.BallotFactory;
 import com.sunya.electionguard.CiphertextBallot;
@@ -191,20 +190,17 @@ public class TestDecryption extends TestProperties {
     Guardian guardian = this.guardians.get(0);
     Guardian missing_guardian = this.guardians.get(2);
 
-    ElectionPublicKey public_key = guardian.share_election_public_key();
-    Auxiliary.KeyPair auxiliary_keys = guardian.auxiliary_keys();
-    ElectionPublicKey missing_guardian_public_key = missing_guardian.share_election_public_key();
+    ElectionPublicKey public_key = guardian.share_key();
+    ElectionPublicKey missing_guardian_public_key = missing_guardian.share_key();
     ElectionPartialKeyBackup missing_guardian_backup =
             missing_guardian.share_election_partial_key_backup(guardian.object_id).orElseThrow();
 
     Optional<DecryptionShare.CompensatedDecryptionShare> share = Decryptions.compute_compensated_decryption_share(
             public_key,
-            auxiliary_keys,
             missing_guardian_public_key,
             missing_guardian_backup,
             this.publishedTally,
-            this.context,
-            Auxiliary.identity_auxiliary_decrypt);
+            this.context);
 
     assertThat(share).isPresent();
   }
@@ -226,9 +222,9 @@ public class TestDecryption extends TestProperties {
     Guardian available_guardian_2 = this.guardians.get(1);
     Guardian missing_guardian = this.guardians.get(2);
 
-    ElectionPublicKey available_guardian_1_key = available_guardian_1.share_election_public_key();
-    ElectionPublicKey available_guardian_2_key = available_guardian_2.share_election_public_key();
-    ElectionPublicKey missing_guardian_key = missing_guardian.share_election_public_key();
+    ElectionPublicKey available_guardian_1_key = available_guardian_1.share_key();
+    ElectionPublicKey available_guardian_2_key = available_guardian_2.share_key();
+    ElectionPublicKey missing_guardian_key = missing_guardian.share_key();
             
     CiphertextTally.Selection first_selection =
             this.publishedTally.contests.values().stream().flatMap(contest -> contest.selections.values().stream())
@@ -260,23 +256,19 @@ public class TestDecryption extends TestProperties {
     // compute compensations shares for the missing guardian
     Optional<DecryptionShare.CiphertextCompensatedDecryptionSelection> compensation_0 =
             Decryptions.compute_compensated_decryption_share_for_selection(
-                    available_guardian_1.share_election_public_key(),
-                    available_guardian_1.auxiliary_keys(),
-                    missing_guardian.share_election_public_key(),
+                    available_guardian_1.share_key(),
+                    missing_guardian.share_key(),
                     missing_guardian.share_election_partial_key_backup(available_guardian_1.object_id).orElseThrow(),
                     first_selection,
-                    this.context,
-                    Auxiliary.identity_auxiliary_decrypt);
+                    this.context);
 
     Optional<DecryptionShare.CiphertextCompensatedDecryptionSelection> compensation_1 =
             Decryptions.compute_compensated_decryption_share_for_selection(
-                    available_guardian_2.share_election_public_key(),
-                    available_guardian_2.auxiliary_keys(),
-                    missing_guardian.share_election_public_key(),
+                    available_guardian_2.share_key(),
+                    missing_guardian.share_key(),
                     missing_guardian.share_election_partial_key_backup(available_guardian_2.object_id).orElseThrow(),
                     first_selection,
-                    this.context,
-                    Auxiliary.identity_auxiliary_decrypt);
+                    this.context);
 
     assertThat(compensation_0).isPresent();
     assertThat(compensation_1).isPresent();
@@ -322,13 +314,13 @@ public class TestDecryption extends TestProperties {
             first_selection,
             ImmutableMap.of(
                     this.guardians.get(0).object_id,
-                    new DecryptionShare.KeyAndSelection(available_guardian_1.share_election_public_key().key(), share_0.get()),
+                    new DecryptionShare.KeyAndSelection(available_guardian_1.share_key().key(), share_0.get()),
 
                     this.guardians.get(1).object_id,
-                    new DecryptionShare.KeyAndSelection(available_guardian_2.share_election_public_key().key(), share_1.get()),
+                    new DecryptionShare.KeyAndSelection(available_guardian_2.share_key().key(), share_1.get()),
 
                     this.guardians.get(2).object_id,
-                    new DecryptionShare.KeyAndSelection(missing_guardian.share_election_public_key().key(), share_2)),
+                    new DecryptionShare.KeyAndSelection(missing_guardian.share_key().key(), share_2)),
             this.context.crypto_extended_base_hash,
             false);
 
@@ -355,13 +347,11 @@ public class TestDecryption extends TestProperties {
     
     Optional<DecryptionShare.CiphertextCompensatedDecryptionSelection> result =
             Decryptions.compute_compensated_decryption_share_for_selection(
-                    available_guardian.share_election_public_key(),
-                    available_guardian.auxiliary_keys(),
-                    missing_guardian.share_election_public_key(),
+                    available_guardian.share_key(),
+                    missing_guardian.share_key(),
                     incorrect_backup,
                     first_selection,
-                    this.context,
-                    Auxiliary.identity_auxiliary_decrypt);
+                    this.context);
 
     assertThat(result).isEmpty();
   }
@@ -372,8 +362,8 @@ public class TestDecryption extends TestProperties {
     Guardian missing_guardian = this.guardians.get(2);
 
     List<ElectionPublicKey> available_guardians_keys =
-            available_guardians.stream().map(Guardian::share_election_public_key).collect(Collectors.toList());
-    ElectionPublicKey missing_guardian_key = missing_guardian.share_election_public_key();
+            available_guardians.stream().map(Guardian::share_key).collect(Collectors.toList());
+    ElectionPublicKey missing_guardian_key = missing_guardian.share_key();
     Map<String, ElectionPartialKeyBackup> missing_guardian_backups = missing_guardian.share_election_partial_key_backups().stream()
             .collect(Collectors.toMap(b -> b.designated_id(), b -> b));
   
@@ -383,13 +373,11 @@ public class TestDecryption extends TestProperties {
             available_guardians.stream().collect(Collectors.toMap(
                     g -> g.object_id,
                     g -> Decryptions.compute_compensated_decryption_share(
-                            g.share_election_public_key(),
-                            g.auxiliary_keys(),
+                            g.share_key(),
                             missing_guardian_key,
                             missing_guardian_backups.get(g.object_id),
                             tally,
-                            this.context,
-                            Auxiliary.identity_auxiliary_decrypt).orElseThrow())
+                            this.context).orElseThrow())
             );
 
     Map<String, ElementModQ> lagrange_coefficients =
@@ -407,10 +395,10 @@ public class TestDecryption extends TestProperties {
   public void test_reconstruct_decryption_shares_for_ballot() {
     List<Guardian> available_guardians = this.guardians.subList(0,2);
     List<ElectionPublicKey> available_guardians_keys =
-            available_guardians.stream().map(Guardian::share_election_public_key).collect(Collectors.toList());
+            available_guardians.stream().map(Guardian::share_key).collect(Collectors.toList());
 
     Guardian missing_guardian = this.guardians.get(2);
-    ElectionPublicKey missing_guardian_key = missing_guardian.share_election_public_key();
+    ElectionPublicKey missing_guardian_key = missing_guardian.share_key();
     Map<String, ElectionPartialKeyBackup> missing_guardian_backups = missing_guardian.share_election_partial_key_backups().stream()
             .collect(Collectors.toMap(b -> b.designated_id(), b -> b));
 
@@ -419,13 +407,11 @@ public class TestDecryption extends TestProperties {
     Map<String, DecryptionShare.CompensatedDecryptionShare> compensated_ballot_shares = new HashMap<>();
     for (Guardian available_guardian : available_guardians) {
       Optional<DecryptionShare.CompensatedDecryptionShare> compensated_share = Decryptions.compute_compensated_decryption_share_for_ballot(
-              available_guardian.share_election_public_key(),
-              available_guardian.auxiliary_keys(),
+              available_guardian.share_key(),
               missing_guardian_key,
               missing_guardian_backups.get(available_guardian.object_id),
               ballot,
-              this.context,
-              Auxiliary.identity_auxiliary_decrypt);
+              this.context);
       compensated_share.ifPresent(share -> compensated_ballot_shares.put(available_guardian.object_id, share));
     }
 
@@ -447,10 +433,10 @@ public class TestDecryption extends TestProperties {
   public void test_reconstruct_decryption_share_for_spoiled_ballot() {
     List<Guardian> available_guardians = this.guardians.subList(0,2);
     List<ElectionPublicKey> available_guardians_keys =
-            available_guardians.stream().map(Guardian::share_election_public_key).collect(Collectors.toList());
+            available_guardians.stream().map(Guardian::share_key).collect(Collectors.toList());
 
     Guardian missing_guardian = this.guardians.get(2);
-    ElectionPublicKey missing_guardian_key = missing_guardian.share_election_public_key();
+    ElectionPublicKey missing_guardian_key = missing_guardian.share_key();
     Map<String, ElectionPartialKeyBackup> missing_guardian_backups = missing_guardian.share_election_partial_key_backups().stream()
             .collect(Collectors.toMap(b -> b.designated_id(), b -> b));
 
@@ -459,13 +445,11 @@ public class TestDecryption extends TestProperties {
     Map<String, DecryptionShare.CompensatedDecryptionShare> compensated_shares = new HashMap<>();
     for (Guardian available_guardian : available_guardians) {
       Optional<DecryptionShare.CompensatedDecryptionShare> compensated_share = Decryptions.compute_compensated_decryption_share_for_ballot(
-              available_guardian.share_election_public_key(),
-              available_guardian.auxiliary_keys(),
+              available_guardian.share_key(),
               missing_guardian_key,
               missing_guardian_backups.get(available_guardian.object_id),
               ballot,
-              this.context,
-              Auxiliary.identity_auxiliary_decrypt);
+              this.context);
       compensated_share.ifPresent(share -> compensated_shares.put(available_guardian.object_id, share));
     }
 

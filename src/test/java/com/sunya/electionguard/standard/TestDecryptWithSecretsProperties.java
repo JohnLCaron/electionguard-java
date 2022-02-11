@@ -1,5 +1,18 @@
-package com.sunya.electionguard;
+package com.sunya.electionguard.standard;
 
+import com.sunya.electionguard.BallotFactory;
+import com.sunya.electionguard.ChaumPedersen;
+import com.sunya.electionguard.CiphertextBallot;
+import com.sunya.electionguard.CiphertextElectionContext;
+import com.sunya.electionguard.ElGamal;
+import com.sunya.electionguard.ElectionBuilder;
+import com.sunya.electionguard.ElectionFactory;
+import com.sunya.electionguard.Encrypt;
+import com.sunya.electionguard.InternalManifest;
+import com.sunya.electionguard.Manifest;
+import com.sunya.electionguard.PlaintextBallot;
+import com.sunya.electionguard.TestProperties;
+import com.sunya.electionguard.standard.DecryptWithSecrets;
 import net.jqwik.api.ForAll;
 import net.jqwik.api.Property;
 import net.jqwik.api.ShrinkingMode;
@@ -14,7 +27,7 @@ import java.util.stream.Collectors;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 import static com.sunya.electionguard.Group.*;
-import static com.sunya.electionguard.DecryptWithSecrets.*;
+import static com.sunya.electionguard.standard.DecryptWithSecrets.*;
 import static com.sunya.electionguard.InternalManifest.ContestWithPlaceholders;
 
 public class TestDecryptWithSecretsProperties extends TestProperties {
@@ -25,7 +38,7 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
   public void test_decrypt_selection_valid_input_succeeds(
           @ForAll("selection_description") Manifest.SelectionDescription description,
           @ForAll("elgamal_keypairs") ElGamal.KeyPair keypair,
-          @ForAll("elements_mod_q_no_zero") Group.ElementModQ nonce_seed) {
+          @ForAll("elements_mod_q_no_zero") ElementModQ nonce_seed) {
 
     PlaintextBallot.Selection data = BallotFactory.get_random_selection_from(description);
 
@@ -52,7 +65,7 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
   @Property(tries = 10, shrinking = ShrinkingMode.OFF)
   public void test_decrypt_selection_valid_input_tampered_fails(
           @ForAll("elgamal_keypairs") ElGamal.KeyPair keypair,
-          @ForAll("elements_mod_q_no_zero") Group.ElementModQ seed) {
+          @ForAll("elements_mod_q_no_zero") ElementModQ seed) {
 
     Manifest.SelectionDescription description = ElectionFactory.get_selection_description_well_formed().selection_description;
     PlaintextBallot.Selection data = BallotFactory.get_random_selection_from(description);
@@ -120,7 +133,7 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
   @Property(tries = 10, shrinking = ShrinkingMode.OFF)
   public void test_decrypt_selection_tampered_nonce_fails(
           @ForAll("elgamal_keypairs") ElGamal.KeyPair keypair,
-          @ForAll("elements_mod_q_no_zero") Group.ElementModQ nonce_seed) {
+          @ForAll("elements_mod_q_no_zero") ElementModQ nonce_seed) {
 
     Manifest.SelectionDescription description = ElectionFactory.get_selection_description_well_formed().selection_description;
     PlaintextBallot.Selection data = BallotFactory.get_random_selection_from(description);
@@ -145,7 +158,7 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
   @Property(tries = 10, shrinking = ShrinkingMode.OFF)
   public void test_decrypt_contest_valid_input_succeeds(
           @ForAll("elgamal_keypairs") ElGamal.KeyPair keypair,
-          @ForAll("elements_mod_q_no_zero") Group.ElementModQ nonce_seed) {
+          @ForAll("elements_mod_q_no_zero") ElementModQ nonce_seed) {
 
     ContestWithPlaceholders description = ElectionFactory.get_contest_description_well_formed();
     PlaintextBallot.Contest data = new BallotFactory().get_random_contest_from(description, false, false);
@@ -258,7 +271,7 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
   @Property(tries = 10, shrinking = ShrinkingMode.OFF)
   public void test_decrypt_contest_invalid_input_fails(
           @ForAll("elgamal_keypairs") ElGamal.KeyPair keypair,
-          @ForAll("elements_mod_q_no_zero") Group.ElementModQ nonce_seed) {
+          @ForAll("elements_mod_q_no_zero") ElementModQ nonce_seed) {
 
     ContestWithPlaceholders description = ElectionFactory.get_contest_description_well_formed();
     PlaintextBallot.Contest data = new BallotFactory().get_random_contest_from(description, false, false);
@@ -351,7 +364,7 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
   @Property(tries = 1, shrinking = ShrinkingMode.OFF)
   public void test_decrypt_ballot_valid_input_succeeds(
           @ForAll("elgamal_keypairs") ElGamal.KeyPair keypair,
-          @ForAll("elements_mod_q_no_zero") Group.ElementModQ seed) throws IOException {
+          @ForAll("elements_mod_q_no_zero") ElementModQ seed) throws IOException {
 
     // TODO: Hypothesis test instead
 

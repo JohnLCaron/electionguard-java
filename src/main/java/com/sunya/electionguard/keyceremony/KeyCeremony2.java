@@ -3,7 +3,6 @@ package com.sunya.electionguard.keyceremony;
 import com.google.auto.value.AutoValue;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import com.sunya.electionguard.Auxiliary;
 import com.sunya.electionguard.ElectionPolynomial;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.SchnorrProof;
@@ -64,15 +63,15 @@ public class KeyCeremony2 {
     public abstract String designatedGuardianId();
     /** The x coordinate (aka sequence order) of the designated guardian. */
     public abstract int designatedGuardianXCoordinate();
-    /** The encrypted coordinate of generatingGuardianId polynomial's value at designatedGuardianXCoordinate. */
-    @Nullable public abstract Auxiliary.ByteString encryptedCoordinate();
+    /** The coordinate of generatingGuardianId polynomial's value at designatedGuardianXCoordinate. */
+    @Nullable public abstract Group.ElementModQ coordinate();
 
     public abstract String error(); // empty means no error
 
     public static PartialKeyBackup create(String owner_id,
                                           String designated_id,
                                           int designated_sequence_order,
-                                          @Nullable Auxiliary.ByteString encrypted_value,
+                                          @Nullable Group.ElementModQ value,
                                           @Nullable String error) {
       if (error == null || error.trim().isEmpty()) {
         error = "";
@@ -80,7 +79,7 @@ public class KeyCeremony2 {
       return new AutoValue_KeyCeremony2_PartialKeyBackup(owner_id,
               designated_id,
               designated_sequence_order,
-              encrypted_value,
+              value,
               error);
     }
   }

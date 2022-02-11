@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 
 /**
  * A command line program that performs the key ceremony to create the Guardians, using standard library and local Guardians.
- * DO NOT USE IN PRODUCTION, as Guardian is inherently unsafe.
+ * DO NOT USE IN PRODUCTION, as Guardian is inherently unsecure.
  * <p>
  * For command line help:
  * <strong>
@@ -157,15 +157,15 @@ public class PerformKeyCeremony {
     // ROUND 1: Public Key Sharing
     // Attendance (Public Key Share)
     for (Guardian guardian : this.guardians) {
-      keyCeremony.announce(guardian.share_public_keys());
+      keyCeremony.announce(guardian.share_key());
     }
 
     System.out.printf(" Confirm all guardians have shared their public keys%n");
     for (Guardian guardian : this.guardians) {
-      List<KeyCeremony.PublicKeySet> announced_keys = keyCeremony.share_announced(null).orElseThrow();
-      for (KeyCeremony.PublicKeySet key_set : announced_keys) {
-        if (!guardian.object_id.equals(key_set.election().owner_id())) {
-          guardian.save_guardian_public_keys(key_set);
+      List<KeyCeremony.ElectionPublicKey> announced_keys = keyCeremony.share_announced(null).orElseThrow();
+      for (KeyCeremony.ElectionPublicKey key : announced_keys) {
+        if (!guardian.object_id.equals(key.owner_id())) {
+          guardian.save_guardian_key(key);
         }
       }
     }
@@ -179,7 +179,7 @@ public class PerformKeyCeremony {
     // ROUND 2: Election Partial Key Backup Sharing
     //Share Backups
     for (Guardian sending_guardian : this.guardians) {
-      sending_guardian.generate_election_partial_key_backups(null);
+      sending_guardian.generate_election_partial_key_backups();
       List<KeyCeremony.ElectionPartialKeyBackup> backups = new ArrayList<>();
       for (Guardian designated_guardian : this.guardians) {
         if (!designated_guardian.object_id.equals(sending_guardian.object_id)) {
@@ -216,7 +216,7 @@ public class PerformKeyCeremony {
         if (!designated_guardian.object_id.equals(backup_owner.object_id)) {
           KeyCeremony.ElectionPartialKeyVerification verification =
                   designated_guardian.verify_election_partial_key_backup(
-                          backup_owner.object_id, null).orElseThrow();
+                          backup_owner.object_id).orElseThrow();
           verifications.add(verification);
         }
       }

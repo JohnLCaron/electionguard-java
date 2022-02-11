@@ -22,7 +22,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 
-public class AcceptedBallotsTable extends JPanel {
+public class SubmittedBallotsTable extends JPanel {
   private final PreferencesExt prefs;
 
   private final BeanTable<SubmittedBallotBean> ballotTable;
@@ -32,7 +32,7 @@ public class AcceptedBallotsTable extends JPanel {
   private final JSplitPane split1, split2;
   private final IndependentWindow infoWindow;
 
-  public AcceptedBallotsTable(PreferencesExt prefs) {
+  public SubmittedBallotsTable(PreferencesExt prefs) {
     this.prefs = prefs;
     TextHistoryPane infoTA = new TextHistoryPane();
     infoWindow = new IndependentWindow("Extra Information", BAMutil.getImage("electionguard-logo.png"), infoTA);

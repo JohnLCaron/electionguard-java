@@ -2,7 +2,6 @@ package com.sunya.electionguard.standard;
 
 import com.google.common.base.Preconditions;
 import com.google.common.flogger.FluentLogger;
-import com.sunya.electionguard.Auxiliary;
 import com.sunya.electionguard.BallotBox;
 import com.sunya.electionguard.ChaumPedersen;
 import com.sunya.electionguard.CiphertextElectionContext;
@@ -27,7 +26,7 @@ import static com.sunya.electionguard.Group.rand_q;
 
 /**
  * Builder of Guardians for an election.
- * DO NOT USE IN PRODUCTION, as Guardian is inherently unsafe.
+ * Note that this object contains the secret key, it must not be exposed to untrusted code.
  */
 class Guardian {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
@@ -35,16 +34,12 @@ class Guardian {
   public final String object_id;
   public final int sequence_order;
   private final KeyCeremony.CeremonyDetails ceremony_details;
-  private final Auxiliary.KeyPair auxiliary_keys;
   private final KeyCeremony.ElectionKeyPair election_keys; // Ki = election keypair for this Guardian
 
   // The collection of this guardian's partial key backups that will be shared to other guardians
   private final Map<String, KeyCeremony.ElectionPartialKeyBackup> backups_to_share; // Map(GUARDIAN_ID, ElectionPartialKeyBackup)
 
   //// From Other Guardians
-  // The collection of other guardians' auxiliary public keys that are shared with this guardian
-  private final Map<String, Auxiliary.PublicKey> otherGuardianAuxiliaryKeys; // map(GUARDIAN_ID, Auxiliary.PublicKey)
-
   // The collection of other guardians' election public keys that are shared with this guardian
   private final Map<String, KeyCeremony.ElectionPublicKey> guardian_election_public_keys; // map(GUARDIAN_ID, ElectionPublicKey)
 
@@ -63,7 +58,6 @@ class Guardian {
   Guardian(KeyCeremony.CoefficientSet coeff,
                   int number_of_guardians,
                   int quorum,
-                  Auxiliary.KeyPair auxiliary_keys,
                   KeyCeremony.ElectionKeyPair election_keys) {
 
     this.object_id = coeff.guardianId();
@@ -71,17 +65,14 @@ class Guardian {
     Preconditions.checkArgument(quorum <= number_of_guardians);
     this.sequence_order = coeff.guardianSequence();
     this.ceremony_details = KeyCeremony.CeremonyDetails.create(number_of_guardians, quorum);
-    this.auxiliary_keys = auxiliary_keys;
     this.election_keys =  election_keys;
 
     this.backups_to_share = new HashMap<>();
-    this.otherGuardianAuxiliaryKeys = new HashMap<>();
     this.guardian_election_public_keys = new HashMap<>();
     this.guardian_election_partial_key_backups = new HashMap<>();
     this.guardian_election_partial_key_verifications = new HashMap<>();
 
-    this.save_auxiliary_public_key(this.share_auxiliary_public_key());
-    this.save_election_public_key(this.share_election_public_key());
+    this.save_guardian_key(this.share_key());
   }
 
   /**
@@ -95,32 +86,27 @@ class Guardian {
          int number_of_guardians,
          int quorum) {
 
-    return new Guardian(coeff, number_of_guardians, quorum, null);
+    return new Guardian(coeff, number_of_guardians, quorum);
   }
 
   // Coefficients are externally chosen
   private Guardian(KeyCeremony.CoefficientSet coeff,
                    int number_of_guardians,
-                   int quorum,
-                   @Nullable Auxiliary.KeyPair auxiliary_keys) {
+                   int quorum) {
 
     this.object_id = coeff.guardianId();
     Preconditions.checkArgument(coeff.guardianSequence() > 0 && coeff.guardianSequence() < 256);
     Preconditions.checkArgument(quorum <= number_of_guardians);
     this.sequence_order = coeff.guardianSequence();
     this.ceremony_details = KeyCeremony.CeremonyDetails.create(number_of_guardians, quorum);
-    this.auxiliary_keys = (auxiliary_keys != null) ? auxiliary_keys :
-            KeyCeremony.generate_rsa_auxiliary_key_pair(this.object_id, coeff.guardianSequence());
     this.election_keys =  coeff.generate_election_key_pair();
 
     this.backups_to_share = new HashMap<>();
-    this.otherGuardianAuxiliaryKeys = new HashMap<>();
     this.guardian_election_public_keys = new HashMap<>();
     this.guardian_election_partial_key_backups = new HashMap<>();
     this.guardian_election_partial_key_verifications = new HashMap<>();
 
-    this.save_auxiliary_public_key(this.share_auxiliary_public_key());
-    this.save_election_public_key(this.share_election_public_key());
+    this.save_guardian_key(this.share_key());
   }
 
   /**
@@ -152,25 +138,18 @@ class Guardian {
     Preconditions.checkArgument(sequence_order > 0 && sequence_order < 256);
     this.sequence_order = sequence_order;
     this.ceremony_details = KeyCeremony.CeremonyDetails.create(number_of_guardians, quorum);
-    this.auxiliary_keys = KeyCeremony.generate_rsa_auxiliary_key_pair(id, sequence_order);
     this.election_keys =  KeyCeremony.generate_election_key_pair(id, sequence_order, quorum, nonce_seed);
 
     this.backups_to_share = new HashMap<>();
-    this.otherGuardianAuxiliaryKeys = new HashMap<>();
     this.guardian_election_public_keys = new HashMap<>();
     this.guardian_election_partial_key_backups = new HashMap<>();
     this.guardian_election_partial_key_verifications = new HashMap<>();
 
-    this.save_auxiliary_public_key(this.share_auxiliary_public_key());
-    this.save_election_public_key(this.share_election_public_key());
+    this.save_guardian_key(this.share_key());
   }
 
   public KeyCeremony.ElectionKeyPair election_keys() {
     return this.election_keys;
-  }
-
-  public Auxiliary.KeyPair auxiliary_keys() {
-    return this.auxiliary_keys;
   }
 
   /////////////////////////////////////////////////////////////////////////////////////////////////
@@ -191,92 +170,36 @@ class Guardian {
   public GuardianRecordPrivate export_private_data() {
     return GuardianRecordPrivate.create(
             election_keys,
-            auxiliary_keys,
             backups_to_share,
-            otherGuardianAuxiliaryKeys,
             guardian_election_public_keys,
             guardian_election_partial_key_backups,
             guardian_election_partial_key_verifications
             );
   }
 
-  /**
-   * Share public election and auxiliary keys for guardian.
-   * @return Public set of election and auxiliary keys
-   */
-  public KeyCeremony.PublicKeySet share_public_keys() {
-    return KeyCeremony.PublicKeySet.create(
-            this.election_keys.share(),
-            this.auxiliary_keys.share());
-  }
-
-  /**
-   * Save public election and auxiliary keys for another guardian.
-   * @param public_key_set: Public set of election and auxiliary keys
-   */
-  public void save_guardian_public_keys(KeyCeremony.PublicKeySet public_key_set) {
-    this.save_auxiliary_public_key(public_key_set.auxiliary());
-    this.save_election_public_key(public_key_set.election());
-  }
-
-  /**
-   * True if all election and auxiliary public keys have been received.
-   * @return All election and auxiliary public keys backups received
-   */
-  boolean all_public_keys_received() {
-    return this.all_auxiliary_public_keys_received() && this.all_election_public_keys_received();
-  }
-
-  /** Share auxiliary public key with another guardian. */
-  Auxiliary.PublicKey share_auxiliary_public_key() {
-    return new Auxiliary.PublicKey(this.object_id, this.sequence_order, this.auxiliary_keys.public_key);
-  }
-
-  /** Save a guardians auxiliary public key. */
-  public void save_auxiliary_public_key(Auxiliary.PublicKey key) {
-    this.otherGuardianAuxiliaryKeys.put(key.owner_id, key);
-  }
-
-  /** True if all auxiliary public keys have been received. */
-  boolean all_auxiliary_public_keys_received() {
-    return this.otherGuardianAuxiliaryKeys.size() == this.ceremony_details.number_of_guardians();
-  }
-
   /** Share election public key with another guardian. */
-  public KeyCeremony.ElectionPublicKey share_election_public_key() {
+  public KeyCeremony.ElectionPublicKey share_key() {
     return this.election_keys.share();
   }
 
   /** Save a guardians election public key. */
-  public void save_election_public_key(KeyCeremony.ElectionPublicKey key) {
+  public void save_guardian_key(KeyCeremony.ElectionPublicKey key) {
     this.guardian_election_public_keys.put(key.owner_id(), key);
   }
 
   /** True if all election public keys have been received. */
-  boolean all_election_public_keys_received() {
+  boolean all_guardian_keys_received() {
     return this.guardian_election_public_keys.size() == this.ceremony_details.number_of_guardians();
   }
 
   /**
    * Generate all election partial key backups based on existing public keys
-   * @param encryptor Encryption function using auxiliary key
    */
-  public boolean generate_election_partial_key_backups(@Nullable Auxiliary.Encryptor encryptor) {
-    if (!this.all_auxiliary_public_keys_received()) {
-      logger.atInfo().log("guardian; %s could not generate election partial key backups: missing auxiliary keys",
-              this.object_id);
-      return false;
-    }
-
-    for (Auxiliary.PublicKey auxiliary_key : this.otherGuardianAuxiliaryKeys.values()) {
-      Optional<KeyCeremony.ElectionPartialKeyBackup> backup =
-              KeyCeremony.generate_election_partial_key_backup(this.object_id, this.election_keys.polynomial(), auxiliary_key, encryptor);
-      if (backup.isEmpty()) {
-        logger.atInfo().log("guardian; %s could not generate election partial key backups: failed to encrypt",
-                this.object_id);
-        return false;
-      }
-      this.backups_to_share.put(auxiliary_key.owner_id, backup.get());
+  public boolean generate_election_partial_key_backups() {
+    for (KeyCeremony.ElectionPublicKey election_key : this.guardian_election_public_keys.values()) {
+      KeyCeremony.ElectionPartialKeyBackup backup =
+              KeyCeremony.generate_election_partial_key_backup(this.object_id, this.election_keys.polynomial(), election_key);
+      this.backups_to_share.put(election_key.owner_id(), backup);
     }
     return true;
   }
@@ -311,12 +234,10 @@ class Guardian {
   /**
    * Verify election partial key backup value is in polynomial.
    * @param guardian_id: Owner of backup to verify
-   * @param decryptor Use default if null.
    * @return Manifest partial key verification or None
    */
   public Optional<KeyCeremony.ElectionPartialKeyVerification> verify_election_partial_key_backup(
-          String guardian_id,
-          @Nullable Auxiliary.Decryptor decryptor) {
+          String guardian_id) {
 
     KeyCeremony.ElectionPartialKeyBackup backup = this.guardian_election_partial_key_backups.get(guardian_id);
     if (backup == null) {
@@ -324,7 +245,7 @@ class Guardian {
     }
     KeyCeremony.ElectionPublicKey public_key = this.guardian_election_public_keys.get(guardian_id);
 
-    return Optional.of(KeyCeremony.verify_election_partial_key_backup(this.object_id, backup, public_key, this.auxiliary_keys, decryptor));
+    return Optional.of(KeyCeremony.verify_election_partial_key_backup(this.object_id, backup, public_key));
   }
 
   /**
@@ -380,7 +301,7 @@ class Guardian {
    * @return Optional joint key for election
    */
   Optional<ElementModP> publish_joint_key() {
-    if (!this.all_election_public_keys_received()) {
+    if (!this.all_guardian_keys_received()) {
       return Optional.empty();
     }
     if (!this.all_election_partial_key_backups_verified()) {
@@ -443,8 +364,7 @@ class Guardian {
   public Optional<DecryptionShare.CompensatedDecryptionShare> compute_compensated_tally_share(
           String missing_guardian_id,
           CiphertextTally tally,
-          CiphertextElectionContext context,
-          @Nullable Auxiliary.Decryptor decryptor) {
+          CiphertextElectionContext context) {
 
     // Ensure missing guardian information available
     KeyCeremony.ElectionPublicKey missing_guardian_key = this.guardian_election_public_keys.get(missing_guardian_id);
@@ -454,21 +374,18 @@ class Guardian {
     }
 
     return Decryptions.compute_compensated_decryption_share(
-            this.share_election_public_key(),
-            this.auxiliary_keys(),
+            this.share_key(),
             missing_guardian_key,
             missing_guardian_backup,
             tally,
-            context,
-            decryptor);
+            context);
   }
 
   /** Compute the compensated decryption share of each ballots for a missing guardian. */
   public Map<String, Optional<DecryptionShare.CompensatedDecryptionShare>> compute_compensated_ballot_shares(
           String missing_guardian_id,
           List<SubmittedBallot> ballots,
-          CiphertextElectionContext context,
-          @Nullable Auxiliary.Decryptor decryptor) {
+          CiphertextElectionContext context) {
 
     Map<String, Optional<DecryptionShare.CompensatedDecryptionShare>> shares = new HashMap<>();
 
@@ -481,13 +398,11 @@ class Guardian {
 
     for (SubmittedBallot ballot : ballots) {
       Optional<DecryptionShare.CompensatedDecryptionShare> share = Decryptions.compute_compensated_decryption_share_for_ballot(
-              this.share_election_public_key(),
-              this.auxiliary_keys,
+              this.share_key(),
               missing_guardian_key,
               missing_guardian_backup,
               ballot,
-              context,
-              decryptor);
+              context);
       shares.put(ballot.object_id(), share);
     }
     return shares;

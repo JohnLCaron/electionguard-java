@@ -132,9 +132,9 @@ public class ElectionFactory {
   // should all be in TestUtils ?
   private static final Random random = new Random(System.currentTimeMillis());
 
-  static class SelectionTuple {
-    String id;
-    Manifest.SelectionDescription selection_description;
+  public static class SelectionTuple {
+    public final String id;
+    public final Manifest.SelectionDescription selection_description;
 
     public SelectionTuple(String id, Manifest.SelectionDescription selection_description) {
       this.id = id;
@@ -142,14 +142,14 @@ public class ElectionFactory {
     }
   }
 
-  static SelectionTuple get_selection_description_well_formed() {
+  public static SelectionTuple get_selection_description_well_formed() {
     String candidate_id = String.format("candidate_id-%d", TestUtils.randomInt(20));
     String object_id = String.format("object_id-%d", TestUtils.randomInt());
     int sequence_order = random.nextInt(20);
     return new SelectionTuple(object_id, new Manifest.SelectionDescription(object_id, candidate_id, sequence_order));
   }
 
-  static ContestWithPlaceholders get_contest_description_well_formed() {
+  public static ContestWithPlaceholders get_contest_description_well_formed() {
     int sequence_order = TestUtils.randomInt(20);
     String electoral_district_id = "{draw(emails)}-gp-unit";
 

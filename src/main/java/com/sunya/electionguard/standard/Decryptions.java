@@ -4,7 +4,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Streams;
 import com.google.common.flogger.FluentLogger;
-import com.sunya.electionguard.Auxiliary;
 import com.sunya.electionguard.BallotBox;
 import com.sunya.electionguard.ChaumPedersen;
 import com.sunya.electionguard.CiphertextBallot;
@@ -16,7 +15,6 @@ import com.sunya.electionguard.DecryptionShare;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.ElectionPolynomial;
 import com.sunya.electionguard.Group;
-import com.sunya.electionguard.Rsa;
 import com.sunya.electionguard.Scheduler;
 import com.sunya.electionguard.SubmittedBallot;
 
@@ -212,7 +210,6 @@ public class Decryptions {
    * Compute a compensated decryptions share for a guardian.
    * <p>
    * @param guardian_key: Guardian's election public key
-   * @param guardian_auxiliary_keys: Guardian's auxiliary key pair
    * @param missing_guardian_key: Missing guardian's election public key
    * @param missing_guardian_backup: Missing guardian's election partial key backup
    * @param tally: The election tally to decrypt
@@ -221,24 +218,20 @@ public class Decryptions {
    */
   public static Optional<CompensatedDecryptionShare> compute_compensated_decryption_share(
           KeyCeremony.ElectionPublicKey guardian_key,
-          Auxiliary.KeyPair guardian_auxiliary_keys,
           KeyCeremony.ElectionPublicKey missing_guardian_key,
           KeyCeremony.ElectionPartialKeyBackup missing_guardian_backup,
           CiphertextTally tally,
-          CiphertextElectionContext context,
-          @Nullable Auxiliary.Decryptor decryptor) {
+          CiphertextElectionContext context) {
 
     Map<String, CiphertextCompensatedDecryptionContest> contests = new HashMap<>();
 
     for (CiphertextTally.Contest contest : tally.contests.values()) {
       Optional<CiphertextCompensatedDecryptionContest> dcontest = compute_compensated_decryption_share_for_contest(
               guardian_key,
-              guardian_auxiliary_keys,
               missing_guardian_key,
               missing_guardian_backup,
               CiphertextContest.createFrom(contest),
-              context,
-              decryptor);
+              context);
       if (dcontest.isEmpty()) {
         return Optional.empty();
       }
@@ -259,19 +252,17 @@ public class Decryptions {
   private static Optional<CiphertextCompensatedDecryptionContest>
   compute_compensated_decryption_share_for_contest(
           KeyCeremony.ElectionPublicKey guardian_key,
-          Auxiliary.KeyPair guardian_auxiliary_keys,
           KeyCeremony.ElectionPublicKey missing_guardian_key,
           KeyCeremony.ElectionPartialKeyBackup missing_guardian_backup,
           CiphertextContest contest,
-          CiphertextElectionContext context,
-          @Nullable Auxiliary.Decryptor decryptor) {
+          CiphertextElectionContext context) {
 
       Map<String, CiphertextCompensatedDecryptionSelection> selections = new HashMap<>();
 
       List<Callable<Optional<CiphertextCompensatedDecryptionSelection>>> tasks =
           Streams.stream(contest.selections)
                   .map(selection -> new RunComputeCompensatedDecryptionShareForSelection(
-                          guardian_key, guardian_auxiliary_keys, missing_guardian_key, missing_guardian_backup, selection, context, decryptor))
+                          guardian_key, missing_guardian_key, missing_guardian_backup, selection, context))
                   .collect(Collectors.toList());
 
       Scheduler<Optional<CiphertextCompensatedDecryptionSelection>> scheduler = new Scheduler<>();
@@ -302,24 +293,20 @@ public class Decryptions {
    */
   static Optional<Map<String, CompensatedDecryptionShare>> compute_compensated_decryption_share_for_ballots(
           KeyCeremony.ElectionPublicKey guardian_key,
-          Auxiliary.KeyPair guardian_auxiliary_keys,
           KeyCeremony.ElectionPublicKey missing_guardian_key,
           KeyCeremony.ElectionPartialKeyBackup missing_guardian_backup,
           Iterable<SubmittedBallot> ballots,
-          CiphertextElectionContext context,
-          @Nullable Auxiliary.Decryptor decrypt) {
+          CiphertextElectionContext context) {
 
     Map<String, CompensatedDecryptionShare> decrypted_ballots = new HashMap<>();
 
     for (SubmittedBallot spoiled_ballot : ballots) {
       Optional<CompensatedDecryptionShare> compensated_ballot = compute_compensated_decryption_share_for_ballot(
               guardian_key,
-              guardian_auxiliary_keys,
               missing_guardian_key,
               missing_guardian_backup,
               spoiled_ballot,
-              context,
-              decrypt);
+              context);
 
       if (compensated_ballot.isPresent()) {
         decrypted_ballots.put(spoiled_ballot.object_id(), compensated_ballot.get());
@@ -334,12 +321,10 @@ public class Decryptions {
   /** Compute the compensated decryption for a single ballot. */
   public static Optional<CompensatedDecryptionShare> compute_compensated_decryption_share_for_ballot(
           KeyCeremony.ElectionPublicKey guardian_key,
-          Auxiliary.KeyPair guardian_auxiliary_keys,
           KeyCeremony.ElectionPublicKey missing_guardian_key,
           KeyCeremony.ElectionPartialKeyBackup missing_guardian_backup,
           SubmittedBallot ballot,
-          CiphertextElectionContext context,
-          @Nullable Auxiliary.Decryptor decryptor) {
+          CiphertextElectionContext context) {
 
     Map<String, CiphertextCompensatedDecryptionContest> contests = new HashMap<>();
 
@@ -347,12 +332,10 @@ public class Decryptions {
       Optional<CiphertextCompensatedDecryptionContest> contest_share =
               compute_compensated_decryption_share_for_contest(
                       guardian_key,
-                      guardian_auxiliary_keys,
                       missing_guardian_key,
                       missing_guardian_backup,
                       CiphertextContest.createFrom(contest),
-                      context,
-                      decryptor);
+                      context);
          if (contest_share.isEmpty()) {
           logger.atWarning().log("could not compute compensated spoiled ballot share for guardian %s missing: %s contest %s",
                   guardian_key.owner_id(), missing_guardian_key.owner_id(), contest.object_id);
@@ -372,34 +355,28 @@ public class Decryptions {
   private static class RunComputeCompensatedDecryptionShareForSelection implements
           Callable<Optional<CiphertextCompensatedDecryptionSelection>> {
     final KeyCeremony.ElectionPublicKey guardian_key;
-    final Auxiliary.KeyPair guardian_auxiliary_keys;
     final KeyCeremony.ElectionPublicKey missing_guardian_key;
     final KeyCeremony.ElectionPartialKeyBackup missing_guardian_backup;
     final CiphertextSelection selection;
     final CiphertextElectionContext context;
-    @Nullable final Auxiliary.Decryptor decryptor;
 
     RunComputeCompensatedDecryptionShareForSelection(
             KeyCeremony.ElectionPublicKey guardian_key,
-            Auxiliary.KeyPair guardian_auxiliary_keys,
             KeyCeremony.ElectionPublicKey missing_guardian_key,
             KeyCeremony.ElectionPartialKeyBackup missing_guardian_backup,
             CiphertextSelection selection,
-            CiphertextElectionContext context,
-            @Nullable Auxiliary.Decryptor decryptor) {
+            CiphertextElectionContext context) {
       this.guardian_key = guardian_key;
-      this.guardian_auxiliary_keys = guardian_auxiliary_keys;
       this.missing_guardian_key = missing_guardian_key;
       this.missing_guardian_backup = missing_guardian_backup;
       this.selection = selection;
       this.context = context;
-      this.decryptor = decryptor;
     }
 
     @Override
     public Optional<CiphertextCompensatedDecryptionSelection> call() {
       return compute_compensated_decryption_share_for_selection(
-              guardian_key, guardian_auxiliary_keys, missing_guardian_key, missing_guardian_backup, selection, context, decryptor);
+              guardian_key, missing_guardian_key, missing_guardian_backup, selection, context);
     }
   }
 
@@ -408,7 +385,6 @@ public class Decryptions {
    * available guardians' share of the missing guardian's private key polynomial.
    * <p>
    * @param guardian_key: Guardian's election public key
-   * @param guardian_auxiliary_keys: Guardian's auxiliary key pair
    * @param missing_guardian_key: Missing guardian's election public key
    * @param missing_guardian_backup: Missing guardian's election partial key backup
    * @param selection: The specific selection to decrypt
@@ -418,20 +394,16 @@ public class Decryptions {
   @VisibleForTesting
   public static Optional<CiphertextCompensatedDecryptionSelection> compute_compensated_decryption_share_for_selection(
           KeyCeremony.ElectionPublicKey guardian_key,
-          Auxiliary.KeyPair guardian_auxiliary_keys,
           KeyCeremony.ElectionPublicKey missing_guardian_key,
           KeyCeremony.ElectionPartialKeyBackup missing_guardian_backup,
           CiphertextSelection selection,
-          CiphertextElectionContext context,
-          @Nullable Auxiliary.Decryptor decryptor) {
+          CiphertextElectionContext context) {
 
     Optional<BallotBox.DecryptionProofTuple> compensated = compensate_decrypt(
-            guardian_auxiliary_keys,
             missing_guardian_backup,
             selection.ciphertext(),
             context.crypto_extended_base_hash,
-            null,
-            decryptor);
+            null);
     if (compensated.isEmpty()) {
       logger.atWarning().log("compute compensated decryption share failed for %s missing: %s %s",
               guardian_key.owner_id(), missing_guardian_key.owner_id(), selection.object_id());
@@ -527,46 +499,31 @@ public class Decryptions {
   /**
    * Compute a compensated partial decryption of an elgamal encryption on behalf of the missing guardian
    *
-   * @param guardian_auxiliary_keys Auxiliary key pair for guardian decrypting
    * @param missing_guardian_backup Missing guardians backup
    * @param ciphertext              the ElGamal.Ciphertext that will be partially decrypted
    * @param extended_base_hash      the extended base hash of the election that was used to generate t he ElGamal Ciphertext
    * @param nonce_seed              an optional value used to generate the `ChaumPedersenProof` if no value is provided, a random number will be used.
-   * @param decryptor               a function to decrypt the missing guardian private key backup
    * @return a `Tuple[ElementModP, ChaumPedersenProof]` of the decryption and its proof
    */
   static Optional<BallotBox.DecryptionProofTuple> compensate_decrypt(
-          Auxiliary.KeyPair guardian_auxiliary_keys,
           KeyCeremony.ElectionPartialKeyBackup missing_guardian_backup,
           ElGamal.Ciphertext ciphertext,
           Group.ElementModQ extended_base_hash,
-          @Nullable Group.ElementModQ nonce_seed,
-          @Nullable Auxiliary.Decryptor decryptor) {
-
-    if (decryptor == null) {
-      decryptor = Rsa::decrypt;
-    }
+          @Nullable Group.ElementModQ nonce_seed) {
 
     if (nonce_seed == null) {
       nonce_seed = Group.rand_q();
     }
 
-    Optional<String> decrypted_value = decryptor.decrypt(missing_guardian_backup.encrypted_value(), guardian_auxiliary_keys.secret_key);
-    if (decrypted_value.isEmpty()) {
-      logger.atWarning().log("compensate decrypt guardian %s failed decryption for %s",
-              guardian_auxiliary_keys.owner_id, missing_guardian_backup.owner_id());
-      return Optional.empty();
-    }
-
-    Optional<Group.ElementModQ> partial_secret_key = Group.hex_to_q(decrypted_value.get());
+    Group.ElementModQ partial_secret_key = missing_guardian_backup.value();
 
     // 𝑀_{𝑖,l} = 𝐴^P𝑖_{l}
-    Group.ElementModP partial_decryption = ciphertext.partial_decrypt(partial_secret_key.orElseThrow());
+    Group.ElementModP partial_decryption = ciphertext.partial_decrypt(partial_secret_key);
 
     // 𝑀_{𝑖,l} = 𝐴^𝑠𝑖 mod 𝑝 and 𝐾𝑖 = 𝑔^𝑠𝑖 mod 𝑝
     ChaumPedersen.ChaumPedersenProof proof = ChaumPedersen.make_chaum_pedersen(
             ciphertext,
-            partial_secret_key.get(),
+            partial_secret_key,
             partial_decryption,
             nonce_seed,
             extended_base_hash);

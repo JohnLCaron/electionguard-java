@@ -138,7 +138,7 @@ public class Encrypt {
    * @param is_placeholder:            specifies if this is a placeholder selection
    * @param should_verify_proofs:      specify if the proofs should be verified prior to returning (default True)
    */
-  static Optional<CiphertextBallot.Selection> encrypt_selection(
+  public static Optional<CiphertextBallot.Selection> encrypt_selection(
           PlaintextBallot.Selection selection,
           Manifest.SelectionDescription selection_description,
           ElementModP elgamal_public_key,
@@ -221,7 +221,7 @@ public class Encrypt {
    *                                   this value can be (or derived from) the Ballot nonce, but no relationship is required
    * @param should_verify_proofs:      specify if the proofs should be verified prior to returning (default True)
    */
-  static Optional<CiphertextBallot.Contest> encrypt_contest(
+  public static Optional<CiphertextBallot.Contest> encrypt_contest(
           PlaintextBallot.Contest contest,
           ContestWithPlaceholders contest_description,
           ElementModP elgamal_public_key,

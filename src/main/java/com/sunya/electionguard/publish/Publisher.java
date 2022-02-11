@@ -31,7 +31,7 @@ public class Publisher {
   static final String ELECTION_RECORD_DIR = "election_record";
 
   //// json
-  static final String SUFFIX = ".json";
+  static final String JSON_SUFFIX = ".json";
 
   static final String DEVICES_DIR = "encryption_devices";
   static final String GUARDIANS_DIR = "guardians";
@@ -39,12 +39,12 @@ public class Publisher {
   static final String SPOILED_BALLOTS_DIR = "spoiled_ballots"; // plaintext
   static final String INVALID_BALLOTS_DIR = "invalid_ballots"; // plaintext
 
-  static final String MANIFEST_FILE_NAME = "manifest" + SUFFIX;
-  static final String CONTEXT_FILE_NAME = "context" + SUFFIX;
-  static final String CONSTANTS_FILE_NAME = "constants" + SUFFIX;
-  static final String COEFFICIENTS_FILE_NAME = "coefficients" + SUFFIX;
-  static final String ENCRYPTED_TALLY_FILE_NAME = "encrypted_tally" + SUFFIX;
-  static final String TALLY_FILE_NAME = "tally" + SUFFIX;
+  static final String MANIFEST_FILE_NAME = "manifest" + JSON_SUFFIX;
+  static final String CONTEXT_FILE_NAME = "context" + JSON_SUFFIX;
+  static final String CONSTANTS_FILE_NAME = "constants" + JSON_SUFFIX;
+  static final String COEFFICIENTS_FILE_NAME = "coefficients" + JSON_SUFFIX;
+  static final String ENCRYPTED_TALLY_FILE_NAME = "encrypted_tally" + JSON_SUFFIX;
+  static final String TALLY_FILE_NAME = "tally" + JSON_SUFFIX;
 
   static final String DEVICE_PREFIX = "device_";
   static final String GUARDIAN_PREFIX = "guardian_";
@@ -58,8 +58,8 @@ public class Publisher {
   static final String PROTO_SUFFIX = ".protobuf";
   static final String ELECTION_RECORD_FILE_NAME = "electionRecord" + PROTO_SUFFIX;
   static final String GUARDIANS_FILE = "guardians" + PROTO_SUFFIX;
-  static final String SUBMITTED_BALLOT_PROTO = "submittedBallot" + PROTO_SUFFIX;
-  static final String SPOILED_BALLOT_FILE = "spoiledBallotTally" + PROTO_SUFFIX;
+  static final String SUBMITTED_BALLOT_PROTO = "submittedBallots" + PROTO_SUFFIX;
+  static final String SPOILED_BALLOT_FILE = "spoiledBallotsTally" + PROTO_SUFFIX;
   static final String TRUSTEES_FILE = "trustees" + PROTO_SUFFIX;
 
   private final String topdir;
@@ -182,7 +182,7 @@ public class Publisher {
   }
 
   public Path devicePath(String id) {
-    return devicesDirPath.resolve(DEVICE_PREFIX + id + SUFFIX);
+    return devicesDirPath.resolve(DEVICE_PREFIX + id + JSON_SUFFIX);
   }
 
   public File[] deviceFiles() {
@@ -193,7 +193,7 @@ public class Publisher {
   }
 
   public Path guardianRecordsPath(String id) {
-    String fileName = GUARDIAN_PREFIX + id + SUFFIX;
+    String fileName = GUARDIAN_PREFIX + id + JSON_SUFFIX;
     return guardianDirPath.resolve(fileName);
   }
 
@@ -205,7 +205,7 @@ public class Publisher {
   }
 
   public Path ballotPath(String id) {
-    String fileName = SUBMITTED_BALLOT_PREFIX + id + SUFFIX;
+    String fileName = SUBMITTED_BALLOT_PREFIX + id + JSON_SUFFIX;
     return ballotsDirPath.resolve(fileName);
   }
 
@@ -217,7 +217,7 @@ public class Publisher {
   }
 
   public Path spoiledBallotPath(String id) {
-    String fileName = SPOILED_BALLOT_PREFIX + id + SUFFIX;
+    String fileName = SPOILED_BALLOT_PREFIX + id + JSON_SUFFIX;
     return spoiledBallotDirPath.resolve(fileName);
   }
 
@@ -234,7 +234,7 @@ public class Publisher {
     return electionRecordDir.resolve(ELECTION_RECORD_FILE_NAME).toAbsolutePath();
   }
 
-  public Path ciphertextBallotProtoPath() {
+  public Path submittedBallotProtoPath() {
     return electionRecordDir.resolve(SUBMITTED_BALLOT_PROTO).toAbsolutePath();
   }
 
@@ -381,7 +381,7 @@ public class Publisher {
     }
 
     // the accepted ballots are written into their own file
-    try (FileOutputStream out = new FileOutputStream(ciphertextBallotProtoPath().toFile())) {
+    try (FileOutputStream out = new FileOutputStream(submittedBallotProtoPath().toFile())) {
       for (SubmittedBallot ballot : submittedBallots) {
         CiphertextBallotProto.SubmittedBallot ballotProto = CiphertextBallotToProto.translateToProto(ballot);
         ballotProto.writeDelimitedTo(out);
@@ -491,7 +491,7 @@ public class Publisher {
     }
 
     // the accepted ballots are written into their own file
-    try (FileOutputStream out = new FileOutputStream(ciphertextBallotProtoPath().toFile())) {
+    try (FileOutputStream out = new FileOutputStream(submittedBallotProtoPath().toFile())) {
       for (SubmittedBallot ballot : accepted_ballots) {
         CiphertextBallotProto.SubmittedBallot ballotProto = CiphertextBallotToProto.translateToProto(ballot);
         ballotProto.writeDelimitedTo(out);
@@ -526,8 +526,8 @@ public class Publisher {
       throw new UnsupportedOperationException("Trying to write to readonly election record");
     }
 
-    Path source = new Publisher(inputDir, Mode.writeonly, false).ciphertextBallotProtoPath();
-    Path dest = ciphertextBallotProtoPath();
+    Path source = new Publisher(inputDir, Mode.writeonly, false).submittedBallotProtoPath();
+    Path dest = submittedBallotProtoPath();
     Files.copy(source, dest, StandardCopyOption.COPY_ATTRIBUTES);
   }
 
@@ -541,7 +541,7 @@ public class Publisher {
     Files.createDirectories(invalidBallotsPath);
 
     for (PlaintextBallot plaintext_ballot : invalid_ballots) {
-      String ballot_name = PLAINTEXT_BALLOT_PREFIX + plaintext_ballot.object_id() + SUFFIX;
+      String ballot_name = PLAINTEXT_BALLOT_PREFIX + plaintext_ballot.object_id() + JSON_SUFFIX;
       ConvertToJson.writePlaintextBallot(plaintext_ballot, invalidBallotsPath.resolve(ballot_name));
     }
 

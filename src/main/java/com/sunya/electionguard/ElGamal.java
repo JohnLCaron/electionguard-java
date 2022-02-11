@@ -104,7 +104,7 @@ public class ElGamal {
      * @param secretKey : The corresponding ElGamal secret key.
      * @return An exponentially encoded plaintext message.
      */
-    Integer decrypt(ElementModQ secretKey) {
+    public Integer decrypt(ElementModQ secretKey) {
       return decrypt_known_product(Group.pow_p(this.pad, secretKey));
     }
 
@@ -115,7 +115,7 @@ public class ElGamal {
      * @param nonce :     The secret nonce used to create the ciphertext.
      * @return An exponentially encoded plaintext message.
      */
-    Integer decrypt_known_nonce(ElementModP publicKey, ElementModQ nonce) {
+    public Integer decrypt_known_nonce(ElementModP publicKey, ElementModQ nonce) {
       return decrypt_known_product(Group.pow_p(publicKey, nonce));
     }
 
@@ -174,7 +174,7 @@ public class ElGamal {
    * @param public_key ElGamal public key.
    * @return An ElGamal.Ciphertext.
    */
-  static Optional<Ciphertext> elgamal_encrypt(int message, ElementModQ nonce, ElementModP public_key) {
+  public static Optional<Ciphertext> elgamal_encrypt(int message, ElementModQ nonce, ElementModP public_key) {
     if (nonce.equals(ZERO_MOD_Q)) {
       logger.atSevere().log("ElGamal encryption requires a non-zero nonce");
       return Optional.empty();

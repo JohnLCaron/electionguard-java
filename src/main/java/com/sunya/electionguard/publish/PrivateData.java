@@ -1,25 +1,8 @@
 package com.sunya.electionguard.publish;
 
-import com.google.common.collect.Iterables;
-import com.sunya.electionguard.AvailableGuardian;
-import com.sunya.electionguard.CiphertextElectionContext;
-import com.sunya.electionguard.CiphertextTally;
-import com.sunya.electionguard.ElectionConstants;
-import com.sunya.electionguard.Encrypt;
-import com.sunya.electionguard.GuardianRecord;
 import com.sunya.electionguard.standard.GuardianRecordPrivate;
-import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.PlaintextBallot;
-import com.sunya.electionguard.PlaintextTally;
-import com.sunya.electionguard.SubmittedBallot;
-import com.sunya.electionguard.proto.CiphertextBallotToProto;
-import com.sunya.electionguard.proto.ElectionRecordToProto;
-import com.sunya.electionguard.proto.PlaintextTallyToProto;
-import com.sunya.electionguard.protogen.CiphertextBallotProto;
-import com.sunya.electionguard.protogen.ElectionRecordProto;
-import com.sunya.electionguard.protogen.PlaintextTallyProto;
 import com.sunya.electionguard.protogen.TrusteeProto;
-import com.sunya.electionguard.verifier.ElectionRecord;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -27,7 +10,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.List;
@@ -37,7 +19,7 @@ public class PrivateData {
   static final String PRIVATE_DATA_DIR = "election_private_data";
 
   //// json
-  static final String SUFFIX = ".json";
+  static final String JSON_SUFFIX = ".json";
   static final String PRIVATE_GUARDIANS_DIR = "private_guardians";
   static final String PRIVATE_BALLOT_DIR = "plaintext_ballots";
   static final String PLAINTEXT_BALLOT_PREFIX = "plaintext_ballot_";
@@ -87,6 +69,7 @@ public class PrivateData {
   }
 
   private void createDirs() throws IOException {
+    Files.createDirectories(privateDirectory);
   }
 
   /** Delete everything in the output directory, but leave that directory. */
@@ -106,6 +89,11 @@ public class PrivateData {
     return privateDirectory.resolve(TRUSTEES_FILE);
   }
 
+  public Path trusteePath(String id) {
+    String filename = id + PROTO_SUFFIX;
+    return privateDirectory.resolve(filename);
+  }
+
   public Path privateGuardiansPath() {
     return privateDirectory.resolve(PRIVATE_GUARDIANS_DIR);
   }
@@ -115,7 +103,7 @@ public class PrivateData {
   }
 
   public Path guardiansPrivatePath(String id) {
-    String fileName = id + SUFFIX;
+    String fileName = id + JSON_SUFFIX;
     return privateDirectory.resolve(fileName);
   }
 
@@ -152,174 +140,14 @@ public class PrivateData {
     }
   }
 
-
-  public static void overwriteTrusteeProto(String outputDir, TrusteeProto.DecryptingTrustee trusteeProto) throws IOException {
-    Path outputPath = Path.of(outputDir + "/" + trusteeProto.getGuardianId() + PROTO_SUFFIX);
+  public void overwriteTrusteeProto(TrusteeProto.DecryptingTrustee trusteeProto) throws IOException {
+    Path outputPath = trusteePath(trusteeProto.getGuardianId());
     if (Files.exists(outputPath)) {
       Files.delete(outputPath);
     }
     try (FileOutputStream out = new FileOutputStream(outputPath.toFile())) {
       trusteeProto.writeDelimitedTo(out);
     }
-  }
-
-  /** Publishes the KeyCeremony part of the election record as proto. */
-  public void writeKeyCeremonyProto(
-          Manifest description,
-          CiphertextElectionContext context,
-          ElectionConstants constants,
-          Iterable<GuardianRecord> guardianRecords) throws IOException {
-
-    if (context.number_of_guardians != Iterables.size(guardianRecords)) {
-      throw new IllegalStateException(String.format("Number of guardians (%d) does not match number of coefficients (%d)",
-              context.number_of_guardians, Iterables.size(guardianRecords)));
-    }
-
-    ElectionRecordProto.ElectionRecord electionRecordProto = ElectionRecordToProto.buildElectionRecord(
-            description, context, constants, guardianRecords,
-            null, null, null, null);
-    try (FileOutputStream out = new FileOutputStream(electionRecordProtoPath().toFile())) {
-      electionRecordProto.writeDelimitedTo(out);
-    }
-  }
-
-  /** Publishes the ballot Encryptions part of election record as proto. */
-  public void writeEncryptionResultsProto(
-          ElectionRecord electionRecord,
-          Iterable<Encrypt.EncryptionDevice> devices,
-          Iterable<SubmittedBallot> submittedBallots) throws IOException {
-
-
-    // the accepted ballots are written into their own file
-    try (FileOutputStream out = new FileOutputStream(ciphertextBallotProtoPath().toFile())) {
-      for (SubmittedBallot ballot : submittedBallots) {
-        CiphertextBallotProto.SubmittedBallot ballotProto = CiphertextBallotToProto.translateToProto(ballot);
-        ballotProto.writeDelimitedTo(out);
-      }
-    }
-
-    ElectionRecordProto.ElectionRecord electionRecordProto = ElectionRecordToProto.buildElectionRecord(
-            electionRecord.election,
-            electionRecord.context,
-            electionRecord.constants,
-            electionRecord.guardianRecords,
-            devices, null, null, null);
-
-    try (FileOutputStream out = new FileOutputStream(electionRecordProtoPath().toFile())) {
-      electionRecordProto.writeDelimitedTo(out);
-    }
-  }
-
-  /** Adds the encryptedTally to the election record. */
-  public void writeEncryptedTallyProto(ElectionRecord electionRecord,
-                                       CiphertextTally encryptedTally) throws IOException {
-
-    ElectionRecordProto.ElectionRecord ElectionRecordProto = ElectionRecordToProto.buildElectionRecord(
-            electionRecord.election, electionRecord.context, electionRecord.constants,
-            electionRecord.guardianRecords,
-            electionRecord.devices,
-            encryptedTally,
-            null, null);
-
-    try (FileOutputStream out = new FileOutputStream(electionRecordProtoPath().toFile())) {
-      ElectionRecordProto.writeDelimitedTo(out);
-    }
-  }
-
-  public void writeDecryptedTallyProto(ElectionRecord electionRecord,
-                                       PlaintextTally decryptedTally) throws IOException {
-
-    ElectionRecordProto.ElectionRecord ElectionRecordProto = ElectionRecordToProto.buildElectionRecord(
-            electionRecord.election, electionRecord.context, electionRecord.constants,
-            electionRecord.guardianRecords, electionRecord.devices,
-            electionRecord.encryptedTally,
-            decryptedTally,
-            null);
-
-    try (FileOutputStream out = new FileOutputStream(electionRecordProtoPath().toFile())) {
-      ElectionRecordProto.writeDelimitedTo(out);
-    }
-  }
-
-  /** Publishes the ballot and tally Decryptions election record as proto. */
-  public void writeDecryptionResultsProto(
-          ElectionRecord electionRecord,
-          CiphertextTally encryptedTally,
-          PlaintextTally decryptedTally,
-          Iterable<PlaintextTally> spoiledBallots,
-          Iterable<AvailableGuardian> availableGuardians) throws IOException {
-
-    if (spoiledBallots != null) {
-      // the spoiledBallots are written into their own file
-      try (FileOutputStream out = new FileOutputStream(spoiledBallotProtoPath().toFile())) {
-        for (PlaintextTally ballot : spoiledBallots) {
-          PlaintextTallyProto.PlaintextTally ballotProto = PlaintextTallyToProto.translateToProto(ballot);
-          ballotProto.writeDelimitedTo(out);
-        }
-      }
-    }
-
-    ElectionRecordProto.ElectionRecord ElectionRecordProto = ElectionRecordToProto.buildElectionRecord(
-            electionRecord.election, electionRecord.context, electionRecord.constants,
-            electionRecord.guardianRecords, electionRecord.devices,
-            encryptedTally,
-            decryptedTally,
-            availableGuardians);
-
-    try (FileOutputStream out = new FileOutputStream(electionRecordProtoPath().toFile())) {
-      ElectionRecordProto.writeDelimitedTo(out);
-    }
-  }
-
-  /** Publishes the entire election record as proto. */
-  public void writeElectionRecordProto(
-          Manifest description,
-          CiphertextElectionContext context,
-          ElectionConstants constants,
-          Iterable<GuardianRecord> guardianRecords,
-          Iterable<Encrypt.EncryptionDevice> devices,
-          Iterable<SubmittedBallot> accepted_ballots,
-          CiphertextTally ciphertext_tally,
-          PlaintextTally decryptedTally,
-          @Nullable Iterable<PlaintextTally> spoiledBallots,
-          Iterable<AvailableGuardian> availableGuardians) throws IOException {
-
-
-    // the accepted ballots are written into their own file
-    try (FileOutputStream out = new FileOutputStream(ciphertextBallotProtoPath().toFile())) {
-      for (SubmittedBallot ballot : accepted_ballots) {
-        CiphertextBallotProto.SubmittedBallot ballotProto = CiphertextBallotToProto.translateToProto(ballot);
-        ballotProto.writeDelimitedTo(out);
-      }
-    }
-
-    if (spoiledBallots != null) {
-      // the spoiledBallots are written into their own file
-      try (FileOutputStream out = new FileOutputStream(spoiledBallotProtoPath().toFile())) {
-        for (PlaintextTally ballot : spoiledBallots) {
-          PlaintextTallyProto.PlaintextTally ballotProto = PlaintextTallyToProto.translateToProto(ballot);
-          ballotProto.writeDelimitedTo(out);
-        }
-      }
-    }
-
-    ElectionRecordProto.ElectionRecord ElectionRecordProto = ElectionRecordToProto.buildElectionRecord(
-            description, context, constants, guardianRecords,
-            devices,
-            ciphertext_tally,
-            decryptedTally,
-            availableGuardians);
-
-    try (FileOutputStream out = new FileOutputStream(electionRecordProtoPath().toFile())) {
-      ElectionRecordProto.writeDelimitedTo(out);
-    }
-  }
-
-  /** Copy accepted ballots file from the inputDir to this election record. */
-  public void copyAcceptedBallots(String inputDir) throws IOException {
-    Path source = new PrivateData(inputDir, false, false).ciphertextBallotProtoPath();
-    Path dest = ciphertextBallotProtoPath();
-    Files.copy(source, dest, StandardCopyOption.COPY_ATTRIBUTES);
   }
 
   ////////////////////////////////////////////////////////////////////////////////
@@ -346,7 +174,7 @@ public class PrivateData {
     if (guardians != null) {
       Files.createDirectories(privateGuardiansPath());
       for (GuardianRecordPrivate guardian : guardians) {
-        String guardian_name = PRIVATE_GUARDIAN_PREFIX + guardian.guardian_id() + SUFFIX;
+        String guardian_name = PRIVATE_GUARDIAN_PREFIX + guardian.guardian_id() + JSON_SUFFIX;
         ConvertToJson.writeGuardianRecordPrivate(guardian, privateGuardiansPath().resolve(guardian_name));
       }
     }
@@ -354,7 +182,7 @@ public class PrivateData {
     if (original_ballots != null) {
       Files.createDirectories(privateBallotsPath());
       for (PlaintextBallot plaintext_ballot : original_ballots) {
-        String ballot_name = PLAINTEXT_BALLOT_PREFIX + plaintext_ballot.object_id() + SUFFIX;
+        String ballot_name = PLAINTEXT_BALLOT_PREFIX + plaintext_ballot.object_id() + JSON_SUFFIX;
         ConvertToJson.writePlaintextBallot(plaintext_ballot, privateBallotsPath().resolve(ballot_name));
       }
     }
@@ -368,7 +196,7 @@ public class PrivateData {
     Files.createDirectories(invalidBallotsPath);
 
     for (PlaintextBallot plaintext_ballot : invalid_ballots) {
-      String ballot_name = PLAINTEXT_BALLOT_PREFIX + plaintext_ballot.object_id() + SUFFIX;
+      String ballot_name = PLAINTEXT_BALLOT_PREFIX + plaintext_ballot.object_id() + JSON_SUFFIX;
       ConvertToJson.writePlaintextBallot(plaintext_ballot, invalidBallotsPath.resolve(ballot_name));
     }
 
