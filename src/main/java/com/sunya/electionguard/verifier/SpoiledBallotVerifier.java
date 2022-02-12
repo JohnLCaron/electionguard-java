@@ -26,12 +26,12 @@ public class SpoiledBallotVerifier {
 
   SpoiledBallotVerifier(ElectionRecord electionRecord) {
     this.electionRecord = electionRecord;
-    for (Manifest.ContestDescription contest : electionRecord.election.contests) {
+    for (Manifest.ContestDescription contest : electionRecord.election.contests()) {
       HashSet<String> selectionNames = new HashSet<>();
-      for (Manifest.SelectionDescription selection : contest.ballot_selections) {
-        selectionNames.add(selection.object_id);
+      for (Manifest.SelectionDescription selection : contest.ballot_selections()) {
+        selectionNames.add(selection.object_id());
       }
-      names.put(contest.object_id, selectionNames);
+      names.put(contest.object_id(), selectionNames);
     }
   }
 

@@ -80,13 +80,13 @@ public class DecryptingTrusteeTable extends JPanel {
     this.current = trusteeBean.object;
 
     java.util.List<PartialKeyBackupBean> beanList = new ArrayList<>();
-    for (Map.Entry<String, KeyCeremony2.PartialKeyBackup> e : trusteeBean.object.otherGuardianPartialKeyBackups.entrySet()) {
+    for (Map.Entry<String, KeyCeremony2.PartialKeyBackup> e : trusteeBean.object.otherGuardianPartialKeyBackups().entrySet()) {
       beanList.add(new PartialKeyBackupBean(e.getKey(), e.getValue()));
     }
     backupTable.setBeans(beanList);
 
     java.util.List<GuardianCommittmentsBean> bean2List = new ArrayList<>();
-    for (Map.Entry<String, ImmutableList<Group.ElementModP>> e : trusteeBean.object.guardianCommittments.entrySet()) {
+    for (Map.Entry<String, ImmutableList<Group.ElementModP>> e : trusteeBean.object.guardianCommittments().entrySet()) {
       bean2List.add(new GuardianCommittmentsBean(e.getKey(), e.getValue()));
     }
     commitmentTable.setBeans(bean2List);
@@ -121,10 +121,10 @@ public class DecryptingTrusteeTable extends JPanel {
       return object.xCoordinate();
     }
     public String getElectionPrivateKey() {
-      return object.election_keypair.secret_key.toString();
+      return object.election_keypair().secret_key().toString();
     }
     public String getElectionPublicKey() {
-      return object.election_keypair.public_key.toShortString();
+      return object.election_keypair().public_key().toShortString();
     }
   }
 

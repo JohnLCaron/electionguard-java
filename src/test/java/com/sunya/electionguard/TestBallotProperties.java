@@ -7,7 +7,6 @@ import net.jqwik.api.ShrinkingMode;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -32,7 +31,7 @@ public class TestBallotProperties extends TestProperties {
 
     PlaintextBallot.Contest first_contest = subject.contests.get(0);
     assertThat(first_contest).isNotNull();
-    assertThat(first_contest.is_valid("justice-supreme-court", 2, 2, Optional.empty())).isTrue();
+    assertThat(first_contest.is_valid("justice-supreme-court", 2, 2, 2)).isTrue();
   }
 
   @Example

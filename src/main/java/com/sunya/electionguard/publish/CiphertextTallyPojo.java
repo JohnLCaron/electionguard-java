@@ -27,7 +27,12 @@ public class CiphertextTallyPojo {
     public String object_id;
     public Integer sequence_order;
     public Group.ElementModQ description_hash;
-    public ElGamal.Ciphertext ciphertext;
+    public CiphertextPojo ciphertext;
+  }
+
+  public static class CiphertextPojo {
+    public Group.ElementModP pad;
+    public Group.ElementModP data;
   }
 
   ////////////////////////////////////////////////////////////////////////////
@@ -63,13 +68,17 @@ public class CiphertextTallyPojo {
   }
 
   private static CiphertextTally.Selection translateSelection(CiphertextTallySelectionPojo pojo) {
-    //     public CiphertextTallySelection(String selectionDescriptionId, ElementModQ description_hash,
-    //     @Nullable ElGamal.Ciphertext ciphertext) {
     return new CiphertextTally.Selection(
             pojo.object_id,
             pojo.sequence_order,
             pojo.description_hash,
-            pojo.ciphertext);
+            translateCiphertext(pojo.ciphertext));
+  }
+
+  public static ElGamal.Ciphertext translateCiphertext(CiphertextPojo pojo) {
+    return new ElGamal.Ciphertext(
+            pojo.pad,
+            pojo.data);
   }
 
   ////////////////////////////////////////////////////////////////////////////
@@ -112,7 +121,14 @@ public class CiphertextTallyPojo {
     pojo.object_id = org.object_id();
     pojo.sequence_order = org.sequence_order();
     pojo.description_hash = org.description_hash();
-    pojo.ciphertext = org.ciphertext();
+    pojo.ciphertext = convertCiphertext(org.ciphertext());
+    return pojo;
+  }
+
+  public static CiphertextPojo convertCiphertext(ElGamal.Ciphertext org) {
+    CiphertextPojo pojo = new CiphertextPojo();
+    pojo.pad = org.pad();
+    pojo.data = org.data();
     return pojo;
   }
 

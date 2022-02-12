@@ -36,10 +36,10 @@ public class EncryptionDevicePojo {
 
   public static JsonElement serialize(Encrypt.EncryptionDevice org) {
     EncryptionDevicePojo pojo = new EncryptionDevicePojo();
-    pojo.device_id = org.device_id;
-    pojo.session_id = org.session_id;
-    pojo.launch_code = org.launch_code;
-    pojo.location = org.location;
+    pojo.device_id = org.device_id();
+    pojo.session_id = org.session_id();
+    pojo.launch_code = org.launch_code();
+    pojo.location = org.location();
 
     Gson gson = GsonTypeAdapters.enhancedGson();
     Type typeOfSrc = new TypeToken<EncryptionDevicePojo>() {}.getType();

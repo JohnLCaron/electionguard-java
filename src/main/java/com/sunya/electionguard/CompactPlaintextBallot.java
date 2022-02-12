@@ -81,17 +81,15 @@ public class CompactPlaintextBallot {
             compact_ballot.style_id, internal_manifest);
 
     List<InternalManifest.ContestWithPlaceholders> sortedContests = internal_manifest.contests.values().stream()
-            .sorted(Comparator.comparing(o -> o.sequence_order))
-            .collect(Collectors.toList());
+            .sorted(Comparator.comparing(o -> o.contest.sequence_order())).toList();
 
     int index = 0;
     List<PlaintextBallot.Contest> contests = new ArrayList<>();
     for (InternalManifest.ContestWithPlaceholders manifest_contest : sortedContests) {
-      boolean placeholder = ballot_style_contests.get(manifest_contest.object_id) == null;
+      boolean placeholder = ballot_style_contests.get(manifest_contest.contest.object_id()) == null;
 
-      List<Manifest.SelectionDescription> sortedSelections = manifest_contest.ballot_selections.stream()
-              .sorted(Comparator.comparing(o -> o.sequence_order))
-              .collect(Collectors.toList());
+      List<Manifest.SelectionDescription> sortedSelections = manifest_contest.contest.ballot_selections().stream()
+              .sorted(Comparator.comparing(o -> o.sequence_order())).toList();
 
       // Iterate through selections. If contest not in style, mark as placeholder
       List<PlaintextBallot.Selection> selections = new ArrayList<>();
@@ -106,8 +104,8 @@ public class CompactPlaintextBallot {
         index += 1;
       }
       contests.add(new PlaintextBallot.Contest(
-              manifest_contest.object_id(),
-              manifest_contest.sequence_order(),
+              manifest_contest.contest.object_id(),
+              manifest_contest.contest.sequence_order(),
               selections));
     }
     return contests;
@@ -117,7 +115,7 @@ public class CompactPlaintextBallot {
           String ballot_style_id, InternalManifest internal_manifest) {
     List<InternalManifest.ContestWithPlaceholders> ballot_style_contests =
             internal_manifest.get_contests_for_style(ballot_style_id);
-    return ballot_style_contests.stream().collect(Collectors.toMap(c -> c.object_id, c -> c));
+    return ballot_style_contests.stream().collect(Collectors.toMap(c -> c.contest.object_id(), c -> c));
   }
 
 }

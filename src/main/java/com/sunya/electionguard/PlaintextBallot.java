@@ -113,7 +113,7 @@ public class PlaintextBallot implements ElectionObjectBaseIF {
             String expected_contest_id,
             int expected_number_selections,
             int expected_number_elected,
-            Optional<Integer> votes_allowed) {
+            Integer votes_allowed) {
 
       if (!this.contest_id.equals(expected_contest_id)) {
         logger.atWarning().log("invalid contest_id: expected(%s) actual(%s)", expected_contest_id, this.contest_id);
@@ -141,8 +141,8 @@ public class PlaintextBallot implements ElectionObjectBaseIF {
         logger.atWarning().log("invalid number_elected: expected(%s) actual(%s)", expected_number_elected, number_elected);
         return false;
       }
-      if (votes_allowed.isPresent() && votes > votes_allowed.get()) {
-        logger.atWarning().log("invalid number of votes: allowed(%s) actual(%s)", votes_allowed.get(), votes);
+      if (votes > votes_allowed) {
+        logger.atWarning().log("invalid number of votes: allowed(%s) actual(%s)", votes_allowed, votes);
         return false;
       }
       return true;
@@ -289,6 +289,7 @@ public class PlaintextBallot implements ElectionObjectBaseIF {
     List<Contest> contests = new ArrayList<>();
     for (CiphertextBallot.Contest ccontest : cballot.contests) {
       PlaintextTally.Contest tcontest = tally.contests.get(ccontest.object_id);
+      Preconditions.checkNotNull(tcontest);
       List<Selection> selections = new ArrayList<>();
       for (CiphertextBallot.Selection cselection : ccontest.ballot_selections) {
         if (!cselection.is_placeholder_selection) {

@@ -126,12 +126,12 @@ public class TestEndToEndElectionIntegration {
     this.election = ElectionFactory.get_simple_election_from_file();
 
     System.out.printf("----------------------------------%n");
-    System.out.printf("Manifest Summary:%nScope: %s%n", this.election.election_scope_id);
-    System.out.printf("Geopolitical Units: %d%n", this.election.geopolitical_units.size());
-    System.out.printf("Parties: %d%n", this.election.parties.size());
-    System.out.printf("Candidates: %d%n", this.election.candidates.size());
-    System.out.printf("Contests: %d%n", this.election.contests.size());
-    System.out.printf("Ballot Styles: %d%n", this.election.ballot_styles.size());
+    System.out.printf("Manifest Summary:%nScope: %s%n", this.election.election_scope_id());
+    System.out.printf("Geopolitical Units: %d%n", this.election.geopolitical_units().size());
+    System.out.printf("Parties: %d%n", this.election.parties().size());
+    System.out.printf("Candidates: %d%n", this.election.candidates().size());
+    System.out.printf("Contests: %d%n", this.election.contests().size());
+    System.out.printf("Ballot Styles: %d%n", this.election.ballot_styles().size());
     System.out.printf("----------------------------------%n");
 
     assertThat(this.election.is_valid()).isTrue();
@@ -257,9 +257,9 @@ public class TestEndToEndElectionIntegration {
   void step_2_encrypt_votes() throws IOException {
     // Configure the Encryption Device
     this.metadata = new InternalManifest(this.election);
-    this.device = Encrypt.EncryptionDevice.createForTest("polling-place-one");
+    this.device = Encrypt.createDeviceForTest("polling-place-one");
     this.encrypter = new Encrypt.EncryptionMediator(this.metadata, this.context, this.device);
-    System.out.printf("%n2. Ready to encrypt at location: %s%n", this.device.location);
+    System.out.printf("%n2. Ready to encrypt at location: %s%n", this.device.location());
 
     // Load some Ballots
     this.originalPlaintextBallots = new BallotFactory().get_simple_ballots_from_file();
@@ -336,9 +336,9 @@ public class TestEndToEndElectionIntegration {
     System.out.printf("%n4.5 Compare results%n");
     // Create a representation of each contest's tally
     Map<String, Integer> expected_plaintext_tally = new HashMap<>();
-    for (ContestWithPlaceholders contest : this.metadata.contests.values()) {
-      for (Manifest.SelectionDescription selection : contest.ballot_selections) {
-        expected_plaintext_tally.put(selection.object_id, 0);
+    for (ContestWithPlaceholders contestp : this.metadata.contests.values()) {
+      for (Manifest.SelectionDescription selection : contestp.contest.ballot_selections()) {
+        expected_plaintext_tally.put(selection.object_id(), 0);
       }
     }
 
@@ -429,8 +429,7 @@ public class TestEndToEndElectionIntegration {
     // Equation 3.A
     // The hashing is order dependent, use the sequence_order to sort.
     List<GuardianRecord> sorted = roundtrip.guardianRecords.stream()
-            .sorted(Comparator.comparing(GuardianRecord::sequence_order))
-            .collect(Collectors.toList());
+            .sorted(Comparator.comparing(GuardianRecord::sequence_order)).toList();
     List<Group.ElementModP> commitments = new ArrayList<>();
     for (GuardianRecord guardian : sorted) {
       commitments.addAll(guardian.election_commitments());

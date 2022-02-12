@@ -3,10 +3,8 @@ package com.sunya.electionguard;
 import com.google.common.base.Preconditions;
 import com.google.common.flogger.FluentLogger;
 
-import javax.annotation.concurrent.Immutable;
 import java.math.BigInteger;
 import java.util.Collection;
-import java.util.Objects;
 import java.util.Optional;
 
 import static com.sunya.electionguard.Group.*;
@@ -17,75 +15,29 @@ public class ElGamal {
   private ElGamal() {}
 
   /** A tuple of an ElGamal secret key and public key. */
-  @Immutable
-  public static class KeyPair {
-    public final ElementModQ secret_key;
-    public final ElementModP public_key;
+  public record KeyPair(
+    ElementModQ secret_key,
+    ElementModP public_key) {
 
-    public KeyPair(ElementModQ secret_key, ElementModP public_key) {
-      this.secret_key = Preconditions.checkNotNull(secret_key);
-      this.public_key = Preconditions.checkNotNull(public_key);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) return true;
-      if (o == null || getClass() != o.getClass()) return false;
-      KeyPair keyPair = (KeyPair) o;
-      return secret_key.equals(keyPair.secret_key) &&
-              public_key.equals(keyPair.public_key);
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(secret_key, public_key);
-    }
-
-    @Override
-    public String toString() {
-      return "KeyPair{" +
-              "  secret_key=" + secret_key +
-              ", public_key=" + public_key.toShortString() +
-              '}';
+    public KeyPair {
+      Preconditions.checkNotNull(secret_key);
+      Preconditions.checkNotNull(public_key);
     }
   }
 
   /**
    * An "exponential ElGamal ciphertext" (i.e., with the plaintext in the exponent to allow for
    * homomorphic addition).
+   * @param pad pad or alpha
+   * @param data encrypted data or beta
    */
-  @Immutable
-  public static class Ciphertext {
-    /** pad or alpha. */
-    public final ElementModP pad;
-    /** encrypted data or beta. */
-    public final ElementModP data;
+  public record Ciphertext(
+    ElementModP pad,
+    ElementModP data) {
 
-    public Ciphertext(ElementModP pad, ElementModP data) {
-      this.pad = Preconditions.checkNotNull(pad);
-      this.data = Preconditions.checkNotNull(data);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) return true;
-      if (o == null || getClass() != o.getClass()) return false;
-      Ciphertext that = (Ciphertext) o;
-      return pad.equals(that.pad) &&
-              data.equals(that.data);
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(pad, data);
-    }
-
-    @Override
-    public String toString() {
-      return "Ciphertext{" +
-              "\n    pad =" + pad.toShortString() +
-              "\n    data=" + data.toShortString() +
-              '}';
+    public Ciphertext {
+      Preconditions.checkNotNull(pad);
+      Preconditions.checkNotNull(data);
     }
 
     /**

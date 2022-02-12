@@ -63,14 +63,15 @@ public class CiphertextTallyBuilder {
   /** Build the object graph for the tally from the InternalManifest. */
   private Map<String, Contest> build_contests(InternalManifest manifest) {
     Map<String, Contest> cast_collection = new HashMap<>();
-    for (ContestWithPlaceholders contest : manifest.contests.values()) {
+    for (ContestWithPlaceholders contestp : manifest.contests.values()) {
+      Manifest.ContestDescription contest = contestp.contest;
       // build a collection of valid selections for the contest description, ignoring the Placeholder Selections.
       Map<String, Selection> contest_selections = new HashMap<>();
-      for (Manifest.SelectionDescription selection : contest.ballot_selections) {
-        contest_selections.put(selection.object_id,
-                new Selection(selection.object_id, selection.sequence_order, selection.crypto_hash()));
+      for (Manifest.SelectionDescription selection : contest.ballot_selections()) {
+        contest_selections.put(selection.object_id(),
+                new Selection(selection.object_id(), selection.sequence_order(), selection.crypto_hash()));
       }
-      cast_collection.put(contest.object_id, new Contest(contest.object_id, contest.sequence_order, contest.crypto_hash(), contest_selections));
+      cast_collection.put(contest.object_id(), new Contest(contest.object_id(), contest.sequence_order(), contest.crypto_hash(), contest_selections));
     }
     return cast_collection;
   }

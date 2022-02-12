@@ -36,8 +36,13 @@ public class GuardianRecordPrivatePojo {
   public static class ElectionKeyPairPojo {
     public String owner_id;
     public Integer sequence_order;
-    public ElGamal.KeyPair key_pair;
+    public ElGamalKeyPairPojo key_pair;
     public ElectionPolynomialPojo polynomial;
+  }
+
+  public static class ElGamalKeyPairPojo {
+    public Group.ElementModQ secret_key;
+    public Group.ElementModP public_key;
   }
 
   public static class ElectionPolynomialPojo {
@@ -114,8 +119,14 @@ public class GuardianRecordPrivatePojo {
     return new KeyCeremony.ElectionKeyPair(
             pojo.owner_id,
             pojo.sequence_order,
-            pojo.key_pair,
+            translateElgamalKeyPair(pojo.key_pair),
             translateElectionPolynomial(pojo.polynomial));
+  }
+
+  private static ElGamal.KeyPair translateElgamalKeyPair(ElGamalKeyPairPojo pojo) {
+    return new ElGamal.KeyPair(
+            pojo.secret_key,
+            pojo.public_key);
   }
 
   private static ElectionPolynomial translateElectionPolynomial(ElectionPolynomialPojo pojo) {
@@ -204,8 +215,15 @@ public class GuardianRecordPrivatePojo {
     ElectionKeyPairPojo pojo = new ElectionKeyPairPojo();
     pojo.owner_id = org.owner_id();
     pojo.sequence_order = org.sequence_order();
-    pojo.key_pair = org.key_pair();
+    pojo.key_pair = convertElgamalKeyPair(org.key_pair());
     pojo.polynomial = convertElectionPolynomial(org.polynomial());
+    return pojo;
+  }
+
+  private static ElGamalKeyPairPojo convertElgamalKeyPair(ElGamal.KeyPair org) {
+    ElGamalKeyPairPojo pojo = new ElGamalKeyPairPojo();
+    pojo.secret_key = org.secret_key();
+    pojo.public_key = org.public_key();
     return pojo;
   }
 

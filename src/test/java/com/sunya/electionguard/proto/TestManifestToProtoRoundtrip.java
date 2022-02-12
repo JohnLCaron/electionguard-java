@@ -28,19 +28,19 @@ public class TestManifestToProtoRoundtrip {
     ManifestProto.Manifest proto = ManifestToProto.translateToProto(fromPython);
     Manifest roundtrip = ManifestFromProto.translateFromProto(proto);
 
-    assertThat(roundtrip.election_scope_id).isEqualTo(fromPython.election_scope_id);
-    assertThat(roundtrip.type).isEqualTo(fromPython.type);
-    assertThat(roundtrip.start_date).isEqualTo(fromPython.start_date);
-    assertThat(roundtrip.end_date).isEqualTo(fromPython.end_date);
+    assertThat(roundtrip.election_scope_id()).isEqualTo(fromPython.election_scope_id());
+    assertThat(roundtrip.type()).isEqualTo(fromPython.type());
+    assertThat(roundtrip.start_date()).isEqualTo(fromPython.start_date());
+    assertThat(roundtrip.end_date()).isEqualTo(fromPython.end_date());
 
-    assertThat(roundtrip.geopolitical_units).containsExactlyElementsIn(fromPython.geopolitical_units);
-    assertThat(roundtrip.parties).containsExactlyElementsIn(fromPython.parties);
-    assertThat(roundtrip.candidates).containsExactlyElementsIn(fromPython.candidates);
-    assertThat(roundtrip.contests).containsExactlyElementsIn(fromPython.contests);
-    assertThat(roundtrip.ballot_styles).containsExactlyElementsIn(fromPython.ballot_styles);
+    assertThat(roundtrip.geopolitical_units()).containsExactlyElementsIn(fromPython.geopolitical_units());
+    assertThat(roundtrip.parties()).containsExactlyElementsIn(fromPython.parties());
+    assertThat(roundtrip.candidates()).containsExactlyElementsIn(fromPython.candidates());
+    assertThat(roundtrip.contests()).containsExactlyElementsIn(fromPython.contests());
+    assertThat(roundtrip.ballot_styles()).containsExactlyElementsIn(fromPython.ballot_styles());
 
-    assertThat(roundtrip.name).isEqualTo(fromPython.name);
-    assertThat(roundtrip.contact_information).isEqualTo(fromPython.contact_information);
+    assertThat(roundtrip.name()).isEqualTo(fromPython.name());
+    assertThat(roundtrip.contact_information()).isEqualTo(fromPython.contact_information());
 
     assertThat(roundtrip).isEqualTo(fromPython);
   }

@@ -55,10 +55,10 @@ public class TestUtils {
   /** Generates a fake ChaumPedersenProof. */
   public static ChaumPedersen.ChaumPedersenProof chaum_pedersen_proof() {
     ElGamal.KeyPair  keypair = ElGamal.elgamal_keypair_from_secret(TWO_MOD_Q).orElseThrow();
-    ElGamal.Ciphertext message = ElGamal.elgamal_encrypt(0, ONE_MOD_Q, keypair.public_key).orElseThrow();
-    ElementModP decryption = message.partial_decrypt(keypair.secret_key);
+    ElGamal.Ciphertext message = ElGamal.elgamal_encrypt(0, ONE_MOD_Q, keypair.public_key()).orElseThrow();
+    ElementModP decryption = message.partial_decrypt(keypair.secret_key());
 
-    return make_chaum_pedersen(message, keypair.secret_key, decryption, TWO_MOD_Q, ONE_MOD_Q);
+    return make_chaum_pedersen(message, keypair.secret_key(), decryption, TWO_MOD_Q, ONE_MOD_Q);
   }
 
 

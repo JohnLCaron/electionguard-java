@@ -87,9 +87,9 @@ class DecryptWithSecrets {
       nonce = selection.nonce;
     } else {
       Nonces nonce_sequence = new Nonces(description.crypto_hash(), nonce_seed.get());
-      nonce = Optional.of(nonce_sequence.get(description.sequence_order));
+      nonce = Optional.of(nonce_sequence.get(description.sequence_order()));
       logger.atFine().log("decrypt_selection_with_nonce %n  %s%n  %s%n  %d%n%s%n",
-              description.crypto_hash(), nonce_seed, description.sequence_order, nonce);
+              description.crypto_hash(), nonce_seed, description.sequence_order(), nonce);
     }
 
     if (nonce.isEmpty()) {
@@ -119,8 +119,8 @@ class DecryptWithSecrets {
   /**
    * Decrypt the specified `CiphertextBallotContest` within the context of the specified contest.
    * <p>
-   * @param contest: the contest to decrypt
-   * @param description: the qualified contest description that includes placeholder selections
+   * @param contestb: the ballot contest to decrypt
+   * @param contestp: the qualified contest description that includes placeholder selections
    * @param public_key: the public key for the election (K)
    * @param secret_key: the known secret key used to generate the public key for this election
    * @param crypto_extended_base_hash: the extended base hash code (𝑄') for the election
@@ -128,8 +128,8 @@ class DecryptWithSecrets {
    * @param remove_placeholders: filter out placeholder ciphertext selections after decryption
    */
   static Optional<PlaintextBallot.Contest> decrypt_contest_with_secret(
-          CiphertextBallot.Contest contest,
-          ContestWithPlaceholders description,
+          CiphertextBallot.Contest contestb,
+          ContestWithPlaceholders contestp,
           ElementModP public_key,
           ElementModQ secret_key,
           ElementModQ crypto_extended_base_hash,
@@ -138,14 +138,14 @@ class DecryptWithSecrets {
     ) {
 
     if (!suppress_validity_check &&
-            !contest.is_valid_encryption(description.crypto_hash(), public_key, crypto_extended_base_hash)) {
-      logger.atWarning().log("contest: %s failed secret validity check", contest.object_id);
+            !contestb.is_valid_encryption(contestp.contest.crypto_hash(), public_key, crypto_extended_base_hash)) {
+      logger.atWarning().log("contest: %s failed secret validity check", contestb.object_id);
       return Optional.empty();
     }
     List<PlaintextBallot.Selection> plaintext_selections = new ArrayList<>();
-    for (CiphertextBallot.Selection selection : contest.ballot_selections) {
+    for (CiphertextBallot.Selection selection : contestb.ballot_selections) {
       Manifest.SelectionDescription selection_description =
-              description.getSelectionById(selection.object_id()).orElseThrow(IllegalStateException::new);
+              contestp.getSelectionById(selection.object_id()).orElseThrow(IllegalStateException::new);
       Optional<PlaintextBallot.Selection> plaintext_selection = decrypt_selection_with_secret(
               selection,
               selection_description,
@@ -160,14 +160,14 @@ class DecryptWithSecrets {
       } else {
         logger.atWarning().log(
                 "decryption with secret failed for contest: %s selection: %s",
-                contest.object_id, selection.object_id());
+                contestb.object_id, selection.object_id());
         return Optional.empty();
       }
     }
 
     return Optional.of(new PlaintextBallot.Contest(
-            contest.object_id(),
-            contest.sequence_order(),
+            contestb.object_id(),
+            contestb.sequence_order(),
             plaintext_selections));
   }
 
@@ -194,7 +194,7 @@ class DecryptWithSecrets {
     ) {
 
     if (!suppress_validity_check && !contest.is_valid_encryption(
-            description.crypto_hash(), public_key, crypto_extended_base_hash)) {
+            description.contest.crypto_hash(), public_key, crypto_extended_base_hash)) {
       logger.atWarning().log("contest: %s failed nonce validity check", contest.object_id);
       return Optional.empty();
     }
@@ -204,10 +204,10 @@ class DecryptWithSecrets {
       logger.atFine().log("decrypt_contest_with_nonce empty %n  %s%n", nonce_seed);
 
     } else {
-      Nonces nonce_sequence = new Nonces(description.crypto_hash(), nonce_seed.get());
-      ElementModQ result = nonce_sequence.get(description.sequence_order);
+      Nonces nonce_sequence = new Nonces(description.contest.crypto_hash(), nonce_seed.get());
+      ElementModQ result = nonce_sequence.get(description.contest.sequence_order());
       logger.atFine().log("decrypt_contest_with_nonce %n  %s%n  %s%n  %d%n%s%n",
-              description.crypto_hash(), nonce_seed, description.sequence_order, result);
+              description.contest.crypto_hash(), nonce_seed, description.contest.sequence_order(), result);
       nonce_seed = Optional.of(result);
     }
 
@@ -274,7 +274,7 @@ class DecryptWithSecrets {
     ) {
 
     if (!suppress_validity_check && !ballot.is_valid_encryption(
-            metadata.manifest.crypto_hash, public_key, crypto_extended_base_hash)) {
+            metadata.manifest.crypto_hash(), public_key, crypto_extended_base_hash)) {
       logger.atWarning().log("ballot: %s failed secret validity check", ballot.object_id());
       return Optional.empty();
     }
@@ -327,14 +327,14 @@ class DecryptWithSecrets {
     ) {
 
     if (!suppress_validity_check && !ballot.is_valid_encryption(
-            metadata.manifest.crypto_hash, public_key, crypto_extended_base_hash)) {
+            metadata.manifest.crypto_hash(), public_key, crypto_extended_base_hash)) {
       logger.atWarning().log("ballot: %s failed nonce validity check", ballot.object_id());
       return Optional.empty();
     }
 
     // Use the hashed representation included in the ballot or override with the provided values
     Optional<ElementModQ> nonce_seed = nonce.isEmpty() ? ballot.hashed_ballot_nonce() :
-            Optional.of(CiphertextBallot.nonce_seed(metadata.manifest.crypto_hash, ballot.object_id(), nonce.get()));
+            Optional.of(CiphertextBallot.nonce_seed(metadata.manifest.crypto_hash(), ballot.object_id(), nonce.get()));
 
     if (nonce_seed.isEmpty()) {
       logger.atWarning().log(

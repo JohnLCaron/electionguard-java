@@ -99,6 +99,7 @@ message ContestDescription {
   repeated SelectionDescription ballot_selections = 8;
   InternationalizedText ballot_title = 9;
   InternationalizedText ballot_subtitle = 10;
+  repeated string primary_party_ids = 11;
 }
 
 message ContestDescriptionWithPlaceholders {

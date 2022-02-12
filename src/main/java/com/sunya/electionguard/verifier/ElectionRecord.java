@@ -71,11 +71,8 @@ public class ElectionRecord {
     } */
 
     ImmutableMap.Builder<String, Integer> builder = ImmutableMap.builder();
-    for (Manifest.ContestDescription contest : election.contests) {
-      builder.put(contest.object_id,
-              // LOOK why optional? comment says "In n-of-m elections, this will be None."
-              contest.votes_allowed.orElseThrow(() -> new IllegalStateException(
-                      String.format("Contest description %s does not have number of allowed votes", contest.object_id))));
+    for (Manifest.ContestDescription contest : election.contests()) {
+      builder.put(contest.object_id(), contest.votes_allowed());
     }
     contestVoteLimits = builder.build();
   }

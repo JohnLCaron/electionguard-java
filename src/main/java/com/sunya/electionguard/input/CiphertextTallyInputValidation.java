@@ -18,7 +18,7 @@ public class CiphertextTallyInputValidation {
   private final Map<String, ElectionContest> contestMap;
 
   public CiphertextTallyInputValidation(Manifest election) {
-    this.contestMap = election.contests.stream().collect(Collectors.toMap(c -> c.object_id, ElectionContest::new));
+    this.contestMap = election.contests().stream().collect(Collectors.toMap(c -> c.object_id(), ElectionContest::new));
   }
 
   /** Determine if a tally is valid and well-formed for the given election manifest. */
@@ -95,13 +95,13 @@ public class CiphertextTallyInputValidation {
     private final Map<String, Manifest.SelectionDescription> selectionMap;
 
     ElectionContest(Manifest.ContestDescription electionContest) {
-      this.contestId = electionContest.object_id;
+      this.contestId = electionContest.object_id();
       this.cryptoHash = electionContest.crypto_hash();
-      this.allowed = electionContest.votes_allowed.orElse(0); // LOOK or else what?
+      this.allowed = electionContest.votes_allowed();
       // allow same object id
       this.selectionMap = new HashMap<>();
-      for (Manifest.SelectionDescription sel : electionContest.ballot_selections) {
-        this.selectionMap.put(sel.object_id, sel);
+      for (Manifest.SelectionDescription sel : electionContest.ballot_selections()) {
+        this.selectionMap.put(sel.object_id(), sel);
       }
     }
   }

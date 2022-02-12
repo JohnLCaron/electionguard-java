@@ -9,6 +9,7 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
+import com.sunya.electionguard.AvailableGuardian;
 import com.sunya.electionguard.BallotBox;
 import com.sunya.electionguard.Encrypt;
 import com.sunya.electionguard.GuardianRecord;
@@ -35,39 +36,57 @@ class GsonTypeAdapters {
 
   static Gson enhancedGson() {
     return new GsonBuilder().setPrettyPrinting().serializeNulls()
-            .registerTypeAdapter(BigInteger.class, new BigIntegerDeserializer())
-            .registerTypeAdapter(BigInteger.class, new BigIntegerSerializer())
-            .registerTypeAdapter(Group.ElementModQ.class, new ModQDeserializer())
-            .registerTypeAdapter(Group.ElementModQ.class, new ModQSerializer())
-            .registerTypeAdapter(Group.ElementModP.class, new ModPDeserializer())
-            .registerTypeAdapter(Group.ElementModP.class, new ModPSerializer())
-            .registerTypeAdapter(Manifest.class, new ManifestSerializer())
-            .registerTypeAdapter(Manifest.class, new ManifestDeserializer())
-            .registerTypeAdapter(GuardianRecord.class, new GuardianRecordSerializer())
-            .registerTypeAdapter(GuardianRecord.class, new GuardianRecordDeserializer())
-            .registerTypeAdapter(GuardianPrivateRecord.class, new GuardianRecordPrivateSerializer())
-            .registerTypeAdapter(GuardianPrivateRecord.class, new GuardianRecordPrivateDeserializer())
-            .registerTypeAdapter(SubmittedBallot.class, new CiphertextBallotSerializer())
-            .registerTypeAdapter(SubmittedBallot.class, new CiphertextBallotDeserializer())
-            .registerTypeAdapter(PlaintextBallot.class, new PlaintextBallotSerializer())
-            .registerTypeAdapter(PlaintextBallot.class, new PlaintextBallotDeserializer())
-            .registerTypeAdapter(PlaintextTally.class, new PlaintextTallySerializer())
-            .registerTypeAdapter(PlaintextTally.class, new PlaintextTallyDeserializer())
-            .registerTypeAdapter(CiphertextTally.class, new CiphertextTallySerializer())
-            .registerTypeAdapter(CiphertextTally.class, new CiphertextTallyDeserializer())
-            .registerTypeAdapter(Encrypt.EncryptionDevice.class, new EncryptionDeviceSerializer())
-            .registerTypeAdapter(Encrypt.EncryptionDevice.class, new EncryptionDeviceDeserializer())
+            .registerTypeAdapter(AvailableGuardian.class, new AvailableGuardianSerializer())
+            .registerTypeAdapter(AvailableGuardian.class, new AvailableGuardianDeserializer())
             .registerTypeAdapter(BallotBox.State.class, new BallotBoxStateSerializer())
             .registerTypeAdapter(BallotBox.State.class, new BallotBoxStateDeserializer())
+            .registerTypeAdapter(BigInteger.class, new BigIntegerDeserializer())
+            .registerTypeAdapter(BigInteger.class, new BigIntegerSerializer())
             .registerTypeAdapter(Boolean.class, new BooleanSerializer())
             .registerTypeAdapter(Boolean.class, new BooleanDeserializer())
             .registerTypeAdapter(Coefficients.class, new CoefficientsSerializer())
             .registerTypeAdapter(Coefficients.class, new CoefficientsDeserializer())
+            .registerTypeAdapter(CiphertextTally.class, new CiphertextTallySerializer())
+            .registerTypeAdapter(CiphertextTally.class, new CiphertextTallyDeserializer())
+            .registerTypeAdapter(Encrypt.EncryptionDevice.class, new EncryptionDeviceSerializer())
+            .registerTypeAdapter(Encrypt.EncryptionDevice.class, new EncryptionDeviceDeserializer())
+            .registerTypeAdapter(Group.ElementModQ.class, new ModQDeserializer())
+            .registerTypeAdapter(Group.ElementModQ.class, new ModQSerializer())
+            .registerTypeAdapter(Group.ElementModP.class, new ModPDeserializer())
+            .registerTypeAdapter(Group.ElementModP.class, new ModPSerializer())
+            .registerTypeAdapter(GuardianRecord.class, new GuardianRecordSerializer())
+            .registerTypeAdapter(GuardianRecord.class, new GuardianRecordDeserializer())
+            .registerTypeAdapter(GuardianPrivateRecord.class, new GuardianRecordPrivateSerializer())
+            .registerTypeAdapter(GuardianPrivateRecord.class, new GuardianRecordPrivateDeserializer())
             .registerTypeAdapter(Integer.class, new IntegerSerializer())
             .registerTypeAdapter(Integer.class, new IntegerDeserializer())
             .registerTypeAdapter(Long.class, new LongSerializer())
             .registerTypeAdapter(Long.class, new LongDeserializer())
+            .registerTypeAdapter(Manifest.class, new ManifestSerializer())
+            .registerTypeAdapter(Manifest.class, new ManifestDeserializer())
+            .registerTypeAdapter(PlaintextBallot.class, new PlaintextBallotSerializer())
+            .registerTypeAdapter(PlaintextBallot.class, new PlaintextBallotDeserializer())
+            .registerTypeAdapter(PlaintextTally.class, new PlaintextTallySerializer())
+            .registerTypeAdapter(PlaintextTally.class, new PlaintextTallyDeserializer())
+            .registerTypeAdapter(SubmittedBallot.class, new CiphertextBallotSerializer())
+            .registerTypeAdapter(SubmittedBallot.class, new CiphertextBallotDeserializer())
             .create();
+  }
+
+  private static class AvailableGuardianDeserializer implements JsonDeserializer<AvailableGuardian> {
+    @Override
+    public AvailableGuardian deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+            throws JsonParseException {
+      return AvailableGuardianPojo.deserialize(json);
+    }
+  }
+
+
+  private static class AvailableGuardianSerializer implements JsonSerializer<AvailableGuardian> {
+    @Override
+    public JsonElement serialize(AvailableGuardian src, Type typeOfSrc, JsonSerializationContext context) {
+      return AvailableGuardianPojo.serialize(src);
+    }
   }
 
   private static class BigIntegerDeserializer implements JsonDeserializer<BigInteger> {
@@ -76,6 +95,14 @@ class GsonTypeAdapters {
             throws JsonParseException {
       String content = json.getAsJsonPrimitive().getAsString();
       return new BigInteger(content, 16);
+    }
+  }
+
+
+  private static class BigIntegerSerializer implements JsonSerializer<BigInteger> {
+    @Override
+    public JsonElement serialize(BigInteger src, Type typeOfSrc, JsonSerializationContext context) {
+      return new JsonPrimitive(Group.int_to_p_unchecked(src).to_hex());
     }
   }
 
@@ -94,13 +121,6 @@ class GsonTypeAdapters {
             throws JsonParseException {
       String content = json.getAsJsonPrimitive().getAsString();
       return Group.int_to_p(new BigInteger(content, 16)).orElseThrow(RuntimeException::new);
-    }
-  }
-
-  private static class BigIntegerSerializer implements JsonSerializer<BigInteger> {
-    @Override
-    public JsonElement serialize(BigInteger src, Type typeOfSrc, JsonSerializationContext context) {
-      return new JsonPrimitive(Group.int_to_p_unchecked(src).to_hex());
     }
   }
 

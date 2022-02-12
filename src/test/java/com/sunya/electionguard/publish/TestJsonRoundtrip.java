@@ -29,7 +29,7 @@ public class TestJsonRoundtrip {
 
     List<AvailableGuardian> ags = new ArrayList<>();
     for (int i=0; i<n; i++) {
-      ags.add(new AvailableGuardian("test"+i+1, i, coeffs.get(i)));
+      ags.add(new AvailableGuardian("test"+i+1, i+1, coeffs.get(i)));
     }
 
     // original
@@ -78,7 +78,7 @@ public class TestJsonRoundtrip {
     String outputFile = file.getAbsolutePath();
 
     // original
-    Encrypt.EncryptionDevice org = Encrypt.EncryptionDevice.createForTest("deviceTest");
+    Encrypt.EncryptionDevice org = Encrypt.createDeviceForTest("deviceTest");
     // write json
     ConvertToJson.writeDevice(org, file.toPath());
     // read it back

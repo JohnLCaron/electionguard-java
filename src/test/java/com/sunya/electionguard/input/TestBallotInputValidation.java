@@ -310,11 +310,11 @@ public class TestBallotInputValidation {
 
   void testEncrypt(ElectionAndBallot eandb, boolean expectValid) {
     ElGamal.KeyPair keypair = elgamal_keypair_from_secret(int_to_q_unchecked(BigInteger.TWO)).orElseThrow();
-    ElectionBuilder.DescriptionAndContext tuple = ElectionFactory.get_fake_ciphertext_election(eandb.election, keypair.public_key).orElseThrow();
+    ElectionBuilder.DescriptionAndContext tuple = ElectionFactory.get_fake_ciphertext_election(eandb.election, keypair.public_key()).orElseThrow();
     CiphertextElectionContext context = tuple.context;
 
     InternalManifest metadata = new InternalManifest(eandb.election);
-    Encrypt.EncryptionDevice device = Encrypt.EncryptionDevice.createForTest("device");
+    Encrypt.EncryptionDevice device = Encrypt.createDeviceForTest("device");
 
     Encrypt.EncryptionMediator encryptor = new Encrypt.EncryptionMediator(metadata, context, device);
     try {

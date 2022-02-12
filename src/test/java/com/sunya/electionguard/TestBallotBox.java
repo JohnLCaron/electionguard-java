@@ -11,7 +11,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 
 public class TestBallotBox {
-  private static final ElementModQ SEED_HASH = Encrypt.EncryptionDevice.createForTest("Location").get_hash();
+  private static final ElementModQ SEED_HASH = Encrypt.createDeviceForTest("Location").get_hash();
 
   InternalManifest metadata;
   CiphertextElectionContext context;
@@ -24,13 +24,13 @@ public class TestBallotBox {
             .orElseThrow(RuntimeException::new);
 
     Manifest election = ElectionFactory.get_fake_manifest();
-    ElectionBuilder.DescriptionAndContext tuple = ElectionFactory.get_fake_ciphertext_election(election, keypair.public_key).orElseThrow();
+    ElectionBuilder.DescriptionAndContext tuple = ElectionFactory.get_fake_ciphertext_election(election, keypair.public_key()).orElseThrow();
     this.metadata = tuple.internalManifest;
     context = tuple.context;
 
     source = ElectionFactory.get_fake_ballot(election, null);
-    assertThat(election.ballot_styles.isEmpty()).isFalse();
-    assertThat(source.is_valid(election.ballot_styles.get(0).object_id())).isTrue();
+    assertThat(election.ballot_styles().isEmpty()).isFalse();
+    assertThat(source.is_valid(election.ballot_styles().get(0).object_id())).isTrue();
 
     Optional<CiphertextBallot> dataO = Encrypt.encrypt_ballot(source, tuple.internalManifest, context, SEED_HASH, Optional.empty(), true);
     assertThat(dataO).isPresent();

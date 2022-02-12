@@ -92,11 +92,11 @@ public class SchnorrProof extends Proof {
    * @param nonce   A random element in [0,Q).
    */
   public static SchnorrProof make_schnorr_proof(ElGamal.KeyPair keypair, ElementModQ nonce) {
-    ElementModP k = keypair.public_key;
+    ElementModP k = keypair.public_key();
     ElementModP h = g_pow_p(nonce);
     // Changed validation spec 2.A. see issue #278
     ElementModQ c = Hash.hash_elems(k, h);
-    ElementModQ u = a_plus_bc_q(nonce, keypair.secret_key, c);
+    ElementModQ u = a_plus_bc_q(nonce, keypair.secret_key(), c);
     return new SchnorrProof(k, h, c, u);
   }
 }

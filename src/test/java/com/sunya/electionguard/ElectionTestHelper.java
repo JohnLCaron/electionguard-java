@@ -192,7 +192,7 @@ public class ElectionTestHelper {
   //     Generates an `AnnotatedString` object with one `Language` and an associated `value` string.
   Manifest.AnnotatedString annotated_strings() {
     Manifest.Language s = languages();
-    return new Manifest.AnnotatedString(s.language, s.value);
+    return new Manifest.AnnotatedString(s.language(), s.value());
   }
 
   /**
@@ -271,14 +271,9 @@ public class ElectionTestHelper {
             String.format("c-%s", candidate.object_id()), candidate.get_candidate_id(), sequence_order);
   }
 
-  public static class CandidateTuple {
-    final List<Manifest.Candidate> candidates;
-    final Manifest.ContestDescription contest; // CandidateContestDescription or ReferendumContestDescription
-
-    public CandidateTuple(List<Manifest.Candidate> candidates, Manifest.ContestDescription contest) {
-      this.candidates = candidates;
-      this.contest = contest;
-    }
+  public record CandidateTuple(
+          List<Manifest.Candidate> candidates,
+          Manifest.ContestDescription contest) {
   }
 
   /**
@@ -322,7 +317,7 @@ public class ElectionTestHelper {
 
     return new CandidateTuple(
             contest_candidates,
-            new Manifest.CandidateContestDescription(
+            new Manifest.ContestDescription(
                     randomString("CandidateContestDescription"),
                     drawList(geo_units).object_id(),
                     sequence_order,
@@ -385,7 +380,7 @@ public class ElectionTestHelper {
 
     return new CandidateTuple(
             contest_candidates,
-            new Manifest.ReferendumContestDescription(
+            new Manifest.ContestDescription(
                     randomString("CandidateContestDescription"),
                     drawList(geo_units).object_id(),
                     sequence_order,
@@ -395,7 +390,8 @@ public class ElectionTestHelper {
                     randomString("Name"),
                     selection_descriptions,
                     internationalized_texts(),
-                    internationalized_texts()));
+                    internationalized_texts(),
+                    ImmutableList.of()));
   }
 
   /**
@@ -456,7 +452,8 @@ public class ElectionTestHelper {
             contests,
             ImmutableList.of(styles),
             internationalized_texts(),
-            contact_infos());
+            contact_infos(),
+            null);
   }
 
   public List<PlaintextBallot> plaintext_voted_ballots(InternalManifest metadata, int count) {
@@ -470,21 +467,21 @@ public class ElectionTestHelper {
 
   /** Generates an arbitrary `PlaintextBallot` with the choices made randomly. */
   PlaintextBallot plaintext_voted_ballot(InternalManifest metadata) {
-    int num_ballot_styles = metadata.manifest.ballot_styles.size();
+    int num_ballot_styles = metadata.manifest.ballot_styles().size();
     assertWithMessage("invalid election with no ballot styles").that(num_ballot_styles > 0).isTrue();
 
           // pick a ballot style at random
-    Manifest.BallotStyle ballot_style = drawList(metadata.manifest.ballot_styles);
+    Manifest.BallotStyle ballot_style = drawList(metadata.manifest.ballot_styles());
 
     List<ContestWithPlaceholders> contests = metadata.get_contests_for_style(ballot_style.object_id());
     assertWithMessage("invalid ballot style with no contests in it").that(contests.size() > 0).isTrue();
 
     List<PlaintextBallot.Contest> voted_contests = new ArrayList<>();
-    for (ContestWithPlaceholders contest : contests) {
-      assertWithMessage("every contest needs to be valid").that(contest.is_valid()).isTrue();
+    for (ContestWithPlaceholders contestp : contests) {
+      assertWithMessage("every contest needs to be valid").that(contestp.is_valid()).isTrue();
       // LOOK dont understand "we need exactly this many 1 's, and the rest 0' s"
-      int n = contest.number_elected ; // we need exactly this many 1 's, and the rest 0' s
-      ArrayList<Manifest.SelectionDescription> ballot_selections = new ArrayList<>(contest.ballot_selections);
+      int n = contestp.contest.number_elected(); // we need exactly this many 1 's, and the rest 0' s
+      ArrayList<Manifest.SelectionDescription> ballot_selections = new ArrayList<>(contestp.contest.ballot_selections());
       assertThat(ballot_selections.size() >= n).isTrue();
       // LOOK shuffle leave this out for now.
       // Collections.shuffle(ballot_selections);
@@ -499,7 +496,7 @@ public class ElectionTestHelper {
       no_votes.stream().map(d -> Encrypt.selection_from(d, false, false))
               .forEach(voted_selections::add);
 
-      voted_contests.add(new PlaintextBallot.Contest(contest.object_id(), contest.sequence_order(), voted_selections));
+      voted_contests.add(new PlaintextBallot.Contest(contestp.contest.object_id(), contestp.contest.sequence_order(), voted_selections));
     }
 
     return new PlaintextBallot(randomString("PlaintextBallot"), ballot_style.object_id(), voted_contests);
@@ -523,11 +520,11 @@ public class ElectionTestHelper {
   CIPHERTEXT_ELECTIONS_TUPLE_TYPE ciphertext_elections(Manifest election_description) {
     ElGamal.KeyPair keypair = elgamal_keypairs();
     return new CIPHERTEXT_ELECTIONS_TUPLE_TYPE(
-            keypair.secret_key,
+            keypair.secret_key(),
             CiphertextElectionContext.create(
                     1,
                     1,
-                    keypair.public_key,
+                    keypair.public_key(),
                     election_description,
                     rand_q(), null));
   }

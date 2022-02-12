@@ -1,6 +1,7 @@
 package com.sunya.electionguard.publish;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
@@ -11,7 +12,9 @@ import java.lang.reflect.Type;
 import java.time.OffsetDateTime;
 import java.util.List;
 
-/** Helper class for conversion of Manifest description to/from Json, using python's object model. */
+/**
+ * Helper class for conversion of Manifest description to/from Json, using python's object model.
+ */
 public class ManifestPojo {
   public InternationalizedText name;
   public String election_scope_id;
@@ -54,6 +57,7 @@ public class ManifestPojo {
     public List<SelectionDescription> ballot_selections;
     public InternationalizedText ballot_title;
     public InternationalizedText ballot_subtitle;
+    public List<String> primary_party_ids;
   }
 
   public static class ContactInformation {
@@ -119,8 +123,8 @@ public class ManifestPojo {
             ConvertPojos.convertList(pojo.contests, ManifestPojo::convertContestDescription),
             ConvertPojos.convertList(pojo.ballot_styles, ManifestPojo::convertBallotStyle),
             convertInternationalizedText(pojo.name),
-            convertContactInformation(pojo.contact_information)
-    );
+            convertContactInformation(pojo.contact_information),
+            null);
   }
 
   @Nullable
@@ -181,7 +185,8 @@ public class ManifestPojo {
             pojo.name,
             ConvertPojos.convertList(pojo.ballot_selections, ManifestPojo::convertSelectionDescription),
             convertInternationalizedText(pojo.ballot_title),
-            convertInternationalizedText(pojo.ballot_subtitle));
+            convertInternationalizedText(pojo.ballot_subtitle),
+            pojo.primary_party_ids);
   }
 
   @Nullable
@@ -196,10 +201,9 @@ public class ManifestPojo {
             convertContactInformation(pojo.contact_information));
   }
 
-  @Nullable
   private static Manifest.InternationalizedText convertInternationalizedText(@Nullable ManifestPojo.InternationalizedText pojo) {
     if (pojo == null) {
-      return null;
+      return new Manifest.InternationalizedText(ImmutableList.of());
     }
     return new Manifest.InternationalizedText(ConvertPojos.convertList(pojo.text, ManifestPojo::convertLanguage));
   }
@@ -244,23 +248,28 @@ public class ManifestPojo {
   public static JsonElement serialize(Manifest src) {
     Gson gson = GsonTypeAdapters.enhancedGson();
     ManifestPojo pojo = convert(src);
-    Type typeOfSrc = new TypeToken<ManifestPojo>() {}.getType();
+    Type typeOfSrc = new TypeToken<ManifestPojo>() {
+    }.getType();
     return gson.toJsonTree(pojo, typeOfSrc);
   }
 
   private static ManifestPojo convert(Manifest org) {
     ManifestPojo pojo = new ManifestPojo();
-    pojo.election_scope_id = org.election_scope_id;
-    pojo.type = org.type.name();
-    pojo.start_date = org.start_date.toString();
-    pojo.end_date = org.end_date.toString();
-    pojo.geopolitical_units = ConvertPojos.convertList(org.geopolitical_units, ManifestPojo::convertGeopoliticalUnit);
-    pojo.parties = ConvertPojos.convertList(org.parties, ManifestPojo::convertParty);
-    pojo.candidates = ConvertPojos.convertList(org.candidates, ManifestPojo::convertCandidate);
-    pojo.contests = ConvertPojos.convertList(org.contests, ManifestPojo::convertContestDescription);
-    pojo.ballot_styles = ConvertPojos.convertList(org.ballot_styles, ManifestPojo::convertBallotStyle);
-    pojo.name = convertInternationalizedText(org.name.orElse(null));
-    pojo.contact_information = convertContactInformation(org.contact_information.orElse(null));
+    pojo.election_scope_id = org.election_scope_id();
+    pojo.type = org.type().name();
+    pojo.start_date = org.start_date().toString();
+    pojo.end_date = org.end_date().toString();
+    pojo.geopolitical_units = ConvertPojos.convertList(org.geopolitical_units(), ManifestPojo::convertGeopoliticalUnit);
+    pojo.parties = ConvertPojos.convertList(org.parties(), ManifestPojo::convertParty);
+    pojo.candidates = ConvertPojos.convertList(org.candidates(), ManifestPojo::convertCandidate);
+    pojo.contests = ConvertPojos.convertList(org.contests(), ManifestPojo::convertContestDescription);
+    pojo.ballot_styles = ConvertPojos.convertList(org.ballot_styles(), ManifestPojo::convertBallotStyle);
+    if (org.name() != null) {
+      pojo.name = convertInternationalizedText(org.name());
+    }
+    if (org.contact_information() != null) {
+      pojo.contact_information = convertContactInformation(org.contact_information());
+    }
 
     return pojo;
   }
@@ -271,8 +280,8 @@ public class ManifestPojo {
       return null;
     }
     ManifestPojo.AnnotatedString pojo = new ManifestPojo.AnnotatedString();
-    pojo.annotation = Strings.nullToEmpty(org.annotation);
-    pojo.value = Strings.nullToEmpty(org.value);
+    pojo.annotation = Strings.nullToEmpty(org.annotation());
+    pojo.value = Strings.nullToEmpty(org.value());
     return pojo;
   }
 
@@ -284,9 +293,11 @@ public class ManifestPojo {
     ManifestPojo.BallotStyle pojo = new ManifestPojo.BallotStyle();
 
     pojo.object_id = org.object_id();
-    pojo.geopolitical_unit_ids = ConvertPojos.convertList(org.geopolitical_unit_ids, Strings::nullToEmpty);
-    pojo.party_ids = ConvertPojos.convertList(org.party_ids, Strings::nullToEmpty);
-    pojo.image_uri = org.image_uri.orElse(null);
+    pojo.geopolitical_unit_ids = ConvertPojos.convertList(org.geopolitical_unit_ids(), Strings::nullToEmpty);
+    pojo.party_ids = ConvertPojos.convertList(org.party_ids(), Strings::nullToEmpty);
+    if (org.image_uri() != null) {
+      pojo.image_uri = org.image_uri();
+    }
     return pojo;
   }
 
@@ -297,10 +308,10 @@ public class ManifestPojo {
     }
     ManifestPojo.Candidate pojo = new ManifestPojo.Candidate();
     pojo.object_id = org.object_id();
-    pojo.name = convertInternationalizedText(org.name);
-    pojo.party_id = org.party_id.orElse(null);
-    pojo.image_uri = org.image_uri.orElse(null);
-    pojo.is_write_in = org.is_write_in;
+    pojo.name = convertInternationalizedText(org.name());
+    pojo.party_id = org.party_id();
+    pojo.image_uri = org.image_uri();
+    pojo.is_write_in = org.is_write_in();
     return pojo;
   }
 
@@ -310,10 +321,12 @@ public class ManifestPojo {
       return null;
     }
     ManifestPojo.ContactInformation pojo = new ManifestPojo.ContactInformation();
-    pojo.address_line = ConvertPojos.convertList(org.address_line, Strings::nullToEmpty);
-    pojo.email = ConvertPojos.convertList(org.email, ManifestPojo::convertAnnotatedString);
-    pojo.phone = ConvertPojos.convertList(org.phone, ManifestPojo::convertAnnotatedString);
-    pojo.name = org.name.orElse(null);
+    pojo.address_line = ConvertPojos.convertList(org.address_line(), Strings::nullToEmpty);
+    pojo.email = ConvertPojos.convertList(org.email(), ManifestPojo::convertAnnotatedString);
+    pojo.phone = ConvertPojos.convertList(org.phone(), ManifestPojo::convertAnnotatedString);
+    if (org.name() != null) {
+      pojo.name = org.name();
+    }
     return pojo;
   }
 
@@ -323,16 +336,21 @@ public class ManifestPojo {
       return null;
     }
     ManifestPojo.ContestDescription pojo = new ManifestPojo.ContestDescription();
-    pojo.object_id = org.object_id;
-    pojo.electoral_district_id = org.electoral_district_id;
-    pojo.sequence_order = org.sequence_order;
-    pojo.vote_variation = org.vote_variation.name();
-    pojo.number_elected = org.number_elected;
-    pojo.votes_allowed = org.votes_allowed.orElse(null);
-    pojo.name = org.name;
-    pojo.ballot_selections = ConvertPojos.convertList(org.ballot_selections, ManifestPojo::convertSelectionDescription);
-    pojo.ballot_title = convertInternationalizedText(org.ballot_title.orElse(null));
-    pojo.ballot_subtitle = convertInternationalizedText(org.ballot_subtitle.orElse(null));
+    pojo.object_id = org.object_id();
+    pojo.electoral_district_id = org.electoral_district_id();
+    pojo.sequence_order = org.sequence_order();
+    pojo.vote_variation = org.vote_variation().name();
+    pojo.number_elected = org.number_elected();
+    pojo.votes_allowed = org.votes_allowed();
+    pojo.name = org.name();
+    pojo.ballot_selections = ConvertPojos.convertList(org.ballot_selections(), ManifestPojo::convertSelectionDescription);
+    if (org.ballot_title() != null) {
+      pojo.ballot_title = convertInternationalizedText(org.ballot_title());
+    }
+    if (org.ballot_subtitle() != null) {
+      pojo.ballot_subtitle = convertInternationalizedText(org.ballot_subtitle());
+    }
+    pojo.primary_party_ids = org.primary_party_ids();
     return pojo;
   }
 
@@ -343,9 +361,11 @@ public class ManifestPojo {
     }
     ManifestPojo.GeopoliticalUnit pojo = new ManifestPojo.GeopoliticalUnit();
     pojo.object_id = org.object_id();
-    pojo.name = org.name;
-    pojo.type = org.type.name();
-    pojo.contact_information = convertContactInformation(org.contact_information.orElse(null));
+    pojo.name = org.name();
+    pojo.type = org.type().name();
+    if (org.contact_information() != null) {
+      pojo.contact_information = convertContactInformation(org.contact_information());
+    }
     return pojo;
   }
 
@@ -355,7 +375,7 @@ public class ManifestPojo {
       return null;
     }
     ManifestPojo.InternationalizedText pojo = new ManifestPojo.InternationalizedText();
-    pojo.text = ConvertPojos.convertList(org.text, ManifestPojo::convertLanguage);
+    pojo.text = ConvertPojos.convertList(org.text(), ManifestPojo::convertLanguage);
     return pojo;
   }
 
@@ -365,8 +385,8 @@ public class ManifestPojo {
       return null;
     }
     ManifestPojo.Language pojo = new ManifestPojo.Language();
-    pojo.value = Strings.nullToEmpty(org.value);
-    pojo.language = Strings.nullToEmpty(org.language);
+    pojo.value = Strings.nullToEmpty(org.value());
+    pojo.language = Strings.nullToEmpty(org.language());
     return pojo;
   }
 
@@ -377,10 +397,16 @@ public class ManifestPojo {
     }
     ManifestPojo.Party pojo = new ManifestPojo.Party();
     pojo.object_id = org.object_id();
-    pojo.ballot_name = convertInternationalizedText(org.name);
-    pojo.abbreviation = org.abbreviation.orElse(null);
-    pojo.color = org.color.orElse(null);
-    pojo.logo_uri = org.logo_uri.orElse(null);
+    pojo.ballot_name = convertInternationalizedText(org.name());
+    if (org.abbreviation() != null) {
+      pojo.abbreviation = org.abbreviation();
+    }
+    if (org.color() != null) {
+      pojo.color = org.color();
+    }
+    if (org.logo_uri() != null) {
+      pojo.logo_uri = org.logo_uri();
+    }
     return pojo;
   }
 
@@ -390,9 +416,9 @@ public class ManifestPojo {
       return null;
     }
     ManifestPojo.SelectionDescription pojo = new ManifestPojo.SelectionDescription();
-    pojo.object_id = org.object_id;
-    pojo.candidate_id = org.candidate_id;
-    pojo.sequence_order = org.sequence_order;
+    pojo.object_id = org.object_id();
+    pojo.candidate_id = org.candidate_id();
+    pojo.sequence_order = org.sequence_order();
     return pojo;
   }
 

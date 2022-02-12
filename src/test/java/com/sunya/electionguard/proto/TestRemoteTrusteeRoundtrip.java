@@ -70,12 +70,12 @@ public class TestRemoteTrusteeRoundtrip {
     DecryptingTrustee roundtrip = publisher.readRemoteTrustee(trusteeProto.getGuardianId());
     assertThat(roundtrip.id()).isEqualTo(org.id);
     assertThat(roundtrip.xCoordinate()).isEqualTo(org.xCoordinate);
-    assertThat(roundtrip.election_keypair).isEqualTo(org.secrets().election_key_pair);
-    assertThat(roundtrip.otherGuardianPartialKeyBackups).isEqualTo(org.otherGuardianPartialKeyBackups);
+    assertThat(roundtrip.election_keypair()).isEqualTo(org.secrets().election_key_pair);
+    assertThat(roundtrip.otherGuardianPartialKeyBackups()).isEqualTo(org.otherGuardianPartialKeyBackups);
 
     Map<String, List<Group.ElementModP>> expected = org.allGuardianPublicKeys.entrySet().stream()
             .collect(Collectors.toMap(Map.Entry::getKey,
                     e -> e.getValue().coefficientCommitments()));
-    assertThat(roundtrip.guardianCommittments).isEqualTo(expected);
+    assertThat(roundtrip.guardianCommittments()).isEqualTo(expected);
   }
 }

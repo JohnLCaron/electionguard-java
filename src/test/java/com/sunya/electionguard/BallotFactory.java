@@ -37,7 +37,7 @@ public class BallotFactory {
     List<PlaintextBallot.Selection> selections = new ArrayList<>();
     int voted = 0;
 
-    for (Manifest.SelectionDescription selection_description : description.ballot_selections) {
+    for (Manifest.SelectionDescription selection_description : description.ballot_selections()) {
       PlaintextBallot.Selection selection = get_random_selection_from(selection_description);
       // the caller may force a true value
       voted += selection.vote;
@@ -47,7 +47,7 @@ public class BallotFactory {
       }
 
       // Possibly append the true selection, indicating an undervote
-      if (voted <= description.number_elected && TestUtils.randomBool()) {
+      if (voted <= description.number_elected() && TestUtils.randomBool()) {
         selections.add(selection);
         // Possibly append the false selections as well, indicating some choices may be explicitly false
       } else if (TestUtils.randomBool()) {
@@ -65,10 +65,10 @@ public class BallotFactory {
           boolean with_trues) { // default true
 
     Preconditions.checkNotNull(ballot_id);
-    String ballotStyleId = metadata.manifest.ballot_styles.get(0).object_id();
+    String ballotStyleId = metadata.manifest.ballot_styles().get(0).object_id();
     List<PlaintextBallot.Contest> contests = new ArrayList<>();
-    for (ContestWithPlaceholders contest : metadata.get_contests_for_style(ballotStyleId)) {
-      contests.add(this.get_random_contest_from(contest, true, with_trues));
+    for (ContestWithPlaceholders contestp : metadata.get_contests_for_style(ballotStyleId)) {
+      contests.add(this.get_random_contest_from(contestp.contest, true, with_trues));
     }
 
     return new PlaintextBallot(ballot_id, ballotStyleId, contests);

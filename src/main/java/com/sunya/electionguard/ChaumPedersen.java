@@ -69,8 +69,8 @@ public class ChaumPedersen {
      * @param qbar: The extended base hash of the election
      */
     boolean is_valid(ElGamal.Ciphertext message, ElementModP k, ElementModQ qbar) {
-      ElementModP alpha = message.pad;
-      ElementModP beta = message.data;
+      ElementModP alpha = message.pad();
+      ElementModP beta = message.data();
 
       ElementModP a0 = this.proof_zero_pad;
       ElementModP b0 = this.proof_zero_data;
@@ -173,8 +173,8 @@ public class ChaumPedersen {
      * @param q: The extended base hash of the election
      */
     public boolean is_valid(ElGamal.Ciphertext message, ElementModP k, ElementModP m, ElementModQ q) {
-      ElementModP alpha = message.pad;
-      ElementModP beta = message.data;
+      ElementModP alpha = message.pad();
+      ElementModP beta = message.data();
       ElementModP a = this.pad;
       ElementModP b = this.data;
       ElementModQ c = this.challenge;
@@ -268,8 +268,8 @@ public class ChaumPedersen {
      */
     boolean is_valid(ElGamal.Ciphertext message, ElementModP k, ElementModQ q) {
 
-      ElementModP alpha = message.pad;
-      ElementModP beta = message.data;
+      ElementModP alpha = message.pad();
+      ElementModP beta = message.data();
       ElementModP a = this.pad;
       ElementModP b = this.data;
       ElementModQ c = this.challenge;
@@ -381,8 +381,8 @@ public class ChaumPedersen {
           ElementModQ qbar,
           ElementModQ seed) {
 
-    ElementModP alpha = message.pad;
-    ElementModP beta = message.data;
+    ElementModP alpha = message.pad();
+    ElementModP beta = message.data();
 
     // Pick three random numbers in Q.
     Nonces nonces = new Nonces(seed, "disjoint-chaum-pedersen-proof");
@@ -421,8 +421,8 @@ public class ChaumPedersen {
           ElementModQ qbar,
           ElementModQ seed) {
 
-    ElementModP alpha = message.pad;
-    ElementModP beta = message.data;
+    ElementModP alpha = message.pad();
+    ElementModP beta = message.data();
 
     // Pick three random numbers in Q.
     Nonces nonces = new Nonces(seed, "disjoint-chaum-pedersen-proof");
@@ -463,8 +463,8 @@ public class ChaumPedersen {
           ElementModQ seed,
           ElementModQ hash_header) {
 
-    ElementModP alpha = message.pad;
-    ElementModP beta = message.data;
+    ElementModP alpha = message.pad();
+    ElementModP beta = message.data();
 
     // Pick one random number in Q.
     ElementModQ u = new Nonces(seed, "constant-chaum-pedersen-proof").get(0);
@@ -494,8 +494,8 @@ public class ChaumPedersen {
           ElementModQ seed,
           ElementModQ crypto_extended_base_hash) {
 
-    ElementModP alpha = message.pad;
-    ElementModP beta = message.data;
+    ElementModP alpha = message.pad();
+    ElementModP beta = message.data();
 
     // Pick one random number in Q.
     ElementModQ u = new Nonces(seed, "constant-chaum-pedersen-proof").get(0);
@@ -539,8 +539,8 @@ public class ChaumPedersen {
           ElementModQ qbar,
           ElementModQ seed) {
 
-    ElementModP alpha = message.pad;
-    ElementModP beta = message.data;
+    ElementModP alpha = message.pad();
+    ElementModP beta = message.data();
 
     // Pick three random numbers in Q.
     Nonces nonces = new Nonces(seed, "disjoint-chaum-pedersen-proof");
@@ -578,8 +578,8 @@ public class ChaumPedersen {
           ElementModQ qbar,
           ElementModQ seed) {
 
-    ElementModP alpha = message.pad;
-    ElementModP beta = message.data;
+    ElementModP alpha = message.pad();
+    ElementModP beta = message.data();
 
     // Pick three random numbers in Q.
     Nonces nonces = new Nonces(seed, "disjoint-chaum-pedersen-proof");

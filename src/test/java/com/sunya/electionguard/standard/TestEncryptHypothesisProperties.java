@@ -11,7 +11,6 @@ import com.sunya.electionguard.Nonces;
 import com.sunya.electionguard.PlaintextBallot;
 import com.sunya.electionguard.TallyTestHelper;
 import com.sunya.electionguard.TestProperties;
-import com.sunya.electionguard.standard.DecryptWithSecrets;
 import net.jqwik.api.ForAll;
 import net.jqwik.api.Property;
 import net.jqwik.api.ShrinkingMode;
@@ -24,7 +23,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 
 public class TestEncryptHypothesisProperties extends TestProperties {
-  private static final Group.ElementModQ SEED_HASH = Encrypt.EncryptionDevice.createForTest("Location").get_hash();
+  private static final Group.ElementModQ SEED_HASH = Encrypt.createDeviceForTest("Location").get_hash();
 
   /**
    * Tests that our Hypothesis election strategies generate "valid" output, also exercises the full stack
@@ -104,19 +103,20 @@ public class TestEncryptHypothesisProperties extends TestProperties {
 
     // loop through the contest descriptions and verify
     // the decrypted tallies match the plaintext tallies
-    for (ContestWithPlaceholders contest : everything.metadata.contests.values()) {
+    for (ContestWithPlaceholders contestp : everything.metadata.contests.values()) {
+      Manifest.ContestDescription contest = contestp.contest;
       // Sanity check the generated data
-      assertThat(contest.ballot_selections).isNotEmpty();
-      assertThat(contest.placeholder_selections).isNotEmpty();
+      assertThat(contest.ballot_selections()).isNotEmpty();
+      assertThat(contestp.placeholder_selections).isNotEmpty();
 
-      List<Integer> decrypted_selection_tallies = contest.ballot_selections.stream()
-              .map(s -> decrypted_tallies.get(s.object_id)).collect(Collectors.toList());
+      List<Integer> decrypted_selection_tallies = contest.ballot_selections().stream()
+              .map(s -> decrypted_tallies.get(s.object_id())).collect(Collectors.toList());
 
-      List<Integer> decrypted_placeholder_tallies = contest.placeholder_selections.stream()
-              .map(p -> decrypted_tallies.get(p.object_id)).collect(Collectors.toList());
+      List<Integer> decrypted_placeholder_tallies = contestp.placeholder_selections.stream()
+              .map(p -> decrypted_tallies.get(p.object_id())).toList();
 
-      List<Integer> plaintext_tally_values = contest.ballot_selections.stream()
-              .map(s -> plaintext_tallies.get(s.object_id)).collect(Collectors.toList());
+      List<Integer> plaintext_tally_values = contest.ballot_selections().stream()
+              .map(s -> plaintext_tallies.get(s.object_id())).collect(Collectors.toList());
 
       // verify the plaintext tallies match the decrypted tallies
       assertThat(decrypted_selection_tallies).isEqualTo(plaintext_tally_values);
@@ -124,7 +124,7 @@ public class TestEncryptHypothesisProperties extends TestProperties {
       // validate the right number of selections including placeholders across all ballots
       Integer total = decrypted_selection_tallies.stream().mapToInt(Integer::intValue).sum() +
                       decrypted_placeholder_tallies.stream().mapToInt(Integer::intValue).sum();
-      assertThat(contest.number_elected * num_ballots).isEqualTo(total);
+      assertThat(contest.number_elected() * num_ballots).isEqualTo(total);
     }
   }
 

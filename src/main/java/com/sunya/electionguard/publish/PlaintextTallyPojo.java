@@ -5,7 +5,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 import com.sunya.electionguard.ChaumPedersen;
 import com.sunya.electionguard.DecryptionShare;
-import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.PlaintextTally;
 
@@ -31,7 +30,7 @@ public class PlaintextTallyPojo {
     public String object_id;
     public Integer tally;
     public Group.ElementModP value;
-    public ElGamal.Ciphertext message;
+    public CiphertextTallyPojo.CiphertextPojo message;
     public List<CiphertextDecryptionSelectionPojo> shares;
   }
 
@@ -93,7 +92,7 @@ public class PlaintextTallyPojo {
             pojo.object_id,
             pojo.tally,
             pojo.value,
-            pojo.message,
+            CiphertextTallyPojo.translateCiphertext(pojo.message),
             ConvertPojos.convertList(pojo.shares, PlaintextTallyPojo::translateShare));
   }
 
@@ -173,7 +172,7 @@ public class PlaintextTallyPojo {
     pojo.object_id = org.object_id();
     pojo.tally = org.tally();
     pojo.value = org.value();
-    pojo.message = org.message();
+    pojo.message = CiphertextTallyPojo.convertCiphertext(org.message());
     pojo.shares = ConvertPojos.convertList(org.shares(), PlaintextTallyPojo::convertShare);
     return pojo;
   }

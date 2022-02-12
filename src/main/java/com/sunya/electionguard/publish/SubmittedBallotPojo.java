@@ -220,8 +220,8 @@ public class SubmittedBallotPojo {
 
   private static ElGamalCiphertextPojo convertCiphertext(ElGamal.Ciphertext ciphertext) {
     ElGamalCiphertextPojo pojo = new ElGamalCiphertextPojo();
-    pojo.pad = ciphertext.pad;
-    pojo.data = ciphertext.data;
+    pojo.pad = ciphertext.pad();
+    pojo.data = ciphertext.data();
     return pojo;
   }
 

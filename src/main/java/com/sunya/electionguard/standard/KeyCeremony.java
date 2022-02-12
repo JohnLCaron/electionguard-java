@@ -74,7 +74,7 @@ public class KeyCeremony {
       return new ElectionPublicKey(
               this.owner_id(),
               this.sequence_order(),
-              this.key_pair().public_key,
+              this.key_pair().public_key(),
               this.polynomial().coefficient_commitments,
               this.polynomial().coefficient_proofs);
     }

@@ -62,9 +62,9 @@ public class ElectionRecordToProto {
 
   static ElectionRecordProto.AvailableGuardian convertAvailableGuardian(AvailableGuardian guardian) {
     ElectionRecordProto.AvailableGuardian.Builder builder = ElectionRecordProto.AvailableGuardian.newBuilder();
-    builder.setGuardianId(guardian.guardian_id);
-    builder.setSequence(guardian.sequence);
-    builder.setLagrangeCoordinate(convertElementModQ(guardian.lagrangeCoordinate));
+    builder.setGuardianId(guardian.guardian_id());
+    builder.setSequence(guardian.sequence());
+    builder.setLagrangeCoordinate(convertElementModQ(guardian.lagrangeCoordinate()));
     return builder.build();
   }
 
@@ -94,10 +94,10 @@ public class ElectionRecordToProto {
 
   static ElectionRecordProto.EncryptionDevice convertDevice(Encrypt.EncryptionDevice device) {
     ElectionRecordProto.EncryptionDevice.Builder builder = ElectionRecordProto.EncryptionDevice.newBuilder();
-    builder.setDeviceId(device.device_id);
-    builder.setSessionId(device.session_id);
-    builder.setLaunchCode(device.launch_code);
-    builder.setLocation(device.location);
+    builder.setDeviceId(device.device_id());
+    builder.setSessionId(device.session_id());
+    builder.setLaunchCode(device.launch_code());
+    builder.setLocation(device.location());
     return builder.build();
   }
 

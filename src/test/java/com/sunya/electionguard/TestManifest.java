@@ -11,8 +11,8 @@ public class TestManifest {
   @Example
   public void test_simple_election_is_valid() throws IOException {
     Manifest subject = ElectionFactory.get_simple_election_from_file();
-    assertThat(subject.election_scope_id).isNotNull();
-    assertThat(subject.election_scope_id).isEqualTo("jefferson-county-primary");
+    assertThat(subject.election_scope_id()).isNotNull();
+    assertThat(subject.election_scope_id()).isEqualTo("jefferson-county-primary");
     assertThat(subject.is_valid()).isTrue();
   }
 
@@ -29,10 +29,10 @@ public class TestManifest {
     Manifest election = ElectionFactory.get_simple_election_from_file();
     InternalManifest metadata = new InternalManifest(election);
 
-    assertThat(election.contests.size()).isEqualTo(election.contests.size());
-    for (Manifest.ContestDescription expected : election.contests) {
-      Manifest.ContestDescription actual = metadata.getContestById(expected.object_id).orElseThrow();
-      assertThat(expected.crypto_hash()).isEqualTo(actual.crypto_hash());
+    assertThat(election.contests().size()).isEqualTo(election.contests().size());
+    for (Manifest.ContestDescription expected : election.contests()) {
+      InternalManifest.ContestWithPlaceholders actual = metadata.getContestById(expected.object_id()).orElseThrow();
+      assertThat(actual.contest.crypto_hash()).isEqualTo(expected.crypto_hash());
     }
   }
 

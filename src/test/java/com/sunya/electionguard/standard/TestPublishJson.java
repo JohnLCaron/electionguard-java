@@ -47,7 +47,7 @@ public class TestPublishJson {
     OffsetDateTime now = OffsetDateTime.now();
     Manifest election = new Manifest(
             "scope", Manifest.ElectionType.unknown, now, now, ImmutableList.of(), ImmutableList.of(),
-            ImmutableList.of(), ImmutableList.of(), ImmutableList.of(), null, null);
+            ImmutableList.of(), ImmutableList.of(), ImmutableList.of(), null, null, null);
     InternalManifest metadata = new InternalManifest(election);
 
     CiphertextElectionContext context = CiphertextElectionContext.create(1, 1, ONE_MOD_P, election, rand_q(), null);

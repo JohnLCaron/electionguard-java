@@ -144,7 +144,7 @@ public class EncryptBallots {
           }
           originalBallots.add(ballot);
         } else {
-          System.out.printf("Ballot %s failed validation%n   %s%n", ballot.object_id(), problems.toString());
+          System.out.printf("Ballot %s failed validation%n   %s%n", ballot.object_id(), problems);
           invalidBallots.add(ballot);
         }
       }
@@ -201,11 +201,11 @@ public class EncryptBallots {
 
     // Configure the Encryption Device
     InternalManifest metadata = new InternalManifest(electionRecord.election);
-    this.device = Encrypt.EncryptionDevice.createForTest(deviceName);
+    this.device = Encrypt.createDeviceForTest(deviceName);
     this.encryptor = new Encrypt.EncryptionMediator(metadata, electionRecord.context, this.device);
 
     this.ballotBox = new BallotBox(electionRecord.election, electionRecord.context);
-    System.out.printf("%nReady to encrypt with device: '%s'%n", this.device.location);
+    System.out.printf("%nReady to encrypt with device: '%s'%n", this.device.location());
   }
 
   Optional<CiphertextBallot> encryptBallot(PlaintextBallot plaintextBallot) {

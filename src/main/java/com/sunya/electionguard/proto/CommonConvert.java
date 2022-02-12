@@ -107,8 +107,8 @@ public class CommonConvert {
 
   public static CommonProto.ElGamalCiphertext convertCiphertext(ElGamal.Ciphertext ciphertext) {
     CommonProto.ElGamalCiphertext.Builder builder = CommonProto.ElGamalCiphertext.newBuilder();
-    builder.setPad(convertElementModP(ciphertext.pad));
-    builder.setData(convertElementModP(ciphertext.data));
+    builder.setPad(convertElementModP(ciphertext.pad()));
+    builder.setData(convertElementModP(ciphertext.data()));
     return builder.build();
   }
 
@@ -123,8 +123,8 @@ public class CommonConvert {
 
   public static CommonProto.ElGamalKeyPair convertElgamalKeypair(ElGamal.KeyPair keypair) {
     CommonProto.ElGamalKeyPair.Builder builder = CommonProto.ElGamalKeyPair.newBuilder();
-    builder.setSecretKey(CommonConvert.convertElementModQ(keypair.secret_key));
-    builder.setPublicKey(CommonConvert.convertElementModP(keypair.public_key));
+    builder.setSecretKey(CommonConvert.convertElementModQ(keypair.secret_key()));
+    builder.setPublicKey(CommonConvert.convertElementModP(keypair.public_key()));
     return builder.build();
   }
 

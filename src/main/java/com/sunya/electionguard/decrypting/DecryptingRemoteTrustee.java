@@ -199,9 +199,9 @@ class DecryptingRemoteTrustee extends DecryptingTrusteeServiceGrpc.DecryptingTru
 
   private DecryptingTrusteeProto.CompensatedDecryptionResult convertDecryptionProofRecovery(DecryptionProofRecovery tuple) {
     return DecryptingTrusteeProto.CompensatedDecryptionResult.newBuilder()
-            .setDecryption(CommonConvert.convertElementModP(tuple.decryption))
-            .setProof(CommonConvert.convertChaumPedersenProof(tuple.proof))
-            .setRecoveryPublicKey(CommonConvert.convertElementModP(tuple.recoveryPublicKey))
+            .setDecryption(CommonConvert.convertElementModP(tuple.decryption()))
+            .setProof(CommonConvert.convertChaumPedersenProof(tuple.proof()))
+            .setRecoveryPublicKey(CommonConvert.convertElementModP(tuple.recoveryPublicKey()))
             .build();
   }
 

@@ -204,19 +204,19 @@ public class RemoteDecryptions {
       for (CiphertextSelection tallySelection : tallyContest.selections.values()) {
         DecryptionProofRecovery tuple = results.get(count);
 
-        if (tuple.proof.is_valid(
+        if (tuple.proof().is_valid(
                 tallySelection.ciphertext(),
-                tuple.recoveryPublicKey,
-                tuple.decryption,
+                tuple.recoveryPublicKey(),
+                tuple.decryption(),
                 context.crypto_extended_base_hash)) {
 
           CiphertextCompensatedDecryptionSelection share = new CiphertextCompensatedDecryptionSelection(
                   tallySelection.object_id(),
                   guardian.id(),
                   missing_guardian_id,
-                  tuple.decryption,
-                  tuple.recoveryPublicKey,
-                  tuple.proof);
+                  tuple.decryption(),
+                  tuple.recoveryPublicKey(),
+                  tuple.proof());
 
           selections.put(tallySelection.object_id(), share);
           count++;
@@ -278,19 +278,19 @@ public class RemoteDecryptions {
       for (CiphertextBallot.Selection selection : ballotContest.ballot_selections) {
         DecryptionProofRecovery tuple = results.get(count);
 
-        if (tuple.proof.is_valid(
+        if (tuple.proof().is_valid(
                 selection.ciphertext(),
-                tuple.recoveryPublicKey,
-                tuple.decryption,
+                tuple.recoveryPublicKey(),
+                tuple.decryption(),
                 context.crypto_extended_base_hash)) {
 
           CiphertextCompensatedDecryptionSelection share = new CiphertextCompensatedDecryptionSelection(
                   selection.object_id(),
                   guardian.id(),
                   missing_guardian_id,
-                  tuple.decryption,
-                  tuple.recoveryPublicKey,
-                  tuple.proof);
+                  tuple.decryption(),
+                  tuple.recoveryPublicKey(),
+                  tuple.proof());
 
           selections.put(selection.object_id(), share);
           count++;

@@ -87,7 +87,7 @@ public class TestDecryptionMediator extends TestProperties {
     this.election = tuple.internalManifest.manifest;
     this.context = tuple.context;
 
-    Encrypt.EncryptionDevice encryption_device = Encrypt.EncryptionDevice.createForTest("location");
+    Encrypt.EncryptionDevice encryption_device = Encrypt.createDeviceForTest("location");
     Encrypt.EncryptionMediator ballot_marking_device = new Encrypt.EncryptionMediator(this.metadata, this.context, encryption_device);
 
     // get some fake ballots
@@ -104,8 +104,8 @@ public class TestDecryptionMediator extends TestProperties {
               ballot_factory.get_fake_ballot(this.metadata, "some-unique-ballot-id-spoiled" + i, true));
     }
 
-    assertThat(this.fake_cast_ballot.is_valid(this.election.ballot_styles.get(0).object_id())).isTrue();
-    assertThat(this.fake_spoiled_ballot.is_valid(this.election.ballot_styles.get(0).object_id())).isTrue();
+    assertThat(this.fake_cast_ballot.is_valid(this.election.ballot_styles().get(0).object_id())).isTrue();
+    assertThat(this.fake_spoiled_ballot.is_valid(this.election.ballot_styles().get(0).object_id())).isTrue();
     ArrayList<PlaintextBallot> all = new ArrayList<>(more_fake_ballots);
     all.add(this.fake_cast_ballot);
 
@@ -113,8 +113,8 @@ public class TestDecryptionMediator extends TestProperties {
 
     // Fill in the expected values with any missing selections
     // that were not made on any ballots
-    Set<String> selection_ids = this.election.contests.stream().flatMap(c -> c.ballot_selections.stream())
-            .map(s -> s.object_id).collect(Collectors.toSet());
+    Set<String> selection_ids = this.election.contests().stream().flatMap(c -> c.ballot_selections().stream())
+            .map(s -> s.object_id()).collect(Collectors.toSet());
     // missing_selection_ids = selection_ids.difference( set(this.expected_plaintext_tally) )
     Sets.SetView<String> missing_selection_ids = Sets.difference(selection_ids, this.expected_plaintext_tally.keySet());
     for (String id : missing_selection_ids) {
@@ -127,7 +127,7 @@ public class TestDecryptionMediator extends TestProperties {
     assertThat(temp_encrypted_fake_cast_ballot).isNotNull();
     assertThat(temp_encrypted_fake_spoiled_ballot).isNotNull();
     assertThat(temp_encrypted_fake_cast_ballot.is_valid_encryption(
-            this.election.crypto_hash,
+            this.election.crypto_hash(),
             this.joint_public_key.joint_public_key(),
             this.context.crypto_extended_base_hash))
             .isTrue();

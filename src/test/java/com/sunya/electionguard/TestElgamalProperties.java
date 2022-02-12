@@ -26,20 +26,20 @@ public class TestElgamalProperties extends TestProperties {
     ElementModQ nonce = ONE_MOD_Q;
     ElementModQ secret_key = TWO_MOD_Q;
     KeyPair keypair = elgamal_keypair_from_secret(secret_key).orElseThrow();
-    ElementModP public_key = keypair.public_key;
+    ElementModP public_key = keypair.public_key();
 
     assertThat(Group.lessThan(public_key.getBigInt(), Group.getPrimes().large_prime)).isTrue();
     ElementModP elem = g_pow_p(ZERO_MOD_Q);
     assertThat(elem).isEqualTo(ONE_MOD_P);  // g^0 == 1
 
-    Ciphertext ciphertext = elgamal_encrypt(0, nonce, keypair.public_key).orElseThrow();
-    assertThat(getPrimes().generator).isEqualTo(ciphertext.pad.getBigInt());
-    assertThat(pow_pi(ciphertext.pad.getBigInt(), secret_key.getBigInt()))
+    Ciphertext ciphertext = elgamal_encrypt(0, nonce, keypair.public_key()).orElseThrow();
+    assertThat(getPrimes().generator).isEqualTo(ciphertext.pad().getBigInt());
+    assertThat(pow_pi(ciphertext.pad().getBigInt(), secret_key.getBigInt()))
             .isEqualTo(pow_pi(public_key.getBigInt(), nonce.getBigInt()));
-    assertThat(ciphertext.data.getBigInt())
+    assertThat(ciphertext.data().getBigInt())
             .isEqualTo(pow_pi(public_key.getBigInt(), nonce.getBigInt()));
 
-    Integer plaintext = ciphertext.decrypt(keypair.secret_key);
+    Integer plaintext = ciphertext.decrypt(keypair.secret_key());
     assertThat(plaintext).isEqualTo(0);
   }
 
@@ -47,7 +47,7 @@ public class TestElgamalProperties extends TestProperties {
   public void test_elgamal_encrypt_requires_nonzero_nonce(
           @ForAll("elgamal_keypairs") ElGamal.KeyPair keypair,
           @ForAll @IntRange(min = 0, max = 100) int message) {
-      assertThat(elgamal_encrypt(message, ZERO_MOD_Q, keypair.public_key)).isEmpty();
+      assertThat(elgamal_encrypt(message, ZERO_MOD_Q, keypair.public_key())).isEmpty();
   }
 
   @Example
@@ -61,8 +61,8 @@ public class TestElgamalProperties extends TestProperties {
           @ForAll("elgamal_keypairs") ElGamal.KeyPair keypair,
           @ForAll @IntRange(min = 0, max = 100) int message,
           @ForAll("elements_mod_q_no_zero") ElementModQ nonce) {
-      Ciphertext ciphertext = elgamal_encrypt(message, nonce, keypair.public_key).orElseThrow();
-      Integer plaintext = ciphertext.decrypt(keypair.secret_key);
+      Ciphertext ciphertext = elgamal_encrypt(message, nonce, keypair.public_key()).orElseThrow();
+      Integer plaintext = ciphertext.decrypt(keypair.secret_key());
       assertThat(plaintext).isEqualTo(message);
   }
 
@@ -71,17 +71,17 @@ public class TestElgamalProperties extends TestProperties {
           @ForAll("elgamal_keypairs") ElGamal.KeyPair keypair,
           @ForAll @IntRange(min = 0, max = 100) int message,
           @ForAll("elements_mod_q_no_zero") ElementModQ nonce) {
-      Ciphertext ciphertext = elgamal_encrypt(message, nonce, keypair.public_key).orElseThrow();
-      Integer plaintext = ciphertext.decrypt_known_nonce(keypair.public_key, nonce);
+      Ciphertext ciphertext = elgamal_encrypt(message, nonce, keypair.public_key()).orElseThrow();
+      Integer plaintext = ciphertext.decrypt_known_nonce(keypair.public_key(), nonce);
       assertThat(plaintext).isEqualTo(message); // TODO FAILS
   }
 
   @Property
   public void test_elgamal_generated_keypairs_are_within_range(
           @ForAll("elgamal_keypairs") ElGamal.KeyPair keypair) {
-    assertThat(Group.lessThan(keypair.public_key.getBigInt(), Group.getPrimes().large_prime)).isTrue();
-    assertThat(Group.lessThan(keypair.secret_key.getBigInt(), Group.getPrimes().small_prime)).isTrue();
-    assertThat(g_pow_p(keypair.secret_key)).isEqualTo(keypair.public_key);
+    assertThat(Group.lessThan(keypair.public_key().getBigInt(), Group.getPrimes().large_prime)).isTrue();
+    assertThat(Group.lessThan(keypair.secret_key().getBigInt(), Group.getPrimes().small_prime)).isTrue();
+    assertThat(g_pow_p(keypair.secret_key())).isEqualTo(keypair.public_key());
   }
 
   @Property
@@ -91,10 +91,10 @@ public class TestElgamalProperties extends TestProperties {
           @ForAll("elements_mod_q_no_zero") ElementModQ r1,
           @ForAll @IntRange(min = 0, max = 100) int m2,
           @ForAll("elements_mod_q_no_zero") ElementModQ r2) {
-    Ciphertext c1 = elgamal_encrypt(m1, r1, keypair.public_key).orElseThrow();
-    Ciphertext c2 = elgamal_encrypt(m2, r2, keypair.public_key).orElseThrow();
+    Ciphertext c1 = elgamal_encrypt(m1, r1, keypair.public_key()).orElseThrow();
+    Ciphertext c2 = elgamal_encrypt(m2, r2, keypair.public_key()).orElseThrow();
     Ciphertext c_sum = elgamal_add(c1, c2);
-    Integer total = c_sum.decrypt(keypair.secret_key);
+    Integer total = c_sum.decrypt(keypair.secret_key());
     assertThat(total).isEqualTo(m1 + m2);
   }
 
@@ -111,7 +111,7 @@ public class TestElgamalProperties extends TestProperties {
   @Example
   public void test_elgamal_keypair_produces_valid_residue() {
     ElGamal.KeyPair keypair = TestUtils.elgamal_keypairs();
-    assertThat(keypair.public_key.is_valid_residue()).isTrue();
+    assertThat(keypair.public_key().is_valid_residue()).isTrue();
   }
 
   @Example
@@ -120,8 +120,8 @@ public class TestElgamalProperties extends TestProperties {
     ElGamal.KeyPair random_keypair_two = elgamal_keypair_random();
 
     assertThat(random_keypair).isNotNull();
-    assertThat(random_keypair.public_key).isNotNull();
-    assertThat(random_keypair.secret_key).isNotNull();
+    assertThat(random_keypair.public_key()).isNotNull();
+    assertThat(random_keypair.secret_key()).isNotNull();
     // TODO seems like this could fail
     assertThat(random_keypair).isNotEqualTo(random_keypair_two);
   }
@@ -132,11 +132,11 @@ public class TestElgamalProperties extends TestProperties {
     ElGamal.KeyPair random_keypair_two = elgamal_keypair_random();
 
     ElementModP joint_key = elgamal_combine_public_keys(
-            ImmutableList.of(random_keypair.public_key, random_keypair_two.public_key));
+            ImmutableList.of(random_keypair.public_key(), random_keypair_two.public_key()));
 
     assertThat(joint_key).isNotNull();
-    assertThat(joint_key).isNotEqualTo(random_keypair.public_key);
-    assertThat(joint_key).isNotEqualTo(random_keypair_two.public_key);
+    assertThat(joint_key).isNotEqualTo(random_keypair.public_key());
+    assertThat(joint_key).isNotEqualTo(random_keypair_two.public_key());
   }
 
   static class TestKeypairFromSecret implements Callable<KeyPair> {
@@ -178,7 +178,7 @@ public class TestElgamalProperties extends TestProperties {
 
     Stopwatch stopwatch2 = Stopwatch.createStarted();
     for (KeyPair keypair : keypairs) {
-      assertThat(keypair.public_key).isEqualTo(elgamal_keypair_from_secret(keypair.secret_key).orElseThrow().public_key);
+      assertThat(keypair.public_key()).isEqualTo(elgamal_keypair_from_secret(keypair.secret_key()).orElseThrow().public_key());
     }
     double stime = stopwatch2.elapsed(TimeUnit.MILLISECONDS);
     System.out.printf("Serial %.3f%n", stime);

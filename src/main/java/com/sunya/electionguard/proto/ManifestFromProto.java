@@ -41,7 +41,8 @@ public class ManifestFromProto {
             convertList(election.getContestsList(), ManifestFromProto::convertContestDescription),
             convertList(election.getBallotStylesList(), ManifestFromProto::convertBallotStyle),
             name,
-            contact);
+            contact,
+            null);
   }
 
   static Manifest.AnnotatedString convertAnnotatedString(ManifestProto.AnnotatedString annotated) {
@@ -53,15 +54,15 @@ public class ManifestFromProto {
             style.getObjectId(),
             style.getGeopoliticalUnitIdsList(),
             style.getPartyIdsList(),
-            style.getImageUrl());
+            style.getImageUrl().isEmpty() ? null : style.getImageUrl());
   }
 
   static Manifest.Candidate convertCandidate(ManifestProto.Candidate candidate) {
     return new Manifest.Candidate(
             candidate.getObjectId(),
             convertInternationalizedText(candidate.getName()),
-            candidate.getPartyId(),
-            candidate.getImageUrl(),
+            candidate.getPartyId().isEmpty() ? null : candidate.getPartyId(),
+            candidate.getImageUrl().isEmpty() ? null : candidate.getImageUrl(),
             candidate.getIsWriteIn());
   }
 
@@ -74,7 +75,7 @@ public class ManifestFromProto {
             contact.getAddressLineList(),
             convertList(contact.getEmailList(), ManifestFromProto::convertAnnotatedString),
             convertList(contact.getPhoneList(), ManifestFromProto::convertAnnotatedString),
-            contact.getName());
+            contact.getName().isEmpty() ? null : contact.getName());
   }
 
   static Manifest.ContestDescription convertContestDescription(ManifestProto.ContestDescription contest) {
@@ -88,7 +89,9 @@ public class ManifestFromProto {
             contest.getName(),
             convertList(contest.getBallotSelectionsList(), ManifestFromProto::convertSelectionDescription),
             contest.hasBallotTitle() ? convertInternationalizedText(contest.getBallotTitle()) : null,
-            contest.hasBallotSubtitle() ? convertInternationalizedText(contest.getBallotSubtitle()) : null);
+            contest.hasBallotSubtitle() ? convertInternationalizedText(contest.getBallotSubtitle()) : null,
+            contest.getPrimaryPartyIdsList()
+            );
   }
 
   static Manifest.VoteVariationType convertVoteVariationType(ManifestProto.ContestDescription.VoteVariationType type) {
@@ -123,9 +126,9 @@ public class ManifestFromProto {
     return new Manifest.Party(
             party.getObjectId(),
             convertInternationalizedText(party.getName()),
-            party.getAbbreviation(),
-            party.getColor(),
-            party.getLogoUri());
+            party.getAbbreviation().isEmpty() ? null : party.getAbbreviation(),
+            party.getColor().isEmpty() ? null : party.getColor(),
+            party.getLogoUri().isEmpty() ? null : party.getLogoUri());
   }
 
   static Manifest.SelectionDescription convertSelectionDescription(ManifestProto.SelectionDescription selection) {

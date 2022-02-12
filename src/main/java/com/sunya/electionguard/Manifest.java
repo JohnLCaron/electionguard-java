@@ -6,116 +6,55 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.flogger.FluentLogger;
 
 import javax.annotation.Nullable;
-import javax.annotation.concurrent.Immutable;
 import java.time.OffsetDateTime;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 
 /**
  * The Manifest: defines the candidates, contests, and associated information for a specific election.
+ *
  * @see <a href="https://developers.google.com/elections-data/reference/election">Civics Common Standard Data Specification</a>
  */
-@Immutable
-public class Manifest implements Hash.CryptoHashable {
+public record Manifest(
+        String election_scope_id,
+        ElectionType type,
+        OffsetDateTime start_date,
+        OffsetDateTime end_date,
+        List<GeopoliticalUnit> geopolitical_units,
+        List<Party> parties,
+        List<Candidate> candidates,
+        List<ContestDescription> contests,
+        List<BallotStyle> ballot_styles,
+        @Nullable InternationalizedText name,
+        @Nullable ContactInformation contact_information,
+        Group.ElementModQ crypto_hash
+) implements Hash.CryptoHashable {
+
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
-  public final String election_scope_id;
-  public final ElectionType type;
-  public final OffsetDateTime start_date;
-  public final OffsetDateTime end_date;
-  public final ImmutableList<GeopoliticalUnit> geopolitical_units;
-  public final ImmutableList<Party> parties;
-  public final ImmutableList<Candidate> candidates;
-  public final ImmutableList<ContestDescription> contests;
-  public final ImmutableList<BallotStyle> ballot_styles;
-  public final Optional<InternationalizedText> name;
-  public final Optional<ContactInformation> contact_information;
-  public final Group.ElementModQ crypto_hash;
-
-  public Manifest(String election_scope_id,
-                  ElectionType type,
-                  OffsetDateTime start_date,
-                  OffsetDateTime end_date,
-                  List<GeopoliticalUnit> geopolitical_units,
-                  List<Party> parties,
-                  List<Candidate> candidates,
-                  List<ContestDescription> contests,
-                  List<BallotStyle> ballot_styles,
-                  @Nullable InternationalizedText name,
-                  @Nullable ContactInformation contact_information) {
-
+  public Manifest {
     Preconditions.checkArgument(!Strings.isNullOrEmpty(election_scope_id));
-    this.election_scope_id = election_scope_id;
-    this.type = Preconditions.checkNotNull(type);
-    this.start_date = Preconditions.checkNotNull(start_date);
-    this.end_date = Preconditions.checkNotNull(end_date);
-    this.geopolitical_units = toImmutableListEmpty(geopolitical_units);
-    this.parties = toImmutableListEmpty(parties);
-    this.candidates = toImmutableListEmpty(candidates);
-    this.contests = toImmutableListEmpty(contests);
-    this.ballot_styles = toImmutableListEmpty(ballot_styles);
-    this.name = Optional.ofNullable(name);
-    this.contact_information = Optional.ofNullable(contact_information);
-
-    this.crypto_hash = Hash.hash_elems(
-            this.election_scope_id,
-            this.type.name(),
-            this.start_date.toString(), // python: to_iso_date_string, LOOK isnt all that well defined.
-            this.end_date.toString(),
-            this.name,
-            this.contact_information,
-            this.geopolitical_units,
-            this.parties,
-            this.contests,
-            this.ballot_styles);
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-    Manifest that = (Manifest) o;
-    return election_scope_id.equals(that.election_scope_id) &&
-            type == that.type &&
-            start_date.equals(that.start_date) &&
-            end_date.equals(that.end_date) &&
-            geopolitical_units.equals(that.geopolitical_units) &&
-            parties.equals(that.parties) &&
-            candidates.equals(that.candidates) &&
-            contests.equals(that.contests) &&
-            ballot_styles.equals(that.ballot_styles) &&
-            name.equals(that.name) &&
-            contact_information.equals(that.contact_information);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(election_scope_id, type, start_date, end_date, geopolitical_units, parties, candidates, contests, ballot_styles, name, contact_information);
-  }
-
-  @Override
-  public String toString() {
-    return "Manifest{" +
-            "election_scope_id='" + election_scope_id + '\'' +
-            ", type=" + type +
-            ", start_date=" + start_date +
-            ", end_date=" + end_date +
-            ", geopolitical_units=" + geopolitical_units +
-            ", parties=" + parties +
-            ", candidates=" + candidates +
-            ", contests=" + contests +
-            ", ballot_styles=" + ballot_styles +
-            ", name=" + name +
-            ", contact_information=" + contact_information +
-            '}';
-  }
-
-  /** The Manifest (aka ElectionDescription) hash. */
-  @Override
-  public Group.ElementModQ crypto_hash() {
-    return this.crypto_hash;
+    Preconditions.checkNotNull(type);
+    Preconditions.checkNotNull(start_date);
+    Preconditions.checkNotNull(end_date);
+    geopolitical_units = toImmutableListEmpty(geopolitical_units);
+    parties = toImmutableListEmpty(parties);
+    candidates = toImmutableListEmpty(candidates);
+    contests = toImmutableListEmpty(contests);
+    ballot_styles = toImmutableListEmpty(ballot_styles);
+    if (crypto_hash == null) {
+      crypto_hash = Hash.hash_elems(
+              election_scope_id,
+              type.name(),
+              start_date.toString(), // python: to_iso_date_string, LOOK isnt all that well defined.
+              end_date.toString(),
+              name,
+              contact_information,
+              geopolitical_units,
+              parties,
+              contests,
+              ballot_styles);
+    }
   }
 
   /**
@@ -164,8 +103,7 @@ public class Manifest implements Hash.CryptoHashable {
     for (Candidate candidate : this.candidates) {
       candidate_ids.add(candidate.object_id);
       // validate the associated party id
-      candidates_have_valid_party_ids &=
-              candidate.party_id.isEmpty() || party_ids.contains(candidate.party_id.get());
+      candidates_have_valid_party_ids &= (candidate.party_id == null) || party_ids.contains(candidate.party_id);
     }
 
     boolean candidates_have_valid_length = candidate_ids.size() == this.candidates.size();
@@ -179,7 +117,6 @@ public class Manifest implements Hash.CryptoHashable {
     HashSet<Integer> contest_sequence_ids = new HashSet<>();
 
     for (ContestDescription contest : this.contests) {
-
       contests_validate_their_properties &= contest.is_valid();
 
       contest_ids.add(contest.object_id);
@@ -188,13 +125,10 @@ public class Manifest implements Hash.CryptoHashable {
       // validate the associated gp unit id
       contests_have_valid_electoral_district_id &= gp_unit_ids.contains(contest.electoral_district_id);
 
-      if (contest instanceof CandidateContestDescription) {
-        CandidateContestDescription candidate_contest = (CandidateContestDescription) contest;
-        if (candidate_contest.primary_party_ids != null) {
-          for (String primary_party_id : candidate_contest.primary_party_ids) {
-            // validate the party ids
-            candidate_contests_have_valid_party_ids &= party_ids.contains(primary_party_id);
-          }
+      if (contest.primary_party_ids != null) {
+        for (String primary_party_id : contest.primary_party_ids) {
+          // validate the party ids
+          candidate_contests_have_valid_party_ids &= party_ids.contains(primary_party_id);
         }
       }
     }
@@ -240,6 +174,7 @@ public class Manifest implements Hash.CryptoHashable {
 
   /**
    * The type of election.
+   *
    * @see <a href="https://developers.google.com/elections-data/reference/election-type">Civics Common Standard Data Specification</a>
    */
   public enum ElectionType {
@@ -276,6 +211,7 @@ public class Manifest implements Hash.CryptoHashable {
 
   /**
    * The type of geopolitical unit.
+   *
    * @see <a href="https://developers.google.com/elections-data/reference/reporting-unit-type">Civics Common Standard Data Specification</a>
    */
   public enum ReportingUnitType {
@@ -403,6 +339,7 @@ public class Manifest implements Hash.CryptoHashable {
 
   /**
    * Enumeration for contest algorithm or rules in the contest.
+   *
    * @see <a href="https://developers.google.com/elections-data/reference/vote-variation">Civics Common Standard Data Specification</a>
    */
   public enum VoteVariationType {
@@ -463,171 +400,86 @@ public class Manifest implements Hash.CryptoHashable {
 
   /**
    * An annotated character string.
+   *
    * @see <a href="https://developers.google.com/elections-data/reference/annotated-string">Civics Common Standard Data Specification</a>
    */
-  @Immutable
-  public static class AnnotatedString implements Hash.CryptoHashable {
-    public final String annotation;
-    public final String value;
+  public record AnnotatedString(
+          String annotation,
+          String value
+  ) implements Hash.CryptoHashable {
 
-    public AnnotatedString(String annotation, String value) {
-      this.annotation = Preconditions.checkNotNull(annotation);
-      this.value = Preconditions.checkNotNull(value);
+    public AnnotatedString {
+      Preconditions.checkArgument(!Strings.isNullOrEmpty(annotation));
+      Preconditions.checkArgument(!Strings.isNullOrEmpty(value));
     }
 
     @Override
     public Group.ElementModQ crypto_hash() {
       return Hash.hash_elems(this.annotation, this.value);
     }
-
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) return true;
-      if (o == null || getClass() != o.getClass()) return false;
-      AnnotatedString that = (AnnotatedString) o;
-      return annotation.equals(that.annotation) &&
-              value.equals(that.value);
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(annotation, value);
-    }
-
-    @Override
-    public String toString() {
-      return "{" +
-              "annotation='" + annotation + '\'' +
-              ", value='" + value + '\'' +
-              '}';
-    }
   }
 
   /**
    * The ISO-639 language code.
+   *
    * @see <a href="https://en.wikipedia.org/wiki/ISO_639">ISO 639</a>
    */
-  @Immutable
-  public static class Language implements Hash.CryptoHashable {
-    public final String value;
-    public final String language;
+  public record Language(
+          String value,
+          String language
+  ) implements Hash.CryptoHashable {
 
-    public Language(String value, String language) {
-      this.value = Preconditions.checkNotNull(value);
-      this.language = Preconditions.checkNotNull(language);
+    public Language {
+      Preconditions.checkNotNull(value);
+      Preconditions.checkNotNull(language);
     }
 
     @Override
     public Group.ElementModQ crypto_hash() {
       return Hash.hash_elems(this.value, this.language);
     }
-
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) return true;
-      if (o == null || getClass() != o.getClass()) return false;
-      Language language1 = (Language) o;
-      return value.equals(language1.value) &&
-              language.equals(language1.language);
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(value, language);
-    }
-
-    @Override
-    public String toString() {
-      return value + " (" + language + ")";
-    }
   }
 
   /**
    * Text that may have translations in multiple languages.
+   *
    * @see <a href="https://developers.google.com/elections-data/reference/internationalized-text">Civics Common Standard Data Specification</a>
    */
-  @Immutable
-  public static class InternationalizedText implements Hash.CryptoHashable {
-    public final ImmutableList<Language> text;
+  public record InternationalizedText(
+          List<Language> text
+  ) implements Hash.CryptoHashable {
 
-    public InternationalizedText(@Nullable List<Language> text) {
-      this.text = toImmutableListEmpty(text);
+    public InternationalizedText {
+      text = toImmutableListEmpty(text);
     }
 
     @Override
     public Group.ElementModQ crypto_hash() {
       return Hash.hash_elems(this.text);
     }
-
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) return true;
-      if (o == null || getClass() != o.getClass()) return false;
-      InternationalizedText that = (InternationalizedText) o;
-      return text.equals(that.text);
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(text);
-    }
-
-    @Override
-    public String toString() {
-      return text.toString();
-    }
   }
 
   /**
    * Contact information about persons, boards of authorities, organizations, etc.
+   *
    * @see <a href="https://developers.google.com/elections-data/reference/contact-information">Civics Common Standard Data Specification</a>
    */
-  @Immutable
-  public static class ContactInformation implements Hash.CryptoHashable {
-    public final ImmutableList<String> address_line; // may be empty
-    public final ImmutableList<AnnotatedString> email; // may be empty
-    public final ImmutableList<AnnotatedString> phone; // may be empty
-    public final Optional<String> name;
+  public record ContactInformation(
+          List<String> address_line,
+          List<AnnotatedString> email,
+          List<AnnotatedString> phone,
+          @Nullable String name
+  ) implements Hash.CryptoHashable {
 
-    public ContactInformation(@Nullable List<String> address_line,
-                              @Nullable List<AnnotatedString> email,
-                              @Nullable List<AnnotatedString> phone,
-                              @Nullable String name) {
-      this.address_line = toImmutableListEmpty(address_line);
-      this.email = toImmutableListEmpty(email);
-      this.phone = toImmutableListEmpty(phone);
-      this.name = Optional.ofNullable(Strings.emptyToNull(name));
+    public ContactInformation {
+      address_line = toImmutableListEmpty(address_line);
+      email = toImmutableListEmpty(email);
+      phone = toImmutableListEmpty(phone);
     }
 
     @Override
     public Group.ElementModQ crypto_hash() {
       return Hash.hash_elems(this.name, this.address_line, this.email, this.phone);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) return true;
-      if (o == null || getClass() != o.getClass()) return false;
-      ContactInformation that = (ContactInformation) o;
-      return address_line.equals(that.address_line) &&
-              email.equals(that.email) &&
-              phone.equals(that.phone) &&
-              name.equals(that.name);
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(address_line, email, phone, name);
-    }
-
-    @Override
-    public String toString() {
-      return "{" +
-              "address_line=" + address_line +
-              "\n email=" + email +
-              "\n phone=" + phone +
-              "\n name=" + name +
-              '}';
     }
   }
 
@@ -635,165 +487,78 @@ public class Manifest implements Hash.CryptoHashable {
    * A physical or virtual unit of representation or vote/seat aggregation.
    * Use this entity to define geopolitical units such as cities, districts, jurisdictions, or precincts
    * to associate contests, offices, vote counts, or other information with those geographies.
+   *
    * @see <a href="https://developers.google.com/elections-data/reference/gp-unit">Civics Common Standard Data Specification</a>
    */
-  @Immutable
-  public static class GeopoliticalUnit implements ElectionObjectBaseIF, Hash.CryptoHashable {
-    private final String object_id;
-    public final String name;
-    public final ReportingUnitType type;
-    public final Optional<ContactInformation> contact_information;
+  public record GeopoliticalUnit(
+          String object_id,
+          String name,
+          ReportingUnitType type,
+          @Nullable ContactInformation contact_information
+  ) implements ElectionObjectBaseIF, Hash.CryptoHashable {
 
-    public GeopoliticalUnit(String object_id,
-                            String name,
-                            ReportingUnitType type,
-                            @Nullable ContactInformation contact_information) {
+    public GeopoliticalUnit {
       Preconditions.checkArgument(!Strings.isNullOrEmpty(object_id));
-      this.object_id = object_id;
-      this.name = Preconditions.checkNotNull(name);
-      this.type = Preconditions.checkNotNull(type);
-      this.contact_information = Optional.ofNullable(contact_information);
-    }
-
-    @Override
-    public String object_id() {
-      return this.object_id;
+      Preconditions.checkArgument(!Strings.isNullOrEmpty(name));
+      Preconditions.checkNotNull(type);
     }
 
     @Override
     public Group.ElementModQ crypto_hash() {
       return Hash.hash_elems(this.object_id, this.name, this.type.name(), this.contact_information);
     }
-
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) return true;
-      if (o == null || getClass() != o.getClass()) return false;
-      GeopoliticalUnit that = (GeopoliticalUnit) o;
-      return object_id.equals(that.object_id) &&
-              name.equals(that.name) &&
-              type == that.type &&
-              contact_information.equals(that.contact_information);
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(object_id, name, type, contact_information);
-    }
-
-    @Override
-    public String toString() {
-      return "GeopoliticalUnit{" +
-              "\n object_id='" + object_id + '\'' +
-              "\n name='" + name + '\'' +
-              "\n type=" + type +
-              "\n contact_information=" + contact_information +
-              '}';
-    }
   }
 
-  /** Classifies a set of contests by their set of parties and geopolitical units */
-  @Immutable
-  public static class BallotStyle implements ElectionObjectBaseIF, Hash.CryptoHashable {
-    private final String object_id;
-    public final ImmutableList<String> geopolitical_unit_ids; // matches GeoPoliticalUnit.object_id; may be empty
-    public final ImmutableList<String> party_ids; // matches Party.object_id; may be empty
-    public final Optional<String> image_uri;
+  /**
+   * Classifies a set of contests by their set of parties and geopolitical units
+   *
+   * @param object_id             A unique name
+   * @param geopolitical_unit_ids matches GeoPoliticalUnit.object_id; may be empty
+   * @param party_ids             matches Party.object_id; may be empty
+   * @param image_uri             an optional image_uri for this BallotStyle
+   */
+  public record BallotStyle(
+          String object_id,
+          List<String> geopolitical_unit_ids,
+          List<String> party_ids,
+          @Nullable String image_uri
+  ) implements ElectionObjectBaseIF, Hash.CryptoHashable {
 
-    /**
-     * Constructor.
-     * @param object_id A unique name
-     * @param geopolitical_unit_ids matches GeoPoliticalUnit.object_id; may be empty
-     * @param party_ids matches Party.object_id; may be empty
-     * @param image_uri an optional image_uri for this BallotStyle
-     */
-    public BallotStyle(String object_id,
-                       @Nullable List<String> geopolitical_unit_ids,
-                       @Nullable List<String> party_ids,
-                       @Nullable String image_uri) {
+    public BallotStyle {
       Preconditions.checkArgument(!Strings.isNullOrEmpty(object_id));
-      this.object_id = object_id;
-      this.geopolitical_unit_ids = toImmutableListEmpty(geopolitical_unit_ids);
-      this.party_ids = toImmutableListEmpty(party_ids);
-      this.image_uri = Optional.ofNullable(Strings.emptyToNull(image_uri));
-    }
-
-    @Override
-    public String object_id() {
-      return this.object_id;
+      geopolitical_unit_ids = toImmutableListEmpty(geopolitical_unit_ids);
+      party_ids = toImmutableListEmpty(party_ids);
     }
 
     @Override
     public Group.ElementModQ crypto_hash() {
-      return Hash.hash_elems(
-              this.object_id, this.geopolitical_unit_ids, this.party_ids, this.image_uri);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) return true;
-      if (o == null || getClass() != o.getClass()) return false;
-      BallotStyle that = (BallotStyle) o;
-      return object_id.equals(that.object_id) &&
-              geopolitical_unit_ids.equals(that.geopolitical_unit_ids) &&
-              party_ids.equals(that.party_ids) &&
-              image_uri.equals(that.image_uri);
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(object_id, geopolitical_unit_ids, party_ids, image_uri);
-    }
-
-    @Override
-    public String toString() {
-      return "BallotStyle{" +
-              "\n object_id='" + object_id + '\'' +
-              "\n geopolitical_unit_ids=" + geopolitical_unit_ids +
-              "\n party_ids=" + party_ids +
-              "\n image_uri=" + image_uri +
-              '}';
+      return Hash.hash_elems(this.object_id, this.geopolitical_unit_ids, this.party_ids, this.image_uri);
     }
   }
 
   /**
    * A political party.
+   *
    * @see <a href="https://developers.google.com/elections-data/reference/party">Civics Common Standard Data Specification</a>
    */
-  @Immutable
-  public static class Party implements ElectionObjectBaseIF, Hash.CryptoHashable {
-    private final String object_id;
-    public final InternationalizedText name;
-    public final Optional<String> abbreviation;
-    public final Optional<String> color;
-    public final Optional<String> logo_uri;
+  public record Party(
+          String object_id,
+          InternationalizedText name,
+          @Nullable String abbreviation,
+          @Nullable String color,
+          @Nullable String logo_uri
+  ) implements ElectionObjectBaseIF, Hash.CryptoHashable {
 
-    /** A Party with only an object_id. */
+    /**
+     * A Party with only an object_id.
+     */
     public Party(String object_id) {
+      this(object_id, new InternationalizedText(ImmutableList.of()), null, null, null);
+    }
+
+    public Party {
       Preconditions.checkArgument(!Strings.isNullOrEmpty(object_id));
-      this.object_id = object_id;
-      this.name = new InternationalizedText(ImmutableList.of());
-      this.abbreviation = Optional.empty();
-      this.color = Optional.empty();
-      this.logo_uri = Optional.empty();
-    }
-
-    /** A Party with an object_id and a name, and optional other fields. */
-    public Party(String object_id,
-                 InternationalizedText name,
-                 @Nullable String abbreviation,
-                 @Nullable String color,
-                 @Nullable String logo_uri) {
-      this.object_id = object_id;
-      this.name = name != null ? name : new InternationalizedText(ImmutableList.of());
-      this.abbreviation = Optional.ofNullable(Strings.emptyToNull(abbreviation));
-      this.color = Optional.ofNullable(Strings.emptyToNull(color));
-      this.logo_uri = Optional.ofNullable(Strings.emptyToNull(logo_uri));
-    }
-
-    @Override
-    public String object_id() {
-      return this.object_id;
+      Preconditions.checkNotNull(name);
     }
 
     String get_party_id() {
@@ -809,34 +574,6 @@ public class Manifest implements Hash.CryptoHashable {
               this.color,
               this.logo_uri);
     }
-
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) return true;
-      if (o == null || getClass() != o.getClass()) return false;
-      Party party = (Party) o;
-      return object_id.equals(party.object_id) &&
-              name.equals(party.name) &&
-              abbreviation.equals(party.abbreviation) &&
-              color.equals(party.color) &&
-              logo_uri.equals(party.logo_uri);
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(object_id, name, abbreviation, color, logo_uri);
-    }
-
-    @Override
-    public String toString() {
-      return "Party{" +
-              "\n object_id='" + object_id + '\'' +
-              "\n name=" + name +
-              "\n abbreviation=" + abbreviation +
-              "\n color=" + color +
-              "\n logo_uri=" + logo_uri +
-              '}';
-    }
   }
 
   /**
@@ -844,45 +581,35 @@ public class Manifest implements Hash.CryptoHashable {
    * Note: The ElectionGuard Data Spec deviates from the NIST model in that selections for any contest type
    * are considered a "candidate". for instance, on a yes-no referendum contest, two `candidate` objects
    * would be included in the model to represent the `affirmative` and `negative` selections for the contest.
+   *
    * @see <a href="https://developers.google.com/elections-data/reference/candidate">Civics Common Standard Data Specification</a>
    */
-  @Immutable
-  public static class Candidate implements ElectionObjectBaseIF,  Hash.CryptoHashable {
-    private final String object_id;
-    public final InternationalizedText name;
-    public final Optional<String> party_id;
-    public final Optional<String> image_uri;
-    public final boolean is_write_in;
+  public record Candidate(
+          String object_id,
+          InternationalizedText name,
+          @Nullable String party_id,
+          @Nullable String image_uri,
+          Boolean is_write_in
+  ) implements ElectionObjectBaseIF, Hash.CryptoHashable {
 
-    /** A Candidate with only an object_id. */
+    /**
+     * A Candidate with only an object_id.
+     */
     public Candidate(String object_id) {
+      this(object_id, new InternationalizedText(ImmutableList.of()), null, null, false);
+    }
+
+    /**
+     * A Candidate with an object_id and a name, and optional other fields.
+     */
+    public Candidate {
       Preconditions.checkArgument(!Strings.isNullOrEmpty(object_id));
-      this.object_id = object_id;
-      this.name = new InternationalizedText(ImmutableList.of());
-      this.party_id = Optional.empty();
-      this.image_uri = Optional.empty();
-      this.is_write_in = false;
+      Preconditions.checkNotNull(name);
+      if (is_write_in == null) {
+        is_write_in = false;
+      }
     }
 
-    /** A Candidate with an object_id and a name, and optional other fields. */
-    public Candidate(String object_id,
-                     InternationalizedText name,
-                     @Nullable String party_id,
-                     @Nullable String image_uri,
-                     @Nullable Boolean is_write_in) {
-      this.object_id = object_id;
-      this.name = Preconditions.checkNotNull(name);
-      this.party_id = Optional.ofNullable(Strings.emptyToNull(party_id));
-      this.image_uri = Optional.ofNullable(Strings.emptyToNull(image_uri));
-      this.is_write_in = is_write_in != null ? is_write_in :  false;
-    }
-
-    @Override
-    public String object_id() {
-      return this.object_id;
-    }
-
-    /** Get the "candidate ID" for this Candidate. */
     String get_candidate_id() {
       return this.object_id;
     }
@@ -892,195 +619,73 @@ public class Manifest implements Hash.CryptoHashable {
       return Hash.hash_elems(
               this.object_id, this.name, this.party_id, this.image_uri);
     }
-
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) return true;
-      if (o == null || getClass() != o.getClass()) return false;
-      Candidate candidate = (Candidate) o;
-      return is_write_in == candidate.is_write_in &&
-              object_id.equals(candidate.object_id) &&
-              name.equals(candidate.name) &&
-              party_id.equals(candidate.party_id) &&
-              image_uri.equals(candidate.image_uri);
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(object_id, name, party_id, image_uri, is_write_in);
-    }
-
-    @Override
-    public String toString() {
-      return "Candidate{" +
-              "\n object_id='" + object_id + '\'' +
-              "\n name=" + name +
-              "\n party_id=" + party_id +
-              "\n image_uri=" + image_uri +
-              "\n is_write_in=" + is_write_in +
-              '}';
-    }
   }
 
   /**
    * A ballot selection for a specific candidate in a contest.
+   *
+   * @param sequence_order Used for ordering selections in a contest to ensure various encryption primitives are deterministic.
+   *                       The sequence order must be unique and should be representative of how the contests are represented
+   *                       on a "master" ballot in an external system.  The sequence order is not required to be in the order
+   *                       in which they are displayed to a voter.  Any acceptable range of integer values may be provided.
    * @see <a href="https://developers.google.com/elections-data/reference/ballot-selection">Civics Common Standard Data Specification</a>
    */
-  @Immutable
-  public static class SelectionDescription implements OrderedObjectBaseIF, Hash.CryptoHashable {
-    public final String object_id;
-    public final String candidate_id;
-    /**
-     * Used for ordering selections in a contest to ensure various encryption primitives are deterministic.
-     * The sequence order must be unique and should be representative of how the contests are represented
-     * on a "master" ballot in an external system.  The sequence order is not required to be in the order
-     * in which they are displayed to a voter.  Any acceptable range of integer values may be provided.
-     */
-    public final int sequence_order;
+  public record SelectionDescription(
+          String object_id,
+          String candidate_id,
+          int sequence_order
+  ) implements OrderedObjectBaseIF, Hash.CryptoHashable {
 
-    public SelectionDescription(String object_id, String candidate_id, int sequence_order) {
+    public SelectionDescription {
       Preconditions.checkArgument(!Strings.isNullOrEmpty(object_id));
-      this.object_id = object_id;
-      this.sequence_order = sequence_order;
       Preconditions.checkArgument(!Strings.isNullOrEmpty(candidate_id));
-      this.candidate_id = candidate_id;
     }
 
     @Override
     public Group.ElementModQ crypto_hash() {
       return Hash.hash_elems(this.object_id, this.sequence_order, this.candidate_id);
     }
-
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) return true;
-      if (o == null || getClass() != o.getClass()) return false;
-      SelectionDescription that = (SelectionDescription) o;
-      return sequence_order == that.sequence_order &&
-              object_id.equals(that.object_id) &&
-              candidate_id.equals(that.candidate_id);
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(object_id, candidate_id, sequence_order);
-    }
-
-    @Override
-    public String toString() {
-      return "SelectionDescription{" +
-              "object_id='" + object_id + '\'' +
-              ", candidate_id='" + candidate_id + '\'' +
-              ", sequence_order=" + sequence_order +
-              '}';
-    }
-
-    @Override
-    public String object_id() {
-      return object_id;
-    }
-
-    @Override
-    public int sequence_order() {
-      return sequence_order;
-    }
   }
 
   /**
    * The metadata that describes the structure and type of one contest in the election.
+   *
+   * @param sequence_order    Used for ordering contests in a ballot to ensure various encryption primitives are deterministic.
+   *                          The sequence order must be unique and should be representative of how the contests are represented
+   *                          on a "master" ballot in an external system.  The sequence order is not required to be in the order
+   *                          in which they are displayed to a voter.  Any acceptable range of integer values may be provided.
+   * @param number_elected    Number of candidates that are elected in the contest ("n" of n-of-m).
+   *                          a referendum is considered a specific case of 1-of-m in ElectionGuard
+   * @param votes_allowed     Maximum number of votes/write-ins per voter in this contest. Used in cumulative voting
+   *                          to indicate how many total votes a voter can spread around. In n-of-m elections, this will be None.
+   * @param name              Name of the contest, not necessarily as it appears on the ballot
+   * @param ballot_selections For associating a ballot selection for the contest, i.e., a candidate, a ballot measure
+   * @param ballot_title      Title of the contest as it appears on the ballot.
+   * @param ballot_subtitle   Subtitle of the contest as it appears on the ballot.
    * @see <a href="https://developers.google.com/elections-data/reference/contest">Civics Common Standard Data Specification</a>
    */
-  @Immutable
-  public static class ContestDescription implements OrderedObjectBaseIF, Hash.CryptoHashable {
+  public record ContestDescription(
+          String object_id,
+          String electoral_district_id,
+          int sequence_order,  // LOOK need to sort?
+          VoteVariationType vote_variation,
+          int number_elected,
+          Integer votes_allowed, // LOOK why optional in python ?
+          String name,
+          List<SelectionDescription> ballot_selections,
+          @Nullable InternationalizedText ballot_title,
+          @Nullable InternationalizedText ballot_subtitle,
+          List<String> primary_party_ids
+  ) implements OrderedObjectBaseIF, Hash.CryptoHashable {
 
-    public final String object_id;
-
-    public final String electoral_district_id;
-
-    /**
-     * Used for ordering contests in a ballot to ensure various encryption primitives are deterministic.
-     * The sequence order must be unique and should be representative of how the contests are represented
-     * on a "master" ballot in an external system.  The sequence order is not required to be in the order
-     * in which they are displayed to a voter.  Any acceptable range of integer values may be provided.
-     */
-    public final int sequence_order;
-
-    public final VoteVariationType vote_variation;
-
-    /** Number of candidates that are elected in the contest ("n" of n-of-m). */
-    // Note: a referendum is considered a specific case of 1-of-m in ElectionGuard
-    public final int number_elected;
-
-    /** Maximum number of votes/write-ins per voter in this contest. Used in cumulative voting
-        to indicate how many total votes a voter can spread around. In n-of-m elections, this will be None. */
-    public final Optional<Integer> votes_allowed; // LOOK why optional ?
-
-    /** Name of the contest, not necessarily as it appears on the ballot. */
-    public final String name;
-
-    /** For associating a ballot selection for the contest, i.e., a candidate, a ballot measure. */
-    public final ImmutableList<SelectionDescription> ballot_selections;
-
-    /** Title of the contest as it appears on the ballot. */
-    public final Optional<InternationalizedText> ballot_title;
-
-    /** Subtitle of the contest as it appears on the ballot. */
-    public final Optional<InternationalizedText> ballot_subtitle;
-
-    public ContestDescription(String object_id,
-                              String electoral_district_id,
-                              int sequence_order,
-                              VoteVariationType vote_variation,
-                              int number_elected,
-                              int votes_allowed,
-                              String name,
-                              List<SelectionDescription> ballot_selections,
-                              @Nullable InternationalizedText ballot_title,
-                              @Nullable InternationalizedText ballot_subtitle) {
-
+    public ContestDescription {
       Preconditions.checkArgument(!Strings.isNullOrEmpty(object_id));
-      this.object_id = object_id;
-
       Preconditions.checkArgument(!Strings.isNullOrEmpty(electoral_district_id));
-      this.electoral_district_id = electoral_district_id;
-
-      this.sequence_order = sequence_order;
-      this.vote_variation = Preconditions.checkNotNull(vote_variation);
-      this.number_elected = number_elected;
-      this.votes_allowed = votes_allowed == 0 ? Optional.empty() : Optional.of(votes_allowed);
-      this.name = Preconditions.checkNotNull(name);
-      this.ballot_selections = toImmutableListEmpty(ballot_selections);
-      this.ballot_title = Optional.ofNullable(ballot_title);
-      this.ballot_subtitle = Optional.ofNullable(ballot_subtitle);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) return true;
-      if (o == null || getClass() != o.getClass()) return false;
-      ContestDescription that = (ContestDescription) o;
-      return sequence_order == that.sequence_order && number_elected == that.number_elected && object_id.equals(that.object_id) && electoral_district_id.equals(that.electoral_district_id) && vote_variation == that.vote_variation && votes_allowed.equals(that.votes_allowed) && name.equals(that.name) && ballot_selections.equals(that.ballot_selections) && ballot_title.equals(that.ballot_title) && ballot_subtitle.equals(that.ballot_subtitle);
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(object_id, electoral_district_id, sequence_order, vote_variation, number_elected, votes_allowed, name, ballot_selections, ballot_title, ballot_subtitle);
-    }
-
-    @Override
-    public String toString() {
-      return "ContestDescription{" +
-              "object_id='" + object_id + '\'' +
-              ", electoral_district_id='" + electoral_district_id + '\'' +
-              ", sequence_order=" + sequence_order +
-              ", vote_variation=" + vote_variation +
-              ", number_elected=" + number_elected +
-              ", votes_allowed=" + votes_allowed +
-              ", name='" + name + '\'' +
-              ", ballot_selections=" + ballot_selections +
-              ", ballot_title=" + ballot_title +
-              ", ballot_subtitle=" + ballot_subtitle +
-              '}';
+      Preconditions.checkNotNull(vote_variation);
+      Preconditions.checkNotNull(votes_allowed);
+      Preconditions.checkNotNull(name);
+      ballot_selections = toImmutableListEmpty(ballot_selections);
+      primary_party_ids = toImmutableListEmpty(primary_party_ids);
     }
 
     @Override
@@ -1095,13 +700,16 @@ public class Manifest implements Hash.CryptoHashable {
               this.name,
               this.number_elected,
               this.votes_allowed,
-              this.ballot_selections);
+              this.ballot_selections,
+              this.primary_party_ids);
     }
 
-    /** Check the validity of the contest object by verifying its data. */
+    /**
+     * Check the validity of the contest object by verifying its data.
+     */
     boolean is_valid() {
       boolean contest_has_valid_number_elected = this.number_elected <= this.ballot_selections.size();
-      boolean contest_has_valid_votes_allowed = this.votes_allowed.isEmpty() || this.number_elected <= this.votes_allowed.get();
+      boolean contest_has_valid_votes_allowed = this.number_elected <= this.votes_allowed;
 
       //  verify the candidate_ids, selection object_ids, and sequence_ids are unique
       HashSet<String> candidate_ids = new HashSet<>();
@@ -1140,76 +748,6 @@ public class Manifest implements Hash.CryptoHashable {
       }
 
       return success;
-    }
-
-    @Override
-    public String object_id() {
-      return object_id;
-    }
-
-    @Override
-    public int sequence_order() {
-      return sequence_order;
-    }
-  }
-
-  /**
-   * A type of contest that involves selecting one or more candidates.
-   * @see <a href="https://developers.google.com/elections-data/reference/contest">Civics Common Standard Data Specification</a>
-   */
-  @Immutable
-  public static class CandidateContestDescription extends ContestDescription {
-    final ImmutableList<String> primary_party_ids;
-
-    public CandidateContestDescription(String object_id,
-                                       String electoral_district_id,
-                                       int sequence_order,
-                                       VoteVariationType vote_variation,
-                                       int number_elected,
-                                       int votes_allowed,
-                                       String name,
-                                       List<SelectionDescription> ballot_selections,
-                                       @Nullable InternationalizedText ballot_title,
-                                       @Nullable InternationalizedText ballot_subtitle,
-                                       @Nullable List<String> primary_party_ids) {
-      super(object_id, electoral_district_id, sequence_order, vote_variation, number_elected, votes_allowed,
-              name, ballot_selections, ballot_title, ballot_subtitle);
-      this.primary_party_ids = toImmutableListEmpty(primary_party_ids);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) return true;
-      if (o == null || getClass() != o.getClass()) return false;
-      if (!super.equals(o)) return false;
-      CandidateContestDescription that = (CandidateContestDescription) o;
-      return primary_party_ids.equals(that.primary_party_ids);
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(super.hashCode(), primary_party_ids);
-    }
-  }
-
-  /**
-   * A type of contest that involves selecting exactly one 'candidate'. LOOK why needed?
-   * @see <a href="https://developers.google.com/elections-data/reference/contest">Civics Common Standard Data Specification</a>
-   */
-  @Immutable
-  public static class ReferendumContestDescription extends ContestDescription {
-
-    public ReferendumContestDescription(String object_id,
-                                        String electoral_district_id,
-                                        int sequence_order,
-                                        VoteVariationType vote_variation,
-                                        int number_elected,
-                                        int votes_allowed,
-                                        String name, List<SelectionDescription> ballot_selections,
-                                        @Nullable InternationalizedText ballot_title,
-                                        @Nullable InternationalizedText ballot_subtitle) {
-      super(object_id, electoral_district_id, sequence_order, vote_variation, number_elected, votes_allowed,
-              name, ballot_selections, ballot_title, ballot_subtitle);
     }
   }
 

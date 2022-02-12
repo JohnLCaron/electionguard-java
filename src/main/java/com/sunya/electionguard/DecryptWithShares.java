@@ -199,7 +199,7 @@ public class DecryptWithShares {
     ElementModP all_shares_product_M = Group.mult_p(decryption_shares);
 
     // Calculate 𝑀 = 𝐵⁄(∏𝑀𝑖) mod 𝑝.
-    ElementModP decrypted_value = div_p(selection.ciphertext().data, all_shares_product_M);
+    ElementModP decrypted_value = div_p(selection.ciphertext().data(), all_shares_product_M);
     Integer dlogM = Dlog.discrete_log(decrypted_value);
 
     // [share for (guardian_id, (public_key, share))in shares.items()],

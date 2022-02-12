@@ -430,12 +430,12 @@ class Guardian {
     //TODO: ISSUE #47: Decrypt the election secret key
 
     // 𝑀_i = 𝐴^𝑠𝑖 mod 𝑝
-    ElementModP partial_decryption = elgamal.partial_decrypt(this.election_keys.key_pair().secret_key);
+    ElementModP partial_decryption = elgamal.partial_decrypt(this.election_keys.key_pair().secret_key());
 
     // 𝑀_i = 𝐴^𝑠𝑖 mod 𝑝 and 𝐾𝑖 = 𝑔^𝑠𝑖 mod 𝑝
     ChaumPedersen.ChaumPedersenProof proof = ChaumPedersen.make_chaum_pedersen(
             elgamal,
-            this.election_keys.key_pair().secret_key,
+            this.election_keys.key_pair().secret_key(),
             partial_decryption,
             nonce_seed,
             extended_base_hash);

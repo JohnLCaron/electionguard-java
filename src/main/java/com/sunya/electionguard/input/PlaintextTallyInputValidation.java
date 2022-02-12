@@ -23,7 +23,7 @@ public class PlaintextTallyInputValidation {
   private final int navailable;
 
   public PlaintextTallyInputValidation(Manifest election, CiphertextTally ctally, int nguardians, int navailable) {
-    this.contestMap = election.contests.stream().collect(Collectors.toMap(c -> c.object_id, ElectionContest::new));
+    this.contestMap = election.contests().stream().collect(Collectors.toMap(c -> c.object_id(), ElectionContest::new));
     this.ctally = ctally;
     this.nguardians = nguardians;
     this.navailable = navailable;
@@ -158,7 +158,7 @@ public class PlaintextTallyInputValidation {
   void validateRecoveredParts(DecryptionShare.CiphertextDecryptionSelection share, ValidationMessenger messes) {
     ValidationMessenger partsMesses = messes.nested("RecoveryParts", share.object_id());
 
-    Map<String, DecryptionShare.CiphertextCompensatedDecryptionSelection> parts =  share.recovered_parts().get();
+    Map<String, DecryptionShare.CiphertextCompensatedDecryptionSelection> parts = share.recovered_parts().get();
     if (parts.size() != navailable) {
       String msg = String.format("PlaintextTally.E.3 share '%s' number of parts = %d should be navailable = %d",
               share.object_id(), parts.size(), navailable);
@@ -199,8 +199,8 @@ public class PlaintextTallyInputValidation {
 
     ElectionContest(Manifest.ContestDescription electionContest) {
       this.selectionMap = new HashMap<>();
-      for (Manifest.SelectionDescription sel : electionContest.ballot_selections) {
-        this.selectionMap.put(sel.object_id, sel);
+      for (Manifest.SelectionDescription sel : electionContest.ballot_selections()) {
+        this.selectionMap.put(sel.object_id(), sel);
       }
     }
   }

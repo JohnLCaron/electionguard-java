@@ -26,8 +26,8 @@ public class TestKeyCeremonyTrustee {
 
     ElGamal.KeyPair election_key_pair = trustee.secrets().election_key_pair;
     assertThat(election_key_pair).isNotNull();
-    assertThat(election_key_pair.public_key).isNotNull();
-    assertThat(election_key_pair.secret_key).isNotNull();
+    assertThat(election_key_pair.public_key()).isNotNull();
+    assertThat(election_key_pair.secret_key()).isNotNull();
 
     ElectionPolynomial polynomial = trustee.secrets().polynomial;
     assertThat(polynomial).isNotNull();

@@ -23,7 +23,7 @@ public class TestTallyProperties extends TestProperties {
 
     // encrypt and cast each ballot
     BallotBox store = new BallotBox(everything.election_description, everything.context);
-    Group.ElementModQ seed_hash = Encrypt.EncryptionDevice.createForTest("Location").get_hash();
+    Group.ElementModQ seed_hash = Encrypt.createDeviceForTest("Location").get_hash();
     for (PlaintextBallot ballot : everything.ballots) {
       Optional<CiphertextBallot> encrypted_ballotO = Encrypt.encrypt_ballot(
               ballot, everything.metadata, everything.context, seed_hash, Optional.empty(), true);
@@ -51,7 +51,7 @@ public class TestTallyProperties extends TestProperties {
 
     // encrypt each ballot
     BallotBox store = new BallotBox(everything.election_description, everything.context);
-    Group.ElementModQ seed_hash = Encrypt.EncryptionDevice.createForTest("Location").get_hash();
+    Group.ElementModQ seed_hash = Encrypt.createDeviceForTest("Location").get_hash();
     for (PlaintextBallot ballot : everything.ballots) {
       Optional<CiphertextBallot> encrypted_ballotO = Encrypt.encrypt_ballot(
               ballot, everything.metadata, everything.context, seed_hash, Optional.empty(), true);
@@ -83,7 +83,7 @@ public class TestTallyProperties extends TestProperties {
 
     // encrypt each ballot
     // DataStore store = new DataStore();
-    Group.ElementModQ seed_hash = Encrypt.EncryptionDevice.createForTest("Location").get_hash();
+    Group.ElementModQ seed_hash = Encrypt.createDeviceForTest("Location").get_hash();
     SubmittedBallot[] acceptedBallots = new SubmittedBallot[3];
     int count = 0;
     for (PlaintextBallot ballot : everything.ballots) {
