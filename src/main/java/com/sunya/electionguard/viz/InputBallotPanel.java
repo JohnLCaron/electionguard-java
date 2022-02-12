@@ -1,5 +1,7 @@
 package com.sunya.electionguard.viz;
 
+import com.google.common.collect.ImmutableList;
+import com.sunya.electionguard.PlaintextBallot;
 import com.sunya.electionguard.publish.CloseableIterableAdapter;
 import com.sunya.electionguard.publish.PrivateData;
 import ucar.ui.prefs.ComboBox;
@@ -12,8 +14,10 @@ import ucar.util.prefs.PreferencesExt;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.io.File;
 import java.io.IOException;
 import java.util.Formatter;
+import java.util.List;
 
 class InputBallotPanel extends JPanel {
   final PreferencesExt prefs;
@@ -23,7 +27,7 @@ class InputBallotPanel extends JPanel {
   final JPanel topPanel;
   final JPanel buttPanel = new JPanel();
   final FileManager fileChooser;
-  final  PlaintextBallotsTable inputBallotsTable;
+  final PlaintextBallotsTable inputBallotsTable;
 
   boolean eventOk = true;
   String inputBallotDir = "none";
@@ -90,10 +94,12 @@ class InputBallotPanel extends JPanel {
     add(tabbedPane, BorderLayout.CENTER);
   }
 
-  boolean setInputBallots(String electionRecord) {
+  boolean setInputBallots(String fileOrDir) {
+    inputBallotsTable.clearBeans();
+    File file = new File(fileOrDir);
     try {
-      PrivateData pdata = new PrivateData(electionRecord, false, false);
-      inputBallotsTable.setBallots(CloseableIterableAdapter.wrap(pdata.inputBallots()));
+      List<PlaintextBallot> inputs = PrivateData.inputBallots(file.toPath());
+      inputBallotsTable.setBallots(CloseableIterableAdapter.wrap(inputs));
     } catch (IOException e) {
       e.printStackTrace();
       return false;

@@ -67,7 +67,7 @@ public class TestRemoteTrusteeRoundtrip {
     TrusteeProto.DecryptingTrustee trusteeProto = TrusteeToProto.convertTrustee(org);
     publisher.overwriteTrusteeProto(trusteeProto);
 
-    DecryptingTrustee roundtrip = publisher.readRemoteTrustee(trusteeProto.getGuardianId());
+    DecryptingTrustee roundtrip = publisher.readDecryptingTrustee(trusteeProto.getGuardianId());
     assertThat(roundtrip.id()).isEqualTo(org.id);
     assertThat(roundtrip.xCoordinate()).isEqualTo(org.xCoordinate);
     assertThat(roundtrip.election_keypair()).isEqualTo(org.secrets().election_key_pair);

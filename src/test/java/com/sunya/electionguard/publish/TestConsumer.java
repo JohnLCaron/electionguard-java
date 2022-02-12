@@ -24,7 +24,7 @@ public class TestConsumer {
     assertThat(record.availableGuardians).hasSize(5);
 
     assertThat(record.acceptedBallots).hasSize(6);
-    assertThat(record.spoiledBallots).hasSize(4);
+    assertThat(record.spoiledBallots).hasSize(2);
   }
 
   @Example
