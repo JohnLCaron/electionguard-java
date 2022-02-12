@@ -1,9 +1,7 @@
 package com.sunya.electionguard;
 
-import com.google.auto.value.AutoValue;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
 import javax.annotation.concurrent.Immutable;
@@ -14,19 +12,25 @@ import java.util.Objects;
 
 import static com.sunya.electionguard.Group.ElementModP;
 
-/** The decrypted plaintext representation of the counts of a collection of ballots. */
+/**
+ * The decrypted plaintext representation of the counts of a collection of ballots.
+ */
 @Immutable
 public class PlaintextTally {
-  /** Matches the CiphertextTally object_id. */
+  /**
+   * Matches the CiphertextTally object_id.
+   */
   public final String object_id;
 
-  /** The list of contests for this tally, keyed by contest_id. */
+  /**
+   * The list of contests for this tally, keyed by contest_id.
+   */
   public final ImmutableMap<String, Contest> contests;
 
   public PlaintextTally(String object_id,
                         Map<String, Contest> contests) {
     this.object_id = Preconditions.checkNotNull(object_id);
-    this.contests =  ImmutableMap.copyOf(Preconditions.checkNotNull(contests));
+    this.contests = ImmutableMap.copyOf(Preconditions.checkNotNull(contests));
   }
 
   @Override
@@ -54,45 +58,42 @@ public class PlaintextTally {
   /**
    * The plaintext representation of the counts of one contest in the election.
    * The object_id is the same as the Manifest.ContestDescription.object_id or PlaintextBallotContest object_id.
+   *
+   * @param selections The collection of selections in the contest, keyed by selection.object_id.
    */
-  @AutoValue
-  public static abstract class Contest implements ElectionObjectBaseIF {
-    /** The collection of selections in the contest, keyed by selection.object_id. */
-    public abstract ImmutableMap<String, Selection> selections(); // Map(SELECTION_ID, PlaintextTallySelection)
+  public record Contest(
+          String object_id,
+          Map<String, Selection> selections) {
 
-    public static Contest create(String object_id, Map<String, Selection> selections) {
+    public Contest {
       Preconditions.checkArgument(!Strings.isNullOrEmpty(object_id));
-      return new AutoValue_PlaintextTally_Contest(
-              object_id,
-              ImmutableMap.copyOf(Preconditions.checkNotNull(selections)));
+      Preconditions.checkNotNull(selections);
+      selections = Map.copyOf(selections);
     }
   }
 
   /**
    * The plaintext representation of the counts of one selection of one contest in the election.
    * The object_id is the same as the encrypted selection (Ballot.CiphertextSelection) object_id.
+   *
+   * @param tally   the actual count.
+   * @param value   g^tally or M in the spec.
+   * @param message The encrypted vote count.
+   * @param shares  The Guardians' shares of the decryption of a selection. `M_i` in the spec. Must be nguardians of them.
    */
-  @AutoValue
-  public static abstract class Selection implements ElectionObjectBaseIF {
-    /** The actual count. */
-    public abstract Integer tally();
-    /** g^tally or M in the spec. */
-    public abstract ElementModP value();
-    /** The encrypted vote count. */
-    public abstract ElGamal.Ciphertext message();
+  public record Selection(
+          String object_id,
+          Integer tally,
+          ElementModP value,
+          ElGamal.Ciphertext message,
+          List<DecryptionShare.CiphertextDecryptionSelection> shares) {
 
-    /** The Guardians' shares of the decryption of a selection. `M_i` in the spec. Must be nguardians of them. */
-    public abstract ImmutableList<DecryptionShare.CiphertextDecryptionSelection> shares();
-
-    public static Selection create(String object_id, Integer tally, ElementModP value, ElGamal.Ciphertext message,
-                                   List<DecryptionShare.CiphertextDecryptionSelection> shares) {
+    public Selection {
       Preconditions.checkArgument(!Strings.isNullOrEmpty(object_id));
-      return new AutoValue_PlaintextTally_Selection(
-              object_id,
-              Preconditions.checkNotNull(tally),
-              Preconditions.checkNotNull(value),
-              Preconditions.checkNotNull(message),
-              ImmutableList.copyOf(shares));
+      Preconditions.checkNotNull(tally);
+      Preconditions.checkNotNull(value);
+      Preconditions.checkNotNull(message);
+      shares = List.copyOf(shares);
     }
 
     @Override

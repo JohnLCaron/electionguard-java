@@ -256,7 +256,7 @@ public class TestPlaintextTallyInputValidation {
     Map<String, DecryptionShare.CiphertextCompensatedDecryptionSelection> parts = new HashMap<>();
     for (int i=0; i < n; i++) {
       String guardian_id = "guardian"+i;
-      parts.put(guardian_id, DecryptionShare.CiphertextCompensatedDecryptionSelection.create(
+      parts.put(guardian_id, new DecryptionShare.CiphertextCompensatedDecryptionSelection(
               object_id,
               bad ? "bad" : guardian_id,
               missing_guardian_id,

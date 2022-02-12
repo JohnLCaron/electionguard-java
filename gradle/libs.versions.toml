@@ -1,6 +1,4 @@
 [versions]
-autoValue = "1.8.2"
-autoValueAnnotations = "1.8.2"
 flogger = "0.5.1"
 grpc = "1.42.1"
 gson = "2.8.6"
@@ -26,9 +24,6 @@ owaspDepCheckPlugin = "6.5.1"
 protobufPlugin = "0.8.18"
 
 [libraries]
-autoValue = { group = "com.google.auto.value", name = "auto-value", version.ref = "autoValue" }
-autoValueAnnotations = { group = "com.google.auto.value", name = "auto-value-annotations", version.ref = "autoValueAnnotations" }
-
 grpcBom = { group = "io.grpc", name = "grpc-bom", version.ref = "grpc" }
 grpcProtobuf = { group = "io.grpc", name = "grpc-protobuf" }
 grpcNettyShaded = { group = "io.grpc", name = "grpc-netty-shaded" }
@@ -40,10 +35,6 @@ tomcatAnnotationsApi = { group = "org.apache.tomcat", name = "annotations-api", 
 gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
 guava = { group = "com.google.guava", name = "guava", version.ref = "guava" }
 
-# viz
-jcommander = { group = "com.beust", name = "jcommander", version.ref = "jcommander" }
-jdom2 = { group = "org.jdom", name = "jdom2", version.ref = "jdom2" }
-
 # Annotations: Nullable
 jsr305 = { group = "com.google.code.findbugs", name = "jsr305", version.ref = "jsr305" }
 
@@ -54,6 +45,10 @@ protobufJava = { group = "com.google.protobuf", name = "protobuf-java" }
 # logging
 flogger = { group = "com.google.flogger", name = "flogger", version.ref = "flogger" }
 floggerBackend = { group = "com.google.flogger", name = "flogger-system-backend", version.ref = "flogger" }
+
+# viz
+jcommander = { group = "com.beust", name = "jcommander", version.ref = "jcommander" }
+jdom2 = { group = "org.jdom", name = "jdom2", version.ref = "jdom2" }
 slf4j = { group = "org.slf4j", name = "slf4j-api", version.ref = "slf4j" }
 slf4jJdk14 = { group = "org.slf4j", name = "slf4j-jdk14", version.ref = "slf4j" }
 

@@ -40,7 +40,7 @@ import static com.sunya.electionguard.standard.KeyCeremony.CeremonyDetails;
 public class TestDecryptionMediator extends TestProperties {
   private static final int NUMBER_OF_GUARDIANS = 3;
   private static final int QUORUM = 2;
-  private static final CeremonyDetails CEREMONY_DETAILS = CeremonyDetails.create(NUMBER_OF_GUARDIANS, QUORUM);
+  private static final CeremonyDetails CEREMONY_DETAILS = new CeremonyDetails(NUMBER_OF_GUARDIANS, QUORUM);
   private static final Random random = new Random();
 
   static BallotFactory ballot_factory = new BallotFactory();

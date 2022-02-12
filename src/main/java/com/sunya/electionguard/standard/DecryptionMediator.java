@@ -168,7 +168,7 @@ class DecryptionMediator {
 
   public void receive_tally_compensation_share(CompensatedDecryptionShare tally_compensation_share) {
     this.compensated_tally_shares.put(
-            GuardianPair.create(
+            new GuardianPair(
                     tally_compensation_share.guardian_id,
                     tally_compensation_share.missing_guardian_id),
             tally_compensation_share);
@@ -183,7 +183,7 @@ class DecryptionMediator {
       Map<GuardianPair, CompensatedDecryptionShare> shares =
               this.compensated_ballot_shares.computeIfAbsent(ballot_id, k -> new HashMap<>());
       shares.put(
-              GuardianPair.create(
+              new GuardianPair(
                       share.guardian_id,
                       share.missing_guardian_id),
               share);

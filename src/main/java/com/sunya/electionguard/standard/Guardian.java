@@ -64,7 +64,7 @@ class Guardian {
     Preconditions.checkArgument(coeff.guardianSequence() > 0 && coeff.guardianSequence() < 256);
     Preconditions.checkArgument(quorum <= number_of_guardians);
     this.sequence_order = coeff.guardianSequence();
-    this.ceremony_details = KeyCeremony.CeremonyDetails.create(number_of_guardians, quorum);
+    this.ceremony_details = new KeyCeremony.CeremonyDetails(number_of_guardians, quorum);
     this.election_keys =  election_keys;
 
     this.backups_to_share = new HashMap<>();
@@ -98,7 +98,7 @@ class Guardian {
     Preconditions.checkArgument(coeff.guardianSequence() > 0 && coeff.guardianSequence() < 256);
     Preconditions.checkArgument(quorum <= number_of_guardians);
     this.sequence_order = coeff.guardianSequence();
-    this.ceremony_details = KeyCeremony.CeremonyDetails.create(number_of_guardians, quorum);
+    this.ceremony_details = new KeyCeremony.CeremonyDetails(number_of_guardians, quorum);
     this.election_keys =  coeff.generate_election_key_pair();
 
     this.backups_to_share = new HashMap<>();
@@ -137,7 +137,7 @@ class Guardian {
     this.object_id = id;
     Preconditions.checkArgument(sequence_order > 0 && sequence_order < 256);
     this.sequence_order = sequence_order;
-    this.ceremony_details = KeyCeremony.CeremonyDetails.create(number_of_guardians, quorum);
+    this.ceremony_details = new KeyCeremony.CeremonyDetails(number_of_guardians, quorum);
     this.election_keys =  KeyCeremony.generate_election_key_pair(id, sequence_order, quorum, nonce_seed);
 
     this.backups_to_share = new HashMap<>();

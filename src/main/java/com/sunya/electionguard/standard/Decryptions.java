@@ -146,7 +146,7 @@ public class Decryptions {
       selections.put(decryption.get().object_id(), decryption.get());
     }
 
-    return Optional.of(CiphertextDecryptionContest.create(
+    return Optional.of(new CiphertextDecryptionContest(
             ciphertextContest.object_id, guardian_keys.owner_id(), ciphertextContest.description_hash, selections));
   }
 
@@ -279,7 +279,7 @@ public class Decryptions {
         selections.put(decryption.get().object_id(), decryption.get());
       }
 
-      return Optional.of(CiphertextCompensatedDecryptionContest.create(
+      return Optional.of(new CiphertextCompensatedDecryptionContest(
               contest.object_id,
               guardian_key.owner_id(),
               missing_guardian_key.owner_id(),
@@ -419,7 +419,7 @@ public class Decryptions {
             tuple.decryption,
             context.crypto_extended_base_hash)) {
 
-      CiphertextCompensatedDecryptionSelection share = CiphertextCompensatedDecryptionSelection.create(
+      CiphertextCompensatedDecryptionSelection share = new CiphertextCompensatedDecryptionSelection(
               selection.object_id(),
               guardian_key.owner_id(),
               missing_guardian_key.owner_id(),
@@ -636,7 +636,7 @@ public class Decryptions {
                 Optional.empty(),
                 Optional.of(compensated_selection_shares)));
       }
-      return CiphertextDecryptionContest.create(
+      return new CiphertextDecryptionContest(
               contest.object_id,
               missing_guardian_id,
               contest.description_hash,

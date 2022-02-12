@@ -14,7 +14,7 @@ import static com.sunya.electionguard.standard.KeyCeremony.*;
 public class TestKeyCeremonyMediator {
   private static final int NUMBER_OF_GUARDIANS = 2;
   private static final int QUORUM = 2;
-  private static final CeremonyDetails CEREMONY_DETAILS = CeremonyDetails.create(NUMBER_OF_GUARDIANS, QUORUM);
+  private static final CeremonyDetails CEREMONY_DETAILS = new CeremonyDetails(NUMBER_OF_GUARDIANS, QUORUM);
   private static final String GUARDIAN_1_ID = "Guardian 1";
   private static final String GUARDIAN_2_ID = "Guardian 2";
   private static final String VERIFIER_ID = "Guardian 3";
@@ -111,7 +111,7 @@ public class TestKeyCeremonyMediator {
     ElectionPartialKeyVerification verification1 =
             GUARDIAN_1.verify_election_partial_key_backup(GUARDIAN_2_ID).orElseThrow();
 
-    ElectionPartialKeyVerification failed_verification2 = ElectionPartialKeyVerification.create(
+    ElectionPartialKeyVerification failed_verification2 = new ElectionPartialKeyVerification(
             GUARDIAN_1_ID,
             GUARDIAN_2_ID,
             GUARDIAN_2_ID,
@@ -125,7 +125,7 @@ public class TestKeyCeremonyMediator {
     assertThat(mediator.publish_joint_key()).isEmpty();
     assertThat(state.failed_verifications()).hasSize(1);
     assertThat(state.failed_verifications().get(0))
-            .isEqualTo(KeyCeremonyMediator.GuardianPair.create(GUARDIAN_1_ID, GUARDIAN_2_ID));
+            .isEqualTo(new KeyCeremonyMediator.GuardianPair(GUARDIAN_1_ID, GUARDIAN_2_ID));
 
     ElectionPartialKeyChallenge challenge = GUARDIAN_1.publish_election_backup_challenge(GUARDIAN_2_ID).orElseThrow();
     mediator.verify_challenge(challenge);

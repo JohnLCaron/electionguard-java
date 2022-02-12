@@ -45,7 +45,6 @@ dependencies {
     implementation(libs.grpcStub)
     compileOnly(libs.tomcatAnnotationsApi)
 
-    implementation(libs.autoValueAnnotations)
     implementation(libs.flogger)
     implementation(libs.gson)
     implementation(libs.guava)
@@ -61,8 +60,6 @@ dependencies {
     implementation(libs.slf4j)
     // implementation("com.jgoodies:jgoodies-forms:1.6.0")
     runtimeOnly(libs.slf4jJdk14)
-
-    annotationProcessor(libs.autoValue)
 
     runtimeOnly(libs.grpcNettyShaded)
     runtimeOnly(libs.floggerBackend)

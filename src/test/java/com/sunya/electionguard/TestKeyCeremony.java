@@ -38,7 +38,7 @@ public class TestKeyCeremony {
     ElectionKeyPair election_key_pair = generate_election_key_pair("owner", 42, QUORUM, null);
     ElectionKeyPair sender_election_key_pair = generate_election_key_pair(SENDER_GUARDIAN_ID, SENDER_SEQUENCE_ORDER, QUORUM, null);
 
-    ElectionPublicKey designated_guardian_key = ElectionPublicKey.create(
+    ElectionPublicKey designated_guardian_key = new ElectionPublicKey(
             RECIPIENT_GUARDIAN_ID,
             RECIPIENT_SEQUENCE_ORDER,
             sender_election_key_pair.key_pair().public_key,
@@ -59,7 +59,7 @@ public class TestKeyCeremony {
   public void test_verify_election_partial_key_backup() {
     ElectionKeyPair sender_election_key_pair = generate_election_key_pair(SENDER_GUARDIAN_ID, SENDER_SEQUENCE_ORDER, QUORUM, null);
 
-    ElectionPublicKey publicKey = ElectionPublicKey.create(
+    ElectionPublicKey publicKey = new ElectionPublicKey(
             RECIPIENT_GUARDIAN_ID,
             RECIPIENT_SEQUENCE_ORDER,
             sender_election_key_pair.key_pair().public_key,
@@ -86,7 +86,7 @@ public class TestKeyCeremony {
   @Example
   public void test_generate_election_partial_key_challenge() {
     ElectionKeyPair sender_election_key_pair = generate_election_key_pair(SENDER_GUARDIAN_ID, 2, QUORUM, null);
-    ElectionPublicKey publicKey = ElectionPublicKey.create(
+    ElectionPublicKey publicKey = new ElectionPublicKey(
             RECIPIENT_GUARDIAN_ID,
             RECIPIENT_SEQUENCE_ORDER,
             sender_election_key_pair.key_pair().public_key,
@@ -114,7 +114,7 @@ public class TestKeyCeremony {
   @Example
   public void test_verify_election_partial_key_challenge() {
     ElectionKeyPair sender_election_key_pair = generate_election_key_pair(SENDER_GUARDIAN_ID, 2, QUORUM, null);
-    ElectionPublicKey publicKey = ElectionPublicKey.create(
+    ElectionPublicKey publicKey = new ElectionPublicKey(
             RECIPIENT_GUARDIAN_ID,
             RECIPIENT_SEQUENCE_ORDER,
             sender_election_key_pair.key_pair().public_key,
@@ -141,13 +141,13 @@ public class TestKeyCeremony {
   public void test_combine_election_public_keys() {
 
     List<ElectionPublicKey> public_keys = new ArrayList<>();
-    public_keys.add(ElectionPublicKey.create(
+    public_keys.add(new ElectionPublicKey(
                     RECIPIENT_GUARDIAN_ID,
                     RECIPIENT_SEQUENCE_ORDER,
                     Group.TWO_MOD_P,
                     ImmutableList.of(Group.TWO_MOD_P, Group.TWO_MOD_P), new ArrayList<>()));
     public_keys.add(
-            ElectionPublicKey.create(
+            new ElectionPublicKey(
                     SENDER_GUARDIAN_ID,
                     SENDER_SEQUENCE_ORDER,
                     Group.TWO_MOD_P,

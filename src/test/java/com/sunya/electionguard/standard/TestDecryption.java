@@ -38,7 +38,7 @@ import static com.sunya.electionguard.standard.KeyCeremony.*;
 public class TestDecryption extends TestProperties {
   private static final int NUMBER_OF_GUARDIANS = 3;
   private static final int QUORUM = 2;
-  private static final CeremonyDetails CEREMONY_DETAILS = CeremonyDetails.create(NUMBER_OF_GUARDIANS, QUORUM);
+  private static final CeremonyDetails CEREMONY_DETAILS = new CeremonyDetails(NUMBER_OF_GUARDIANS, QUORUM);
 
   static BallotFactory ballot_factory = new BallotFactory();
 
@@ -164,7 +164,7 @@ public class TestDecryption extends TestProperties {
 
     // Guardian doesn't give keys
     ElementModQ broken_secret_key = ZERO_MOD_Q;
-    ElectionKeyPair broken_guardian_key_pair = ElectionKeyPair.create(
+    ElectionKeyPair broken_guardian_key_pair = new ElectionKeyPair(
             guardian.object_id,
             guardian.sequence_order,
             new ElGamal.KeyPair(broken_secret_key, guardian.election_keys().key_pair().public_key),

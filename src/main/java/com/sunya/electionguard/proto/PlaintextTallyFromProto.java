@@ -31,7 +31,7 @@ public class PlaintextTallyFromProto {
             .collect(Collectors.toMap(Map.Entry::getKey,
                     e -> convertSelection(e.getValue())));
 
-    return PlaintextTally.Contest.create(
+    return new PlaintextTally.Contest(
             proto.getObjectId(),
             selections);
   }
@@ -41,7 +41,7 @@ public class PlaintextTallyFromProto {
             .map(PlaintextTallyFromProto::convertShare)
             .collect(Collectors.toList());
 
-    return PlaintextTally.Selection.create(
+    return new PlaintextTally.Selection(
             proto.getObjectId(),
             proto.getTally(),
             convertElementModP(proto.getValue()),
@@ -55,7 +55,7 @@ public class PlaintextTallyFromProto {
       recovered.put(entry.getKey(), convertCompensatedShare(entry.getValue()));
     }
 
-    return DecryptionShare.CiphertextDecryptionSelection.create(
+    return new DecryptionShare.CiphertextDecryptionSelection(
             proto.getObjectId(),
             proto.getGuardianId(),
             convertElementModP(proto.getShare()),
@@ -66,7 +66,7 @@ public class PlaintextTallyFromProto {
   private static DecryptionShare.CiphertextCompensatedDecryptionSelection convertCompensatedShare(
           PlaintextTallyProto.CiphertextCompensatedDecryptionSelection proto) {
 
-    return DecryptionShare.CiphertextCompensatedDecryptionSelection.create(
+    return new DecryptionShare.CiphertextCompensatedDecryptionSelection(
             proto.getObjectId(),
             proto.getGuardianId(),
             proto.getMissingGuardianId(),

@@ -44,7 +44,7 @@ class KeyCeremonyRemoteTrusteeProxy implements KeyCeremonyTrusteeIF {
         return Optional.empty();
       }
       List<SchnorrProof> proofs = response.getCoefficientProofsList().stream().map(CommonConvert::convertSchnorrProof).collect(Collectors.toList());
-      return Optional.of(KeyCeremony2.PublicKeySet.create(
+      return Optional.of(new KeyCeremony2.PublicKeySet(
               response.getOwnerId(),
               response.getGuardianXCoordinate(),
               proofs));
@@ -81,7 +81,7 @@ class KeyCeremonyRemoteTrusteeProxy implements KeyCeremonyTrusteeIF {
     try {
       RemoteKeyCeremonyTrusteeProto.PartialKeyBackupRequest request = RemoteKeyCeremonyTrusteeProto.PartialKeyBackupRequest.newBuilder().setGuardianId(guardianId).build();
       RemoteKeyCeremonyTrusteeProto.PartialKeyBackup response = blockingStub.sendPartialKeyBackup(request);
-      return Optional.of(KeyCeremony2.PartialKeyBackup.create(
+      return Optional.of(new KeyCeremony2.PartialKeyBackup(
               response.getGeneratingGuardianId(),
               response.getDesignatedGuardianId(),
               response.getDesignatedGuardianXCoordinate(),
@@ -104,7 +104,7 @@ class KeyCeremonyRemoteTrusteeProxy implements KeyCeremonyTrusteeIF {
               .setCoordinate(CommonConvert.convertElementModQ(backup.coordinate()));
 
       RemoteKeyCeremonyTrusteeProto.PartialKeyVerification response = blockingStub.verifyPartialKeyBackup(request.build());
-      return Optional.of(KeyCeremony2.PartialKeyVerification.create(
+      return Optional.of(new KeyCeremony2.PartialKeyVerification(
               response.getGeneratingGuardianId(),
               response.getDesignatedGuardianId(),
               response.getError()));
@@ -120,7 +120,7 @@ class KeyCeremonyRemoteTrusteeProxy implements KeyCeremonyTrusteeIF {
     try {
       RemoteKeyCeremonyTrusteeProto.PartialKeyChallenge request = RemoteKeyCeremonyTrusteeProto.PartialKeyChallenge.newBuilder().setGuardianId(guardianId).build();
       RemoteKeyCeremonyTrusteeProto.PartialKeyChallengeResponse response = blockingStub.sendBackupChallenge(request);
-       return Optional.of(KeyCeremony2.PartialKeyChallengeResponse.create(
+       return Optional.of(new KeyCeremony2.PartialKeyChallengeResponse(
               response.getGeneratingGuardianId(),
               response.getDesignatedGuardianId(),
               response.getDesignatedGuardianXCoordinate(),

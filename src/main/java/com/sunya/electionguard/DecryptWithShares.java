@@ -163,7 +163,7 @@ public class DecryptWithShares {
         plaintext_selections.put(plaintext_selection.object_id(), plaintext_selection);
       }
 
-    return Optional.of(PlaintextTally.Contest.create(contest.object_id, plaintext_selections));
+    return Optional.of(new PlaintextTally.Contest(contest.object_id, plaintext_selections));
   }
 
   /**
@@ -186,8 +186,8 @@ public class DecryptWithShares {
       // Verify that all of the shares are computed correctly
       for (KeyAndSelection tuple : shares.values()) {
         // verify we have a proof or recovered parts
-        if (!tuple.decryption.is_valid(selection.ciphertext(), tuple.public_key, extended_base_hash)) {
-          logger.atWarning().log("share: %s has invalid proof or recovered parts", tuple.decryption.object_id());
+        if (!tuple.decryption().is_valid(selection.ciphertext(), tuple.public_key(), extended_base_hash)) {
+          logger.atWarning().log("share: %s has invalid proof or recovered parts", tuple.decryption().object_id());
           return Optional.empty();
         }
       }
@@ -195,7 +195,7 @@ public class DecryptWithShares {
 
     // accumulate all of the shares calculated for the selection
     // all_shares_product_M = mult_p( *[decryption.share for (_, decryption) in shares.values()]);
-    List<ElementModP> decryption_shares = shares.values().stream().map(t -> t.decryption.share()).collect(Collectors.toList());
+    List<ElementModP> decryption_shares = shares.values().stream().map(t -> t.decryption().share()).collect(Collectors.toList());
     ElementModP all_shares_product_M = Group.mult_p(decryption_shares);
 
     // Calculate 𝑀 = 𝐵⁄(∏𝑀𝑖) mod 𝑝.
@@ -203,8 +203,8 @@ public class DecryptWithShares {
     Integer dlogM = Dlog.discrete_log(decrypted_value);
 
     // [share for (guardian_id, (public_key, share))in shares.items()],
-    List<DecryptionShare.CiphertextDecryptionSelection> selections = shares.values().stream().map(t -> t.decryption).collect(Collectors.toList());
-    return Optional.of( PlaintextTally.Selection.create(
+    List<DecryptionShare.CiphertextDecryptionSelection> selections = shares.values().stream().map(t -> t.decryption()).collect(Collectors.toList());
+    return Optional.of(new PlaintextTally.Selection(
             selection.object_id(),
             dlogM,
             decrypted_value,
