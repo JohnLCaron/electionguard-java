@@ -27,7 +27,7 @@ class TrusteesPanel extends JPanel {
   final JPanel topPanel;
   final JPanel buttPanel = new JPanel();
   final FileManager fileChooser;
-  final TrusteeDecryptingTable trusteesDecryptingTable;
+  final DecryptingTrusteeTable trusteesDecryptingTable;
 
   boolean eventOk = true;
   String inputFile = "none";
@@ -74,11 +74,11 @@ class TrusteesPanel extends JPanel {
         infoWindow.show();
       }
     };
-    BAMutil.setActionProperties(infoAction, "Information", "info on current Manifest Record", false, 'I', -1);
+    BAMutil.setActionProperties(infoAction, "Information", "info on seleced Trustee Record", false, 'I', -1);
     BAMutil.addActionToContainer(buttPanel, infoAction);
 
     // components
-    this.trusteesDecryptingTable = new TrusteeDecryptingTable((PreferencesExt) prefs.node("DecryptingTrustees"));
+    this.trusteesDecryptingTable = new DecryptingTrusteeTable((PreferencesExt) prefs.node("DecryptingTrustees"));
 
     // layout
     this.topPanel = new JPanel(new BorderLayout());
@@ -113,6 +113,7 @@ class TrusteesPanel extends JPanel {
 
   void showInfo(Formatter f) {
     f.format("%s%n", this.inputFile);
+    trusteesDecryptingTable.showInfo(f);
   }
 
   void save() {

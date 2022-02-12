@@ -35,6 +35,7 @@ public class TestElectionRecordProtoRoundtrip {
     assertThat(consumer.availableGuardians()).hasSize(5);
 
     assertThat(consumer.acceptedBallots()).isNotNull();
+    assertThat(consumer.acceptedBallots()).isNotEmpty();
   }
 
   @Example

@@ -24,6 +24,7 @@ public class TestCiphertextBallotToProtoRoundtrip {
 
   @Example
   public void testCiphertextBallotsRoundtrip() throws IOException {
+    assertThat(publisher.ballotFiles()).isNotEmpty();
     for (File file : publisher.ballotFiles()) {
       SubmittedBallot fromPython = ConvertFromJson.readSubmittedBallot(file.getAbsolutePath());
       assertThat(fromPython).isNotNull();
@@ -43,6 +44,7 @@ public class TestCiphertextBallotToProtoRoundtrip {
       assertThat(roundtrip.contests).isEqualTo(fromPython.contests);
       assertThat(roundtrip).isEqualTo(fromPython);
     }
+    System.out.printf("testCiphertextBallotsRoundtrip %d%n", publisher.ballotFiles().length);
   }
 
 }

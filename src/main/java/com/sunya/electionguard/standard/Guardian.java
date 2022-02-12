@@ -159,7 +159,7 @@ class Guardian {
   public GuardianRecord publish() {
     KeyCeremony.ElectionPublicKey election_public_key = this.election_keys.share();
 
-    return GuardianRecord.create(
+    return new GuardianRecord(
             election_public_key.owner_id(),
             election_public_key.sequence_order(),
             election_public_key.key(),
@@ -167,8 +167,8 @@ class Guardian {
             election_public_key.coefficient_proofs());
   }
 
-  public GuardianRecordPrivate export_private_data() {
-    return GuardianRecordPrivate.create(
+  public GuardianPrivateRecord export_private_data() {
+    return new GuardianPrivateRecord(
             election_keys,
             backups_to_share,
             guardian_election_public_keys,

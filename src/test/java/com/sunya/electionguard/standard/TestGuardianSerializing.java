@@ -116,7 +116,7 @@ public class TestGuardianSerializing {
             Group.getPrimes(),
             this.guardianRecords);
 
-    List<GuardianRecordPrivate> gprivate = this.guardians.stream().map(g -> g.export_private_data()).collect(Collectors.toList());
+    List<GuardianPrivateRecord> gprivate = this.guardians.stream().map(g -> g.export_private_data()).collect(Collectors.toList());
     pdata.publish_private_data(null, gprivate);
   }
 
@@ -137,13 +137,13 @@ public class TestGuardianSerializing {
 
   @Example
   public void checkGuardianPrivate() throws IOException {
-    List<GuardianRecordPrivate> roundtrip = pdata.readGuardianPrivateJson();
+    List<GuardianPrivateRecord> roundtrip = pdata.readGuardianPrivateJson();
     assertThat(roundtrip).hasSize(this.guardians.size());
 
     for (Guardian guardian : this.guardians) {
       System.out.printf("Test Guardian %s%n", guardian.object_id);
-      GuardianRecordPrivate guardianPrivate = guardian.export_private_data();
-      GuardianRecordPrivate guardianPrivateRoundtrip = roundtrip.stream().filter(g -> g.guardian_id().equals(guardian.object_id)).findFirst().orElseThrow();
+      GuardianPrivateRecord guardianPrivate = guardian.export_private_data();
+      GuardianPrivateRecord guardianPrivateRoundtrip = roundtrip.stream().filter(g -> g.guardian_id().equals(guardian.object_id)).findFirst().orElseThrow();
       assertThat(guardianPrivateRoundtrip.equals(guardianPrivate)).isTrue();
       assertThat(guardianPrivateRoundtrip).isEqualTo(guardianPrivate);
     }

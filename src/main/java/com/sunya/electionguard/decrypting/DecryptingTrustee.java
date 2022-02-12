@@ -16,6 +16,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.sunya.electionguard.Group.ONE_MOD_P;
 import static com.sunya.electionguard.Group.mult_p;
@@ -75,6 +76,30 @@ public class DecryptingTrustee implements DecryptingTrusteeIF {
   @Override
   public Group.ElementModP electionPublicKey() {
     return election_keypair.public_key;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    DecryptingTrustee that = (DecryptingTrustee) o;
+    return xCoordinate == that.xCoordinate && id.equals(that.id) && election_keypair.equals(that.election_keypair) && otherGuardianPartialKeyBackups.equals(that.otherGuardianPartialKeyBackups) && guardianCommittments.equals(that.guardianCommittments);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(id, xCoordinate, election_keypair, otherGuardianPartialKeyBackups, guardianCommittments);
+  }
+
+  @Override
+  public String toString() {
+    return "DecryptingTrustee{" +
+            "id='" + id + '\'' +
+            ", xCoordinate=" + xCoordinate +
+            ", election_keypair=" + election_keypair +
+            ", otherGuardianPartialKeyBackups=" + otherGuardianPartialKeyBackups +
+            ", guardianCommittments=" + guardianCommittments +
+            '}';
   }
 
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////

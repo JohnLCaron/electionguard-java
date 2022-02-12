@@ -21,6 +21,7 @@ public class TestPlaintextBallotToProtoRoundtrip {
 
   @Example
   public void testSpoiledBallotsRoundtrip() throws IOException {
+    assertThat(consumer.spoiledBallots()).isNotEmpty();
     for (PlaintextTally tally : consumer.spoiledBallots()) {
       PlaintextTallyProto.PlaintextTally proto = PlaintextTallyToProto.translateToProto(tally);
       PlaintextTally roundtrip = PlaintextTallyFromProto.translateFromProto(proto);

@@ -12,13 +12,13 @@ import com.google.gson.JsonSerializer;
 import com.sunya.electionguard.BallotBox;
 import com.sunya.electionguard.Encrypt;
 import com.sunya.electionguard.GuardianRecord;
-import com.sunya.electionguard.standard.GuardianRecordPrivate;
 import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.SubmittedBallot;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.CiphertextTally;
 import com.sunya.electionguard.PlaintextBallot;
 import com.sunya.electionguard.PlaintextTally;
+import com.sunya.electionguard.standard.GuardianPrivateRecord;
 
 import java.lang.reflect.Type;
 import java.math.BigInteger;
@@ -41,12 +41,12 @@ class GsonTypeAdapters {
             .registerTypeAdapter(Group.ElementModQ.class, new ModQSerializer())
             .registerTypeAdapter(Group.ElementModP.class, new ModPDeserializer())
             .registerTypeAdapter(Group.ElementModP.class, new ModPSerializer())
-            .registerTypeAdapter(Manifest.class, new ElectionDescriptionSerializer())
-            .registerTypeAdapter(Manifest.class, new ElectionDescriptionDeserializer())
+            .registerTypeAdapter(Manifest.class, new ManifestSerializer())
+            .registerTypeAdapter(Manifest.class, new ManifestDeserializer())
             .registerTypeAdapter(GuardianRecord.class, new GuardianRecordSerializer()) // @AutoValue
             .registerTypeAdapter(GuardianRecord.class, new GuardianRecordDeserializer())
-            .registerTypeAdapter(GuardianRecordPrivate.class, new GuardianRecordPrivateSerializer()) // @AutoValue
-            .registerTypeAdapter(GuardianRecordPrivate.class, new GuardianRecordPrivateDeserializer())
+            .registerTypeAdapter(GuardianPrivateRecord.class, new GuardianRecordPrivateSerializer()) // @AutoValue
+            .registerTypeAdapter(GuardianPrivateRecord.class, new GuardianRecordPrivateDeserializer())
             .registerTypeAdapter(SubmittedBallot.class, new CiphertextBallotSerializer())
             .registerTypeAdapter(SubmittedBallot.class, new CiphertextBallotDeserializer())
             .registerTypeAdapter(PlaintextBallot.class, new PlaintextBallotSerializer())
@@ -118,14 +118,14 @@ class GsonTypeAdapters {
     }
   }
 
-  private static class ElectionDescriptionSerializer implements JsonSerializer<Manifest> {
+  private static class ManifestSerializer implements JsonSerializer<Manifest> {
     @Override
     public JsonElement serialize(Manifest src, Type typeOfSrc, JsonSerializationContext context) {
       return ManifestPojo.serialize(src);
     }
   }
 
-  private static class ElectionDescriptionDeserializer implements JsonDeserializer<Manifest> {
+  private static class ManifestDeserializer implements JsonDeserializer<Manifest> {
     @Override
     public Manifest deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
             throws JsonParseException {
@@ -148,16 +148,16 @@ class GsonTypeAdapters {
     }
   }
 
-  private static class GuardianRecordPrivateSerializer implements JsonSerializer<GuardianRecordPrivate> {
+  private static class GuardianRecordPrivateSerializer implements JsonSerializer<GuardianPrivateRecord> {
     @Override
-    public JsonElement serialize(GuardianRecordPrivate src, Type typeOfSrc, JsonSerializationContext context) {
+    public JsonElement serialize(GuardianPrivateRecord src, Type typeOfSrc, JsonSerializationContext context) {
       return GuardianRecordPrivatePojo.serialize(src);
     }
   }
 
-  private static class GuardianRecordPrivateDeserializer implements JsonDeserializer<GuardianRecordPrivate> {
+  private static class GuardianRecordPrivateDeserializer implements JsonDeserializer<GuardianPrivateRecord> {
     @Override
-    public GuardianRecordPrivate deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+    public GuardianPrivateRecord deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
             throws JsonParseException {
       return GuardianRecordPrivatePojo.deserialize(json);
     }

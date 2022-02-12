@@ -3,7 +3,7 @@ package com.sunya.electionguard.publish;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.*;
 import com.sunya.electionguard.*;
-import com.sunya.electionguard.standard.GuardianRecordPrivate;
+import com.sunya.electionguard.standard.GuardianPrivateRecord;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -107,8 +107,8 @@ public class ConvertToJson {
     }
   }
 
-  public static void writeGuardianRecordPrivate(GuardianRecordPrivate object, Path where) throws IOException {
-    Type type = new TypeToken<GuardianRecordPrivate>(){}.getType();
+  public static void writeGuardianRecordPrivate(GuardianPrivateRecord object, Path where) throws IOException {
+    Type type = new TypeToken<GuardianPrivateRecord>(){}.getType();
     try (FileWriter writer = new FileWriter(where.toFile())) {
       enhancedGson.toJson(object, type, writer);
     }

@@ -80,17 +80,17 @@ public class TestPublishJson {
     List<PlaintextBallot> original_ballots = helper.plaintext_voted_ballots(new InternalManifest(manifest), 1);
 
     Guardian g = Guardian.createForTesting("GuardianId", 1, 1, 1, null);
-    List<GuardianRecordPrivate> guardians = ImmutableList.of(g.export_private_data());
-    PrivateData publisher = new PrivateData(outputDir, false, false);
-    publisher.publish_private_data(
+    List<GuardianPrivateRecord> guardians = ImmutableList.of(g.export_private_data());
+    PrivateData publishPrivate = new PrivateData(outputDir, false, false);
+    publishPrivate.publish_private_data(
             original_ballots,
             guardians);
 
-    List<PlaintextBallot> inputs = publisher.inputBallots();
+    List<PlaintextBallot> inputs = publishPrivate.inputBallots();
     assertThat(inputs).hasSize(1);
     assertThat(inputs.get(0)).isEqualTo(original_ballots.get(0));
 
-    List<GuardianRecordPrivate> results = publisher.readGuardianPrivateJson();
+    List<GuardianPrivateRecord> results = publishPrivate.readGuardianPrivateJson();
     assertThat(results).hasSize(1);
     assertThat(results.get(0)).isEqualTo(guardians.get(0));
   }

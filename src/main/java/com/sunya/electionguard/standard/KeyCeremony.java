@@ -46,7 +46,7 @@ public class KeyCeremony {
     }
 
     public GuardianRecord publish_guardian_record() {
-      return GuardianRecord.create(
+      return new GuardianRecord(
               this.owner_id(),
               this.sequence_order(),
               this.key(),

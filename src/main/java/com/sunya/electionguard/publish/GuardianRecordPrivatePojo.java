@@ -6,7 +6,7 @@ import com.google.gson.reflect.TypeToken;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.ElectionPolynomial;
 import com.sunya.electionguard.Group;
-import com.sunya.electionguard.standard.GuardianRecordPrivate;
+import com.sunya.electionguard.standard.GuardianPrivateRecord;
 import com.sunya.electionguard.standard.KeyCeremony;
 import com.sunya.electionguard.SchnorrProof;
 
@@ -17,6 +17,7 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Conversion between GuardianRecordPrivate and Json, using python's object model.
@@ -84,20 +85,29 @@ public class GuardianRecordPrivatePojo {
   ////////////////////////////////////////////////////////////////////////////
   // deserialize
 
-  public static GuardianRecordPrivate deserialize(JsonElement jsonElem) {
+  public static GuardianPrivateRecord deserialize(JsonElement jsonElem) {
     Gson gson = GsonTypeAdapters.enhancedGson();
     GuardianRecordPrivatePojo pojo = gson.fromJson(jsonElem, GuardianRecordPrivatePojo.class);
-    return translateGuardianRecordPrivate(pojo);
+    return deserializeGuardianPrivateRecord(pojo);
   }
 
-  private static GuardianRecordPrivate translateGuardianRecordPrivate(GuardianRecordPrivatePojo pojo) {
+  static GuardianPrivateRecord deserializeGuardianPrivateRecord(GuardianRecordPrivatePojo pojo) {
+    List<KeyCeremony.ElectionPartialKeyBackup> backups_to_share = ConvertPojos.convertCollection(pojo.backups_to_share,
+            GuardianRecordPrivatePojo::translateElectionPartialKeyBackup);
+    List<KeyCeremony.ElectionPublicKey> guardian_election_public_keys = ConvertPojos.convertCollection(pojo.guardian_election_public_keys,
+            GuardianRecordPrivatePojo::translateElectionPublicKey);
+    List<KeyCeremony.ElectionPartialKeyBackup> guardian_election_partial_key_backups = ConvertPojos.convertCollection(pojo.guardian_election_partial_key_backups,
+            GuardianRecordPrivatePojo::translateElectionPartialKeyBackup);
+    List<KeyCeremony.ElectionPartialKeyVerification> guardian_election_partial_key_verifications = ConvertPojos.convertCollection(pojo.guardian_election_partial_key_verifications,
+            GuardianRecordPrivatePojo::translateElectionPartialKeyVerification);
 
-    return GuardianRecordPrivate.create(
+    // translate to Map
+    return new GuardianPrivateRecord(
             translateElectionKeyPair(pojo.election_keys),
-            ConvertPojos.convertCollection(pojo.backups_to_share, GuardianRecordPrivatePojo::translateElectionPartialKeyBackup),
-            ConvertPojos.convertCollection(pojo.guardian_election_public_keys, GuardianRecordPrivatePojo::translateElectionPublicKey),
-            ConvertPojos.convertCollection(pojo.guardian_election_partial_key_backups, GuardianRecordPrivatePojo::translateElectionPartialKeyBackup),
-            ConvertPojos.convertCollection(pojo.guardian_election_partial_key_verifications, GuardianRecordPrivatePojo::translateElectionPartialKeyVerification));
+            backups_to_share.stream().collect(Collectors.toMap(o -> o.designated_id(), o -> o)),
+            guardian_election_public_keys.stream().collect(Collectors.toMap(o -> o.owner_id(), o -> o)),
+            guardian_election_partial_key_backups.stream().collect(Collectors.toMap(o -> o.owner_id(), o -> o)),
+            guardian_election_partial_key_verifications.stream().collect(Collectors.toMap(o -> o.owner_id(), o -> o)));
   }
 
   private static KeyCeremony.ElectionKeyPair translateElectionKeyPair(ElectionKeyPairPojo pojo) {
@@ -165,14 +175,14 @@ public class GuardianRecordPrivatePojo {
   ////////////////////////////////////////////////////////////////////////////
   // serialize
 
-  public static JsonElement serialize(GuardianRecordPrivate src) {
+  public static JsonElement serialize(GuardianPrivateRecord src) {
     Gson gson = GsonTypeAdapters.enhancedGson();
     GuardianRecordPrivatePojo pojo = convertGuardianRecordPrivate(src);
     Type typeOfSrc = new TypeToken<GuardianRecordPrivatePojo>() {}.getType();
     return gson.toJsonTree(pojo, typeOfSrc);
   }
 
-  private static GuardianRecordPrivatePojo convertGuardianRecordPrivate(GuardianRecordPrivate org) {
+  private static GuardianRecordPrivatePojo convertGuardianRecordPrivate(GuardianPrivateRecord org) {
     GuardianRecordPrivatePojo pojo = new GuardianRecordPrivatePojo();
     pojo.election_keys = convertElectionKeyPair(org.election_keys());
     pojo.backups_to_share = ConvertPojos.convertCollection(

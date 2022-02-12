@@ -254,7 +254,7 @@ public class KeyCeremonyRemoteMediator {
 
     List<Group.ElementModP> commitments = new ArrayList<>();
     for (KeyCeremony2.PublicKeySet keys : sorted) {
-      GuardianRecord guardianRecord = GuardianRecord.create(
+      GuardianRecord guardianRecord = new GuardianRecord(
               keys.ownerId(),
               keys.guardianXCoordinate(),
               keys.coefficientCommitments().get(0),

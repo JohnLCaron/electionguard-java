@@ -1,37 +1,22 @@
 package com.sunya.electionguard;
 
-import com.google.auto.value.AutoValue;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 
-import javax.annotation.Nullable;
 import java.util.List;
 
-/** Published record per Guardian used in verification processes. */
-@AutoValue
-public abstract class GuardianRecord {
-
-  /** Unique identifier of the guardian. */
-  public abstract String guardian_id();
-
-  /** Unique sequence order of the guardian indicating the order in which the guardian should be processed. */
-  public abstract int sequence_order();
-
-  /** Guardian's election public key for encrypting election objects. */
-  public abstract Group.ElementModP election_public_key();
-
-  /** Commitment for each coefficient of the guardians secret polynomial. First commitment is the election_public_key. */
-  public abstract List<Group.ElementModP> election_commitments();
-
-  /** Proofs for each commitment for each coefficient of the guardians secret polynomial. */
-  public abstract List<SchnorrProof> election_proofs();
-
-  public static GuardianRecord create(String guardian_id,
-                                      int sequence_order,
-                                      @Nullable Group.ElementModP election_public_key,
-                                      List<Group.ElementModP> election_commitments,
-                                      List<SchnorrProof> election_proofs) {
-
+/**
+ * Published record per Guardian used in verification processes.
+ */
+public record GuardianRecord(
+        String guardian_id, // Unique identifier of the guardian.
+        int sequence_order, // Actually the x coordinate, must be > 0
+        Group.ElementModP election_public_key, // Guardian's election public key for encrypting election objects.
+        List<Group.ElementModP> election_commitments,
+        // Commitment for each coefficient of the guardians secret polynomial. First commitment is the election_public_key.
+        List<SchnorrProof> election_proofs) // Proofs for each commitment for each coefficient of the guardians secret polynomial.
+{
+  public GuardianRecord {
     Preconditions.checkArgument(!Strings.isNullOrEmpty(guardian_id));
     Preconditions.checkNotNull(election_commitments);
     Preconditions.checkNotNull(election_proofs);
@@ -44,13 +29,6 @@ public abstract class GuardianRecord {
     } else {
       Preconditions.checkArgument(election_public_key.equals(election_commitments.get(0)));
     }
-
-    return new AutoValue_GuardianRecord(
-            guardian_id,
-            sequence_order,
-            election_public_key,
-            election_commitments,
-            election_proofs);
   }
 
 }
