@@ -1,6 +1,5 @@
 package com.sunya.electionguard.standard;
 
-import com.google.auto.value.AutoValue;
 import com.google.common.flogger.FluentLogger;
 
 import javax.annotation.Nullable;
@@ -13,26 +12,16 @@ class KeyCeremonyMediator {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   /** Pair of guardians involved in sharing. */
-  @AutoValue
-  abstract static class GuardianPair {
-    abstract String owner_id();
-    abstract String designated_id();
-
-    public static GuardianPair create(String owner_id, String designated_id) {
-      return new AutoValue_KeyCeremonyMediator_GuardianPair(owner_id, designated_id);
-    }
+  record GuardianPair(
+    String owner_id,
+    String designated_id) {
   }
 
   /** Pair of guardians involved in sharing. */
-  @AutoValue
-  abstract static class BackupVerificationState {
-    abstract boolean all_sent();
-    abstract boolean all_verified();
-    abstract List<GuardianPair> failed_verifications();
-
-    public static BackupVerificationState create(boolean all_sent, boolean all_verified, List<GuardianPair> failed_verifications) {
-      return new AutoValue_KeyCeremonyMediator_BackupVerificationState(all_sent, all_verified, failed_verifications);
-    }
+  record BackupVerificationState(
+    boolean all_sent,
+    boolean all_verified,
+    List<GuardianPair> failed_verifications) {
   }
 
   private final String id;
@@ -121,7 +110,7 @@ class KeyCeremonyMediator {
 
   BackupVerificationState get_verification_state() {
     if (! this.all_backups_available() || !this.all_election_partial_key_verifications_received()) {
-      return BackupVerificationState.create(false, false, new ArrayList<>());
+      return new BackupVerificationState(false, false, new ArrayList<>());
     }
     return this.check_verification_of_election_partial_key_backups();
   }
@@ -176,7 +165,7 @@ class KeyCeremonyMediator {
     if (backup.owner_id().equals(backup.designated_id())) {
       return;
     }
-    this.election_partial_key_backups.put(GuardianPair.create(backup.owner_id(), backup.designated_id()), backup);
+    this.election_partial_key_backups.put(new GuardianPair(backup.owner_id(), backup.designated_id()), backup);
   }
 
   /** True if all election partial key backups for all guardians available. */
@@ -196,7 +185,7 @@ class KeyCeremonyMediator {
     for (String current_guardian_id : this.get_announced_guardians_ids()) {
       if (!guardian_id.equals(current_guardian_id)) {
         ElectionPartialKeyBackup backup = this.election_partial_key_backups.get(
-                GuardianPair.create(current_guardian_id, guardian_id));
+                new GuardianPair(current_guardian_id, guardian_id));
         if (backup != null) {
           backups.add(backup);
         }
@@ -209,7 +198,7 @@ class KeyCeremonyMediator {
   void receive_election_partial_key_verification(ElectionPartialKeyVerification verification) {
     if (!verification.owner_id().equals(verification.designated_id())) {
       this.election_partial_key_verifications.put(
-              GuardianPair.create(verification.owner_id(), verification.designated_id()),
+              new GuardianPair(verification.owner_id(), verification.designated_id()),
               verification);
     }
   }
@@ -237,15 +226,15 @@ class KeyCeremonyMediator {
   /** return: All election partial key backups verified. */
   BackupVerificationState check_verification_of_election_partial_key_backups() {
     if (!this.all_election_partial_key_verifications_received()) {
-      return BackupVerificationState.create(false, false, new ArrayList<>());
+      return new BackupVerificationState(false, false, new ArrayList<>());
     }
     ArrayList<GuardianPair> failed_verifications = new ArrayList<>();
     for (ElectionPartialKeyVerification verification : this.election_partial_key_verifications.values()) {
       if (!verification.verified()) {
-        failed_verifications.add(GuardianPair.create(verification.owner_id(), verification.designated_id()));
+        failed_verifications.add(new GuardianPair(verification.owner_id(), verification.designated_id()));
       }
     }
-    return BackupVerificationState.create(true, failed_verifications.isEmpty(), failed_verifications);
+    return new BackupVerificationState(true, failed_verifications.isEmpty(), failed_verifications);
   }
 
 }

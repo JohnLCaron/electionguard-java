@@ -111,7 +111,7 @@ public class GuardianRecordPrivatePojo {
   }
 
   private static KeyCeremony.ElectionKeyPair translateElectionKeyPair(ElectionKeyPairPojo pojo) {
-    return KeyCeremony.ElectionKeyPair.create(
+    return new KeyCeremony.ElectionKeyPair(
             pojo.owner_id,
             pojo.sequence_order,
             pojo.key_pair,
@@ -148,7 +148,7 @@ public class GuardianRecordPrivatePojo {
   }
 
   private static KeyCeremony.ElectionPublicKey translateElectionPublicKey(ElectionPublicKeyPojo pojo) {
-    return KeyCeremony.ElectionPublicKey.create(
+    return new KeyCeremony.ElectionPublicKey(
             pojo.owner_id,
             pojo.sequence_order,
             pojo.key,
@@ -157,7 +157,7 @@ public class GuardianRecordPrivatePojo {
   }
 
   private static KeyCeremony.ElectionPartialKeyBackup translateElectionPartialKeyBackup(ElectionPartialKeyBackupPojo pojo) {
-    return KeyCeremony.ElectionPartialKeyBackup.create(
+    return new KeyCeremony.ElectionPartialKeyBackup(
             pojo.owner_id,
             pojo.designated_id,
             pojo.designated_sequence_order,
@@ -165,7 +165,7 @@ public class GuardianRecordPrivatePojo {
   }
 
   private static KeyCeremony.ElectionPartialKeyVerification translateElectionPartialKeyVerification(ElectionPartialKeyVerificationPojo pojo) {
-    return KeyCeremony.ElectionPartialKeyVerification.create(
+    return new KeyCeremony.ElectionPartialKeyVerification(
             pojo.owner_id,
             pojo.designated_id,
             pojo.verifier_id,

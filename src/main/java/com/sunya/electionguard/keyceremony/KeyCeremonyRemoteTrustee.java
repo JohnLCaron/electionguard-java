@@ -218,7 +218,7 @@ class KeyCeremonyRemoteTrustee extends RemoteKeyCeremonyTrusteeServiceGrpc.Remot
     CommonProto.ErrorResponse.Builder response = CommonProto.ErrorResponse.newBuilder();
     try {
       List<SchnorrProof> proofs = proto.getCoefficientProofsList().stream().map(CommonConvert::convertSchnorrProof).collect(Collectors.toList());
-      KeyCeremony2.PublicKeySet keyset = KeyCeremony2.PublicKeySet.create(
+      KeyCeremony2.PublicKeySet keyset = new KeyCeremony2.PublicKeySet(
               proto.getOwnerId(),
               proto.getGuardianXCoordinate(),
               proofs);
@@ -269,7 +269,7 @@ class KeyCeremonyRemoteTrustee extends RemoteKeyCeremonyTrusteeServiceGrpc.Remot
 
     RemoteKeyCeremonyTrusteeProto.PartialKeyVerification.Builder response = RemoteKeyCeremonyTrusteeProto.PartialKeyVerification.newBuilder();
     try {
-      KeyCeremony2.PartialKeyBackup backup = KeyCeremony2.PartialKeyBackup.create(
+      KeyCeremony2.PartialKeyBackup backup = new KeyCeremony2.PartialKeyBackup(
               proto.getGeneratingGuardianId(),
               proto.getDesignatedGuardianId(),
               proto.getDesignatedGuardianXCoordinate(),

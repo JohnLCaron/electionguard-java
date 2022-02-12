@@ -61,7 +61,7 @@ public class TrusteeFromProto {
   }
 
   private static KeyCeremony2.PartialKeyBackup convertElectionPartialKeyBackup(TrusteeProto.ElectionPartialKeyBackup2 proto) {
-    return KeyCeremony2.PartialKeyBackup.create(
+    return new KeyCeremony2.PartialKeyBackup(
             proto.getGeneratingGuardianId(),
             proto.getDesignatedGuardianId(),
             proto.getDesignatedGuardianXCoordinate(),

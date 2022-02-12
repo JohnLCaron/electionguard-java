@@ -1,9 +1,7 @@
 package com.sunya.electionguard.standard;
 
-import com.google.auto.value.AutoValue;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableList;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.ElectionPolynomial;
 import com.sunya.electionguard.Group;
@@ -23,26 +21,25 @@ import static com.sunya.electionguard.Group.*;
 
 public class KeyCeremony {
 
-  /** A Guardian's public key, commitments and proof. */
-  @AutoValue
-  public abstract static class ElectionPublicKey {
-    /** The guardian object_id. */
-    public abstract String owner_id();
-    /** The guardian sequence. */
-    public abstract int sequence_order();
-    /** The guardian's ElGamal.KeyPair public key. */
-    public abstract ElementModP key();
-    /** The public keys `K_ij` generated from secret coefficients.*/
-    public abstract ImmutableList<ElementModP> coefficient_commitments();
-    /** A proof of possession of the private key for each secret coefficient. */
-    public abstract ImmutableList<SchnorrProof> coefficient_proofs();
+  /**
+   * A Guardian's public key, commitments and proof.
+   *
+   * @param owner_id                The guardian object_id
+   * @param sequence_order          The guardian sequence, actually the x coordinate.
+   * @param key                     The guardian's ElGamal.KeyPair public key
+   * @param coefficient_commitments TThe public keys `K_ij` generated from secret coefficients
+   * @param coefficient_proofs      A proof of possession of the private key for each secret coefficient.
+   */
+  public record ElectionPublicKey(
+          String owner_id,
+          int sequence_order,
+          ElementModP key,
+          List<ElementModP> coefficient_commitments,
+          List<SchnorrProof> coefficient_proofs) {
 
-    public static ElectionPublicKey create(String owner_id, int sequence_order, ElementModP key,
-                                           List<ElementModP> coefficient_commitments, List<SchnorrProof> coefficient_proofs) {
-      return new AutoValue_KeyCeremony_ElectionPublicKey(
-              owner_id, sequence_order, key,
-              ImmutableList.copyOf(coefficient_commitments),
-              ImmutableList.copyOf(coefficient_proofs));
+    public ElectionPublicKey {
+      coefficient_commitments = List.copyOf(coefficient_commitments);
+      coefficient_proofs = List.copyOf(coefficient_proofs);
     }
 
     public GuardianRecord publish_guardian_record() {
@@ -56,109 +53,89 @@ public class KeyCeremony {
     }
   }
 
-  /** Pair of keys (public and secret) used to encrypt/decrypt election. One for each Guardian. */
-  @AutoValue
-  public abstract static class ElectionKeyPair {
-    /** The guardian object_id. */
-    public abstract String owner_id();
-    /** The guardian sequence. */
-    public abstract int sequence_order();
-    /** Ki = (si, g^si), for the ith Guardian */
-    public abstract ElGamal.KeyPair key_pair();
-    /** The Guardian's polynomial. */
-    public abstract ElectionPolynomial polynomial();
+  /**
+   * Pair of keys (public and secret) used to encrypt/decrypt election. One for each Guardian.
+   *
+   * @param owner_id       The guardian object_id
+   * @param sequence_order The guardian sequence, actually the x coordinate.
+   * @param key_pair       Ki = (si, g^si), for the ith Guardian
+   * @param polynomial     The Guardian's polynomial
+   */
+  public record ElectionKeyPair(
+          String owner_id,
+          int sequence_order,
+          ElGamal.KeyPair key_pair,
+          ElectionPolynomial polynomial) {
 
-    public static ElectionKeyPair create(String owner_id, int sequence_order, ElGamal.KeyPair key_pair, ElectionPolynomial polynomial) {
-      return new AutoValue_KeyCeremony_ElectionKeyPair(owner_id, sequence_order, key_pair, polynomial);
-    }
-
-   /** Share the election public key and associated data. */
+    /**
+     * Share the election public key and associated data.
+     */
     public ElectionPublicKey share() {
-      return ElectionPublicKey.create(
+      return new ElectionPublicKey(
               this.owner_id(),
               this.sequence_order(),
               this.key_pair().public_key,
               this.polynomial().coefficient_commitments,
-              this.polynomial().coefficient_proofs
-              );
+              this.polynomial().coefficient_proofs);
     }
   }
 
-  @AutoValue
-  public abstract static class ElectionJointKey {
-    /** The product of the guardian public keys K = ∏ ni=1 Ki mod p. */
-    public abstract ElementModP joint_public_key();
-
-    /** The hash of the commitments that the guardians make to each other: H = H(K 1,0 , K 2,0 ... , K n,0 ). */
-    public abstract ElementModQ commitment_hash();
-
-    public static ElectionJointKey create(ElementModP joint_public_key, ElementModQ commitment_hash) {
-      return new AutoValue_KeyCeremony_ElectionJointKey(joint_public_key, commitment_hash);
-    }
+  /**
+   * @param joint_public_key The product of the guardian public keys K = ∏ ni=1 Ki mod p.
+   * @param commitment_hash  The hash of the commitments that the guardians make to each other: H = H(K 1,0 , K 2,0 ... , K n,0 ).
+   */
+  public record ElectionJointKey(
+          ElementModP joint_public_key,
+          ElementModQ commitment_hash) {
   }
 
-  /** A point on a secret polynomial, and commitments to verify this point for a designated guardian. */
-  @AutoValue
-  public abstract static class ElectionPartialKeyBackup {
-    /** The Id of the guardian that generated this backup. */
-    public abstract String owner_id();
-    /** The Id of the guardian to receive this backup. */
-    public abstract String designated_id();
-    /** The sequence order of the designated guardian. */
-    public abstract int designated_sequence_order();
-    /** The coordinate corresponding to a secret election polynomial. */
-    public abstract ElementModQ value();
-
-    public static ElectionPartialKeyBackup create(String owner_id,
-                                                  String designated_id,
-                                                  int designated_sequence_order,
-                                                  ElementModQ value) {
-      return new AutoValue_KeyCeremony_ElectionPartialKeyBackup(
-              owner_id,
-              designated_id,
-              designated_sequence_order,
-              value);
-    }
+  /**
+   * A point on a secret polynomial, and commitments to verify this point for a designated guardian.
+   *
+   * @param owner_id                  The Id of the guardian that generated this backup
+   * @param designated_id             The Id of the guardian to receive this backup.
+   * @param designated_sequence_order The sequence order of the designated guardian
+   * @param value                     The coordinate corresponding to a secret election polynomial.
+   */
+  public record ElectionPartialKeyBackup(
+          String owner_id,
+          String designated_id,
+          int designated_sequence_order,
+          ElementModQ value) {
   }
 
-  /** Details of key ceremony: number of guardians and quorum size. */
-  @AutoValue
-  public abstract static class CeremonyDetails {
-    public abstract int number_of_guardians();
-    public abstract int quorum();
-
-    public static CeremonyDetails create(int number_of_guardians, int quorum) {
-      return new AutoValue_KeyCeremony_CeremonyDetails(number_of_guardians, quorum);
-    }
+  /**
+   * Details of key ceremony: number of guardians and quorum size.
+   */
+  public record CeremonyDetails (
+          int number_of_guardians,
+          int quorum) {
   }
 
-  /** Verification of election partial key used in key sharing. */
-  @AutoValue
-  public abstract static class ElectionPartialKeyVerification {
-    public abstract String owner_id();
-    public abstract String designated_id();
-    public abstract String verifier_id();
-    public abstract boolean verified();
-
-    public static ElectionPartialKeyVerification create(String owner_id, String designated_id, String verifier_id, boolean verified) {
-      return new AutoValue_KeyCeremony_ElectionPartialKeyVerification(owner_id, designated_id, verifier_id, verified);
-    }
+  /**
+   * Verification of election partial key used in key sharing.
+   */
+  public record ElectionPartialKeyVerification(
+          String owner_id,
+          String designated_id,
+          String verifier_id,
+          boolean verified) {
   }
 
-  /** Challenge of election partial key used in key sharing. */
-  @AutoValue
-  public abstract static class ElectionPartialKeyChallenge {
-    public abstract String owner_id();
-    public abstract String designated_id();
-    public abstract int designated_sequence_order(); // The sequence order of the designated guardian
-    public abstract ElementModQ value();
-    public abstract ImmutableList<ElementModP> coefficient_commitments();
-    public abstract ImmutableList<SchnorrProof> coefficient_proofs();
+  /**
+   * Challenge of election partial key used in key sharing.
+   */
+  public record ElectionPartialKeyChallenge(
+          String owner_id,
+          String designated_id,
+          int designated_sequence_order,
+          ElementModQ value,
+          List<ElementModP> coefficient_commitments,
+          List<SchnorrProof> coefficient_proofs) {
 
-    public static ElectionPartialKeyChallenge create(String owner_id, String designated_id, int designated_sequence_order,
-           ElementModQ value, List<ElementModP> coefficient_commitments, List<SchnorrProof> coefficient_proofs) {
-      return new AutoValue_KeyCeremony_ElectionPartialKeyChallenge(owner_id, designated_id, designated_sequence_order, value,
-              ImmutableList.copyOf(coefficient_commitments), ImmutableList.copyOf(coefficient_proofs));
+    public ElectionPartialKeyChallenge {
+      coefficient_commitments = List.copyOf(coefficient_commitments);
+      coefficient_proofs = List.copyOf(coefficient_proofs);
     }
   }
 
@@ -166,27 +143,23 @@ public class KeyCeremony {
   // extraneous
 
   // TODO delete
-  /** The secret polynomial coefficients for one Guardian. */
-  @AutoValue
-  public abstract static class CoefficientSet {
-    /** Guardian.object_id. */
-    public abstract String guardianId();
-    /** i: a unique number in [1, 256) that is the polynomial x value for this guardian. */
-    public abstract int guardianSequence();
-    /** The secret polynomial coefficients. */
-    public abstract ImmutableList<ElementModQ> coefficients();
 
-    /**
-     * Create a CoefficientSet for the ith guardian, i &gt; 0
-     * @param guardian_id the Guardian.object_id
-     * @param guardian the guardian value i, must be &gt; 0
-     * @param coefficients the secret polynomial coefficients
-     */
-    public static CoefficientSet create(String guardian_id, int guardian, List<ElementModQ> coefficients) {
-      Preconditions.checkArgument(!Strings.isNullOrEmpty(guardian_id));
-      Preconditions.checkArgument(guardian > 0);
+  /**
+   * The secret polynomial coefficients for one Guardian.
+   * @param guardianId Guardian.object_id
+   * @param guardianSequence a unique number in [1, 256) that is the polynomial x value for this guardian.
+   * @param coefficients The secret polynomial coefficients.
+   * @param guardianId Guardian.object_id
+   */
+  public record CoefficientSet(
+          String guardianId,
+          int guardianSequence,
+          List<ElementModQ> coefficients) {
+    public CoefficientSet {
+      Preconditions.checkArgument(!Strings.isNullOrEmpty(guardianId));
+      Preconditions.checkArgument(guardianSequence > 0);
       Preconditions.checkNotNull(coefficients);
-      return new AutoValue_KeyCeremony_CoefficientSet(guardian_id, guardian, ImmutableList.copyOf(coefficients));
+      coefficients = List.copyOf(coefficients);
     }
 
     // This is what the Guardian needs.
@@ -194,13 +167,13 @@ public class KeyCeremony {
       ElectionPolynomial polynomial = generate_polynomial(coefficients());
       ElGamal.KeyPair key_pair = new ElGamal.KeyPair(
               polynomial.coefficients.get(0), polynomial.coefficient_commitments.get(0));
-      return ElectionKeyPair.create(guardianId(), guardianSequence(), key_pair, polynomial);
+      return new ElectionKeyPair(guardianId(), guardianSequence(), key_pair, polynomial);
     }
 
     /**
      * Generates a polynomial when the coefficients are already chosen
      *
-     * @param coefficients:           the k coefficients of the polynomial
+     * @param coefficients: the k coefficients of the polynomial
      * @return Polynomial used to share election keys
      */
     private ElectionPolynomial generate_polynomial(List<Group.ElementModQ> coefficients) {
@@ -223,8 +196,9 @@ public class KeyCeremony {
 
   /**
    * Generate election key pair, proof, and polynomial.
+   *
    * @param quorum: Quorum of guardians needed to decrypt
-   * @param nonce: Optional nonce for determinism, use null when generating in production.
+   * @param nonce:  Optional nonce for determinism, use null when generating in production.
    */
   public static ElectionKeyPair generate_election_key_pair(String owner_id, int sequence_order, int quorum, @Nullable ElementModQ nonce) {
     ElectionPolynomial polynomial = ElectionPolynomial.generate_polynomial(quorum, nonce);
@@ -233,13 +207,14 @@ public class KeyCeremony {
     // The key_pair is Ki = election keypair for ith Guardian
     ElGamal.KeyPair key_pair = new ElGamal.KeyPair(
             polynomial.coefficients.get(0), polynomial.coefficient_commitments.get(0));
-    return ElectionKeyPair.create(owner_id, sequence_order, key_pair, polynomial);
+    return new ElectionKeyPair(owner_id, sequence_order, key_pair, polynomial);
   }
 
   /**
    * Generate election partial key backup for sharing.
-   * @param owner_id: Owner of election key
-   * @param polynomial: The owner's Manifest polynomial
+   *
+   * @param owner_id:                Owner of election key
+   * @param polynomial:              The owner's Manifest polynomial
    * @param designated_guardian_key: The Guardian's public key
    * @return Election partial key backup
    */
@@ -250,7 +225,7 @@ public class KeyCeremony {
 
     ElementModQ value = ElectionPolynomial.compute_polynomial_coordinate(
             BigInteger.valueOf(designated_guardian_key.sequence_order()), polynomial);
-    return ElectionPartialKeyBackup.create(
+    return new ElectionPartialKeyBackup(
             owner_id,
             designated_guardian_key.owner_id(),
             designated_guardian_key.sequence_order(),
@@ -259,8 +234,9 @@ public class KeyCeremony {
 
   /**
    * Verify election partial key backup contains point on owners polynomial.
-   * @param verifier_id: Verifier of the partial key backup
-   * @param backup: Manifest partial key backup
+   *
+   * @param verifier_id:         Verifier of the partial key backup
+   * @param backup:              Manifest partial key backup
    * @param election_public_key: Other guardian's election public key
    */
   public static ElectionPartialKeyVerification verify_election_partial_key_backup(
@@ -268,7 +244,7 @@ public class KeyCeremony {
           ElectionPartialKeyBackup backup,
           ElectionPublicKey election_public_key) {
 
-    return ElectionPartialKeyVerification.create(
+    return new ElectionPartialKeyVerification(
             backup.owner_id(),
             backup.designated_id(),
             verifier_id,
@@ -278,7 +254,8 @@ public class KeyCeremony {
 
   /**
    * Generate challenge to a previous verification of a partial key backup.
-   * @param backup: Manifest partial key backup in question
+   *
+   * @param backup:     Manifest partial key backup in question
    * @param polynomial: Polynomial to regenerate point
    * @return Manifest partial key verification
    */
@@ -286,7 +263,7 @@ public class KeyCeremony {
           ElectionPartialKeyBackup backup,
           ElectionPolynomial polynomial) {
 
-    return ElectionPartialKeyChallenge.create(
+    return new ElectionPartialKeyChallenge(
             backup.owner_id(),
             backup.designated_id(),
             backup.designated_sequence_order(),
@@ -297,14 +274,15 @@ public class KeyCeremony {
 
   /**
    * Verify a challenge to a previous verification of a partial key backup.
+   *
    * @param verifier_id: Verifier of the challenge
-   * @param challenge: Manifest partial key challenge
+   * @param challenge:   Manifest partial key challenge
    * @return Manifest partial key verification
    */
   public static ElectionPartialKeyVerification verify_election_partial_key_challenge(
           String verifier_id, ElectionPartialKeyChallenge challenge) {
 
-    return ElectionPartialKeyVerification.create(
+    return new ElectionPartialKeyVerification(
             challenge.owner_id(),
             challenge.designated_id(),
             verifier_id,
@@ -315,6 +293,7 @@ public class KeyCeremony {
 
   /**
    * Creates a joint election key from the public keys of all guardians.
+   *
    * @return Joint key and commitment hash for election
    */
   public static ElectionJointKey combine_election_public_keys(Collection<ElectionPublicKey> election_public_keys) {
@@ -333,6 +312,6 @@ public class KeyCeremony {
     }
     ElementModQ commitment_hash = Hash.hash_elems(commitments);
 
-    return ElectionJointKey.create(joint_public_keys, commitment_hash);
+    return new ElectionJointKey(joint_public_keys, commitment_hash);
   }
 }

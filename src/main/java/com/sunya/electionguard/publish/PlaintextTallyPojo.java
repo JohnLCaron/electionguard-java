@@ -83,13 +83,13 @@ public class PlaintextTallyPojo {
             Map.Entry::getKey,
             e2 -> translateSelection(e2.getValue())));
 
-    return PlaintextTally.Contest.create(
+    return new PlaintextTally.Contest(
             pojo.object_id,
             selections);
   }
 
   private static PlaintextTally.Selection translateSelection(PlaintextTallySelectionPojo pojo) {
-    return PlaintextTally.Selection.create(
+    return new PlaintextTally.Selection(
             pojo.object_id,
             pojo.tally,
             pojo.value,
@@ -106,7 +106,7 @@ public class PlaintextTallyPojo {
       }
     }
 
-    return DecryptionShare.CiphertextDecryptionSelection.create(
+    return new DecryptionShare.CiphertextDecryptionSelection(
             pojo.object_id,
             pojo.guardian_id,
             pojo.share,
@@ -117,7 +117,7 @@ public class PlaintextTallyPojo {
   private static DecryptionShare.CiphertextCompensatedDecryptionSelection translateCompensatedShare(
           CiphertextCompensatedDecryptionSelectionPojo pojo) {
 
-    return DecryptionShare.CiphertextCompensatedDecryptionSelection.create(
+    return new DecryptionShare.CiphertextCompensatedDecryptionSelection(
             pojo.object_id,
             pojo.guardian_id,
             pojo.missing_guardian_id,

@@ -1,5 +1,5 @@
 # 🗳 ElectionGuard Java
-_last changed: 02/08/2022_
+_last changed: 02/11/2022_
 
 This is a port of https://github.com/microsoft/electionguard-python/ to Java.
 
@@ -84,20 +84,19 @@ These may be interesting to implement in other libraries:
 
 ## Notes
 
- * Assumes Java 11.
+ * Assumes Java 17.
  * Most classes are immutable. Builders are used where needed to separate mutable and immutable uses. 
  * Uses Java's BigInteger for cryptographic computations.
  * Uses Gson for JSON serialization. 
  * Also serializes using protobuf.
- * Uses AutoValue for (some) immutable value classes.
+ * Use Java record classes instead of @AutoValue
  * Uses Flogger for logging.
  * Uses JUnit5, jqwik, Mockito for testing.
- * Uses gradle for building.
+ * Uses gradle 7 for building.
  
 ## TODO
 
-  * Not yet compatible with python library JSON serialization, due to different ways to serialize Optional.
-    It incorporates a workaround which should work for now.
+  * Not yet fully compatible with python library JSON serialization
   * Review error logging.
   * Measure computational performance.
   * Investigate parallelization strategies.

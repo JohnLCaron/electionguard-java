@@ -43,9 +43,9 @@ class GsonTypeAdapters {
             .registerTypeAdapter(Group.ElementModP.class, new ModPSerializer())
             .registerTypeAdapter(Manifest.class, new ManifestSerializer())
             .registerTypeAdapter(Manifest.class, new ManifestDeserializer())
-            .registerTypeAdapter(GuardianRecord.class, new GuardianRecordSerializer()) // @AutoValue
+            .registerTypeAdapter(GuardianRecord.class, new GuardianRecordSerializer())
             .registerTypeAdapter(GuardianRecord.class, new GuardianRecordDeserializer())
-            .registerTypeAdapter(GuardianPrivateRecord.class, new GuardianRecordPrivateSerializer()) // @AutoValue
+            .registerTypeAdapter(GuardianPrivateRecord.class, new GuardianRecordPrivateSerializer())
             .registerTypeAdapter(GuardianPrivateRecord.class, new GuardianRecordPrivateDeserializer())
             .registerTypeAdapter(SubmittedBallot.class, new CiphertextBallotSerializer())
             .registerTypeAdapter(SubmittedBallot.class, new CiphertextBallotDeserializer())

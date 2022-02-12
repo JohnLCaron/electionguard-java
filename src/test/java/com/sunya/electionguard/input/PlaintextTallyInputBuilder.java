@@ -63,11 +63,11 @@ public class PlaintextTallyInputBuilder {
     }
 
     PlaintextTally.Contest build() {
-      return PlaintextTally.Contest.create(id, selections.stream().collect(Collectors.toMap(s -> s.id, s -> s.build())));
+      return new PlaintextTally.Contest(id, selections.stream().collect(Collectors.toMap(s -> s.id, s -> s.build())));
     }
 
     PlaintextTally.Contest buildBad() {
-      return PlaintextTally.Contest.create(id, selections.stream().collect(Collectors.toMap(s -> s.id + "bad", s -> s.build())));
+      return new PlaintextTally.Contest(id, selections.stream().collect(Collectors.toMap(s -> s.id + "bad", s -> s.build())));
     }
 
     public class SelectionBuilder {
@@ -92,7 +92,7 @@ public class PlaintextTallyInputBuilder {
               @Nullable Map<String, DecryptionShare.CiphertextCompensatedDecryptionSelection> recovered_parts) {
         ChaumPedersen.ChaumPedersenProof proof = (recovered_parts == null) ? chaum_pedersen_proof() : null;
 
-        DecryptionShare.CiphertextDecryptionSelection share = DecryptionShare.CiphertextDecryptionSelection.create(
+        DecryptionShare.CiphertextDecryptionSelection share = new DecryptionShare.CiphertextDecryptionSelection(
                 id, guardian_id, elements_mod_p(), Optional.ofNullable(proof), Optional.ofNullable(recovered_parts));
         shares.add(share);
         return this;
@@ -103,7 +103,7 @@ public class PlaintextTallyInputBuilder {
               String guardian_id,
               @Nullable ChaumPedersen.ChaumPedersenProof proof,
               @Nullable Map<String, DecryptionShare.CiphertextCompensatedDecryptionSelection> recovered_parts) {
-        DecryptionShare.CiphertextDecryptionSelection share = DecryptionShare.CiphertextDecryptionSelection.create(
+        DecryptionShare.CiphertextDecryptionSelection share = new DecryptionShare.CiphertextDecryptionSelection(
                 id, guardian_id, elements_mod_p(), Optional.ofNullable(proof), Optional.ofNullable(recovered_parts));
         shares.add(share);
         return this;
@@ -115,7 +115,7 @@ public class PlaintextTallyInputBuilder {
 
       PlaintextTally.Selection build() {
         Group.ElementModP tally = Group.int_to_p_unchecked(BigInteger.valueOf(1));
-        return PlaintextTally.Selection.create(id, 1, Group.g_pow_p(tally), message, shares);
+        return new PlaintextTally.Selection(id, 1, Group.g_pow_p(tally), message, shares);
       }
     }
   }

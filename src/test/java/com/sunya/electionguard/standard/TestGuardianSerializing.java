@@ -44,7 +44,7 @@ public class TestGuardianSerializing {
         for (int j = 0; j < this.quorum; j++) {
           coefficients.add(Group.rand_q()); // ramdomly chosen
         }
-        coeffSets.add(KeyCeremony.CoefficientSet.create("guardian_" + sequence, sequence, coefficients));
+        coeffSets.add(new KeyCeremony.CoefficientSet("guardian_" + sequence, sequence, coefficients));
       }
       return coeffSets;
     }
@@ -102,7 +102,7 @@ public class TestGuardianSerializing {
   KeyCeremony.ElectionJointKey keyCeremony(List<Guardian> guardians) {
     // Setup Mediator
     KeyCeremony.CeremonyDetails details =
-            KeyCeremony.CeremonyDetails.create(numberOfGuardians, quorum);
+            new KeyCeremony.CeremonyDetails(numberOfGuardians, quorum);
     KeyCeremonyMediator keyCeremony = new KeyCeremonyMediator("TestKeyCeremonyProtoRoundtrip", details);
 
     KeyCeremonyHelper.perform_full_ceremony(guardians, keyCeremony);

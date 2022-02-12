@@ -75,7 +75,7 @@ public class KeyCeremonyTrustee {
   /** Share public keys for this guardian. */
   public KeyCeremony2.PublicKeySet sharePublicKeys() {
     ElectionPolynomial polynomial = this.guardianSecrets.polynomial;
-    return KeyCeremony2.PublicKeySet.create(
+    return new KeyCeremony2.PublicKeySet(
             this.id,
             this.xCoordinate,
             polynomial.coefficient_proofs);
@@ -97,7 +97,7 @@ public class KeyCeremonyTrustee {
   /** Share this guardians backup for otherGuardian. */
   public KeyCeremony2.PartialKeyBackup sendPartialKeyBackup(String otherGuardian) {
     if (id.equals(otherGuardian)) {
-      return KeyCeremony2.PartialKeyBackup.create(
+      return new KeyCeremony2.PartialKeyBackup(
               this.id,
               otherGuardian,
               0,
@@ -120,7 +120,7 @@ public class KeyCeremonyTrustee {
   private KeyCeremony2.PartialKeyBackup generatePartialKeyBackup(String otherGuardian) {
     KeyCeremony2.PublicKeySet otherKeys = this.allGuardianPublicKeys.get(otherGuardian);
     if (otherKeys == null) {
-      return KeyCeremony2.PartialKeyBackup.create(
+      return new KeyCeremony2.PartialKeyBackup(
               this.id,
               otherGuardian,
               0,
@@ -132,7 +132,7 @@ public class KeyCeremonyTrustee {
     ElementModQ value = ElectionPolynomial.compute_polynomial_coordinate(
             BigInteger.valueOf(otherKeys.guardianXCoordinate()), this.guardianSecrets.polynomial);
 
-    return KeyCeremony2.PartialKeyBackup.create(
+    return new KeyCeremony2.PartialKeyBackup(
             this.id,
             otherGuardian,
             otherKeys.guardianXCoordinate(),
@@ -143,7 +143,7 @@ public class KeyCeremonyTrustee {
   // The designated guardian verifies a backup of its own key from the generatingGuardian
   public KeyCeremony2.PartialKeyVerification verifyPartialKeyBackup(KeyCeremony2.PartialKeyBackup backup) {
     if (!backup.designatedGuardianId().equals(this.id)) {
-      return KeyCeremony2.PartialKeyVerification.create(
+      return new KeyCeremony2.PartialKeyVerification(
               backup.generatingGuardianId(),
               backup.designatedGuardianId(),
               String.format("Sent backup to wrong trustee '%s', should be trustee '%s'", this.id, backup.designatedGuardianId()));
@@ -154,7 +154,7 @@ public class KeyCeremonyTrustee {
     // Is that value consistent with the generating guardian's commitments?
     KeyCeremony2.PublicKeySet generatingKeys = allGuardianPublicKeys.get(backup.generatingGuardianId());
     if (generatingKeys == null) {
-      return KeyCeremony2.PartialKeyVerification.create(
+      return new KeyCeremony2.PartialKeyVerification(
               backup.generatingGuardianId(),
               backup.designatedGuardianId(),
               String.format("'%s' trustee does not have public key for '%s' trustee", this.id, backup.generatingGuardianId()));
@@ -162,7 +162,7 @@ public class KeyCeremonyTrustee {
     boolean verify = ElectionPolynomial.verify_polynomial_coordinate(backup.coordinate(), BigInteger.valueOf(backup.designatedGuardianXCoordinate()),
             generatingKeys.coefficientCommitments());
 
-    return KeyCeremony2.PartialKeyVerification.create(
+    return new KeyCeremony2.PartialKeyVerification(
             backup.generatingGuardianId(),
             backup.designatedGuardianId(),
             verify ? null : "verify_polynomial_coordinate against public committments failed");
@@ -175,7 +175,7 @@ public class KeyCeremonyTrustee {
   public KeyCeremony2.PartialKeyChallengeResponse sendBackupChallenge(String otherGuardian) {
     KeyCeremony2.PartialKeyBackup backup = this.myPartialKeyBackups.get(otherGuardian);
     if (backup == null) {
-      return KeyCeremony2.PartialKeyChallengeResponse.create(
+      return new KeyCeremony2.PartialKeyChallengeResponse(
               this.id,
               otherGuardian,
               0,
@@ -183,7 +183,7 @@ public class KeyCeremonyTrustee {
               String.format("Trustee '%s' does not have backup for '%s' trustee", this.id, otherGuardian));
     }
     if (!backup.designatedGuardianId().equals(otherGuardian)) {
-      return KeyCeremony2.PartialKeyChallengeResponse.create(
+      return new KeyCeremony2.PartialKeyChallengeResponse(
               this.id,
               otherGuardian,
               0,
@@ -191,7 +191,7 @@ public class KeyCeremonyTrustee {
               String.format("Trustee %s' backup for '%s' does not match the designatedGuardianId %s", this.id, otherGuardian, backup.designatedGuardianId()));
     }
     if (!backup.generatingGuardianId().equals(this.id)) {
-      return KeyCeremony2.PartialKeyChallengeResponse.create(
+      return new KeyCeremony2.PartialKeyChallengeResponse(
               this.id,
               otherGuardian,
               0,
@@ -199,7 +199,7 @@ public class KeyCeremonyTrustee {
               String.format("Trustee %s' backup for '%s' does not match the generatingGuardianId %s", this.id, otherGuardian, backup.generatingGuardianId()));
     }
     ElectionPolynomial polynomial = this.guardianSecrets.polynomial;
-    return KeyCeremony2.PartialKeyChallengeResponse.create(
+    return new KeyCeremony2.PartialKeyChallengeResponse(
             backup.generatingGuardianId(),
             backup.designatedGuardianId(),
             backup.designatedGuardianXCoordinate(),

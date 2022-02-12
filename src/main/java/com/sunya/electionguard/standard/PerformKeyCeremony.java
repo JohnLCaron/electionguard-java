@@ -151,7 +151,7 @@ public class PerformKeyCeremony {
   boolean keyCeremony() {
     // Setup Mediator
     KeyCeremony.CeremonyDetails details =
-            KeyCeremony.CeremonyDetails.create(this.numberOfGuardians, this.quorum);
+            new KeyCeremony.CeremonyDetails(this.numberOfGuardians, this.quorum);
     KeyCeremonyMediator keyCeremony = new KeyCeremonyMediator("PerformKeyCeremony", details);
 
     // ROUND 1: Public Key Sharing

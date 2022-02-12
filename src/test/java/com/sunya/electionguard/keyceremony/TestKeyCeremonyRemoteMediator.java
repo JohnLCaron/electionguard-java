@@ -139,8 +139,8 @@ public class TestKeyCeremonyRemoteMediator {
 
     // suppose trustee1 challenges everyone else
     ArrayList<KeyCeremony2.PartialKeyVerification> failures = new ArrayList<>();
-    failures.add(KeyCeremony2.PartialKeyVerification.create(GUARDIAN1_ID, GUARDIAN2_ID, null));
-    failures.add(KeyCeremony2.PartialKeyVerification.create(GUARDIAN1_ID, GUARDIAN3_ID, null));
+    failures.add(new KeyCeremony2.PartialKeyVerification(GUARDIAN1_ID, GUARDIAN2_ID, null));
+    failures.add(new KeyCeremony2.PartialKeyVerification(GUARDIAN1_ID, GUARDIAN3_ID, null));
 
     assertThat(mediator.round3(failures)).isTrue();
 

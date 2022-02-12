@@ -1,6 +1,5 @@
 package com.sunya.electionguard.input;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.flogger.FluentLogger;
 import com.sunya.electionguard.CiphertextTally;
 import com.sunya.electionguard.DecryptionShare;
@@ -159,7 +158,7 @@ public class PlaintextTallyInputValidation {
   void validateRecoveredParts(DecryptionShare.CiphertextDecryptionSelection share, ValidationMessenger messes) {
     ValidationMessenger partsMesses = messes.nested("RecoveryParts", share.object_id());
 
-    ImmutableMap<String, DecryptionShare.CiphertextCompensatedDecryptionSelection> parts =  share.recovered_parts().get();
+    Map<String, DecryptionShare.CiphertextCompensatedDecryptionSelection> parts =  share.recovered_parts().get();
     if (parts.size() != navailable) {
       String msg = String.format("PlaintextTally.E.3 share '%s' number of parts = %d should be navailable = %d",
               share.object_id(), parts.size(), navailable);

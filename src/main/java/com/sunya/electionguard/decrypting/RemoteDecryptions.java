@@ -78,7 +78,7 @@ public class RemoteDecryptions {
         }
       }
 
-      CiphertextDecryptionContest contest = CiphertextDecryptionContest.create(
+      CiphertextDecryptionContest contest = new CiphertextDecryptionContest(
               tallyContest.object_id(), guardian.id(), tallyContest.contestDescriptionHash, selections);
       contests.put(tallyContest.object_id(), contest);
     }
@@ -152,7 +152,7 @@ public class RemoteDecryptions {
         }
       }
 
-      CiphertextDecryptionContest contest = CiphertextDecryptionContest.create(
+      CiphertextDecryptionContest contest = new CiphertextDecryptionContest(
               ballotContest.object_id, guardian.id(), ballotContest.contest_hash, selections);
       contests.put(ballotContest.object_id, contest);
     }
@@ -210,7 +210,7 @@ public class RemoteDecryptions {
                 tuple.decryption,
                 context.crypto_extended_base_hash)) {
 
-          CiphertextCompensatedDecryptionSelection share = CiphertextCompensatedDecryptionSelection.create(
+          CiphertextCompensatedDecryptionSelection share = new CiphertextCompensatedDecryptionSelection(
                   tallySelection.object_id(),
                   guardian.id(),
                   missing_guardian_id,
@@ -225,7 +225,7 @@ public class RemoteDecryptions {
         }
       }
 
-      CiphertextCompensatedDecryptionContest contest = CiphertextCompensatedDecryptionContest.create(
+      CiphertextCompensatedDecryptionContest contest = new CiphertextCompensatedDecryptionContest(
               tallyContest.object_id(),
               guardian.id(),
               missing_guardian_id,
@@ -284,7 +284,7 @@ public class RemoteDecryptions {
                 tuple.decryption,
                 context.crypto_extended_base_hash)) {
 
-          CiphertextCompensatedDecryptionSelection share = CiphertextCompensatedDecryptionSelection.create(
+          CiphertextCompensatedDecryptionSelection share = new CiphertextCompensatedDecryptionSelection(
                   selection.object_id(),
                   guardian.id(),
                   missing_guardian_id,
@@ -299,7 +299,7 @@ public class RemoteDecryptions {
         }
       }
 
-      CiphertextCompensatedDecryptionContest contest = CiphertextCompensatedDecryptionContest.create(
+      CiphertextCompensatedDecryptionContest contest = new CiphertextCompensatedDecryptionContest(
               ballotContest.object_id,
               guardian.id(),
               missing_guardian_id,
@@ -429,7 +429,7 @@ public class RemoteDecryptions {
               Optional.empty(),
               Optional.of(compensated_selection_shares)));
     }
-    return CiphertextDecryptionContest.create(
+    return new CiphertextDecryptionContest(
             contest.object_id,
             missing_guardian_id,
             contest.description_hash,
