@@ -115,8 +115,8 @@ public class DecryptionVerifier {
       this.id = id; // contest/selection
       this.selection = selection;
       this.selection_id = selection.object_id();
-      this.pad = selection.message().pad;
-      this.data = selection.message().data;
+      this.pad = selection.message().pad();
+      this.data = selection.message().data();
     }
 
     /** Verify a selection at a time. Combine all the checks separated by guardian shares. */

@@ -53,8 +53,8 @@ public class SelectionEncryptionVerifier {
 
     SelectionVerifier(CiphertextBallot.Selection selection) {
       this.selection = selection;
-      this.alpha = selection.ciphertext().pad;
-      this.beta = selection.ciphertext().data;
+      this.alpha = selection.ciphertext().pad();
+      this.beta = selection.ciphertext().data();
     }
 
     boolean verifySelection() {
@@ -77,7 +77,7 @@ public class SelectionEncryptionVerifier {
       ElementModQ challenge = proof.challenge; // c
 
       // 4.A: check alpha, beta, a0, b0, a1, b1 are all in set Zrp
-      if (!(this.check_params_within_zrp(cipher.pad, cipher.data, a0, a1, b0, b1))) {
+      if (!(this.check_params_within_zrp(cipher.pad(), cipher.data(), a0, a1, b0, b1))) {
         error = true;
       }
 

@@ -59,7 +59,7 @@ public class TallyDecryptionVerifier {
         List<ElementModP> partialDecryptions = selection.shares().stream().map(s -> s.share()).collect(Collectors.toList());
         ElementModP productMi = Group.mult_p(partialDecryptions);
         ElementModP M = selection.value();
-        ElementModP B = selection.message().data;
+        ElementModP B = selection.message().data();
         if (!B.equals(Group.mult_p(M, productMi))) {
           System.out.printf(" 11.A Tally Decryption failed for %s.%n", key);
           error = true;

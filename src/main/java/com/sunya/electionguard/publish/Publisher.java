@@ -316,7 +316,7 @@ public class Publisher {
     ConvertToJson.writeConstants(constants, this.constantsPath());
 
     for (Encrypt.EncryptionDevice device : devices) {
-      ConvertToJson.writeDevice(device, this.devicePath(device.location));
+      ConvertToJson.writeDevice(device, this.devicePath(device.location()));
     }
 
     for (SubmittedBallot ballot : ciphertext_ballots) {

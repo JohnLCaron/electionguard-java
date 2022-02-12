@@ -43,10 +43,10 @@ public class TestPlaintextTallyInputValidation {
     assertThat(validateElection(election)).isTrue();
 
     CiphertextTallyInputBuilder builder = new CiphertextTallyInputBuilder("ctally");
-    for (Manifest.ContestDescription contest : election.contests) {
-      CiphertextTallyInputBuilder.ContestBuilder cbuilder = builder.addContest(contest.object_id, contest.crypto_hash());
-      for (Manifest.SelectionDescription selection : contest.ballot_selections) {
-        cbuilder.addSelection(selection.object_id, selection.crypto_hash(), elgamal_ciphertext());
+    for (Manifest.ContestDescription contest : election.contests()) {
+      CiphertextTallyInputBuilder.ContestBuilder cbuilder = builder.addContest(contest.object_id(), contest.crypto_hash());
+      for (Manifest.SelectionDescription selection : contest.ballot_selections()) {
+        cbuilder.addSelection(selection.object_id(), selection.crypto_hash(), elgamal_ciphertext());
       }
     }
     CiphertextTally ctally = builder.build();

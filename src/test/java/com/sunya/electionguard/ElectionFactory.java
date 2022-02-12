@@ -40,7 +40,7 @@ public class ElectionFactory {
     int sequence_order = 0;
     int number_elected = 1;
     int votes_allowed = 1;
-    Manifest.ReferendumContestDescription fake_referendum_contest = new Manifest.ReferendumContestDescription(
+    Manifest.ContestDescription fake_referendum_contest = new Manifest.ContestDescription(
             "some-referendum-contest-object-id",
             "some-geopoltical-unit-id",
             sequence_order,
@@ -48,7 +48,8 @@ public class ElectionFactory {
             number_elected,
             votes_allowed,
             "some-referendum-contest-name",
-            fake_referendum_ballot_selections, null, null);
+            fake_referendum_ballot_selections,
+            null, null, null);
 
     List<Manifest.SelectionDescription> fake_candidate_ballot_selections = ImmutableList.of(
             new Manifest.SelectionDescription("some-object-id-candidate-1", "some-candidate-id-1", 0),
@@ -59,7 +60,7 @@ public class ElectionFactory {
     int sequence_order_2 = 1;
     int number_elected_2 = 2;
     int votes_allowed_2 = 2;
-    Manifest.CandidateContestDescription fake_candidate_contest = new Manifest.CandidateContestDescription(
+    Manifest.ContestDescription fake_candidate_contest = new Manifest.ContestDescription(
             "some-candidate-contest-object-id",
             "some-geopoltical-unit-id",
             sequence_order_2,
@@ -80,7 +81,7 @@ public class ElectionFactory {
                     new Manifest.Candidate("some-candidate-id-3")),
             ImmutableList.of(fake_referendum_contest, fake_candidate_contest),
             ImmutableList.of(fake_ballot_style),
-            null, null);
+            null, null, null);
   }
 
   public static Optional<ElectionBuilder.DescriptionAndContext> get_fake_ciphertext_election(
@@ -104,9 +105,9 @@ public class ElectionFactory {
 
     return new PlaintextBallot(
             ballot_id,
-            election.ballot_styles.get(0).object_id(),
-            ImmutableList.of(Encrypt.contest_from(election.contests.get(0)),
-                    Encrypt.contest_from(election.contests.get(1)))
+            election.ballot_styles().get(0).object_id(),
+            ImmutableList.of(Encrypt.contest_from(election.contests().get(0)),
+                    Encrypt.contest_from(election.contests().get(1)))
     );
   }
 
@@ -117,7 +118,7 @@ public class ElectionFactory {
   }
 
   public static Encrypt.EncryptionDevice get_fake_encryption_device(String polling_place) {
-    return Encrypt.EncryptionDevice.createForTest(String.format("polling-place-%s", polling_place));
+    return Encrypt.createDeviceForTest(String.format("polling-place-%s", polling_place));
   }
 
   /**
@@ -177,10 +178,10 @@ public class ElectionFactory {
             votes_allowed,
             "draw(text)",
             selection_descriptions,
-            null, null);
+            null, null, null);
 
     List<Manifest.SelectionDescription> placeholder_selections = InternalManifest.generate_placeholder_selections_from(contest_description, number_elected);
-    return InternalManifest.contest_description_with_placeholders_from(contest_description, placeholder_selections);
+    return  new ContestWithPlaceholders(contest_description, placeholder_selections);
   }
 
 }

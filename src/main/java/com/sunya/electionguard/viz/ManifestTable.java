@@ -110,17 +110,17 @@ public class ManifestTable extends JPanel {
 
   void setElectionManifest(Manifest election) {
     this.election = election;
-    candidateTable.setBeans(election.candidates.stream().map(CandidateBean::new).collect(Collectors.toList()));
-    partyTable.setBeans(election.parties.stream().map(PartyBean::new).collect(Collectors.toList()));
-    gpunitTable.setBeans(election.geopolitical_units.stream().map(GpUnitBean::new).collect(Collectors.toList()));
-    styleTable.setBeans(election.ballot_styles.stream().map(BallotStyleBean::new).collect(Collectors.toList()));
-    contestTable.setBeans(election.contests.stream().map(ContestBean::new).collect(Collectors.toList()));
+    candidateTable.setBeans(election.candidates().stream().map(CandidateBean::new).collect(Collectors.toList()));
+    partyTable.setBeans(election.parties().stream().map(PartyBean::new).collect(Collectors.toList()));
+    gpunitTable.setBeans(election.geopolitical_units().stream().map(GpUnitBean::new).collect(Collectors.toList()));
+    styleTable.setBeans(election.ballot_styles().stream().map(BallotStyleBean::new).collect(Collectors.toList()));
+    contestTable.setBeans(election.contests().stream().map(ContestBean::new).collect(Collectors.toList()));
     selectionTable.setBeans(new ArrayList<>());
   }
 
   void setContest(ContestBean contestBean) {
     selectionTable.setBeans(
-            contestBean.contest.ballot_selections.stream().map(SelectionBean::new).collect(Collectors.toList()));
+            contestBean.contest.ballot_selections().stream().map(SelectionBean::new).collect(Collectors.toList()));
   }
 
   void save() {
@@ -165,16 +165,16 @@ public class ManifestTable extends JPanel {
       return org.object_id();
     }
     public String getAbbreviation() {
-      return org.abbreviation.orElse("");
+      return org.abbreviation();
     }
     public String getLogoUri() {
-      return org.logo_uri.orElse("");
+      return org.logo_uri();
     }
     public String getContactInformation() {
-      return org.name.toString();
+      return org.name().toString();
     }
     public String getColor() {
-      return org.color.orElse("");
+      return org.color();
     }
   }
 
@@ -191,16 +191,16 @@ public class ManifestTable extends JPanel {
       return org.object_id();
     }
     public String getPartyId() {
-      return org.party_id.orElse("");
+      return org.party_id();
     }
     public String getImageUri() {
-      return org.image_uri.orElse("");
+      return org.image_uri();
     }
     public String getName() {
-      return org.name.toString();
+      return org.name().toString();
     }
     public boolean isWriteIn() {
-      return org.is_write_in;
+      return org.is_write_in();
     }
   }
 
@@ -217,13 +217,13 @@ public class ManifestTable extends JPanel {
       return gpunit.object_id();
     }
     public String getType() {
-      return gpunit.type.toString();
+      return gpunit.type().toString();
     }
     public String getName() {
-      return gpunit.name;
+      return gpunit.name();
     }
     public String getContactInformation() {
-      return gpunit.contact_information.toString();
+      return gpunit.contact_information().toString();
     }
   }
 
@@ -240,14 +240,14 @@ public class ManifestTable extends JPanel {
       return style.object_id();
     }
     public String getGeopolitical() {
-      return style.geopolitical_unit_ids.toString();
+      return style.geopolitical_unit_ids().toString();
     }
     public String getParties() {
-      return style.party_ids.toString();
+      return style.party_ids().toString();
     }
 
     public String getImageUrl() {
-      return style.image_uri.orElse("");
+      return style.image_uri();
     }
   }
 
@@ -260,34 +260,34 @@ public class ManifestTable extends JPanel {
       this.contest = contest;
     }
     public String getContestId() {
-      return contest.object_id;
+      return contest.object_id();
     }
     public String getName() {
-      return contest.name;
+      return contest.name();
     }
-    public String getElectoralDistrictId() { return contest.electoral_district_id; }
+    public String getElectoralDistrictId() { return contest.electoral_district_id(); }
 
     public String getBallotTitle() {
-      if(contest.ballot_title.isPresent()) {
-        return contest.ballot_title.get().text.toString();
+      if(contest.ballot_title() != null) {
+        return contest.ballot_title().text().toString();
       } else {
         return "";
       }
     }
 
     public String getBallotSubTitle() {
-      if(contest.ballot_subtitle.isPresent()) {
-        return contest.ballot_subtitle.get().text.toString();
+      if(contest.ballot_subtitle() != null) {
+        return contest.ballot_subtitle().text().toString();
       } else {
         return "";
       }
     }
 
     public String getCryptoHash() { return contest.crypto_hash().toString(); }
-    public int getNumberElected() { return contest.number_elected; }
-    public int getSeq() { return contest.sequence_order; }
-    public String getVoteVariation() { return contest.vote_variation.toString(); }
-    public int getVotesAllowed() { return contest.votes_allowed.orElse(-1); }
+    public int getNumberElected() { return contest.number_elected(); }
+    public int getSeq() { return contest.sequence_order(); }
+    public String getVoteVariation() { return contest.vote_variation().toString(); }
+    public int getVotesAllowed() { return contest.votes_allowed(); }
   }
 
   public static class SelectionBean {
@@ -300,15 +300,15 @@ public class ManifestTable extends JPanel {
     }
 
     public String getSelectionId() {
-      return selection.object_id;
+      return selection.object_id();
     }
 
     public String getCandidateId() {
-      return selection.candidate_id;
+      return selection.candidate_id();
     }
 
     public int getSeq() {
-      return selection.sequence_order;
+      return selection.sequence_order();
     }
 
     public String getCryptoHash() { return selection.crypto_hash().toString(); }

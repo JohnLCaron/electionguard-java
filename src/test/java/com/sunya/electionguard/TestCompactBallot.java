@@ -16,11 +16,11 @@ public class TestCompactBallot {
   public TestCompactBallot() {
     ElGamal.KeyPair keypair = ElGamal.elgamal_keypair_from_secret(Group.TWO_MOD_Q).orElseThrow();
     Manifest manifest = ElectionFactory.get_fake_manifest();
-    ElectionBuilder.DescriptionAndContext metadata = ElectionFactory.get_fake_ciphertext_election(manifest, keypair.public_key).orElseThrow();
+    ElectionBuilder.DescriptionAndContext metadata = ElectionFactory.get_fake_ciphertext_election(manifest, keypair.public_key()).orElseThrow();
     this.internal_manifest = metadata.internalManifest;
     this.context = metadata.context;
 
-    Group.ElementModQ device_hash = Encrypt.EncryptionDevice.createForTest("device").get_hash();
+    Group.ElementModQ device_hash = Encrypt.createDeviceForTest("device").get_hash();
 
     // Arrange ballots
     this.plaintext_ballot = ElectionFactory.get_fake_ballot(manifest, "fake_ballot_id");

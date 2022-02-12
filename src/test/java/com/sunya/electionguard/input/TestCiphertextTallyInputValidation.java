@@ -48,10 +48,10 @@ public class TestCiphertextTallyInputValidation {
     assertThat(validateElection(election)).isTrue();
 
     CiphertextTallyInputBuilder builder = new CiphertextTallyInputBuilder("ctally");
-    for (Manifest.ContestDescription contest : election.contests) {
+    for (Manifest.ContestDescription contest : election.contests()) {
       CiphertextTallyInputBuilder.ContestBuilder cbuilder = builder.addContest("bad_contest_id", contest.crypto_hash());
-      for (Manifest.SelectionDescription selection : contest.ballot_selections) {
-        cbuilder.addSelection(selection.object_id, selection.crypto_hash(), TestUtils.elgamal_ciphertext());
+      for (Manifest.SelectionDescription selection : contest.ballot_selections()) {
+        cbuilder.addSelection(selection.object_id(), selection.crypto_hash(), TestUtils.elgamal_ciphertext());
       }
     }
     validateTally(election, builder.build(), "CiphertextTally.A.1 Tally Contest 'bad_contest_id' does not exist in manifest");
@@ -68,10 +68,10 @@ public class TestCiphertextTallyInputValidation {
     assertThat(validateElection(election)).isTrue();
 
     CiphertextTallyInputBuilder builder = new CiphertextTallyInputBuilder("ctally");
-    for (Manifest.ContestDescription contest : election.contests) {
-      CiphertextTallyInputBuilder.ContestBuilder cbuilder = builder.addContest(contest.object_id, TestUtils.elements_mod_q());
-      for (Manifest.SelectionDescription selection : contest.ballot_selections) {
-        cbuilder.addSelection(selection.object_id, selection.crypto_hash(), TestUtils.elgamal_ciphertext());
+    for (Manifest.ContestDescription contest : election.contests()) {
+      CiphertextTallyInputBuilder.ContestBuilder cbuilder = builder.addContest(contest.object_id(), TestUtils.elements_mod_q());
+      for (Manifest.SelectionDescription selection : contest.ballot_selections()) {
+        cbuilder.addSelection(selection.object_id(), selection.crypto_hash(), TestUtils.elgamal_ciphertext());
       }
     }
     validateTally(election, builder.build(), "CiphertextTally.A.1.1 Tally Contest 'contest_id' crypto_hash does not match manifest contest");
@@ -88,10 +88,10 @@ public class TestCiphertextTallyInputValidation {
     assertThat(validateElection(election)).isTrue();
 
     CiphertextTallyInputBuilder builder = new CiphertextTallyInputBuilder("ctally");
-    for (Manifest.ContestDescription contest : election.contests) {
-      CiphertextTallyInputBuilder.ContestBuilder cbuilder = builder.addContest(contest.object_id, contest.crypto_hash());
-      for (Manifest.SelectionDescription selection : contest.ballot_selections) {
-        cbuilder.addSelection(selection.object_id +"bad", selection.crypto_hash(), TestUtils.elgamal_ciphertext());
+    for (Manifest.ContestDescription contest : election.contests()) {
+      CiphertextTallyInputBuilder.ContestBuilder cbuilder = builder.addContest(contest.object_id(), contest.crypto_hash());
+      for (Manifest.SelectionDescription selection : contest.ballot_selections()) {
+        cbuilder.addSelection(selection.object_id() +"bad", selection.crypto_hash(), TestUtils.elgamal_ciphertext());
       }
     }
     validateTally(election, builder.build(), "CiphertextBallot.A.2 Tally Selection 'selection_id2bad' does not exist in contest 'contest_id'");
@@ -108,10 +108,10 @@ public class TestCiphertextTallyInputValidation {
     assertThat(validateElection(election)).isTrue();
 
     CiphertextTallyInputBuilder builder = new CiphertextTallyInputBuilder("ctally");
-    for (Manifest.ContestDescription contest : election.contests) {
-      CiphertextTallyInputBuilder.ContestBuilder cbuilder = builder.addContest(contest.object_id, contest.crypto_hash());
-      for (Manifest.SelectionDescription selection : contest.ballot_selections) {
-        cbuilder.addSelection(selection.object_id, TestUtils.elements_mod_q(), TestUtils.elgamal_ciphertext());
+    for (Manifest.ContestDescription contest : election.contests()) {
+      CiphertextTallyInputBuilder.ContestBuilder cbuilder = builder.addContest(contest.object_id(), contest.crypto_hash());
+      for (Manifest.SelectionDescription selection : contest.ballot_selections()) {
+        cbuilder.addSelection(selection.object_id(), TestUtils.elements_mod_q(), TestUtils.elgamal_ciphertext());
       }
     }
     validateTally(election, builder.build(), "CiphertextTally.A.2.1 Tally Selection 'contest_id-selection_id' crypto_hash does not match manifest selection");
@@ -128,10 +128,10 @@ public class TestCiphertextTallyInputValidation {
     assertThat(validateElection(election)).isTrue();
 
     CiphertextTallyInputBuilder builder = new CiphertextTallyInputBuilder("ctally");
-    for (Manifest.ContestDescription contest : election.contests) {
-      CiphertextTallyInputBuilder.ContestBuilder cbuilder = builder.addContest(contest.object_id, contest.crypto_hash());
-      for (Manifest.SelectionDescription selection : contest.ballot_selections) {
-        cbuilder.addSelection(selection.object_id, selection.crypto_hash(), TestUtils.elgamal_ciphertext());
+    for (Manifest.ContestDescription contest : election.contests()) {
+      CiphertextTallyInputBuilder.ContestBuilder cbuilder = builder.addContest(contest.object_id(), contest.crypto_hash());
+      for (Manifest.SelectionDescription selection : contest.ballot_selections()) {
+        cbuilder.addSelection(selection.object_id(), selection.crypto_hash(), TestUtils.elgamal_ciphertext());
       }
     }
     validateTally(election, builder.buildBadContest(), "CiphertextTally.B.1 Contest id key 'contest_idbad' doesnt match value 'contest_id'");
@@ -148,10 +148,10 @@ public class TestCiphertextTallyInputValidation {
     assertThat(validateElection(election)).isTrue();
 
     CiphertextTallyInputBuilder builder = new CiphertextTallyInputBuilder("ctally");
-    for (Manifest.ContestDescription contest : election.contests) {
-      CiphertextTallyInputBuilder.ContestBuilder cbuilder = builder.addContest(contest.object_id, contest.crypto_hash());
-      for (Manifest.SelectionDescription selection : contest.ballot_selections) {
-        cbuilder.addSelection(selection.object_id, selection.crypto_hash(), TestUtils.elgamal_ciphertext());
+    for (Manifest.ContestDescription contest : election.contests()) {
+      CiphertextTallyInputBuilder.ContestBuilder cbuilder = builder.addContest(contest.object_id(), contest.crypto_hash());
+      for (Manifest.SelectionDescription selection : contest.ballot_selections()) {
+        cbuilder.addSelection(selection.object_id(), selection.crypto_hash(), TestUtils.elgamal_ciphertext());
       }
     }
     validateTally(election, builder.buildBadSelection(), "CiphertextTally.B.2 Selection id key 'selection_id2bad' doesnt match value 'selection_id2'");
@@ -170,10 +170,10 @@ public class TestCiphertextTallyInputValidation {
     assertThat(validateElection(election)).isTrue();
 
     CiphertextTallyInputBuilder builder = new CiphertextTallyInputBuilder("ctally");
-    for (Manifest.ContestDescription contest : election.contests) {
-      CiphertextTallyInputBuilder.ContestBuilder cbuilder = builder.addContest(contest.object_id, contest.crypto_hash());
-      for (Manifest.SelectionDescription selection : contest.ballot_selections) {
-        cbuilder.addSelection(selection.object_id, selection.crypto_hash(), TestUtils.elgamal_ciphertext());
+    for (Manifest.ContestDescription contest : election.contests()) {
+      CiphertextTallyInputBuilder.ContestBuilder cbuilder = builder.addContest(contest.object_id(), contest.crypto_hash());
+      for (Manifest.SelectionDescription selection : contest.ballot_selections()) {
+        cbuilder.addSelection(selection.object_id(), selection.crypto_hash(), TestUtils.elgamal_ciphertext());
       }
     }
     validateTally(election, builder.build(), null);

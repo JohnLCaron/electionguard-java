@@ -301,6 +301,7 @@ class DecryptingMediatorRunner {
     // Here's where the spoiled ballots are decrypted.
     List<SpoiledBallotAndTally> spoiledTallyAndBallot = mediator.decrypt_spoiled_ballots().orElseThrow();
     System.out.printf("SpoiledBallotAndTally = %d%n", spoiledTallyAndBallot.size());
+    // LOOK we only care about the tallies, not the ballots
     this.spoiledDecryptedTallies = spoiledTallyAndBallot.stream().map(e -> e.tally).collect(Collectors.toList());
 
     this.availableGuardians = mediator.getAvailableGuardians();

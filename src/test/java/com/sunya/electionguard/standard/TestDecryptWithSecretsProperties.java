@@ -12,7 +12,6 @@ import com.sunya.electionguard.InternalManifest;
 import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.PlaintextBallot;
 import com.sunya.electionguard.TestProperties;
-import com.sunya.electionguard.standard.DecryptWithSecrets;
 import net.jqwik.api.ForAll;
 import net.jqwik.api.Property;
 import net.jqwik.api.ShrinkingMode;
@@ -43,16 +42,16 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
     PlaintextBallot.Selection data = BallotFactory.get_random_selection_from(description);
 
     Optional<CiphertextBallot.Selection> subjectO = Encrypt.encrypt_selection(
-            data, description, keypair.public_key, ONE_MOD_Q, nonce_seed, false, true);
+            data, description, keypair.public_key(), ONE_MOD_Q, nonce_seed, false, true);
     assertThat(subjectO).isPresent();
     CiphertextBallot.Selection subject = subjectO.get();
 
     Optional<PlaintextBallot.Selection> result_from_key =
-            decrypt_selection_with_secret(subject, description, keypair.public_key, keypair.secret_key, ONE_MOD_Q, false);
+            decrypt_selection_with_secret(subject, description, keypair.public_key(), keypair.secret_key(), ONE_MOD_Q, false);
     Optional<PlaintextBallot.Selection> result_from_nonce =
-            decrypt_selection_with_nonce(subject, description, keypair.public_key, ONE_MOD_Q, Optional.empty(), false);
+            decrypt_selection_with_nonce(subject, description, keypair.public_key(), ONE_MOD_Q, Optional.empty(), false);
     Optional<PlaintextBallot.Selection> result_from_nonce_seed =
-            decrypt_selection_with_nonce(subject, description, keypair.public_key, ONE_MOD_Q, Optional.of(nonce_seed), false);
+            decrypt_selection_with_nonce(subject, description, keypair.public_key(), ONE_MOD_Q, Optional.of(nonce_seed), false);
 
     assertThat(result_from_key).isPresent();
     assertThat(result_from_nonce).isPresent();
@@ -71,13 +70,13 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
     PlaintextBallot.Selection data = BallotFactory.get_random_selection_from(description);
 
     // Act
-    Optional<CiphertextBallot.Selection> subjectO = Encrypt.encrypt_selection(data, description, keypair.public_key, ONE_MOD_Q, seed, false, true);
+    Optional<CiphertextBallot.Selection> subjectO = Encrypt.encrypt_selection(data, description, keypair.public_key(), ONE_MOD_Q, seed, false, true);
     assertThat(subjectO).isPresent();
     CiphertextBallot.Selection subject = subjectO.get();
 
     // tamper with the encryption
-    ElGamal.Ciphertext malformed_message = new ElGamal.Ciphertext(mult_p(subject.ciphertext().pad, TWO_MOD_P),
-            subject.ciphertext().data);
+    ElGamal.Ciphertext malformed_message = new ElGamal.Ciphertext(mult_p(subject.ciphertext().pad(), TWO_MOD_P),
+            subject.ciphertext().data());
     CiphertextBallot.Selection malformed_encryption = new CiphertextBallot.Selection(
             subject.object_id(), subject.sequence_order(), TWO_MOD_Q, malformed_message,
             subject.crypto_hash, subject.is_placeholder_selection, subject.nonce,
@@ -106,21 +105,21 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
     Optional<PlaintextBallot.Selection> result_from_key_malformed_encryption = decrypt_selection_with_secret(
             malformed_encryption,
             description,
-            keypair.public_key,
-            keypair.secret_key,
+            keypair.public_key(),
+            keypair.secret_key(),
             ONE_MOD_Q, false);
 
     Optional<PlaintextBallot.Selection> result_from_key_malformed_proof = decrypt_selection_with_secret(
             malformed_proof,
             description,
-            keypair.public_key,
-            keypair.secret_key,
+            keypair.public_key(),
+            keypair.secret_key(),
             ONE_MOD_Q, false);
 
     Optional<PlaintextBallot.Selection> result_from_nonce_malformed_encryption = decrypt_selection_with_nonce(
-            malformed_encryption, description, keypair.public_key, ONE_MOD_Q, Optional.empty(), false);
+            malformed_encryption, description, keypair.public_key(), ONE_MOD_Q, Optional.empty(), false);
     Optional<PlaintextBallot.Selection> result_from_nonce_malformed_proof = decrypt_selection_with_nonce(
-            malformed_proof, description, keypair.public_key, ONE_MOD_Q, Optional.empty(), false);
+            malformed_proof, description, keypair.public_key(), ONE_MOD_Q, Optional.empty(), false);
 
     // Assert
     assertThat(result_from_key_malformed_encryption).isEmpty();
@@ -139,7 +138,7 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
     PlaintextBallot.Selection data = BallotFactory.get_random_selection_from(description);
 
     // Act
-    Optional<CiphertextBallot.Selection> subjectO = Encrypt.encrypt_selection(data, description, keypair.public_key, ONE_MOD_Q, nonce_seed, false, true);
+    Optional<CiphertextBallot.Selection> subjectO = Encrypt.encrypt_selection(data, description, keypair.public_key(), ONE_MOD_Q, nonce_seed, false, true);
     assertThat(subjectO).isPresent();
     CiphertextBallot.Selection subject = subjectO.get();
 
@@ -150,7 +149,7 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
             subject.proof, subject.extended_data);
 
     Optional<PlaintextBallot.Selection> result_from_nonce_seed =
-            decrypt_selection_with_nonce(bad_subject, description, keypair.public_key, ONE_MOD_Q, Optional.of(nonce_seed), false);
+            decrypt_selection_with_nonce(bad_subject, description, keypair.public_key(), ONE_MOD_Q, Optional.of(nonce_seed), false);
 
     assertThat(result_from_nonce_seed).isEmpty();
   }
@@ -160,17 +159,18 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
           @ForAll("elgamal_keypairs") ElGamal.KeyPair keypair,
           @ForAll("elements_mod_q_no_zero") ElementModQ nonce_seed) {
 
-    ContestWithPlaceholders description = ElectionFactory.get_contest_description_well_formed();
-    PlaintextBallot.Contest data = new BallotFactory().get_random_contest_from(description, false, false);
+    ContestWithPlaceholders contestp = ElectionFactory.get_contest_description_well_formed();
+    Manifest.ContestDescription contest = contestp.contest;
+    PlaintextBallot.Contest data = new BallotFactory().get_random_contest_from(contestp.contest, false, false);
 
-    List<Manifest.SelectionDescription> placeholders = InternalManifest.generate_placeholder_selections_from(description, description.number_elected);
-    ContestWithPlaceholders description_with_placeholders = InternalManifest.contest_description_with_placeholders_from(description, placeholders);
+    List<Manifest.SelectionDescription> placeholders = InternalManifest.generate_placeholder_selections_from(contest, contest.number_elected());
+    ContestWithPlaceholders description_with_placeholders = new ContestWithPlaceholders(contestp.contest, placeholders);
     assertThat(description_with_placeholders.is_valid()).isTrue();
 
     Optional<CiphertextBallot.Contest> subjectO = Encrypt.encrypt_contest(
             data,
             description_with_placeholders,
-            keypair.public_key,
+            keypair.public_key(),
             ONE_MOD_Q,
             nonce_seed, true);
     assertThat(subjectO).isPresent();
@@ -180,21 +180,21 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
     Optional<PlaintextBallot.Contest> result_from_key = decrypt_contest_with_secret(
             subject,
             description_with_placeholders,
-            keypair.public_key,
-            keypair.secret_key,
+            keypair.public_key(),
+            keypair.secret_key(),
             ONE_MOD_Q,
             false, false);
     Optional<PlaintextBallot.Contest> result_from_nonce = DecryptWithSecrets.decrypt_contest_with_nonce(
             subject,
             description_with_placeholders,
-            keypair.public_key,
+            keypair.public_key(),
             ONE_MOD_Q,
             Optional.empty(), false, false);
 
     Optional<PlaintextBallot.Contest> result_from_nonce_seed = DecryptWithSecrets.decrypt_contest_with_nonce(
             subject,
             description_with_placeholders,
-            keypair.public_key,
+            keypair.public_key(),
             ONE_MOD_Q,
             Optional.of(nonce_seed),
             false, false);
@@ -205,27 +205,27 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
     assertThat(result_from_nonce_seed).isPresent();
 
     // The decrypted contest should include an entry for each possible selection// and placeholders for each seat
-    int expected_entries = description.ballot_selections.size() + description.number_elected;
+    int expected_entries = contest.ballot_selections().size() + contest.number_elected();
     assertThat(
             result_from_key.get().is_valid(
-                    description.object_id,
+                    contest.object_id(),
                     expected_entries,
-                    description.number_elected,
-                    description.votes_allowed)).isTrue();
+                    contest.number_elected(),
+                    contest.votes_allowed())).isTrue();
 
     assertThat(
             result_from_nonce.get().is_valid(
-                    description.object_id,
+                    contest.object_id(),
                     expected_entries,
-                    description.number_elected,
-                    description.votes_allowed)).isTrue();
+                    contest.number_elected(),
+                    contest.votes_allowed())).isTrue();
 
     assertThat(
             result_from_nonce_seed.get().is_valid(
-                    description.object_id,
+                    contest.object_id(),
                     expected_entries,
-                    description.number_elected,
-                    description.votes_allowed)).isTrue();
+                    contest.number_elected(),
+                    contest.votes_allowed())).isTrue();
 
     // Assert the ballot selections sum to the expected number of selections
     int key_selected = result_from_key.get().ballot_selections.stream().mapToInt(s -> s.vote).sum();
@@ -234,22 +234,22 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
 
     assertThat(key_selected).isEqualTo(nonce_selected);
     assertThat(seed_selected).isEqualTo(nonce_selected);
-    assertThat(description.number_elected).isEqualTo(key_selected);
+    assertThat(contest.number_elected()).isEqualTo(key_selected);
 
     //Assert each selection is valid
-    for (Manifest.SelectionDescription selection_description : description.ballot_selections) {
+    for (Manifest.SelectionDescription selection_description : contest.ballot_selections()) {
 
       PlaintextBallot.Selection key_selection = result_from_key.get().ballot_selections.stream()
-              .filter(s -> s.selection_id.equals(selection_description.object_id)).findFirst().orElseThrow(IllegalStateException::new);
+              .filter(s -> s.selection_id.equals(selection_description.object_id())).findFirst().orElseThrow(IllegalStateException::new);
 
       PlaintextBallot.Selection nonce_selection = result_from_nonce.get().ballot_selections.stream()
-              .filter(s -> s.selection_id.equals(selection_description.object_id)).findFirst().orElseThrow(IllegalStateException::new);
+              .filter(s -> s.selection_id.equals(selection_description.object_id())).findFirst().orElseThrow(IllegalStateException::new);
 
       PlaintextBallot.Selection seed_selection = result_from_nonce_seed.get().ballot_selections.stream()
-              .filter(s -> s.selection_id.equals(selection_description.object_id)).findFirst().orElseThrow(IllegalStateException::new);
+              .filter(s -> s.selection_id.equals(selection_description.object_id())).findFirst().orElseThrow(IllegalStateException::new);
 
       List<PlaintextBallot.Selection> data_selections_exist = data.ballot_selections.stream()
-              .filter(s -> s.selection_id.equals(selection_description.object_id)).collect(Collectors.toList());
+              .filter(s -> s.selection_id.equals(selection_description.object_id())).toList();
 
 
       // It 's possible there are no selections in the original data collection
@@ -262,9 +262,9 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
 
       // TODO: also check edge cases such as: placeholder selections are true for under votes
 
-      assertThat(key_selection.is_valid(selection_description.object_id)).isTrue();
-      assertThat(nonce_selection.is_valid(selection_description.object_id)).isTrue();
-      assertThat(seed_selection.is_valid(selection_description.object_id)).isTrue();
+      assertThat(key_selection.is_valid(selection_description.object_id())).isTrue();
+      assertThat(nonce_selection.is_valid(selection_description.object_id())).isTrue();
+      assertThat(seed_selection.is_valid(selection_description.object_id())).isTrue();
     }
   }
 
@@ -273,18 +273,19 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
           @ForAll("elgamal_keypairs") ElGamal.KeyPair keypair,
           @ForAll("elements_mod_q_no_zero") ElementModQ nonce_seed) {
 
-    ContestWithPlaceholders description = ElectionFactory.get_contest_description_well_formed();
-    PlaintextBallot.Contest data = new BallotFactory().get_random_contest_from(description, false, false);
+    ContestWithPlaceholders contestp = ElectionFactory.get_contest_description_well_formed();
+    Manifest.ContestDescription contest = contestp.contest;
+    PlaintextBallot.Contest data = new BallotFactory().get_random_contest_from(contest, false, false);
 
-    List<Manifest.SelectionDescription> placeholders = InternalManifest.generate_placeholder_selections_from(description, description.number_elected);
-    ContestWithPlaceholders description_with_placeholders = InternalManifest.contest_description_with_placeholders_from(description, placeholders);
+    List<Manifest.SelectionDescription> placeholders = InternalManifest.generate_placeholder_selections_from(contest, contest.number_elected());
+    ContestWithPlaceholders description_with_placeholders = new ContestWithPlaceholders(contest, placeholders);
 
     assertThat(description_with_placeholders.is_valid()).isTrue();
 
     Optional<CiphertextBallot.Contest> subjectO = Encrypt.encrypt_contest(
             data,
             description_with_placeholders,
-            keypair.public_key,
+            keypair.public_key(),
             ONE_MOD_Q,
             nonce_seed, true);
     assertThat(subjectO).isPresent();
@@ -300,14 +301,14 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
     Optional<PlaintextBallot.Contest> result_from_nonce = DecryptWithSecrets.decrypt_contest_with_nonce(
             bad_subject,
             description_with_placeholders,
-            keypair.public_key,
+            keypair.public_key(),
             ONE_MOD_Q,
             Optional.empty(),
             false, false);
     Optional<PlaintextBallot.Contest> result_from_nonce_seed = DecryptWithSecrets.decrypt_contest_with_nonce(
             bad_subject,
             description_with_placeholders,
-            keypair.public_key,
+            keypair.public_key(),
             ONE_MOD_Q,
             Optional.of(nonce_seed),
             false, false);
@@ -333,21 +334,21 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
     Optional<PlaintextBallot.Contest> result_from_key_tampered = decrypt_contest_with_secret(
             bad_contest,
             description_with_placeholders,
-            keypair.public_key,
-            keypair.secret_key,
+            keypair.public_key(),
+            keypair.secret_key(),
             ONE_MOD_Q,
             false, false);
     Optional<PlaintextBallot.Contest> result_from_nonce_tampered = DecryptWithSecrets.decrypt_contest_with_nonce(
             bad_contest,
             description_with_placeholders,
-            keypair.public_key,
+            keypair.public_key(),
             ONE_MOD_Q,
             Optional.empty(),
             false, false);
     Optional<PlaintextBallot.Contest> result_from_nonce_seed_tampered = DecryptWithSecrets.decrypt_contest_with_nonce(
             bad_contest,
             description_with_placeholders,
-            keypair.public_key,
+            keypair.public_key(),
             ONE_MOD_Q,
             Optional.of(nonce_seed),
             false, false);
@@ -369,12 +370,12 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
     // TODO: Hypothesis test instead
 
     Manifest election = ElectionFactory.get_simple_election_from_file();
-    ElectionBuilder.DescriptionAndContext celection = ElectionFactory.get_fake_ciphertext_election(election, keypair.public_key).orElseThrow();
+    ElectionBuilder.DescriptionAndContext celection = ElectionFactory.get_fake_ciphertext_election(election, keypair.public_key()).orElseThrow();
     InternalManifest metadata = celection.internalManifest;
     CiphertextElectionContext context = celection.context;
 
     PlaintextBallot data = new BallotFactory().get_simple_ballot_from_file();
-    Encrypt.EncryptionDevice device = Encrypt.EncryptionDevice.createForTest("Location");
+    Encrypt.EncryptionDevice device = Encrypt.createDeviceForTest("Location");
     Encrypt.EncryptionMediator operator = new Encrypt.EncryptionMediator(metadata, context, device);
 
     // Act
@@ -386,21 +387,21 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
             subject,
             metadata,
             context.crypto_extended_base_hash,
-            keypair.public_key,
-            keypair.secret_key,
+            keypair.public_key(),
+            keypair.secret_key(),
             false, false);
     Optional<PlaintextBallot> result_from_nonce = decrypt_ballot_with_nonce(
             subject,
             metadata,
             context.crypto_extended_base_hash,
-            keypair.public_key,
+            keypair.public_key(),
             Optional.empty(),
             false, false);
     Optional<PlaintextBallot> result_from_nonce_seed = decrypt_ballot_with_nonce(
             subject,
             metadata,
             context.crypto_extended_base_hash,
-            keypair.public_key,
+            keypair.public_key(),
             subject.nonce,
             false, false);
 
@@ -413,20 +414,21 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
     assertThat(data.object_id()).isEqualTo(result_from_nonce.get().object_id());
     assertThat(data.object_id()).isEqualTo(result_from_nonce_seed.get().object_id());
 
-    for (ContestWithPlaceholders description : metadata.get_contests_for_style(data.style_id)) {
-      int expected_entries = description.ballot_selections.size() + description.number_elected;
+    for (ContestWithPlaceholders contestp : metadata.get_contests_for_style(data.style_id)) {
+      Manifest.ContestDescription contest = contestp.contest;
+      int expected_entries = contest.ballot_selections().size() + contest.number_elected();
 
       PlaintextBallot.Contest key_contest = result_from_key.get().contests.stream()
-              .filter(c -> c.contest_id.equals(description.object_id)).findFirst().orElseThrow(IllegalStateException::new);
+              .filter(c -> c.contest_id.equals(contest.object_id())).findFirst().orElseThrow(IllegalStateException::new);
 
       PlaintextBallot.Contest nonce_contest = result_from_nonce.get().contests.stream()
-              .filter(c -> c.contest_id.equals(description.object_id)).findFirst().orElseThrow(IllegalStateException::new);
+              .filter(c -> c.contest_id.equals(contest.object_id())).findFirst().orElseThrow(IllegalStateException::new);
 
       PlaintextBallot.Contest seed_contest = result_from_nonce_seed.get().contests.stream()
-              .filter(c -> c.contest_id.equals(description.object_id)).findFirst().orElseThrow(IllegalStateException::new);
+              .filter(c -> c.contest_id.equals(contest.object_id())).findFirst().orElseThrow(IllegalStateException::new);
 
       List<PlaintextBallot.Contest> data_contest_exists = data.contests.stream()
-              .filter(c -> c.contest_id.equals(description.object_id)).collect(Collectors.toList());
+              .filter(c -> c.contest_id.equals(contest.object_id())).toList();
 
 
       // Contests may not be voted on the ballot
@@ -434,43 +436,43 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
 
       assertThat(
               key_contest.is_valid(
-                      description.object_id,
+                      contest.object_id(),
                       expected_entries,
-                      description.number_elected,
-                      description.votes_allowed)
+                      contest.number_elected(),
+                      contest.votes_allowed())
       ).isTrue();
       assertThat(
               nonce_contest.is_valid(
-                      description.object_id,
+                      contest.object_id(),
                       expected_entries,
-                      description.number_elected,
-                      description.votes_allowed)
+                      contest.number_elected(),
+                      contest.votes_allowed())
       ).isTrue();
       assertThat(
               seed_contest.is_valid(
-                      description.object_id,
+                      contest.object_id(),
                       expected_entries,
-                      description.number_elected,
-                      description.votes_allowed)
+                      contest.number_elected(),
+                      contest.votes_allowed())
       ).isTrue();
 
-      for (Manifest.SelectionDescription selection_description : description.ballot_selections) {
+      for (Manifest.SelectionDescription selection_description : contest.ballot_selections()) {
 
         PlaintextBallot.Selection key_selection = key_contest.ballot_selections.stream()
-                .filter(s -> s.selection_id.equals(selection_description.object_id)).findFirst().orElseThrow(IllegalStateException::new);
+                .filter(s -> s.selection_id.equals(selection_description.object_id())).findFirst().orElseThrow(IllegalStateException::new);
 
         PlaintextBallot.Selection nonce_selection = nonce_contest.ballot_selections.stream()
-                .filter(s -> s.selection_id.equals(selection_description.object_id)).findFirst().orElseThrow(IllegalStateException::new);
+                .filter(s -> s.selection_id.equals(selection_description.object_id())).findFirst().orElseThrow(IllegalStateException::new);
 
         PlaintextBallot.Selection seed_selection = seed_contest.ballot_selections.stream()
-                .filter(s -> s.selection_id.equals(selection_description.object_id)).findFirst().orElseThrow(IllegalStateException::new);
+                .filter(s -> s.selection_id.equals(selection_description.object_id())).findFirst().orElseThrow(IllegalStateException::new);
 
         // Selections may be undervoted for a specific contest
         List<PlaintextBallot.Selection> data_selection_exist = new ArrayList<>();
 
         if (data_contest != null) {
           data_selection_exist = data_contest.ballot_selections.stream()
-                  .filter(s -> s.selection_id.equals(selection_description.object_id)).collect(Collectors.toList());
+                  .filter(s -> s.selection_id.equals(selection_description.object_id())).collect(Collectors.toList());
         }
 
         if (!data_selection_exist.isEmpty()) {
@@ -482,9 +484,9 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
 
         // TODO: also check edge cases such as: placeholder selections are true for under votes
 
-        assertThat(key_selection.is_valid(selection_description.object_id)).isTrue();
-        assertThat(nonce_selection.is_valid(selection_description.object_id)).isTrue();
-        assertThat(seed_selection.is_valid(selection_description.object_id)).isTrue();
+        assertThat(key_selection.is_valid(selection_description.object_id())).isTrue();
+        assertThat(nonce_selection.is_valid(selection_description.object_id())).isTrue();
+        assertThat(seed_selection.is_valid(selection_description.object_id())).isTrue();
       }
     }
   }
@@ -494,12 +496,12 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
           @ForAll("elgamal_keypairs") ElGamal.KeyPair keypair) throws IOException {
 
     Manifest election = ElectionFactory.get_simple_election_from_file();
-    ElectionBuilder.DescriptionAndContext celection = ElectionFactory.get_fake_ciphertext_election(election, keypair.public_key).orElseThrow();
+    ElectionBuilder.DescriptionAndContext celection = ElectionFactory.get_fake_ciphertext_election(election, keypair.public_key()).orElseThrow();
     InternalManifest metadata = celection.internalManifest;
     CiphertextElectionContext context = celection.context;
 
     PlaintextBallot data = new BallotFactory().get_simple_ballot_from_file();
-    Encrypt.EncryptionDevice device = Encrypt.EncryptionDevice.createForTest("Location");
+    Encrypt.EncryptionDevice device = Encrypt.createDeviceForTest("Location");
     Encrypt.EncryptionMediator operator = new Encrypt.EncryptionMediator(metadata, context, device);
 
     // Act
@@ -520,7 +522,7 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
             bad_subject,
             metadata,
             context.crypto_extended_base_hash,
-            keypair.public_key,
+            keypair.public_key(),
             Optional.empty(), false, true
     );
     // This test is the same as the one above
@@ -528,7 +530,7 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
             bad_subject,
             metadata,
             context.crypto_extended_base_hash,
-            keypair.public_key,
+            keypair.public_key(),
             missing_nonce_value, false, true
     );
 

@@ -165,12 +165,12 @@ class ElectionRecordPanel extends JPanel {
       f.format("  version = %s%n", record.version);
       Manifest manifest = record.election;
       f.format("%nManifest%n");
-      f.format("  election_scope_id = %s%n", manifest.election_scope_id);
-      f.format("  type = %s%n", manifest.type);
-      f.format("  name = %s%n", manifest.name);
-      f.format("  start_date = %s%n", manifest.start_date);
-      f.format("  end_date = %s%n", manifest.end_date);
-      f.format("  manifest crypto hash = %s%n", manifest.crypto_hash);
+      f.format("  election_scope_id = %s%n", manifest.election_scope_id());
+      f.format("  type = %s%n", manifest.type());
+      f.format("  name = %s%n", manifest.name());
+      f.format("  start_date = %s%n", manifest.start_date());
+      f.format("  end_date = %s%n", manifest.end_date());
+      f.format("  manifest crypto hash = %s%n", manifest.crypto_hash());
 
       CiphertextElectionContext context = record.context;
       f.format("%nContext%n");
@@ -184,7 +184,7 @@ class ElectionRecordPanel extends JPanel {
 
       f.format("%n  EncryptionDevices%n");
       for (Encrypt.EncryptionDevice device : record.devices) {
-        f.format("    %d session=%d launch=%d location=%s%n", device.device_id, device.session_id, device.launch_code, device.location);
+        f.format("    %d session=%d launch=%d location=%s%n", device.device_id(), device.session_id(), device.launch_code(), device.location());
       }
 
       f.format("%n  Guardian Records id, sequence%n");
@@ -201,7 +201,7 @@ class ElectionRecordPanel extends JPanel {
 
       f.format("%n  Available Guardians%n");
       for (AvailableGuardian guardian : record.availableGuardians) {
-        f.format("    %20s %d %s%n", guardian.guardian_id, guardian.sequence, guardian.lagrangeCoordinate);
+        f.format("    %20s %d %s%n", guardian.guardian_id(), guardian.sequence(), guardian.lagrangeCoordinate());
       }
 
       f.format("%nAcceptedBallots %d%n", Iterables.size(record.acceptedBallots));

@@ -25,8 +25,8 @@ public class TestKeyCeremony {
     assertThat(election_key_pair).isNotNull();
     assertThat(election_key_pair.owner_id()).isEqualTo("owner");
     assertThat(election_key_pair.sequence_order()).isEqualTo(42);
-    assertThat(election_key_pair.key_pair().public_key).isNotNull();
-    assertThat(election_key_pair.key_pair().secret_key).isNotNull();
+    assertThat(election_key_pair.key_pair().public_key()).isNotNull();
+    assertThat(election_key_pair.key_pair().secret_key()).isNotNull();
     assertThat(election_key_pair.polynomial()).isNotNull();
     for (SchnorrProof proof : election_key_pair.polynomial().coefficient_proofs) {
       assertThat(proof.is_valid()).isTrue();
@@ -41,7 +41,7 @@ public class TestKeyCeremony {
     ElectionPublicKey designated_guardian_key = new ElectionPublicKey(
             RECIPIENT_GUARDIAN_ID,
             RECIPIENT_SEQUENCE_ORDER,
-            sender_election_key_pair.key_pair().public_key,
+            sender_election_key_pair.key_pair().public_key(),
             new ArrayList<>(),
             new ArrayList<>());
 
@@ -62,7 +62,7 @@ public class TestKeyCeremony {
     ElectionPublicKey publicKey = new ElectionPublicKey(
             RECIPIENT_GUARDIAN_ID,
             RECIPIENT_SEQUENCE_ORDER,
-            sender_election_key_pair.key_pair().public_key,
+            sender_election_key_pair.key_pair().public_key(),
             new ArrayList<>(),
             new ArrayList<>());
 
@@ -89,7 +89,7 @@ public class TestKeyCeremony {
     ElectionPublicKey publicKey = new ElectionPublicKey(
             RECIPIENT_GUARDIAN_ID,
             RECIPIENT_SEQUENCE_ORDER,
-            sender_election_key_pair.key_pair().public_key,
+            sender_election_key_pair.key_pair().public_key(),
             new ArrayList<>(),
             new ArrayList<>());
     ElectionPartialKeyBackup partial_key_backup = generate_election_partial_key_backup(
@@ -117,7 +117,7 @@ public class TestKeyCeremony {
     ElectionPublicKey publicKey = new ElectionPublicKey(
             RECIPIENT_GUARDIAN_ID,
             RECIPIENT_SEQUENCE_ORDER,
-            sender_election_key_pair.key_pair().public_key,
+            sender_election_key_pair.key_pair().public_key(),
             new ArrayList<>(),
             new ArrayList<>());
     ElectionPartialKeyBackup partial_key_backup = generate_election_partial_key_backup(

@@ -166,11 +166,11 @@ public class CiphertextTallyTable extends JPanel {
     }
 
     public String getCiphertextPad() {
-      return selection.ciphertext().pad.toShortString();
+      return selection.ciphertext().pad().toShortString();
     }
 
     public String getCiphertextData() {
-      return selection.ciphertext().data.toShortString();
+      return selection.ciphertext().data().toShortString();
     }
 
   }

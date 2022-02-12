@@ -317,19 +317,19 @@ public class TrusteeDecryptions {
     }
     DecryptionProofRecovery tuple = compensated.get(0);
 
-    if (tuple.proof.is_valid(
+    if (tuple.proof().is_valid(
             selection.ciphertext(),
-            tuple.recoveryPublicKey,
-            tuple.decryption,
+            tuple.recoveryPublicKey(),
+            tuple.decryption(),
             context.crypto_extended_base_hash)) {
 
       CiphertextCompensatedDecryptionSelection share = new CiphertextCompensatedDecryptionSelection(
               selection.object_id(),
               guardian.id(),
               missing_guardian_id,
-              tuple.decryption,
-              tuple.recoveryPublicKey,
-              tuple.proof);
+              tuple.decryption(),
+              tuple.recoveryPublicKey(),
+              tuple.proof());
       return Optional.of(share);
     } else {
       logger.atWarning().log("compute compensated decryption share proof failed for %s missing: %s %s",

@@ -12,7 +12,7 @@ public class TestInternalManifest {
 
   @Example
   public void test_contest_description_valid_input_succeeds() {
-    ContestWithPlaceholders description = new ContestWithPlaceholders(
+    Manifest.ContestDescription contest = new Manifest.ContestDescription(
             "0@A.com-contest",
             "0@A.com-gp-unit",
             1,
@@ -30,6 +30,10 @@ public class TestInternalManifest {
                             "0@B.com",
                             1)),
             null, null,
+            ImmutableList.of());
+
+    ContestWithPlaceholders contestp = new ContestWithPlaceholders(
+            contest,
             ImmutableList.of(
                     new SelectionDescription(
                             "0@A.com-contest-2-placeholder",
@@ -37,12 +41,12 @@ public class TestInternalManifest {
                             2)
             ));
 
-    assertThat(description.is_valid()).isTrue();
+    assertThat(contestp.is_valid()).isTrue();
   }
 
   @Example
   public void test_contest_description_invalid_input_fails() {
-    ContestWithPlaceholders description = new ContestWithPlaceholders(
+    Manifest.ContestDescription contest = new Manifest.ContestDescription(
             "0@A.com-contest",
             "0@A.com-gp-unit",
             1,
@@ -60,7 +64,10 @@ public class TestInternalManifest {
                             "0@A.com-selection",
                             "0@A.com",
                             1)),
-            null, null,
+            null, null, ImmutableList.of());
+
+    ContestWithPlaceholders contestp = new ContestWithPlaceholders(
+            contest,
             ImmutableList.of(
                     new SelectionDescription(
                             "0@A.com-contest-2-placeholder",
@@ -68,7 +75,7 @@ public class TestInternalManifest {
                             2)
             ));
 
-    assertThat(description.is_valid()).isFalse();
+    assertThat(contestp.is_valid()).isFalse();
   }
 
 

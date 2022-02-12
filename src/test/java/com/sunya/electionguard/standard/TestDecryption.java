@@ -83,7 +83,7 @@ public class TestDecryption extends TestProperties {
     this.context = tuple.context;
     this.metadata = tuple.internalManifest;
 
-    Encrypt.EncryptionDevice encryption_device = Encrypt.EncryptionDevice.createForTest("location");
+    Encrypt.EncryptionDevice encryption_device = Encrypt.createDeviceForTest("location");
     Encrypt.EncryptionMediator ballot_marking_device = new Encrypt.EncryptionMediator(this.metadata, this.context, encryption_device);
 
     // get some fake ballots
@@ -100,16 +100,16 @@ public class TestDecryption extends TestProperties {
               ballot_factory.get_fake_ballot(this.metadata, "some-unique-ballot-id-spoiled" + i, true));
     }
 
-    assertThat(this.fake_cast_ballot.is_valid(this.election.ballot_styles.get(0).object_id())).isTrue();
-    assertThat(this.fake_spoiled_ballot.is_valid(this.election.ballot_styles.get(0).object_id())).isTrue();
+    assertThat(this.fake_cast_ballot.is_valid(this.election.ballot_styles().get(0).object_id())).isTrue();
+    assertThat(this.fake_spoiled_ballot.is_valid(this.election.ballot_styles().get(0).object_id())).isTrue();
     ArrayList<PlaintextBallot> all = new ArrayList<>(more_fake_ballots);
     all.add(this.fake_cast_ballot);
     this.expected_plaintext_tally = TallyTestHelper.accumulate_plaintext_ballots(all);
 
     // Fill in the expected values with any missing selections
     // that were not made on any ballots
-    Set<String> selection_ids = this.election.contests.stream().flatMap(c -> c.ballot_selections.stream())
-            .map(s -> s.object_id).collect(Collectors.toSet());
+    Set<String> selection_ids = this.election.contests().stream().flatMap(c -> c.ballot_selections().stream())
+            .map(s -> s.object_id()).collect(Collectors.toSet());
     // missing_selection_ids = selection_ids.difference( set(this.expected_plaintext_tally) )
     Sets.SetView<String> missing_selection_ids = Sets.difference(selection_ids, this.expected_plaintext_tally.keySet());
     for (String id : missing_selection_ids) {
@@ -167,7 +167,7 @@ public class TestDecryption extends TestProperties {
     ElectionKeyPair broken_guardian_key_pair = new ElectionKeyPair(
             guardian.object_id,
             guardian.sequence_order,
-            new ElGamal.KeyPair(broken_secret_key, guardian.election_keys().key_pair().public_key),
+            new ElGamal.KeyPair(broken_secret_key, guardian.election_keys().key_pair().public_key()),
             guardian.election_keys().polynomial());
 
     Optional<DecryptionShare> broken_share = Decryptions.compute_decryption_share(

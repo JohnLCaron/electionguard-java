@@ -67,8 +67,8 @@ public class ContestVoteLimitsVerifier {
     ContestVerifier(Contest contest) {
       this.contest = contest;
       this.proof = contest.proof.orElseThrow();
-      this.contest_alpha = contest.encrypted_total.pad;
-      this.contest_beta = contest.encrypted_total.data;
+      this.contest_alpha = contest.encrypted_total.pad();
+      this.contest_beta = contest.encrypted_total.data();
       this.contest_response = proof.response;
       this.contest_challenge = proof.challenge;
       this.contest_id = contest.object_id;
@@ -89,8 +89,8 @@ public class ContestVoteLimitsVerifier {
 
       for (Selection selection : contest.ballot_selections) {
         if (show) System.out.printf("   Selection %s.%n", selection.object_id());
-        ElementModP alpha = selection.ciphertext().pad;
-        ElementModP beta = selection.ciphertext().data;
+        ElementModP alpha = selection.ciphertext().pad();
+        ElementModP beta = selection.ciphertext().data();
 
         // get alpha, beta products
         selection_alpha_product = Group.mult_p(selection_alpha_product, alpha);

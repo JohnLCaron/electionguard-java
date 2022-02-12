@@ -117,7 +117,7 @@ public class Decryptions {
     return Optional.of(new DecryptionShare(
             ballot.object_id(),
             guardian_keys.owner_id(),
-            guardian_keys.key_pair().public_key,
+            guardian_keys.key_pair().public_key(),
             contests));
   }
 
@@ -184,7 +184,7 @@ public class Decryptions {
       BallotBox.DecryptionProofTuple tuple =
               partially_decrypt(guardian_keys, selection.ciphertext(), context.crypto_extended_base_hash, null);
 
-      if (tuple.proof.is_valid(selection.ciphertext(), guardian_keys.key_pair().public_key,
+      if (tuple.proof.is_valid(selection.ciphertext(), guardian_keys.key_pair().public_key(),
               tuple.decryption, context.crypto_extended_base_hash)) {
         return Optional.of(DecryptionShare.create_ciphertext_decryption_selection(
                 selection.object_id(),
@@ -481,12 +481,12 @@ public class Decryptions {
     // TODO: ISSUE #47: Decrypt the election secret key
 
     // 𝑀_i = 𝐴^𝑠𝑖 mod 𝑝
-    Group.ElementModP partial_decryption = elgamal.partial_decrypt(guardian_keys.key_pair().secret_key);
+    Group.ElementModP partial_decryption = elgamal.partial_decrypt(guardian_keys.key_pair().secret_key());
 
     // 𝑀_i = 𝐴^𝑠𝑖 mod 𝑝 and 𝐾𝑖 = 𝑔^𝑠𝑖 mod 𝑝
     ChaumPedersen.ChaumPedersenProof proof = ChaumPedersen.make_chaum_pedersen(
             elgamal,
-            guardian_keys.key_pair().secret_key,
+            guardian_keys.key_pair().secret_key(),
             partial_decryption,
             nonce_seed,
             extended_base_hash

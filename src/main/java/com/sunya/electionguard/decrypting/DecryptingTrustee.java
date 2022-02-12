@@ -2,7 +2,6 @@ package com.sunya.electionguard.decrypting;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.flogger.FluentLogger;
 import com.sunya.electionguard.BallotBox;
 import com.sunya.electionguard.ChaumPedersen;
@@ -11,12 +10,10 @@ import com.sunya.electionguard.Group;
 import com.sunya.electionguard.keyceremony.KeyCeremony2;
 
 import javax.annotation.Nullable;
-import javax.annotation.concurrent.Immutable;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import static com.sunya.electionguard.Group.ONE_MOD_P;
 import static com.sunya.electionguard.Group.mult_p;
@@ -26,80 +23,36 @@ import static com.sunya.electionguard.Group.rand_q;
 /**
  * A Trustee/Guardian used in Decryptions, with secrets hidden as much as possible.
  * This object must not be used with untrusted code.
+ * @param id The Guardian id
+ * @param xCoordinate A unique number in [1, 256) that is the polynomial x value for this guardian. aka sequence_order.
+ * @param election_keypair The election (ElGamal) secret key
+ * @param otherGuardianPartialKeyBackups Other guardians' partial key backups of this guardian's keys, keyed by guardian id.
+ * @param guardianCommittments All guardians' public coefficient commitments, keyed by guardian id.
  */
-@Immutable
-public class DecryptingTrustee implements DecryptingTrusteeIF {
+public record DecryptingTrustee(
+  String id,
+  int xCoordinate,
+  ElGamal.KeyPair election_keypair,
+  Map<String, KeyCeremony2.PartialKeyBackup> otherGuardianPartialKeyBackups,
+  Map<String, ImmutableList<Group.ElementModP>> guardianCommittments)  implements DecryptingTrusteeIF {
+
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
-  /** The Guardian id. */
-  private final String id;
-
-  /** A unique number in [1, 256) that is the polynomial x value for this guardian. aka sequence_order. */
-  private final int xCoordinate;
-
-  /** The election (ElGamal) secret key */
-  public final ElGamal.KeyPair election_keypair;
-
-  /** Other guardians' partial key backups of this guardian's keys, keyed by guardian id. */
-  public final ImmutableMap<String, KeyCeremony2.PartialKeyBackup> otherGuardianPartialKeyBackups;
-
-  /** All guardians' public coefficient commitments, keyed by guardian id. */
-  public final ImmutableMap<String, ImmutableList<Group.ElementModP>> guardianCommittments;
-
   // TODO id and sequence_order are not matching
-  public DecryptingTrustee(String id, int sequence_order,
-                           ElGamal.KeyPair election_keypair,
-                           Map<String, KeyCeremony2.PartialKeyBackup> otherGuardianPartialKeyBackups,
-                           Map<String, ImmutableList<Group.ElementModP>> guardianCommittments) {
-    this.id = Preconditions.checkNotNull(id);
-    Preconditions.checkArgument(sequence_order > 0);
-    this.xCoordinate = sequence_order;
-    this.election_keypair = Preconditions.checkNotNull(election_keypair);
-
+  public DecryptingTrustee {
+    id = Preconditions.checkNotNull(id);
+    Preconditions.checkArgument(xCoordinate > 0);
+    Preconditions.checkNotNull(election_keypair);
     Preconditions.checkArgument(otherGuardianPartialKeyBackups.size() > 0);
     Preconditions.checkArgument(guardianCommittments.size() == otherGuardianPartialKeyBackups.size() + 1);
 
-    this.otherGuardianPartialKeyBackups = ImmutableMap.copyOf(otherGuardianPartialKeyBackups);
-    this.guardianCommittments = ImmutableMap.copyOf(guardianCommittments);
-  }
-
-  @Override
-  public String id() {
-    return id;
-  }
-
-  @Override
-  public int xCoordinate() {
-    return xCoordinate;
+    otherGuardianPartialKeyBackups = Map.copyOf(otherGuardianPartialKeyBackups);
+    guardianCommittments = Map.copyOf(guardianCommittments);
   }
 
   @Override
   public Group.ElementModP electionPublicKey() {
-    return election_keypair.public_key;
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-    DecryptingTrustee that = (DecryptingTrustee) o;
-    return xCoordinate == that.xCoordinate && id.equals(that.id) && election_keypair.equals(that.election_keypair) && otherGuardianPartialKeyBackups.equals(that.otherGuardianPartialKeyBackups) && guardianCommittments.equals(that.guardianCommittments);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(id, xCoordinate, election_keypair, otherGuardianPartialKeyBackups, guardianCommittments);
-  }
-
-  @Override
-  public String toString() {
-    return "DecryptingTrustee{" +
-            "id='" + id + '\'' +
-            ", xCoordinate=" + xCoordinate +
-            ", election_keypair=" + election_keypair +
-            ", otherGuardianPartialKeyBackups=" + otherGuardianPartialKeyBackups +
-            ", guardianCommittments=" + guardianCommittments +
-            '}';
+    return election_keypair.public_key();
   }
 
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -190,21 +143,21 @@ public class DecryptingTrustee implements DecryptingTrusteeIF {
     List<BallotBox.DecryptionProofTuple> results = new ArrayList<>();
     for (ElGamal.Ciphertext text : texts) {
       // 𝑀_i = 𝐴^𝑠𝑖 mod 𝑝
-      Group.ElementModP partial_decryption = text.partial_decrypt(this.election_keypair.secret_key);
+      Group.ElementModP partial_decryption = text.partial_decrypt(this.election_keypair.secret_key());
       // 𝑀_i = 𝐴^𝑠𝑖 mod 𝑝 and 𝐾𝑖 = 𝑔^𝑠𝑖 mod 𝑝
       ChaumPedersen.ChaumPedersenProof proof = ChaumPedersen.make_chaum_pedersen(
               text,
-              this.election_keypair.secret_key,
+              this.election_keypair.secret_key(),
               partial_decryption,
               nonce_seed,
               extended_base_hash);
 
-      boolean valid = proof.is_valid(text, this.election_keypair.public_key, partial_decryption, extended_base_hash);
+      boolean valid = proof.is_valid(text, this.election_keypair.public_key(), partial_decryption, extended_base_hash);
       if (!valid) {
         logger.atWarning().log(
                 String.format(" partialDecrypt invalid proof for %s = %s%n ", this.id, proof) +
                         String.format("   message = %s %n ", text) +
-                        String.format("   public_key = %s %n ", this.election_keypair.public_key.toShortString()) +
+                        String.format("   public_key = %s %n ", this.election_keypair.public_key().toShortString()) +
                         String.format("   partial_decryption = %s %n ", partial_decryption.toShortString()) +
                         String.format("   extended_base_hash = %s %n ", extended_base_hash)
         );

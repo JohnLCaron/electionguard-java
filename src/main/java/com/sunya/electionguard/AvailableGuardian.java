@@ -5,34 +5,20 @@ import com.google.common.base.Preconditions;
 import javax.annotation.concurrent.Immutable;
 import java.util.Objects;
 
-/** An available Guardian when decrypting. */
-@Immutable
-public class AvailableGuardian {
-  /** The guardian id. */
-  public final String guardian_id;
-  /** The guardian x coordinate value. */
-  public final Integer sequence;
-  /** Its lagrange coordinate when decrypting. */
-  public final Group.ElementModQ lagrangeCoordinate;
+/**
+ * An available Guardian when decrypting.
+ * @param guardian_id The guardian id
+ * @param sequence the guardian x coordinate value
+ * @param lagrangeCoordinate the lagrange coordinate when decrypting
+ */
+public record AvailableGuardian(
+  String guardian_id,
+  Integer sequence,
+  Group.ElementModQ lagrangeCoordinate) {
 
-  public AvailableGuardian(String guardianId, int sequence, Group.ElementModQ lagrangeCoordinate) {
-    this.guardian_id = Preconditions.checkNotNull(guardianId);
-    this.sequence = sequence;
-    this.lagrangeCoordinate = Preconditions.checkNotNull(lagrangeCoordinate);
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-    AvailableGuardian that = (AvailableGuardian) o;
-    return sequence.equals(that.sequence) &&
-            guardian_id.equals(that.guardian_id) &&
-            lagrangeCoordinate.equals(that.lagrangeCoordinate);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(guardian_id, sequence, lagrangeCoordinate);
+  public AvailableGuardian {
+    Preconditions.checkNotNull(guardian_id);
+    Preconditions.checkArgument(sequence > 0);
+    Preconditions.checkNotNull(lagrangeCoordinate);
   }
 }

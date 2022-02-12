@@ -65,7 +65,7 @@ public class ElectionInputBuilder {
     return new Manifest(election_scope_id, Manifest.ElectionType.general, OffsetDateTime.now(), OffsetDateTime.now(),
             ImmutableList.of(gpUnit), parties, candidates,
             contests.stream().map(ContestBuilder::build).collect(Collectors.toList()),
-            ImmutableList.of(ballotStyle), null, null);
+            ImmutableList.of(ballotStyle), null, null, null);
   }
 
   private static int contest_seq = 0;
@@ -115,7 +115,7 @@ public class ElectionInputBuilder {
       return new Manifest.ContestDescription(id, district, seq, Manifest.VoteVariationType.one_of_m,
               allowed, allowed, "name",
               selections.stream().map(SelectionBuilder::build).collect(Collectors.toList()),
-              null, null);
+              null, null, ImmutableList.of());
     }
 
     public class SelectionBuilder {

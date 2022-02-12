@@ -170,7 +170,7 @@ public class TestAttackTallyDecryptionVerifyier {
     // if (!B.equals(Group.mult_p(M, productMi))) {
     // we need B = Group.mult_p(M, productMi);
     // can we just do
-    Group.ElementModP B = org.message().data;
+    Group.ElementModP B = org.message().data();
     Group.ElementModP productMi = Group.div_p(B, M);
 
     // String object_id,

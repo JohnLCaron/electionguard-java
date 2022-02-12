@@ -22,8 +22,8 @@ public class BallotInputValidation {
 
   public BallotInputValidation(Manifest election) {
     this.election = election;
-    this.contestMap = election.contests.stream().collect(Collectors.toMap(c -> c.object_id, ElectionContest::new));
-    this.styles = election.ballot_styles.stream().collect(Collectors.toMap(bs -> bs.object_id(), bs -> bs));
+    this.contestMap = election.contests().stream().collect(Collectors.toMap(c -> c.object_id(), ElectionContest::new));
+    this.styles = election.ballot_styles().stream().collect(Collectors.toMap(bs -> bs.object_id(), bs -> bs));
   }
 
   /** Determine if a ballot is valid and well-formed for the given election. */
@@ -109,13 +109,13 @@ public class BallotInputValidation {
     private final Map<String, Manifest.SelectionDescription> selectionMap;
 
     ElectionContest(Manifest.ContestDescription electionContest) {
-      this.contestId = electionContest.object_id;
-      this.allowed = electionContest.votes_allowed.orElse(0); // LOOK or else what?
+      this.contestId = electionContest.object_id();
+      this.allowed = electionContest.votes_allowed();
       // this.selectionMap = electionContest.ballot_selections.stream().collect(Collectors.toMap(b -> b.object_id, b -> b));
       // allow same object id
       this.selectionMap = new HashMap<>();
-      for (Manifest.SelectionDescription sel : electionContest.ballot_selections) {
-        this.selectionMap.put(sel.object_id, sel);
+      for (Manifest.SelectionDescription sel : electionContest.ballot_selections()) {
+        this.selectionMap.put(sel.object_id(), sel);
       }
     }
   }

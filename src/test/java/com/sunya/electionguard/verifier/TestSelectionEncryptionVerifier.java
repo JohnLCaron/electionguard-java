@@ -68,8 +68,8 @@ public class TestSelectionEncryptionVerifier {
       ElementModP selection_beta_product = Group.ONE_MOD_P;
 
       for (CiphertextBallot.Selection selection : contest.ballot_selections) {
-        ElementModP this_pad = selection.ciphertext().pad;
-        ElementModP this_data = selection.ciphertext().data;
+        ElementModP this_pad = selection.ciphertext().pad();
+        ElementModP this_data = selection.ciphertext().data();
 
         // get alpha, beta products
         selection_alpha_product = Group.mult_p(selection_alpha_product, this_pad);
@@ -116,8 +116,8 @@ public class TestSelectionEncryptionVerifier {
 
     boolean verify_selection_validity(CiphertextBallot.Selection selection) {
       boolean error = false;
-      ElementModP this_pad = selection.ciphertext().pad;
-      ElementModP this_data = selection.ciphertext().data;
+      ElementModP this_pad = selection.ciphertext().pad();
+      ElementModP this_data = selection.ciphertext().data();
 
       // get dictionaries
       ChaumPedersen.DisjunctiveChaumPedersenProof proof = selection.proof.orElseThrow();
@@ -135,7 +135,7 @@ public class TestSelectionEncryptionVerifier {
       ElementModQ one_response = proof.proof_one_response; // v1
 
       // point 1: check alpha, beta, a0, b0, a1, b1 are all in set Zrp
-      if (!(this.check_params_within_zrp(cipher.pad, cipher.data, zero_pad, one_pad, zero_data, one_data))) {
+      if (!(this.check_params_within_zrp(cipher.pad(), cipher.data(), zero_pad, one_pad, zero_data, one_data))) {
         error = true;
       }
 
@@ -285,8 +285,8 @@ public class TestSelectionEncryptionVerifier {
      * check if a selection's a and b are in set Z_r^p
      */
     boolean verify_selection_limit(CiphertextBallot.Selection selection) {
-      ElementModP this_pad = selection.ciphertext().pad;
-      ElementModP this_data = selection.ciphertext().data;
+      ElementModP this_pad = selection.ciphertext().pad();
+      ElementModP this_data = selection.ciphertext().data();
 
       boolean a_res = this_pad.is_valid_residue();
       boolean b_res = this_data.is_valid_residue();
