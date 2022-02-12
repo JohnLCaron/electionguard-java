@@ -3,7 +3,6 @@ package com.sunya.electionguard.decrypting;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.PlaintextBallot;
 import com.sunya.electionguard.PlaintextTally;
-import com.sunya.electionguard.SpoiledBallotAndTally;
 import com.sunya.electionguard.SubmittedBallot;
 import com.sunya.electionguard.TestProperties;
 import com.sunya.electionguard.proto.TrusteeFromProto;
@@ -121,9 +120,9 @@ public class TestDecryptingMediator extends TestProperties {
     assertThat(decrypted_tallies.get()).isEqualTo(another_decrypted_tally.get());
 
     // Verify that the decrypted ballots equal the original ballots
-    List<SpoiledBallotAndTally> spoiledTallyAndBallot = mediator.decrypt_spoiled_ballots().orElseThrow();
-    System.out.printf("SpoiledBallotAndTally = %d%n", spoiledTallyAndBallot.size());
-    checkDecrypted(spoiledTallyAndBallot);
+    List<PlaintextTally> spoiledBallots = mediator.decrypt_spoiled_ballots().orElseThrow();
+    System.out.printf("spoiledBallots = %d%n", spoiledBallots.size());
+    checkDecrypted(spoiledBallots);
   }
 
   @Example
@@ -139,24 +138,19 @@ public class TestDecryptingMediator extends TestProperties {
     assertThat(result).isEqualTo(this.expectedTally);
 
     // Verify that the decrypted ballots equal the original ballots
-    List<SpoiledBallotAndTally> spoiledTallyAndBallot = mediator.decrypt_spoiled_ballots().orElseThrow();
-    System.out.printf("SpoiledBallotAndTally = %d%n", spoiledTallyAndBallot.size());
-    checkDecrypted(spoiledTallyAndBallot);
+    List<PlaintextTally> spoiledBallots = mediator.decrypt_spoiled_ballots().orElseThrow();
+    System.out.printf("spoiledBallots = %d%n", spoiledBallots.size());
+    checkDecrypted(spoiledBallots);
   }
 
-  private void checkDecrypted(List<SpoiledBallotAndTally> decrypteds) throws IOException {
+  private void checkDecrypted(List<PlaintextTally> decrypteds) throws IOException {
     PrivateData pdata = new PrivateData(DECRYPTING_DATA_DIR, false, false);
     List<PlaintextBallot> inputBallots = pdata.inputBallots();
     Map<String, PlaintextBallot> inputBallotsMap = inputBallots.stream().collect(Collectors.toMap(e -> e.object_id(), e -> e));
-    for (SpoiledBallotAndTally decrypted : decrypteds) {
-      PlaintextBallot decrypted_ballot = decrypted.ballot;
-      PlaintextBallot input_ballot = inputBallotsMap.get(decrypted_ballot.object_id());
+    for (PlaintextTally decrypted : decrypteds) {
+      PlaintextBallot input_ballot = inputBallotsMap.get(decrypted.object_id);
       assertThat(input_ballot).isNotNull();
-      if (!decrypted_ballot.equals(input_ballot)) {
-        System.out.printf("HEY not equal");
-      }
-      // assertThat(decrypted_ballot).isEqualTo(input_ballot); LOOK
-      checkTallyAgainstBallot(decrypted.tally, input_ballot);
+      checkTallyAgainstBallot(decrypted, input_ballot);
     }
   }
 

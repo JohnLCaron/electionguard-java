@@ -11,7 +11,6 @@ import com.sunya.electionguard.DecryptionShare;
 import com.sunya.electionguard.ElectionPolynomial;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.PlaintextTally;
-import com.sunya.electionguard.SpoiledBallotAndTally;
 import com.sunya.electionguard.SubmittedBallot;
 
 import javax.annotation.Nullable;
@@ -248,13 +247,13 @@ public class DecryptingMediator {
   }
 
   /** You must call get_plaintext_tally() first. */
-  public Optional<List<SpoiledBallotAndTally>> decrypt_spoiled_ballots() {
+  public Optional<List<PlaintextTally>> decrypt_spoiled_ballots() {
     if (!compute_ballot_shares()){
       return Optional.empty();
     }
 
     // LOOK must augment this.ballot_shares with missing guardians
-    return DecryptWithShares.decrypt_spoiled_ballots(this.ciphertext_ballots, this.ballot_shares, this.context);
+    return Optional.of(DecryptWithShares.decrypt_spoiled_ballots(this.ciphertext_ballots, this.ballot_shares, this.context));
   }
 
   /**
