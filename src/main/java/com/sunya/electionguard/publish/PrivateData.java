@@ -1,5 +1,6 @@
 package com.sunya.electionguard.publish;
 
+import com.google.common.collect.ImmutableList;
 import com.sunya.electionguard.decrypting.DecryptingTrustee;
 import com.sunya.electionguard.proto.TrusteeFromProto;
 import com.sunya.electionguard.standard.GuardianPrivateRecord;
@@ -8,6 +9,8 @@ import com.sunya.electionguard.protogen.TrusteeProto;
 
 import javax.annotation.Nullable;
 import java.io.File;
+import java.io.FileFilter;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -131,9 +134,22 @@ public class PrivateData {
     }
   }
 
-  public DecryptingTrustee readRemoteTrustee(String id) throws IOException {
+  public DecryptingTrustee readDecryptingTrustee(String id) throws IOException {
     Path outputPath = trusteePath(id);
     return TrusteeFromProto.readTrustee(outputPath.toString());
+  }
+
+  public static List<DecryptingTrustee> readDecryptingTrustees(String fileOrDir) throws IOException {
+    List<DecryptingTrustee> result = new ArrayList<>();
+    File dir = new File(fileOrDir);
+    if (dir.isDirectory()) {
+      for (File file : dir.listFiles((parent, name) -> name.endsWith(Publisher.PROTO_SUFFIX))) {
+        result.add(TrusteeFromProto.readTrustee(file.toString()));
+      }
+    } else {
+      result.add(TrusteeFromProto.readTrustee(fileOrDir));
+    }
+    return result;
   }
 
   ////////////////////////////////////////////////////////////////////////////////
@@ -213,6 +229,24 @@ public class PrivateData {
     } else {
       return new ArrayList<>();
     }
+  }
+
+  public static List<PlaintextBallot> inputBallots(Path fileOrDirPath) throws IOException {
+    if (!Files.exists(fileOrDirPath)) {
+      return new ArrayList<>();
+    }
+    List<PlaintextBallot> result = new ArrayList<>();
+
+    File dir = fileOrDirPath.toFile();
+    if (dir.isDirectory()) {
+      for (File file : dir.listFiles((parent, name) -> name.endsWith(Publisher.JSON_SUFFIX))) {
+        result.add(ConvertFromJson.readPlaintextBallot(file.getAbsolutePath()));
+      }
+    } else {
+      result.add(ConvertFromJson.readPlaintextBallot(dir.getAbsolutePath()));
+    }
+
+    return result;
   }
 
 }

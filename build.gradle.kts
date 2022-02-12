@@ -55,7 +55,7 @@ dependencies {
     // TODO put viz into separate module
     // temporary until i get uibase hosted on a maven repo
     // implementation "edu.ucar:uibase:6.1.0-SNAPSHOT"
-    implementation(files("libs/uibase-6.1.0.jar"))
+    implementation(files("libs/uibase.jar"))
     implementation(libs.jdom2)
     implementation(libs.slf4j)
     // implementation("com.jgoodies:jgoodies-forms:1.6.0")

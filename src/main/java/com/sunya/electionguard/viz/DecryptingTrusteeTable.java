@@ -64,6 +64,12 @@ public class DecryptingTrusteeTable extends JPanel {
     add(split1, BorderLayout.CENTER);
   }
 
+  void clearBeans() {
+    trusteeTable.clearBeans();
+    backupTable.clearBeans();
+    commitmentTable.clearBeans();
+  }
+
   void setTrustees(Iterable<DecryptingTrustee> trustees) {
     this.current = null;
     java.util.List<TrusteeBean> beanList = new ArrayList<>();

@@ -3,6 +3,7 @@ package com.sunya.electionguard.viz;
 import com.google.common.collect.ImmutableList;
 import com.sunya.electionguard.decrypting.DecryptingTrustee;
 import com.sunya.electionguard.proto.TrusteeFromProto;
+import com.sunya.electionguard.publish.PrivateData;
 import ucar.ui.prefs.ComboBox;
 import ucar.ui.widget.BAMutil;
 import ucar.ui.widget.FileManager;
@@ -52,7 +53,7 @@ class TrusteesPanel extends JPanel {
     AbstractAction fileAction = new AbstractAction() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        String dirName = fileChooser.chooseFilename("");
+        String dirName = fileChooser.chooseFileOrDirectory(null);
         if (dirName != null) {
           inputBallotDirCB.setSelectedItem(dirName);
         }
@@ -95,10 +96,11 @@ class TrusteesPanel extends JPanel {
   }
 
   boolean setInputFile(String inputFile) {
+    trusteesDecryptingTable.clearBeans();
     try {
       Path path = Paths.get(inputFile);
       if (Files.isDirectory(path)) {
-        ImmutableList<DecryptingTrustee> trustees = TrusteeFromProto.readTrustees(inputFile);
+        java.util.List<DecryptingTrustee> trustees = PrivateData.readDecryptingTrustees(inputFile);
         trusteesDecryptingTable.setTrustees(trustees);
       } else {
         DecryptingTrustee trustee = TrusteeFromProto.readTrustee(inputFile);

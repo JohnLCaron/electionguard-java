@@ -72,6 +72,10 @@ public class PlaintextBallotsTable extends JPanel {
     add(split2, BorderLayout.CENTER);
   }
 
+  void clearBeans() {
+    ballotTable.clearBeans();
+  }
+
   void setBallots(CloseableIterable<PlaintextBallot> ballots) {
     System.out.printf(" setBallots %n");
 
