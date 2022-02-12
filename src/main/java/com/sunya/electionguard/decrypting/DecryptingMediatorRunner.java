@@ -13,7 +13,6 @@ import com.sunya.electionguard.Group;
 import com.sunya.electionguard.InternalManifest;
 import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.Scheduler;
-import com.sunya.electionguard.SpoiledBallotAndTally;
 import com.sunya.electionguard.input.CiphertextTallyInputValidation;
 import com.sunya.electionguard.input.ElectionInputValidation;
 import com.sunya.electionguard.proto.CommonConvert;
@@ -299,10 +298,8 @@ class DecryptingMediatorRunner {
     this.decryptedTally = mediator.get_plaintext_tally().orElseThrow();
 
     // Here's where the spoiled ballots are decrypted.
-    List<SpoiledBallotAndTally> spoiledTallyAndBallot = mediator.decrypt_spoiled_ballots().orElseThrow();
-    System.out.printf("SpoiledBallotAndTally = %d%n", spoiledTallyAndBallot.size());
-    // LOOK we only care about the tallies, not the ballots
-    this.spoiledDecryptedTallies = spoiledTallyAndBallot.stream().map(e -> e.tally).collect(Collectors.toList());
+    this.spoiledDecryptedTallies = mediator.decrypt_spoiled_ballots().orElseThrow();
+    System.out.printf("SpoiledBallotAndTally = %d%n", spoiledDecryptedTallies.size());
 
     this.availableGuardians = mediator.getAvailableGuardians();
     System.out.printf("Done decrypting tally%n%n%s%n", this.decryptedTally);

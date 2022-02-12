@@ -20,13 +20,13 @@ import static com.sunya.electionguard.Group.div_p;
 public class DecryptWithShares {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
-  /** Decrypt a collection of ciphertext spoiled ballots into decrypted plaintext tallies and ballots. */
-  public static Optional<List<SpoiledBallotAndTally>> decrypt_spoiled_ballots(
+  /** Decrypt a collection of ciphertext spoiled ballots into decrypted plaintext tallies. */
+  public static List<PlaintextTally> decrypt_spoiled_ballots(
           Iterable<SubmittedBallot> ballots,
           Map<String, Map<String, DecryptionShare>> shares, // MAP(AVAILABLE_GUARDIAN_ID, Map(BALLOT_ID, DecryptionShare))
           CiphertextElectionContext context) {
 
-    List<SpoiledBallotAndTally> result = new ArrayList<>();
+    List<PlaintextTally> result = new ArrayList<>();
     for (SubmittedBallot ballot : ballots) {
       HashMap<String, DecryptionShare> ballot_shares = new HashMap<>();
       for (Map.Entry<String, Map<String, DecryptionShare>> entry : shares.entrySet()) {
@@ -38,14 +38,14 @@ public class DecryptWithShares {
       Optional<PlaintextTally> decrypted_tally =
               decrypt_ballot(ballot, ballot_shares, context.crypto_extended_base_hash);
       if (decrypted_tally.isEmpty()) {
-        return Optional.empty();
+        logger.atWarning().log("Failed to decrypt ciphertext spoiled ballots %s", ballot.object_id());
+      } else {
+        PlaintextTally dtally = decrypted_tally.get();
+        result.add(decrypted_tally.get());
       }
-      PlaintextTally dtally = decrypted_tally.get();
-      PlaintextBallot dballot = PlaintextBallot.from(ballot, dtally);
-      result.add(new SpoiledBallotAndTally(dtally, dballot));
     }
 
-    return Optional.of(result);
+    return result;
   }
 
   /**
