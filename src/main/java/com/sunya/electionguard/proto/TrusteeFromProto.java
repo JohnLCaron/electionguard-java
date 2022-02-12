@@ -44,7 +44,6 @@ public class TrusteeFromProto {
   }
 
   private static DecryptingTrustee convertTrustee(TrusteeProto.DecryptingTrustee proto) {
-
     String guardian_id = proto.getGuardianId();
     int sequence_order = proto.getGuardianXCoordinate();
     ElGamal.KeyPair election_keypair = convertElgamalKeypair(proto.getElectionKeyPair());

@@ -281,7 +281,7 @@ public class PerformKeyCeremony {
             this.guardian_records);
 
     // save private data for decrypting
-    List<GuardianRecordPrivate> gprivate = this.guardians.stream().map(g -> g.export_private_data()).collect(Collectors.toList());
+    List<GuardianPrivateRecord> gprivate = this.guardians.stream().map(g -> g.export_private_data()).collect(Collectors.toList());
     PrivateData pdata = publisher.makePrivateData(false, false);
     pdata.writeGuardiansJson(gprivate);
     return true;

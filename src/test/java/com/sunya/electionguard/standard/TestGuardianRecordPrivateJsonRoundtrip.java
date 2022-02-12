@@ -7,10 +7,11 @@ import net.jqwik.api.Example;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 
 import static com.google.common.truth.Truth.assertThat;
 
-public class TestJsonRoundtrip {
+public class TestGuardianRecordPrivateJsonRoundtrip {
 
   @Example
   public void readGuardianRecordPrivateRoundtrip() throws IOException {
@@ -20,11 +21,11 @@ public class TestJsonRoundtrip {
 
     // original
     Guardian guardian = Guardian.createForTesting("test", 5, 4, 3, null);
-    GuardianRecordPrivate org = guardian.export_private_data();
+    GuardianPrivateRecord org = guardian.export_private_data();
     // write json
-    ConvertToJson.writeGuardianRecordPrivate(org, file.toPath());
+    ConvertToJson.writeGuardianRecordPrivate(org, Path.of(outputFile));
     // read it back
-    GuardianRecordPrivate fromFile = ConvertFromJson.readGuardianRecordPrivate(outputFile);
+    GuardianPrivateRecord fromFile = ConvertFromJson.readGuardianRecordPrivate(outputFile);
     assertThat(fromFile).isEqualTo(org);
   }
 

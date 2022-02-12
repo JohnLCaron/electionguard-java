@@ -1,6 +1,8 @@
 package com.sunya.electionguard.publish;
 
-import com.sunya.electionguard.standard.GuardianRecordPrivate;
+import com.sunya.electionguard.decrypting.DecryptingTrustee;
+import com.sunya.electionguard.proto.TrusteeFromProto;
+import com.sunya.electionguard.standard.GuardianPrivateRecord;
 import com.sunya.electionguard.PlaintextBallot;
 import com.sunya.electionguard.protogen.TrusteeProto;
 
@@ -19,20 +21,13 @@ public class PrivateData {
   static final String PRIVATE_DATA_DIR = "election_private_data";
 
   //// json
-  static final String JSON_SUFFIX = ".json";
   static final String PRIVATE_GUARDIANS_DIR = "private_guardians";
   static final String PRIVATE_BALLOT_DIR = "plaintext_ballots";
   static final String PLAINTEXT_BALLOT_PREFIX = "plaintext_ballot_";
-  static final String CIPHERTEXT_BALLOT_PREFIX = "ciphertext_ballot_";
   static final String PRIVATE_GUARDIAN_PREFIX = "private_guardian_";
 
   //// proto
-  static final String PROTO_SUFFIX = ".protobuf";
-  static final String ELECTION_RECORD_FILE_NAME = "electionRecord" + PROTO_SUFFIX;
-  static final String GUARDIANS_FILE = "guardians" + PROTO_SUFFIX;
-  static final String SUBMITTED_BALLOT_PROTO = "submittedBallot" + PROTO_SUFFIX;
-  static final String SPOILED_BALLOT_FILE = "spoiledBallotTally" + PROTO_SUFFIX;
-  static final String TRUSTEES_FILE = "trustees" + PROTO_SUFFIX;
+  static final String TRUSTEES_FILE = "trustees" + Publisher.PROTO_SUFFIX;
 
   private final Path privateDirectory;
 
@@ -90,7 +85,7 @@ public class PrivateData {
   }
 
   public Path trusteePath(String id) {
-    String filename = id + PROTO_SUFFIX;
+    String filename = id + Publisher.PROTO_SUFFIX;
     return privateDirectory.resolve(filename);
   }
 
@@ -103,7 +98,7 @@ public class PrivateData {
   }
 
   public Path guardiansPrivatePath(String id) {
-    String fileName = id + JSON_SUFFIX;
+    String fileName = id + Publisher.JSON_SUFFIX;
     return privateDirectory.resolve(fileName);
   }
 
@@ -113,20 +108,6 @@ public class PrivateData {
       return new File[0];
     }
     return privateGuardiansPath().toFile().listFiles();
-  }
-
-  ////////////////////
-
-  public Path electionRecordProtoPath() {
-    return privateDirectory.resolve(ELECTION_RECORD_FILE_NAME).toAbsolutePath();
-  }
-
-  public Path ciphertextBallotProtoPath() {
-    return privateDirectory.resolve(SUBMITTED_BALLOT_PROTO).toAbsolutePath();
-  }
-
-  public Path spoiledBallotProtoPath() {
-    return privateDirectory.resolve(SPOILED_BALLOT_FILE).toAbsolutePath();
   }
 
   //////////////////////////////////////////////////////////////////
@@ -150,12 +131,17 @@ public class PrivateData {
     }
   }
 
-  ////////////////////////////////////////////////////////////////////////////////
-  // private, probably not needed
+  public DecryptingTrustee readRemoteTrustee(String id) throws IOException {
+    Path outputPath = trusteePath(id);
+    return TrusteeFromProto.readTrustee(outputPath.toString());
+  }
 
-  public void writeGuardiansJson(Iterable<GuardianRecordPrivate> guardianRecords) throws IOException {
+  ////////////////////////////////////////////////////////////////////////////////
+  // JSON, probably not needed
+
+  public void writeGuardiansJson(Iterable<GuardianPrivateRecord> guardianRecords) throws IOException {
     Files.createDirectories(privateDirectory);
-    for (GuardianRecordPrivate guardianRecord : guardianRecords) {
+    for (GuardianPrivateRecord guardianRecord : guardianRecords) {
       ConvertToJson.writeGuardianRecordPrivate(guardianRecord, this.guardiansPrivatePath(guardianRecord.guardian_id()));
     }
   }
@@ -167,14 +153,14 @@ public class PrivateData {
    */
   public void publish_private_data(
           @Nullable Iterable<PlaintextBallot> original_ballots,
-          @Nullable Iterable<GuardianRecordPrivate> guardians) throws IOException {
+          @Nullable Iterable<GuardianPrivateRecord> guardians) throws IOException {
 
     Files.createDirectories(privateDirectory);
 
     if (guardians != null) {
       Files.createDirectories(privateGuardiansPath());
-      for (GuardianRecordPrivate guardian : guardians) {
-        String guardian_name = PRIVATE_GUARDIAN_PREFIX + guardian.guardian_id() + JSON_SUFFIX;
+      for (GuardianPrivateRecord guardian : guardians) {
+        String guardian_name = PRIVATE_GUARDIAN_PREFIX + guardian.guardian_id() + Publisher.JSON_SUFFIX;
         ConvertToJson.writeGuardianRecordPrivate(guardian, privateGuardiansPath().resolve(guardian_name));
       }
     }
@@ -182,7 +168,7 @@ public class PrivateData {
     if (original_ballots != null) {
       Files.createDirectories(privateBallotsPath());
       for (PlaintextBallot plaintext_ballot : original_ballots) {
-        String ballot_name = PLAINTEXT_BALLOT_PREFIX + plaintext_ballot.object_id() + JSON_SUFFIX;
+        String ballot_name = PLAINTEXT_BALLOT_PREFIX + plaintext_ballot.object_id() + Publisher.JSON_SUFFIX;
         ConvertToJson.writePlaintextBallot(plaintext_ballot, privateBallotsPath().resolve(ballot_name));
       }
     }
@@ -196,20 +182,16 @@ public class PrivateData {
     Files.createDirectories(invalidBallotsPath);
 
     for (PlaintextBallot plaintext_ballot : invalid_ballots) {
-      String ballot_name = PLAINTEXT_BALLOT_PREFIX + plaintext_ballot.object_id() + JSON_SUFFIX;
+      String ballot_name = PLAINTEXT_BALLOT_PREFIX + plaintext_ballot.object_id() + Publisher.JSON_SUFFIX;
       ConvertToJson.writePlaintextBallot(plaintext_ballot, invalidBallotsPath.resolve(ballot_name));
     }
 
   }
 
-
-  //////////////////////////////////////////////
-
-
-  public List<GuardianRecordPrivate> readGuardianPrivateJson() throws IOException {
-    List<GuardianRecordPrivate> result = new ArrayList<>();
+  public List<GuardianPrivateRecord> readGuardianPrivateJson() throws IOException {
+    List<GuardianPrivateRecord> result = new ArrayList<>();
     for (File file : guardianRecordPrivateFiles()) {
-      GuardianRecordPrivate fromPython = ConvertFromJson.readGuardianRecordPrivate(file.getAbsolutePath());
+      GuardianPrivateRecord fromPython = ConvertFromJson.readGuardianRecordPrivate(file.getAbsolutePath());
       result.add(fromPython);
     }
     return result;

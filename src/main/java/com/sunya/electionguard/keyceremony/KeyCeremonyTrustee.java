@@ -22,6 +22,7 @@ import static com.sunya.electionguard.Group.rand_q;
 
 /**
  * A Trustee/Guardian used in the KeyCeremony, with secrets hidden as much as possible.
+ * Mutable.
  * This object must not be used with untrusted code.
  */
 public class KeyCeremonyTrustee {
@@ -36,7 +37,7 @@ public class KeyCeremonyTrustee {
   public final Map<String, KeyCeremony2.PublicKeySet> allGuardianPublicKeys;
 
   // This guardian's partial key backups of other guardians' keys, keyed by designated guardian id.
-  final Map<String, KeyCeremony2.PartialKeyBackup> myPartialKeyBackups;
+  public final Map<String, KeyCeremony2.PartialKeyBackup> myPartialKeyBackups;
 
   // Other guardians' partial key backups of this guardian's keys, keyed by generating guardian id.
   public final Map<String, KeyCeremony2.PartialKeyBackup> otherGuardianPartialKeyBackups;

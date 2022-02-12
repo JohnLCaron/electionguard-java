@@ -35,7 +35,7 @@ public class GuardianRecordPojo {
   }
 
   private static GuardianRecord translateGuardianRecord(GuardianRecordPojo pojo) {
-    return GuardianRecord.create(
+    return new GuardianRecord(
             pojo.guardian_id,
             pojo.sequence_order,
             pojo.election_public_key,

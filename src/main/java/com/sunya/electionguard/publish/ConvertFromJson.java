@@ -3,7 +3,7 @@ package com.sunya.electionguard.publish;
 import com.google.common.flogger.FluentLogger;
 import com.google.gson.*;
 import com.sunya.electionguard.*;
-import com.sunya.electionguard.standard.GuardianRecordPrivate;
+import com.sunya.electionguard.standard.GuardianPrivateRecord;
 
 import java.io.*;
 
@@ -52,10 +52,11 @@ public class ConvertFromJson {
     }
   }
 
-  public static GuardianRecordPrivate readGuardianRecordPrivate(String pathname) throws IOException {
+  public static GuardianPrivateRecord readGuardianRecordPrivate(String pathname) throws IOException {
     try (InputStream is = new FileInputStream(pathname)) {
       Reader reader = new InputStreamReader(is);
-      return enhancedGson.fromJson(reader, GuardianRecordPrivate.class);
+      GuardianRecordPrivatePojo pojo = enhancedGson.fromJson(reader, GuardianRecordPrivatePojo.class);
+      return GuardianRecordPrivatePojo.deserializeGuardianPrivateRecord(pojo);
     } catch (Exception ioe) {
       logger.atSevere().log("Failed readGuardianRecordPrivate file '%s'", pathname);
       throw ioe;

@@ -104,7 +104,7 @@ public class ElectionRecordFromProto {
             .map(CommonConvert::convertSchnorrProof)
             .collect(Collectors.toList());
 
-    return GuardianRecord.create(
+    return new GuardianRecord(
             guardianRecord.getGuardianId(),
             guardianRecord.getSequence(),
             CommonConvert.convertElementModP(guardianRecord.getElectionPublicKey()),
