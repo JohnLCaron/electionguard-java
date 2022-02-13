@@ -1,6 +1,5 @@
 package com.sunya.electionguard.verifier;
 
-import com.sunya.electionguard.publish.CloseableIterableAdapter;
 import com.sunya.electionguard.publish.Consumer;
 import net.jqwik.api.Example;
 

@@ -23,3 +23,5 @@ dependencyResolutionManagement {
         gradlePluginPortal()
     }
 }
+include("core")
+include("viewer")

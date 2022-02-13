@@ -1,6 +1,5 @@
 package com.sunya.electionguard.publish;
 
-import com.google.common.collect.ImmutableList;
 import com.sunya.electionguard.decrypting.DecryptingTrustee;
 import com.sunya.electionguard.proto.TrusteeFromProto;
 import com.sunya.electionguard.standard.GuardianPrivateRecord;
@@ -9,8 +8,6 @@ import com.sunya.electionguard.protogen.TrusteeProto;
 
 import javax.annotation.Nullable;
 import java.io.File;
-import java.io.FileFilter;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
