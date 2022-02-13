@@ -97,19 +97,14 @@ class TrusteesPanel extends JPanel {
 
   boolean setInputFile(String inputFile) {
     trusteesDecryptingTable.clearBeans();
+    java.util.List<DecryptingTrustee> trustees = null;
     try {
-      Path path = Paths.get(inputFile);
-      if (Files.isDirectory(path)) {
-        java.util.List<DecryptingTrustee> trustees = PrivateData.readDecryptingTrustees(inputFile);
-        trusteesDecryptingTable.setTrustees(trustees);
-      } else {
-        DecryptingTrustee trustee = TrusteeFromProto.readTrustee(inputFile);
-        trusteesDecryptingTable.setTrustees(ImmutableList.of(trustee));
-      }
+      trustees = PrivateData.readDecryptingTrustees(inputFile);
     } catch (IOException e) {
       e.printStackTrace();
       return false;
     }
+    trusteesDecryptingTable.setTrustees(trustees);
     return true;
   }
 

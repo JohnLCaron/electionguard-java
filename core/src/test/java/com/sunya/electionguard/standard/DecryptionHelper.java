@@ -27,7 +27,7 @@ public class DecryptionHelper {
 
     announcement(
             available_guardians,
-            available_guardians.stream().map(g -> g.share_key()).collect(Collectors.toList()),
+            available_guardians.stream().map(g -> g.share_key()).toList(),
             mediator,
             context,
             ciphertext_tally,
@@ -45,7 +45,7 @@ public class DecryptionHelper {
 
     announcement(
             all_guardians.subList(0, quorum),
-            all_guardians.stream().map(g -> g.share_key()).collect(Collectors.toList()),
+            all_guardians.stream().map(g -> g.share_key()).toList(),
             mediator,
             context,
             ciphertext_tally,
@@ -101,10 +101,10 @@ public class DecryptionHelper {
     // Get all guardian keys and filter to determine the missing guardians
     List<String> available_guardian_ids = available_guardians.stream()
             .map(g -> g.object_id)
-            .collect(Collectors.toList());
+            .toList();
     List<KeyCeremony.ElectionPublicKey> missing_guardians = all_guardians_keys.stream()
             .filter(k -> !available_guardian_ids.contains(k.owner_id()))
-            .collect(Collectors.toList());
+            .toList();
 
     for (KeyCeremony.ElectionPublicKey missing_guardian_key : missing_guardians) {
       mediator.announce_missing(missing_guardian_key);

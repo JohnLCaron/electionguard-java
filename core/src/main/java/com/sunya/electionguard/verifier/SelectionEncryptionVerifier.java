@@ -47,9 +47,9 @@ public class SelectionEncryptionVerifier {
   }
 
   private class SelectionVerifier {
-    CiphertextBallot.Selection selection;
-    ElementModP alpha;
-    ElementModP beta;
+    final CiphertextBallot.Selection selection;
+    final ElementModP alpha;
+    final ElementModP beta;
 
     SelectionVerifier(CiphertextBallot.Selection selection) {
       this.selection = selection;

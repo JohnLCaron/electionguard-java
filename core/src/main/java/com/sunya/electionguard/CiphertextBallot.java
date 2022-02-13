@@ -12,7 +12,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static com.sunya.electionguard.Group.ZERO_MOD_Q;
 import static com.sunya.electionguard.Group.add_q;
@@ -85,8 +84,7 @@ public class CiphertextBallot implements ElectionObjectBaseIF, Hash.CryptoHashCh
     // contest_hashes = [contest.crypto_hash for contest in sequence_order_sort(contests)]
     List<Group.ElementModQ> contest_hashes = contests.stream()
             .sorted(Comparator.comparingInt(CiphertextBallot.Contest::sequence_order))
-            .map(c -> c.crypto_hash)
-            .collect(Collectors.toList());
+            .map(c -> c.crypto_hash).toList();
     return Hash.hash_elems(ballot_id, description_hash, contest_hashes);
   }
 
@@ -136,7 +134,7 @@ public class CiphertextBallot implements ElectionObjectBaseIF, Hash.CryptoHashCh
   private static ElGamal.Ciphertext ciphertext_ballot_elgamal_accumulate(List<Selection> ballot_selections) {
     List<ElGamal.Ciphertext> texts = ballot_selections.stream()
             .map(CiphertextSelection::ciphertext)
-            .collect(Collectors.toList());
+            .toList();
     return ElGamal.elgamal_add(Iterables.toArray(texts, ElGamal.Ciphertext.class));
   }
 
@@ -153,7 +151,7 @@ public class CiphertextBallot implements ElectionObjectBaseIF, Hash.CryptoHashCh
     List<Group.ElementModQ> selection_hashes = ballot_selections.stream()
             .sorted(Comparator.comparingInt(Selection::sequence_order))
             .map(s -> s.crypto_hash)
-            .collect(Collectors.toList());
+            .toList();
     Group.ElementModQ result = Hash.hash_elems(object_id, seed_hash, selection_hashes);
     logger.atFine().log("%n%n ciphertext_ballot_context_crypto_hash:%n %s%n %s%n %s%n%s%n", object_id, seed_hash, selection_hashes, result);
     return result;
@@ -227,7 +225,7 @@ public class CiphertextBallot implements ElectionObjectBaseIF, Hash.CryptoHashCh
 
     // LOOK ordering of contests?
     // contest_hashes = [contest.crypto_hash for contest in this.contests]
-    List<Group.ElementModQ> selection_hashes = contests.stream().map(s -> s.crypto_hash).collect(Collectors.toList());
+    List<Group.ElementModQ> selection_hashes = contests.stream().map(s -> s.crypto_hash).toList();
     return Hash.hash_elems(this.object_id, seed_hash, selection_hashes);
   }
 
@@ -580,7 +578,7 @@ public class CiphertextBallot implements ElectionObjectBaseIF, Hash.CryptoHashCh
     /** Remove nonces from selections and return new contest. */
     Contest removeNonces() {
       List<Selection> new_selections =
-              this.ballot_selections.stream().map(s -> s.removeNonce()).collect(Collectors.toList());
+              this.ballot_selections.stream().map(s -> s.removeNonce()).toList();
 
       return new Contest(this.object_id, this.sequence_order, this.contest_hash, new_selections, this.crypto_hash,
               this.encrypted_total, Optional.empty(), this.proof);

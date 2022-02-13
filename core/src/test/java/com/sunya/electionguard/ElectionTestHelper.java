@@ -201,8 +201,8 @@ public class ElectionTestHelper {
    * @param geo_units: a list of `GeopoliticalUnit` objects to be used in this ballot style
    */
   Manifest.BallotStyle ballot_styles(List<Manifest.Party> parties, List<Manifest.GeopoliticalUnit> geo_units) {
-    List<String> geopolitical_unit_ids = geo_units.stream().map(g -> g.object_id()).collect(Collectors.toList());
-    List<String> party_ids = parties.stream().map(p -> p.get_party_id()).collect(Collectors.toList());
+    List<String> geopolitical_unit_ids = geo_units.stream().map(g -> g.object_id()).toList();
+    List<String> party_ids = parties.stream().map(p -> p.get_party_id()).toList();
     return new Manifest.BallotStyle(randomString("BallotStyle"), geopolitical_unit_ids, party_ids, urls());
   }
 
@@ -299,7 +299,7 @@ public class ElectionTestHelper {
     int m = mo.orElse(n + random.nextInt(3)); // for an n-of-m election
 
     // party_ids = [p.get_party_id() for p in party_list]
-    List<String> party_ids = party_list.stream().map(p -> p.get_party_id()).collect(Collectors.toList());
+    List<String> party_ids = party_list.stream().map(p -> p.get_party_id()).toList();
 
     // contest_candidates = draw(lists(candidates(party_list), min_size=m, max_size=m))
     List<Manifest.Candidate> contest_candidates = new ArrayList<>();
@@ -429,11 +429,13 @@ public class ElectionTestHelper {
     }
 
     // candidates_ = reduce(lambda a, b:a + b,[candidate_contest[0] for candidate_contest in candidate_contests],)
-    List<Manifest.Candidate> candidates_ = candidate_contests.stream().map(t -> t.candidates).flatMap(List::stream)
-            .collect(Collectors.toList());
+    List<Manifest.Candidate> candidates_ = candidate_contests.stream()
+            .map(t -> t.candidates)
+            .flatMap(List::stream)
+            .toList();
 
     // contests = [candidate_contest[1] for candidate_contest in candidate_contests]
-    List<Manifest.ContestDescription> contests = candidate_contests.stream().map(t -> t.contest).collect(Collectors.toList());
+    List<Manifest.ContestDescription> contests = candidate_contests.stream().map(t -> t.contest).toList();
 
     Manifest.BallotStyle styles = ballot_styles(parties, geo_units);
 

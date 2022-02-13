@@ -5,7 +5,6 @@ import com.sunya.electionguard.PlaintextTally;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static com.sunya.electionguard.proto.CommonConvert.convertElementModP;
 import static com.sunya.electionguard.proto.CommonConvert.convertCiphertext;
@@ -35,8 +34,9 @@ public class PlaintextTallyToProto {
 
   static PlaintextTallyProto.PlaintextTallySelection convertSelection(PlaintextTally.Selection selection) {
 
-    List<PlaintextTallyProto.CiphertextDecryptionSelection> shares =
-            selection.shares().stream().map(PlaintextTallyToProto::convertShare).collect(Collectors.toList());
+    List<PlaintextTallyProto.CiphertextDecryptionSelection> shares = selection.shares().stream()
+                    .map(PlaintextTallyToProto::convertShare)
+                    .toList();
 
     PlaintextTallyProto.PlaintextTallySelection.Builder builder = PlaintextTallyProto.PlaintextTallySelection.newBuilder();
     builder.setObjectId(selection.object_id());

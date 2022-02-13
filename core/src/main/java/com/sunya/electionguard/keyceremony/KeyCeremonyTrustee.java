@@ -14,7 +14,6 @@ import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static com.sunya.electionguard.Group.ElementModP;
 import static com.sunya.electionguard.Group.ElementModQ;
@@ -210,7 +209,8 @@ public class KeyCeremonyTrustee {
   /** Creates a joint election key from the public keys of all guardians. */
   public ElementModP publishJointKey() {
     List<ElementModP> public_keys = allGuardianPublicKeys.values().stream()
-            .map(KeyCeremony2.PublicKeySet::electionPublicKey).collect(Collectors.toList());
+            .map(KeyCeremony2.PublicKeySet::electionPublicKey)
+            .toList();
 
     return ElGamal.elgamal_combine_public_keys(public_keys);
   }

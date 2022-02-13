@@ -110,17 +110,17 @@ public class ManifestTable extends JPanel {
 
   void setElectionManifest(Manifest election) {
     this.election = election;
-    candidateTable.setBeans(election.candidates().stream().map(CandidateBean::new).collect(Collectors.toList()));
-    partyTable.setBeans(election.parties().stream().map(PartyBean::new).collect(Collectors.toList()));
-    gpunitTable.setBeans(election.geopolitical_units().stream().map(GpUnitBean::new).collect(Collectors.toList()));
-    styleTable.setBeans(election.ballot_styles().stream().map(BallotStyleBean::new).collect(Collectors.toList()));
-    contestTable.setBeans(election.contests().stream().map(ContestBean::new).collect(Collectors.toList()));
+    candidateTable.setBeans(election.candidates().stream().map(CandidateBean::new).toList());
+    partyTable.setBeans(election.parties().stream().map(PartyBean::new).toList());
+    gpunitTable.setBeans(election.geopolitical_units().stream().map(GpUnitBean::new).toList());
+    styleTable.setBeans(election.ballot_styles().stream().map(BallotStyleBean::new).toList());
+    contestTable.setBeans(election.contests().stream().map(ContestBean::new).toList());
     selectionTable.setBeans(new ArrayList<>());
   }
 
   void setContest(ContestBean contestBean) {
     selectionTable.setBeans(
-            contestBean.contest.ballot_selections().stream().map(SelectionBean::new).collect(Collectors.toList()));
+            contestBean.contest.ballot_selections().stream().map(SelectionBean::new).toList());
   }
 
   void save() {

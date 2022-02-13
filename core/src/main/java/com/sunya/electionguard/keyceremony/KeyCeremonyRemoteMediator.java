@@ -18,7 +18,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
 
 /** Mediate the key ceremony using remote Guardians. */
 public class KeyCeremonyRemoteMediator {
@@ -28,8 +27,8 @@ public class KeyCeremonyRemoteMediator {
   final int quorum;
   final List<KeyCeremonyTrusteeIF> trusteeProxies;
 
-  Map<String, KeyCeremony2.PublicKeySet> publicKeysMap = new HashMap<>();
-  List<GuardianRecord> guardianRecords = new ArrayList<>();
+  final Map<String, KeyCeremony2.PublicKeySet> publicKeysMap = new HashMap<>();
+  final List<GuardianRecord> guardianRecords = new ArrayList<>();
 
   Group.ElementModP jointKey;
   Group.ElementModQ commitmentsHash;
@@ -249,8 +248,7 @@ public class KeyCeremonyRemoteMediator {
   public boolean makeCoefficientValidationSets() {
     // The hashing is order dependent, use the x coordinate to sort.
     List<KeyCeremony2.PublicKeySet> sorted = this.publicKeysMap.values().stream()
-            .sorted(Comparator.comparing(KeyCeremony2.PublicKeySet::guardianXCoordinate))
-            .collect(Collectors.toList());
+            .sorted(Comparator.comparing(KeyCeremony2.PublicKeySet::guardianXCoordinate)).toList();
 
     List<Group.ElementModP> commitments = new ArrayList<>();
     for (KeyCeremony2.PublicKeySet keys : sorted) {

@@ -56,13 +56,13 @@ public class ContestVoteLimitsVerifier {
   }
 
   class ContestVerifier {
-    Contest contest;
-    ChaumPedersen.ConstantChaumPedersenProof proof;
-    ElementModP contest_alpha;
-    ElementModP contest_beta;
-    ElementModQ contest_response;
-    ElementModQ contest_challenge;
-    String contest_id;
+    final Contest contest;
+    final ChaumPedersen.ConstantChaumPedersenProof proof;
+    final ElementModP contest_alpha;
+    final ElementModP contest_beta;
+    final ElementModQ contest_response;
+    final ElementModQ contest_challenge;
+    final String contest_id;
 
     ContestVerifier(Contest contest) {
       this.contest = contest;

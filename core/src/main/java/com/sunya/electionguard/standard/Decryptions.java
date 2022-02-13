@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Callable;
-import java.util.stream.Collectors;
 
 import static com.sunya.electionguard.DecryptionShare.CiphertextCompensatedDecryptionContest;
 import static com.sunya.electionguard.DecryptionShare.CiphertextCompensatedDecryptionSelection;
@@ -129,9 +128,10 @@ public class Decryptions {
 
     Map<String, CiphertextDecryptionSelection> selections = new HashMap<>();
 
-    List<Callable<Optional<CiphertextDecryptionSelection>>> tasks =
-            Streams.stream(ciphertextContest.selections).map(selection ->
-                    new RunComputeDecryptionShareForSelection(guardian_keys, selection, context)).collect(Collectors.toList());
+    List<RunComputeDecryptionShareForSelection> tasks =
+            Streams.stream(ciphertextContest.selections)
+                    .map(selection -> new RunComputeDecryptionShareForSelection(guardian_keys, selection, context))
+                    .toList();
 
     Scheduler<Optional<CiphertextDecryptionSelection>> scheduler = new Scheduler<>();
     List<Optional<CiphertextDecryptionSelection>> selection_decryptions = scheduler.schedule(tasks, true);
@@ -151,7 +151,7 @@ public class Decryptions {
   }
 
   private static class RunComputeDecryptionShareForSelection implements Callable<Optional<CiphertextDecryptionSelection>> {
-    KeyCeremony.ElectionKeyPair guardian_keys;
+    final KeyCeremony.ElectionKeyPair guardian_keys;
     private final CiphertextSelection selection;
     private final CiphertextElectionContext context;
 
@@ -259,11 +259,11 @@ public class Decryptions {
 
       Map<String, CiphertextCompensatedDecryptionSelection> selections = new HashMap<>();
 
-      List<Callable<Optional<CiphertextCompensatedDecryptionSelection>>> tasks =
+      List<RunComputeCompensatedDecryptionShareForSelection> tasks =
           Streams.stream(contest.selections)
                   .map(selection -> new RunComputeCompensatedDecryptionShareForSelection(
                           guardian_key, missing_guardian_key, missing_guardian_backup, selection, context))
-                  .collect(Collectors.toList());
+                  .toList();
 
       Scheduler<Optional<CiphertextCompensatedDecryptionSelection>> scheduler = new Scheduler<>();
       List<Optional<CiphertextCompensatedDecryptionSelection>>
@@ -453,7 +453,8 @@ public class Decryptions {
 
     List<Integer> other_guardian_orders = other_guardians_keys.stream()
             .filter(g -> !g.owner_id().equals(guardian_key.owner_id()))
-            .map(g -> g.sequence_order()).collect(Collectors.toList());
+            .map(g -> g.sequence_order())
+            .toList();
 
     return ElectionPolynomial.compute_lagrange_coefficient(guardian_key.sequence_order(), other_guardian_orders);
   }
@@ -466,7 +467,7 @@ public class Decryptions {
    * @param elgamal: the `ElGamalCiphertext` that will be partially decrypted
    * @param extended_base_hash: the extended base hash of the election that was used to generate t he ElGamal Ciphertext
    * @param nonce_seed: an optional value used to generate the `ChaumPedersenProof` if no value is provided, a random number will be used.
-   * @return: a `Tuple[ElementModP, ChaumPedersenProof]` of the decryption and its proof
+   * @return a `Tuple[ElementModP, ChaumPedersenProof]` of the decryption and its proof
    */
   static BallotBox.DecryptionProofTuple partially_decrypt(
           KeyCeremony.ElectionKeyPair guardian_keys,

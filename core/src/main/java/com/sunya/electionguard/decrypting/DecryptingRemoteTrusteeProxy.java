@@ -17,7 +17,6 @@ import io.grpc.StatusRuntimeException;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 /** A Remote Trustee client proxy, communicating over gRpc. */
 class DecryptingRemoteTrusteeProxy implements DecryptingTrusteeIF  {
@@ -46,7 +45,9 @@ class DecryptingRemoteTrusteeProxy implements DecryptingTrusteeIF  {
           @Nullable Group.ElementModQ nonce_seed) { // LOOK currently ignoring
 
     try {
-      List<CommonProto.ElGamalCiphertext> texts = text.stream().map(CommonConvert::convertCiphertext).collect(Collectors.toList());
+      List<CommonProto.ElGamalCiphertext> texts = text.stream()
+              .map(CommonConvert::convertCiphertext)
+              .toList();
 
       DecryptingTrusteeProto.CompensatedDecryptionRequest.Builder request = DecryptingTrusteeProto.CompensatedDecryptionRequest.newBuilder()
               .setMissingGuardianId(missing_guardian_id)
@@ -59,7 +60,8 @@ class DecryptingRemoteTrusteeProxy implements DecryptingTrusteeIF  {
         return ImmutableList.of();
       }
       return response.getResultsList().stream()
-              .map(this::convertDecryptionProofRecovery).collect(Collectors.toList());
+              .map(this::convertDecryptionProofRecovery)
+              .toList();
 
     } catch (StatusRuntimeException e) {
       logger.atSevere().withCause(e).log("compensatedDecrypt failed");
@@ -80,7 +82,9 @@ class DecryptingRemoteTrusteeProxy implements DecryptingTrusteeIF  {
           Group.ElementModQ extended_base_hash,
           @Nullable Group.ElementModQ nonce_seed) { // LOOK currently ignoring
     try {
-      List<CommonProto.ElGamalCiphertext> texts = text.stream().map(CommonConvert::convertCiphertext).collect(Collectors.toList());
+      List<CommonProto.ElGamalCiphertext> texts = text.stream()
+              .map(CommonConvert::convertCiphertext)
+              .toList();
 
       DecryptingTrusteeProto.PartialDecryptionRequest.Builder request = DecryptingTrusteeProto.PartialDecryptionRequest.newBuilder()
               .addAllText(texts)
@@ -92,7 +96,8 @@ class DecryptingRemoteTrusteeProxy implements DecryptingTrusteeIF  {
         return ImmutableList.of();
       }
       return response.getResultsList().stream()
-              .map(this::convertDecryptionProofTuple).collect(Collectors.toList());
+              .map(this::convertDecryptionProofTuple)
+              .toList();
 
     } catch (StatusRuntimeException e) {
       logger.atSevere().withCause(e).log("partialDecrypt failed: ");

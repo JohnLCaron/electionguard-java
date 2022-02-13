@@ -9,19 +9,18 @@ public class TestBallotAggregationVerifier {
 
   @Example
   public void testVerifyBallotAggregationProto() throws IOException {
-    String topdir = TestParameterVerifier.topdirProto;
-    Consumer consumer = new Consumer(topdir);
-    BallotAggregationVerifier validator = new BallotAggregationVerifier(consumer.readElectionRecordProto());
-
+    Consumer consumer = new Consumer(TestParameterVerifier.topdirProto);
+    ElectionRecord electionRecord = consumer.readElectionRecordProto();
+    BallotAggregationVerifier validator = new BallotAggregationVerifier(electionRecord.acceptedBallots, electionRecord.decryptedTally);
     boolean sevOk1 = validator.verify_ballot_aggregation();
     assertThat(sevOk1).isTrue();
   }
 
   @Example
   public void testVerifyBallotAggregationJson() throws IOException {
-    String topdir = TestParameterVerifier.topdirJson;
-    Consumer consumer = new Consumer(topdir);
-    BallotAggregationVerifier validator = new BallotAggregationVerifier(consumer.readElectionRecordJson());
+    Consumer consumer = new Consumer(TestParameterVerifier.topdirJson);
+    ElectionRecord electionRecord = consumer.readElectionRecordJson();
+    BallotAggregationVerifier validator = new BallotAggregationVerifier(electionRecord.acceptedBallots, electionRecord.decryptedTally);
 
     boolean sevOk1 = validator.verify_ballot_aggregation();
     assertThat(sevOk1).isTrue();

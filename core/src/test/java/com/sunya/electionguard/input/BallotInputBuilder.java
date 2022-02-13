@@ -23,7 +23,7 @@ public class BallotInputBuilder {
   }
 
   PlaintextBallot build() {
-    return new PlaintextBallot(id, style, contests.stream().map(ContestBuilder::build).collect(Collectors.toList()));
+    return new PlaintextBallot(id, style, contests.stream().map(ContestBuilder::build).toList());
   }
 
   public class ContestBuilder {
@@ -46,7 +46,7 @@ public class BallotInputBuilder {
     }
 
     PlaintextBallot.Contest build() {
-      return new PlaintextBallot.Contest(id, seq++, selections.stream().map(SelectionBuilder::build).collect(Collectors.toList()));
+      return new PlaintextBallot.Contest(id, seq++, selections.stream().map(SelectionBuilder::build).toList());
     }
 
     public class SelectionBuilder {

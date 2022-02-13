@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * A command line program that performs the key ceremony to create the Guardians.
@@ -136,7 +135,9 @@ public class KeyCeremonySimulator {
     boolean ok = mediator.publishElectionRecord(this.publisher);
     System.out.printf("%nKey Ceremony publishElectionRecord = %s%n", ok);
 
-    List<KeyCeremonyTrustee> trustees = trusteeProxies.stream().map(t -> t.delegate).collect(Collectors.toList());
+    List<KeyCeremonyTrustee> trustees = trusteeProxies.stream()
+            .map(t -> t.delegate)
+            .toList();
     TrusteeProto.DecryptingTrustees trusteesProto = TrusteeToProto.convertTrustees(trustees);
     boolean okt;
     try {

@@ -14,7 +14,7 @@ import static com.google.common.truth.Truth8.assertThat;
 public class TestTallyProperties extends TestProperties {
 
   @Property(tries = 3, shrinking = ShrinkingMode.OFF)
-  public void test_tally_cast_ballots_accumulates_valid_tally(
+  public void test_tally_decrypt_with_secret(
           @ForAll("elections_and_ballots") ElectionTestHelper.EverythingTuple everything) {
 
     // Tally the plaintext ballots for comparison later

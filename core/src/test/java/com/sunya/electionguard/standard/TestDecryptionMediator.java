@@ -217,7 +217,7 @@ public class TestDecryptionMediator extends TestProperties {
     DecryptionMediator mediator = new DecryptionMediator("mediator-id", this.context);
 
     List<Guardian> available_guardians = this.guardians.subList(0, 2);
-    List<KeyCeremony.ElectionPublicKey> all_guardian_keys = this.guardians.stream().map(Guardian::share_key).collect(Collectors.toList());
+    List<KeyCeremony.ElectionPublicKey> all_guardian_keys = this.guardians.stream().map(Guardian::share_key).toList();
 
     DecryptionHelper.perform_compensated_decryption_setup(
             available_guardians,

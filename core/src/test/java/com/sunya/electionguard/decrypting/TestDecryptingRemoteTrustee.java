@@ -65,7 +65,7 @@ public class TestDecryptingRemoteTrustee {
     List<CommonProto.ElGamalCiphertext> texts = this.tally.contests.values().stream()
             .flatMap(c -> c.selections.values().stream())
             .map(s -> CommonConvert.convertCiphertext(s.ciphertext()))
-            .collect(Collectors.toList());
+            .toList();
 
     DecryptingTrusteeProto.PartialDecryptionRequest request = DecryptingTrusteeProto.PartialDecryptionRequest.newBuilder()
             .addAllText(texts)
@@ -110,7 +110,7 @@ public class TestDecryptingRemoteTrustee {
     List<CommonProto.ElGamalCiphertext> texts = this.tally.contests.values().stream()
             .flatMap(c -> c.selections.values().stream())
             .map(s -> CommonConvert.convertCiphertext(s.ciphertext()))
-            .collect(Collectors.toList());
+            .toList();
 
     DecryptingTrusteeProto.CompensatedDecryptionRequest request = DecryptingTrusteeProto.CompensatedDecryptionRequest.newBuilder()
             .setMissingGuardianId("remoteTrustee2")

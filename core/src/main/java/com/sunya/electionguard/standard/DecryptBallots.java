@@ -58,6 +58,7 @@ public class DecryptBallots {
     String outputDir;
 
     @Parameter(names = {"-h", "--help"},  order = 4, description = "Display this help and exit", help = true)
+    final
     boolean help = false;
 
     private final JCommander jc;
@@ -152,14 +153,14 @@ public class DecryptBallots {
   final ElectionRecord electionRecord;
   final Manifest election;
 
-  Iterable<Guardian> guardians;
+  final Iterable<Guardian> guardians;
   CiphertextTally encryptedTally;
   PlaintextTally decryptedTally;
   Collection<PlaintextTally> spoiledDecryptedBallots;
   Map<String, PlaintextTally> spoiledDecryptedTallies;
   List<AvailableGuardian> availableGuardians;
-  int quorum;
-  int numberOfGuardians;
+  final int quorum;
+  final int numberOfGuardians;
 
   public DecryptBallots(Consumer consumer, ElectionRecord electionRecord, GuardiansProvider provider) {
     this.consumer = consumer;

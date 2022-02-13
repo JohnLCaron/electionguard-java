@@ -20,7 +20,6 @@ import java.net.ServerSocket;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 /** A Remote Trustee with a DecryptingTrustee delegate, communicating over gRpc. */
 class DecryptingRemoteTrustee extends DecryptingTrusteeServiceGrpc.DecryptingTrusteeServiceImplBase {
@@ -176,7 +175,9 @@ class DecryptingRemoteTrustee extends DecryptingTrusteeServiceGrpc.DecryptingTru
 
     DecryptingTrusteeProto.CompensatedDecryptionResponse.Builder response = DecryptingTrusteeProto.CompensatedDecryptionResponse.newBuilder();
     try {
-      List<ElGamal.Ciphertext > texts = request.getTextList().stream().map(CommonConvert::convertCiphertext).collect(Collectors.toList());
+      List<ElGamal.Ciphertext > texts = request.getTextList().stream()
+              .map(CommonConvert::convertCiphertext)
+              .toList();
 
       List<DecryptionProofRecovery> tuples = delegate.compensatedDecrypt(
               request.getMissingGuardianId(),
@@ -184,7 +185,9 @@ class DecryptingRemoteTrustee extends DecryptingTrusteeServiceGrpc.DecryptingTru
               CommonConvert.convertElementModQ(request.getExtendedBaseHash()),
               null);
 
-      List<DecryptingTrusteeProto.CompensatedDecryptionResult> protos = tuples.stream().map(this::convertDecryptionProofRecovery).collect(Collectors.toList());
+      List<DecryptingTrusteeProto.CompensatedDecryptionResult> protos = tuples.stream()
+              .map(this::convertDecryptionProofRecovery)
+              .toList();
       response.addAllResults(protos);
       logger.atInfo().log("DecryptingRemoteTrustee compensatedDecrypt %s", request.getMissingGuardianId());
     } catch (Throwable t) {
@@ -211,13 +214,17 @@ class DecryptingRemoteTrustee extends DecryptingTrusteeServiceGrpc.DecryptingTru
 
     DecryptingTrusteeProto.PartialDecryptionResponse.Builder response = DecryptingTrusteeProto.PartialDecryptionResponse.newBuilder();
     try {
-      List<ElGamal.Ciphertext > texts = request.getTextList().stream().map(CommonConvert::convertCiphertext).collect(Collectors.toList());
+      List<ElGamal.Ciphertext > texts = request.getTextList().stream()
+              .map(CommonConvert::convertCiphertext)
+              .toList();
       List<BallotBox.DecryptionProofTuple> tuples = delegate.partialDecrypt(
               texts,
               CommonConvert.convertElementModQ(request.getExtendedBaseHash()),
               null);
 
-      List<DecryptingTrusteeProto.PartialDecryptionResult> protos = tuples.stream().map(this::convertDecryptionProofTuple).collect(Collectors.toList());
+      List<DecryptingTrusteeProto.PartialDecryptionResult> protos = tuples.stream()
+              .map(this::convertDecryptionProofTuple)
+              .toList();
       response.addAllResults(protos);
       logger.atInfo().log("DecryptingRemoteTrustee partialDecrypt %s", delegate.id());
     } catch (Throwable t) {

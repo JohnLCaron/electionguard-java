@@ -472,7 +472,7 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
 
         if (data_contest != null) {
           data_selection_exist = data_contest.ballot_selections.stream()
-                  .filter(s -> s.selection_id.equals(selection_description.object_id())).collect(Collectors.toList());
+                  .filter(s -> s.selection_id.equals(selection_description.object_id())).toList();
         }
 
         if (!data_selection_exist.isEmpty()) {

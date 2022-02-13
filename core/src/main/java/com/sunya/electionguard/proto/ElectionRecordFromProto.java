@@ -18,7 +18,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static com.sunya.electionguard.proto.CommonConvert.convertElementModP;
 import static com.sunya.electionguard.proto.CommonConvert.convertElementModQ;
@@ -42,19 +41,24 @@ public class ElectionRecordFromProto {
     ElectionConstants constants = convertConstants(proto.getConstants());
     CiphertextElectionContext context = convertContext(proto.getContext());
     Manifest description = ManifestFromProto.translateFromProto(proto.getManifest());
+
     List<GuardianRecord> guardianRecords =
-            proto.getGuardianRecordsList().stream().map(ElectionRecordFromProto::convertGuardianRecord).collect(Collectors.toList());
+            proto.getGuardianRecordsList().stream()
+                    .map(ElectionRecordFromProto::convertGuardianRecord)
+                    .toList();
     List<Encrypt.EncryptionDevice> devices =
-            proto.getDeviceList().stream().map(ElectionRecordFromProto::convertDevice).collect(Collectors.toList());
+            proto.getDeviceList().stream()
+                    .map(ElectionRecordFromProto::convertDevice)
+                    .toList();
 
     CiphertextTally ciphertextTally = proto.hasCiphertextTally() ?
             CiphertextTallyFromProto.translateFromProto(proto.getCiphertextTally()) : null;
     PlaintextTally decryptedTally = proto.hasDecryptedTally() ?
             PlaintextTallyFromProto.translateFromProto(proto.getDecryptedTally()) : null;
 
-    List<AvailableGuardian> guardians =
-            proto.getAvailableGuardiansList().stream().map(ElectionRecordFromProto::convertAvailableGuardian).collect(Collectors.toList());
-
+    List<AvailableGuardian> guardians = proto.getAvailableGuardiansList().stream()
+                    .map(ElectionRecordFromProto::convertAvailableGuardian)
+                    .toList();
 
     return new ElectionRecord(version, constants, context, description, guardianRecords,
             devices, ciphertextTally, decryptedTally, null, null, guardians);
@@ -98,12 +102,10 @@ public class ElectionRecordFromProto {
   static GuardianRecord convertGuardianRecord(ElectionRecordProto.GuardianRecord guardianRecord) {
    List<Group.ElementModP> coefficient_commitments = guardianRecord.getCoefficientCommitmentsList().stream()
             .map(CommonConvert::convertElementModP)
-            .collect(Collectors.toList());
-
+           .toList();
     List<SchnorrProof> coefficient_proofs = guardianRecord.getCoefficientProofsList().stream()
             .map(CommonConvert::convertSchnorrProof)
-            .collect(Collectors.toList());
-
+            .toList();
     return new GuardianRecord(
             guardianRecord.getGuardianId(),
             guardianRecord.getSequence(),

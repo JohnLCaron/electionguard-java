@@ -9,6 +9,7 @@ import com.sunya.electionguard.input.PlaintextTallyInputValidation;
 import com.sunya.electionguard.publish.Consumer;
 
 import java.util.Formatter;
+import java.util.Objects;
 
 /**
  * A command line program to verify a complete election record.
@@ -120,7 +121,7 @@ public class VerifyElectionRecord {
 
     System.out.println("\n============ Decryption Verification =========================");
     System.out.println("------------ [box 7] Ballot Aggregation Validation ------------");
-    BallotAggregationVerifier bav = new BallotAggregationVerifier(electionRecord);
+    BallotAggregationVerifier bav = new BallotAggregationVerifier(electionRecord.acceptedBallots, electionRecord.decryptedTally);
     boolean bavOk = bav.verify_ballot_aggregation();
 
     System.out.println("------------ [box 8, 9] Correctness of Decryptions ------------");
@@ -129,7 +130,7 @@ public class VerifyElectionRecord {
 
     System.out.println("------------ [box 10] Correctness of Replacement Partial Decryptions ------------");
     boolean pdvOk = true;
-    if (electionRecord.context.number_of_guardians == electionRecord.context.quorum) {
+    if (Objects.equals(electionRecord.context.number_of_guardians, electionRecord.context.quorum)) {
       System.out.println("  not needed since there are no missing guardians");
     } else {
       PartialDecryptionVerifier pdv = new PartialDecryptionVerifier(electionRecord, electionRecord.decryptedTally);

@@ -8,6 +8,7 @@ import com.sunya.electionguard.keyceremony.KeyCeremony2;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -19,7 +20,7 @@ import com.sunya.electionguard.protogen.TrusteeProto;
 
 public class TrusteeFromProto {
 
-  public static ImmutableList<DecryptingTrustee> readTrustees(String filename) throws IOException {
+  public static List<DecryptingTrustee> readTrustees(String filename) throws IOException {
     TrusteeProto.DecryptingTrustees proto;
     try (FileInputStream inp = new FileInputStream(filename)) {
       proto = TrusteeProto.DecryptingTrustees.parseDelimitedFrom(inp);

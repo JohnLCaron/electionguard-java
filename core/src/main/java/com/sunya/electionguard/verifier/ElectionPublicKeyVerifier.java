@@ -8,7 +8,6 @@ import com.sunya.electionguard.Hash;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static com.sunya.electionguard.Group.ElementModP;
 import static com.sunya.electionguard.Group.ElementModQ;
@@ -37,8 +36,7 @@ public class ElectionPublicKeyVerifier {
     // Equation 3.A
     // The hashing is order dependent, use the sequence_order to sort.
     List<GuardianRecord> sorted = this.electionRecord.guardianRecords.stream()
-            .sorted(Comparator.comparing(GuardianRecord::sequence_order))
-            .collect(Collectors.toList());
+            .sorted(Comparator.comparing(GuardianRecord::sequence_order)).toList();
     List<Group.ElementModP> commitments = new ArrayList<>();
     for (GuardianRecord coeff : sorted) {
       commitments.addAll(coeff.election_commitments());

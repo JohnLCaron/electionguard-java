@@ -110,13 +110,13 @@ public class TestEncryptHypothesisProperties extends TestProperties {
       assertThat(contestp.placeholder_selections).isNotEmpty();
 
       List<Integer> decrypted_selection_tallies = contest.ballot_selections().stream()
-              .map(s -> decrypted_tallies.get(s.object_id())).collect(Collectors.toList());
+              .map(s -> decrypted_tallies.get(s.object_id())).toList();
 
       List<Integer> decrypted_placeholder_tallies = contestp.placeholder_selections.stream()
               .map(p -> decrypted_tallies.get(p.object_id())).toList();
 
       List<Integer> plaintext_tally_values = contest.ballot_selections().stream()
-              .map(s -> plaintext_tallies.get(s.object_id())).collect(Collectors.toList());
+              .map(s -> plaintext_tallies.get(s.object_id())).toList();
 
       // verify the plaintext tallies match the decrypted tallies
       assertThat(decrypted_selection_tallies).isEqualTo(plaintext_tally_values);
