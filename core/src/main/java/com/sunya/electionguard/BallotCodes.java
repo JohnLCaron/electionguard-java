@@ -1,5 +1,7 @@
 package com.sunya.electionguard;
 
+import java.util.List;
+
 /** Static methods for ballot codes, aka tracking codes. */
 public class BallotCodes {
 
@@ -24,6 +26,10 @@ public class BallotCodes {
    */
   public static Group.ElementModQ get_rotating_ballot_code(Group.ElementModQ prev_code, long timestamp, Group.ElementModQ ballot_hash) {
     return Hash.hash_elems(prev_code, timestamp, ballot_hash);
+  }
+
+  List<Integer> lengthsOfStrings(List<String> input) {
+    return input.stream().map(String::length).toList();
   }
 
 }

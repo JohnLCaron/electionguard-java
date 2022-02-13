@@ -8,7 +8,7 @@ class ValidationMessenger {
   private final String id;
   private final ArrayList<String> messages = new ArrayList<>();
   private final ArrayList<ValidationMessenger> nested = new ArrayList<>();
-  private Indent indent = new Indent(2);
+  private final Indent indent = new Indent(2);
 
   public ValidationMessenger(String name, String id) {
     this.name = name;

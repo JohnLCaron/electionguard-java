@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static com.sunya.electionguard.DecryptionShare.KeyAndSelection;
 import static com.sunya.electionguard.Group.ElementModP;
@@ -195,7 +194,7 @@ public class DecryptWithShares {
 
     // accumulate all of the shares calculated for the selection
     // all_shares_product_M = mult_p( *[decryption.share for (_, decryption) in shares.values()]);
-    List<ElementModP> decryption_shares = shares.values().stream().map(t -> t.decryption().share()).collect(Collectors.toList());
+    List<ElementModP> decryption_shares = shares.values().stream().map(t -> t.decryption().share()).toList();
     ElementModP all_shares_product_M = Group.mult_p(decryption_shares);
 
     // Calculate 𝑀 = 𝐵⁄(∏𝑀𝑖) mod 𝑝.
@@ -203,7 +202,8 @@ public class DecryptWithShares {
     Integer dlogM = Dlog.discrete_log(decrypted_value);
 
     // [share for (guardian_id, (public_key, share))in shares.items()],
-    List<DecryptionShare.CiphertextDecryptionSelection> selections = shares.values().stream().map(t -> t.decryption()).collect(Collectors.toList());
+    List<DecryptionShare.CiphertextDecryptionSelection> selections =
+            shares.values().stream().map(t -> t.decryption()).toList();
     return Optional.of(new PlaintextTally.Selection(
             selection.object_id(),
             dlogM,

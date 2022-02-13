@@ -147,7 +147,7 @@ public class Consumer {
   }
 
   // Decrypted, spoiled ballots
-  public List<PlaintextTally> spoiledBallots() throws IOException {
+  public List<PlaintextTally> spoiledBallots() {
     List<PlaintextTally> result = new ArrayList<>();
     for (File file : publisher.spoiledBallotFiles()) {
       try {

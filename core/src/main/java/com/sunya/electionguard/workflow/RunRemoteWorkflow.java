@@ -253,7 +253,7 @@ public class RunRemoteWorkflow {
 
     // VerifyElectionRecord
     RunCommand verifyElectionRecord = new RunCommand("VerifyElectionRecord", service,
-      "java",
+            "java",
             "-classpath", classpath,
             "com.sunya.electionguard.verifier.VerifyElectionRecord",
             "-in", cmdLine.outputDir);
@@ -279,7 +279,7 @@ public class RunRemoteWorkflow {
     try {
       for (RunCommand command : running) {
         command.kill();
-          command.show();
+        command.show();
       }
     } catch (IOException e) {
       e.printStackTrace();

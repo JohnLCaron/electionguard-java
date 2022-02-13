@@ -10,6 +10,7 @@ import com.sunya.electionguard.SubmittedBallot;
 import com.sunya.electionguard.CiphertextBallot;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.PlaintextTally;
+import com.sunya.electionguard.publish.CloseableIterable;
 
 import java.util.List;
 
@@ -20,12 +21,12 @@ import java.util.List;
 public class BallotAggregationVerifier {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
-  final ElectionRecord electionRecord;
+  final CloseableIterable<SubmittedBallot> acceptedBallots;
   final PlaintextTally decryptedTally;
 
-  BallotAggregationVerifier(ElectionRecord electionRecord) {
-    this.electionRecord = electionRecord;
-    this.decryptedTally = electionRecord.decryptedTally;
+  public BallotAggregationVerifier(CloseableIterable<SubmittedBallot> acceptedBallots, PlaintextTally decryptedTally) {
+    this.acceptedBallots = acceptedBallots;
+    this.decryptedTally = decryptedTally;
   }
 
   /**
@@ -35,7 +36,7 @@ public class BallotAggregationVerifier {
    */
   boolean verify_ballot_aggregation() {
     boolean error = false;
-    SelectionAggregator agg = new SelectionAggregator(electionRecord.acceptedBallots);
+    SelectionAggregator agg = new SelectionAggregator(acceptedBallots);
     Preconditions.checkNotNull(decryptedTally);
 
     int ncontests = 0;

@@ -26,7 +26,7 @@ public class CloseableIterableAdapter<T> implements Iterable<T>, CloseableIterab
   }
 
   private static class CloseableIteratorAdapter<T> implements Iterator<T>, CloseableIterator<T> {
-    Iterator<T> proxy;
+    final Iterator<T> proxy;
 
     public CloseableIteratorAdapter(Iterator<T> proxy) {
       this.proxy = proxy;

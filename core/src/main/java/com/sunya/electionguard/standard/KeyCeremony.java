@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static com.sunya.electionguard.Group.*;
 
@@ -149,7 +148,6 @@ public class KeyCeremony {
    * @param guardianId Guardian.object_id
    * @param guardianSequence a unique number in [1, 256) that is the polynomial x value for this guardian.
    * @param coefficients The secret polynomial coefficients.
-   * @param guardianId Guardian.object_id
    */
   public record CoefficientSet(
           String guardianId,
@@ -298,12 +296,11 @@ public class KeyCeremony {
    */
   public static ElectionJointKey combine_election_public_keys(Collection<ElectionPublicKey> election_public_keys) {
     List<ElectionPublicKey> sorted = election_public_keys.stream()
-            .sorted(Comparator.comparing(ElectionPublicKey::sequence_order))
-            .collect(Collectors.toList());
+            .sorted(Comparator.comparing(ElectionPublicKey::sequence_order)).toList();
 
     List<ElementModP> public_keys = sorted.stream()
             .map(ElectionPublicKey::key)
-            .collect(Collectors.toList());
+            .toList();
     ElementModP joint_public_keys = ElGamal.elgamal_combine_public_keys(public_keys);
 
     List<Group.ElementModP> commitments = new ArrayList<>();

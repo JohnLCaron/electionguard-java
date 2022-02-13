@@ -121,7 +121,7 @@ class DecryptingMediatorRunner {
               cmdLine.navailable, publisher);
       decryptor.start(cmdLine.port);
 
-      System.out.printf("Waiting for guardians to register: elapsed seconds = ");
+      System.out.print("Waiting for guardians to register: elapsed seconds = ");
       Stopwatch stopwatch = Stopwatch.createStarted();
       while (!decryptor.ready()) {
         System.out.printf("%s ", stopwatch.elapsed(TimeUnit.SECONDS));
@@ -198,13 +198,13 @@ class DecryptingMediatorRunner {
   final int nguardians;
   final int quorum;
   final List<DecryptingRemoteTrusteeProxy> trusteeProxies = Collections.synchronizedList(new ArrayList<>());
-  boolean startedDecryption = false;
+  final boolean startedDecryption = false;
 
   CiphertextTally encryptedTally;
   PlaintextTally decryptedTally;
   List<PlaintextTally> spoiledDecryptedTallies;
   List<AvailableGuardian> availableGuardians;
-  Publisher publisher;
+  final Publisher publisher;
 
   DecryptingMediatorRunner(Consumer consumer, ElectionRecord electionRecord, String encryptDir, String outputDir,
                            int navailable, Publisher publisher) {
@@ -234,6 +234,7 @@ class DecryptingMediatorRunner {
   private boolean runDecryption() {
     // Do the accumulation if the encryptedTally doesnt exist
     if (this.electionRecord.encryptedTally == null) {
+      System.out.printf("   DecryptingMediatorRunner accumulateTally%n");
       accumulateTally();
     } else {
       this.encryptedTally = this.electionRecord.encryptedTally;

@@ -9,7 +9,6 @@ import com.sunya.electionguard.PlaintextTally;
 
 import java.math.BigInteger;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static com.sunya.electionguard.Group.ElementModP;
 
@@ -56,7 +55,9 @@ public class TallyDecryptionVerifier {
           error = true;
         }
         String key = contest.object_id() + "." + selection.object_id();
-        List<ElementModP> partialDecryptions = selection.shares().stream().map(s -> s.share()).collect(Collectors.toList());
+        List<ElementModP> partialDecryptions = selection.shares().stream()
+                .map(s -> s.share())
+                .toList();
         ElementModP productMi = Group.mult_p(partialDecryptions);
         ElementModP M = selection.value();
         ElementModP B = selection.message().data();

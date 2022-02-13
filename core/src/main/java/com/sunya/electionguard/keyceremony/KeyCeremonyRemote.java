@@ -233,7 +233,7 @@ class KeyCeremonyRemote {
     System.out.printf(" Proxy channel shutdown was success = %s%n", shutdownOk);
   }
 
-  private AtomicInteger nextCoordinate = new AtomicInteger(0);
+  private final AtomicInteger nextCoordinate = new AtomicInteger(0);
   synchronized KeyCeremonyRemoteTrusteeProxy registerTrustee(String guardianId, String url) {
     for (KeyCeremonyRemoteTrusteeProxy proxy : trusteeProxies) {
       if (proxy.id().toLowerCase().contains(guardianId.toLowerCase()) ||

@@ -7,7 +7,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * An encrypted ballot that is accepted for inclusion in election results. An accepted ballot is either cast or spoiled.
@@ -56,7 +55,7 @@ public class SubmittedBallot extends CiphertextBallot {
     List<Group.ElementModQ> contest_hashes = contests.stream()
             .sorted(Comparator.comparingInt(CiphertextBallot.Contest::sequence_order))
             .map(c -> c.crypto_hash)
-            .collect(Collectors.toList());
+            .toList();
 
     Group.ElementModQ contest_hash = Hash.hash_elems(object_id, manifest_hash, contest_hashes);
 
@@ -64,7 +63,7 @@ public class SubmittedBallot extends CiphertextBallot {
     Group.ElementModQ code_seed = code_seedO.orElse(manifest_hash); // LOOK spec #6.A says H0 = H(Qbar)
 
     // copy the contests and selections, removing all nonces
-    List<Contest> new_contests = contests.stream().map(Contest::removeNonces).collect(Collectors.toList());
+    List<Contest> new_contests = contests.stream().map(Contest::removeNonces).toList();
 
     return new SubmittedBallot(
             object_id,

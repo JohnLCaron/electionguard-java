@@ -24,7 +24,6 @@ import java.util.Formatter;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import static com.sunya.electionguard.Group.ElementModP;
 
@@ -217,7 +216,9 @@ class KeyCeremonyRemoteTrustee extends RemoteKeyCeremonyTrusteeServiceGrpc.Remot
 
     CommonProto.ErrorResponse.Builder response = CommonProto.ErrorResponse.newBuilder();
     try {
-      List<SchnorrProof> proofs = proto.getCoefficientProofsList().stream().map(CommonConvert::convertSchnorrProof).collect(Collectors.toList());
+      List<SchnorrProof> proofs = proto.getCoefficientProofsList().stream()
+              .map(CommonConvert::convertSchnorrProof)
+              .toList();
       KeyCeremony2.PublicKeySet keyset = new KeyCeremony2.PublicKeySet(
               proto.getOwnerId(),
               proto.getGuardianXCoordinate(),

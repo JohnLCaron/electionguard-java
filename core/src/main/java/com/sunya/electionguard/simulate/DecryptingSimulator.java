@@ -137,7 +137,7 @@ public class DecryptingSimulator {
       return guardians;
     }
 
-    ImmutableList<DecryptingTrustee> read(String location) {
+    List<DecryptingTrustee> read(String location) {
       try {
         return TrusteeFromProto.readTrustees(location);
       } catch (IOException e) {

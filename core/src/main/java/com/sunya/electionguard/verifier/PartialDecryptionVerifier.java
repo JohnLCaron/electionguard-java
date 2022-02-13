@@ -85,7 +85,7 @@ public class PartialDecryptionVerifier {
   boolean verify_lagrange_coefficient(int coordinate, List<Integer> degrees, ElementModQ lagrange) {
     int product = degrees.stream().reduce(1, (a, b)  -> a * b);
     ElementModQ numerator = Group.int_to_q_unchecked(BigInteger.valueOf(product).mod(Group.getPrimes().small_prime));
-    List<Integer> diff = degrees.stream().map(degree -> degree - coordinate).collect(Collectors.toList());
+    List<Integer> diff = degrees.stream().map(degree -> degree - coordinate).toList();
     int productDiff = diff.stream().reduce(1, (a, b)  -> a * b);
     ElementModQ denominator = Group.int_to_q_unchecked(BigInteger.valueOf(productDiff).mod(Group.getPrimes().small_prime));
     return numerator.equals(Group.mult_q(lagrange, denominator));
@@ -103,7 +103,7 @@ public class PartialDecryptionVerifier {
   }
 
   private class DecryptionContestVerifier {
-    PlaintextTally.Contest contest;
+    final PlaintextTally.Contest contest;
 
     DecryptionContestVerifier(PlaintextTally.Contest contest) {
       this.contest = contest;
@@ -152,10 +152,10 @@ public class PartialDecryptionVerifier {
 
   private class ShareVerifier {
     final String id; // contest/selection
-    List<CiphertextDecryptionSelection> shares;
-    ElementModP selection_pad;
-    ElementModP selection_data;
-    ImmutableMap<String, ElementModP> public_keys;
+    final List<CiphertextDecryptionSelection> shares;
+    final ElementModP selection_pad;
+    final ElementModP selection_data;
+    final ImmutableMap<String, ElementModP> public_keys;
 
     ShareVerifier(String id, List<CiphertextDecryptionSelection> shares, ElementModP selection_pad, ElementModP selection_data) {
       this.id = id;

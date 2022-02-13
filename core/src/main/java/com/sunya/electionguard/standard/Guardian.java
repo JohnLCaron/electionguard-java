@@ -18,7 +18,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static com.sunya.electionguard.Group.ElementModP;
 import static com.sunya.electionguard.Group.ElementModQ;
@@ -308,13 +307,9 @@ class Guardian {
       return Optional.empty();
     }
 
-    //         public_keys = map(
-    //            lambda public_key: public_key.key,
-    //            self._guardian_election_public_keys.values(),
-    //        )
-    // LOOK does this include itself?
     Collection<ElementModP> public_keys = this.guardian_election_public_keys.values().stream()
-            .map(pk -> pk.key()).collect(Collectors.toList());
+            .map(pk -> pk.key())
+            .toList();
     return Optional.of(ElGamal.elgamal_combine_public_keys(public_keys));
   }
 

@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /** An election with contests that have been filled out with selection placeholders. */
 @Immutable
@@ -61,7 +60,7 @@ public class InternalManifest {
           Manifest.ContestDescription contest, Optional<Integer> use_sequence_idO) {
 
     // sequence_ids = [selection.sequence_order for selection in contest.ballot_selections]
-    List<Integer> sequence_ids = contest.ballot_selections().stream().map(s -> s.sequence_order()).collect(Collectors.toList());
+    List<Integer> sequence_ids = contest.ballot_selections().stream().map(s -> s.sequence_order()).toList();
 
     int use_sequence_id;
     if (use_sequence_idO.isEmpty()) {
@@ -98,7 +97,7 @@ public class InternalManifest {
       return new ArrayList<>();
     }
     List<String> gp_wanted = new ArrayList<>(style.get().geopolitical_unit_ids());
-    return this.contests.values().stream().filter(c -> gp_wanted.contains(c.contest.electoral_district_id())).collect(Collectors.toList());
+    return this.contests.values().stream().filter(c -> gp_wanted.contains(c.contest.electoral_district_id())).toList();
   }
 
   /**

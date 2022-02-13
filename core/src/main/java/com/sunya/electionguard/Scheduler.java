@@ -23,7 +23,7 @@ public class Scheduler<T> {
    * @param tasks: the callable task to execute
    * @return the unordered list of results of type T.
    */
-  public List<T> schedule(List<Callable<T>> tasks, boolean with_shared_resources) {
+  public List<T> schedule(List<? extends Callable<T>> tasks, boolean with_shared_resources) {
     List<ListenableFuture<? extends T>> futures = new ArrayList<>();
     for (Callable<T> task : tasks) {
       futures.add(service.submit(task));

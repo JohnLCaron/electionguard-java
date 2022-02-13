@@ -14,7 +14,6 @@ import io.grpc.StatusRuntimeException;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import static com.sunya.electionguard.protogen.RemoteKeyCeremonyTrusteeServiceGrpc.RemoteKeyCeremonyTrusteeServiceBlockingStub;
 
@@ -43,7 +42,9 @@ class KeyCeremonyRemoteTrusteeProxy implements KeyCeremonyTrusteeIF {
         logger.atSevere().log("sendPublicKeys failed: %s", response.getError());
         return Optional.empty();
       }
-      List<SchnorrProof> proofs = response.getCoefficientProofsList().stream().map(CommonConvert::convertSchnorrProof).collect(Collectors.toList());
+      List<SchnorrProof> proofs = response.getCoefficientProofsList().stream()
+              .map(CommonConvert::convertSchnorrProof)
+              .toList();
       return Optional.of(new KeyCeremony2.PublicKeySet(
               response.getOwnerId(),
               response.getGuardianXCoordinate(),

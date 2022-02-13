@@ -160,7 +160,7 @@ public class TestAttackTallyDecryptionVerifyier {
     Group.ElementModP t = Group.int_to_p_unchecked(BigInteger.valueOf(tally));
     Group.ElementModP M = Group.g_pow_p(t);
 
-    // List<ElementModP> partialDecryptions = selection.shares().stream().map(s -> s.share()).collect(Collectors.toList());
+    // List<ElementModP> partialDecryptions = selection.shares().stream().map(s -> s.share()).toList();
     // ElementModP productMi = Group.mult_p(partialDecryptions);
     // ElementModP M = selection.value();
     // ElementModP B = selection.message().data;

@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Orchestrates the decryption of encrypted Tallies and Ballots with remote Guardians. Mutable.
@@ -210,9 +209,7 @@ public class DecryptingMediator {
     }
 
     // Add the newly calculated shares
-    for (Map.Entry<String, DecryptionShare> entry : missing_tally_shares.entrySet()) {
-      this.tally_shares.put(entry.getKey(), entry.getValue());
-    }
+    this.tally_shares.putAll(missing_tally_shares);
   }
 
   /**
@@ -368,7 +365,8 @@ public class DecryptingMediator {
     for (DecryptingTrusteeIF guardian : this.available_guardians.values()) {
       List<Integer> seq_orders = this.available_guardians.values().stream()
               .filter(g -> !g.id().equals(guardian.id()))
-              .map(g -> g.xCoordinate()).collect(Collectors.toList());
+              .map(g -> g.xCoordinate())
+              .toList();
       Group.ElementModQ coeff = ElectionPolynomial.compute_lagrange_coefficient(guardian.xCoordinate(), seq_orders);
       this.lagrange_coefficients.put(guardian.id(), coeff);
       this.guardianStates.add(new AvailableGuardian(guardian.id(), guardian.xCoordinate(), coeff));

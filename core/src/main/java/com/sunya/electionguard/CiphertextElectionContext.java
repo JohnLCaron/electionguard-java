@@ -118,8 +118,8 @@ public class CiphertextElectionContext {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     CiphertextElectionContext that = (CiphertextElectionContext) o;
-    return number_of_guardians == that.number_of_guardians &&
-            quorum == that.quorum &&
+    return Objects.equals(number_of_guardians, that.number_of_guardians) &&
+            Objects.equals(quorum, that.quorum) &&
             elgamal_public_key.equals(that.elgamal_public_key) &&
             manifest_hash.equals(that.manifest_hash) &&
             crypto_base_hash.equals(that.crypto_base_hash) &&

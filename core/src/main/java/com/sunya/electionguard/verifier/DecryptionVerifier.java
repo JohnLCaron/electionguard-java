@@ -84,7 +84,7 @@ public class DecryptionVerifier {
   }
 
   class DecryptionContestVerifier {
-    PlaintextTally.Contest contest;
+    final PlaintextTally.Contest contest;
 
     DecryptionContestVerifier(PlaintextTally.Contest contest) {
       this.contest = contest;
@@ -134,10 +134,10 @@ public class DecryptionVerifier {
   // verify section 8 and 9
   private class ShareVerifier {
     final String id; // contest/selection
-    List<CiphertextDecryptionSelection> shares;
-    ElementModP selection_pad;
-    ElementModP selection_data;
-    ImmutableMap<String, ElementModP> public_keys;
+    final List<CiphertextDecryptionSelection> shares;
+    final ElementModP selection_pad;
+    final ElementModP selection_data;
+    final ImmutableMap<String, ElementModP> public_keys;
 
     ShareVerifier(String id, List<CiphertextDecryptionSelection> shares, ElementModP selection_pad, ElementModP selection_data) {
       this.id = id;

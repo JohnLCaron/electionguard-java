@@ -39,7 +39,7 @@ public class PlaintextTallyFromProto {
   static PlaintextTally.Selection convertSelection(PlaintextTallyProto.PlaintextTallySelection proto) {
     List<DecryptionShare.CiphertextDecryptionSelection> shares = proto.getSharesList().stream()
             .map(PlaintextTallyFromProto::convertShare)
-            .collect(Collectors.toList());
+            .toList();
 
     return new PlaintextTally.Selection(
             proto.getObjectId(),

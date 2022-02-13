@@ -129,7 +129,7 @@ public class RunRemoteWorkflowSimulated {
     command2.run(out, "java", "-classpath", classpath,
             "com.sunya.electionguard.simulate.DecryptingSimulator",
             "-in", cmdLine.encryptDir,
-            "-guardiansLocation", cmdLine.encryptDir + "/private/trustees.protobuf",
+            "-guardiansLocation", cmdLine.encryptDir + "/election_private_data/trustees.protobuf",
             "-out", cmdLine.outputDir
     );
     System.out.printf("%s", out);

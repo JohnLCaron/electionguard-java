@@ -1,5 +1,6 @@
 package com.sunya.electionguard.publish;
 
+import com.google.common.collect.ImmutableList;
 import com.sunya.electionguard.decrypting.DecryptingTrustee;
 import com.sunya.electionguard.proto.TrusteeFromProto;
 import com.sunya.electionguard.standard.GuardianPrivateRecord;
@@ -12,6 +13,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.List;
@@ -137,6 +139,7 @@ public class PrivateData {
   }
 
   public static List<DecryptingTrustee> readDecryptingTrustees(String fileOrDir) throws IOException {
+
     List<DecryptingTrustee> result = new ArrayList<>();
     File dir = new File(fileOrDir);
     if (dir.isDirectory()) {
@@ -144,7 +147,13 @@ public class PrivateData {
         result.add(TrusteeFromProto.readTrustee(file.toString()));
       }
     } else {
-      result.add(TrusteeFromProto.readTrustee(fileOrDir));
+      try {
+        // multiple trustees
+        result.addAll(TrusteeFromProto.readTrustees(fileOrDir));
+      } catch (Exception e) {
+        // one trustee
+        result.add(TrusteeFromProto.readTrustee(fileOrDir));
+      }
     }
     return result;
   }

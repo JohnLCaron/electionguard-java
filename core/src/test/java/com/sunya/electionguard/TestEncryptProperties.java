@@ -428,11 +428,11 @@ public class TestEncryptProperties extends TestProperties {
        ContestWithPlaceholders contestp = tuple.internalManifest.getContestById(contest.object_id).orElseThrow();
 
        // Homomorpically accumulate the selection encryptions
-       List<ElGamal.Ciphertext> ciphertexts = contest.ballot_selections.stream().map(s -> s.ciphertext()).collect(Collectors.toList());
+       List<ElGamal.Ciphertext> ciphertexts = contest.ballot_selections.stream().map(s -> s.ciphertext()).toList();
        Ciphertext elgamal_accumulation = elgamal_add(Iterables.toArray(ciphertexts, ElGamal.Ciphertext.class));
 
        // accumulate the selection nonce's
-       List<ElementModQ> nonces = contest.ballot_selections.stream().map(s -> s.nonce.orElseThrow()).collect(Collectors.toList());
+       List<ElementModQ> nonces = contest.ballot_selections.stream().map(s -> s.nonce.orElseThrow()).toList();
        ElementModQ aggregate_nonce = add_q(Iterables.toArray(nonces, ElementModQ.class));
 
        ConstantChaumPedersenProof regenerated_constant = make_constant_chaum_pedersen(

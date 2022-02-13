@@ -9,7 +9,6 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import static com.sunya.electionguard.Group.ElementModQ;
 import static com.sunya.electionguard.Group.ElementModP;
@@ -123,7 +122,7 @@ public class ElectionPolynomial {
     int product = degrees.stream().reduce(1, (a, b)  -> a * b);
     ElementModQ numerator = Group.int_to_q_unchecked(BigInteger.valueOf(product).mod(Group.getPrimes().small_prime));
     // denominator = mult_q(*[(degree - coordinate) for degree in degrees])
-    List<Integer> diff = degrees.stream().map(degree -> degree - coordinate).collect(Collectors.toList());
+    List<Integer> diff = degrees.stream().map(degree -> degree - coordinate).toList();
     int productDiff = diff.stream().reduce(1, (a, b)  -> a * b);
     ElementModQ denominator = Group.int_to_q_unchecked(BigInteger.valueOf(productDiff).mod(Group.getPrimes().small_prime));
     return Group.div_q(numerator, denominator);

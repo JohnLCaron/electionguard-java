@@ -116,7 +116,7 @@ public class TestGuardianSerializing {
             Group.getPrimes(),
             this.guardianRecords);
 
-    List<GuardianPrivateRecord> gprivate = this.guardians.stream().map(g -> g.export_private_data()).collect(Collectors.toList());
+    List<GuardianPrivateRecord> gprivate = this.guardians.stream().map(g -> g.export_private_data()).toList();
     pdata.publish_private_data(null, gprivate);
   }
 

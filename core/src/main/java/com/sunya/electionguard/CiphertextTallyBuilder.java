@@ -198,10 +198,10 @@ public class CiphertextTallyBuilder {
   private boolean execute_accumulate(
           Map<String, Map<String, ElGamal.Ciphertext>> ciphertext_selections_by_selection_id) {
 
-    List<Callable<AccumOverBallotsTuple>> tasks =
+    List<RunAccumulateOverBallots> tasks =
             ciphertext_selections_by_selection_id.entrySet().stream()
                     .map(entry -> new RunAccumulateOverBallots(entry.getKey(), entry.getValue()))
-                    .collect(Collectors.toList());
+                    .toList();
 
     Scheduler<AccumOverBallotsTuple> scheduler = new Scheduler<>();
     // This line is the only parallel processing
@@ -277,10 +277,10 @@ public class CiphertextTallyBuilder {
       }
 
       // Accumulate the tally selections in parallel tasks
-      List<Callable<AccumSelectionsTuple>> tasks =
+      List<RunAccumulateSelections> tasks =
               this.selections.entrySet().stream()
                       .map(entry -> new RunAccumulateSelections(entry.getKey(), entry.getValue(), contest_selections))
-                      .collect(Collectors.toList());
+                      .toList();
 
       Scheduler<AccumSelectionsTuple> scheduler = new Scheduler<>();
       // this line is the only parallel processing

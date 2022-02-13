@@ -45,7 +45,7 @@ public class Coefficients {
   }
 
   static class Pojo {
-    public List<Group.ElementModQ> coefficients;
+    public final List<Group.ElementModQ> coefficients;
 
     public Pojo(List<Group.ElementModQ> coefficients) {
       this.coefficients = coefficients;

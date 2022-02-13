@@ -11,7 +11,6 @@ import javax.annotation.Nullable;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import com.sunya.electionguard.protogen.*;
 
@@ -19,7 +18,7 @@ public class CommonConvert {
 
   @Nullable
   static <T, U> List<U> convertList(@Nullable List<T> from, Function<T, U> converter) {
-    return from == null ? null : from.stream().map(converter).collect(Collectors.toList());
+    return from == null ? null : from.stream().map(converter).toList();
   }
 
   /////////////////////////////////////////////////////////////////////////////////////////

@@ -362,7 +362,7 @@ public class TestDecryption extends TestProperties {
     Guardian missing_guardian = this.guardians.get(2);
 
     List<ElectionPublicKey> available_guardians_keys =
-            available_guardians.stream().map(Guardian::share_key).collect(Collectors.toList());
+            available_guardians.stream().map(Guardian::share_key).toList();
     ElectionPublicKey missing_guardian_key = missing_guardian.share_key();
     Map<String, ElectionPartialKeyBackup> missing_guardian_backups = missing_guardian.share_election_partial_key_backups().stream()
             .collect(Collectors.toMap(b -> b.designated_id(), b -> b));
@@ -395,7 +395,7 @@ public class TestDecryption extends TestProperties {
   public void test_reconstruct_decryption_shares_for_ballot() {
     List<Guardian> available_guardians = this.guardians.subList(0,2);
     List<ElectionPublicKey> available_guardians_keys =
-            available_guardians.stream().map(Guardian::share_key).collect(Collectors.toList());
+            available_guardians.stream().map(Guardian::share_key).toList();
 
     Guardian missing_guardian = this.guardians.get(2);
     ElectionPublicKey missing_guardian_key = missing_guardian.share_key();
@@ -433,7 +433,7 @@ public class TestDecryption extends TestProperties {
   public void test_reconstruct_decryption_share_for_spoiled_ballot() {
     List<Guardian> available_guardians = this.guardians.subList(0,2);
     List<ElectionPublicKey> available_guardians_keys =
-            available_guardians.stream().map(Guardian::share_key).collect(Collectors.toList());
+            available_guardians.stream().map(Guardian::share_key).toList();
 
     Guardian missing_guardian = this.guardians.get(2);
     ElectionPublicKey missing_guardian_key = missing_guardian.share_key();
