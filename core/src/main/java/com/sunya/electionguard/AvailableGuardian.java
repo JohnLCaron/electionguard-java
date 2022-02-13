@@ -2,9 +2,6 @@ package com.sunya.electionguard;
 
 import com.google.common.base.Preconditions;
 
-import javax.annotation.concurrent.Immutable;
-import java.util.Objects;
-
 /**
  * An available Guardian when decrypting.
  * @param guardian_id The guardian id

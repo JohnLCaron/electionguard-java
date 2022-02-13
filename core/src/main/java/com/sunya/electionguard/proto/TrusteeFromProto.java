@@ -6,7 +6,6 @@ import com.sunya.electionguard.Group;
 import com.sunya.electionguard.decrypting.DecryptingTrustee;
 import com.sunya.electionguard.keyceremony.KeyCeremony2;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Map;
