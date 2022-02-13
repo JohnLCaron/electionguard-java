@@ -313,6 +313,7 @@
           }
         ]
       },
+      "primary_party_ids": [],
       "object_id": "justice-supreme-court"
     },
     {
@@ -358,6 +359,7 @@
           }
         ]
       },
+      "primary_party_ids": [],
       "object_id": "referendum-pineapple"
     }
   ],
