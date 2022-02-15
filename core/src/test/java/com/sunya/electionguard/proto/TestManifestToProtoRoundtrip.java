@@ -23,7 +23,7 @@ public class TestManifestToProtoRoundtrip {
 
   @Example
   public void testElectionRoundtrip() throws IOException {
-    Manifest fromPython = ConvertFromJson.readElection(publisher.manifestPath().toString());
+    Manifest fromPython = ConvertFromJson.readManifest(publisher.manifestPath().toString());
     assertThat(fromPython).isNotNull();
     ManifestProto.Manifest proto = ManifestToProto.translateToProto(fromPython);
     Manifest roundtrip = ManifestFromProto.translateFromProto(proto);

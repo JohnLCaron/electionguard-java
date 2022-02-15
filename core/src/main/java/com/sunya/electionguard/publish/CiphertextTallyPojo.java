@@ -18,14 +18,14 @@ public class CiphertextTallyPojo {
 
   public static class CiphertextTallyContestPojo {
     public String object_id;
-    public Integer sequence_order;
+    public int sequence_order; // JSON leaves it out when 0 ? or old versions dont have this
     public Group.ElementModQ description_hash;
     public Map<String, CiphertextTallySelectionPojo> selections;
   }
 
   public static class CiphertextTallySelectionPojo {
     public String object_id;
-    public Integer sequence_order;
+    public int sequence_order;
     public Group.ElementModQ description_hash;
     public CiphertextPojo ciphertext;
   }

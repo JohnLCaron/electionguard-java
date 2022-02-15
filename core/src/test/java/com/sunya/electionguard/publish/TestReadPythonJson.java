@@ -51,7 +51,7 @@ public class TestReadPythonJson {
 
   @Example
   public void testManifestPythonJson() throws IOException {
-    Manifest fromPython = ConvertFromJson.readElection(publisher.manifestPath().toString());
+    Manifest fromPython = ConvertFromJson.readManifest(publisher.manifestPath().toString());
     assertThat(fromPython).isNotNull();
     System.out.printf("%n%s%n%n", fromPython);
   }

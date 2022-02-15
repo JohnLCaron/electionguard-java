@@ -47,6 +47,13 @@ public class ManifestPojo {
     public Boolean is_write_in = Boolean.FALSE;
   }
 
+  public static class ContactInformation {
+    public List<String> address_line;
+    public List<AnnotatedString> email;
+    public List<AnnotatedString> phone;
+    public String name;
+  }
+
   public static class ContestDescription extends ElectionObjectBase {
     public String electoral_district_id;
     public Integer sequence_order;
@@ -58,13 +65,6 @@ public class ManifestPojo {
     public InternationalizedText ballot_title;
     public InternationalizedText ballot_subtitle;
     public List<String> primary_party_ids;
-  }
-
-  public static class ContactInformation {
-    public List<String> address_line;
-    public List<AnnotatedString> email;
-    public List<AnnotatedString> phone;
-    public String name;
   }
 
   public static class ElectionObjectBase {
@@ -87,7 +87,7 @@ public class ManifestPojo {
   }
 
   public static class Party extends ElectionObjectBase {
-    public InternationalizedText ballot_name;
+    public InternationalizedText name;
     public String abbreviation;
     public String color;
     public String logo_uri;
@@ -225,7 +225,7 @@ public class ManifestPojo {
     }
     return new Manifest.Party(
             pojo.object_id,
-            convertInternationalizedText(pojo.ballot_name),
+            convertInternationalizedText(pojo.name),
             pojo.abbreviation,
             pojo.color,
             pojo.logo_uri);
@@ -397,7 +397,7 @@ public class ManifestPojo {
     }
     ManifestPojo.Party pojo = new ManifestPojo.Party();
     pojo.object_id = org.object_id();
-    pojo.ballot_name = convertInternationalizedText(org.name());
+    pojo.name = convertInternationalizedText(org.name());
     if (org.abbreviation() != null) {
       pojo.abbreviation = org.abbreviation();
     }

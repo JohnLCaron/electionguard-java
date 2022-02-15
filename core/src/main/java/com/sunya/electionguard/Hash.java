@@ -87,7 +87,7 @@ public class Hash {
 
     // must be positive
     BigInteger bi = new BigInteger(1, digest.digest());
-    BigInteger bim = bi.mod(Group.getPrimes().qminus1());
+    BigInteger bim = bi.mod(Group.getPrimes().small_prime);
     return Group.int_to_q_unchecked(bim);
   }
 }

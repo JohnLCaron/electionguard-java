@@ -1,0 +1,290 @@
+Type		JSON	language type
+----		----	-------------
+BigInteger	string	hex encoded integer, arbitrary number of digits
+bool		boolean boolean
+datestr	string	ISO 8601 formatted date/time
+datetime	number	64 bit signed integer = millisecs since unix epoch, ISO 8601 Calendar (proleptic_gregorian)
+Dict[K,V]	array of objects with fields K, V	
+ElementModQ	string	BigInteger converted to ElementModQ
+ElementModP	string	BigInteger converted to ElementModP
+enum<T>	string  matches an elemnent of enum T
+int		number	32 bit signed integer
+List[T]	array   0 or more objects of type T
+ulong		number	64 bit unsigned integer LOOK long or ulong
+T		object	T
+str		string	UTF-8 encoded string
+
+1) Any field may be missing or null.
+2) Dict[T] could be List[T], since the key is redundant (its in the value object), except for extended_data.
+3) names will be baked in for this version, so now is the time to rename if needed
+
+///// Election
+
+class CiphertextElectionContext:
+    number_of_guardians: int
+    quorum: int
+    elgamal_public_key: ElementModP
+    commitment_hash: ElementModQ
+    manifest_hash: ElementModQ
+    crypto_base_hash: ElementModQ
+    crypto_extended_base_hash: ElementModQ
+    extended_data: Dict[str, str]  
+
+class ElectionConstants:
+    large_prime: BigInteger
+    small_prime: BigInteger
+    cofactor: BigInteger
+    generator: BigInteger
+  
+class EncryptionDevice:
+    device_id: ulong	LOOK ulong	 
+    session_id: int	LOOK ulong
+    launch_code: int	LOOK ulong
+    location: str
+    
+class GuardianRecord:
+    guardian_id: GuardianId
+    sequence_order: int
+    election_public_key: ElementModP
+    election_commitments: List[ElementModP]
+    election_proofs: List[SchnorrProof]
+
+class SchnorrProof(Proof):
+    name: str				UNNEEDED
+    usage: enum<ProofUsage>		UNNEEDED
+    public_key: ElementModP
+    commitment: ElementModP
+    challenge: ElementModQ
+    response: ElementModQ
+    
+//// Manifest
+
+class Manifest:
+    election_scope_id: str
+    spec_version: str		LOOK: library version, serialization version
+    type: enum<ElectionType>
+    start_date: datestr
+    end_date: datestr
+    geopolitical_units: List[GeopoliticalUnit]
+    parties: List[Party]
+    candidates: List[Candidate]
+    contests: List[ContestDescription]
+    ballot_styles: List[BallotStyle]
+    name: InternationalizedText
+    contact_information: ContactInformation
+        
+class AnnotatedString:
+    annotation: str
+    value: str
+    
+class BallotStyle:
+    object_id: str
+    geopolitical_unit_ids: List[str]  referential integrity
+    party_ids: List[str]
+    image_uri: str
+
+class Candidate:
+    object_id: str
+    name: InternationalizedText
+    party_id: str
+    image_uri: str
+    is_write_in: bool
+        
+class ContactInformation:
+    name: str
+    address_line: List[str]
+    email: List[str]
+    phone: List[str]
+
+class ContestDescription:
+    object_id: str
+    sequence_order: int
+    electoral_district_id: str
+    vote_variation: enum<VoteVariationType>
+    number_elected: int
+    votes_allowed: int
+    name: str
+    ballot_selections: List[SelectionDescription]
+    ballot_title: InternationalizedText
+    ballot_subtitle: InternationalizedText
+    primary_party_ids: List[str]
+        
+class GeopoliticalUnit:
+    object_id: str
+    name: str
+    type: enum<ReportingUnitType>
+    contact_information: ContactInformation
+
+class InternationalizedText:
+    text: List<Language>
+
+class Language:
+    value: str
+    language: str
+
+class Party:
+    object_id: str
+    name: InternationalizedText
+    abbreviation: str
+    color: str
+    logo_uri: str
+      
+class SelectionDescription:
+    object_id: str
+    sequence_order: int
+    candidate_id: str
+    
+//// ElGamal
+
+class ElGamalKeyPair:
+    secret_key: ElementModQ
+    public_key: ElementModP
+    
+class ElGamalCiphertext:
+    pad: ElementModP
+    data: ElementModP
+
+    
+//// PlaintextTally
+
+class PlaintextTally:
+    object_id: str
+    contests: Dict[str, PlaintextTallyContest]
+
+class PlaintextTallyContest:
+    object_id: str		LOOK
+    selections: Dict[str, PlaintextTallySelection]
+
+class PlaintextTallySelection:
+    object_id: str
+    tally: int
+    value: ElementModP
+    message: ElGamalCiphertext
+    shares: List[CiphertextDecryptionSelection]
+    
+class CiphertextDecryptionSelection:
+    object_id: str    
+    guardian_id: str
+    share: ElementModP
+    proof: ChaumPedersenProof
+    recovered_parts: Dict[str, CiphertextCompensatedDecryptionSelection]
+    
+      // The SelectionDescription hash. // NOT IN JSON
+   ElementModQ description_hash = 3;
+
+class CiphertextCompensatedDecryptionSelection(ElectionObjectBase):
+    object_id: str        
+    guardian_id: str
+    missing_guardian_id: str
+    share: ElementModP
+    recovery_key: ElementModP
+    proof: ChaumPedersenProof
+            
+class ChaumPedersenProof:
+    name: str  		NOT NEEDED
+    usage: enum<ProofUsage>  	NOT NEEDED
+    pad: ElementModP
+    data: ElementModP
+    challenge: ElementModQ
+    response: ElementModQ
+   
+                
+//// PublishedCiphertextTally
+
+class PublishedCiphertextTally:
+    object_id: str
+    contests: Dict[str, CiphertextTallyContest]    
+
+class CiphertextTallyContest:
+    object_id: str
+    sequence_order: int
+    description_hash: ElementModQ
+    selections: Dict[str, CiphertextTallySelection]
+
+class CiphertextTallySelection:
+    object_id: str
+    sequence_order: int
+    description_hash: ElementModQ
+    ciphertext: ElGamalCiphertext
+    
+    
+//// PlaintextBallot
+
+class PlaintextBallot:
+    object_id: str
+    style_id: str
+    contests: List[PlaintextBallotContest]
+
+class PlaintextBallotContest:
+    object_id: str
+    sequence_order: int
+    ballot_selections: List[PlaintextBallotSelection]
+    
+class PlaintextBallotSelection:
+    object_id: str
+    sequence_order: int
+    vote: int
+    is_placeholder_selection: bool
+    extended_data: ExtendedData
+    
+
+//// SubmittedBallot
+
+class SubmittedBallot:
+    object_id: str
+    style_id: str
+    manifest_hash: ElementModQ
+    code_seed: ElementModQ
+    code: ElementModQ
+    contests: List[CiphertextBallotContest]
+    timestamp: datetime		LOOK
+    crypto_hash: ElementModQ
+    nonce: ElementModQ
+    state: enum<BallotBoxState>
+    
+class CiphertextBallotContest:
+    object_id: str
+    sequence_order: int
+    description_hash: ElementModQ
+    ballot_selections: List[CiphertextBallotSelection]
+    ciphertext_accumulation: ElGamalCiphertext
+    crypto_hash: ElementModQ
+    nonce: ElementModQ			UNNEEDED
+    proof: ConstantChaumPedersenProof 
+
+class CiphertextBallotSelection:
+    object_id: str
+    sequence_order: int
+    description_hash: ElementModQ
+    ciphertext: ElGamalCiphertext
+    crypto_hash: ElementModQ
+    is_placeholder_selection: bool
+    nonce: ElementModQ			UNNEEDED
+    proof: DisjunctiveChaumPedersenProof
+    extended_data: ElGamalCiphertext
+
+class ConstantChaumPedersenProof:
+    name: str				UNNEEDED
+    usage: enum<ProofUsage>		UNNEEDED
+    pad: ElementModP
+    data: ElementModP
+    challenge: ElementModQ
+    response: ElementModQ
+    constant: int
+    
+class DisjunctiveChaumPedersenProof:
+    name: str				UNNEEDED
+    usage: enum<ProofUsage>		UNNEEDED
+    proof_zero_pad: ElementModP
+    proof_zero_data: ElementModP
+    proof_one_pad: ElementModP
+    proof_one_data: ElementModP
+    proof_zero_challenge: ElementModQ
+    proof_one_challenge: ElementModQ
+    challenge: ElementModQ
+    proof_zero_response: ElementModQ
+    proof_one_response: ElementModQ
+        
+class ExtendedData:
+    value: str
+    length: int               

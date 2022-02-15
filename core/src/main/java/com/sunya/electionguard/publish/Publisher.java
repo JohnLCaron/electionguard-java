@@ -64,6 +64,8 @@ public class Publisher {
 
   private final String topdir;
   private final Mode createMode;
+  private final boolean isJsonOutput;
+
   private final Path electionRecordDir;
   private final Path devicesDirPath;
   private final Path ballotsDirPath;
@@ -73,7 +75,44 @@ public class Publisher {
   public Publisher(String where, Mode createMode, boolean isJsonOutput) throws IOException {
     this.topdir = where;
     this.createMode = createMode;
+    this.isJsonOutput = isJsonOutput;
+
     this.electionRecordDir = Path.of(where).resolve(ELECTION_RECORD_DIR);
+    this.devicesDirPath = electionRecordDir.resolve(DEVICES_DIR);
+    this.ballotsDirPath = electionRecordDir.resolve(SUBMITTED_BALLOTS_DIR);
+    this.guardianDirPath = electionRecordDir.resolve(GUARDIANS_DIR);
+    this.spoiledBallotDirPath = electionRecordDir.resolve(SPOILED_BALLOTS_DIR);
+    // this.availableGuardianDirPath = publishDirectory.resolve(AVAILABLE_GUARDIANS_DIR);
+
+    if (createMode == Mode.createNew) {
+      if (!Files.exists(electionRecordDir)) {
+        Files.createDirectories(electionRecordDir);
+      } else {
+        removeAllFiles();
+      }
+      if (isJsonOutput) {
+        createDirs();
+      }
+    } else if (createMode == Mode.createIfMissing) {
+      if (!Files.exists(electionRecordDir)) {
+        Files.createDirectories(electionRecordDir);
+      }
+      if (isJsonOutput) {
+        createDirs();
+      }
+    } else {
+      if (!Files.exists(electionRecordDir)) {
+        throw new IllegalStateException("Non existing election directory " + electionRecordDir);
+      }
+    }
+  }
+
+  Publisher(Path electionRecordDir, Mode createMode, boolean isJsonOutput) throws IOException {
+    this.createMode = createMode;
+    this.topdir = electionRecordDir.toAbsolutePath().toString();
+    this.isJsonOutput = isJsonOutput;
+
+    this.electionRecordDir = electionRecordDir;
     this.devicesDirPath = electionRecordDir.resolve(DEVICES_DIR);
     this.ballotsDirPath = electionRecordDir.resolve(SUBMITTED_BALLOTS_DIR);
     this.guardianDirPath = electionRecordDir.resolve(GUARDIANS_DIR);

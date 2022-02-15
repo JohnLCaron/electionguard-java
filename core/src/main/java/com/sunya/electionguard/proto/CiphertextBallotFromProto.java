@@ -32,7 +32,7 @@ public class CiphertextBallotFromProto {
     return new CiphertextBallot(
             ballot.getObjectId(),
             ballot.getBallotStyleId(),
-            convertElementModQ(ballot.getDescriptionHash()),
+            convertElementModQ(ballot.getManifestHash()),
             convertElementModQ(ballot.getPreviousTrackingHash()),
             convertList(ballot.getContestsList(), CiphertextBallotFromProto::convertContest),
             convertElementModQ(ballot.getTrackingHash()),

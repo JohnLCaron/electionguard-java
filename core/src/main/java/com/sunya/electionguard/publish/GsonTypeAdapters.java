@@ -81,7 +81,6 @@ class GsonTypeAdapters {
     }
   }
 
-
   private static class AvailableGuardianSerializer implements JsonSerializer<AvailableGuardian> {
     @Override
     public JsonElement serialize(AvailableGuardian src, Type typeOfSrc, JsonSerializationContext context) {
@@ -89,29 +88,31 @@ class GsonTypeAdapters {
     }
   }
 
+  // ?? JsonElement.getAsBigInteger()
   private static class BigIntegerDeserializer implements JsonDeserializer<BigInteger> {
     @Override
     public BigInteger deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
             throws JsonParseException {
       String content = json.getAsJsonPrimitive().getAsString();
-      return new BigInteger(content, 16);
+      return new BigInteger(content, 10);
     }
   }
-
 
   private static class BigIntegerSerializer implements JsonSerializer<BigInteger> {
     @Override
     public JsonElement serialize(BigInteger src, Type typeOfSrc, JsonSerializationContext context) {
-      return new JsonPrimitive(Group.int_to_p_unchecked(src).to_hex());
+      return new JsonPrimitive(src.toString(10));
     }
   }
 
+  // LOOK python is using base 10
   private static class ModQDeserializer implements JsonDeserializer<Group.ElementModQ> {
     @Override
     public Group.ElementModQ deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
             throws JsonParseException {
       String content = json.getAsJsonPrimitive().getAsString();
-      return Group.int_to_q(new BigInteger(content, 16)).orElseThrow(RuntimeException::new);
+      // System.out.printf("content %s %n int = %s%n hex = %s%n+", content, new BigInteger(content, 10), new BigInteger(content, 16));
+      return Group.int_to_q(new BigInteger(content, 10)).orElseThrow(RuntimeException::new);
     }
   }
 
@@ -120,21 +121,22 @@ class GsonTypeAdapters {
     public Group.ElementModP deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
             throws JsonParseException {
       String content = json.getAsJsonPrimitive().getAsString();
-      return Group.int_to_p(new BigInteger(content, 16)).orElseThrow(RuntimeException::new);
+      // System.out.printf("content %s %n int = %s%n hex = %s%n+", content, new BigInteger(content, 10), new BigInteger(content, 16));
+      return Group.int_to_p(new BigInteger(content, 10)).orElseThrow(RuntimeException::new);
     }
   }
 
   private static class ModQSerializer implements JsonSerializer<Group.ElementModQ> {
     @Override
     public JsonElement serialize(Group.ElementModQ src, Type typeOfSrc, JsonSerializationContext context) {
-      return new JsonPrimitive(src.to_hex());
+      return new JsonPrimitive(src.getBigInt().toString());
     }
   }
 
   private static class ModPSerializer implements JsonSerializer<Group.ElementModP> {
     @Override
     public JsonElement serialize(Group.ElementModP src, Type typeOfSrc, JsonSerializationContext context) {
-      return new JsonPrimitive(src.to_hex());
+      return new JsonPrimitive(src.getBigInt().toString());
     }
   }
 

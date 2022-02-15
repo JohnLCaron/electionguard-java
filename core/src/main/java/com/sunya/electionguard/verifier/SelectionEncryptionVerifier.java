@@ -90,14 +90,14 @@ public class SelectionEncryptionVerifier {
       ElementModQ expected_challenge = Hash.hash_elems(electionRecord.extendedHash(),
               this.alpha, this.beta, a0, b0, a1, b1);
       if (!challenge.equals(expected_challenge)) {
-        System.out.printf("4.B selection challenge failed for %s.%n", selection);
+        System.out.printf("4.B selection challenge failed for %s.%n", selection.object_id());
         error = true;
       }
 
       // 4.D:  c = (c0 + c1) mod q
       ElementModQ expected = Group.add_q(c0, c1);
       if (!challenge.equals(expected)) {
-        System.out.printf("4.D c = (c0 + c1) mod q failed for %s.%n", selection);
+        System.out.printf("4.D c = (c0 + c1) mod q failed for %s.%n", selection.object_id());
         error = true;
       }
 
@@ -105,7 +105,7 @@ public class SelectionEncryptionVerifier {
       ElementModP equE_left = Group.pow_p(electionRecord.generatorP(), v0);
       ElementModP equE_right = Group.mult_p(a0, Group.pow_p(alpha, c0));
       if (!equE_left.equals(equE_right)) {
-        System.out.printf("4.E check chaum-pedersen zero proof failed for %s.%n", selection);
+        System.out.printf("4.E check chaum-pedersen zero proof failed for %s.%n", selection.object_id());
         error = true;
       }
 
@@ -113,7 +113,7 @@ public class SelectionEncryptionVerifier {
       ElementModP equF_left = Group.pow_p(electionRecord.generatorP(), v1);
       ElementModP equF_right = Group.mult_p(a1, Group.pow_p(alpha, c1));
       if (!equF_left.equals(equF_right)) {
-        System.out.printf("4.F check chaum-pedersen one proof failed for %s.%n", selection);
+        System.out.printf("4.F check chaum-pedersen one proof failed for %s.%n", selection.object_id());
         error = true;
       }
 
@@ -122,7 +122,7 @@ public class SelectionEncryptionVerifier {
       ElementModP equG_left = Group.pow_p(K, v0);
       ElementModP equG_right = Group.mult_p(b0, Group.pow_p(beta, c0));
       if (!equG_left.equals(equG_right)) {
-        System.out.printf("4.G check chaum-pedersen zero proof failed for %s.%n", selection);
+        System.out.printf("4.G check chaum-pedersen zero proof failed for %s.%n", selection.object_id());
         error = true;
       }
 
@@ -131,7 +131,7 @@ public class SelectionEncryptionVerifier {
               Group.pow_p(electionRecord.electionPublicKey(), v1));
       ElementModP equH_right = Group.mult_p(b1, Group.pow_p(beta, c1));
       if (!equH_left.equals(equH_right)) {
-        System.out.printf("4.H check chaum-pedersen one proof failed for %s.%n", selection);
+        System.out.printf("4.H check chaum-pedersen one proof failed for %s.%n", selection.object_id());
         error = true;
       }
 
