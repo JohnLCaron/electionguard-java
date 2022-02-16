@@ -12,10 +12,6 @@ message PlaintextTally {
   map<string, PlaintextTallyContest> contests = 2;
 }
 
-message PlaintextTallyContestMap {
-  map<string, PlaintextTallyContest> contests = 1;
-}
-
 message PlaintextTallyContest {
   string object_id = 1;
   map<string, PlaintextTallySelection> selections = 2;
