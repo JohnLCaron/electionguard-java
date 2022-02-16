@@ -52,19 +52,6 @@ public class GuardianRecordPrivatePojo {
     public List<SchnorrProof> coefficient_proofs;
   }
 
-  public static class AuxilaryKeyPairPojo {
-    public String owner_id;
-    public Integer sequence_order;
-    public String secret_key; // LOOK
-    public String public_key; // LOOK
-  }
-
-  public static class AuxilaryPublicKeyPojo {
-    public String owner_id;
-    public Integer sequence_order;
-    public String key; // LOOK
-  }
-
   public static class ElectionPublicKeyPojo {
     public String owner_id;
     public Integer sequence_order;

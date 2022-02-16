@@ -84,7 +84,7 @@ public class ConvertFromJson {
     }
   }
 
-  public static Manifest readElection(String pathname) throws IOException {
+  public static Manifest readManifest(String pathname) throws IOException {
     try (InputStream is = new FileInputStream(pathname)) {
       Reader reader = new InputStreamReader(is);
       return enhancedGson.fromJson(reader, Manifest.class);

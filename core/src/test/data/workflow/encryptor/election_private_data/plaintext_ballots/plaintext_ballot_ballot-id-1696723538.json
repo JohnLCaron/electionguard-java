@@ -1,5 +1,5 @@
 {
-  "object_id": "ballot-id-720242839",
+  "object_id": "ballot-id-1696723538",
   "style_id": "jefferson-county-ballot-style",
   "contests": [
     {
@@ -9,7 +9,7 @@
         {
           "object_id": "john-adams-selection",
           "sequence_order": "0",
-          "vote": "1",
+          "vote": "0",
           "is_placeholder_selection": "00",
           "extended_data": null
         },
@@ -24,6 +24,13 @@
           "object_id": "john-hancock-selection",
           "sequence_order": "2",
           "vote": "1",
+          "is_placeholder_selection": "00",
+          "extended_data": null
+        },
+        {
+          "object_id": "write-in-selection",
+          "sequence_order": "3",
+          "vote": "0",
           "is_placeholder_selection": "00",
           "extended_data": null
         }

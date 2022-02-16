@@ -51,20 +51,6 @@ message Candidate {
   bool is_write_in = 5; // default false
 }
 
-message CandidateContestDescription {
-  ContestDescription contest_description = 1;
-  repeated string primary_party_ids = 2;
-}
-
-message CiphertextElectionContext {
-  uint32 number_of_guardians = 1;
-  uint32 quorum = 2;
-  ElementModP elgamal_public_key = 3;
-  ElementModQ description_hash = 4;
-  ElementModQ crypto_base_hash = 5;
-  ElementModQ crypto_extended_base_hash = 6;
-}
-
 message ContactInformation {
   string name = 1;
   repeated string address_line = 2;
@@ -100,11 +86,6 @@ message ContestDescription {
   InternationalizedText ballot_title = 9;
   InternationalizedText ballot_subtitle = 10;
   repeated string primary_party_ids = 11;
-}
-
-message ContestDescriptionWithPlaceholders {
-  ContestDescription contest_description = 1;
-  repeated SelectionDescription placeholder_selections = 2;
 }
 
 message GeopoliticalUnit {
@@ -162,10 +143,6 @@ message Party {
   string abbreviation = 3;
   string color = 4;
   string logo_uri = 5;
-}
-
-message ReferendumContestDescription {
-  ContestDescription contest_description = 1;
 }
 
 message SelectionDescription {

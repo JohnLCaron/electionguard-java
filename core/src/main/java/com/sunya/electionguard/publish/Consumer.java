@@ -13,6 +13,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Formatter;
@@ -33,6 +34,11 @@ public class Consumer {
   public Consumer(String topDir) throws IOException {
     publisher = new Publisher(topDir, Publisher.Mode.readonly, false);
   }
+
+  public static Consumer fromElectionRecord(String electionRecordDir, boolean isJson) throws IOException {
+    return new Consumer(new Publisher(Path.of(electionRecordDir), Publisher.Mode.readonly, isJson));
+  }
+
 
   public String location() {
     return publisher.publishPath().toAbsolutePath().toString();
@@ -94,7 +100,7 @@ public class Consumer {
   }
 
   public Manifest election() throws IOException {
-    return ConvertFromJson.readElection(publisher.manifestPath().toString());
+    return ConvertFromJson.readManifest(publisher.manifestPath().toString());
   }
 
   public CiphertextElectionContext context() throws IOException {
@@ -132,6 +138,10 @@ public class Consumer {
   }
 
   public List<AvailableGuardian> availableGuardians() throws IOException {
+    // early versions didnt have this
+    if (!publisher.coefficientsPath().toFile().exists()) {
+      return new ArrayList<>();
+    }
     // TODO are these guarenteed to be in order ?
     List<GuardianRecord> grs = new ArrayList<>(guardianRecords());
     grs.sort(Comparator.comparingInt(GuardianRecord::sequence_order));

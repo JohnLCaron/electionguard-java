@@ -24,7 +24,7 @@ public class ParameterVerifier {
 
     // check if p, q, g are the expected values
     if (!electionRecord.largePrime().equals(primes.large_prime)) {
-      System.out.printf(" Large prime value not equal to P. %n");
+      System.out.printf(" Large prime value not equal to P. %s%n", electionRecord.largePrime());
       error = true;
     }
     if (!electionRecord.smallPrime().equals(primes.small_prime)) {

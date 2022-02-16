@@ -88,7 +88,7 @@ public class ElectionRecordFromProto {
             context.getNumberOfGuardians(),
             context.getQuorum(),
             convertElementModP(context.getJointPublicKey()),
-            convertElementModQ(context.getDescriptionHash()),
+            convertElementModQ(context.getManifestHash()),
             convertElementModQ(context.getCryptoBaseHash()),
             convertElementModQ(context.getCryptoExtendedBaseHash()),
             convertElementModQ(context.getCommitmentHash()),

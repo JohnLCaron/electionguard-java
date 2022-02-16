@@ -82,7 +82,7 @@ public class ElectionRecordToProto {
     builder.setNumberOfGuardians(context.number_of_guardians);
     builder.setQuorum(context.quorum);
     builder.setJointPublicKey(convertElementModP(context.elgamal_public_key));
-    builder.setDescriptionHash(convertElementModQ(context.manifest_hash));
+    builder.setManifestHash(convertElementModQ(context.manifest_hash));
     builder.setCryptoBaseHash(convertElementModQ(context.crypto_base_hash));
     builder.setCryptoExtendedBaseHash(convertElementModQ(context.crypto_extended_base_hash));
     builder.setCommitmentHash(convertElementModQ(context.commitment_hash));

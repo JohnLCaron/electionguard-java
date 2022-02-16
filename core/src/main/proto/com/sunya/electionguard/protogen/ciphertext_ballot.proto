@@ -21,9 +21,9 @@ message SubmittedBallot {
 message CiphertextBallot {
   string object_id = 1; // a unique Ballot ID created by the external system
   string ballot_style_id = 2; // The object_id of the BallotStyle in the Election Manifest
-  ElementModQ description_hash = 3; // Hash of the election description
-  ElementModQ tracking_hash = 4; // Unique ballot tracking hash for this ballot
-  ElementModQ previous_tracking_hash = 5; // Previous ballot tracking hash or seed hash
+  ElementModQ manifest_hash = 3; // Hash of the manifest
+  ElementModQ tracking_hash = 4; // Unique ballot tracking hash for this ballot, aka code
+  ElementModQ previous_tracking_hash = 5; // Previous ballot tracking hash or seed hash, aka code_seed
   repeated CiphertextBallotContest contests = 6;
   int64 timestamp = 7; // Timestamp at which the ballot encryption is generated, in seconds since the epoch UTC.
   ElementModQ crypto_hash = 8; // The hash of the encrypted ballot representation

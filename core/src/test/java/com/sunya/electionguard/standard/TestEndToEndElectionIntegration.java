@@ -48,7 +48,7 @@ import static com.google.common.truth.Truth8.assertThat;
 public class TestEndToEndElectionIntegration {
   private static final int NUMBER_OF_GUARDIANS = 7;
   private static final int QUORUM = 5;
-  private static final Random random = new Random(System.currentTimeMillis());
+  private static final Random random = new Random();
 
   String outputDir;
 

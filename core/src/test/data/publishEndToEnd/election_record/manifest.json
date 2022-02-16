@@ -142,8 +142,13 @@
   ],
   "parties": [
     {
-      "ballot_name": {
-        "text": null
+      "name": {
+        "text": [
+          {
+            "value": "Whig Party",
+            "language": "en"
+          }
+        ]
       },
       "abbreviation": "WHI",
       "color": "AAAAAA",
@@ -151,8 +156,13 @@
       "object_id": "whig"
     },
     {
-      "ballot_name": {
-        "text": null
+      "name": {
+        "text": [
+          {
+            "value": "Federalist Party",
+            "language": "en"
+          }
+        ]
       },
       "abbreviation": "FED",
       "color": "CCCCCC",
@@ -160,8 +170,13 @@
       "object_id": "federalist"
     },
     {
-      "ballot_name": {
-        "text": null
+      "name": {
+        "text": [
+          {
+            "value": "Democratic Republican Party",
+            "language": "en"
+          }
+        ]
       },
       "abbreviation": "DEMREP",
       "color": "EEEEEE",

@@ -114,7 +114,7 @@ public class ElectionFactory {
   private static Manifest get_election_from_file(String filename) throws IOException {
     String current = new java.io.File("./src/test/resources/").getCanonicalPath();
     String absFilename = current + "/" + filename;
-    return ConvertFromJson.readElection(absFilename);
+    return ConvertFromJson.readManifest(absFilename);
   }
 
   public static Encrypt.EncryptionDevice get_fake_encryption_device(String polling_place) {

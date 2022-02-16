@@ -52,7 +52,7 @@ public class TestJsonRoundtrip {
     // write json
     ConvertToJson.writeElection(description, file.toPath());
     // read it back
-    Manifest roundtrip = ConvertFromJson.readElection(outputFile);
+    Manifest roundtrip = ConvertFromJson.readManifest(outputFile);
     assertThat(roundtrip).isEqualTo(description);
   }
 

@@ -70,8 +70,8 @@ message ElectionContext {
   // The `joint public key (K)` in the [ElectionGuard Spec]
   ElementModP joint_public_key = 3;
 
-  // The hash of the election description
-  ElementModQ description_hash = 4;
+  // The hash of the manifest
+  ElementModQ manifest_hash = 4;
 
   // the `base hash code (𝑄)` in the [ElectionGuard Spec]
   ElementModQ crypto_base_hash = 5;
