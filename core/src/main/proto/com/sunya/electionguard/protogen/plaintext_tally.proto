@@ -33,7 +33,7 @@ message CiphertextDecryptionSelection {
   string guardian_id = 2;
 
   // The SelectionDescription hash.
-  ElementModQ description_hash = 3;
+  reserved 3;
 
   // The Share of the decryption of a selection. `M_i` in the spec.
   ElementModP share = 4;
@@ -57,7 +57,7 @@ message CiphertextCompensatedDecryptionSelection {
   // The Share of the decryption of a selection. M_il in the spec.
   ElementModP share = 5;
 
-  // he Recovery Public Key for the missing_guardian that corresponds to the available guardian's share of the secret.
+  // The Recovery Public Key for the missing_guardian that corresponds to the available guardian's share of the secret.
   ElementModP recovery_key = 6;
 
   // The Proof that the share was decrypted correctly.

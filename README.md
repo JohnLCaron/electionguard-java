@@ -39,7 +39,8 @@ The entire workflow, consisting of the above steps plus verification can be run 
 ## Election Record
 
 * [Election record](https://github.com/JohnLCaron/electionguard-java/blob/master/docs/ElectionRecord.md)
-* [JSON serialization](https://github.com/JohnLCaron/electionguard-java/blob/master/docs/JsonSpec.md)
+* [Manifest JSON serialization](https://github.com/JohnLCaron/electionguard-java/blob/master/docs/JsonManifestSpec.md)
+* [Election JSON serialization](https://github.com/JohnLCaron/electionguard-java/blob/master/docs/JsonElectionSpec.md)
 
 ### Election Record Visualization
 
