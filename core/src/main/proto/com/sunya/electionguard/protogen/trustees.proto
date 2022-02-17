@@ -36,7 +36,7 @@ message ElectionPartialKeyBackup2 {
   // The x coefficient of the designated guardian.
   uint32 designated_guardian_x_coordinate = 3;
   // The coordinate of the designated guardian
-  ElementModQ coordinate = 6;
+  ElementModQ coordinate = 4;
   // if not empty, an error has occurrred.
   string error = 5;
 }

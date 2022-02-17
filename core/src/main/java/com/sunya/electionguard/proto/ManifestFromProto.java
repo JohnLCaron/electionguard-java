@@ -32,6 +32,7 @@ public class ManifestFromProto {
     //            @Nullable ContactInformation contact_information
     return new Manifest(
             election.getElectionScopeId(),
+            election.getSpecVersion(),
             convert(election.getElectionType()),
             start_date,
             end_date,

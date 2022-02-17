@@ -46,7 +46,7 @@ public class TestPublishJson {
   public void testPublishJson() throws IOException {
     OffsetDateTime now = OffsetDateTime.now();
     Manifest election = new Manifest(
-            "scope", Manifest.ElectionType.unknown, now, now, ImmutableList.of(), ImmutableList.of(),
+            "scope", CiphertextElectionContext.SPEC_VERSION, Manifest.ElectionType.unknown, now, now, ImmutableList.of(), ImmutableList.of(),
             ImmutableList.of(), ImmutableList.of(), ImmutableList.of(), null, null, null);
     InternalManifest metadata = new InternalManifest(election);
 

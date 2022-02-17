@@ -9,6 +9,9 @@ public class ManifestToProto {
   public static ManifestProto.Manifest translateToProto(Manifest election) {
     ManifestProto.Manifest.Builder builder = ManifestProto.Manifest.newBuilder();
     builder.setElectionScopeId(election.election_scope_id());
+    if (election.spec_version() != null) {
+      builder.setSpecVersion(election.spec_version());
+    }
     builder.setElectionType(convertElectionType(election.type()));
     builder.setStartDate(election.start_date().toString());
     builder.setEndDate(election.end_date().toString());

@@ -11,7 +11,6 @@ import net.jqwik.api.lifecycle.BeforeContainer;
 import java.io.IOException;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
 
 public class TestManifestToProtoRoundtrip {
   private static Publisher publisher;

@@ -12,16 +12,16 @@ message PlaintextBallot {
 
 message PlaintextBallotContest {
   string contest_id = 1; // matches the ContestDescription.object_id
-  int32 sequence_order = 4;
+  int32 sequence_order = 2;
   repeated PlaintextBallotSelection ballot_selections = 3;
 }
 
 message PlaintextBallotSelection {
   string selection_id = 1; // matches the SelectionDescription.object_id
-  int32 sequence_order = 5;
-  uint32 vote = 2;
-  bool is_placeholder_selection = 3;
-  ExtendedData extended_data = 4;
+  int32 sequence_order = 2;
+  uint32 vote = 3;
+  bool is_placeholder_selection = 4;
+  ExtendedData extended_data = 5; // not used
 }
 
 // used for write-in candidate value

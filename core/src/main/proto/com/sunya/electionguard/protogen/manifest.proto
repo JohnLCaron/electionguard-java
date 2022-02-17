@@ -19,16 +19,17 @@ message Manifest {
   }
 
   string election_scope_id = 1;
-  ElectionType election_type = 2;
-  string start_date = 3; // ISO 8601 formatted date
-  string end_date = 4; // ISO 8601 formatted date
-  repeated GeopoliticalUnit geopolitical_units = 5;
-  repeated Party parties = 6;
-  repeated Candidate candidates = 7;
-  repeated ContestDescription contests = 8;
-  repeated BallotStyle ballot_styles = 9;
-  InternationalizedText name = 10;
-  ContactInformation contact_information = 11;
+  string spec_version = 2;
+  ElectionType election_type = 3;
+  string start_date = 4; // ISO 8601 formatted date
+  string end_date = 5; // ISO 8601 formatted date
+  repeated GeopoliticalUnit geopolitical_units = 6;
+  repeated Party parties = 7;
+  repeated Candidate candidates = 8;
+  repeated ContestDescription contests = 9;
+  repeated BallotStyle ballot_styles = 10;
+  InternationalizedText name = 11;
+  ContactInformation contact_information = 12;
 }
 
 message AnnotatedString {
@@ -56,36 +57,6 @@ message ContactInformation {
   repeated string address_line = 2;
   repeated AnnotatedString email = 3;
   repeated AnnotatedString phone = 4;
-}
-
-message ContestDescription {
-  enum VoteVariationType {
-    unknown = 0;
-    one_of_m = 1;
-    approval = 2;
-    borda = 3;
-    cumulative = 4;
-    majority = 5;
-    n_of_m = 6;
-    plurality = 7;
-    proportional = 8;
-    range = 9;
-    rcv = 10;
-    super_majority = 11;
-    other = 12;
-  }
-
-  string object_id = 1;
-  string electoral_district_id = 2;
-  uint32 sequence_order = 3;
-  VoteVariationType vote_variation = 4;
-  uint32 number_elected = 5;
-  uint32 votes_allowed = 6;  // TODO why Optional?
-  string name = 7;
-  repeated SelectionDescription ballot_selections = 8;
-  InternationalizedText ballot_title = 9;
-  InternationalizedText ballot_subtitle = 10;
-  repeated string primary_party_ids = 11;
 }
 
 message GeopoliticalUnit {
@@ -143,6 +114,36 @@ message Party {
   string abbreviation = 3;
   string color = 4;
   string logo_uri = 5;
+}
+
+message ContestDescription {
+  enum VoteVariationType {
+    unknown = 0;
+    one_of_m = 1;
+    approval = 2;
+    borda = 3;
+    cumulative = 4;
+    majority = 5;
+    n_of_m = 6;
+    plurality = 7;
+    proportional = 8;
+    range = 9;
+    rcv = 10;
+    super_majority = 11;
+    other = 12;
+  }
+
+  string object_id = 1;
+  string electoral_district_id = 2;
+  uint32 sequence_order = 3;
+  VoteVariationType vote_variation = 4;
+  uint32 number_elected = 5;
+  uint32 votes_allowed = 6;
+  string name = 7;
+  repeated SelectionDescription ballot_selections = 8;
+  InternationalizedText ballot_title = 9;
+  InternationalizedText ballot_subtitle = 10;
+  repeated string primary_party_ids = 11;
 }
 
 message SelectionDescription {

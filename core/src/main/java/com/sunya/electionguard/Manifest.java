@@ -17,6 +17,7 @@ import java.util.List;
  */
 public record Manifest(
         String election_scope_id,
+        String spec_version,
         ElectionType type,
         OffsetDateTime start_date,
         OffsetDateTime end_date,
@@ -37,6 +38,9 @@ public record Manifest(
     Preconditions.checkNotNull(type);
     Preconditions.checkNotNull(start_date);
     Preconditions.checkNotNull(end_date);
+    if (Strings.isNullOrEmpty(spec_version)) {
+      spec_version = CiphertextElectionContext.SPEC_VERSION;
+    }
     geopolitical_units = toImmutableListEmpty(geopolitical_units);
     parties = toImmutableListEmpty(parties);
     candidates = toImmutableListEmpty(candidates);

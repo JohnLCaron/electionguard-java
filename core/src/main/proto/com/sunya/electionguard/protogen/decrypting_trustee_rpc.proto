@@ -1,6 +1,7 @@
 syntax = "proto3";
 
 import "com/sunya/electionguard/protogen/common.proto";
+import "com/sunya/electionguard/protogen/plaintext_tally.proto";
 import "google/protobuf/empty.proto";
 
 option java_package = "com.sunya.electionguard.protogen";

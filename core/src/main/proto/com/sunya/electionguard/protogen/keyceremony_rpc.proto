@@ -15,8 +15,8 @@ message RegisterKeyCeremonyTrusteeRequest {
 }
 
 message RegisterKeyCeremonyTrusteeResponse {
-  string guardian_id = 2; // echoed from the request
-  uint32 guardian_x_coordinate = 3; // assign the KeyCeremonyTrustee's xcoordinate
-  uint32 quorum = 4; // tell the KeyCeremonyTrustee what the quorum size is.
-  string error = 5; // error if not empty
+  string guardian_id = 1; // echoed from the request
+  uint32 guardian_x_coordinate = 2; // assign the KeyCeremonyTrustee's xcoordinate
+  uint32 quorum = 3; // tell the KeyCeremonyTrustee what the quorum size is.
+  string error = 4; // error if not empty
 }

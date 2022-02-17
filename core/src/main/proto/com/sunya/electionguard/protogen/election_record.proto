@@ -54,12 +54,10 @@ message GuardianRecord {
 
 // The device that does the encryption.
 message EncryptionDevice {
-  reserved 3; // int64 uuid
-  int64 device_id = 6;
-  reserved 4; // string session_id
-  int64 session_id = 7;
-  int64 launch_code = 5;
-  string location = 2;
+  int64 device_id = 1;
+  int64 session_id = 2;
+  int64 launch_code = 3;
+  string location = 4;
 }
 
 // ElectionGuard representation of a specific election.

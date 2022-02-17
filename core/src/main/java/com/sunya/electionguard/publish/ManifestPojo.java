@@ -16,11 +16,12 @@ import java.util.List;
  * Helper class for conversion of Manifest description to/from Json, using python's object model.
  */
 public class ManifestPojo {
-  public InternationalizedText name;
   public String election_scope_id;
+  public String spec_version;
   public String type;
   public String start_date; // LOOK specify ISO-8601 format
   public String end_date; // ISO-8601 Local or UTC? Assume local has zone offset
+  public InternationalizedText name;
   public ContactInformation contact_information;
 
   public List<GeopoliticalUnit> geopolitical_units;
@@ -114,6 +115,7 @@ public class ManifestPojo {
 
     return new Manifest(
             pojo.election_scope_id,
+            pojo.spec_version,
             Manifest.ElectionType.valueOf(pojo.type),
             startLocalDate,
             endLocalDate,
