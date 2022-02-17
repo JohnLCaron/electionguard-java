@@ -1,33 +1,34 @@
 # 🗳 Election Record JSON serialization (proposed specification)
-draft 2/15/2022
+draft 2/17/2022
 
 This covers only the election record, and not any serialized classes used in remote procedure calls.
 
 # Data Types
 
-| Data Type		 | JSON	                                            | language type                                                               |
-|-------------|--------------------------------------------------|-----------------------------------------------------------------------------|
-| BigInteger  | string	                                          | decimal encoded integer, arbitrary number of digits. LOOK or hex or base64? |
-| bool		      | boolean                                          | boolean                                                                     |
-| isodate	    | string	                                          | ISO 8601 formatted date/time                                                |
-| timestamp	  | number	                                          | 64 bit signed integer = secs since unix epoch  LOOK or millis?              |
-| Dict[K,V]	  | array of objects V with name K	 | Dict[K,V], Map<K, V>                                                        |
-| ElementModQ | string	                                          | BigInteger converted to ElementModQ                                         |
-| ElementModP | string	                                          | BigInteger converted to ElementModP                                         |
-| enum<T>	    | string                                           | matches the name of an element of enum T                                    |
-| int		       | number	                                          | 32 bit signed integer                                                       |
-| List[T]	    | array                                            | 0 or more objects of type T                                                 |
-| ulong		     | number	                                          | 64 bit unsigned integer                                                     |
-| str		       | string	                                          | UTF-8 encoded string                                                        |
-| T		         | object	                                          | T                                                                           |
+| Data Type		 | JSON	                           | language type                                                          |
+|------------|---------------------------------|------------------------------------------------------------------------|
+| BigInteger | string	                         | hex encoded integer, arbitrary number of digits. |
+| bool		     | boolean                         | boolean                                                                |
+| isodate	   | string	                         | ISO 8601 formatted date/time                                           |
+| timestamp	 | number	                         | 64 bit signed integer = secs since unix epoch  LOOK or millis?         |
+| Dict[K,V]	 | array of objects V with name K	 | Dict[K,V], Map<K, V>                                                   |
+| ElementModQ | object	                         | ElementModQ                                                            |
+| ElementModP | object	                         | ElementModP                                                            |
+| enum<T>	   | string                          | matches the name of an element of enum T                               |
+| int		      | number	                         | 32 bit signed integer                                                  |
+| List[T]	   | array                           | 0 or more objects of type T                                            |
+| long		     | number	                         | 64 bit signed integer                                                  |
+| str		      | string	                         | UTF-8 encoded string                                                   |
+| T		        | object	                         | T                                                                      |
 
 Notes
 
   1. Any field may be missing or null. Could try to document when fields must be present 
-  3. Could document the filenames and directory layout
-  4. BigInteger currently inconsistent
-  5. bool currently inconsistent
-  6. ulong only used for EncryptionDevice.device_id, could switch that to str.
+  2. Could document the filenames and directory layout
+  3. bool currently inconsistent
+  4. long only used for EncryptionDevice.device_id, could switch to str.
+  5. could use timestamp everywhere instead of isodate
+  6. could use base64 encoding for BigInteger for compactness and possibly processing speed
 
 ## Election
 
@@ -51,15 +52,20 @@ Notes
 | cofactor    | BigInteger  ||
 | generator   | BigInteger  ||
 
-### class EncryptionDevice
-| Name		      | Type	  | Notes                                  |
-|-------------|--------|----------------------------------------|
-| device_id   | ulong	 | was uuid LOOK maybe just use a string? |
-| session_id  | int	   |                                        |
-| launch_code | int	   |                                        |
-| location    | str    ||
+### class ElementModQ, ElementModP
+| Name		 | Type	       | Notes                         |
+|--------|-------------|-------------------------------|
+| data   | BigInteger	 |  |
 
-### class LagrangeCoefficientsRecord
+### class EncryptionDevice
+| Name		      | Type	 | Notes                                  |
+|-------------|-------|----------------------------------------|
+| device_id   | long	 | was uuid LOOK maybe just use a string? |
+| session_id  | int	  |                                        |
+| launch_code | int	  |                                        |
+| location    | str   ||
+
+### class LagrangeCoefficients
 | Name		      | Type	                  | Notes                                  |
 |-------------|------------------------|----------------------------------------|
 | coefficients   | Dict[str,ElementModQ]	 | |

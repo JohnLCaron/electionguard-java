@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -22,22 +23,23 @@ public class TestJsonRoundtrip {
     String outputFile = file.getAbsolutePath();
 
     int n = 17;
-    List<Group.ElementModQ> coeffs = new ArrayList<>();
+    Map<String, Group.ElementModQ> coeffs = new HashMap<>();
     for (int i=0; i<n; i++) {
-      coeffs.add(Group.rand_q());
+      coeffs.put("test"+i+1, Group.rand_q());
     }
 
     List<AvailableGuardian> ags = new ArrayList<>();
     for (int i=0; i<n; i++) {
-      ags.add(new AvailableGuardian("test"+i+1, i+1, coeffs.get(i)));
+      String key = "test"+i+1;
+      ags.add(new AvailableGuardian(key, i+1, coeffs.get(key)));
     }
 
     // original
-    Coefficients org = new Coefficients(coeffs);
+    LagrangeCoefficientsPojo org = new LagrangeCoefficientsPojo(coeffs);
     // write json
     ConvertToJson.writeCoefficients(ags, file.toPath());
     // read it back
-    Coefficients fromFile = ConvertFromJson.readCoefficients(outputFile);
+    LagrangeCoefficientsPojo fromFile = ConvertFromJson.readCoefficients(outputFile);
     assertThat(fromFile).isEqualTo(org);
   }
 

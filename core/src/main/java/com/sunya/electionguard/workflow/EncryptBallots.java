@@ -239,9 +239,10 @@ public class EncryptBallots {
   }
 
   void saveOriginalBallots(Publisher publisher, List<PlaintextBallot> ballots) throws IOException {
-    PrivateData pdata = publisher.makePrivateData(false, false);
+    PrivateData pdata = publisher.makePrivateData(true, true);
+    // LOOK JSON !!
     pdata.publish_private_data(ballots, null);
-    System.out.printf("Save original ballots in %s%n", pdata.privateDirectory());
+    System.out.printf("Save %d original ballots in %s%n", ballots.size(), pdata.privateDirectory());
   }
 
   void saveInvalidBallots(Publisher publisher, List<PlaintextBallot> ballots) throws IOException {

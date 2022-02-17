@@ -1,9 +1,19 @@
 {
-  "coefficients": [
-    "10",
-    "115792089237316195423570985008687907853269984665640564039457584007913129639737",
-    "1",
-    "115792089237316195423570985008687907853269984665640564039457584007913129639742",
-    "5"
-  ]
+  "coefficients": {
+    "guardian_3": {
+      "data": "0A"
+    },
+    "guardian_2": {
+      "data": "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF39"
+    },
+    "guardian_5": {
+      "data": "01"
+    },
+    "guardian_4": {
+      "data": "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF3E"
+    },
+    "guardian_1": {
+      "data": "05"
+    }
+  }
 }

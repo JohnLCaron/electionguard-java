@@ -9,6 +9,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.file.Path;
+import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 /** Static helper methods for writing serialized classes to json files. */
@@ -16,6 +17,7 @@ import java.util.stream.StreamSupport;
 public class ConvertToJson {
   private static final Gson enhancedGson = GsonTypeAdapters.enhancedGson();
 
+  // LOOK maybe replace AvailableGuardian with AvailableGuardian ??
   static void writeAvailableGuardian(AvailableGuardian object, Path where) throws IOException {
     Type type = new TypeToken<AvailableGuardian>(){}.getType();
     try (FileWriter writer = new FileWriter(where.toFile())) {
@@ -24,11 +26,11 @@ public class ConvertToJson {
   }
 
   static void writeCoefficients(Iterable<AvailableGuardian> object, Path where) throws IOException {
-    Coefficients coefs = new Coefficients(
+    LagrangeCoefficientsPojo coeffs = new LagrangeCoefficientsPojo(
             StreamSupport.stream(object.spliterator(), false)
-            .map(g -> g.lagrangeCoordinate()).toList());
+            .collect(Collectors.toMap(AvailableGuardian::guardian_id, AvailableGuardian::lagrangeCoordinate)));
     try (FileWriter writer = new FileWriter(where.toFile())) {
-      enhancedGson.toJson(coefs, Coefficients.class, writer);
+      enhancedGson.toJson(coeffs, LagrangeCoefficientsPojo.class, writer);
     }
   }
 

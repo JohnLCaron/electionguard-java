@@ -22,7 +22,7 @@ public class TestReadPythonJson {
 
   @Example
   public void testCoefficientsPythonJson() throws IOException {
-    Coefficients fromPython = ConvertFromJson.readCoefficients(publisher.coefficientsPath().toString());
+    LagrangeCoefficientsPojo fromPython = ConvertFromJson.readCoefficients(publisher.coefficientsPath().toString());
     assertThat(fromPython).isNotNull();
     System.out.printf("%n%s%n%n", fromPython);
   }

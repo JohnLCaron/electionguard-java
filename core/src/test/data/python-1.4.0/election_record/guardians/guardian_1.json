@@ -1,33 +1,65 @@
 {
-    "guardian_id": "1",
-    "sequence_order": "01",
-    "election_public_key": "AFAAFC2F0E303F5F",
-    "election_commitments": [
-        "AFAAFC2F0E303F5F",
-        "A0856AD1FF464FF8",
-        "B21E1ECCE46CB9AA"
-    ],
-    "election_proofs": [
-        {
-            "public_key": "AFAAFC2F0E303F5F",
-            "commitment": "937CC819C9CE7E25",
-            "challenge": "72F2",
-            "response": "C733",
-            "usage": "Prove knowledge of secret value"
-        },
-        {
-            "public_key": "A0856AD1FF464FF8",
-            "commitment": "10D2B6C6B02284E2",
-            "challenge": "9C72",
-            "response": "0845",
-            "usage": "Prove knowledge of secret value"
-        },
-        {
-            "public_key": "B21E1ECCE46CB9AA",
-            "commitment": "180A3A21F37611FB",
-            "challenge": "CD11",
-            "response": "EBD6",
-            "usage": "Prove knowledge of secret value"
-        }
-    ]
+  "guardian_id": "1",
+  "sequence_order": 1,
+  "election_public_key": {
+    "data": "2A931F53A3DDA05F"
+  },
+  "election_commitments": [
+    {
+      "data": "2A931F53A3DDA05F"
+    },
+    {
+      "data": "9872F18B667DBF63"
+    },
+    {
+      "data": "60E841C05129E71D"
+    }
+  ],
+  "election_proofs": [
+    {
+      "public_key": {
+        "data": "2A931F53A3DDA05F"
+      },
+      "commitment": {
+        "data": "73650B8141737E47"
+      },
+      "challenge": {
+        "data": "BF01"
+      },
+      "response": {
+        "data": "A818"
+      },
+      "usage": "Prove knowledge of secret value"
+    },
+    {
+      "public_key": {
+        "data": "9872F18B667DBF63"
+      },
+      "commitment": {
+        "data": "865F4DBC9A85A5F9"
+      },
+      "challenge": {
+        "data": "043F"
+      },
+      "response": {
+        "data": "629C"
+      },
+      "usage": "Prove knowledge of secret value"
+    },
+    {
+      "public_key": {
+        "data": "60E841C05129E71D"
+      },
+      "commitment": {
+        "data": "01B4D871A64C9BD9"
+      },
+      "challenge": {
+        "data": "8910"
+      },
+      "response": {
+        "data": "21B4"
+      },
+      "usage": "Prove knowledge of secret value"
+    }
+  ]
 }

@@ -22,10 +22,10 @@ public class ConvertFromJson {
     }
   }
 
-  public static Coefficients readCoefficients(String pathname) throws IOException {
+  public static LagrangeCoefficientsPojo readCoefficients(String pathname) throws IOException {
     try (InputStream is = new FileInputStream(pathname)) {
       Reader reader = new InputStreamReader(is);
-      return enhancedGson.fromJson(reader, Coefficients.class);
+      return enhancedGson.fromJson(reader, LagrangeCoefficientsPojo.class);
     } catch (Exception ioe) {
       logger.atSevere().log("Failed readCoefficients file '%s'", pathname);
       throw ioe;

@@ -420,12 +420,15 @@ public class Publisher {
     }
 
     // the accepted ballots are written into their own file
+    int count = 0;
     try (FileOutputStream out = new FileOutputStream(submittedBallotProtoPath().toFile())) {
       for (SubmittedBallot ballot : submittedBallots) {
         CiphertextBallotProto.SubmittedBallot ballotProto = CiphertextBallotToProto.translateToProto(ballot);
         ballotProto.writeDelimitedTo(out);
+        count++;
       }
     }
+    System.out.printf("Save %d accepted ballots in %s%n", count, submittedBallotProtoPath());
 
     ElectionRecordProto.ElectionRecord electionRecordProto = ElectionRecordToProto.buildElectionRecord(
             electionRecord.election,
@@ -564,9 +567,13 @@ public class Publisher {
     if (createMode == Mode.readonly) {
       throw new UnsupportedOperationException("Trying to write to readonly election record");
     }
-
     Path source = new Publisher(inputDir, Mode.writeonly, false).submittedBallotProtoPath();
     Path dest = submittedBallotProtoPath();
+    if (source.equals(dest)) {
+      return;
+    }
+
+    System.out.printf("Copy AcceptedBallots from %s to %s%n", source, dest);
     Files.copy(source, dest, StandardCopyOption.COPY_ATTRIBUTES);
   }
 

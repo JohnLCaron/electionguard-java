@@ -1,5 +1,7 @@
 package com.sunya.electionguard.verifier;
 
+import com.sunya.electionguard.ElectionConstants;
+import com.sunya.electionguard.Group;
 import com.sunya.electionguard.publish.Consumer;
 import net.jqwik.api.Example;
 
@@ -30,5 +32,20 @@ public class TestParameterVerifier {
     ParameterVerifier blv = new ParameterVerifier(consumer.readElectionRecordProto());
     boolean blvOk = blv.verify_all_params();
     assertThat(blvOk).isTrue();
+  }
+
+  @Example
+  public void testElectionRecordPythonJson() throws IOException {
+    try {
+      Consumer consumer = new Consumer(topdirJsonPython);
+      ElectionRecord electionRecord = consumer.readElectionRecordJson();
+      assertThat(electionRecord.constants.getPrimeOptionType()).isEqualTo(ElectionConstants.PrimeOption.LargeTest);
+      Group.setPrimes(electionRecord.constants);
+      ParameterVerifier blv = new ParameterVerifier(electionRecord);
+      boolean blvOk = blv.verify_all_params();
+      assertThat(blvOk).isTrue();
+    } finally {
+      Group.reset();
+    }
   }
 }

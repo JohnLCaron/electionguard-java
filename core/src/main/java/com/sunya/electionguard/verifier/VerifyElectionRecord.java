@@ -90,6 +90,8 @@ public class VerifyElectionRecord {
     } catch (Throwable t) {
       t.printStackTrace();
       System.exit(2);
+    } finally {
+      Group.reset();
     }
   }
 

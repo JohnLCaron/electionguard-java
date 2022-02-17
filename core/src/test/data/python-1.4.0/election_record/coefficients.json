@@ -1,9 +1,19 @@
 {
-    "coefficients": [
-        "05",
-        "FFE7",
-        "0A",
-        "FFEC",
-        "01"
-    ]
+  "coefficients": {
+    "1": {
+      "data": "05"
+    },
+    "2": {
+      "data": "FFE7"
+    },
+    "3": {
+      "data": "0A"
+    },
+    "4": {
+      "data": "FFEC"
+    },
+    "5": {
+      "data": "01"
+    }
+  }
 }
