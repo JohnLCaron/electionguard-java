@@ -15,17 +15,6 @@ public class CiphertextBallotToProto {
 
   public static CiphertextBallotProto.SubmittedBallot translateToProto(SubmittedBallot ballot) {
     CiphertextBallotProto.SubmittedBallot.Builder builder = CiphertextBallotProto.SubmittedBallot.newBuilder();
-    builder.setCiphertextBallot(convertCiphertextBallot(ballot));
-    builder.setState(convertBallotBoxState(ballot.state));
-    return builder.build();
-  }
-
-  static CiphertextBallotProto.SubmittedBallot.BallotBoxState convertBallotBoxState(BallotBox.State type) {
-    return CiphertextBallotProto.SubmittedBallot.BallotBoxState.valueOf(type.name());
-  }
-
-  static CiphertextBallotProto.CiphertextBallot convertCiphertextBallot(CiphertextBallot ballot) {
-    CiphertextBallotProto.CiphertextBallot.Builder builder = CiphertextBallotProto.CiphertextBallot.newBuilder();
     builder.setObjectId(ballot.object_id());
     builder.setBallotStyleId(ballot.style_id);
     builder.setManifestHash(convertElementModQ(ballot.manifest_hash));
@@ -35,7 +24,12 @@ public class CiphertextBallotToProto {
     builder.setTimestamp(ballot.timestamp);
     builder.setCryptoHash(convertElementModQ(ballot.crypto_hash));
     ballot.nonce.ifPresent(value -> builder.setNonce(convertElementModQ(value)));
+    builder.setState(convertBallotBoxState(ballot.state));
     return builder.build();
+  }
+
+  static CiphertextBallotProto.SubmittedBallot.BallotBoxState convertBallotBoxState(BallotBox.State type) {
+    return CiphertextBallotProto.SubmittedBallot.BallotBoxState.valueOf(type.name());
   }
 
   static CiphertextBallotProto.CiphertextBallotContest convertContest(CiphertextBallot.Contest contest) {
@@ -45,7 +39,7 @@ public class CiphertextBallotToProto {
     builder.setDescriptionHash(convertElementModQ(contest.contest_hash));
     contest.ballot_selections.forEach(value -> builder.addSelections(convertSelection(value)));
     builder.setCryptoHash(convertElementModQ(contest.crypto_hash));
-    builder.setEncryptedTotal(convertCiphertext(contest.encrypted_total));
+    builder.setCiphertextAccumulation(convertCiphertext(contest.encrypted_total));
     contest.nonce.ifPresent(value -> builder.setNonce(convertElementModQ(value)));
     contest.proof.ifPresent(value -> builder.setProof(convertConstantProof(value)));
     return builder.build();

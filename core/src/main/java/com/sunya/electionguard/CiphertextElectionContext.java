@@ -20,6 +20,7 @@ import static com.sunya.electionguard.Group.int_to_q_unchecked;
  */
 @Immutable
 public class CiphertextElectionContext {
+  public static final String SPEC_VERSION = "v0.95";
 
   /**
    * Makes a CiphertextElectionContext object. python: election.make_ciphertext_election_context().

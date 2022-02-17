@@ -32,17 +32,14 @@ message CiphertextDecryptionSelection {
   // The Available Guardian that this share belongs to
   string guardian_id = 2;
 
-  // The SelectionDescription hash.
-  reserved 3;
-
   // The Share of the decryption of a selection. `M_i` in the spec.
-  ElementModP share = 4;
+  ElementModP share = 3;
 
   // The Proof that the share was decrypted correctly, if the guardian was available for decryption.
-  ChaumPedersenProof proof = 5;
+  ChaumPedersenProof proof = 4;
 
   // Map[GUARDIAN_ID, CiphertextCompensatedDecryptionSelection]
-  map<string, CiphertextCompensatedDecryptionSelection> recovered_parts = 6;
+  map<string, CiphertextCompensatedDecryptionSelection> recovered_parts = 5;
 }
 
 message CiphertextCompensatedDecryptionSelection {
@@ -55,11 +52,11 @@ message CiphertextCompensatedDecryptionSelection {
   string missing_guardian_id = 3;
 
   // The Share of the decryption of a selection. M_il in the spec.
-  ElementModP share = 5;
+  ElementModP share = 4;
 
   // The Recovery Public Key for the missing_guardian that corresponds to the available guardian's share of the secret.
-  ElementModP recovery_key = 6;
+  ElementModP recovery_key = 5;
 
   // The Proof that the share was decrypted correctly.
-  ChaumPedersenProof proof = 7;
+  ChaumPedersenProof proof = 6;
 }

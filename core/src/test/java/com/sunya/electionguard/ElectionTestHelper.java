@@ -445,6 +445,7 @@ public class ElectionTestHelper {
 
     return new Manifest(
             randomString("election_scope_id"),
+            CiphertextElectionContext.SPEC_VERSION,
             Manifest.ElectionType.general,  // good enough for now
             start_date,
             end_date,

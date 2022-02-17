@@ -1,12 +1,12 @@
 package com.sunya.electionguard.input;
 
 import com.google.common.collect.ImmutableList;
+import com.sunya.electionguard.CiphertextElectionContext;
 import com.sunya.electionguard.Manifest;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class ElectionInputBuilder {
   public static final String districtDef = "district";
@@ -62,7 +62,8 @@ public class ElectionInputBuilder {
     //                  List<BallotStyle> ballot_styles,
     //                  @Nullable InternationalizedText name,
     //                  @Nullable ContactInformation contact_information
-    return new Manifest(election_scope_id, Manifest.ElectionType.general, OffsetDateTime.now(), OffsetDateTime.now(),
+    return new Manifest(election_scope_id, CiphertextElectionContext.SPEC_VERSION, Manifest.ElectionType.general,
+            OffsetDateTime.now(), OffsetDateTime.now(),
             ImmutableList.of(gpUnit), parties, candidates,
             contests.stream().map(ContestBuilder::build).toList(),
             ImmutableList.of(ballotStyle), null, null, null);

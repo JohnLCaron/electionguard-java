@@ -13,12 +13,6 @@ message SubmittedBallot {
     SPOILED = 2;
   }
 
-  CiphertextBallot ciphertext_ballot = 1;
-  BallotBoxState state = 2;
-}
-
-// An encrypted Ballot
-message CiphertextBallot {
   string object_id = 1; // a unique Ballot ID created by the external system
   string ballot_style_id = 2; // The object_id of the BallotStyle in the Election Manifest
   ElementModQ manifest_hash = 3; // Hash of the manifest
@@ -28,33 +22,34 @@ message CiphertextBallot {
   int64 timestamp = 7; // Timestamp at which the ballot encryption is generated, in seconds since the epoch UTC.
   ElementModQ crypto_hash = 8; // The hash of the encrypted ballot representation
   ElementModQ nonce = 9; // The nonce used to encrypt this ballot. TODO Issue #47
+  BallotBoxState state = 10;
 }
 
 // Encrypted selections for a specific contest.
 message CiphertextBallotContest {
   string object_id = 1; // matches the ContestDescription.object_id
-  int32 sequence_order = 8; // matches the ContestDescription.object_id
-  ElementModQ description_hash = 2; // Hash of the contest description
-  repeated CiphertextBallotSelection selections = 3;
-  ElementModQ crypto_hash = 4; // The hash of the encrypted values
-  ElGamalCiphertext encrypted_total = 5;  // The contest total (A, B)
-  ElementModQ nonce = 6; // The nonce used to generate the encryption. TODO Issue #47
-  ConstantChaumPedersenProof proof = 7;  // The proof that the sum of the selections does not exceed the maximum
+  int32 sequence_order = 2; // matches the ContestDescription.object_id
+  ElementModQ description_hash = 3; // Hash of the contest description
+  repeated CiphertextBallotSelection selections = 4;
+  ElementModQ crypto_hash = 5; // The hash of the encrypted values
+  ElGamalCiphertext ciphertext_accumulation = 6;  // The contest total (A, B)
+  ElementModQ nonce = 7; // The nonce used to generate the encryption. TODO Issue #47
+  ConstantChaumPedersenProof proof = 8;  // The proof that the sum of the selections does not exceed the maximum
                // available selections for the contest, and that the proof was generated with the nonce
 }
 
 // Encryption of a specific selection.
 message CiphertextBallotSelection {
   string object_id = 1;
-  int32 sequence_order = 9; // matches the ContestDescription.object_id
-  ElementModQ description_hash = 2; // Hash of the selection description
-  ElGamalCiphertext ciphertext = 3; // The encrypted representation of the vote field
-  ElementModQ crypto_hash = 4; // The hash of the encrypted values
-  bool is_placeholder_selection = 5;
-  ElementModQ nonce = 6; // The nonce used to generate the encryption. TODO Issue #47
-  DisjunctiveChaumPedersenProof proof = 7; // The proof that demonstrates the selection is an encryption of 0 or 1,
+  int32 sequence_order = 2; // matches the ContestDescription.object_id
+  ElementModQ description_hash = 3; // Hash of the selection description
+  ElGamalCiphertext ciphertext = 4; // The encrypted representation of the vote field
+  ElementModQ crypto_hash = 5; // The hash of the encrypted values
+  bool is_placeholder_selection = 6;
+  ElementModQ nonce = 7; // The nonce used to generate the encryption. TODO Issue #47
+  DisjunctiveChaumPedersenProof proof = 8; // The proof that demonstrates the selection is an encryption of 0 or 1,
                                            // and was encrypted using the nonce.
-  ElGamalCiphertext extended_data = 8;     // Not used yet - TODO Issue #47
+  ElGamalCiphertext extended_data = 9;     // Not used
 }
 
 message ConstantChaumPedersenProof {
