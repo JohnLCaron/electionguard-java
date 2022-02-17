@@ -44,8 +44,8 @@ class GsonTypeAdapters {
             .registerTypeAdapter(BigInteger.class, new BigIntegerSerializer())
             .registerTypeAdapter(Boolean.class, new BooleanSerializer())
             .registerTypeAdapter(Boolean.class, new BooleanDeserializer())
-            .registerTypeAdapter(Coefficients.class, new CoefficientsSerializer())
-            .registerTypeAdapter(Coefficients.class, new CoefficientsDeserializer())
+            .registerTypeAdapter(LagrangeCoefficientsPojo.class, new LagrangeCoefficientsSerializer())
+            .registerTypeAdapter(LagrangeCoefficientsPojo.class, new LagrangeCoefficientsDeserializer())
             .registerTypeAdapter(CiphertextTally.class, new CiphertextTallySerializer())
             .registerTypeAdapter(CiphertextTally.class, new CiphertextTallyDeserializer())
             .registerTypeAdapter(Encrypt.EncryptionDevice.class, new EncryptionDeviceSerializer())
@@ -105,14 +105,18 @@ class GsonTypeAdapters {
     }
   }
 
-  // LOOK python is using base 10
   private static class ModQDeserializer implements JsonDeserializer<Group.ElementModQ> {
     @Override
     public Group.ElementModQ deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
             throws JsonParseException {
-      String content = json.getAsJsonPrimitive().getAsString();
-      // System.out.printf("content %s %n int = %s%n hex = %s%n+", content, new BigInteger(content, 10), new BigInteger(content, 16));
-      return Group.int_to_q(new BigInteger(content, 10)).orElseThrow(RuntimeException::new);
+      return ElementModPojo.deserializeQ(json);
+    }
+  }
+
+  private static class ModQSerializer implements JsonSerializer<Group.ElementModQ> {
+    @Override
+    public JsonElement serialize(Group.ElementModQ src, Type typeOfSrc, JsonSerializationContext context) {
+      return ElementModPojo.serializeQ(src);
     }
   }
 
@@ -120,23 +124,14 @@ class GsonTypeAdapters {
     @Override
     public Group.ElementModP deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
             throws JsonParseException {
-      String content = json.getAsJsonPrimitive().getAsString();
-      // System.out.printf("content %s %n int = %s%n hex = %s%n+", content, new BigInteger(content, 10), new BigInteger(content, 16));
-      return Group.int_to_p(new BigInteger(content, 10)).orElseThrow(RuntimeException::new);
-    }
-  }
-
-  private static class ModQSerializer implements JsonSerializer<Group.ElementModQ> {
-    @Override
-    public JsonElement serialize(Group.ElementModQ src, Type typeOfSrc, JsonSerializationContext context) {
-      return new JsonPrimitive(src.getBigInt().toString());
+      return ElementModPojo.deserializeP(json);
     }
   }
 
   private static class ModPSerializer implements JsonSerializer<Group.ElementModP> {
     @Override
     public JsonElement serialize(Group.ElementModP src, Type typeOfSrc, JsonSerializationContext context) {
-      return new JsonPrimitive(src.getBigInt().toString());
+      return ElementModPojo.serializeP(src);
     }
   }
 
@@ -260,18 +255,18 @@ class GsonTypeAdapters {
     }
   }
 
-  private static class CoefficientsSerializer implements JsonSerializer<Coefficients> {
+  private static class LagrangeCoefficientsSerializer implements JsonSerializer<LagrangeCoefficientsPojo> {
     @Override
-    public JsonElement serialize(Coefficients src, Type typeOfSrc, JsonSerializationContext context) {
-      return Coefficients.serialize(src);
+    public JsonElement serialize(LagrangeCoefficientsPojo src, Type typeOfSrc, JsonSerializationContext context) {
+      return LagrangeCoefficientsPojo.serialize(src);
     }
   }
 
-  private static class CoefficientsDeserializer implements JsonDeserializer<Coefficients> {
+  private static class LagrangeCoefficientsDeserializer implements JsonDeserializer<LagrangeCoefficientsPojo> {
     @Override
-    public Coefficients deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+    public LagrangeCoefficientsPojo deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
             throws JsonParseException {
-      return Coefficients.deserialize(json);
+      return LagrangeCoefficientsPojo.deserialize(json);
     }
   }
 

@@ -13,7 +13,7 @@ import java.util.Objects;
 @Immutable
 public class ElectionConstants {
 
-  enum PrimeOption { Standard, LargeTest, MediumTest, SmallTest, ExtraSmallTest, StandardPrevious, Custom }
+  public enum PrimeOption { Standard, LargeTest, MediumTest, SmallTest, ExtraSmallTest, StandardPrevious, Custom }
 
   public static ElectionConstants get(PrimeOption used) {
     switch (used) {
@@ -82,23 +82,11 @@ public class ElectionConstants {
   /** generator or G. */
   public final BigInteger generator;
 
-  /** Q - 1, expect this to go away */
-  private BigInteger qminus1;
-
   public ElectionConstants(BigInteger large_prime, BigInteger small_prime, BigInteger cofactor, BigInteger generator) {
     this.large_prime = Preconditions.checkNotNull(large_prime);
     this.small_prime = Preconditions.checkNotNull(small_prime);
     this.cofactor = Preconditions.checkNotNull(cofactor);
     this.generator = Preconditions.checkNotNull(generator);
-
-    this.qminus1 = this.small_prime.subtract(BigInteger.ONE);
-  }
-
-  public BigInteger qminus1() {
-    if (this.qminus1 == null) {
-      this.qminus1 = this.small_prime.subtract(BigInteger.ONE);
-    }
-    return qminus1;
   }
 
   @Override

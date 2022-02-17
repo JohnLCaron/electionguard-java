@@ -1,184 +1,364 @@
 {
-    "object_id": "25a7111b-4334-425a-87c1-f7a49f42b3a2",
-    "style_id": "jefferson-county-ballot-style",
-    "manifest_hash": "26F5",
-    "code_seed": "1A39",
-    "contests": [
+  "object_id": "25a7111b-4334-425a-87c1-f7a49f42b3a2",
+  "style_id": "jefferson-county-ballot-style",
+  "manifest_hash": {
+    "data": "6208"
+  },
+  "code_seed": {
+    "data": "DBCB"
+  },
+  "contests": [
+    {
+      "object_id": "justice-supreme-court",
+      "sequence_order": 0,
+      "description_hash": {
+        "data": "8902"
+      },
+      "ballot_selections": [
         {
-            "object_id": "justice-supreme-court",
-            "sequence_order": "00",
-            "description_hash": "6654",
-            "ballot_selections": [
-                {
-                    "object_id": "john-adams-selection",
-                    "sequence_order": "00",
-                    "description_hash": "2DFF",
-                    "ciphertext": {
-                        "pad": "C3752C6FB1C0BFAB",
-                        "data": "C867172A7A9D8755"
-                    },
-                    "crypto_hash": "31FC",
-                    "is_placeholder_selection": "00",
-                    "nonce": null,
-                    "proof": {
-                        "proof_zero_pad": "2C7B631EC970E357",
-                        "proof_zero_data": "64D45D3A136168A9",
-                        "proof_one_pad": "E2C0E1F4E99145FA",
-                        "proof_one_data": "CB29C98CD62C200C",
-                        "proof_zero_challenge": "9665",
-                        "proof_one_challenge": "5183",
-                        "challenge": "E7E8",
-                        "proof_zero_response": "B5AF",
-                        "proof_one_response": "2956",
-                        "usage": "Prove selection's value (0 or 1)"
-                    },
-                    "extended_data": null
-                },
-                {
-                    "object_id": "benjamin-franklin-selection",
-                    "sequence_order": "02",
-                    "description_hash": "C9D7",
-                    "ciphertext": {
-                        "pad": "0F780CE8D3FDB43B",
-                        "data": "CA5556CE35702C5B"
-                    },
-                    "crypto_hash": "32E1",
-                    "is_placeholder_selection": "00",
-                    "nonce": null,
-                    "proof": {
-                        "proof_zero_pad": "816B0F8D5EE27597",
-                        "proof_zero_data": "49DFF49D6DD5D346",
-                        "proof_one_pad": "2B5B15CDAD3832E6",
-                        "proof_one_data": "BD36F57E2796A23D",
-                        "proof_zero_challenge": "2F55",
-                        "proof_one_challenge": "C3E5",
-                        "challenge": "F33A",
-                        "proof_zero_response": "B831",
-                        "proof_one_response": "6A9A",
-                        "usage": "Prove selection's value (0 or 1)"
-                    },
-                    "extended_data": null
-                },
-                {
-                    "object_id": "john-hancock-selection",
-                    "sequence_order": "02",
-                    "description_hash": "041E",
-                    "ciphertext": {
-                        "pad": "42D0CEBBF66BFFD4",
-                        "data": "EE4CA098AFC0D220"
-                    },
-                    "crypto_hash": "3C1F",
-                    "is_placeholder_selection": "00",
-                    "nonce": null,
-                    "proof": {
-                        "proof_zero_pad": "D7A937644BD4A76D",
-                        "proof_zero_data": "2CA65AA254DA28D6",
-                        "proof_one_pad": "FF290F3C259D42BB",
-                        "proof_one_data": "CA9D77A7984F6357",
-                        "proof_zero_challenge": "F014",
-                        "proof_one_challenge": "A59A",
-                        "challenge": "95BD",
-                        "proof_zero_response": "49E9",
-                        "proof_one_response": "F617",
-                        "usage": "Prove selection's value (0 or 1)"
-                    },
-                    "extended_data": null
-                },
-                {
-                    "object_id": "write-in-selection",
-                    "sequence_order": "03",
-                    "description_hash": "C6AF",
-                    "ciphertext": {
-                        "pad": "56AB80E27B845172",
-                        "data": "FF0B86A401930DD0"
-                    },
-                    "crypto_hash": "C405",
-                    "is_placeholder_selection": "00",
-                    "nonce": null,
-                    "proof": {
-                        "proof_zero_pad": "2A5D8DE8D18E27DA",
-                        "proof_zero_data": "667969F5EE31DD73",
-                        "proof_one_pad": "210552612EBBF290",
-                        "proof_one_data": "B8DCFFE419D7DBA2",
-                        "proof_zero_challenge": "2735",
-                        "proof_one_challenge": "DFCD",
-                        "challenge": "0711",
-                        "proof_zero_response": "D2E6",
-                        "proof_one_response": "5499",
-                        "usage": "Prove selection's value (0 or 1)"
-                    },
-                    "extended_data": null
-                },
-                {
-                    "object_id": "justice-supreme-court-4-placeholder",
-                    "sequence_order": "04",
-                    "description_hash": "A191",
-                    "ciphertext": {
-                        "pad": "490A1F6C2BE5F819",
-                        "data": "B3756991A04A2E4F"
-                    },
-                    "crypto_hash": "6FFA",
-                    "is_placeholder_selection": "01",
-                    "nonce": null,
-                    "proof": {
-                        "proof_zero_pad": "BAE259E15C21E01A",
-                        "proof_zero_data": "3682380646A241C6",
-                        "proof_one_pad": "D18D3DEDCF71F920",
-                        "proof_one_data": "4ACE0FCD2547D43D",
-                        "proof_zero_challenge": "1BE1",
-                        "proof_one_challenge": "4811",
-                        "challenge": "63F2",
-                        "proof_zero_response": "09C5",
-                        "proof_one_response": "37C8",
-                        "usage": "Prove selection's value (0 or 1)"
-                    },
-                    "extended_data": null
-                },
-                {
-                    "object_id": "justice-supreme-court-5-placeholder",
-                    "sequence_order": "05",
-                    "description_hash": "F10A",
-                    "ciphertext": {
-                        "pad": "1ABAE7298AB0757C",
-                        "data": "FA8CDC2202C9CF7F"
-                    },
-                    "crypto_hash": "CCE4",
-                    "is_placeholder_selection": "01",
-                    "nonce": null,
-                    "proof": {
-                        "proof_zero_pad": "5FF6E4FA9EC9C377",
-                        "proof_zero_data": "0D1B1AF19F1585D5",
-                        "proof_one_pad": "A3D8BF1E614C0689",
-                        "proof_one_data": "DA5A473DD2A0D9E3",
-                        "proof_zero_challenge": "5663",
-                        "proof_one_challenge": "B1DB",
-                        "challenge": "084D",
-                        "proof_zero_response": "BB89",
-                        "proof_one_response": "CD8E",
-                        "usage": "Prove selection's value (0 or 1)"
-                    },
-                    "extended_data": null
-                }
-            ],
-            "ciphertext_accumulation": {
-                "pad": "D68CF440A6E9D56C",
-                "data": "A1FC5C76DAAE77E4"
+          "object_id": "john-adams-selection",
+          "sequence_order": 0,
+          "description_hash": {
+            "data": "98A7"
+          },
+          "ciphertext": {
+            "pad": {
+              "data": "2C7C46EE8BA5AEFC"
             },
-            "crypto_hash": "392C",
-            "nonce": null,
-            "proof": {
-                "pad": "7BA40146C6F1B896",
-                "data": "07F0885DE2CABE23",
-                "challenge": "AE86",
-                "response": "F8C3",
-                "constant": "02",
-                "usage": "Prove value within selection's limit"
+            "data": {
+              "data": "FD50F6ECAFC79073"
             }
+          },
+          "crypto_hash": {
+            "data": "2F06"
+          },
+          "is_placeholder_selection": false,
+          "nonce": null,
+          "proof": {
+            "proof_zero_pad": {
+              "data": "D026A323124C9194"
+            },
+            "proof_zero_data": {
+              "data": "4A96FB09D3438E18"
+            },
+            "proof_one_pad": {
+              "data": "1F88C3C78A9DF8DB"
+            },
+            "proof_one_data": {
+              "data": "4DFF6CB2389E3C1C"
+            },
+            "proof_zero_challenge": {
+              "data": "9C2F"
+            },
+            "proof_one_challenge": {
+              "data": "4978"
+            },
+            "challenge": {
+              "data": "E5A7"
+            },
+            "proof_zero_response": {
+              "data": "3DC0"
+            },
+            "proof_one_response": {
+              "data": "E8B6"
+            },
+            "usage": "Prove selection's value (0 or 1)"
+          },
+          "extended_data": null
+        },
+        {
+          "object_id": "benjamin-franklin-selection",
+          "sequence_order": 2,
+          "description_hash": {
+            "data": "5FDA"
+          },
+          "ciphertext": {
+            "pad": {
+              "data": "06C5E09F09F47C9F"
+            },
+            "data": {
+              "data": "A530A65876226808"
+            }
+          },
+          "crypto_hash": {
+            "data": "A62F"
+          },
+          "is_placeholder_selection": false,
+          "nonce": null,
+          "proof": {
+            "proof_zero_pad": {
+              "data": "6E9845337056E80F"
+            },
+            "proof_zero_data": {
+              "data": "F0DD37519084AF33"
+            },
+            "proof_one_pad": {
+              "data": "348EC20B0336C3A7"
+            },
+            "proof_one_data": {
+              "data": "10B5FC3C9C62057A"
+            },
+            "proof_zero_challenge": {
+              "data": "CE4E"
+            },
+            "proof_one_challenge": {
+              "data": "ACB2"
+            },
+            "challenge": {
+              "data": "7B0F"
+            },
+            "proof_zero_response": {
+              "data": "D644"
+            },
+            "proof_one_response": {
+              "data": "7A79"
+            },
+            "usage": "Prove selection's value (0 or 1)"
+          },
+          "extended_data": null
+        },
+        {
+          "object_id": "john-hancock-selection",
+          "sequence_order": 2,
+          "description_hash": {
+            "data": "3316"
+          },
+          "ciphertext": {
+            "pad": {
+              "data": "0E4CA8706A1CD1D1"
+            },
+            "data": {
+              "data": "0D9B695D210E1C82"
+            }
+          },
+          "crypto_hash": {
+            "data": "550B"
+          },
+          "is_placeholder_selection": false,
+          "nonce": null,
+          "proof": {
+            "proof_zero_pad": {
+              "data": "04E3534ACBA01C1A"
+            },
+            "proof_zero_data": {
+              "data": "571CCA82692A8104"
+            },
+            "proof_one_pad": {
+              "data": "73932B6D1EC70AA4"
+            },
+            "proof_one_data": {
+              "data": "43FB7B78F10DBB93"
+            },
+            "proof_zero_challenge": {
+              "data": "579D"
+            },
+            "proof_one_challenge": {
+              "data": "95EF"
+            },
+            "challenge": {
+              "data": "ED8C"
+            },
+            "proof_zero_response": {
+              "data": "927D"
+            },
+            "proof_one_response": {
+              "data": "D70F"
+            },
+            "usage": "Prove selection's value (0 or 1)"
+          },
+          "extended_data": null
+        },
+        {
+          "object_id": "write-in-selection",
+          "sequence_order": 3,
+          "description_hash": {
+            "data": "3086"
+          },
+          "ciphertext": {
+            "pad": {
+              "data": "E97C36A5C23AC4D0"
+            },
+            "data": {
+              "data": "564E73C49D6FEE39"
+            }
+          },
+          "crypto_hash": {
+            "data": "17C8"
+          },
+          "is_placeholder_selection": false,
+          "nonce": null,
+          "proof": {
+            "proof_zero_pad": {
+              "data": "452DC9C6BE172E59"
+            },
+            "proof_zero_data": {
+              "data": "224CA5BEEA311CCB"
+            },
+            "proof_one_pad": {
+              "data": "655575D176A98A6E"
+            },
+            "proof_one_data": {
+              "data": "A76C94D554405A9D"
+            },
+            "proof_zero_challenge": {
+              "data": "8C16"
+            },
+            "proof_one_challenge": {
+              "data": "DBD4"
+            },
+            "challenge": {
+              "data": "67F9"
+            },
+            "proof_zero_response": {
+              "data": "23EA"
+            },
+            "proof_one_response": {
+              "data": "0D32"
+            },
+            "usage": "Prove selection's value (0 or 1)"
+          },
+          "extended_data": null
+        },
+        {
+          "object_id": "justice-supreme-court-4-placeholder",
+          "sequence_order": 4,
+          "description_hash": {
+            "data": "2E68"
+          },
+          "ciphertext": {
+            "pad": {
+              "data": "34510FC25FA181FD"
+            },
+            "data": {
+              "data": "DB8A09F9C90B746A"
+            }
+          },
+          "crypto_hash": {
+            "data": "E89C"
+          },
+          "is_placeholder_selection": true,
+          "nonce": null,
+          "proof": {
+            "proof_zero_pad": {
+              "data": "75C60F910D71FE7F"
+            },
+            "proof_zero_data": {
+              "data": "297E3FBB74C101D5"
+            },
+            "proof_one_pad": {
+              "data": "0F70D2CF85BC45A8"
+            },
+            "proof_one_data": {
+              "data": "BBD8E8B83B65FA27"
+            },
+            "proof_zero_challenge": {
+              "data": "AA0E"
+            },
+            "proof_one_challenge": {
+              "data": "937A"
+            },
+            "challenge": {
+              "data": "3D97"
+            },
+            "proof_zero_response": {
+              "data": "F742"
+            },
+            "proof_one_response": {
+              "data": "BFE4"
+            },
+            "usage": "Prove selection's value (0 or 1)"
+          },
+          "extended_data": null
+        },
+        {
+          "object_id": "justice-supreme-court-5-placeholder",
+          "sequence_order": 5,
+          "description_hash": {
+            "data": "5C58"
+          },
+          "ciphertext": {
+            "pad": {
+              "data": "DB68B9549026E7DC"
+            },
+            "data": {
+              "data": "BB22B4C8D8C3F965"
+            }
+          },
+          "crypto_hash": {
+            "data": "ED38"
+          },
+          "is_placeholder_selection": true,
+          "nonce": null,
+          "proof": {
+            "proof_zero_pad": {
+              "data": "0794DAA85584A454"
+            },
+            "proof_zero_data": {
+              "data": "0F28AAFC2FC8848C"
+            },
+            "proof_one_pad": {
+              "data": "42CCC125A30B72A7"
+            },
+            "proof_one_data": {
+              "data": "2134E7B4ACD8780E"
+            },
+            "proof_zero_challenge": {
+              "data": "56C2"
+            },
+            "proof_one_challenge": {
+              "data": "E2A2"
+            },
+            "challenge": {
+              "data": "3973"
+            },
+            "proof_zero_response": {
+              "data": "6D20"
+            },
+            "proof_one_response": {
+              "data": "85D8"
+            },
+            "usage": "Prove selection's value (0 or 1)"
+          },
+          "extended_data": null
         }
-    ],
-    "code": "B401",
-    "timestamp": "61E5EC1E",
-    "crypto_hash": "81F7",
-    "nonce": null,
-    "state": 2
+      ],
+      "ciphertext_accumulation": {
+        "pad": {
+          "data": "2CB41AA41FE082EF"
+        },
+        "data": {
+          "data": "DB6070D9EFEF8490"
+        }
+      },
+      "crypto_hash": {
+        "data": "7505"
+      },
+      "nonce": null,
+      "proof": {
+        "pad": {
+          "data": "717DCD681493A8E6"
+        },
+        "data": {
+          "data": "E9B29F3B98F6E8D2"
+        },
+        "challenge": {
+          "data": "FEE4"
+        },
+        "response": {
+          "data": "39E2"
+        },
+        "constant": 2,
+        "usage": "Prove value within selection's limit"
+      }
+    }
+  ],
+  "code": {
+    "data": "C5FB"
+  },
+  "timestamp": 1645045050,
+  "crypto_hash": {
+    "data": "24D6"
+  },
+  "nonce": null,
+  "state": 1
 }

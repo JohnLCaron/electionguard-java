@@ -1,6 +1,6 @@
 {
-    "large_prime": "FFFFFFFFFFB43EA5",
-    "small_prime": "FFF1",
-    "cofactor": "01000F00E10CE4",
-    "generator": "D6982759F3D5107E"
+  "large_prime": 18446744073704586917,
+  "small_prime": 65521,
+  "cofactor": 281539415968996,
+  "generator": 15463152587872997502
 }

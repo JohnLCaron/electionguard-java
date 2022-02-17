@@ -15,11 +15,15 @@ class GroupTest {
   }
 
   private void basics(ElectionConstants context) {
-    Group.setPrimes(context);
-    Group.ElementModQ three = Group.int_to_q_unchecked(BigInteger.valueOf(3));
-    Group.ElementModQ four = Group.int_to_q_unchecked(BigInteger.valueOf(4));
-    Group.ElementModQ seven = Group.int_to_q_unchecked(BigInteger.valueOf(7));
-    assertThat(Group.add_q(three, four)).isEqualTo(seven);
+    try {
+      Group.setPrimes(context);
+      Group.ElementModQ three = Group.int_to_q_unchecked(BigInteger.valueOf(3));
+      Group.ElementModQ four = Group.int_to_q_unchecked(BigInteger.valueOf(4));
+      Group.ElementModQ seven = Group.int_to_q_unchecked(BigInteger.valueOf(7));
+      assertThat(Group.add_q(three, four)).isEqualTo(seven);
+    } finally {
+      Group.reset();
+    }
   }
 
   /*

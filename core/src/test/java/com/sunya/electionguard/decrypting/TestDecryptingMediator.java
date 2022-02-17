@@ -53,9 +53,9 @@ public class TestDecryptingMediator extends TestProperties {
     expectedTally = new HashMap<>();
     expectedTally.put("referendum-pineapple:referendum-pineapple-affirmative-selection", 0);
     expectedTally.put("referendum-pineapple:referendum-pineapple-negative-selection", 0);
-    expectedTally.put("justice-supreme-court:benjamin-franklin-selection", 0);
-    expectedTally.put("justice-supreme-court:john-adams-selection", 2);
-    expectedTally.put("justice-supreme-court:john-hancock-selection", 1);
+    expectedTally.put("justice-supreme-court:benjamin-franklin-selection", 3);
+    expectedTally.put("justice-supreme-court:john-adams-selection", 1);
+    expectedTally.put("justice-supreme-court:john-hancock-selection", 6);
     expectedTally.put("justice-supreme-court:write-in-selection", 3);
 
     this.spoiledBallots =  consumer.submittedSpoiledBallotsProto();

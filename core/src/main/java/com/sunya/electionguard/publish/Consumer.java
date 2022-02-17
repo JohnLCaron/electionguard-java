@@ -15,10 +15,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Formatter;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import com.sunya.electionguard.protogen.*;
 
@@ -142,15 +143,14 @@ public class Consumer {
     if (!publisher.coefficientsPath().toFile().exists()) {
       return new ArrayList<>();
     }
-    // TODO are these guarenteed to be in order ?
-    List<GuardianRecord> grs = new ArrayList<>(guardianRecords());
-    grs.sort(Comparator.comparingInt(GuardianRecord::sequence_order));
-    Coefficients pojo = ConvertFromJson.readCoefficients(publisher.coefficientsPath().toString());
+    Map<String, GuardianRecord> grMap = guardianRecords().stream().collect(Collectors.toMap(
+            GuardianRecord::guardian_id, gr -> gr));
+    LagrangeCoefficientsPojo coeffPojo = ConvertFromJson.readCoefficients(publisher.coefficientsPath().toString());
     // Preconditions.checkArgument(grs.size() == pojo.coefficients.size());
     List<AvailableGuardian> result = new ArrayList<>();
-    for (int i = 0; i < pojo.coefficients.size(); i++) {
-      GuardianRecord gr = grs.get(i);
-      AvailableGuardian avail = new AvailableGuardian(gr.guardian_id(), gr.sequence_order(), pojo.coefficients.get(i));
+    for (Map.Entry<String, Group.ElementModQ> entry : coeffPojo.coefficients.entrySet()) {
+      GuardianRecord gr = grMap.get(entry.getKey());
+      AvailableGuardian avail = new AvailableGuardian(entry.getKey(), gr.sequence_order(), entry.getValue());
       result.add(avail);
     }
     return result;

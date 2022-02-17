@@ -67,6 +67,7 @@ public class PrivateData {
 
   private void createDirs() throws IOException {
     Files.createDirectories(privateDirectory);
+    System.out.printf("Make private directory %s%n", privateDirectory);
   }
 
   /** Delete everything in the output directory, but leave that directory. */

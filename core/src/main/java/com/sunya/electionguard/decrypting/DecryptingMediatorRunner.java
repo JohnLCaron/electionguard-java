@@ -111,7 +111,7 @@ class DecryptingMediatorRunner {
       }
 
       // check that outputDir exists and can be written to
-      Publisher publisher = new Publisher(cmdLine.outputDir, Publisher.Mode.createIfMissing, false);
+      Publisher publisher = new Publisher(cmdLine.outputDir, Publisher.Mode.createNew, false);
       if (!publisher.validateOutputDir(errors)) {
         System.out.printf("*** Publisher validateOutputDir FAILED on %s%n%s", cmdLine.outputDir, errors);
         System.exit(1);
@@ -250,7 +250,7 @@ class DecryptingMediatorRunner {
 
     boolean ok;
     try {
-      publish(encryptDir, outputDir);
+      publish(encryptDir);
       ok = true;
     } catch (IOException e) {
       e.printStackTrace();
@@ -303,7 +303,7 @@ class DecryptingMediatorRunner {
     System.out.printf("SpoiledBallotAndTally = %d%n", spoiledDecryptedTallies.size());
 
     this.availableGuardians = mediator.getAvailableGuardians();
-    System.out.printf("Done decrypting tally%n%n%s%n", this.decryptedTally);
+    System.out.printf("Done decrypting tally%n%n");
   }
 
   private void shutdownRemoteTrustees(boolean allOk) {
@@ -328,7 +328,7 @@ class DecryptingMediatorRunner {
     System.out.printf(" Proxy channel shutdown was success = %s%n", shutdownOk);
   }
 
-  void publish(String inputDir, String publishDir) throws IOException {
+  void publish(String inputDir) throws IOException {
     publisher.writeDecryptionResultsProto(
             this.electionRecord,
             this.encryptedTally,

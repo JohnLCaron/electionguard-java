@@ -1,73 +1,113 @@
 {
-    "object_id": "election-results",
-    "contests": {
-        "justice-supreme-court": {
-            "object_id": "justice-supreme-court",
-            "sequence_order": "00",
-            "description_hash": "6654",
-            "selections": {
-                "john-adams-selection": {
-                    "object_id": "john-adams-selection",
-                    "sequence_order": "00",
-                    "description_hash": "2DFF",
-                    "ciphertext": {
-                        "pad": "44A2D1D5A35CAE5C",
-                        "data": "EAC1CCC69EF29DF5"
-                    }
-                },
-                "benjamin-franklin-selection": {
-                    "object_id": "benjamin-franklin-selection",
-                    "sequence_order": "01",
-                    "description_hash": "C9D7",
-                    "ciphertext": {
-                        "pad": "3E8CCBCAAC754ABE",
-                        "data": "7FC98D20F144D665"
-                    }
-                },
-                "john-hancock-selection": {
-                    "object_id": "john-hancock-selection",
-                    "sequence_order": "02",
-                    "description_hash": "041E",
-                    "ciphertext": {
-                        "pad": "DC44876F003E5D6C",
-                        "data": "CAD6E25A1008E79B"
-                    }
-                },
-                "write-in-selection": {
-                    "object_id": "write-in-selection",
-                    "sequence_order": "03",
-                    "description_hash": "C6AF",
-                    "ciphertext": {
-                        "pad": "6FD8BA350ABDE487",
-                        "data": "D57FC5F900530032"
-                    }
-                }
+  "object_id": "election-results",
+  "contests": {
+    "justice-supreme-court": {
+      "object_id": "justice-supreme-court",
+      "sequence_order": 0,
+      "description_hash": {
+        "data": "8902"
+      },
+      "selections": {
+        "john-adams-selection": {
+          "object_id": "john-adams-selection",
+          "sequence_order": 0,
+          "description_hash": {
+            "data": "98A7"
+          },
+          "ciphertext": {
+            "pad": {
+              "data": "D2BFB3C912936374"
+            },
+            "data": {
+              "data": "E0CCAA3C5EA341"
             }
+          }
         },
-        "referendum-pineapple": {
-            "object_id": "referendum-pineapple",
-            "sequence_order": "01",
-            "description_hash": "B576",
-            "selections": {
-                "referendum-pineapple-affirmative-selection": {
-                    "object_id": "referendum-pineapple-affirmative-selection",
-                    "sequence_order": "00",
-                    "description_hash": "D961",
-                    "ciphertext": {
-                        "pad": "90801773873878FD",
-                        "data": "AE48BBBBAAF4C238"
-                    }
-                },
-                "referendum-pineapple-negative-selection": {
-                    "object_id": "referendum-pineapple-negative-selection",
-                    "sequence_order": "01",
-                    "description_hash": "05ED",
-                    "ciphertext": {
-                        "pad": "67C7CD7871856012",
-                        "data": "A86EB1BB3B274A61"
-                    }
-                }
+        "benjamin-franklin-selection": {
+          "object_id": "benjamin-franklin-selection",
+          "sequence_order": 1,
+          "description_hash": {
+            "data": "5FDA"
+          },
+          "ciphertext": {
+            "pad": {
+              "data": "5A21C7DED272F8A6"
+            },
+            "data": {
+              "data": "BEA298C9C3FC3F30"
             }
+          }
+        },
+        "john-hancock-selection": {
+          "object_id": "john-hancock-selection",
+          "sequence_order": 2,
+          "description_hash": {
+            "data": "3316"
+          },
+          "ciphertext": {
+            "pad": {
+              "data": "51CF48222F67FB04"
+            },
+            "data": {
+              "data": "D6C2D29A3B8E5203"
+            }
+          }
+        },
+        "write-in-selection": {
+          "object_id": "write-in-selection",
+          "sequence_order": 3,
+          "description_hash": {
+            "data": "3086"
+          },
+          "ciphertext": {
+            "pad": {
+              "data": "7B9E0842BA329542"
+            },
+            "data": {
+              "data": "91116815C14612C5"
+            }
+          }
         }
+      }
+    },
+    "referendum-pineapple": {
+      "object_id": "referendum-pineapple",
+      "sequence_order": 1,
+      "description_hash": {
+        "data": "79CC"
+      },
+      "selections": {
+        "referendum-pineapple-affirmative-selection": {
+          "object_id": "referendum-pineapple-affirmative-selection",
+          "sequence_order": 0,
+          "description_hash": {
+            "data": "2AEF"
+          },
+          "ciphertext": {
+            "pad": {
+              "data": "6B9F060D273D7DB1"
+            },
+            "data": {
+              "data": "0CF090577BDE3D5B"
+            }
+          }
+        },
+        "referendum-pineapple-negative-selection": {
+          "object_id": "referendum-pineapple-negative-selection",
+          "sequence_order": 1,
+          "description_hash": {
+            "data": "2465"
+          },
+          "ciphertext": {
+            "pad": {
+              "data": "F7123AC9B1B399BF"
+            },
+            "data": {
+              "data": "A540B51E9F9F5BE8"
+            }
+          }
+        }
+      }
     }
+  }
 }

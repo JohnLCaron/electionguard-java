@@ -1,10 +1,20 @@
 {
-    "number_of_guardians": "05",
-    "quorum": "03",
-    "elgamal_public_key": "28837FFDB33C9258",
-    "commitment_hash": "4863",
-    "manifest_hash": "26F5",
-    "crypto_base_hash": "6532",
-    "crypto_extended_base_hash": "8F1B",
-    "extended_data": null
+  "number_of_guardians": 5,
+  "quorum": 3,
+  "elgamal_public_key": {
+    "data": "C6BA6B3ABD1BEFBC"
+  },
+  "commitment_hash": {
+    "data": "BA8C"
+  },
+  "manifest_hash": {
+    "data": "6208"
+  },
+  "crypto_base_hash": {
+    "data": "DE26"
+  },
+  "crypto_extended_base_hash": {
+    "data": "F096"
+  },
+  "extended_data": null
 }

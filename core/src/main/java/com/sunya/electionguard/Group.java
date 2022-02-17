@@ -22,7 +22,15 @@ public class Group {
   private static ElectionConstants primes = ElectionConstants.get(ElectionConstants.PrimeOption.Standard);
   public static ElectionConstants getPrimes() { return primes; }
   public static void setPrimes(ElectionConstants usePrimes) {
+    if (!usePrimes.getPrimeOptionType().equals(ElectionConstants.PrimeOption.Standard)) {
+      System.out.printf("Setting non-standard primes %s%n", usePrimes.getPrimeOptionType());
+    } else if (!primes.getPrimeOptionType().equals(ElectionConstants.PrimeOption.Standard)) {
+      System.out.printf("Setting standard primes%n");
+    }
     primes = usePrimes;
+  }
+  public static void reset() {
+    primes = ElectionConstants.STANDARD_CONSTANTS;
   }
 
   @Immutable

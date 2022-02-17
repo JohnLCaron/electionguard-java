@@ -3,14 +3,14 @@ package com.sunya.electionguard.publish;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.sunya.electionguard.Group;
-import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
-/** Conversion between Coefficients and Json, using python's object model. */
-public class Coefficients {
-  public final List<Group.ElementModQ> coefficients;
+/** Conversion between AvailableGuardian and Json, using python's object model. */
+public class LagrangeCoefficientsPojo {
+  public final Map<String, Group.ElementModQ> coefficients; // guardian id to lagrange coefficient
 
-  public Coefficients(List<Group.ElementModQ> coefficients) {
+  public LagrangeCoefficientsPojo(Map<String, Group.ElementModQ> coefficients) {
     this.coefficients = coefficients;
   }
 
@@ -25,7 +25,7 @@ public class Coefficients {
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-    Coefficients that = (Coefficients) o;
+    LagrangeCoefficientsPojo that = (LagrangeCoefficientsPojo) o;
     return coefficients.equals(that.coefficients);
   }
 
@@ -34,20 +34,20 @@ public class Coefficients {
     return Objects.hash(coefficients);
   }
 
-  public static Coefficients deserialize(JsonElement jsonElem) {
+  public static LagrangeCoefficientsPojo deserialize(JsonElement jsonElem) {
     Gson gson = GsonTypeAdapters.enhancedGson();
-    return new Coefficients(gson.fromJson(jsonElem, Pojo.class).coefficients);
+    return new LagrangeCoefficientsPojo(gson.fromJson(jsonElem, Pojo.class).coefficients);
   }
 
-  public static JsonElement serialize(Coefficients src) {
+  public static JsonElement serialize(LagrangeCoefficientsPojo src) {
     Gson gson = GsonTypeAdapters.enhancedGson();
     return gson.toJsonTree(new Pojo(src.coefficients), Pojo.class);
   }
 
   static class Pojo {
-    public final List<Group.ElementModQ> coefficients;
+    public final Map<String, Group.ElementModQ> coefficients;
 
-    public Pojo(List<Group.ElementModQ> coefficients) {
+    public Pojo(Map<String, Group.ElementModQ> coefficients) {
       this.coefficients = coefficients;
     }
   }
