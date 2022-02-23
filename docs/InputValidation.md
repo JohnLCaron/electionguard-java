@@ -29,11 +29,12 @@ A specific validation is referenced as, eg, Manifest.B.5 and Ballot.A.2.1
 
 2. All ContestDescription have a unique sequence_order .  
 
-3. Within a ContestDescription, all SelectionDescription have a unique object_id.
+3. Within a ContestDescription, all SelectionDescription have a unique object_id. 
+4. All SelectionDescription have a unique object_id within the election (see get_shares_for_selection in decryption_share)
 
-4. Within a ContestDescription, all SelectionDescription have a unique sequence_order.
+5. Within a ContestDescription, all SelectionDescription have a unique sequence_order.
 
-5. Within a ContestDescription, all SelectionDescription have a unique candidate_id.
+6. Within a ContestDescription, all SelectionDescription have a unique candidate_id.
 
 
 ## Input Ballot

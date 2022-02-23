@@ -108,10 +108,10 @@ public class PlaintextTally {
         }
         if (sel.recovered_parts().isPresent()) {
           f.format(" recovered_parts=%n");
-          f.format("     %30s %12s %12s %20s %s%n", "object_id", "guardian", "missing", "proof", "share");
+          f.format("     %30s %12s %12s %20s %s%n", "selection_id", "guardian", "missing", "proof", "share");
           Map<String, DecryptionShare.CiphertextCompensatedDecryptionSelection> m = sel.recovered_parts().get();
           for (DecryptionShare.CiphertextCompensatedDecryptionSelection r : m.values()) {
-            f.format("     %30s %12s %12s %20s %s%n", r.object_id(), r.guardian_id(), r.missing_guardian_id(),
+            f.format("     %30s %12s %12s %20s %s%n", r.selection_id(), r.guardian_id(), r.missing_guardian_id(),
                     r.proof().name, r.share().toShortString());
           }
         } else {

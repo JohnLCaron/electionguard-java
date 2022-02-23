@@ -12,27 +12,27 @@ import java.util.stream.Collectors;
 import static com.sunya.electionguard.proto.CommonConvert.convertElementModP;
 import static com.sunya.electionguard.proto.CommonConvert.convertCiphertext;
 
-import com.sunya.electionguard.protogen.PlaintextTallyProto;
+import electionguard.protogen.PlaintextTallyProto;
 
 
 public class PlaintextTallyFromProto {
 
   public static PlaintextTally translateFromProto(PlaintextTallyProto.PlaintextTally tally) {
-    Map<String, PlaintextTally.Contest> contests = tally.getContestsMap().entrySet().stream()
-            .collect(Collectors.toMap(Map.Entry::getKey, e -> convertContest(e.getValue())));
+    Map<String, PlaintextTally.Contest> contests = tally.getContestsList().stream()
+            .collect(Collectors.toMap(t -> t.getContestId(), t -> convertContest(t)));
 
     return new PlaintextTally(
-            tally.getObjectId(),
+            tally.getTallyId(),
             contests);
   }
 
   static PlaintextTally.Contest convertContest(PlaintextTallyProto.PlaintextTallyContest proto) {
-    Map<String, PlaintextTally.Selection> selections = proto.getSelectionsMap().entrySet().stream()
-            .collect(Collectors.toMap(Map.Entry::getKey,
-                    e -> convertSelection(e.getValue())));
+    Map<String, PlaintextTally.Selection> selections = proto.getSelectionsList().stream()
+            .collect(Collectors.toMap(s -> s.getSelectionId(),
+                    s -> convertSelection(s)));
 
     return new PlaintextTally.Contest(
-            proto.getObjectId(),
+            proto.getContestId(),
             selections);
   }
 
@@ -42,7 +42,7 @@ public class PlaintextTallyFromProto {
             .toList();
 
     return new PlaintextTally.Selection(
-            proto.getObjectId(),
+            proto.getSelectionId(),
             proto.getTally(),
             convertElementModP(proto.getValue()),
             convertCiphertext(proto.getMessage()),
@@ -56,7 +56,7 @@ public class PlaintextTallyFromProto {
     }
 
     return new DecryptionShare.CiphertextDecryptionSelection(
-            proto.getObjectId(),
+            proto.getSelectionId(),
             proto.getGuardianId(),
             convertElementModP(proto.getShare()),
             proto.hasProof() ? Optional.of(CommonConvert.convertChaumPedersenProof(proto.getProof())) : Optional.empty(),
@@ -67,7 +67,7 @@ public class PlaintextTallyFromProto {
           PlaintextTallyProto.CiphertextCompensatedDecryptionSelection proto) {
 
     return new DecryptionShare.CiphertextCompensatedDecryptionSelection(
-            proto.getObjectId(),
+            proto.getSelectionId(),
             proto.getGuardianId(),
             proto.getMissingGuardianId(),
             convertElementModP(proto.getShare()),

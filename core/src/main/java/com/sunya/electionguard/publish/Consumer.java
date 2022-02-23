@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import com.sunya.electionguard.protogen.*;
+import electionguard.protogen.*;
 
 
 /** Helper class for consumers of published election records in Json or protobuf. */
@@ -200,7 +200,7 @@ public class Consumer {
   public CloseableIterable<SubmittedBallot> submittedSpoiledBallotsProto() {
     if (Files.exists(publisher.submittedBallotProtoPath())) {
       return () -> new SubmittedBallotIterator(publisher.submittedBallotProtoPath().toString(),
-              b -> b.getState() == CiphertextBallotProto.SubmittedBallot.BallotBoxState.SPOILED);
+              b -> b.getState() == CiphertextBallotProto.SubmittedBallot.BallotState.SPOILED);
     } else {
       return CloseableIterableAdapter.empty();
     }

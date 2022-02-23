@@ -4,14 +4,14 @@ import com.sunya.electionguard.PlaintextBallot;
 
 import static com.sunya.electionguard.proto.CommonConvert.convertList;
 
-import com.sunya.electionguard.protogen.PlaintextBallotProto;
+import electionguard.protogen.PlaintextBallotProto;
 
 public class PlaintextBallotFromProto {
 
   public static PlaintextBallot translateFromProto(PlaintextBallotProto.PlaintextBallot ballot) {
     return new PlaintextBallot(
-            ballot.getObjectId(),
-            ballot.getStyleId(),
+            ballot.getBallotId(),
+            ballot.getBallotStyleId(),
             convertList(ballot.getContestsList(), PlaintextBallotFromProto::convertContest));
   }
 
@@ -19,7 +19,7 @@ public class PlaintextBallotFromProto {
     return new PlaintextBallot.Contest(
             contest.getContestId(),
             contest.getSequenceOrder(),
-            convertList(contest.getBallotSelectionsList(), PlaintextBallotFromProto::convertSelection));
+            convertList(contest.getSelectionsList(), PlaintextBallotFromProto::convertSelection));
   }
 
   static PlaintextBallot.Selection convertSelection(PlaintextBallotProto.PlaintextBallotSelection selection) {

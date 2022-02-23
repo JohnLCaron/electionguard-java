@@ -4,9 +4,9 @@ import com.google.common.flogger.FluentLogger;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.SchnorrProof;
 import com.sunya.electionguard.proto.CommonConvert;
-import com.sunya.electionguard.protogen.CommonProto;
-import com.sunya.electionguard.protogen.RemoteKeyCeremonyTrusteeProto;
-import com.sunya.electionguard.protogen.RemoteKeyCeremonyTrusteeServiceGrpc;
+import electionguard.protogen.CommonRpcProto;
+import electionguard.protogen.RemoteKeyCeremonyTrusteeProto;
+import electionguard.protogen.RemoteKeyCeremonyTrusteeServiceGrpc;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-import static com.sunya.electionguard.protogen.RemoteKeyCeremonyTrusteeServiceGrpc.RemoteKeyCeremonyTrusteeServiceBlockingStub;
+import static electionguard.protogen.RemoteKeyCeremonyTrusteeServiceGrpc.RemoteKeyCeremonyTrusteeServiceBlockingStub;
 
 /** A Remote Trustee client proxy, communicating over gRpc. */
 class KeyCeremonyRemoteTrusteeProxy implements KeyCeremonyTrusteeIF {
@@ -65,7 +65,7 @@ class KeyCeremonyRemoteTrusteeProxy implements KeyCeremonyTrusteeIF {
               .setGuardianXCoordinate(keyset.guardianXCoordinate());
       keyset.coefficientProofs().forEach(p -> request.addCoefficientProofs(CommonConvert.convertSchnorrProof(p)));
 
-      CommonProto.ErrorResponse response = blockingStub.receivePublicKeys(request.build());
+      CommonRpcProto.ErrorResponse response = blockingStub.receivePublicKeys(request.build());
       if (!response.getError().isEmpty()) {
         logger.atSevere().log("receivePublicKeys failed: %s", response.getError());
       }
@@ -154,7 +154,7 @@ class KeyCeremonyRemoteTrusteeProxy implements KeyCeremonyTrusteeIF {
 
   boolean saveState() {
     try {
-      CommonProto.ErrorResponse response = blockingStub.saveState(com.google.protobuf.Empty.getDefaultInstance());
+      CommonRpcProto.ErrorResponse response = blockingStub.saveState(com.google.protobuf.Empty.getDefaultInstance());
       if (!response.getError().isEmpty()) {
         logger.atSevere().log("saveState failed: %s", response.getError());
         return false;
@@ -170,8 +170,8 @@ class KeyCeremonyRemoteTrusteeProxy implements KeyCeremonyTrusteeIF {
 
   boolean finish(boolean allOk) {
     try {
-      CommonProto.FinishRequest request = CommonProto.FinishRequest.newBuilder().setAllOk(allOk).build();
-      CommonProto.ErrorResponse response = blockingStub.finish(request);
+      CommonRpcProto.FinishRequest request = CommonRpcProto.FinishRequest.newBuilder().setAllOk(allOk).build();
+      CommonRpcProto.ErrorResponse response = blockingStub.finish(request);
       if (!response.getError().isEmpty()) {
         logger.atSevere().log("commit failed: %s", response.getError());
         return false;

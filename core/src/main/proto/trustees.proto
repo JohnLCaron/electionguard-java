@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+import "common.proto";
+
+option java_package = "electionguard.protogen";
+option java_outer_classname = "TrusteeProto";
+
+message DecryptingTrustees {
+  repeated DecryptingTrustee trustees = 1;
+}
+
+message DecryptingTrustee {
+  string guardian_id = 1;
+  uint32 guardian_x_coordinate = 2;     // the x coefficient (sequence_order), must be > 0
+  ElGamalKeyPair election_key_pair = 3;
+  reserved 4;    // auxiliary private key
+  // Other guardians' partial key backups shared with this guardian
+  repeated ElectionPartialKeyBackup2 other_guardian_backups = 5;
+  // The commitments {"public keys K_ij") generated from the election polynomial coefficients.
+  // Duplicated here and in ElectionRecordProto.GuardianRecord, to keep the trustees independent
+  repeated CommitmentSet guardian_commitments = 6;
+}
+
+message CommitmentSet {
+  // for which guardian
+  string guardian_id = 1;
+  // coefficient commitments, always quorum number of them
+  repeated ElementModP commitments = 3;
+}
+
+message ElectionPartialKeyBackup2 {
+  // The Id of the guardian that generated this backup.
+  string generating_guardian_id = 1;
+  // The Id of the guardian to receive this backup.
+  string designated_guardian_id = 2;
+  // The x coefficient of the designated guardian.
+  uint32 designated_guardian_x_coordinate = 3;
+  // The coordinate of the designated guardian
+  ElementModQ coordinate = 4;
+  // if not empty, an error has occurrred.
+  string error = 5;
+}

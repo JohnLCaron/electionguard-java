@@ -185,7 +185,7 @@ public class TestAttackTallyDecryptionVerifyier {
       Optional<Map<String, DecryptionShare.CiphertextCompensatedDecryptionSelection>> recovered_parts =
               orgShare.recovered_parts().map(r -> r);
       DecryptionShare.CiphertextDecryptionSelection messShare = new DecryptionShare.CiphertextDecryptionSelection(
-              orgShare.object_id(), orgShare.guardian_id(), s, orgShare.proof(), recovered_parts);
+              orgShare.selection_id(), orgShare.guardian_id(), s, orgShare.proof(), recovered_parts);
       shares.add(messShare);
     }
 

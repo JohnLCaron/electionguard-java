@@ -29,7 +29,7 @@ public class DecryptionShare {
   final ElementModP public_key;
 
   /**
-   * The collection of decryption shares for all contests in the election .
+   * The collection of decryption shares for all contests in the election.
    */
   final ImmutableMap<String, CiphertextDecryptionContest> contests; // Map(CONTEST_ID, CiphertextDecryptionContest)
 
@@ -83,13 +83,14 @@ public class DecryptionShare {
    * collection is populated with the `CiphertextCompensatedDecryptionSelection` objects generated
    * by each available guardian.
    *
+   * @param selection_id    Matches SelectionDescription.selection_id. See DecryptionShare.get_tally_shares_for_selection2
    * @param guardian_id     The Guardian that this share belongs to, is available or missing.
    * @param share           The Share of the decryption of a selection. `M_i` in the spec.
    * @param proof           For available guardians, proof that the share was decrypted correctly.
    * @param recovered_parts For missing guardians, keyed by available guardian_id.
    */
   public record CiphertextDecryptionSelection(
-          String object_id,
+          String selection_id,
           String guardian_id,
           ElementModP share,
           Optional<ChaumPedersen.ChaumPedersenProof> proof,
@@ -98,7 +99,7 @@ public class DecryptionShare {
     public CiphertextDecryptionSelection {
       Preconditions.checkArgument(proof.isPresent() || recovered_parts.isPresent());
       Preconditions.checkArgument(!(proof.isPresent() && recovered_parts.isPresent()));
-      Preconditions.checkNotNull(object_id);
+      Preconditions.checkNotNull(selection_id);
       Preconditions.checkNotNull(guardian_id);
       Preconditions.checkNotNull(share);
       Preconditions.checkNotNull(proof);
@@ -121,7 +122,7 @@ public class DecryptionShare {
         ChaumPedersen.ChaumPedersenProof proof = this.proof().get();
         if (!proof.is_valid(message, election_public_key, this.share(), extended_base_hash)) {
           logger.atWarning().log("CiphertextDecryptionSelection is_valid failed for guardian: %s selection: %s with invalid proof",
-                  this.guardian_id(), this.object_id());
+                  this.guardian_id(), this.selection_id());
           return false;
         }
       }
@@ -131,7 +132,7 @@ public class DecryptionShare {
         for (CiphertextCompensatedDecryptionSelection part : recovered.values()) {
           if (!part.proof().is_valid(message, part.recovery_key(), part.share(), extended_base_hash)) {
             logger.atWarning().log("CiphertextDecryptionSelection is_valid failed for guardian: %s selection: %s with invalid partial proof",
-                    this.guardian_id(), this.object_id());
+                    this.guardian_id(), this.selection_id());
             return false;
           }
         }
@@ -211,7 +212,7 @@ public class DecryptionShare {
    * @param proof               The proof that the share was decrypted correctly.
    */
   public record CiphertextCompensatedDecryptionSelection(
-          String object_id,
+          String selection_id,
           String guardian_id,
           String missing_guardian_id,
           ElementModP share,
@@ -219,7 +220,6 @@ public class DecryptionShare {
           ChaumPedersen.ChaumPedersenProof proof) {
 
     public CiphertextCompensatedDecryptionSelection {
-      Preconditions.checkNotNull(object_id);
       Preconditions.checkNotNull(guardian_id);
       Preconditions.checkNotNull(missing_guardian_id);
       Preconditions.checkNotNull(share);
@@ -241,7 +241,7 @@ public class DecryptionShare {
     for (DecryptionShare share : shares.values()) {
       for (CiphertextDecryptionContest contest : share.contests.values()) {
         for (CiphertextDecryptionSelection selection : contest.selections().values()) {
-          if (selection.object_id().equals(selection_id)) {
+          if (selection.selection_id().equals(selection_id)) {
             cast_shares.put(share.guardian_id, new KeyAndSelection(share.public_key, selection));
           }
         }

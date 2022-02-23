@@ -7,9 +7,10 @@ import com.sunya.electionguard.BallotBox;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.proto.CommonConvert;
-import com.sunya.electionguard.protogen.CommonProto;
-import com.sunya.electionguard.protogen.DecryptingTrusteeProto;
-import com.sunya.electionguard.protogen.DecryptingTrusteeServiceGrpc;
+import electionguard.protogen.CommonProto;
+import electionguard.protogen.CommonRpcProto;
+import electionguard.protogen.DecryptingTrusteeProto;
+import electionguard.protogen.DecryptingTrusteeServiceGrpc;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
@@ -113,8 +114,8 @@ class DecryptingRemoteTrusteeProxy implements DecryptingTrusteeIF  {
 
   boolean finish(boolean allOk) {
     try {
-      CommonProto.FinishRequest request = CommonProto.FinishRequest.newBuilder().setAllOk(allOk).build();
-      CommonProto.ErrorResponse response = blockingStub.finish(request);
+      CommonRpcProto.FinishRequest request = CommonRpcProto.FinishRequest.newBuilder().setAllOk(allOk).build();
+      CommonRpcProto.ErrorResponse response = blockingStub.finish(request);
       if (!response.getError().isEmpty()) {
         logger.atSevere().log("commit failed: %s", response.getError());
         return false;

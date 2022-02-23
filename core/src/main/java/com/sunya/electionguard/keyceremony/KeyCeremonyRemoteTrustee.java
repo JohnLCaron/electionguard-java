@@ -6,11 +6,11 @@ import com.beust.jcommander.ParameterException;
 import com.google.common.flogger.FluentLogger;
 import com.sunya.electionguard.SchnorrProof;
 import com.sunya.electionguard.proto.CommonConvert;
-import com.sunya.electionguard.protogen.CommonProto;
-import com.sunya.electionguard.protogen.RemoteKeyCeremonyProto;
-import com.sunya.electionguard.protogen.RemoteKeyCeremonyTrusteeProto;
-import com.sunya.electionguard.protogen.RemoteKeyCeremonyTrusteeServiceGrpc;
-import com.sunya.electionguard.protogen.TrusteeProto;
+import electionguard.protogen.CommonRpcProto;
+import electionguard.protogen.RemoteKeyCeremonyProto;
+import electionguard.protogen.RemoteKeyCeremonyTrusteeProto;
+import electionguard.protogen.RemoteKeyCeremonyTrusteeServiceGrpc;
+import electionguard.protogen.TrusteeProto;
 import com.sunya.electionguard.proto.TrusteeToProto;
 import com.sunya.electionguard.publish.PrivateData;
 import io.grpc.Server;
@@ -212,9 +212,9 @@ class KeyCeremonyRemoteTrustee extends RemoteKeyCeremonyTrusteeServiceGrpc.Remot
 
   @Override
   public void receivePublicKeys(RemoteKeyCeremonyTrusteeProto.PublicKeySet proto,
-                                StreamObserver<CommonProto.ErrorResponse> responseObserver) {
+                                StreamObserver<CommonRpcProto.ErrorResponse> responseObserver) {
 
-    CommonProto.ErrorResponse.Builder response = CommonProto.ErrorResponse.newBuilder();
+    CommonRpcProto.ErrorResponse.Builder response = CommonRpcProto.ErrorResponse.newBuilder();
     try {
       List<SchnorrProof> proofs = proto.getCoefficientProofsList().stream()
               .map(CommonConvert::convertSchnorrProof)
@@ -342,8 +342,8 @@ class KeyCeremonyRemoteTrustee extends RemoteKeyCeremonyTrusteeServiceGrpc.Remot
 
   @Override
   public void saveState(com.google.protobuf.Empty request,
-                        StreamObserver<CommonProto.ErrorResponse> responseObserver) {
-    CommonProto.ErrorResponse.Builder response = CommonProto.ErrorResponse.newBuilder();
+                        StreamObserver<CommonRpcProto.ErrorResponse> responseObserver) {
+    CommonRpcProto.ErrorResponse.Builder response = CommonRpcProto.ErrorResponse.newBuilder();
     try {
       TrusteeProto.DecryptingTrustee trusteeProto = TrusteeToProto.convertTrustee(this.delegate);
       publisher.overwriteTrusteeProto(trusteeProto);
@@ -360,9 +360,9 @@ class KeyCeremonyRemoteTrustee extends RemoteKeyCeremonyTrusteeServiceGrpc.Remot
   }
 
   @Override
-  public void finish(CommonProto.FinishRequest request,
-                     StreamObserver<CommonProto.ErrorResponse> responseObserver) {
-    CommonProto.ErrorResponse.Builder response = CommonProto.ErrorResponse.newBuilder();
+  public void finish(CommonRpcProto.FinishRequest request,
+                     StreamObserver<CommonRpcProto.ErrorResponse> responseObserver) {
+    CommonRpcProto.ErrorResponse.Builder response = CommonRpcProto.ErrorResponse.newBuilder();
     boolean ok = true;
     try {
       logger.atInfo().log("KeyCeremonyRemoteTrustee finish ok = %s", request.getAllOk());

@@ -1,0 +1,151 @@
+syntax = "proto3";
+
+option java_package = "electionguard.protogen";
+option java_outer_classname = "ManifestProto";
+
+// The structure of the election. See: https://developers.google.com/elections-data/reference/election
+message Manifest {
+
+  enum ElectionType {
+    unknown = 0;
+    general = 1;
+    partisan_primary_closed = 2;
+    partisan_primary_open = 3;
+    primary = 4;
+    runoff = 5;
+    special = 6;
+  }
+
+  string election_scope_id = 1;
+  string spec_version = 2;
+  ElectionType election_type = 3;
+  string start_date = 4; // ISO 8601 formatted date
+  string end_date = 5; // ISO 8601 formatted date
+  repeated GeopoliticalUnit geopolitical_units = 6;
+  repeated Party parties = 7;
+  repeated Candidate candidates = 8;
+  repeated ContestDescription contests = 9;
+  repeated BallotStyle ballot_styles = 10;
+  InternationalizedText name = 11;
+  ContactInformation contact_information = 12;
+}
+
+message AnnotatedString {
+  string annotation = 1;
+  string value = 2;
+}
+
+message BallotStyle {
+  string ballot_style_id = 1;
+  repeated string geopolitical_unit_ids = 2;
+  repeated string party_ids = 3;
+  string image_url = 4;
+}
+
+message Candidate {
+  string candidate_id = 1;
+  InternationalizedText name = 2;
+  string party_id = 3;
+  string image_url = 4;
+  bool is_write_in = 5; // default false
+}
+
+message ContactInformation {
+  string name = 1;
+  repeated string address_line = 2;
+  repeated AnnotatedString email = 3;
+  repeated AnnotatedString phone = 4;
+}
+
+message GeopoliticalUnit {
+
+  enum ReportingUnitType {
+    unknown = 0;
+    ballot_batch = 1;
+    ballot_style_area = 2;
+    borough = 3;
+    city = 4;
+    city_council = 5;
+    combined_precinct = 6;
+    congressional = 7;
+    country = 8;
+    county = 9;
+    county_council = 10;
+    drop_box = 11;
+    judicial = 12;
+    municipality = 13;
+    polling_place = 14;
+    precinct = 15;
+    school = 16;
+    special = 17;
+    split_precinct = 18;
+    state = 19;
+    state_house = 20;
+    state_senate = 21;
+    township = 22;
+    utility = 23;
+    village = 24;
+    vote_center = 25;
+    ward = 26;
+    water = 27;
+    other = 28;
+  }
+
+  string geopolitical_unit_id = 1;
+  string name = 2;
+  ReportingUnitType type = 3;
+  ContactInformation contact_information = 4;
+}
+
+message InternationalizedText {
+  repeated Language text = 1;
+}
+
+message Language {
+  string value = 1;
+  string language = 2;
+}
+
+message Party {
+  string party_id = 1;
+  InternationalizedText name = 2;
+  string abbreviation = 3;
+  string color = 4;
+  string logo_uri = 5;
+}
+
+message ContestDescription {
+  enum VoteVariationType {
+    unknown = 0;
+    one_of_m = 1;
+    approval = 2;
+    borda = 3;
+    cumulative = 4;
+    majority = 5;
+    n_of_m = 6;
+    plurality = 7;
+    proportional = 8;
+    range = 9;
+    rcv = 10;
+    super_majority = 11;
+    other = 12;
+  }
+
+  string contest_id = 1;
+  uint32 sequence_order = 2;
+  string geopolitical_unit_id = 3;
+  VoteVariationType vote_variation = 4;
+  uint32 number_elected = 5;
+  uint32 votes_allowed = 6;
+  string name = 7;
+  repeated SelectionDescription selections = 8;
+  InternationalizedText ballot_title = 9;
+  InternationalizedText ballot_subtitle = 10;
+  repeated string primary_party_ids = 11;
+}
+
+message SelectionDescription {
+  string selection_id = 1;
+  uint32 sequence_order = 2;
+  string candidate_id = 3;   // matches Candidate.candidate_id
+}

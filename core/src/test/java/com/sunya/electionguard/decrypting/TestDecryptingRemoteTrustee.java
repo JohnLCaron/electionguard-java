@@ -4,8 +4,9 @@ import com.sunya.electionguard.CiphertextTally;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.proto.CommonConvert;
-import com.sunya.electionguard.protogen.CommonProto;
-import com.sunya.electionguard.protogen.DecryptingTrusteeProto;
+import electionguard.protogen.CommonProto;
+import electionguard.protogen.CommonRpcProto;
+import electionguard.protogen.DecryptingTrusteeProto;
 import com.sunya.electionguard.publish.Consumer;
 import com.sunya.electionguard.verifier.ElectionRecord;
 
@@ -18,10 +19,8 @@ import org.mockito.MockitoAnnotations;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.verify;
 
 /** Test DecryptingRemoteTrustee. Needs one to be running on 17771. */
@@ -38,9 +37,9 @@ public class TestDecryptingRemoteTrustee {
   ArgumentCaptor<DecryptingTrusteeProto.PartialDecryptionResponse> capturePartialDecryption;
 
   @Mock
-  StreamObserver<CommonProto.ErrorResponse> observeBooleanResponse;
+  StreamObserver<CommonRpcProto.ErrorResponse> observeBooleanResponse;
   @Captor
-  ArgumentCaptor<CommonProto.ErrorResponse> captureBooleanResponse;
+  ArgumentCaptor<CommonRpcProto.ErrorResponse> captureBooleanResponse;
 
   CiphertextTally tally;
   Group.ElementModQ extendedHash;
@@ -174,11 +173,11 @@ public class TestDecryptingRemoteTrustee {
   @Example
   public void testFinish() throws IOException {
     DecryptingRemoteTrustee remote1 = makeDecryptingRemoteTrustee();
-    remote1.finish(CommonProto.FinishRequest.getDefaultInstance(), observeBooleanResponse);
+    remote1.finish(CommonRpcProto.FinishRequest.getDefaultInstance(), observeBooleanResponse);
 
     verify(observeBooleanResponse).onCompleted();
     verify(observeBooleanResponse).onNext(captureBooleanResponse.capture());
-    CommonProto.ErrorResponse response = captureBooleanResponse.getValue();
+    CommonRpcProto.ErrorResponse response = captureBooleanResponse.getValue();
 
     assertThat(response).isNotNull();
     assertThat(response.getError()).isEmpty();

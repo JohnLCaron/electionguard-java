@@ -13,7 +13,7 @@ import static com.sunya.electionguard.proto.CommonConvert.convertElementModQ;
 import static com.sunya.electionguard.proto.CommonConvert.convertElementModP;
 import static com.sunya.electionguard.proto.CommonConvert.convertList;
 
-import com.sunya.electionguard.protogen.CiphertextBallotProto;
+import electionguard.protogen.CiphertextBallotProto;
 
 
 public class CiphertextBallotFromProto {
@@ -29,7 +29,7 @@ public class CiphertextBallotFromProto {
   //                         BallotBox.State state
   public static SubmittedBallot translateFromProto(CiphertextBallotProto.SubmittedBallot ballot) {
     return new SubmittedBallot(
-            ballot.getObjectId(),
+            ballot.getBallotId(),
             ballot.getBallotStyleId(),
             convertElementModQ(ballot.getManifestHash()),
             convertElementModQ(ballot.getPreviousTrackingHash()),
@@ -37,34 +37,34 @@ public class CiphertextBallotFromProto {
             convertElementModQ(ballot.getTrackingHash()),
             ballot.getTimestamp(),
             convertElementModQ(ballot.getCryptoHash()),
-            convertBallotBoxState(ballot.getState()));
+            convertBallotState(ballot.getState()));
   }
 
-  static BallotBox.State convertBallotBoxState(CiphertextBallotProto.SubmittedBallot.BallotBoxState type) {
+  static BallotBox.State convertBallotState(CiphertextBallotProto.SubmittedBallot.BallotState type) {
     return BallotBox.State.valueOf(type.name());
   }
 
   static CiphertextBallot.Contest convertContest(CiphertextBallotProto.CiphertextBallotContest contest) {
     return new CiphertextBallot.Contest(
-            contest.getObjectId(),
+            contest.getContestId(),
             contest.getSequenceOrder(),
-            convertElementModQ(contest.getDescriptionHash()),
+            convertElementModQ(contest.getContestHash()),
             convertList(contest.getSelectionsList(), CiphertextBallotFromProto::convertSelection),
             convertElementModQ(contest.getCryptoHash()),
             convertCiphertext(contest.getCiphertextAccumulation()),
-            Optional.ofNullable(convertElementModQ(contest.getNonce())),
+            Optional.empty(),
             Optional.ofNullable(convertConstantProof(contest.getProof())));
   }
 
   static CiphertextBallot.Selection convertSelection(CiphertextBallotProto.CiphertextBallotSelection selection) {
     return new CiphertextBallot.Selection(
-            selection.getObjectId(),
+            selection.getSelectionId(),
             selection.getSequenceOrder(),
-            convertElementModQ(selection.getDescriptionHash()),
+            convertElementModQ(selection.getSelectionHash()),
             convertCiphertext(selection.getCiphertext()),
             convertElementModQ(selection.getCryptoHash()),
             selection.getIsPlaceholderSelection(),
-            Optional.ofNullable(convertElementModQ(selection.getNonce())),
+            Optional.empty(),
             Optional.ofNullable(convertDisjunctiveProof(selection.getProof())),
             Optional.ofNullable(convertCiphertext(selection.getExtendedData())));
   }

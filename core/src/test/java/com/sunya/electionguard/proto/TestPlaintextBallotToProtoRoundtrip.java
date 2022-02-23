@@ -1,7 +1,7 @@
 package com.sunya.electionguard.proto;
 
 import com.sunya.electionguard.PlaintextTally;
-import com.sunya.electionguard.protogen.PlaintextTallyProto;
+import electionguard.protogen.PlaintextTallyProto;
 import com.sunya.electionguard.publish.Consumer;
 import com.sunya.electionguard.verifier.TestParameterVerifier;
 import net.jqwik.api.Example;

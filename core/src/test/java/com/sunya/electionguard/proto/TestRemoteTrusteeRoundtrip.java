@@ -3,7 +3,7 @@ package com.sunya.electionguard.proto;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.decrypting.DecryptingTrustee;
 import com.sunya.electionguard.keyceremony.KeyCeremonyTrustee;
-import com.sunya.electionguard.protogen.TrusteeProto;
+import electionguard.protogen.TrusteeProto;
 import com.sunya.electionguard.publish.PrivateData;
 import net.jqwik.api.Example;
 import net.jqwik.api.lifecycle.BeforeProperty;

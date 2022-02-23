@@ -186,7 +186,7 @@ public class DecryptWithShares {
       for (KeyAndSelection tuple : shares.values()) {
         // verify we have a proof or recovered parts
         if (!tuple.decryption().is_valid(selection.ciphertext(), tuple.public_key(), extended_base_hash)) {
-          logger.atWarning().log("share: %s has invalid proof or recovered parts", tuple.decryption().object_id());
+          logger.atWarning().log("share: %s has invalid proof or recovered parts", tuple.decryption().selection_id());
           return Optional.empty();
         }
       }

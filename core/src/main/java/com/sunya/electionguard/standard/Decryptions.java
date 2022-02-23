@@ -143,7 +143,7 @@ public class Decryptions {
                 guardian_keys.owner_id(), ciphertextContest.object_id);
         return Optional.empty();
       }
-      selections.put(decryption.get().object_id(), decryption.get());
+      selections.put(decryption.get().selection_id(), decryption.get());
     }
 
     return Optional.of(new CiphertextDecryptionContest(
@@ -276,7 +276,7 @@ public class Decryptions {
                   missing_guardian_key.owner_id(), contest.object_id);
           return Optional.empty();
         }
-        selections.put(decryption.get().object_id(), decryption.get());
+        selections.put(decryption.get().selection_id(), decryption.get());
       }
 
       return Optional.of(new CiphertextCompensatedDecryptionContest(

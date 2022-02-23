@@ -1,7 +1,8 @@
 package com.sunya.electionguard.proto;
 
 import com.sunya.electionguard.CiphertextTally;
-import com.sunya.electionguard.protogen.ElectionRecordProto;
+import com.sunya.electionguard.PlaintextTally;
+import electionguard.protogen.ElectionRecordProto;
 import com.sunya.electionguard.verifier.ElectionRecord;
 import com.sunya.electionguard.publish.Consumer;
 import com.sunya.electionguard.publish.Publisher;
@@ -12,6 +13,7 @@ import net.jqwik.api.lifecycle.BeforeContainer;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -57,9 +59,24 @@ public class TestElectionRecordProtoRoundtrip {
     assertThat(roundtrip.devices).isEqualTo(consumer.devices());
     CiphertextTally expected = consumer.ciphertextTally();
     assertThat(roundtrip.encryptedTally).isEqualTo(expected);
-    assertThat(roundtrip.decryptedTally).isEqualTo(consumer.decryptedTally());
+    PlaintextTally expectedDecryptedTally = consumer.decryptedTally();
+    comparePlaintextTally(roundtrip.decryptedTally, expectedDecryptedTally);
+    assertThat(roundtrip.decryptedTally).isEqualTo(expectedDecryptedTally);
     assertThat(roundtrip.guardianRecords).isEqualTo(consumer.guardianRecords());
     assertThat(roundtrip.availableGuardians).isEqualTo(consumer.availableGuardians());
+  }
+
+  void comparePlaintextTally(PlaintextTally decryptedTally, PlaintextTally expected) {
+    for (Map.Entry<String, PlaintextTally.Contest> entry : expected.contests.entrySet()) {
+      PlaintextTally.Contest expectedContest = entry.getValue();
+      PlaintextTally.Contest contest = decryptedTally.contests.get(entry.getKey());
+      assertThat(contest).isNotNull();
+      for (Map.Entry<String, PlaintextTally.Selection> entry2 : expectedContest.selections().entrySet()) {
+        PlaintextTally.Selection expectedSelection = entry2.getValue();
+        PlaintextTally.Selection selection = contest.selections().get(entry2.getKey());
+        assertThat(selection).isEqualTo(expectedSelection);
+      }
+    }
   }
 
   @Example

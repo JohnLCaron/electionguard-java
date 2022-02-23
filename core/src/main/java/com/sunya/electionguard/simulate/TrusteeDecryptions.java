@@ -136,7 +136,7 @@ public class TrusteeDecryptions {
                 guardian.id(), ciphertextContest.object_id);
         return Optional.empty();
       }
-      selections.put(decryption.get().object_id(), decryption.get());
+      selections.put(decryption.get().selection_id(), decryption.get());
     }
 
     return Optional.of(new CiphertextDecryptionContest(
@@ -240,7 +240,7 @@ public class TrusteeDecryptions {
           continue;
           // return Optional.empty();
         }
-        selections.put(decryption.get().object_id(), decryption.get());
+        selections.put(decryption.get().selection_id(), decryption.get());
       }
 
       return Optional.of(new CiphertextCompensatedDecryptionContest(
