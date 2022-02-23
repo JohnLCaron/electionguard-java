@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+option java_package = "electionguard.protogen";
+option java_outer_classname = "CommonProto";
+
+
+message ChaumPedersenProof {
+  ElementModP pad = 1; // a in the spec
+  ElementModP data = 2; // b in the spec
+  ElementModQ challenge = 3; // c in the spec
+  ElementModQ response = 4; // v in the spec
+}
+
+// A member of the group Z mod P
+message ElementModP {
+  bytes value = 1;
+}
+
+// A member of the group Z mod Q
+message ElementModQ {
+  bytes value = 1;
+}
+
+message ElGamalCiphertext {
+  ElementModP pad = 1;
+  ElementModP data = 2;
+}
+
+message ElGamalKeyPair {
+  ElementModQ secret_key = 1;
+  ElementModP public_key = 2;
+}
+
+message SchnorrProof {
+  ElementModP public_key = 1; // k in the spec
+  ElementModP commitment = 2; // h in the spec
+  ElementModQ challenge = 3; // c in the spec
+  ElementModQ response = 4; // u in the spec
+}

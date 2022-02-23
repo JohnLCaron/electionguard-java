@@ -1,11 +1,10 @@
 package com.sunya.electionguard.publish;
 
-import com.google.common.collect.ImmutableList;
 import com.sunya.electionguard.decrypting.DecryptingTrustee;
 import com.sunya.electionguard.proto.TrusteeFromProto;
 import com.sunya.electionguard.standard.GuardianPrivateRecord;
 import com.sunya.electionguard.PlaintextBallot;
-import com.sunya.electionguard.protogen.TrusteeProto;
+import electionguard.protogen.TrusteeProto;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -13,7 +12,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.List;
@@ -72,6 +70,9 @@ public class PrivateData {
 
   /** Delete everything in the output directory, but leave that directory. */
   private void removeAllFiles() throws IOException {
+    if (!this.privateDirectory.toFile().exists()) {
+      return;
+    }
     Files.walk(this.privateDirectory)
             .filter(p -> !p.equals(privateDirectory))
             .map(Path::toFile)

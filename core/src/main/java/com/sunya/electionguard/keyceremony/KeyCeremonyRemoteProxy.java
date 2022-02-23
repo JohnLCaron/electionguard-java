@@ -1,8 +1,8 @@
 package com.sunya.electionguard.keyceremony;
 
 import com.google.common.flogger.FluentLogger;
-import com.sunya.electionguard.protogen.RemoteKeyCeremonyServiceGrpc;
-import com.sunya.electionguard.protogen.RemoteKeyCeremonyProto;
+import electionguard.protogen.RemoteKeyCeremonyServiceGrpc;
+import electionguard.protogen.RemoteKeyCeremonyProto;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;

@@ -9,8 +9,8 @@ import java.util.List;
 
 import static com.sunya.electionguard.proto.CommonConvert.convertElementModP;
 
-import com.sunya.electionguard.protogen.CommonProto;
-import com.sunya.electionguard.protogen.TrusteeProto;
+import electionguard.protogen.CommonProto;
+import electionguard.protogen.TrusteeProto;
 
 
 public class TrusteeToProto {

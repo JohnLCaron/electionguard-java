@@ -5,7 +5,7 @@ import com.sunya.electionguard.*;
 import com.sunya.electionguard.proto.CiphertextBallotToProto;
 import com.sunya.electionguard.proto.ElectionRecordToProto;
 import com.sunya.electionguard.proto.PlaintextTallyToProto;
-import com.sunya.electionguard.protogen.PlaintextTallyProto;
+import electionguard.protogen.PlaintextTallyProto;
 import com.sunya.electionguard.verifier.ElectionRecord;
 
 import javax.annotation.Nullable;
@@ -17,8 +17,8 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Formatter;
 
-import com.sunya.electionguard.protogen.CiphertextBallotProto;
-import com.sunya.electionguard.protogen.ElectionRecordProto;
+import electionguard.protogen.CiphertextBallotProto;
+import electionguard.protogen.ElectionRecordProto;
 
 /** Publishes the Manifest Record to Json or protobuf files. */
 public class Publisher {

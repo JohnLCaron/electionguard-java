@@ -1,7 +1,7 @@
 package com.sunya.electionguard.proto;
 
 import com.sunya.electionguard.Manifest;
-import com.sunya.electionguard.protogen.ManifestProto;
+import electionguard.protogen.ManifestProto;
 import com.sunya.electionguard.publish.ConvertFromJson;
 import com.sunya.electionguard.publish.Publisher;
 import com.sunya.electionguard.verifier.TestParameterVerifier;

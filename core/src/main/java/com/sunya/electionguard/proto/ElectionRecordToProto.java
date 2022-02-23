@@ -17,10 +17,11 @@ import javax.annotation.Nullable;
 import static com.sunya.electionguard.proto.CommonConvert.convertElementModP;
 import static com.sunya.electionguard.proto.CommonConvert.convertElementModQ;
 
-import com.sunya.electionguard.protogen.ElectionRecordProto;
+import electionguard.protogen.ElectionRecordProto;
 
 
 public class ElectionRecordToProto {
+  public static final String version = "2/23/2022";
 
   public static ElectionRecordProto.ElectionRecord buildElectionRecord(
           Manifest description,
@@ -33,6 +34,7 @@ public class ElectionRecordToProto {
           @Nullable Iterable<AvailableGuardian> availableGuardians) {
 
     ElectionRecordProto.ElectionRecord.Builder builder = ElectionRecordProto.ElectionRecord.newBuilder();
+    builder.setVersion(version);
     builder.setConstants( convertConstants(constants));
     builder.setManifest( ManifestToProto.translateToProto(description));
     builder.setContext( convertContext(context));
@@ -43,7 +45,7 @@ public class ElectionRecordToProto {
 
     if (devices != null) {
       for (Encrypt.EncryptionDevice device : devices) {
-        builder.addDevice(convertDevice(device));
+        builder.addDevices(convertDevice(device));
       }
     }
     if (ciphertext_tally != null) {
@@ -63,13 +65,13 @@ public class ElectionRecordToProto {
   static ElectionRecordProto.AvailableGuardian convertAvailableGuardian(AvailableGuardian guardian) {
     ElectionRecordProto.AvailableGuardian.Builder builder = ElectionRecordProto.AvailableGuardian.newBuilder();
     builder.setGuardianId(guardian.guardian_id());
-    builder.setSequence(guardian.sequence());
+    builder.setXCoordinate(guardian.sequence());
     builder.setLagrangeCoordinate(convertElementModQ(guardian.lagrangeCoordinate()));
     return builder.build();
   }
 
-  static ElectionRecordProto.Constants convertConstants(ElectionConstants constants) {
-    ElectionRecordProto.Constants.Builder builder = ElectionRecordProto.Constants.newBuilder();
+  static ElectionRecordProto.ElectionConstants convertConstants(ElectionConstants constants) {
+    ElectionRecordProto.ElectionConstants.Builder builder = ElectionRecordProto.ElectionConstants.newBuilder();
     builder.setLargePrime(ByteString.copyFrom(constants.large_prime.toByteArray()));
     builder.setSmallPrime(ByteString.copyFrom(constants.small_prime.toByteArray()));
     builder.setCofactor(ByteString.copyFrom(constants.cofactor.toByteArray()));
@@ -104,7 +106,7 @@ public class ElectionRecordToProto {
   static ElectionRecordProto.GuardianRecord convertGuardianRecord(GuardianRecord guardianRecord) {
     ElectionRecordProto.GuardianRecord.Builder builder = ElectionRecordProto.GuardianRecord.newBuilder();
     builder.setGuardianId(guardianRecord.guardian_id());
-    builder.setSequence(guardianRecord.sequence_order());
+    builder.setXCoordinate(guardianRecord.sequence_order());
     builder.setElectionPublicKey(convertElementModP(guardianRecord.election_public_key()));
     for (Group.ElementModP commitment : guardianRecord.election_commitments()) {
       builder.addCoefficientCommitments(convertElementModP(commitment));

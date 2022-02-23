@@ -16,9 +16,9 @@ import com.sunya.electionguard.Scheduler;
 import com.sunya.electionguard.input.CiphertextTallyInputValidation;
 import com.sunya.electionguard.input.ElectionInputValidation;
 import com.sunya.electionguard.proto.CommonConvert;
-import com.sunya.electionguard.protogen.CommonProto;
-import com.sunya.electionguard.protogen.DecryptingProto;
-import com.sunya.electionguard.protogen.DecryptingServiceGrpc;
+import electionguard.protogen.CommonRpcProto;
+import electionguard.protogen.DecryptingProto;
+import electionguard.protogen.DecryptingServiceGrpc;
 import com.sunya.electionguard.publish.Consumer;
 import com.sunya.electionguard.publish.Publisher;
 import com.sunya.electionguard.verifier.ElectionRecord;
@@ -361,18 +361,18 @@ class DecryptingMediatorRunner {
 
     @Override
     public void registerTrustee(DecryptingProto.RegisterDecryptingTrusteeRequest request,
-                                StreamObserver<CommonProto.ErrorResponse> responseObserver) {
+                                StreamObserver<CommonRpcProto.ErrorResponse> responseObserver) {
 
       System.out.printf("DecryptingRemote registerTrustee %s url %s %n", request.getGuardianId(), request.getRemoteUrl());
 
       if (startedDecryption) {
-        responseObserver.onNext(CommonProto.ErrorResponse.newBuilder()
+        responseObserver.onNext(CommonRpcProto.ErrorResponse.newBuilder()
                 .setError("Already started Decryption").build());
         responseObserver.onCompleted();
         return;
       }
 
-      CommonProto.ErrorResponse.Builder response = CommonProto.ErrorResponse.newBuilder();
+      CommonRpcProto.ErrorResponse.Builder response = CommonRpcProto.ErrorResponse.newBuilder();
       try {
         DecryptingRemoteTrusteeProxy trustee = DecryptingMediatorRunner.this.registerTrustee(request);
         responseObserver.onNext(response.build());

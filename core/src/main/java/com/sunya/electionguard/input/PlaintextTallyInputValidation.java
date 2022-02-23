@@ -133,9 +133,9 @@ public class PlaintextTallyInputValidation {
 
     Set<String> guardianIds = new HashSet<>();
     for (DecryptionShare.CiphertextDecryptionSelection share : tallySelection.shares()) {
-      if (!share.object_id().equals(tallySelection.object_id())) {
+      if (!share.selection_id().equals(tallySelection.object_id())) {
         String msg = String.format("PlaintextTally.D.1 Share id '%s' doesnt match selection '%s'",
-                share.object_id(), tallySelection.object_id());
+                share.selection_id(), tallySelection.object_id());
         selectionMesses.add(msg);
         logger.atWarning().log(msg);
         continue;
@@ -156,12 +156,12 @@ public class PlaintextTallyInputValidation {
   }
 
   void validateRecoveredParts(DecryptionShare.CiphertextDecryptionSelection share, ValidationMessenger messes) {
-    ValidationMessenger partsMesses = messes.nested("RecoveryParts", share.object_id());
+    ValidationMessenger partsMesses = messes.nested("RecoveryParts", share.selection_id());
 
     Map<String, DecryptionShare.CiphertextCompensatedDecryptionSelection> parts = share.recovered_parts().get();
     if (parts.size() != navailable) {
       String msg = String.format("PlaintextTally.E.3 share '%s' number of parts = %d should be navailable = %d",
-              share.object_id(), parts.size(), navailable);
+              share.selection_id(), parts.size(), navailable);
       messes.add(msg);
       logger.atWarning().log(msg);
     }
@@ -176,9 +176,9 @@ public class PlaintextTallyInputValidation {
       }
       DecryptionShare.CiphertextCompensatedDecryptionSelection part = entry.getValue();
 
-      if (!share.object_id().equals(part.object_id())) {
+      if (!share.selection_id().equals(part.selection_id())) {
         String msg = String.format("PlaintextTally.E.1 recovered_parts object_id '%s' doesnt match share object_id '%s'",
-                part.object_id(), share.object_id());
+                part.selection_id(), share.selection_id());
         partsMesses.add(msg);
         logger.atWarning().log(msg);
         continue;

@@ -2,7 +2,7 @@ package com.sunya.electionguard.proto;
 
 import com.sunya.electionguard.CiphertextBallot;
 import com.sunya.electionguard.SubmittedBallot;
-import com.sunya.electionguard.protogen.CiphertextBallotProto;
+import electionguard.protogen.CiphertextBallotProto;
 import com.sunya.electionguard.publish.ConvertFromJson;
 import com.sunya.electionguard.publish.Publisher;
 import com.sunya.electionguard.verifier.TestParameterVerifier;

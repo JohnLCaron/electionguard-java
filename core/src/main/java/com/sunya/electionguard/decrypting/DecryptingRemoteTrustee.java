@@ -7,9 +7,9 @@ import com.google.common.flogger.FluentLogger;
 import com.sunya.electionguard.BallotBox;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.proto.CommonConvert;
-import com.sunya.electionguard.protogen.CommonProto;
-import com.sunya.electionguard.protogen.DecryptingTrusteeProto;
-import com.sunya.electionguard.protogen.DecryptingTrusteeServiceGrpc;
+import electionguard.protogen.CommonRpcProto;
+import electionguard.protogen.DecryptingTrusteeProto;
+import electionguard.protogen.DecryptingTrusteeServiceGrpc;
 import com.sunya.electionguard.proto.TrusteeFromProto;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
@@ -87,7 +87,7 @@ class DecryptingRemoteTrustee extends DecryptingTrusteeServiceGrpc.DecryptingTru
       if (cmdLine.serverPort != 0) {
         // register with the DecryptingRemote "server".
         DecryptingMediatorRunnerProxy proxy = new DecryptingMediatorRunnerProxy(serverUrl);
-        CommonProto.ErrorResponse response = proxy.registerTrustee(trustee.id(), url,
+        CommonRpcProto.ErrorResponse response = proxy.registerTrustee(trustee.id(), url,
                 trustee.delegate.xCoordinate(), trustee.delegate.electionPublicKey());
         proxy.shutdown();
 
@@ -245,9 +245,9 @@ class DecryptingRemoteTrustee extends DecryptingTrusteeServiceGrpc.DecryptingTru
   }
 
   @Override
-  public void finish(CommonProto.FinishRequest request,
-                     StreamObserver<CommonProto.ErrorResponse> responseObserver) {
-    CommonProto.ErrorResponse.Builder response = CommonProto.ErrorResponse.newBuilder();
+  public void finish(CommonRpcProto.FinishRequest request,
+                     StreamObserver<CommonRpcProto.ErrorResponse> responseObserver) {
+    CommonRpcProto.ErrorResponse.Builder response = CommonRpcProto.ErrorResponse.newBuilder();
     boolean ok = true;
     try {
       logger.atInfo().log("DecryptingTrusteeProto finish ok = %s", request.getAllOk());

@@ -2,14 +2,14 @@ package com.sunya.electionguard.proto;
 
 import com.sunya.electionguard.PlaintextBallot;
 
-import com.sunya.electionguard.protogen.PlaintextBallotProto;
+import electionguard.protogen.PlaintextBallotProto;
 
 public class PlaintextBallotToProto {
 
   public static PlaintextBallotProto.PlaintextBallot translateToProto(PlaintextBallot ballot) {
     PlaintextBallotProto.PlaintextBallot.Builder builder = PlaintextBallotProto.PlaintextBallot.newBuilder();
-    builder.setObjectId(ballot.object_id());
-    builder.setStyleId(ballot.style_id);
+    builder.setBallotId(ballot.object_id());
+    builder.setBallotStyleId(ballot.style_id);
     ballot.contests.forEach(value -> builder.addContests(convertContest(value)));
     return builder.build();
   }
@@ -17,7 +17,7 @@ public class PlaintextBallotToProto {
   static PlaintextBallotProto.PlaintextBallotContest convertContest(PlaintextBallot.Contest contest) {
     PlaintextBallotProto.PlaintextBallotContest.Builder builder = PlaintextBallotProto.PlaintextBallotContest.newBuilder();
     builder.setContestId(contest.contest_id);
-    contest.ballot_selections.forEach(value -> builder.addBallotSelections(convertSelection(value)));
+    contest.ballot_selections.forEach(value -> builder.addSelections(convertSelection(value)));
     return builder.build();
   }
 

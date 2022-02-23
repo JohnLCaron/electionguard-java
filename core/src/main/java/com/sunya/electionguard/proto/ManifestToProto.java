@@ -2,7 +2,7 @@ package com.sunya.electionguard.proto;
 
 import com.sunya.electionguard.Manifest;
 
-import com.sunya.electionguard.protogen.ManifestProto;
+import electionguard.protogen.ManifestProto;
 
 public class ManifestToProto {
 
@@ -44,7 +44,7 @@ public class ManifestToProto {
 
   static ManifestProto.BallotStyle convertBallotStyle(Manifest.BallotStyle style) {
     ManifestProto.BallotStyle.Builder builder = ManifestProto.BallotStyle.newBuilder();
-    builder.setObjectId(style.object_id());
+    builder.setBallotStyleId(style.object_id());
     builder.addAllGeopoliticalUnitIds(style.geopolitical_unit_ids());
     builder.addAllPartyIds(style.party_ids());
     if (style.image_uri() != null) {
@@ -55,7 +55,7 @@ public class ManifestToProto {
 
   static ManifestProto.Candidate convertCandidate(Manifest.Candidate candidate) {
     ManifestProto.Candidate.Builder builder = ManifestProto.Candidate.newBuilder();
-    builder.setObjectId(candidate.object_id());
+    builder.setCandidateId(candidate.object_id());
     builder.setName(convertInternationalizedText(candidate.name()));
     if (candidate.party_id() != null) {
       builder.setPartyId(candidate.party_id());
@@ -80,14 +80,14 @@ public class ManifestToProto {
 
   static ManifestProto.ContestDescription convertContestDescription(Manifest.ContestDescription contest) {
     ManifestProto.ContestDescription.Builder builder = ManifestProto.ContestDescription.newBuilder();
-    builder.setObjectId(contest.object_id());
-    builder.setElectoralDistrictId(contest.electoral_district_id());
+    builder.setContestId(contest.object_id());
+    builder.setGeopoliticalUnitId(contest.electoral_district_id());
     builder.setSequenceOrder(contest.sequence_order());
     builder.setVoteVariation(convertVoteVariationType(contest.vote_variation()));
     builder.setNumberElected(contest.number_elected());
     builder.setVotesAllowed(contest.votes_allowed());
     builder.setName(contest.name());
-    contest.ballot_selections().forEach(value -> builder.addBallotSelections(convertSelectionDescription(value)));
+    contest.ballot_selections().forEach(value -> builder.addSelections(convertSelectionDescription(value)));
     if (contest.ballot_title() != null) {
       builder.setBallotTitle(convertInternationalizedText(contest.ballot_title()));
     }
@@ -112,7 +112,7 @@ public class ManifestToProto {
 
   static ManifestProto.GeopoliticalUnit convertGeopoliticalUnit(Manifest.GeopoliticalUnit geoUnit) {
     ManifestProto.GeopoliticalUnit.Builder builder = ManifestProto.GeopoliticalUnit.newBuilder();
-    builder.setObjectId(geoUnit.object_id());
+    builder.setGeopoliticalUnitId(geoUnit.object_id());
     builder.setName(geoUnit.name());
     builder.setType(convertReportingUnitType(geoUnit.type()));
     if (geoUnit.contact_information() != null) {
@@ -138,7 +138,7 @@ public class ManifestToProto {
 
   static ManifestProto.Party convertParty(Manifest.Party party) {
     ManifestProto.Party.Builder builder = ManifestProto.Party.newBuilder();
-    builder.setObjectId(party.object_id());
+    builder.setPartyId(party.object_id());
     if (party.name() != null) {
       builder.setName(convertInternationalizedText(party.name()));
     }
@@ -156,7 +156,7 @@ public class ManifestToProto {
 
   static ManifestProto.SelectionDescription convertSelectionDescription(Manifest.SelectionDescription selection) {
     ManifestProto.SelectionDescription.Builder builder = ManifestProto.SelectionDescription.newBuilder();
-    builder.setObjectId(selection.object_id());
+    builder.setSelectionId(selection.object_id());
     builder.setCandidateId(selection.candidate_id());
     builder.setSequenceOrder(selection.sequence_order());
     return builder.build();

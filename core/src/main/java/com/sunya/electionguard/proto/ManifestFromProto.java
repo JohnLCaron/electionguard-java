@@ -7,7 +7,7 @@ import java.time.OffsetDateTime;
 
 import static com.sunya.electionguard.proto.CommonConvert.convertList;
 
-import com.sunya.electionguard.protogen.ManifestProto;
+import electionguard.protogen.ManifestProto;
 
 public class ManifestFromProto {
 
@@ -52,7 +52,7 @@ public class ManifestFromProto {
 
   static Manifest.BallotStyle convertBallotStyle(ManifestProto.BallotStyle style) {
     return new Manifest.BallotStyle(
-            style.getObjectId(),
+            style.getBallotStyleId(),
             style.getGeopoliticalUnitIdsList(),
             style.getPartyIdsList(),
             style.getImageUrl().isEmpty() ? null : style.getImageUrl());
@@ -60,7 +60,7 @@ public class ManifestFromProto {
 
   static Manifest.Candidate convertCandidate(ManifestProto.Candidate candidate) {
     return new Manifest.Candidate(
-            candidate.getObjectId(),
+            candidate.getCandidateId(),
             convertInternationalizedText(candidate.getName()),
             candidate.getPartyId().isEmpty() ? null : candidate.getPartyId(),
             candidate.getImageUrl().isEmpty() ? null : candidate.getImageUrl(),
@@ -81,14 +81,14 @@ public class ManifestFromProto {
 
   static Manifest.ContestDescription convertContestDescription(ManifestProto.ContestDescription contest) {
     return new Manifest.ContestDescription(
-            contest.getObjectId(),
-            contest.getElectoralDistrictId(),
+            contest.getContestId(),
+            contest.getGeopoliticalUnitId(),
             contest.getSequenceOrder(),
             convertVoteVariationType(contest.getVoteVariation()),
             contest.getNumberElected(),
             contest.getVotesAllowed(),
             contest.getName(),
-            convertList(contest.getBallotSelectionsList(), ManifestFromProto::convertSelectionDescription),
+            convertList(contest.getSelectionsList(), ManifestFromProto::convertSelectionDescription),
             contest.hasBallotTitle() ? convertInternationalizedText(contest.getBallotTitle()) : null,
             contest.hasBallotSubtitle() ? convertInternationalizedText(contest.getBallotSubtitle()) : null,
             contest.getPrimaryPartyIdsList()
@@ -109,7 +109,7 @@ public class ManifestFromProto {
 
   static Manifest.GeopoliticalUnit convertGeopoliticalUnit(ManifestProto.GeopoliticalUnit geoUnit) {
     return new Manifest.GeopoliticalUnit(
-            geoUnit.getObjectId(),
+            geoUnit.getGeopoliticalUnitId(),
             geoUnit.getName(),
             convertReportingUnitType(geoUnit.getType()),
             geoUnit.hasContactInformation() ? convertContactInformation(geoUnit.getContactInformation()) : null);
@@ -125,7 +125,7 @@ public class ManifestFromProto {
 
   static Manifest.Party convertParty(ManifestProto.Party party) {
     return new Manifest.Party(
-            party.getObjectId(),
+            party.getPartyId(),
             convertInternationalizedText(party.getName()),
             party.getAbbreviation().isEmpty() ? null : party.getAbbreviation(),
             party.getColor().isEmpty() ? null : party.getColor(),
@@ -134,7 +134,7 @@ public class ManifestFromProto {
 
   static Manifest.SelectionDescription convertSelectionDescription(ManifestProto.SelectionDescription selection) {
     return new Manifest.SelectionDescription(
-            selection.getObjectId(),
+            selection.getSelectionId(),
             selection.getCandidateId(),
             selection.getSequenceOrder());
   }

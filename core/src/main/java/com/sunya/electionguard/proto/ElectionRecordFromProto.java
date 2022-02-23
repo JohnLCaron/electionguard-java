@@ -22,7 +22,7 @@ import java.util.List;
 import static com.sunya.electionguard.proto.CommonConvert.convertElementModP;
 import static com.sunya.electionguard.proto.CommonConvert.convertElementModQ;
 
-import com.sunya.electionguard.protogen.ElectionRecordProto;
+import electionguard.protogen.ElectionRecordProto;
 
 
 @Immutable
@@ -47,7 +47,7 @@ public class ElectionRecordFromProto {
                     .map(ElectionRecordFromProto::convertGuardianRecord)
                     .toList();
     List<Encrypt.EncryptionDevice> devices =
-            proto.getDeviceList().stream()
+            proto.getDevicesList().stream()
                     .map(ElectionRecordFromProto::convertDevice)
                     .toList();
 
@@ -67,11 +67,11 @@ public class ElectionRecordFromProto {
   static AvailableGuardian convertAvailableGuardian(ElectionRecordProto.AvailableGuardian proto) {
     return new AvailableGuardian(
             proto.getGuardianId(),
-            proto.getSequence(),
+            proto.getXCoordinate(),
             convertElementModQ(proto.getLagrangeCoordinate()));
   }
 
-  static ElectionConstants convertConstants(ElectionRecordProto.Constants constants) {
+  static ElectionConstants convertConstants(ElectionRecordProto.ElectionConstants constants) {
     return new ElectionConstants(
             convertBigInteger(constants.getLargePrime()),
             convertBigInteger(constants.getSmallPrime()),
@@ -108,7 +108,7 @@ public class ElectionRecordFromProto {
             .toList();
     return new GuardianRecord(
             guardianRecord.getGuardianId(),
-            guardianRecord.getSequence(),
+            guardianRecord.getXCoordinate(),
             CommonConvert.convertElementModP(guardianRecord.getElectionPublicKey()),
             coefficient_commitments,
             coefficient_proofs

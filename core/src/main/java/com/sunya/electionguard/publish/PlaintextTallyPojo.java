@@ -186,7 +186,7 @@ public class PlaintextTallyPojo {
     });
 
     CiphertextDecryptionSelectionPojo pojo = new CiphertextDecryptionSelectionPojo();
-    pojo.object_id = org.object_id();
+    pojo.object_id = org.selection_id();
     pojo.guardian_id = org.guardian_id();
     pojo.share = org.share();
     org.proof().ifPresent( proof -> pojo.proof = convertProof(proof));
@@ -198,7 +198,7 @@ public class PlaintextTallyPojo {
           DecryptionShare.CiphertextCompensatedDecryptionSelection org) {
 
     CiphertextCompensatedDecryptionSelectionPojo pojo = new CiphertextCompensatedDecryptionSelectionPojo();
-    pojo.object_id = org.object_id();
+    pojo.object_id = org.selection_id();
     pojo.guardian_id = org.guardian_id();
     pojo.missing_guardian_id = org.missing_guardian_id();
     pojo.share = org.share();

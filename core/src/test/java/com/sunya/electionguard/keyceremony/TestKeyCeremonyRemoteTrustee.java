@@ -3,8 +3,9 @@ package com.sunya.electionguard.keyceremony;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.TestUtils;
 import com.sunya.electionguard.proto.CommonConvert;
-import com.sunya.electionguard.protogen.CommonProto;
-import com.sunya.electionguard.protogen.RemoteKeyCeremonyTrusteeProto;
+import electionguard.protogen.CommonProto;
+import electionguard.protogen.CommonRpcProto;
+import electionguard.protogen.RemoteKeyCeremonyTrusteeProto;
 import io.grpc.stub.StreamObserver;
 import net.jqwik.api.Example;
 import org.mockito.ArgumentCaptor;
@@ -32,9 +33,9 @@ public class TestKeyCeremonyRemoteTrustee {
   ArgumentCaptor<RemoteKeyCeremonyTrusteeProto.PublicKeySet> capturePublicKeySet;
 
   @Mock
-  StreamObserver<CommonProto.ErrorResponse> observeBooleanResponse;
+  StreamObserver<CommonRpcProto.ErrorResponse> observeBooleanResponse;
   @Captor
-  ArgumentCaptor<CommonProto.ErrorResponse> captureBooleanResponse;
+  ArgumentCaptor<CommonRpcProto.ErrorResponse> captureBooleanResponse;
 
   @Mock
   StreamObserver<RemoteKeyCeremonyTrusteeProto.PartialKeyBackup> observePartialKeyBackup;
@@ -114,7 +115,7 @@ public class TestKeyCeremonyRemoteTrustee {
 
     verify(observeBooleanResponse).onCompleted();
     verify(observeBooleanResponse).onNext(captureBooleanResponse.capture());
-    CommonProto.ErrorResponse response2 = captureBooleanResponse.getValue();
+    CommonRpcProto.ErrorResponse response2 = captureBooleanResponse.getValue();
 
     assertThat(response2).isNotNull();
     assertThat(response2.getError()).isEmpty();
@@ -135,7 +136,7 @@ public class TestKeyCeremonyRemoteTrustee {
 
     verify(observeBooleanResponse).onCompleted();
     verify(observeBooleanResponse).onNext(captureBooleanResponse.capture());
-    CommonProto.ErrorResponse response = captureBooleanResponse.getValue();
+    CommonRpcProto.ErrorResponse response = captureBooleanResponse.getValue();
 
     assertThat(response).isNotNull();
     assertThat(response.getError()).contains("Guardian Id equals mine");
@@ -162,7 +163,7 @@ public class TestKeyCeremonyRemoteTrustee {
 
     verify(observeBooleanResponse).onCompleted();
     verify(observeBooleanResponse).onNext(captureBooleanResponse.capture());
-    CommonProto.ErrorResponse response2 = captureBooleanResponse.getValue();
+    CommonRpcProto.ErrorResponse response2 = captureBooleanResponse.getValue();
 
     assertThat(response2).isNotNull();
     assertThat(response2.getError()).contains("Invalid Schnorr proof");
@@ -382,7 +383,7 @@ public class TestKeyCeremonyRemoteTrustee {
 
     verify(observeBooleanResponse).onCompleted();
     verify(observeBooleanResponse).onNext(captureBooleanResponse.capture());
-    CommonProto.ErrorResponse response = captureBooleanResponse.getValue();
+    CommonRpcProto.ErrorResponse response = captureBooleanResponse.getValue();
 
     assertThat(response).isNotNull();
     assertThat(response.getError()).isEmpty();
@@ -391,11 +392,11 @@ public class TestKeyCeremonyRemoteTrustee {
   @Example
   public void testFinish() throws IOException {
     KeyCeremonyRemoteTrustee remote1 = makeRemote(1);
-    remote1.finish(CommonProto.FinishRequest.getDefaultInstance(), observeBooleanResponse);
+    remote1.finish(CommonRpcProto.FinishRequest.getDefaultInstance(), observeBooleanResponse);
 
     verify(observeBooleanResponse).onCompleted();
     verify(observeBooleanResponse).onNext(captureBooleanResponse.capture());
-    CommonProto.ErrorResponse response = captureBooleanResponse.getValue();
+    CommonRpcProto.ErrorResponse response = captureBooleanResponse.getValue();
 
     assertThat(response).isNotNull();
     assertThat(response.getError()).isEmpty();
