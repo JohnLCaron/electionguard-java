@@ -405,7 +405,7 @@ public class Publisher {
             description, context, constants, guardianRecords,
             null, null, null, null);
     try (FileOutputStream out = new FileOutputStream(electionRecordProtoPath().toFile())) {
-      electionRecordProto.writeDelimitedTo(out);
+      electionRecordProto.writeTo(out);
     }
   }
 
@@ -438,7 +438,7 @@ public class Publisher {
             devices, null, null, null);
 
     try (FileOutputStream out = new FileOutputStream(electionRecordProtoPath().toFile())) {
-      electionRecordProto.writeDelimitedTo(out);
+      electionRecordProto.writeTo(out);
     }
   }
 
@@ -450,7 +450,7 @@ public class Publisher {
       throw new UnsupportedOperationException("Trying to write to readonly election record");
     }
 
-    ElectionRecordProto.ElectionRecord ElectionRecordProto = ElectionRecordToProto.buildElectionRecord(
+    ElectionRecordProto.ElectionRecord electionRecordProto = ElectionRecordToProto.buildElectionRecord(
             electionRecord.election, electionRecord.context, electionRecord.constants,
             electionRecord.guardianRecords,
             electionRecord.devices,
@@ -458,7 +458,7 @@ public class Publisher {
             null, null);
 
     try (FileOutputStream out = new FileOutputStream(electionRecordProtoPath().toFile())) {
-      ElectionRecordProto.writeDelimitedTo(out);
+      electionRecordProto.writeTo(out);
     }
   }
 
@@ -477,7 +477,7 @@ public class Publisher {
             null);
 
     try (FileOutputStream out = new FileOutputStream(electionRecordProtoPath().toFile())) {
-      ElectionRecordProto.writeDelimitedTo(out);
+      ElectionRecordProto.writeTo(out);
     }
   }
 
@@ -503,7 +503,7 @@ public class Publisher {
       }
     }
 
-    ElectionRecordProto.ElectionRecord ElectionRecordProto = ElectionRecordToProto.buildElectionRecord(
+    ElectionRecordProto.ElectionRecord electionRecordProto = ElectionRecordToProto.buildElectionRecord(
             electionRecord.election, electionRecord.context, electionRecord.constants,
             electionRecord.guardianRecords, electionRecord.devices,
             encryptedTally,
@@ -511,7 +511,7 @@ public class Publisher {
             availableGuardians);
 
     try (FileOutputStream out = new FileOutputStream(electionRecordProtoPath().toFile())) {
-      ElectionRecordProto.writeDelimitedTo(out);
+      electionRecordProto.writeTo(out);
     }
   }
 
@@ -550,7 +550,7 @@ public class Publisher {
       }
     }
 
-    ElectionRecordProto.ElectionRecord ElectionRecordProto = ElectionRecordToProto.buildElectionRecord(
+    ElectionRecordProto.ElectionRecord electionRecordProto = ElectionRecordToProto.buildElectionRecord(
             description, context, constants, guardianRecords,
             devices,
             ciphertext_tally,
@@ -558,7 +558,7 @@ public class Publisher {
             availableGuardians);
 
     try (FileOutputStream out = new FileOutputStream(electionRecordProtoPath().toFile())) {
-      ElectionRecordProto.writeDelimitedTo(out);
+      electionRecordProto.writeTo(out);
     }
   }
 

@@ -34,8 +34,8 @@ public class SubmittedBallot extends CiphertextBallot {
    * @param code_seedO:              Seed for ballot code
    * @param contests:                List of contests for this ballot
    * @param ballot_code:             This ballot's tracking hash, not Optional.
-   * @param timestampO:              Timestamp at which the ballot encryption is generated in tick
-   * @param state:                   ballot box state
+   * @param timestampO:              Timestamp at which the ballot encryption is generated in seconds since the epoch UTC
+   * @param state:                   ballot state
    */
   static SubmittedBallot create(
           String object_id,

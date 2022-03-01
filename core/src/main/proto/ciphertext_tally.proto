@@ -8,17 +8,13 @@ option java_outer_classname = "CiphertextTallyProto";
 // Encrypted Tally of some collection of ballots.
 message CiphertextTally {
   string tally_id = 1;
-
   repeated CiphertextTallyContest contests = 2;
 }
 
 message CiphertextTallyContest {
   string contest_id = 1; // matches ContestDescription.contest_id
   uint32 sequence_order = 2;
-
-  // The ContestDescription hash.
   ElementModQ contest_description_hash = 3;
-
   repeated CiphertextTallySelection selections = 4;
 }
 
@@ -27,6 +23,5 @@ message CiphertextTallySelection {
   string selection_id = 1; // matches SelectionDescription.selection_id
   uint32 sequence_order = 2;
   ElementModQ selection_description_hash = 3;
-  // accumulation over all the cast ballots
-  ElGamalCiphertext ciphertext = 4;
+  ElGamalCiphertext ciphertext = 4;  // accumulation over all the cast ballots for this selection
 }

@@ -60,12 +60,6 @@ public class CommonConvert {
             convertElementModQ(proof.getResponse()));
   }
 
-  public static ElGamal.KeyPair convertElgamalKeypair(CommonProto.ElGamalKeyPair keypair) {
-    return new ElGamal.KeyPair(
-            CommonConvert.convertElementModQ(keypair.getSecretKey()),
-            CommonConvert.convertElementModP(keypair.getPublicKey()));
-  }
-
   public static SchnorrProof convertSchnorrProof(CommonProto.SchnorrProof proof) {
     return new SchnorrProof(
             convertElementModP(proof.getPublicKey()),
@@ -102,13 +96,6 @@ public class CommonConvert {
     builder.setData(convertElementModP(proof.data));
     builder.setChallenge(convertElementModQ(proof.challenge));
     builder.setResponse(convertElementModQ(proof.response));
-    return builder.build();
-  }
-
-  public static CommonProto.ElGamalKeyPair convertElgamalKeypair(ElGamal.KeyPair keypair) {
-    CommonProto.ElGamalKeyPair.Builder builder = CommonProto.ElGamalKeyPair.newBuilder();
-    builder.setSecretKey(CommonConvert.convertElementModQ(keypair.secret_key()));
-    builder.setPublicKey(CommonConvert.convertElementModP(keypair.public_key()));
     return builder.build();
   }
 

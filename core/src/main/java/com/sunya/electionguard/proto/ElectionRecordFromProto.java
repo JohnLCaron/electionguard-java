@@ -31,13 +31,13 @@ public class ElectionRecordFromProto {
   public static ElectionRecord read(String filename) throws IOException {
     ElectionRecordProto.ElectionRecord proto;
     try (FileInputStream inp = new FileInputStream(filename)) {
-      proto = ElectionRecordProto.ElectionRecord.parseDelimitedFrom(inp);
+      proto = ElectionRecordProto.ElectionRecord.parseFrom(inp);
     }
     return translateFromProto(proto);
   }
 
   public static ElectionRecord translateFromProto(ElectionRecordProto.ElectionRecord proto) {
-    String version = proto.getVersion();
+    String version = proto.getProtoVersion();
     ElectionConstants constants = convertConstants(proto.getConstants());
     CiphertextElectionContext context = convertContext(proto.getContext());
     Manifest description = ManifestFromProto.translateFromProto(proto.getManifest());

@@ -21,6 +21,11 @@ message DecryptingTrustee {
   repeated CommitmentSet guardian_commitments = 6;
 }
 
+message ElGamalKeyPair {
+  ElementModQ secret_key = 1;
+  ElementModP public_key = 2;
+}
+
 message CommitmentSet {
   // for which guardian
   string guardian_id = 1;

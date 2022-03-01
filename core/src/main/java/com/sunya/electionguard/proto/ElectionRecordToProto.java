@@ -21,7 +21,7 @@ import electionguard.protogen.ElectionRecordProto;
 
 
 public class ElectionRecordToProto {
-  public static final String version = "2/23/2022";
+  public static final String protoVersion = "1.0.0";
 
   public static ElectionRecordProto.ElectionRecord buildElectionRecord(
           Manifest description,
@@ -34,7 +34,7 @@ public class ElectionRecordToProto {
           @Nullable Iterable<AvailableGuardian> availableGuardians) {
 
     ElectionRecordProto.ElectionRecord.Builder builder = ElectionRecordProto.ElectionRecord.newBuilder();
-    builder.setVersion(version);
+    builder.setProtoVersion(protoVersion);
     builder.setConstants( convertConstants(constants));
     builder.setManifest( ManifestToProto.translateToProto(description));
     builder.setContext( convertContext(context));

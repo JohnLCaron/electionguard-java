@@ -10,7 +10,7 @@ option java_outer_classname = "ElectionRecordProto";
 
 // The published Election record, for some collection of ballots.
 message ElectionRecord {
-  string version = 1;
+  string proto_version = 1; // protobuf serialization version
   ElectionConstants constants = 2;
   Manifest manifest = 3;
   ElectionContext context = 4;

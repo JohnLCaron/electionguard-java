@@ -53,13 +53,14 @@ public class PlaintextTallyToProto {
     builder.setSelectionId(org.selection_id());
     builder.setGuardianId(org.guardian_id());
     builder.setShare(convertElementModP(org.share()));
-    // Optional
+    // OneOf
     org.proof().ifPresent( proof -> builder.setProof(CommonConvert.convertChaumPedersenProof(proof)));
-    // Optional
     org.recovered_parts().ifPresent(org_recoverd ->  {
+      PlaintextTallyProto.RecoveredParts.Builder partsBuilder = PlaintextTallyProto.RecoveredParts.newBuilder();
       for (Map.Entry<String, DecryptionShare.CiphertextCompensatedDecryptionSelection> entry : org_recoverd.entrySet()) {
-        builder.putRecoveredParts(entry.getKey(), convertCompensatedShare(entry.getValue()));
+        partsBuilder.addFragments(convertCompensatedShare(entry.getValue()));
       }
+      builder.setRecoveredParts(partsBuilder);
     });
     return builder.build();
   }

@@ -32,8 +32,7 @@ message CiphertextBallotContest {
   repeated CiphertextBallotSelection selections = 4;
   ElGamalCiphertext ciphertext_accumulation = 5;  // The contest total (A, B)
   ElementModQ crypto_hash = 6; // The hash of the encrypted values
-  ConstantChaumPedersenProof proof = 7;  // The proof that the sum of the selections does not exceed the maximum
-               // available selections for the contest, and that the proof was generated with the nonce
+  ConstantChaumPedersenProof proof = 7;  // The proof the sum of the selections does not exceed the maximum
 }
 
 // Encryption of a specific selection.
@@ -44,9 +43,8 @@ message CiphertextBallotSelection {
   ElGamalCiphertext ciphertext = 4; // The encrypted representation of the vote field
   ElementModQ crypto_hash = 5; // The hash of the encrypted values
   bool is_placeholder_selection = 6;
-  DisjunctiveChaumPedersenProof proof = 7; // The proof that demonstrates the selection is an encryption of 0 or 1,
-                                           // and was encrypted using the nonce.
-  ElGamalCiphertext extended_data = 8;     // Not used
+  DisjunctiveChaumPedersenProof proof = 7; // The proof the selection is an encryption of 0 or 1
+  ElGamalCiphertext extended_data = 8; // encrypted representation of the extended_data field. Not used
 }
 
 message ConstantChaumPedersenProof {
@@ -54,7 +52,7 @@ message ConstantChaumPedersenProof {
   ElementModP data = 2;
   ElementModQ challenge = 3;
   ElementModQ response = 4;
-  int32 constant = 5;
+  uint32 constant = 5;
 }
 
 message DisjunctiveChaumPedersenProof {
