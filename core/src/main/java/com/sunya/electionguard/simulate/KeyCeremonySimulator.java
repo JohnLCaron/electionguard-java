@@ -4,7 +4,7 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.sunya.electionguard.Manifest;
-import com.sunya.electionguard.input.ElectionInputValidation;
+import com.sunya.electionguard.input.ManifestInputValidation;
 import com.sunya.electionguard.keyceremony.KeyCeremonyTrustee;
 import com.sunya.electionguard.keyceremony.KeyCeremonyTrusteeIF;
 import com.sunya.electionguard.keyceremony.KeyCeremonyRemoteMediator;
@@ -84,7 +84,7 @@ public class KeyCeremonySimulator {
       // all we need from election record is the ElectionDescription.
       Consumer consumer = new Consumer(cmdLine.inputDir);
       Manifest election = consumer.readManifest();
-      ElectionInputValidation validator = new ElectionInputValidation(election);
+      ManifestInputValidation validator = new ManifestInputValidation(election);
       Formatter errors = new Formatter();
       if (!validator.validateElection(errors)) {
         System.out.printf("*** ElectionInputValidation FAILED on %s%n%s", cmdLine.inputDir, errors);

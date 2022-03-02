@@ -36,7 +36,7 @@ public class TestBallotInputValidation {
   }
 
   private boolean validate(Manifest election) {
-    ElectionInputValidation validator = new ElectionInputValidation(election);
+    ManifestInputValidation validator = new ManifestInputValidation(election);
     Formatter problems = new Formatter();
     boolean isValid = validator.validateElection(problems);
     if (!isValid) {
@@ -60,7 +60,7 @@ public class TestBallotInputValidation {
   }
 
   ElectionAndBallot testDefaultOk() {
-    ElectionInputBuilder ebuilder = new ElectionInputBuilder("ballot_id");
+    ManifestInputBuilder ebuilder = new ManifestInputBuilder("ballot_id");
     Manifest election = ebuilder.addContest("contest_id")
             .addSelection("selection_id", "candidate_1")
             .addSelection("selection_id2", "candidate_2")
@@ -88,7 +88,7 @@ public class TestBallotInputValidation {
   }
 
   ElectionAndBallot testStylingNotExist() {
-    ElectionInputBuilder ebuilder = new ElectionInputBuilder("ballot_id")
+    ManifestInputBuilder ebuilder = new ManifestInputBuilder("ballot_id")
             .setStyle("badHairDay");
     Manifest election = ebuilder.addContest("contest_id")
             .addSelection("selection_id", "candidate_1")
@@ -117,7 +117,7 @@ public class TestBallotInputValidation {
   }
 
   ElectionAndBallot testInvalidContest() {
-    ElectionInputBuilder ebuilder = new ElectionInputBuilder("ballot_id");
+    ManifestInputBuilder ebuilder = new ManifestInputBuilder("ballot_id");
     Manifest election = ebuilder.addContest("contest_id")
             .addSelection("selection_id", "candidate_1")
             .addSelection("selection_id2", "candidate_2")
@@ -146,7 +146,7 @@ public class TestBallotInputValidation {
   }
 
   ElectionAndBallot testInvalidSelection() {
-    ElectionInputBuilder ebuilder = new ElectionInputBuilder("ballot_id");
+    ManifestInputBuilder ebuilder = new ManifestInputBuilder("ballot_id");
     Manifest election = ebuilder.addContest("contest_id")
             .addSelection("selection_id", "candidate_1")
             .addSelection("selection_id2", "candidate_2")
@@ -175,7 +175,7 @@ public class TestBallotInputValidation {
   }
 
   ElectionAndBallot testZeroOrOne() {
-    ElectionInputBuilder ebuilder = new ElectionInputBuilder("ballot_id");
+    ManifestInputBuilder ebuilder = new ManifestInputBuilder("ballot_id");
     Manifest election = ebuilder.addContest("contest_id")
             .setAllowedVotes(2)
             .addSelection("selection_id", "candidate_1")
@@ -205,7 +205,7 @@ public class TestBallotInputValidation {
   }
 
   ElectionAndBallot testOvervote() {
-    ElectionInputBuilder ebuilder = new ElectionInputBuilder("ballot_id");
+    ManifestInputBuilder ebuilder = new ManifestInputBuilder("ballot_id");
     Manifest election = ebuilder.addContest("contest_id")
             .addSelection("selection_id", "candidate_1")
             .addSelection("selection_id2", "candidate_2")
@@ -234,7 +234,7 @@ public class TestBallotInputValidation {
   }
 
   private ElectionAndBallot testContestDeclaredTwice() {
-    ElectionInputBuilder ebuilder = new ElectionInputBuilder("ballot_id");
+    ManifestInputBuilder ebuilder = new ManifestInputBuilder("ballot_id");
     Manifest election = ebuilder.addContest("contest_id")
             .addSelection("selection_id", "candidate_1")
             .addSelection("selection_id2", "candidate_2")
@@ -265,7 +265,7 @@ public class TestBallotInputValidation {
   }
 
   private ElectionAndBallot testSelectionDeclaredTwice() {
-    ElectionInputBuilder ebuilder = new ElectionInputBuilder("ballot_id");
+    ManifestInputBuilder ebuilder = new ManifestInputBuilder("ballot_id");
     Manifest election = ebuilder.addContest("contest_id").setAllowedVotes(2)
             .addSelection("selection_id", "candidate_1")
             .addSelection("selection_id2", "candidate_2")

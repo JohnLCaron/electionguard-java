@@ -6,7 +6,7 @@
 package com.sunya.electionguard.viz;
 
 import com.sunya.electionguard.Manifest;
-import com.sunya.electionguard.input.ElectionInputValidation;
+import com.sunya.electionguard.input.ManifestInputValidation;
 import ucar.ui.prefs.BeanTable;
 import ucar.ui.widget.BAMutil;
 import ucar.ui.widget.IndependentWindow;
@@ -18,7 +18,6 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Formatter;
-import java.util.stream.Collectors;
 
 public class ManifestTable extends JPanel {
   private final PreferencesExt prefs;
@@ -142,7 +141,7 @@ public class ManifestTable extends JPanel {
     if (this.election == null) {
       return;
     }
-    ElectionInputValidation input = new ElectionInputValidation(this.election);
+    ManifestInputValidation input = new ManifestInputValidation(this.election);
     Formatter problems = new Formatter();
     boolean ok = input.validateElection(problems);
 

@@ -4,7 +4,7 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.sunya.electionguard.Group;
-import com.sunya.electionguard.input.ElectionInputValidation;
+import com.sunya.electionguard.input.ManifestInputValidation;
 import com.sunya.electionguard.input.PlaintextTallyInputValidation;
 import com.sunya.electionguard.publish.Consumer;
 
@@ -74,7 +74,7 @@ public class VerifyElectionRecord {
     try {
       Consumer consumer = new Consumer(cmdLine.inputDir);
       ElectionRecord electionRecord = consumer.readElectionRecord();
-      ElectionInputValidation validator = new ElectionInputValidation(electionRecord.election);
+      ManifestInputValidation validator = new ManifestInputValidation(electionRecord.election);
       Formatter errors = new Formatter();
       if (!validator.validateElection(errors)) {
         System.out.printf("*** ElectionInputValidation FAILED on %s%n%s", cmdLine.inputDir, errors);

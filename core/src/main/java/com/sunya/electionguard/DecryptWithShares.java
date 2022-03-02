@@ -151,7 +151,7 @@ public class DecryptWithShares {
         }
         // Map(AVAILABLE_GUARDIAN_ID, KeyAndSelection)
         Map<String, KeyAndSelection> tally_shares =
-                DecryptionShare.get_tally_shares_for_selection2(selection.object_id(), shares);
+                DecryptionShare.get_tally_shares_for_selection(selection.object_id(), shares);
         Optional<PlaintextTally.Selection> plaintext_selectionO = decrypt_selection_with_decryption_shares(
                 selection, tally_shares, extended_base_hash, false);
         if (plaintext_selectionO.isEmpty()) {

@@ -3,7 +3,7 @@ package com.sunya.electionguard.keyceremony;
 import com.google.common.collect.ImmutableList;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.Manifest;
-import com.sunya.electionguard.input.ElectionInputBuilder;
+import com.sunya.electionguard.input.ManifestInputBuilder;
 import com.sunya.electionguard.simulate.KeyCeremonyTrusteeSimulator;
 import net.jqwik.api.Example;
 
@@ -26,7 +26,7 @@ public class TestKeyCeremonyRemoteMediator {
   Manifest manifest;
 
   public TestKeyCeremonyRemoteMediator() {
-    ElectionInputBuilder ebuilder = new ElectionInputBuilder("ballot_id");
+    ManifestInputBuilder ebuilder = new ManifestInputBuilder("ballot_id");
     this.manifest = ebuilder.addContest("contest_id")
             .addSelection("selection_id", "candidate_1")
             .addSelection("selection_id2", "candidate_2")

@@ -8,31 +8,31 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ElectionInputBuilder {
+public class ManifestInputBuilder {
   public static final String districtDef = "district";
   public static final String styleDef = "styling";
 
-  private final String election_scope_id;
+  private final String manifest_name;
   private final ArrayList<ContestBuilder> contests = new ArrayList<>();
   private String style = styleDef;
   private Manifest.BallotStyle ballotStyle;
   private String district = districtDef;
 
-  public ElectionInputBuilder(String election_scope_id) {
-    this.election_scope_id = election_scope_id;
+  public ManifestInputBuilder(String manifest_name) {
+    this.manifest_name = manifest_name;
   }
 
-  ElectionInputBuilder setGpunit(String gpunit) {
+  ManifestInputBuilder setGpunit(String gpunit) {
     this.district = gpunit;
     return this;
   }
 
-  ElectionInputBuilder setStyle(String style) {
+  ManifestInputBuilder setStyle(String style) {
     this.style = style;
     return this;
   }
 
-  ElectionInputBuilder setBallotStyle(Manifest.BallotStyle ballotStyle) {
+  ManifestInputBuilder setBallotStyle(Manifest.BallotStyle ballotStyle) {
     this.ballotStyle = ballotStyle;
     return this;
   }
@@ -62,7 +62,7 @@ public class ElectionInputBuilder {
     //                  List<BallotStyle> ballot_styles,
     //                  @Nullable InternationalizedText name,
     //                  @Nullable ContactInformation contact_information
-    return new Manifest(election_scope_id, ElectionContext.SPEC_VERSION, Manifest.ElectionType.general,
+    return new Manifest(manifest_name, ElectionContext.SPEC_VERSION, Manifest.ElectionType.general,
             OffsetDateTime.now(), OffsetDateTime.now(),
             ImmutableList.of(gpUnit), parties, candidates,
             contests.stream().map(ContestBuilder::build).toList(),
@@ -98,8 +98,8 @@ public class ElectionInputBuilder {
       return this;
     }
 
-    public ElectionInputBuilder done() {
-      return ElectionInputBuilder.this;
+    public ManifestInputBuilder done() {
+      return ManifestInputBuilder.this;
     }
 
     public Manifest.ContestDescription build() {

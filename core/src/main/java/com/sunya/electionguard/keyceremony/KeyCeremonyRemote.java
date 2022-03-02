@@ -6,7 +6,7 @@ import com.beust.jcommander.ParameterException;
 import com.google.common.base.Stopwatch;
 import com.google.common.flogger.FluentLogger;
 import com.sunya.electionguard.Manifest;
-import com.sunya.electionguard.input.ElectionInputValidation;
+import com.sunya.electionguard.input.ManifestInputValidation;
 import electionguard.protogen.RemoteKeyCeremonyProto;
 import electionguard.protogen.RemoteKeyCeremonyServiceGrpc;
 import com.sunya.electionguard.publish.Consumer;
@@ -95,7 +95,7 @@ class KeyCeremonyRemote {
       // all we need from election record is the ElectionDescription.
       Consumer consumer = new Consumer(cmdLine.inputDir);
       Manifest election = consumer.readManifest();
-      ElectionInputValidation validator = new ElectionInputValidation(election);
+      ManifestInputValidation validator = new ManifestInputValidation(election);
       Formatter errors = new Formatter();
       if (!validator.validateElection(errors)) {
         System.out.printf("*** ElectionInputValidation FAILED on %s%n%s", cmdLine.inputDir, errors);

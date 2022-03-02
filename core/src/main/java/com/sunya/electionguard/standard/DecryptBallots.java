@@ -11,7 +11,7 @@ import com.sunya.electionguard.InternalManifest;
 import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.CiphertextTally;
 import com.sunya.electionguard.Scheduler;
-import com.sunya.electionguard.input.ElectionInputValidation;
+import com.sunya.electionguard.input.ManifestInputValidation;
 import com.sunya.electionguard.publish.Consumer;
 import com.sunya.electionguard.publish.Publisher;
 import com.sunya.electionguard.verifier.ElectionRecord;
@@ -112,7 +112,7 @@ public class DecryptBallots {
     try {
       Consumer consumer = new Consumer(cmdLine.encryptDir);
       ElectionRecord electionRecord = consumer.readElectionRecord();
-      ElectionInputValidation validator = new ElectionInputValidation(electionRecord.election);
+      ManifestInputValidation validator = new ManifestInputValidation(electionRecord.election);
       Formatter errors = new Formatter();
       if (!validator.validateElection(errors)) {
         System.out.printf("*** ElectionInputValidation FAILED on %s%n%s", cmdLine.encryptDir, errors);

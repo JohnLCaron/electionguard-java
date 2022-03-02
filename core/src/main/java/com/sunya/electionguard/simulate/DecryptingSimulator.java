@@ -13,7 +13,7 @@ import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.Scheduler;
 import com.sunya.electionguard.decrypting.DecryptingTrustee;
-import com.sunya.electionguard.input.ElectionInputValidation;
+import com.sunya.electionguard.input.ManifestInputValidation;
 import com.sunya.electionguard.proto.TrusteeFromProto;
 import com.sunya.electionguard.publish.Consumer;
 import com.sunya.electionguard.publish.Publisher;
@@ -91,7 +91,7 @@ public class DecryptingSimulator {
       Consumer consumer = new Consumer(cmdLine.encryptDir);
       ElectionRecord electionRecord = consumer.readElectionRecord();
       // LOOK how to validate guardians??
-      ElectionInputValidation validator = new ElectionInputValidation(electionRecord.election);
+      ManifestInputValidation validator = new ManifestInputValidation(electionRecord.election);
       Formatter errors = new Formatter();
       if (!validator.validateElection(errors)) {
         System.out.printf("*** ElectionInputValidation FAILED on %s%n%s", cmdLine.encryptDir, errors);
