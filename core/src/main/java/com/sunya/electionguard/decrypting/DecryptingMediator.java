@@ -4,7 +4,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.flogger.FluentLogger;
 import com.sunya.electionguard.AvailableGuardian;
-import com.sunya.electionguard.CiphertextElectionContext;
+import com.sunya.electionguard.ElectionContext;
 import com.sunya.electionguard.CiphertextTally;
 import com.sunya.electionguard.DecryptWithShares;
 import com.sunya.electionguard.DecryptionShare;
@@ -29,7 +29,7 @@ import java.util.Set;
 public class DecryptingMediator {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
-  private final CiphertextElectionContext context;
+  private final ElectionContext context;
   private final CiphertextTally ciphertext_tally;
   private final Iterable<SubmittedBallot> ciphertext_ballots; // spoiled ballots
 
@@ -53,7 +53,7 @@ public class DecryptingMediator {
   private Map<String, Group.ElementModQ> lagrange_coefficients;
   private List<AvailableGuardian> guardianStates;
 
-  public DecryptingMediator(CiphertextElectionContext context,
+  public DecryptingMediator(ElectionContext context,
                             CiphertextTally encryptedTally,
                             Iterable<SubmittedBallot> spoiled_ballots,
                             Map<String, Group.ElementModP> guardianPublicKeys) {

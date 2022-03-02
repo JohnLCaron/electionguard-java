@@ -28,7 +28,7 @@ public class TestManifestToProtoRoundtrip {
     Manifest roundtrip = ManifestFromProto.translateFromProto(proto);
 
     assertThat(roundtrip.election_scope_id()).isEqualTo(fromPython.election_scope_id());
-    assertThat(roundtrip.type()).isEqualTo(fromPython.type());
+    assertThat(roundtrip.electionType()).isEqualTo(fromPython.electionType());
     assertThat(roundtrip.start_date()).isEqualTo(fromPython.start_date());
     assertThat(roundtrip.end_date()).isEqualTo(fromPython.end_date());
 

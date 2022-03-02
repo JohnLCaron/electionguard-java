@@ -5,7 +5,7 @@ import com.google.common.flogger.FluentLogger;
 import com.sunya.electionguard.BallotBox;
 import com.sunya.electionguard.CiphertextBallot;
 import com.sunya.electionguard.CiphertextContest;
-import com.sunya.electionguard.CiphertextElectionContext;
+import com.sunya.electionguard.ElectionContext;
 import com.sunya.electionguard.CiphertextSelection;
 import com.sunya.electionguard.CiphertextTally;
 import com.sunya.electionguard.DecryptionShare;
@@ -43,7 +43,7 @@ public class RemoteDecryptions {
   public static DecryptionShare computeDecryptionShareForTally(
           DecryptingTrusteeIF guardian,
           CiphertextTally tally,
-          CiphertextElectionContext context) {
+          ElectionContext context) {
 
     // Get all the Ciphertext that need to be decrypted, and do so in one call
     List<ElGamal.Ciphertext> texts = new ArrayList<>();
@@ -94,7 +94,7 @@ public class RemoteDecryptions {
   public static Optional<Map<String, DecryptionShare>> computeDecryptionShareForBallots(
           DecryptingTrusteeIF guardian,
           Iterable<SubmittedBallot> ballots,
-          CiphertextElectionContext context) {
+          ElectionContext context) {
 
     Map<String, DecryptionShare> shares = new HashMap<>();
     for (SubmittedBallot ballot : ballots) {
@@ -117,7 +117,7 @@ public class RemoteDecryptions {
   private static DecryptionShare computeDecryptionShareForBallot(
           DecryptingTrusteeIF guardian,
           SubmittedBallot ballot,
-          CiphertextElectionContext context) {
+          ElectionContext context) {
 
     // Get all the Ciphertext that need to be decrypted, and do so in one call
     List<ElGamal.Ciphertext> texts = new ArrayList<>();
@@ -180,7 +180,7 @@ public class RemoteDecryptions {
           DecryptingTrusteeIF guardian,
           String missing_guardian_id,
           CiphertextTally tally,
-          CiphertextElectionContext context) {
+          ElectionContext context) {
 
     // Get all the Ciphertext that need to be decrypted, and do so in one call
     List<ElGamal.Ciphertext> texts = new ArrayList<>();
@@ -254,7 +254,7 @@ public class RemoteDecryptions {
           DecryptingTrusteeIF guardian,
           String missing_guardian_id,
           SubmittedBallot ballot,
-          CiphertextElectionContext context) {
+          ElectionContext context) {
 
     // Get all the Ciphertext that need to be decrypted, and do so in one call
     List<ElGamal.Ciphertext> texts = new ArrayList<>();

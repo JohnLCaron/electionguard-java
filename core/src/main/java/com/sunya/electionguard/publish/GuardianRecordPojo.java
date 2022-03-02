@@ -63,11 +63,11 @@ public class GuardianRecordPojo {
 
   private static GuardianRecordPojo convertCoefficients(GuardianRecord org) {
     GuardianRecordPojo pojo = new GuardianRecordPojo();
-    pojo.guardian_id = org.guardian_id();
-    pojo.sequence_order = org.sequence_order();
-    pojo.election_public_key = org.election_public_key();
-    pojo.election_commitments = org.election_commitments();
-    pojo.election_proofs = ConvertPojos.convertList(org.election_proofs(), GuardianRecordPojo::convertProof);
+    pojo.guardian_id = org.guardianId();
+    pojo.sequence_order = org.xCoordinate();
+    pojo.election_public_key = org.guardianPublicKey();
+    pojo.election_commitments = org.coefficientCommitments();
+    pojo.election_proofs = ConvertPojos.convertList(org.coefficientProofs(), GuardianRecordPojo::convertProof);
     return pojo;
   }
 

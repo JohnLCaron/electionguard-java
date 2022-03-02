@@ -233,11 +233,11 @@ class DecryptingMediatorRunner {
 
   private boolean runDecryption() {
     // Do the accumulation if the encryptedTally doesnt exist
-    if (this.electionRecord.encryptedTally == null) {
+    if (this.electionRecord.ciphertextTally == null) {
       System.out.printf("   DecryptingMediatorRunner accumulateTally%n");
       accumulateTally();
     } else {
-      this.encryptedTally = this.electionRecord.encryptedTally;
+      this.encryptedTally = this.electionRecord.ciphertextTally;
       CiphertextTallyInputValidation validator = new CiphertextTallyInputValidation(electionRecord.election);
       Formatter errors = new Formatter();
       if (!validator.validateTally(this.encryptedTally, errors)) {
@@ -276,7 +276,7 @@ class DecryptingMediatorRunner {
 
     // The guardians' election public key is in the electionRecord.guardianRecords.
     Map<String, Group.ElementModP> guardianPublicKeys = electionRecord.guardianRecords.stream().collect(
-            Collectors.toMap(coeff -> coeff.guardian_id(), coeff -> coeff.election_public_key()));
+            Collectors.toMap(coeff -> coeff.guardianId(), coeff -> coeff.guardianPublicKey()));
 
     DecryptingMediator mediator = new DecryptingMediator(electionRecord.context,
             this.encryptedTally,

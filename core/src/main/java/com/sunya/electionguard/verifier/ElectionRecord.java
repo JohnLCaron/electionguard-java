@@ -7,7 +7,7 @@ import com.sunya.electionguard.BallotBox;
 import com.sunya.electionguard.GuardianRecord;
 import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.SubmittedBallot;
-import com.sunya.electionguard.CiphertextElectionContext;
+import com.sunya.electionguard.ElectionContext;
 import com.sunya.electionguard.ElectionConstants;
 import com.sunya.electionguard.Encrypt;
 import com.sunya.electionguard.Group;
@@ -27,14 +27,14 @@ import java.util.Objects;
 public class ElectionRecord {
   public static final String currentVersion = "1.2.2";
 
-  public final String version;
+  public final String protoVersion;
   public final ElectionConstants constants;
-  public final CiphertextElectionContext context;
+  public final ElectionContext context;
   public final Manifest election;
   public final ImmutableList<GuardianRecord> guardianRecords;
   public final ImmutableList<Encrypt.EncryptionDevice> devices; // may be empty
   public final CloseableIterable<SubmittedBallot> acceptedBallots; // All ballots, not just cast! // may be empty
-  @Nullable public final CiphertextTally encryptedTally;
+  @Nullable public final CiphertextTally ciphertextTally;
   @Nullable public final PlaintextTally decryptedTally;
   public final CloseableIterable<PlaintextTally> spoiledBallots; // may be empty
   public final ImmutableList<AvailableGuardian> availableGuardians; // may be empty
@@ -43,7 +43,7 @@ public class ElectionRecord {
 
   public ElectionRecord(String version,
                         ElectionConstants constants,
-                        CiphertextElectionContext context,
+                        ElectionContext context,
                         Manifest election,
                         List<GuardianRecord> guardianRecords,
                         @Nullable List<Encrypt.EncryptionDevice> devices,
@@ -52,14 +52,14 @@ public class ElectionRecord {
                         @Nullable CloseableIterable<SubmittedBallot> acceptedBallots,
                         @Nullable CloseableIterable<PlaintextTally> spoiledBallots,
                         @Nullable List<AvailableGuardian> availableGuardians) {
-    this.version = version;
+    this.protoVersion = version;
     this.constants = constants;
     this.context = context;
     this.election = election;
     this.guardianRecords = ImmutableList.copyOf(guardianRecords);
     this.devices = devices == null ? ImmutableList.of() : ImmutableList.copyOf(devices);
     this.acceptedBallots = acceptedBallots == null ? CloseableIterableAdapter.empty() : acceptedBallots;
-    this.encryptedTally = encryptedTally;
+    this.ciphertextTally = encryptedTally;
     this.decryptedTally = decryptedTally;
     this.spoiledBallots = spoiledBallots == null ? CloseableIterableAdapter.empty() : spoiledBallots;
     this.availableGuardians = availableGuardians == null ? ImmutableList.of() : ImmutableList.copyOf(availableGuardians);
@@ -85,7 +85,7 @@ public class ElectionRecord {
             this.election,
             this.guardianRecords,
             this.devices,
-            this.encryptedTally,
+            this.ciphertextTally,
             this.decryptedTally,
             acceptedBallots,
             spoiledBallots,
@@ -141,7 +141,7 @@ public class ElectionRecord {
   public ImmutableMap<String, Group.ElementModP> public_keys_of_all_guardians() {
     ImmutableMap.Builder<String, Group.ElementModP> result = ImmutableMap.builder();
     for (GuardianRecord guardianRecord : this.guardianRecords) {
-      result.put(guardianRecord.guardian_id(), guardianRecord.election_public_key());
+      result.put(guardianRecord.guardianId(), guardianRecord.guardianPublicKey());
     }
     return result.build();
   }
@@ -177,7 +177,7 @@ public class ElectionRecord {
             election.equals(that.election) &&
             Objects.equals(devices, that.devices) &&
             Objects.equals(acceptedBallots, that.acceptedBallots) &&
-            Objects.equals(encryptedTally, that.encryptedTally) &&
+            Objects.equals(ciphertextTally, that.ciphertextTally) &&
             Objects.equals(decryptedTally, that.decryptedTally) &&
             Objects.equals(guardianRecords, that.guardianRecords) &&
             Objects.equals(spoiledBallots, that.spoiledBallots) &&
@@ -186,6 +186,6 @@ public class ElectionRecord {
 
   @Override
   public int hashCode() {
-    return Objects.hash(constants, context, election, devices, acceptedBallots, encryptedTally, decryptedTally, guardianRecords, spoiledBallots, contestVoteLimits);
+    return Objects.hash(constants, context, election, devices, acceptedBallots, ciphertextTally, decryptedTally, guardianRecords, spoiledBallots, contestVoteLimits);
   }
 }

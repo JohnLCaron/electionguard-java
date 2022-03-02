@@ -37,7 +37,7 @@ public class TestReadPythonJson {
 
   @Example
   public void testContextPythonJson() throws IOException {
-    CiphertextElectionContext fromPython = ConvertFromJson.readContext(publisher.contextPath().toString());
+    ElectionContext fromPython = ConvertFromJson.readContext(publisher.contextPath().toString());
     assertThat(fromPython).isNotNull();
     System.out.printf("%n%s%n%n", fromPython);
   }

@@ -2,7 +2,7 @@ package com.sunya.electionguard.proto;
 
 import com.google.protobuf.ByteString;
 import com.sunya.electionguard.AvailableGuardian;
-import com.sunya.electionguard.CiphertextElectionContext;
+import com.sunya.electionguard.ElectionContext;
 import com.sunya.electionguard.ElectionConstants;
 import com.sunya.electionguard.CiphertextTally;
 import com.sunya.electionguard.GuardianRecord;
@@ -39,7 +39,7 @@ public class ElectionRecordFromProto {
   public static ElectionRecord translateFromProto(ElectionRecordProto.ElectionRecord proto) {
     String version = proto.getProtoVersion();
     ElectionConstants constants = convertConstants(proto.getConstants());
-    CiphertextElectionContext context = convertContext(proto.getContext());
+    ElectionContext context = convertContext(proto.getContext());
     Manifest description = ManifestFromProto.translateFromProto(proto.getManifest());
 
     List<GuardianRecord> guardianRecords =
@@ -73,6 +73,7 @@ public class ElectionRecordFromProto {
 
   static ElectionConstants convertConstants(ElectionRecordProto.ElectionConstants constants) {
     return new ElectionConstants(
+            constants.getName(),
             convertBigInteger(constants.getLargePrime()),
             convertBigInteger(constants.getSmallPrime()),
             convertBigInteger(constants.getCofactor()),
@@ -83,8 +84,8 @@ public class ElectionRecordFromProto {
     return new BigInteger(bs.toByteArray());
   }
 
-  static CiphertextElectionContext convertContext(ElectionRecordProto.ElectionContext context) {
-    return new CiphertextElectionContext(
+  static ElectionContext convertContext(ElectionRecordProto.ElectionContext context) {
+    return new ElectionContext(
             context.getNumberOfGuardians(),
             context.getQuorum(),
             convertElementModP(context.getJointPublicKey()),
@@ -109,7 +110,7 @@ public class ElectionRecordFromProto {
     return new GuardianRecord(
             guardianRecord.getGuardianId(),
             guardianRecord.getXCoordinate(),
-            CommonConvert.convertElementModP(guardianRecord.getElectionPublicKey()),
+            CommonConvert.convertElementModP(guardianRecord.getGuardianPublicKey()),
             coefficient_commitments,
             coefficient_proofs
     );

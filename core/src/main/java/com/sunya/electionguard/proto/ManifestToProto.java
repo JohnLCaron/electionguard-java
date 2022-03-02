@@ -12,7 +12,7 @@ public class ManifestToProto {
     if (election.spec_version() != null) {
       builder.setSpecVersion(election.spec_version());
     }
-    builder.setElectionType(convertElectionType(election.type()));
+    builder.setElectionType(convertElectionType(election.electionType()));
     builder.setStartDate(election.start_date().toString());
     builder.setEndDate(election.end_date().toString());
 

@@ -72,7 +72,7 @@ public class ElectionFactory {
             null, null, null);
 
     return new Manifest(
-            "some-scope-id", CiphertextElectionContext.SPEC_VERSION,
+            "some-scope-id", ElectionContext.SPEC_VERSION,
             Manifest.ElectionType.unknown, OffsetDateTime.now(), OffsetDateTime.now(),
             ImmutableList.of(new Manifest.GeopoliticalUnit("some-geopoltical-unit-id", "some-gp-unit-name", Manifest.ReportingUnitType.unknown, null)),
             ImmutableList.of(new Manifest.Party("some-party-id-1"), new Manifest.Party("some-party-id-2")),

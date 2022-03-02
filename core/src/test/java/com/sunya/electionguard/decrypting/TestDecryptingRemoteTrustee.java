@@ -49,7 +49,7 @@ public class TestDecryptingRemoteTrustee {
 
     Consumer consumer = new Consumer(TestDecryptingMediator.DECRYPTING_DATA_DIR);
     ElectionRecord electionRecord = consumer.readElectionRecord();
-    this.tally = electionRecord.encryptedTally;
+    this.tally = electionRecord.ciphertextTally;
     this.extendedHash =  electionRecord.extendedHash();
   }
 

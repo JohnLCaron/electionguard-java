@@ -4,7 +4,7 @@ import com.google.common.collect.Sets;
 import com.sunya.electionguard.BallotBox;
 import com.sunya.electionguard.BallotFactory;
 import com.sunya.electionguard.CiphertextBallot;
-import com.sunya.electionguard.CiphertextElectionContext;
+import com.sunya.electionguard.ElectionContext;
 import com.sunya.electionguard.CiphertextTally;
 import com.sunya.electionguard.CiphertextTallyBuilder;
 import com.sunya.electionguard.DecryptionShare;
@@ -49,7 +49,7 @@ public class TestDecryptionMediator extends TestProperties {
   List<Guardian> guardians = new ArrayList<>();
   KeyCeremony.ElectionJointKey joint_public_key;
   Manifest election;
-  CiphertextElectionContext context;
+  ElectionContext context;
   InternalManifest metadata;
   Map<String, Integer> expected_plaintext_tally;
 
@@ -278,7 +278,7 @@ public class TestDecryptionMediator extends TestProperties {
 
   private CiphertextTally generate_encrypted_tally(
           InternalManifest imanifest,
-          CiphertextElectionContext context,
+          ElectionContext context,
           List<PlaintextBallot> ballots) {
 
     // encrypt each ballot

@@ -3,7 +3,7 @@ package com.sunya.electionguard.standard;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
-import com.sunya.electionguard.CiphertextElectionContext;
+import com.sunya.electionguard.ElectionContext;
 import com.sunya.electionguard.GuardianRecord;
 import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.Group;
@@ -116,7 +116,7 @@ public class PerformKeyCeremony {
 
   KeyCeremony.ElectionJointKey jointKey;
   Group.ElementModQ commitmentsHash;
-  CiphertextElectionContext context;
+  ElectionContext context;
 
   List<Guardian> guardians;
   List<GuardianRecord> guardian_records = new ArrayList<>();
@@ -138,7 +138,7 @@ public class PerformKeyCeremony {
       throw new RuntimeException("*** Key Ceremony failed");
     }
 
-    this.context = CiphertextElectionContext.create(this.numberOfGuardians, this.quorum,
+    this.context = ElectionContext.create(this.numberOfGuardians, this.quorum,
             this.jointKey.joint_public_key(), this.election, this.commitmentsHash, null);
   }
 
@@ -257,9 +257,9 @@ public class PerformKeyCeremony {
     for (Guardian guardian : this.guardians) {
       GuardianRecord guardianRecord = guardian.publish();
       this.guardian_records.add(guardianRecord);
-      commitments.addAll(guardianRecord.election_commitments());
+      commitments.addAll(guardianRecord.coefficientCommitments());
 
-      Group.ElementModQ commitmentHash = Hash.hash_elems(guardianRecord.election_commitments());
+      Group.ElementModQ commitmentHash = Hash.hash_elems(guardianRecord.coefficientCommitments());
       System.out.printf(" %d commitmentHash %s%n", guardian.sequence_order, commitmentHash);
     }
     this.commitmentsHash = Hash.hash_elems(commitments);

@@ -6,7 +6,7 @@ import com.google.common.collect.Sets;
 import com.sunya.electionguard.BallotBox;
 import com.sunya.electionguard.BallotFactory;
 import com.sunya.electionguard.CiphertextBallot;
-import com.sunya.electionguard.CiphertextElectionContext;
+import com.sunya.electionguard.ElectionContext;
 import com.sunya.electionguard.CiphertextTally;
 import com.sunya.electionguard.CiphertextTallyBuilder;
 import com.sunya.electionguard.DecryptWithShares;
@@ -48,7 +48,7 @@ public class TestDecryption extends TestProperties {
   Manifest election;
   InternalManifest metadata;
 
-  CiphertextElectionContext context;
+  ElectionContext context;
   PlaintextBallot fake_cast_ballot;
   PlaintextBallot fake_spoiled_ballot;
   SubmittedBallot encrypted_fake_cast_ballot;

@@ -36,10 +36,10 @@ public class ElectionPublicKeyVerifier {
     // Equation 3.A
     // The hashing is order dependent, use the sequence_order to sort.
     List<GuardianRecord> sorted = this.electionRecord.guardianRecords.stream()
-            .sorted(Comparator.comparing(GuardianRecord::sequence_order)).toList();
+            .sorted(Comparator.comparing(GuardianRecord::xCoordinate)).toList();
     List<Group.ElementModP> commitments = new ArrayList<>();
     for (GuardianRecord coeff : sorted) {
-      commitments.addAll(coeff.election_commitments());
+      commitments.addAll(coeff.coefficientCommitments());
     }
     ElementModQ commitment_hash = Hash.hash_elems(commitments);
     ElementModQ expectedExtendedHash = Hash.hash_elems(this.electionRecord.baseHash(), commitment_hash);
@@ -55,7 +55,7 @@ public class ElectionPublicKeyVerifier {
   ElementModP computePublicKey() {
     List<ElementModP> Ki = new ArrayList<>();
     for (GuardianRecord coeff : this.electionRecord.guardianRecords) {
-      Ki.add(coeff.election_public_key());
+      Ki.add(coeff.guardianPublicKey());
     }
     return ElGamal.elgamal_combine_public_keys(Ki);
   }

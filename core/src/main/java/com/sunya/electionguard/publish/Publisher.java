@@ -286,7 +286,7 @@ public class Publisher {
 
   public void writeKeyCeremonyJson(
           Manifest manifest,
-          CiphertextElectionContext context,
+          ElectionContext context,
           ElectionConstants constants,
           Iterable<GuardianRecord> guardianRecords) throws IOException {
 
@@ -299,7 +299,7 @@ public class Publisher {
     ConvertToJson.writeConstants(constants, this.constantsPath());
 
     for (GuardianRecord guardianRecord : guardianRecords) {
-      ConvertToJson.writeGuardianRecord(guardianRecord, this.guardianRecordsPath(guardianRecord.guardian_id()));
+      ConvertToJson.writeGuardianRecord(guardianRecord, this.guardianRecordsPath(guardianRecord.guardianId()));
     }
   }
 
@@ -336,7 +336,7 @@ public class Publisher {
   /** Publishes the election record as json. */
   public void writeElectionRecordJson(
           Manifest manifest,
-          CiphertextElectionContext context,
+          ElectionContext context,
           ElectionConstants constants,
           Iterable<Encrypt.EncryptionDevice> devices,
           Iterable<SubmittedBallot> ciphertext_ballots,
@@ -367,7 +367,7 @@ public class Publisher {
 
     if (guardianRecords != null) {
       for (GuardianRecord guardianRecord : guardianRecords) {
-        ConvertToJson.writeGuardianRecord(guardianRecord, this.guardianRecordsPath(guardianRecord.guardian_id()));
+        ConvertToJson.writeGuardianRecord(guardianRecord, this.guardianRecordsPath(guardianRecord.guardianId()));
       }
     }
 
@@ -388,7 +388,7 @@ public class Publisher {
   /** Publishes the KeyCeremony part of the election record as proto. */
   public void writeKeyCeremonyProto(
           Manifest description,
-          CiphertextElectionContext context,
+          ElectionContext context,
           ElectionConstants constants,
           Iterable<GuardianRecord> guardianRecords) throws IOException {
 
@@ -472,7 +472,7 @@ public class Publisher {
     ElectionRecordProto.ElectionRecord ElectionRecordProto = ElectionRecordToProto.buildElectionRecord(
             electionRecord.election, electionRecord.context, electionRecord.constants,
             electionRecord.guardianRecords, electionRecord.devices,
-            electionRecord.encryptedTally,
+            electionRecord.ciphertextTally,
             decryptedTally,
             null);
 
@@ -518,7 +518,7 @@ public class Publisher {
   /** Publishes the entire election record as proto. */
   public void writeElectionRecordProto(
           Manifest description,
-          CiphertextElectionContext context,
+          ElectionContext context,
           ElectionConstants constants,
           Iterable<GuardianRecord> guardianRecords,
           Iterable<Encrypt.EncryptionDevice> devices,

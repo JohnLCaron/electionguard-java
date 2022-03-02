@@ -102,7 +102,7 @@ public class DecryptingSimulator {
       decryptor = new DecryptingSimulator(consumer, electionRecord, guardiansProvider);
 
       // Do the accumulation if the encryptedTally doesnt exist
-      if (electionRecord.encryptedTally == null) {
+      if (electionRecord.ciphertextTally == null) {
         decryptor.accumulateTally();
       }
 
@@ -164,7 +164,7 @@ public class DecryptingSimulator {
     this.election = electionRecord.election;
     this.quorum = electionRecord.context.quorum;
     this.numberOfGuardians = electionRecord.context.number_of_guardians;
-    this.encryptedTally = electionRecord.encryptedTally;
+    this.encryptedTally = electionRecord.ciphertextTally;
 
     this.guardians = provider.guardians();
     for (DecryptingTrustee guardian : provider.guardians()) {
@@ -187,7 +187,7 @@ public class DecryptingSimulator {
 
     // The guardians' election public key is in the electionRecord.guardianRecords.
     Map<String, Group.ElementModP> guardianPublicKeys = electionRecord.guardianRecords.stream().collect(
-            Collectors.toMap(coeff -> coeff.guardian_id(), coeff -> coeff.election_public_key()));
+            Collectors.toMap(coeff -> coeff.guardianId(), coeff -> coeff.guardianPublicKey()));
 
     DecryptingTrusteeMediator mediator = new DecryptingTrusteeMediator(electionRecord.context,
             this.encryptedTally,

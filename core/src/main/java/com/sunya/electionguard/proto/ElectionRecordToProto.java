@@ -2,7 +2,7 @@ package com.sunya.electionguard.proto;
 
 import com.google.protobuf.ByteString;
 import com.sunya.electionguard.AvailableGuardian;
-import com.sunya.electionguard.CiphertextElectionContext;
+import com.sunya.electionguard.ElectionContext;
 import com.sunya.electionguard.ElectionConstants;
 import com.sunya.electionguard.GuardianRecord;
 import com.sunya.electionguard.Manifest;
@@ -21,11 +21,11 @@ import electionguard.protogen.ElectionRecordProto;
 
 
 public class ElectionRecordToProto {
-  public static final String protoVersion = "1.0.0";
+  public static final String PROTO_VERSION = "1.0.0";
 
   public static ElectionRecordProto.ElectionRecord buildElectionRecord(
           Manifest description,
-          CiphertextElectionContext context,
+          ElectionContext context,
           ElectionConstants constants,
           Iterable<GuardianRecord> guardianRecords,
           @Nullable Iterable<Encrypt.EncryptionDevice> devices,
@@ -34,7 +34,7 @@ public class ElectionRecordToProto {
           @Nullable Iterable<AvailableGuardian> availableGuardians) {
 
     ElectionRecordProto.ElectionRecord.Builder builder = ElectionRecordProto.ElectionRecord.newBuilder();
-    builder.setProtoVersion(protoVersion);
+    builder.setProtoVersion(PROTO_VERSION);
     builder.setConstants( convertConstants(constants));
     builder.setManifest( ManifestToProto.translateToProto(description));
     builder.setContext( convertContext(context));
@@ -72,6 +72,9 @@ public class ElectionRecordToProto {
 
   static ElectionRecordProto.ElectionConstants convertConstants(ElectionConstants constants) {
     ElectionRecordProto.ElectionConstants.Builder builder = ElectionRecordProto.ElectionConstants.newBuilder();
+    if (constants.name != null) {
+      builder.setName(constants.name);
+    }
     builder.setLargePrime(ByteString.copyFrom(constants.large_prime.toByteArray()));
     builder.setSmallPrime(ByteString.copyFrom(constants.small_prime.toByteArray()));
     builder.setCofactor(ByteString.copyFrom(constants.cofactor.toByteArray()));
@@ -79,7 +82,7 @@ public class ElectionRecordToProto {
     return builder.build();
   }
 
-  static ElectionRecordProto.ElectionContext convertContext(CiphertextElectionContext context) {
+  static ElectionRecordProto.ElectionContext convertContext(ElectionContext context) {
     ElectionRecordProto.ElectionContext.Builder builder = ElectionRecordProto.ElectionContext.newBuilder();
     builder.setNumberOfGuardians(context.number_of_guardians);
     builder.setQuorum(context.quorum);
@@ -105,13 +108,13 @@ public class ElectionRecordToProto {
 
   static ElectionRecordProto.GuardianRecord convertGuardianRecord(GuardianRecord guardianRecord) {
     ElectionRecordProto.GuardianRecord.Builder builder = ElectionRecordProto.GuardianRecord.newBuilder();
-    builder.setGuardianId(guardianRecord.guardian_id());
-    builder.setXCoordinate(guardianRecord.sequence_order());
-    builder.setElectionPublicKey(convertElementModP(guardianRecord.election_public_key()));
-    for (Group.ElementModP commitment : guardianRecord.election_commitments()) {
+    builder.setGuardianId(guardianRecord.guardianId());
+    builder.setXCoordinate(guardianRecord.xCoordinate());
+    builder.setGuardianPublicKey(convertElementModP(guardianRecord.guardianPublicKey()));
+    for (Group.ElementModP commitment : guardianRecord.coefficientCommitments()) {
       builder.addCoefficientCommitments(convertElementModP(commitment));
     }
-    for (SchnorrProof proof : guardianRecord.election_proofs()) {
+    for (SchnorrProof proof : guardianRecord.coefficientProofs()) {
       builder.addCoefficientProofs(CommonConvert.convertSchnorrProof(proof));
     }
     return builder.build();

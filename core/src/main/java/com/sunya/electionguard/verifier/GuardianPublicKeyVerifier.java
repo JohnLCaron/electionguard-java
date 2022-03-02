@@ -44,7 +44,7 @@ public class GuardianPublicKeyVerifier {
 
   boolean verify_one_guardian(GuardianRecord coeffSet) {
     boolean error = false;
-    List<SchnorrProof> coefficient_proofs = coeffSet.election_proofs();
+    List<SchnorrProof> coefficient_proofs = coeffSet.coefficientProofs();
 
     int count = 0;
     for (SchnorrProof proof : coefficient_proofs) {
@@ -57,13 +57,13 @@ public class GuardianPublicKeyVerifier {
       ElementModQ challenge_computed =  Hash.hash_elems(public_key, commitment);
       if (!challenge_computed.equals(challenge)) {
         error = true;
-        System.out.printf("Guardian %s coefficient_proof %d: equation 2A challenge validation failed.%n", coeffSet.guardian_id(), count);
+        System.out.printf("Guardian %s coefficient_proof %d: equation 2A challenge validation failed.%n", coeffSet.guardianId(), count);
       }
 
       // check equation 2.B
       if (!this.verify_individual_key_computation(response, commitment, public_key, challenge)) {
         error = true;
-        System.out.printf("Guardian %s coefficient_proof %d: equation 2B validation failed.%n", coeffSet.guardian_id(), count);
+        System.out.printf("Guardian %s coefficient_proof %d: equation 2B validation failed.%n", coeffSet.guardianId(), count);
       }
       count++;
     }

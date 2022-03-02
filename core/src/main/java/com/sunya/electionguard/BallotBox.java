@@ -26,11 +26,10 @@ public class BallotBox {
   }
 
   private final InternalManifest metadata;
-  private final CiphertextElectionContext context;
+  private final ElectionContext context;
   private final DataStore store;
 
-  public BallotBox(Manifest election,
-                   CiphertextElectionContext context) {
+  public BallotBox(Manifest election, ElectionContext context) {
     this.metadata = new InternalManifest(election);
     this.context = context;
     this.store = new DataStore();

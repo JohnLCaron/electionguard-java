@@ -6,7 +6,7 @@ import com.google.common.collect.Lists;
 import com.sunya.electionguard.BallotBox;
 import com.sunya.electionguard.BallotFactory;
 import com.sunya.electionguard.CiphertextBallot;
-import com.sunya.electionguard.CiphertextElectionContext;
+import com.sunya.electionguard.ElectionContext;
 import com.sunya.electionguard.CiphertextTally;
 import com.sunya.electionguard.CiphertextTallyBuilder;
 import com.sunya.electionguard.ElectionBuilder;
@@ -63,7 +63,7 @@ public class TestEndToEndElectionIntegration {
   // Step 0 - Configure Manifest
   Manifest election;
   ElectionBuilder election_builder;
-  CiphertextElectionContext context;
+  ElectionContext context;
   ElectionConstants constants;
   InternalManifest metadata;
 
@@ -244,7 +244,7 @@ public class TestEndToEndElectionIntegration {
     this.election = tuple.internalManifest.manifest;
     this.context = tuple.context;
     this.constants = Group.getPrimes();
-    Group.ElementModQ crypto_base_hash = CiphertextElectionContext.make_crypto_base_hash(NUMBER_OF_GUARDIANS, QUORUM, election);
+    Group.ElementModQ crypto_base_hash = ElectionContext.make_crypto_base_hash(NUMBER_OF_GUARDIANS, QUORUM, election);
     assertThat(this.context.crypto_base_hash).isEqualTo(crypto_base_hash);
 
     Group.ElementModQ extended_hash = Hash.hash_elems(crypto_base_hash, joint_key.commitment_hash());
@@ -415,24 +415,24 @@ public class TestEndToEndElectionIntegration {
     assertThat(roundtrip.constants).isEqualTo(this.constants);
     assertThat(roundtrip.devices.size()).isEqualTo(1);
     assertThat(roundtrip.devices.get(0)).isEqualTo(this.device);
-    assertThat(roundtrip.encryptedTally).isEqualTo(this.publishedTally);
+    assertThat(roundtrip.ciphertextTally).isEqualTo(this.publishedTally);
     assertThat(roundtrip.decryptedTally).isEqualTo(this.decryptedTally);
 
     Map<String, GuardianRecord> coeffMap = this.guardian_records.stream()
-            .collect(Collectors.toMap(g->g.guardian_id(), g -> g));
+            .collect(Collectors.toMap(g->g.guardianId(), g -> g));
     for (GuardianRecord guardianRecord : roundtrip.guardianRecords) {
-      GuardianRecord expected = coeffMap.get(guardianRecord.guardian_id());
+      GuardianRecord expected = coeffMap.get(guardianRecord.guardianId());
       assertThat(expected).isNotNull();
-      assertWithMessage(guardianRecord.guardian_id()).that(guardianRecord).isEqualTo(expected);
+      assertWithMessage(guardianRecord.guardianId()).that(guardianRecord).isEqualTo(expected);
     }
 
     // Equation 3.A
     // The hashing is order dependent, use the sequence_order to sort.
     List<GuardianRecord> sorted = roundtrip.guardianRecords.stream()
-            .sorted(Comparator.comparing(GuardianRecord::sequence_order)).toList();
+            .sorted(Comparator.comparing(GuardianRecord::xCoordinate)).toList();
     List<Group.ElementModP> commitments = new ArrayList<>();
     for (GuardianRecord guardian : sorted) {
-      commitments.addAll(guardian.election_commitments());
+      commitments.addAll(guardian.coefficientCommitments());
     }
 
     Group.ElementModQ commitment_hash = Hash.hash_elems(commitments);

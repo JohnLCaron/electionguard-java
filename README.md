@@ -1,5 +1,5 @@
 # 🗳 ElectionGuard Java
-_last changed: 02/15/2022_
+_last changed: 03/01/2022_
 
 This is a port of https://github.com/microsoft/electionguard-python/ to Java.
 
@@ -42,7 +42,7 @@ The entire workflow, consisting of the above steps plus verification can be run 
 
 ### Serialization
   * [JSON serialization](https://github.com/JohnLCaron/electionguard-java/blob/master/docs/JsonElectionSpec.md)
-  * [Proto serialization](https://github.com/JohnLCaron/electionguard-java/blob/master/docs/SerializationSpec.md)
+  * [Proto serialization](https://github.com/danwallach/electionguard-kotlin-multiplatform/blob/main/docs/SerializationSpec.md)
 
 ### Election Record Visualization
 

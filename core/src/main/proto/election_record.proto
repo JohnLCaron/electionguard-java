@@ -32,6 +32,7 @@ message AvailableGuardian {
 
 // The constants for mathematical functions during the election.
 message ElectionConstants {
+  string name = 5;
   bytes large_prime = 1; // large prime or p
   bytes small_prime = 2; // small prime or q
   bytes cofactor = 3;    // cofactor or r
@@ -73,7 +74,7 @@ message EncryptionDevice {
 message GuardianRecord {
   string guardian_id = 1; // guardian id
   uint32 x_coordinate = 2;    // x coordinate in the secret polynomial
-  ElementModP election_public_key = 3;
+  ElementModP guardian_public_key = 3;
   repeated ElementModP coefficient_commitments = 4;  // Kij, j=0...quorum-1
   repeated SchnorrProof coefficient_proofs = 5;
 }

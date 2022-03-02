@@ -258,7 +258,7 @@ public class ManifestPojo {
   private static ManifestPojo convert(Manifest org) {
     ManifestPojo pojo = new ManifestPojo();
     pojo.election_scope_id = org.election_scope_id();
-    pojo.type = org.type().name();
+    pojo.type = org.electionType().name();
     pojo.start_date = org.start_date().toString();
     pojo.end_date = org.end_date().toString();
     pojo.geopolitical_units = ConvertPojos.convertList(org.geopolitical_units(), ManifestPojo::convertGeopoliticalUnit);

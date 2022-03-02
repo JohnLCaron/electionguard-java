@@ -2,7 +2,7 @@ package com.sunya.electionguard.standard;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.sunya.electionguard.CiphertextElectionContext;
+import com.sunya.electionguard.ElectionContext;
 import com.sunya.electionguard.CiphertextTallyBuilder;
 import com.sunya.electionguard.ElectionFactory;
 import com.sunya.electionguard.ElectionTestHelper;
@@ -46,11 +46,11 @@ public class TestPublishJson {
   public void testPublishJson() throws IOException {
     OffsetDateTime now = OffsetDateTime.now();
     Manifest election = new Manifest(
-            "scope", CiphertextElectionContext.SPEC_VERSION, Manifest.ElectionType.unknown, now, now, ImmutableList.of(), ImmutableList.of(),
+            "scope", ElectionContext.SPEC_VERSION, Manifest.ElectionType.unknown, now, now, ImmutableList.of(), ImmutableList.of(),
             ImmutableList.of(), ImmutableList.of(), ImmutableList.of(), null, null, null);
     InternalManifest metadata = new InternalManifest(election);
 
-    CiphertextElectionContext context = CiphertextElectionContext.create(1, 1, ONE_MOD_P, election, rand_q(), null);
+    ElectionContext context = ElectionContext.create(1, 1, ONE_MOD_P, election, rand_q(), null);
     Guardian guardian = Guardian.createForTesting("GuardianId", 1, 1, 1, null);
     List<GuardianRecord> coefficients = ImmutableList.of(guardian.publish());
     PlaintextTally plaintext_tally = new PlaintextTally("PlaintextTallyId", ImmutableMap.of());

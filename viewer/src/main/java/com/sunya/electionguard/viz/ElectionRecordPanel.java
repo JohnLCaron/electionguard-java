@@ -3,7 +3,7 @@ package com.sunya.electionguard.viz;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.sunya.electionguard.AvailableGuardian;
-import com.sunya.electionguard.CiphertextElectionContext;
+import com.sunya.electionguard.ElectionContext;
 import com.sunya.electionguard.ElectionConstants;
 import com.sunya.electionguard.Encrypt;
 import com.sunya.electionguard.Group;
@@ -143,8 +143,8 @@ class ElectionRecordPanel extends JPanel {
       if (record.acceptedBallots != null) {
         submittedBallotsTable.setAcceptedBallots(record.acceptedBallots);
       }
-      if (record.encryptedTally != null) {
-        ciphertextTallyTable.setCiphertextTally(record.encryptedTally);
+      if (record.ciphertextTally != null) {
+        ciphertextTallyTable.setCiphertextTally(record.ciphertextTally);
       }
       if (record.decryptedTally != null) {
         plaintextTallyTable.setPlaintextTallies(CloseableIterableAdapter.wrap(ImmutableList.of(record.decryptedTally)));
@@ -162,17 +162,17 @@ class ElectionRecordPanel extends JPanel {
   void showInfo(Formatter f) {
     f.format("Election Record %s%n", this.electionRecordDir);
     if (this.record != null) {
-      f.format("  version = %s%n", record.version);
+      f.format("  version = %s%n", record.protoVersion);
       Manifest manifest = record.election;
       f.format("%nManifest%n");
       f.format("  election_scope_id = %s%n", manifest.election_scope_id());
-      f.format("  type = %s%n", manifest.type());
+      f.format("  type = %s%n", manifest.electionType());
       f.format("  name = %s%n", manifest.name());
       f.format("  start_date = %s%n", manifest.start_date());
       f.format("  end_date = %s%n", manifest.end_date());
       f.format("  manifest crypto hash = %s%n", manifest.crypto_hash());
 
-      CiphertextElectionContext context = record.context;
+      ElectionContext context = record.context;
       f.format("%nContext%n");
       f.format("  number_of_guardians = %s%n", context.number_of_guardians);
       f.format("  quorum = %s%n", context.quorum);
@@ -189,7 +189,7 @@ class ElectionRecordPanel extends JPanel {
 
       f.format("%n  Guardian Records id, sequence%n");
       for (GuardianRecord gr : record.guardianRecords) {
-        f.format("    %s %d%n", gr.guardian_id(), gr.sequence_order());
+        f.format("    %s %d%n", gr.guardianId(), gr.xCoordinate());
       }
 
       ElectionConstants constants = record.constants;
@@ -206,7 +206,7 @@ class ElectionRecordPanel extends JPanel {
 
       f.format("%nAcceptedBallots %d%n", Iterables.size(record.acceptedBallots));
       f.format("SpoiledBallots %d%n", Iterables.size(record.spoiledBallots));
-      f.format("EncryptedTally present = %s%n", record.encryptedTally != null);
+      f.format("EncryptedTally present = %s%n", record.ciphertextTally != null);
       f.format("DecryptedTally present = %s%n", record.decryptedTally != null);
 
     }

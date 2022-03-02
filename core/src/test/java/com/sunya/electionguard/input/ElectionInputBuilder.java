@@ -1,7 +1,7 @@
 package com.sunya.electionguard.input;
 
 import com.google.common.collect.ImmutableList;
-import com.sunya.electionguard.CiphertextElectionContext;
+import com.sunya.electionguard.ElectionContext;
 import com.sunya.electionguard.Manifest;
 
 import java.time.OffsetDateTime;
@@ -62,7 +62,7 @@ public class ElectionInputBuilder {
     //                  List<BallotStyle> ballot_styles,
     //                  @Nullable InternationalizedText name,
     //                  @Nullable ContactInformation contact_information
-    return new Manifest(election_scope_id, CiphertextElectionContext.SPEC_VERSION, Manifest.ElectionType.general,
+    return new Manifest(election_scope_id, ElectionContext.SPEC_VERSION, Manifest.ElectionType.general,
             OffsetDateTime.now(), OffsetDateTime.now(),
             ImmutableList.of(gpUnit), parties, candidates,
             contests.stream().map(ContestBuilder::build).toList(),

@@ -19,7 +19,7 @@ import static com.sunya.electionguard.Group.int_to_q_unchecked;
  * for defintion of K, 𝑄, 𝑄'.
  */
 @Immutable
-public class CiphertextElectionContext {
+public class ElectionContext {
   public static final String SPEC_VERSION = "v0.95";
 
   /**
@@ -32,7 +32,7 @@ public class CiphertextElectionContext {
    * @param commitment_hash all the public commitments for all the guardians = H(K 1,0 , K 1,1 , K 1,2 , ... ,
    *    K 1,k−1 , K 2,0 , K 2,1 , K 2,2 , ... , K 2,k−1 , ... , K n,0 , K n,1 , K n,2 , ... , K n,k−1 )
    */
-  public static CiphertextElectionContext create(
+  public static ElectionContext create(
           int number_of_guardians,
           int quorum,
           Group.ElementModP joint_public_key,
@@ -59,7 +59,7 @@ public class CiphertextElectionContext {
     Group.ElementModQ crypto_base_hash = make_crypto_base_hash(number_of_guardians, quorum, description);
     Group.ElementModQ crypto_extended_base_hash = Hash.hash_elems(crypto_base_hash, commitment_hash);
 
-    return new CiphertextElectionContext(
+    return new ElectionContext(
             number_of_guardians,
             quorum,
             joint_public_key,
@@ -100,10 +100,10 @@ public class CiphertextElectionContext {
   public final Map<String, String> extended_data;
 
   /** Do not use directly, use CiphertextElectionContext.create() */
-  public CiphertextElectionContext(int number_of_guardians, int quorum, Group.ElementModP jointPublicKey,
-                                   Group.ElementModQ manifest_hash, Group.ElementModQ crypto_base_hash,
-                                   Group.ElementModQ crypto_extended_base_hash, Group.ElementModQ commitment_hash,
-                                   @Nullable Map<String, String> extended_data) {
+  public ElectionContext(int number_of_guardians, int quorum, Group.ElementModP jointPublicKey,
+                         Group.ElementModQ manifest_hash, Group.ElementModQ crypto_base_hash,
+                         Group.ElementModQ crypto_extended_base_hash, Group.ElementModQ commitment_hash,
+                         @Nullable Map<String, String> extended_data) {
     this.number_of_guardians = number_of_guardians;
     this.quorum = quorum;
     this.elgamal_public_key = Preconditions.checkNotNull(jointPublicKey);
@@ -118,7 +118,7 @@ public class CiphertextElectionContext {
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-    CiphertextElectionContext that = (CiphertextElectionContext) o;
+    ElectionContext that = (ElectionContext) o;
     return Objects.equals(number_of_guardians, that.number_of_guardians) &&
             Objects.equals(quorum, that.quorum) &&
             elgamal_public_key.equals(that.elgamal_public_key) &&

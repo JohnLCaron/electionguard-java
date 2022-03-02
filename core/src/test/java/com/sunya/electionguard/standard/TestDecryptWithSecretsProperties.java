@@ -3,7 +3,7 @@ package com.sunya.electionguard.standard;
 import com.sunya.electionguard.BallotFactory;
 import com.sunya.electionguard.ChaumPedersen;
 import com.sunya.electionguard.CiphertextBallot;
-import com.sunya.electionguard.CiphertextElectionContext;
+import com.sunya.electionguard.ElectionContext;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.ElectionBuilder;
 import com.sunya.electionguard.ElectionFactory;
@@ -21,7 +21,6 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
@@ -372,7 +371,7 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
     Manifest election = ElectionFactory.get_simple_election_from_file();
     ElectionBuilder.DescriptionAndContext celection = ElectionFactory.get_fake_ciphertext_election(election, keypair.public_key()).orElseThrow();
     InternalManifest metadata = celection.internalManifest;
-    CiphertextElectionContext context = celection.context;
+    ElectionContext context = celection.context;
 
     PlaintextBallot data = new BallotFactory().get_simple_ballot_from_file();
     Encrypt.EncryptionDevice device = Encrypt.createDeviceForTest("Location");
@@ -498,7 +497,7 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
     Manifest election = ElectionFactory.get_simple_election_from_file();
     ElectionBuilder.DescriptionAndContext celection = ElectionFactory.get_fake_ciphertext_election(election, keypair.public_key()).orElseThrow();
     InternalManifest metadata = celection.internalManifest;
-    CiphertextElectionContext context = celection.context;
+    ElectionContext context = celection.context;
 
     PlaintextBallot data = new BallotFactory().get_simple_ballot_from_file();
     Encrypt.EncryptionDevice device = Encrypt.createDeviceForTest("Location");

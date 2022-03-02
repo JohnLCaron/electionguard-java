@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.flogger.FluentLogger;
 import com.sunya.electionguard.BallotBox;
 import com.sunya.electionguard.ChaumPedersen;
-import com.sunya.electionguard.CiphertextElectionContext;
+import com.sunya.electionguard.ElectionContext;
 import com.sunya.electionguard.CiphertextTally;
 import com.sunya.electionguard.DecryptionShare;
 import com.sunya.electionguard.ElGamal;
@@ -328,7 +328,7 @@ class Guardian {
    * @param context: Election context
    * @return Decryption share of tally or None if failure
    */
-  public Optional<DecryptionShare> compute_tally_share(CiphertextTally tally, CiphertextElectionContext context) {
+  public Optional<DecryptionShare> compute_tally_share(CiphertextTally tally, ElectionContext context) {
     return Decryptions.compute_decryption_share(
             this.election_keys,
             tally,
@@ -342,7 +342,7 @@ class Guardian {
    * @param context: Election context
    * @return Map[BALLOT_ID, DecryptionShare]
    */
-  public Map<String, Optional<DecryptionShare>> compute_ballot_shares(Iterable<SubmittedBallot> ballots, CiphertextElectionContext context) {
+  public Map<String, Optional<DecryptionShare>> compute_ballot_shares(Iterable<SubmittedBallot> ballots, ElectionContext context) {
 
     Map<String, Optional<DecryptionShare>> shares = new HashMap<>();
     for (SubmittedBallot ballot : ballots) {
@@ -359,7 +359,7 @@ class Guardian {
   public Optional<DecryptionShare.CompensatedDecryptionShare> compute_compensated_tally_share(
           String missing_guardian_id,
           CiphertextTally tally,
-          CiphertextElectionContext context) {
+          ElectionContext context) {
 
     // Ensure missing guardian information available
     KeyCeremony.ElectionPublicKey missing_guardian_key = this.guardian_election_public_keys.get(missing_guardian_id);
@@ -380,7 +380,7 @@ class Guardian {
   public Map<String, Optional<DecryptionShare.CompensatedDecryptionShare>> compute_compensated_ballot_shares(
           String missing_guardian_id,
           List<SubmittedBallot> ballots,
-          CiphertextElectionContext context) {
+          ElectionContext context) {
 
     Map<String, Optional<DecryptionShare.CompensatedDecryptionShare>> shares = new HashMap<>();
 

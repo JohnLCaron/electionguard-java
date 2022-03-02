@@ -48,7 +48,7 @@ public class CompactSubmittedBallot {
   static SubmittedBallot expand_compact_submitted_ballot(
           CompactSubmittedBallot compact_ballot,
           InternalManifest internal_manifest,
-          CiphertextElectionContext context) {
+          ElectionContext context) {
 
     // Expand ballot and encrypt & hash contests
     PlaintextBallot plaintext_ballot = CompactPlaintextBallot.expand_compact_plaintext_ballot(

@@ -104,7 +104,7 @@ public class Consumer {
     return ConvertFromJson.readManifest(publisher.manifestPath().toString());
   }
 
-  public CiphertextElectionContext context() throws IOException {
+  public ElectionContext context() throws IOException {
     return ConvertFromJson.readContext(publisher.contextPath().toString());
   }
 
@@ -144,13 +144,13 @@ public class Consumer {
       return new ArrayList<>();
     }
     Map<String, GuardianRecord> grMap = guardianRecords().stream().collect(Collectors.toMap(
-            GuardianRecord::guardian_id, gr -> gr));
+            GuardianRecord::guardianId, gr -> gr));
     LagrangeCoefficientsPojo coeffPojo = ConvertFromJson.readCoefficients(publisher.coefficientsPath().toString());
     // Preconditions.checkArgument(grs.size() == pojo.coefficients.size());
     List<AvailableGuardian> result = new ArrayList<>();
     for (Map.Entry<String, Group.ElementModQ> entry : coeffPojo.coefficients.entrySet()) {
       GuardianRecord gr = grMap.get(entry.getKey());
-      AvailableGuardian avail = new AvailableGuardian(entry.getKey(), gr.sequence_order(), entry.getValue());
+      AvailableGuardian avail = new AvailableGuardian(entry.getKey(), gr.xCoordinate(), entry.getValue());
       result.add(avail);
     }
     return result;
@@ -187,7 +187,7 @@ public class Consumer {
     return fromProto.setBallots(submittedAllBallotsProto(), decryptedSpoiledBallotsProto());
   }
 
-  // all submitted ballots cast
+  // all submitted ballots cast or spoiled
   public CloseableIterable<SubmittedBallot> submittedAllBallotsProto() {
     if (Files.exists(publisher.submittedBallotProtoPath())) {
       return () -> new SubmittedBallotIterator(publisher.submittedBallotProtoPath().toString(),
@@ -197,6 +197,7 @@ public class Consumer {
     }
   }
 
+  // all submitted ballots spoiled only
   public CloseableIterable<SubmittedBallot> submittedSpoiledBallotsProto() {
     if (Files.exists(publisher.submittedBallotProtoPath())) {
       return () -> new SubmittedBallotIterator(publisher.submittedBallotProtoPath().toString(),

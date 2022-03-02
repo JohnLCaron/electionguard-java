@@ -11,7 +11,7 @@ public class TestCompactBallot {
   Group.ElementModQ ballot_nonce;
   SubmittedBallot submitted_ballot;
   InternalManifest internal_manifest;
-  CiphertextElectionContext context;
+  ElectionContext context;
 
   public TestCompactBallot() {
     ElGamal.KeyPair keypair = ElGamal.elgamal_keypair_from_secret(Group.TWO_MOD_Q).orElseThrow();
