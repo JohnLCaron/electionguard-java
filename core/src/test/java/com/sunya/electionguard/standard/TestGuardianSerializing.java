@@ -1,6 +1,6 @@
 package com.sunya.electionguard.standard;
 
-import com.sunya.electionguard.CiphertextElectionContext;
+import com.sunya.electionguard.ElectionContext;
 import com.sunya.electionguard.ElectionFactory;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.GuardianRecord;
@@ -16,7 +16,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -81,14 +80,14 @@ public class TestGuardianSerializing {
       this.guardians.add(guardian);
       this.guardianRecords.add(guardian.publish());
       GuardianRecord coeffValidSet = guardian.publish();
-      commitments.addAll(coeffValidSet.election_commitments());
+      commitments.addAll(coeffValidSet.coefficientCommitments());
     }
     Group.ElementModQ commitmentsHash = Hash.hash_elems(commitments);
 
     System.out.printf("%nKey Ceremony%n");
     this.jointKey = keyCeremony(guardians);
 
-    CiphertextElectionContext context = CiphertextElectionContext.create(
+    ElectionContext context = ElectionContext.create(
             this.numberOfGuardians,
             this.quorum,
             this.jointKey.joint_public_key(),
@@ -109,7 +108,7 @@ public class TestGuardianSerializing {
     return keyCeremony.publish_joint_key().orElseThrow();
   }
 
-  void publish(CiphertextElectionContext context) throws IOException {
+  void publish(ElectionContext context) throws IOException {
     publisher.writeKeyCeremonyJson(
             this.election,
             context,
@@ -129,7 +128,7 @@ public class TestGuardianSerializing {
     for (Guardian guardian : this.guardians) {
       System.out.printf("Test Guardian %s%n", guardian.object_id);
       GuardianRecord guardianRecord = guardian.publish();
-      GuardianRecord guardianPrivateRoundtrip = guardianRecords.stream().filter(g -> g.guardian_id().equals(guardian.object_id)).findFirst().orElseThrow();
+      GuardianRecord guardianPrivateRoundtrip = guardianRecords.stream().filter(g -> g.guardianId().equals(guardian.object_id)).findFirst().orElseThrow();
       assertThat(guardianPrivateRoundtrip.equals(guardianRecord)).isTrue();
       assertThat(guardianPrivateRoundtrip).isEqualTo(guardianRecord);
     }

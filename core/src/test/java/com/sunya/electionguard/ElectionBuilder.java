@@ -9,9 +9,9 @@ public class ElectionBuilder {
 
   public static class DescriptionAndContext {
     public final InternalManifest internalManifest;
-    public final CiphertextElectionContext context;
+    public final ElectionContext context;
 
-    public DescriptionAndContext(Manifest election, CiphertextElectionContext context) {
+    public DescriptionAndContext(Manifest election, ElectionContext context) {
       this.internalManifest = new InternalManifest(election);
       this.context = context;
     }
@@ -49,7 +49,7 @@ public class ElectionBuilder {
     }
 
     return Optional.of(new DescriptionAndContext(this.description,
-            CiphertextElectionContext.create(
+            ElectionContext.create(
               this.number_of_guardians,
               this.quorum,
               this.election_joint_public_key.get(),

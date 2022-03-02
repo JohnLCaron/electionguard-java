@@ -1,7 +1,7 @@
 package com.sunya.electionguard.standard;
 
 import com.sunya.electionguard.CiphertextBallot;
-import com.sunya.electionguard.CiphertextElectionContext;
+import com.sunya.electionguard.ElectionContext;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.ElectionTestHelper;
 import com.sunya.electionguard.Encrypt;
@@ -16,7 +16,7 @@ import net.jqwik.api.Property;
 import net.jqwik.api.ShrinkingMode;
 
 import java.util.*;
-import java.util.stream.Collectors;
+
 import static com.sunya.electionguard.InternalManifest.ContestWithPlaceholders;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -49,7 +49,7 @@ public class TestEncryptHypothesisProperties extends TestProperties {
 
     List<PlaintextBallot> ballots = everything.ballots;
     Group.ElementModQ secret_key = everything.secret_key;
-    CiphertextElectionContext context = everything.context;
+    ElectionContext context = everything.context;
 
     // Tally the plaintext ballots for comparison later
     Map<String, Integer> plaintext_tallies = TallyTestHelper.accumulate_plaintext_ballots(ballots);

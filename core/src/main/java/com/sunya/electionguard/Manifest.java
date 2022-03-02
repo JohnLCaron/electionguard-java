@@ -18,7 +18,7 @@ import java.util.List;
 public record Manifest(
         String election_scope_id,
         String spec_version,
-        ElectionType type,
+        ElectionType electionType,
         OffsetDateTime start_date,
         OffsetDateTime end_date,
         List<GeopoliticalUnit> geopolitical_units,
@@ -35,11 +35,11 @@ public record Manifest(
 
   public Manifest {
     Preconditions.checkArgument(!Strings.isNullOrEmpty(election_scope_id));
-    Preconditions.checkNotNull(type);
+    Preconditions.checkNotNull(electionType);
     Preconditions.checkNotNull(start_date);
     Preconditions.checkNotNull(end_date);
     if (Strings.isNullOrEmpty(spec_version)) {
-      spec_version = CiphertextElectionContext.SPEC_VERSION;
+      spec_version = ElectionContext.SPEC_VERSION;
     }
     geopolitical_units = toImmutableListEmpty(geopolitical_units);
     parties = toImmutableListEmpty(parties);
@@ -49,13 +49,14 @@ public record Manifest(
     if (crypto_hash == null) {
       crypto_hash = Hash.hash_elems(
               election_scope_id,
-              type.name(),
+              electionType.name(),
               start_date.toString(), // python: to_iso_date_string, LOOK isnt all that well defined.
               end_date.toString(),
               name,
               contact_information,
               geopolitical_units,
               parties,
+              candidates, // TODO did python add this ?
               contests,
               ballot_styles);
     }

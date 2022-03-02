@@ -6,7 +6,7 @@ option java_outer_classname = "PlaintextBallotProto";
 // A decrypted ballot.
 message PlaintextBallot {
   string ballot_id = 1; // a unique Ballot ID created by the external system
-  string ballot_style_id = 2; // matches the BallotStyle.ballot_style_id
+  string ballot_style_id = 2; // matches a BallotStyle.ballot_style_id
   repeated PlaintextBallotContest contests = 3;
 }
 

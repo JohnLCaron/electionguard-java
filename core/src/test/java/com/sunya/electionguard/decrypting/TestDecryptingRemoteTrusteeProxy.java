@@ -37,7 +37,7 @@ public class TestDecryptingRemoteTrusteeProxy {
 
     Consumer consumer = new Consumer(electionRecordDir);
     ElectionRecord record = consumer.readElectionRecord();
-    this.tally = record.encryptedTally;
+    this.tally = record.ciphertextTally;
     this.extendedHash =  record.extendedHash();
   }
 

@@ -17,7 +17,7 @@ public class TestConsumer {
     assertThat(record.election).isNotNull();
     assertThat(record.context).isNotNull();
     assertThat(record.constants).isNotNull();
-    assertThat(record.encryptedTally).isNotNull();
+    assertThat(record.ciphertextTally).isNotNull();
     assertThat(record.decryptedTally).isNotNull();
     assertThat(record.devices).hasSize(1);
     assertThat(record.guardianRecords).hasSize(7);
@@ -34,7 +34,7 @@ public class TestConsumer {
     assertThat(record.election).isNotNull();
     assertThat(record.context).isNotNull();
     assertThat(record.constants).isNotNull();
-    assertThat(record.encryptedTally).isNotNull();
+    assertThat(record.ciphertextTally).isNotNull();
     assertThat(record.decryptedTally).isNotNull();
     assertThat(record.devices).hasSize(1);
     assertThat(record.guardianRecords).hasSize(5);
@@ -50,7 +50,7 @@ public class TestConsumer {
     assertThat(record.election).isNotNull();
     assertThat(record.context).isNotNull();
     assertThat(record.constants).isNotNull();
-    assertThat(record.encryptedTally).isNotNull();
+    assertThat(record.ciphertextTally).isNotNull();
     assertThat(record.decryptedTally).isNotNull();
     assertThat(record.devices).hasSize(1);
     assertThat(record.guardianRecords).hasSize(3);

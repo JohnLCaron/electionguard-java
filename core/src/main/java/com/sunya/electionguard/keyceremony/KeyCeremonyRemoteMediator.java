@@ -1,7 +1,7 @@
 package com.sunya.electionguard.keyceremony;
 
 import com.google.common.flogger.FluentLogger;
-import com.sunya.electionguard.CiphertextElectionContext;
+import com.sunya.electionguard.ElectionContext;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.GuardianRecord;
 import com.sunya.electionguard.Hash;
@@ -32,7 +32,7 @@ public class KeyCeremonyRemoteMediator {
 
   Group.ElementModP jointKey;
   Group.ElementModQ commitmentsHash;
-  CiphertextElectionContext context;
+  ElectionContext context;
 
   public KeyCeremonyRemoteMediator(Manifest election, int quorum,
                                    List<KeyCeremonyTrusteeIF> trusteeProxies) {
@@ -85,7 +85,7 @@ public class KeyCeremonyRemoteMediator {
       throw new RuntimeException("*** makeCoefficientValidationSets failed");
     }
 
-    this.context = CiphertextElectionContext.create(this.trusteeProxies.size(), this.quorum,
+    this.context = ElectionContext.create(this.trusteeProxies.size(), this.quorum,
             this.jointKey, this.election, this.commitmentsHash, null);
 
     System.out.printf("  Key Ceremony complete%n");

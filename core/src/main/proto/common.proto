@@ -26,11 +26,6 @@ message ElGamalCiphertext {
   ElementModP data = 2;
 }
 
-message ElGamalKeyPair {
-  ElementModQ secret_key = 1;
-  ElementModP public_key = 2;
-}
-
 message SchnorrProof {
   ElementModP public_key = 1; // k in the spec
   ElementModP commitment = 2; // h in the spec

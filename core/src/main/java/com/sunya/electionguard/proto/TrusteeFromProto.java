@@ -70,7 +70,7 @@ public class TrusteeFromProto {
             proto.getError());
   }
 
-  private static ElGamal.KeyPair convertElgamalKeypair(CommonProto.ElGamalKeyPair keypair) {
+  private static ElGamal.KeyPair convertElgamalKeypair(TrusteeProto.ElGamalKeyPair keypair) {
     return new ElGamal.KeyPair(
             CommonConvert.convertElementModQ(keypair.getSecretKey()),
             convertElementModP(keypair.getPublicKey()));

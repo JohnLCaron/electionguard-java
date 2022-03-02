@@ -121,7 +121,7 @@ public class DecryptBallots {
 
       System.out.printf(" BallotDecryptor read from %s%n Write to %s%n", cmdLine.encryptDir, cmdLine.outputDir);
       decryptor = new DecryptBallots(consumer, electionRecord, guardiansProvider);
-      if (electionRecord.encryptedTally == null) {
+      if (electionRecord.ciphertextTally == null) {
         decryptor.accumulateTally();
       }
       decryptor.decryptTally();
@@ -169,7 +169,7 @@ public class DecryptBallots {
     this.quorum = electionRecord.context.quorum;
     this.numberOfGuardians = electionRecord.context.number_of_guardians;
     // LOOK We could do the accumulation if the encryptedTally doesnt exist
-    this.encryptedTally = electionRecord.encryptedTally;
+    this.encryptedTally = electionRecord.ciphertextTally;
 
     this.guardians = provider.guardians();
     for (Guardian guardian : provider.guardians()) {

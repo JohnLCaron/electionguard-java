@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableList;
 
 import java.time.OffsetDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
@@ -445,7 +444,7 @@ public class ElectionTestHelper {
 
     return new Manifest(
             randomString("election_scope_id"),
-            CiphertextElectionContext.SPEC_VERSION,
+            ElectionContext.SPEC_VERSION,
             Manifest.ElectionType.general,  // good enough for now
             start_date,
             end_date,
@@ -507,9 +506,9 @@ public class ElectionTestHelper {
 
   static class CIPHERTEXT_ELECTIONS_TUPLE_TYPE {
     ElementModQ secret_key;
-    CiphertextElectionContext context;
+    ElectionContext context;
 
-    public CIPHERTEXT_ELECTIONS_TUPLE_TYPE(ElementModQ secret_key, CiphertextElectionContext context) {
+    public CIPHERTEXT_ELECTIONS_TUPLE_TYPE(ElementModQ secret_key, ElectionContext context) {
       this.secret_key = secret_key;
       this.context = context;
     }
@@ -524,7 +523,7 @@ public class ElectionTestHelper {
     ElGamal.KeyPair keypair = elgamal_keypairs();
     return new CIPHERTEXT_ELECTIONS_TUPLE_TYPE(
             keypair.secret_key(),
-            CiphertextElectionContext.create(
+            ElectionContext.create(
                     1,
                     1,
                     keypair.public_key(),
@@ -537,14 +536,14 @@ public class ElectionTestHelper {
     public final InternalManifest metadata;
     public final List<PlaintextBallot> ballots;
     public final ElementModQ secret_key;
-    public final CiphertextElectionContext context;
+    public final ElectionContext context;
 
     public EverythingTuple(
                  Manifest election_description,
                  InternalManifest metadata,
                  List<PlaintextBallot> ballots,
                  ElementModQ secret_key,
-                 CiphertextElectionContext context) {
+                 ElectionContext context) {
       this.election_description = election_description;
       this.metadata = metadata;
       this.ballots = ballots;

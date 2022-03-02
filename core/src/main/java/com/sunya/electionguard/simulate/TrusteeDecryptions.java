@@ -7,7 +7,7 @@ import com.google.common.flogger.FluentLogger;
 import com.sunya.electionguard.BallotBox;
 import com.sunya.electionguard.CiphertextBallot;
 import com.sunya.electionguard.CiphertextContest;
-import com.sunya.electionguard.CiphertextElectionContext;
+import com.sunya.electionguard.ElectionContext;
 import com.sunya.electionguard.CiphertextSelection;
 import com.sunya.electionguard.CiphertextTally;
 import com.sunya.electionguard.DecryptionShare;
@@ -46,7 +46,7 @@ public class TrusteeDecryptions {
   public static Optional<DecryptionShare> compute_decryption_share(
           DecryptingTrusteeIF guardian,
           CiphertextTally tally,
-          CiphertextElectionContext context) {
+          ElectionContext context) {
 
     Map<String, CiphertextDecryptionContest> contests = new HashMap<>();
     for (CiphertextTally.Contest tallyContest : tally.contests.values()) {
@@ -69,7 +69,7 @@ public class TrusteeDecryptions {
   public static Optional<Map<String, DecryptionShare>> compute_decryption_share_for_ballots(
           DecryptingTrusteeIF guardian,
           Iterable<SubmittedBallot> ballots,
-          CiphertextElectionContext context) {
+          ElectionContext context) {
 
   Map<String, DecryptionShare> shares = new HashMap<>();
 
@@ -89,7 +89,7 @@ public class TrusteeDecryptions {
   private static Optional<DecryptionShare> compute_decryption_share_for_ballot(
           DecryptingTrusteeIF guardian,
           SubmittedBallot ballot,
-          CiphertextElectionContext context) {
+          ElectionContext context) {
 
     // Map(CONTEST_ID, CiphertextDecryptionContest)
     Map<String, CiphertextDecryptionContest> contests = new HashMap<>();
@@ -121,7 +121,7 @@ public class TrusteeDecryptions {
   private static Optional<CiphertextDecryptionContest> compute_decryption_share_for_contest(
           DecryptingTrusteeIF guardian,
           CiphertextContest ciphertextContest,
-          CiphertextElectionContext context) {
+          ElectionContext context) {
 
     Map<String, CiphertextDecryptionSelection> selections = new HashMap<>();
 
@@ -154,7 +154,7 @@ public class TrusteeDecryptions {
   private static Optional<CiphertextDecryptionSelection> compute_decryption_share_for_selection(
           DecryptingTrusteeIF guardian,
           CiphertextSelection selection,
-          CiphertextElectionContext context) {
+          ElectionContext context) {
 
     try {
       List<BallotBox.DecryptionProofTuple> results = guardian.partialDecrypt(ImmutableList.of(selection.ciphertext()), context.crypto_extended_base_hash, null);
@@ -199,7 +199,7 @@ public class TrusteeDecryptions {
           DecryptingTrusteeIF guardian,
           String missing_guardian_id,
           CiphertextTally tally,
-          CiphertextElectionContext context) {
+          ElectionContext context) {
 
     Map<String, CiphertextCompensatedDecryptionContest> contests = new HashMap<>();
 
@@ -228,7 +228,7 @@ public class TrusteeDecryptions {
           DecryptingTrusteeIF guardian,
           String missing_guardian_id,
           CiphertextContest contest,
-          CiphertextElectionContext context) {
+          ElectionContext context) {
 
       Map<String, CiphertextCompensatedDecryptionSelection> selections = new HashMap<>();
 
@@ -260,7 +260,7 @@ public class TrusteeDecryptions {
           DecryptingTrusteeIF guardian,
           String missing_guardian_id,
           SubmittedBallot ballot,
-          CiphertextElectionContext context) {
+          ElectionContext context) {
 
     Map<String, CiphertextCompensatedDecryptionContest> contests = new HashMap<>();
 
@@ -302,7 +302,7 @@ public class TrusteeDecryptions {
           DecryptingTrusteeIF guardian,
           String missing_guardian_id,
           CiphertextSelection selection,
-          CiphertextElectionContext context) {
+          ElectionContext context) {
 
     List<DecryptionProofRecovery> compensated = guardian.compensatedDecrypt(
             missing_guardian_id,

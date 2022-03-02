@@ -36,7 +36,7 @@ public class CiphertextTallyBuilder {
 
   private final String object_id;
   private final InternalManifest manifest;
-  private final CiphertextElectionContext context;
+  private final ElectionContext context;
 
   /** Local cache of ballots id's that have already been cast. */
   private final Set<String> cast_ballot_ids;
@@ -51,7 +51,7 @@ public class CiphertextTallyBuilder {
    * @param manifest the election manifest
    * @param context the election context
    */
-  public CiphertextTallyBuilder(String object_id, InternalManifest manifest, CiphertextElectionContext context) {
+  public CiphertextTallyBuilder(String object_id, InternalManifest manifest, ElectionContext context) {
     this.object_id = object_id;
     this.manifest = manifest;
     this.context = context;

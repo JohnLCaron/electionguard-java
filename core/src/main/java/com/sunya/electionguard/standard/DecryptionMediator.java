@@ -2,7 +2,7 @@ package com.sunya.electionguard.standard;
 
 import com.google.common.flogger.FluentLogger;
 import com.sunya.electionguard.AvailableGuardian;
-import com.sunya.electionguard.CiphertextElectionContext;
+import com.sunya.electionguard.ElectionContext;
 import com.sunya.electionguard.CiphertextTally;
 import com.sunya.electionguard.DecryptWithShares;
 import com.sunya.electionguard.DecryptionShare;
@@ -29,7 +29,7 @@ class DecryptionMediator {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   private final String id;
-  private final CiphertextElectionContext context;
+  private final ElectionContext context;
 
   // Map(GUARDIAN_ID, Guardian)
   private final Map<String, KeyCeremony.ElectionPublicKey> available_guardians = new HashMap<>();
@@ -47,7 +47,7 @@ class DecryptionMediator {
   // Map<BALLOT_ID, Map<GuardianPair, DecryptionShare>>
   private final Map<String, Map<GuardianPair, CompensatedDecryptionShare>> compensated_ballot_shares = new HashMap<>();
 
-  public DecryptionMediator(String id, CiphertextElectionContext context) {
+  public DecryptionMediator(String id, ElectionContext context) {
     this.id = id;
     this.context = context;
   }

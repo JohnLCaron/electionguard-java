@@ -1,7 +1,7 @@
 package com.sunya.electionguard.input;
 
 import com.sunya.electionguard.CiphertextBallot;
-import com.sunya.electionguard.CiphertextElectionContext;
+import com.sunya.electionguard.ElectionContext;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.ElectionBuilder;
@@ -311,7 +311,7 @@ public class TestBallotInputValidation {
   void testEncrypt(ElectionAndBallot eandb, boolean expectValid) {
     ElGamal.KeyPair keypair = elgamal_keypair_from_secret(int_to_q_unchecked(BigInteger.TWO)).orElseThrow();
     ElectionBuilder.DescriptionAndContext tuple = ElectionFactory.get_fake_ciphertext_election(eandb.election, keypair.public_key()).orElseThrow();
-    CiphertextElectionContext context = tuple.context;
+    ElectionContext context = tuple.context;
 
     InternalManifest metadata = new InternalManifest(eandb.election);
     Encrypt.EncryptionDevice device = Encrypt.createDeviceForTest("device");

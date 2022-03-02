@@ -23,7 +23,7 @@ public class DecryptWithShares {
   public static List<PlaintextTally> decrypt_spoiled_ballots(
           Iterable<SubmittedBallot> ballots,
           Map<String, Map<String, DecryptionShare>> shares, // MAP(AVAILABLE_GUARDIAN_ID, Map(BALLOT_ID, DecryptionShare))
-          CiphertextElectionContext context) {
+          ElectionContext context) {
 
     List<PlaintextTally> result = new ArrayList<>();
     for (SubmittedBallot ballot : ballots) {
@@ -58,7 +58,7 @@ public class DecryptWithShares {
   public static Optional<PlaintextTally> decrypt_tally(
           CiphertextTally tally,
           Map<String, DecryptionShare> shares, // Map(AVAILABLE_GUARDIAN_ID, DecryptionShare)
-          CiphertextElectionContext context) {
+          ElectionContext context) {
 
     Map<String, PlaintextTally.Contest> contests = new HashMap<>();
     for (CiphertextTally.Contest tallyContest : tally.contests.values()) {
@@ -86,7 +86,7 @@ public class DecryptWithShares {
   public static Optional<Map<String, PlaintextTally>> decrypt_ballots(
           Iterable<SubmittedBallot> ballots,
           Map<String, Map<String, DecryptionShare>> shares, // MAP(AVAILABLE_GUARDIAN_ID, Map(BALLOT_ID, DecryptionShare))
-          CiphertextElectionContext context) {
+          ElectionContext context) {
 
     Map<String, PlaintextTally> result = new HashMap<>();
     for (SubmittedBallot ballot : ballots) {

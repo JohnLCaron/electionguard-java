@@ -17,7 +17,7 @@ class BallotValidations {
   static boolean ballot_is_valid_for_election(
           CiphertextBallot ballot,
           InternalManifest manifest,
-          CiphertextElectionContext context) {
+          ElectionContext context) {
 
     if (!ballot_is_valid_for_style(ballot, manifest)) {
       return false;

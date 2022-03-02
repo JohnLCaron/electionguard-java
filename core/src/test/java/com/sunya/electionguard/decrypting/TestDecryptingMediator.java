@@ -47,15 +47,15 @@ public class TestDecryptingMediator extends TestProperties {
 
     // The guardians' election public key is in the electionRecord.guardianCoefficients.
     this.guardianPublicKeys = electionRecord.guardianRecords.stream().collect(
-            Collectors.toMap(coeff -> coeff.guardian_id(), coeff -> coeff.election_public_key()));
+            Collectors.toMap(coeff -> coeff.guardianId(), coeff -> coeff.guardianPublicKey()));
 
     // hand tally the results
     expectedTally = new HashMap<>();
     expectedTally.put("referendum-pineapple:referendum-pineapple-affirmative-selection", 0);
     expectedTally.put("referendum-pineapple:referendum-pineapple-negative-selection", 0);
     expectedTally.put("justice-supreme-court:benjamin-franklin-selection", 3);
-    expectedTally.put("justice-supreme-court:john-adams-selection", 3);
-    expectedTally.put("justice-supreme-court:john-hancock-selection", 2);
+    expectedTally.put("justice-supreme-court:john-adams-selection", 0);
+    expectedTally.put("justice-supreme-court:john-hancock-selection", 3);
     expectedTally.put("justice-supreme-court:write-in-selection", 1);
 
     this.spoiledBallots =  consumer.submittedSpoiledBallotsProto();
@@ -63,7 +63,7 @@ public class TestDecryptingMediator extends TestProperties {
 
   DecryptingMediator makeDecryptingMediator() {
     return new DecryptingMediator(this.electionRecord.context,
-            this.electionRecord.encryptedTally,
+            this.electionRecord.ciphertextTally,
             this.spoiledBallots,
             this.guardianPublicKeys);
   }

@@ -51,8 +51,10 @@ public class PlaintextTallyFromProto {
 
   private static DecryptionShare.CiphertextDecryptionSelection convertShare(PlaintextTallyProto.CiphertextDecryptionSelection proto) {
     Map<String, DecryptionShare.CiphertextCompensatedDecryptionSelection> recovered = new HashMap<>();
-    for (Map.Entry<String, PlaintextTallyProto.CiphertextCompensatedDecryptionSelection> entry : proto.getRecoveredPartsMap().entrySet()) {
-      recovered.put(entry.getKey(), convertCompensatedShare(entry.getValue()));
+    if (proto.hasRecoveredParts()) {
+      for (PlaintextTallyProto.CiphertextCompensatedDecryptionSelection part : proto.getRecoveredParts().getFragmentsList()) {
+        recovered.put(part.getGuardianId(), convertCompensatedShare(part));
+      }
     }
 
     return new DecryptionShare.CiphertextDecryptionSelection(
@@ -60,7 +62,7 @@ public class PlaintextTallyFromProto {
             proto.getGuardianId(),
             convertElementModP(proto.getShare()),
             proto.hasProof() ? Optional.of(CommonConvert.convertChaumPedersenProof(proto.getProof())) : Optional.empty(),
-            recovered.size() > 0 ? Optional.of(recovered) : Optional.empty());
+            proto.hasRecoveredParts() ? Optional.of(recovered) : Optional.empty());
   }
 
   private static DecryptionShare.CiphertextCompensatedDecryptionSelection convertCompensatedShare(

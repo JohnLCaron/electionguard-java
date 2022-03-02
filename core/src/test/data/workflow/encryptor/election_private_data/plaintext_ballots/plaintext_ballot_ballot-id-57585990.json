@@ -1,5 +1,5 @@
 {
-  "object_id": "ballot-id--49918020",
+  "object_id": "ballot-id-57585990",
   "style_id": "jefferson-county-ballot-style",
   "contests": [
     {
@@ -16,7 +16,7 @@
         {
           "object_id": "benjamin-franklin-selection",
           "sequence_order": "1",
-          "vote": "1",
+          "vote": "0",
           "is_placeholder_selection": "00",
           "extended_data": null
         },

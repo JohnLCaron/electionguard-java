@@ -55,10 +55,10 @@ public class Encrypt {
    */
   public static class EncryptionMediator {
     private final InternalManifest metadata;
-    private final CiphertextElectionContext context;
+    private final ElectionContext context;
     private ElementModQ previous_tracking_hash;
 
-    public EncryptionMediator(InternalManifest metadata, CiphertextElectionContext context,
+    public EncryptionMediator(InternalManifest metadata, ElectionContext context,
                               EncryptionDevice encryption_device) {
       this.metadata = metadata;
       this.context = context;
@@ -359,7 +359,7 @@ public class Encrypt {
   public static Optional<CiphertextBallot> encrypt_ballot(
           PlaintextBallot ballot,
           InternalManifest internal_manifest,
-          CiphertextElectionContext context,
+          ElectionContext context,
           ElementModQ previous_tracking_hash,
           Optional<ElementModQ> nonce,
           boolean should_verify_proofs)  {
@@ -416,7 +416,7 @@ public class Encrypt {
   static Optional<List<CiphertextBallot.Contest>> encrypt_ballot_contests(
           PlaintextBallot ballot,
           InternalManifest description,
-          CiphertextElectionContext context,
+          ElectionContext context,
           ElementModQ nonce_seed) {
 
     List<CiphertextBallot.Contest> encrypted_contests = new ArrayList<>();

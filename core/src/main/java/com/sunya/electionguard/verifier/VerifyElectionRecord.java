@@ -142,7 +142,7 @@ public class VerifyElectionRecord {
     System.out.println("------------ PlaintextTallyInputValidation ------------");
     PlaintextTallyInputValidation validator = new PlaintextTallyInputValidation(
             electionRecord.election,
-            electionRecord.encryptedTally,
+            electionRecord.ciphertextTally,
             electionRecord.context.number_of_guardians,
             electionRecord.availableGuardians.size());
     Formatter errors = new Formatter();

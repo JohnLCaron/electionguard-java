@@ -14,7 +14,7 @@ public class TestBallotBox {
   private static final ElementModQ SEED_HASH = Encrypt.createDeviceForTest("Location").get_hash();
 
   InternalManifest metadata;
-  CiphertextElectionContext context;
+  ElectionContext context;
   PlaintextBallot source;
   CiphertextBallot data;
   BallotBox ballotBox;
