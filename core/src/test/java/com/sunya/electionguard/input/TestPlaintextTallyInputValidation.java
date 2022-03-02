@@ -34,7 +34,7 @@ public class TestPlaintextTallyInputValidation {
   }
 
   ElectionAndTallies makeTally() {
-    ElectionInputBuilder ebuilder = new ElectionInputBuilder("ballot_id");
+    ManifestInputBuilder ebuilder = new ManifestInputBuilder("ballot_id");
     Manifest election = ebuilder.addContest("contest_id")
             .addSelection("selection_id", "candidate_1")
             .addSelection("selection_id2", "candidate_2")
@@ -67,7 +67,7 @@ public class TestPlaintextTallyInputValidation {
   }
 
   private boolean validateElection(Manifest election) {
-    ElectionInputValidation validator = new ElectionInputValidation(election);
+    ManifestInputValidation validator = new ManifestInputValidation(election);
     Formatter problems = new Formatter();
     boolean isValid = validator.validateElection(problems);
     if (!isValid) {

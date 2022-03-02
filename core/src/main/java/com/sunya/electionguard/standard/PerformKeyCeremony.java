@@ -8,7 +8,7 @@ import com.sunya.electionguard.GuardianRecord;
 import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.Hash;
-import com.sunya.electionguard.input.ElectionInputValidation;
+import com.sunya.electionguard.input.ManifestInputValidation;
 import com.sunya.electionguard.publish.Consumer;
 import com.sunya.electionguard.publish.PrivateData;
 import com.sunya.electionguard.publish.Publisher;
@@ -85,7 +85,7 @@ public class PerformKeyCeremony {
       // all we need from election record is the ElectionDescription.
       Consumer consumer = new Consumer(cmdLine.inputDir);
       Manifest election = consumer.readManifest();
-      ElectionInputValidation validator = new ElectionInputValidation(election);
+      ManifestInputValidation validator = new ManifestInputValidation(election);
       Formatter errors = new Formatter();
       if (!validator.validateElection(errors)) {
         System.out.printf("*** ElectionInputValidation FAILED on %s%n%s", cmdLine.inputDir, errors);

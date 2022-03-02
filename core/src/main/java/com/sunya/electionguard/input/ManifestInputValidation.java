@@ -10,7 +10,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /** Validate an election manifest, give human readable error information. */
-public class ElectionInputValidation {
+public class ManifestInputValidation {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   private final Manifest election;
@@ -18,7 +18,7 @@ public class ElectionInputValidation {
   private final Set<String> candidates;
   private final Set<String> parties;
 
-  public ElectionInputValidation(Manifest election) {
+  public ManifestInputValidation(Manifest election) {
     this.election = election;
     this.gpUnits = election.geopolitical_units().stream().map(gp -> gp.object_id()).collect(Collectors.toSet());
     this.candidates = election.candidates().stream().map(c -> c.object_id()).collect(Collectors.toSet());
@@ -55,6 +55,7 @@ public class ElectionInputValidation {
 
     Set<String> contestIds = new HashSet<>();
     Set<Integer> contestSeqs = new HashSet<>();
+    Set<String> selectionIds = new HashSet<>();
     for (Manifest.ContestDescription electionContest : election.contests()) {
       // No duplicate contest object_id
       if (contestIds.contains(electionContest.object_id())) {
@@ -72,6 +73,16 @@ public class ElectionInputValidation {
         logger.atWarning().log(msg);
       } else {
         contestSeqs.add(electionContest.sequence_order());
+      }
+
+      // No duplicate sequenceIds across contests
+      for (Manifest.SelectionDescription electionSelection : electionContest.ballot_selections()) {
+        if (selectionIds.contains(electionSelection.object_id())) {
+          String msg = String.format("Manifest.B.6 All SelectionDescription have a unique object_id within the election %s", electionContest.object_id());
+          ballotMesses.add(msg);
+          logger.atWarning().log(msg);
+        }
+        selectionIds.add(electionSelection.object_id());
       }
 
       validateContest(electionContest, ballotMesses);

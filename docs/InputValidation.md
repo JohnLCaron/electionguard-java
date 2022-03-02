@@ -1,5 +1,5 @@
 # 🗳 ElectionGuard Input Validation
-_last changed: April 10, 2021_
+_last changed: Mar 2, 2022_
 
 The election manifest and each input plaintext ballot are expected to be validated before being passed to the 
 electionguard library. Both the encrypted and decrypted tallies may also be validated against the manifest,
@@ -27,14 +27,15 @@ A specific validation is referenced as, eg, Manifest.B.5 and Ballot.A.2.1
 
 1. All ContestDescription have a unique object_id.   
 
-2. All ContestDescription have a unique sequence_order .  
+2. All ContestDescription have a unique sequence_order.  
 
-3. Within a ContestDescription, all SelectionDescription have a unique object_id. 
-4. All SelectionDescription have a unique object_id within the election (see get_shares_for_selection in decryption_share)
+3. Within a ContestDescription, all SelectionDescription have a unique object_id.
 
-5. Within a ContestDescription, all SelectionDescription have a unique sequence_order.
+4. Within a ContestDescription, all SelectionDescription have a unique sequence_order.
 
-6. Within a ContestDescription, all SelectionDescription have a unique candidate_id.
+5. Within a ContestDescription, all SelectionDescription have a unique candidate_id.
+
+6. All SelectionDescription have a unique object_id within the election (see get_shares_for_selection in decryption_share)
 
 
 ## Input Ballot

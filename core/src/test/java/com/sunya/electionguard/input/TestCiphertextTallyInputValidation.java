@@ -13,7 +13,7 @@ import static com.google.common.truth.Truth.assertThat;
 public class TestCiphertextTallyInputValidation {
 
   private boolean validateElection(Manifest election) {
-    ElectionInputValidation validator = new ElectionInputValidation(election);
+    ManifestInputValidation validator = new ManifestInputValidation(election);
     Formatter problems = new Formatter();
     boolean isValid = validator.validateElection(problems);
     if (!isValid) {
@@ -39,7 +39,7 @@ public class TestCiphertextTallyInputValidation {
 
   @Example
   public void testContestObjectId() {
-    ElectionInputBuilder ebuilder = new ElectionInputBuilder("ballot_id");
+    ManifestInputBuilder ebuilder = new ManifestInputBuilder("ballot_id");
     Manifest election = ebuilder.addContest("contest_id")
             .addSelection("selection_id", "candidate_1")
             .addSelection("selection_id2", "candidate_2")
@@ -59,7 +59,7 @@ public class TestCiphertextTallyInputValidation {
 
   @Example
   public void testContestHash() {
-    ElectionInputBuilder ebuilder = new ElectionInputBuilder("ballot_id");
+    ManifestInputBuilder ebuilder = new ManifestInputBuilder("ballot_id");
     Manifest election = ebuilder.addContest("contest_id")
             .addSelection("selection_id", "candidate_1")
             .addSelection("selection_id2", "candidate_2")
@@ -79,7 +79,7 @@ public class TestCiphertextTallyInputValidation {
 
   @Example
   public void testSelectionId() {
-    ElectionInputBuilder ebuilder = new ElectionInputBuilder("ballot_id");
+    ManifestInputBuilder ebuilder = new ManifestInputBuilder("ballot_id");
     Manifest election = ebuilder.addContest("contest_id")
             .addSelection("selection_id", "candidate_1")
             .addSelection("selection_id2", "candidate_2")
@@ -99,7 +99,7 @@ public class TestCiphertextTallyInputValidation {
 
   @Example
   public void testSelectionHash() {
-    ElectionInputBuilder ebuilder = new ElectionInputBuilder("ballot_id");
+    ManifestInputBuilder ebuilder = new ManifestInputBuilder("ballot_id");
     Manifest election = ebuilder.addContest("contest_id")
             .addSelection("selection_id", "candidate_1")
             .addSelection("selection_id2", "candidate_2")
@@ -119,7 +119,7 @@ public class TestCiphertextTallyInputValidation {
 
   @Example
   public void testDuplicateContest() {
-    ElectionInputBuilder ebuilder = new ElectionInputBuilder("ballot_id");
+    ManifestInputBuilder ebuilder = new ManifestInputBuilder("ballot_id");
     Manifest election = ebuilder.addContest("contest_id")
             .addSelection("selection_id", "candidate_1")
             .addSelection("selection_id2", "candidate_2")
@@ -139,7 +139,7 @@ public class TestCiphertextTallyInputValidation {
 
   @Example
   public void testDuplicateSelection() {
-    ElectionInputBuilder ebuilder = new ElectionInputBuilder("ballot_id");
+    ManifestInputBuilder ebuilder = new ManifestInputBuilder("ballot_id");
     Manifest election = ebuilder.addContest("contest_id")
             .addSelection("selection_id", "candidate_1")
             .addSelection("selection_id2", "candidate_2")
@@ -161,7 +161,7 @@ public class TestCiphertextTallyInputValidation {
 
   @Example
   public void testDefaultOk() {
-    ElectionInputBuilder ebuilder = new ElectionInputBuilder("ballot_id");
+    ManifestInputBuilder ebuilder = new ManifestInputBuilder("ballot_id");
     Manifest election = ebuilder.addContest("contest_id")
             .addSelection("selection_id", "candidate_1")
             .addSelection("selection_id2", "candidate_2")

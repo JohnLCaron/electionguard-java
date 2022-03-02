@@ -8,19 +8,19 @@ import java.util.Formatter;
 
 import static com.google.common.truth.Truth.assertThat;
 
-/** Tester for {@link ElectionInputValidation */
-public class TestElectionInputValidation {
+/** Tester for {@link ManifestInputValidation */
+public class TestManifestInputValidation {
 
   @Example
   public void testDefaults() {
-    ElectionInputBuilder ebuilder = new ElectionInputBuilder("election_scope_id");
+    ManifestInputBuilder ebuilder = new ManifestInputBuilder("test_manifest");
     Manifest election = ebuilder.addContest("contest_id")
             .addSelection("selection_id", "candidate_1")
             .addSelection("selection_id2", "candidate_2")
             .done()
             .build();
 
-    ElectionInputValidation validator = new ElectionInputValidation(election);
+    ManifestInputValidation validator = new ManifestInputValidation(election);
     Formatter problems = new Formatter();
     boolean isValid = validator.validateElection(problems);
     System.out.printf("Problems=%n%s", problems);
@@ -30,7 +30,7 @@ public class TestElectionInputValidation {
   @Example
   public void testBallotStyleBadGpUnit() {
     Manifest.BallotStyle bs = new Manifest.BallotStyle("bad", ImmutableList.of("badGP"), null, null);
-    ElectionInputBuilder ebuilder = new ElectionInputBuilder("election_scope_id")
+    ManifestInputBuilder ebuilder = new ManifestInputBuilder("election_scope_id")
             .setBallotStyle(bs);
     Manifest election = ebuilder.addContest("contest_id")
             .addSelection("selection_id", "candidate_1")
@@ -38,7 +38,7 @@ public class TestElectionInputValidation {
             .done()
             .build();
 
-    ElectionInputValidation validator = new ElectionInputValidation(election);
+    ManifestInputValidation validator = new ManifestInputValidation(election);
     Formatter problems = new Formatter();
     boolean isValid = validator.validateElection(problems);
     System.out.printf("Problems=%n%s", problems);
@@ -48,7 +48,7 @@ public class TestElectionInputValidation {
 
   @Example
   public void testDuplicateContestId() {
-    ElectionInputBuilder ebuilder = new ElectionInputBuilder("election_scope_id");
+    ManifestInputBuilder ebuilder = new ManifestInputBuilder("election_scope_id");
     Manifest election = ebuilder.addContest("contest_id")
             .addSelection("selection_id", "candidate_1")
             .addSelection("selection_id2", "candidate_2")
@@ -59,7 +59,7 @@ public class TestElectionInputValidation {
             .done()
             .build();
 
-    ElectionInputValidation validator = new ElectionInputValidation(election);
+    ManifestInputValidation validator = new ManifestInputValidation(election);
     Formatter problems = new Formatter();
     boolean isValid = validator.validateElection(problems);
     System.out.printf("Problems=%n%s", problems);
@@ -69,7 +69,7 @@ public class TestElectionInputValidation {
 
   @Example
   public void testContestGpunit() {
-    ElectionInputBuilder ebuilder = new ElectionInputBuilder("election_scope_id")
+    ManifestInputBuilder ebuilder = new ManifestInputBuilder("election_scope_id")
             .setGpunit("district9");
     Manifest election = ebuilder.addContest("contest_id")
             .setGpunit("district1")
@@ -78,7 +78,7 @@ public class TestElectionInputValidation {
             .done()
             .build();
 
-    ElectionInputValidation validator = new ElectionInputValidation(election);
+    ManifestInputValidation validator = new ManifestInputValidation(election);
     Formatter problems = new Formatter();
     boolean isValid = validator.validateElection(problems);
     System.out.printf("Problems=%n%s", problems);
@@ -88,14 +88,14 @@ public class TestElectionInputValidation {
 
   @Example
   public void testDuplicateSelectionId() {
-    ElectionInputBuilder ebuilder = new ElectionInputBuilder("election_scope_id");
+    ManifestInputBuilder ebuilder = new ManifestInputBuilder("election_scope_id");
     Manifest election = ebuilder.addContest("contest_id")
             .addSelection("selection_id", "candidate_1")
             .addSelection("selection_id", "candidate_2")
             .done()
             .build();
 
-    ElectionInputValidation validator = new ElectionInputValidation(election);
+    ManifestInputValidation validator = new ManifestInputValidation(election);
     Formatter problems = new Formatter();
     boolean isValid = validator.validateElection(problems);
     System.out.printf("Problems=%n%s", problems);
@@ -104,15 +104,36 @@ public class TestElectionInputValidation {
   }
 
   @Example
+  public void testDuplicateSelectionIdGlobal() {
+    ManifestInputBuilder ebuilder = new ManifestInputBuilder("election_scope_id");
+    Manifest election = ebuilder.addContest("contest_id")
+            .addSelection("selection_id1", "candidate_1")
+            .addSelection("selection_id2", "candidate_2")
+            .done()
+            .addContest("contest_id2")
+            .addSelection("selection_id1", "candidate_1")
+            .addSelection("selection_id3", "candidate_2")
+            .done()
+            .build();
+
+    ManifestInputValidation validator = new ManifestInputValidation(election);
+    Formatter problems = new Formatter();
+    boolean isValid = validator.validateElection(problems);
+    System.out.printf("Problems=%n%s", problems);
+    assertThat(isValid).isFalse();
+    assertThat(problems.toString()).contains("Manifest.B.6");
+  }
+
+  @Example
   public void testDuplicateCandidateId() {
-    ElectionInputBuilder ebuilder = new ElectionInputBuilder("election_scope_id");
+    ManifestInputBuilder ebuilder = new ManifestInputBuilder("election_scope_id");
     Manifest election = ebuilder.addContest("contest_id")
             .addSelection("selection_id", "candidate_1")
             .addSelection("selection_id2", "candidate_1")
             .done()
             .build();
 
-    ElectionInputValidation validator = new ElectionInputValidation(election);
+    ManifestInputValidation validator = new ManifestInputValidation(election);
     Formatter problems = new Formatter();
     boolean isValid = validator.validateElection(problems);
     System.out.printf("Problems=%n%s", problems);
@@ -122,14 +143,14 @@ public class TestElectionInputValidation {
 
   @Example
   public void testBadCandidateId() {
-    ElectionInputBuilder ebuilder = new ElectionInputBuilder("election_scope_id");
+    ManifestInputBuilder ebuilder = new ManifestInputBuilder("election_scope_id");
     Manifest election = ebuilder.addContest("contest_id")
             .addSelection("selection_id", "candidate_1")
             .addSelection("selection_id2", "manchurian")
             .done()
             .build();
 
-    ElectionInputValidation validator = new ElectionInputValidation(election);
+    ManifestInputValidation validator = new ManifestInputValidation(election);
     Formatter problems = new Formatter();
     boolean isValid = validator.validateElection(problems);
     System.out.printf("Problems=%n%s", problems);

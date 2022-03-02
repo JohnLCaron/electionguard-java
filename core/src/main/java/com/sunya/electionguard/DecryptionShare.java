@@ -233,7 +233,7 @@ public class DecryptionShare {
           CiphertextDecryptionSelection decryption) {
   }
 
-  static Map<String, KeyAndSelection> get_tally_shares_for_selection2(
+  static Map<String, KeyAndSelection> get_tally_shares_for_selection(
           String selection_id,
           Map<String, DecryptionShare> shares) { // Map(AVAILABLE_GUARDIAN_ID, TallyDecryptionShare)
 
