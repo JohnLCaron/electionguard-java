@@ -11,6 +11,8 @@ import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import com.sunya.electionguard.AvailableGuardian;
 import com.sunya.electionguard.BallotBox;
+import com.sunya.electionguard.ElectionConstants;
+import com.sunya.electionguard.ElectionContext;
 import com.sunya.electionguard.Encrypt;
 import com.sunya.electionguard.GuardianRecord;
 import com.sunya.electionguard.Manifest;
@@ -48,6 +50,10 @@ class GsonTypeAdapters {
             .registerTypeAdapter(LagrangeCoefficientsPojo.class, new LagrangeCoefficientsDeserializer())
             .registerTypeAdapter(CiphertextTally.class, new CiphertextTallySerializer())
             .registerTypeAdapter(CiphertextTally.class, new CiphertextTallyDeserializer())
+            .registerTypeAdapter(ElectionConstants.class, new ElectionConstantsSerializer())
+            .registerTypeAdapter(ElectionConstants.class, new ElectionConstantsDeserializer())
+            .registerTypeAdapter(ElectionContext.class, new ElectionContextSerializer())
+            .registerTypeAdapter(ElectionContext.class, new ElectionContextDeserializer())
             .registerTypeAdapter(Encrypt.EncryptionDevice.class, new EncryptionDeviceSerializer())
             .registerTypeAdapter(Encrypt.EncryptionDevice.class, new EncryptionDeviceDeserializer())
             .registerTypeAdapter(Group.ElementModQ.class, new ModQDeserializer())
@@ -237,6 +243,37 @@ class GsonTypeAdapters {
     public CiphertextTally deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
             throws JsonParseException {
       return CiphertextTallyPojo.deserialize(json);
+    }
+  }
+
+  private static class ElectionConstantsSerializer implements JsonSerializer<ElectionConstants> {
+    @Override
+    public JsonElement serialize(ElectionConstants src, Type typeOfSrc, JsonSerializationContext context) {
+      return ElectionConstantsPojo.serialize(src);
+    }
+  }
+
+  private static class ElectionConstantsDeserializer implements JsonDeserializer<ElectionConstants> {
+    @Override
+    public ElectionConstants deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+            throws JsonParseException {
+      return ElectionConstantsPojo.deserialize(json);
+    }
+  }
+
+
+  private static class ElectionContextSerializer implements JsonSerializer<ElectionContext> {
+    @Override
+    public JsonElement serialize(ElectionContext src, Type typeOfSrc, JsonSerializationContext context) {
+      return ElectionContextPojo.serialize(src);
+    }
+  }
+
+  private static class ElectionContextDeserializer implements JsonDeserializer<ElectionContext> {
+    @Override
+    public ElectionContext deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+            throws JsonParseException {
+      return ElectionContextPojo.deserialize(json);
     }
   }
 

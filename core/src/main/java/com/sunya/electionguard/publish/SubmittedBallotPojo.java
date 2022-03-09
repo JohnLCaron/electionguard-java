@@ -179,8 +179,8 @@ public class SubmittedBallotPojo {
   private static SubmittedBallotPojo convertSubmittedBallot(SubmittedBallot org) {
     SubmittedBallotPojo pojo = new SubmittedBallotPojo();
     pojo.object_id = org.object_id();
-    pojo.style_id = org.style_id;
-    pojo.manifest_hash = org.manifest_hash;
+    pojo.style_id = org.ballotStyleId;
+    pojo.manifest_hash = org.manifestHash;
     pojo.code_seed = org.code_seed;
     pojo.contests = ConvertPojos.convertList(org.contests, SubmittedBallotPojo::convertContest);
     pojo.code = org.code;
@@ -195,10 +195,10 @@ public class SubmittedBallotPojo {
     CiphertextBallotContestPojo pojo = new CiphertextBallotContestPojo();
     pojo.object_id = contest.object_id();
     pojo.sequence_order = contest.sequence_order();
-    pojo.description_hash = contest.contest_hash;
-    pojo.ballot_selections = ConvertPojos.convertList(contest.ballot_selections, SubmittedBallotPojo::convertSelection);
+    pojo.description_hash = contest.contestHash;
+    pojo.ballot_selections = ConvertPojos.convertList(contest.selections, SubmittedBallotPojo::convertSelection);
     pojo.crypto_hash = contest.crypto_hash;
-    pojo.ciphertext_accumulation = convertCiphertext(contest.encrypted_total);
+    pojo.ciphertext_accumulation = convertCiphertext(contest.ciphertextAccumulation);
     pojo.nonce = contest.nonce.orElse(null);
     contest.proof.ifPresent(proof -> pojo.proof = convertConstantProof(proof));
     return pojo;

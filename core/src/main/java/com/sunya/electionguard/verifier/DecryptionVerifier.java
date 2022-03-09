@@ -46,8 +46,8 @@ public class DecryptionVerifier {
     AtomicBoolean valid = new AtomicBoolean(true);
     try (Stream<PlaintextTally> tallies = talliesIterable.iterator().stream()) {
       tallies.forEach(spoiled_tally ->  {
-        if (show) System.out.printf(" Spoiled tally %s %n", spoiled_tally.object_id);
-        boolean ok = this.make_all_contest_verification(spoiled_tally.object_id, spoiled_tally.contests);
+        if (show) System.out.printf(" Spoiled tally %s %n", spoiled_tally.tallyId);
+        boolean ok = this.make_all_contest_verification(spoiled_tally.tallyId, spoiled_tally.contests);
         valid.compareAndSet(true, ok); // AND
       });
     }
@@ -62,7 +62,7 @@ public class DecryptionVerifier {
 
   /** Verify 8,9 for the election tally. */
   boolean verify_election_tally() {
-    boolean error = !this.make_all_contest_verification(this.decryptedTally.object_id, this.decryptedTally.contests);
+    boolean error = !this.make_all_contest_verification(this.decryptedTally.tallyId, this.decryptedTally.contests);
     if (error) {
       System.out.printf(" ***Decryptions of cast ballots failure. %n");
     } else {
@@ -76,7 +76,7 @@ public class DecryptionVerifier {
     for (PlaintextTally.Contest contest : contests.values()) {
       DecryptionContestVerifier tcv = new DecryptionContestVerifier(contest);
       if (!tcv.verify_a_contest()) {
-        System.out.printf(" Contest %s decryption failure for %s. %n", contest.object_id(), name);
+        System.out.printf(" Contest %s decryption failure for %s. %n", contest.contestId(), name);
         error = true;
       }
     }
@@ -93,7 +93,7 @@ public class DecryptionVerifier {
     boolean verify_a_contest() {
       boolean error = false;
       for (PlaintextTally.Selection selection : this.contest.selections().values()) {
-        String id = contest.object_id() + "-" + selection.object_id();
+        String id = contest.contestId() + "-" + selection.selectionId();
         DecryptionSelectionVerifier tsv = new DecryptionSelectionVerifier(id, selection);
         if (!tsv.verify_a_selection()) {
           System.out.printf("  Selection %s decryption failure.%n", id);
@@ -114,7 +114,7 @@ public class DecryptionVerifier {
     DecryptionSelectionVerifier(String id, PlaintextTally.Selection selection) {
       this.id = id; // contest/selection
       this.selection = selection;
-      this.selection_id = selection.object_id();
+      this.selection_id = selection.selectionId();
       this.pad = selection.message().pad();
       this.data = selection.message().data();
     }
@@ -151,20 +151,20 @@ public class DecryptionVerifier {
     boolean verify_all_shares() {
       boolean error = false;
       for (CiphertextDecryptionSelection share : this.shares){
-        ElementModP curr_public_key = this.public_keys.get(share.guardian_id());
+        ElementModP curr_public_key = this.public_keys.get(share.guardianId());
         if (share.proof().isPresent()) {
           if (!this.verify_share_guardian_present(share, curr_public_key)) {
             error = true;
-            System.out.printf("8. ShareVerifier verify present Guardian %s failed for %s.%n", share.guardian_id(), id);
+            System.out.printf("8. ShareVerifier verify present Guardian %s failed for %s.%n", share.guardianId(), id);
           }
-        } else if (share.recovered_parts().isPresent()) {
+        } else if (share.recoveredParts().isPresent()) {
           if (!this.verify_share_guardian_missing(share)) {
             error = true;
-            System.out.printf("9. ShareVerifier verify missing Guardian %s failed for %s.%n", share.guardian_id(), id);
+            System.out.printf("9. ShareVerifier verify missing Guardian %s failed for %s.%n", share.guardianId(), id);
           }
         } else {
           error = true;
-          System.out.printf("ShareVerifier Guardian %s has no proof or recovery for %s.%n", share.guardian_id(), id);
+          System.out.printf("ShareVerifier Guardian %s has no proof or recovery for %s.%n", share.guardianId(), id);
         }
       }
       return !error;
@@ -182,8 +182,8 @@ public class DecryptionVerifier {
       boolean error = false;
 
       // get values
-      Preconditions.checkArgument(share.recovered_parts().isPresent());
-      for (CiphertextCompensatedDecryptionSelection compSelection : share.recovered_parts().get().values()) {
+      Preconditions.checkArgument(share.recoveredParts().isPresent());
+      for (CiphertextCompensatedDecryptionSelection compSelection : share.recoveredParts().get().values()) {
         String missing_guardian_id = compSelection.missing_guardian_id();
         ChaumPedersen.ChaumPedersenProof proof = compSelection.proof();
         ElementModP pad = proof.pad;
@@ -191,7 +191,7 @@ public class DecryptionVerifier {
         ElementModQ response = proof.response;
         ElementModQ challenge = proof.challenge;
         ElementModP partial_decryption = compSelection.share();
-        ElementModP recovery_key = compSelection.recovery_key();
+        ElementModP recovery_key = compSelection.recoveryKey();
 
         // 9.A check if the response vi is in the set Zq
         if (!response.is_in_bounds()) {
@@ -242,7 +242,7 @@ public class DecryptionVerifier {
     // (E) The equation A v i mod p = (b i M i c i ) mod p is satisfied.
     private boolean verify_share_guardian_present(CiphertextDecryptionSelection share, ElementModP public_key) {
       boolean error = false;
-      String guardian_id = share.guardian_id();
+      String guardian_id = share.guardianId();
 
       // get values
       Preconditions.checkArgument(share.proof().isPresent());

@@ -65,7 +65,7 @@ public class TestEncryptHypothesisProperties extends TestProperties {
     assertThat(everything.metadata.contests.size() > 0).isTrue();
 
     // Generate a valid encryption of zero
-    Optional<ElGamal.Ciphertext> encrypted_zero = ElGamal.elgamal_encrypt(0, zero_nonce, context.elgamal_public_key);
+    Optional<ElGamal.Ciphertext> encrypted_zero = ElGamal.elgamal_encrypt(0, zero_nonce, context.jointPublicKey);
     assertThat(encrypted_zero).isPresent();
 
     List<CiphertextBallot> encrypted_ballots = new ArrayList<>();
@@ -85,8 +85,8 @@ public class TestEncryptHypothesisProperties extends TestProperties {
       Optional<PlaintextBallot> decrypted_ballot = DecryptWithSecrets.decrypt_ballot_with_secret(
               encrypted_ballot,
               everything.metadata,
-              context.crypto_extended_base_hash,
-              context.elgamal_public_key,
+              context.cryptoExtendedBaseHash,
+              context.jointPublicKey,
                secret_key,
               false, true);
       assertThat(decrypted_ballot).isPresent();
@@ -106,17 +106,17 @@ public class TestEncryptHypothesisProperties extends TestProperties {
     for (ContestWithPlaceholders contestp : everything.metadata.contests.values()) {
       Manifest.ContestDescription contest = contestp.contest;
       // Sanity check the generated data
-      assertThat(contest.ballot_selections()).isNotEmpty();
+      assertThat(contest.selections()).isNotEmpty();
       assertThat(contestp.placeholder_selections).isNotEmpty();
 
-      List<Integer> decrypted_selection_tallies = contest.ballot_selections().stream()
-              .map(s -> decrypted_tallies.get(s.object_id())).toList();
+      List<Integer> decrypted_selection_tallies = contest.selections().stream()
+              .map(s -> decrypted_tallies.get(s.selectionId())).toList();
 
       List<Integer> decrypted_placeholder_tallies = contestp.placeholder_selections.stream()
-              .map(p -> decrypted_tallies.get(p.object_id())).toList();
+              .map(p -> decrypted_tallies.get(p.selectionId())).toList();
 
-      List<Integer> plaintext_tally_values = contest.ballot_selections().stream()
-              .map(s -> plaintext_tallies.get(s.object_id())).toList();
+      List<Integer> plaintext_tally_values = contest.selections().stream()
+              .map(s -> plaintext_tallies.get(s.selectionId())).toList();
 
       // verify the plaintext tallies match the decrypted tallies
       assertThat(decrypted_selection_tallies).isEqualTo(plaintext_tally_values);
@@ -124,7 +124,7 @@ public class TestEncryptHypothesisProperties extends TestProperties {
       // validate the right number of selections including placeholders across all ballots
       Integer total = decrypted_selection_tallies.stream().mapToInt(Integer::intValue).sum() +
                       decrypted_placeholder_tallies.stream().mapToInt(Integer::intValue).sum();
-      assertThat(contest.number_elected() * num_ballots).isEqualTo(total);
+      assertThat(contest.numberElected() * num_ballots).isEqualTo(total);
     }
   }
 
@@ -149,7 +149,7 @@ public class TestEncryptHypothesisProperties extends TestProperties {
 
     for (CiphertextBallot ballot : ballots) {
       for (CiphertextBallot.Contest contest : ballot.contests) {
-        for (CiphertextBallot.Selection selection : contest.ballot_selections) {
+        for (CiphertextBallot.Selection selection : contest.selections) {
           String desc_id = selection.object_id(); // this should be the same as in the PlaintextBallot!
           if (!tally.containsKey(desc_id)) {
             tally.put(desc_id, encrypted_zero);

@@ -137,7 +137,7 @@ public class PlaintextTallyTable extends JPanel {
     }
 
     public String getId() {
-      return tally.object_id;
+      return tally.tallyId;
     }
   }
 
@@ -150,7 +150,7 @@ public class PlaintextTallyTable extends JPanel {
       this.contest = contest;
     }
     public String getContestId() {
-      return contest.object_id();
+      return contest.contestId();
     }
   }
 
@@ -164,7 +164,7 @@ public class PlaintextTallyTable extends JPanel {
     }
 
     public String getSelectionId() {
-      return selection.object_id();
+      return selection.selectionId();
     }
 
     public int getTally() {

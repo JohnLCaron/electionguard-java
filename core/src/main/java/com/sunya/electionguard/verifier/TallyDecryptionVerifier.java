@@ -43,18 +43,18 @@ public class TallyDecryptionVerifier {
     Preconditions.checkNotNull(decryptedTally);
 
     for (PlaintextTally.Contest contest : decryptedTally.contests.values()) {
-      InternalManifest.ContestWithPlaceholders manifestContest = manifest.getContestById(contest.object_id()).orElse(null);
+      InternalManifest.ContestWithPlaceholders manifestContest = manifest.getContestById(contest.contestId()).orElse(null);
       if (manifestContest == null) {
-        System.out.printf(" 11.C Tally Decryption contains contest (%s) not in manifest%n", contest.object_id());
+        System.out.printf(" 11.C Tally Decryption contains contest (%s) not in manifest%n", contest.contestId());
         error = true;
       }
       for (PlaintextTally.Selection selection : contest.selections().values()) {
-        if (manifestContest != null && manifestContest.getSelectionById(selection.object_id()).isEmpty()) {
+        if (manifestContest != null && manifestContest.getSelectionById(selection.selectionId()).isEmpty()) {
           System.out.printf(" 11.C Tally Decryption contest (%s) contains selection (%s) not in manifest%n",
-                  contest.object_id(), selection.object_id());
+                  contest.contestId(), selection.selectionId());
           error = true;
         }
-        String key = contest.object_id() + "." + selection.object_id();
+        String key = contest.contestId() + "." + selection.selectionId();
         List<ElementModP> partialDecryptions = selection.shares().stream()
                 .map(s -> s.share())
                 .toList();

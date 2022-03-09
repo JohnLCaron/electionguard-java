@@ -64,8 +64,8 @@ public class ElectionRecordToProto {
 
   static ElectionRecordProto.AvailableGuardian convertAvailableGuardian(AvailableGuardian guardian) {
     ElectionRecordProto.AvailableGuardian.Builder builder = ElectionRecordProto.AvailableGuardian.newBuilder();
-    builder.setGuardianId(guardian.guardian_id());
-    builder.setXCoordinate(guardian.sequence());
+    builder.setGuardianId(guardian.guardianId());
+    builder.setXCoordinate(guardian.xCoordinate());
     builder.setLagrangeCoordinate(convertElementModQ(guardian.lagrangeCoordinate()));
     return builder.build();
   }
@@ -75,8 +75,8 @@ public class ElectionRecordToProto {
     if (constants.name != null) {
       builder.setName(constants.name);
     }
-    builder.setLargePrime(ByteString.copyFrom(constants.large_prime.toByteArray()));
-    builder.setSmallPrime(ByteString.copyFrom(constants.small_prime.toByteArray()));
+    builder.setLargePrime(ByteString.copyFrom(constants.largePrime.toByteArray()));
+    builder.setSmallPrime(ByteString.copyFrom(constants.smallPrime.toByteArray()));
     builder.setCofactor(ByteString.copyFrom(constants.cofactor.toByteArray()));
     builder.setGenerator(ByteString.copyFrom(constants.generator.toByteArray()));
     return builder.build();
@@ -84,13 +84,13 @@ public class ElectionRecordToProto {
 
   static ElectionRecordProto.ElectionContext convertContext(ElectionContext context) {
     ElectionRecordProto.ElectionContext.Builder builder = ElectionRecordProto.ElectionContext.newBuilder();
-    builder.setNumberOfGuardians(context.number_of_guardians);
+    builder.setNumberOfGuardians(context.numberOfGuardians);
     builder.setQuorum(context.quorum);
-    builder.setJointPublicKey(convertElementModP(context.elgamal_public_key));
-    builder.setManifestHash(convertElementModQ(context.manifest_hash));
-    builder.setCryptoBaseHash(convertElementModQ(context.crypto_base_hash));
-    builder.setCryptoExtendedBaseHash(convertElementModQ(context.crypto_extended_base_hash));
-    builder.setCommitmentHash(convertElementModQ(context.commitment_hash));
+    builder.setJointPublicKey(convertElementModP(context.jointPublicKey));
+    builder.setManifestHash(convertElementModQ(context.manifestHash));
+    builder.setCryptoBaseHash(convertElementModQ(context.cryptoBaseHash));
+    builder.setCryptoExtendedBaseHash(convertElementModQ(context.cryptoExtendedBaseHash));
+    builder.setCommitmentHash(convertElementModQ(context.commitmentHash));
     if (context.extended_data != null && !context.extended_data.isEmpty()) {
       builder.putAllExtendedData(context.extended_data);
     }
@@ -99,9 +99,9 @@ public class ElectionRecordToProto {
 
   static ElectionRecordProto.EncryptionDevice convertDevice(Encrypt.EncryptionDevice device) {
     ElectionRecordProto.EncryptionDevice.Builder builder = ElectionRecordProto.EncryptionDevice.newBuilder();
-    builder.setDeviceId(device.device_id());
-    builder.setSessionId(device.session_id());
-    builder.setLaunchCode(device.launch_code());
+    builder.setDeviceId(device.deviceId());
+    builder.setSessionId(device.sessionId());
+    builder.setLaunchCode(device.launchCode());
     builder.setLocation(device.location());
     return builder.build();
   }

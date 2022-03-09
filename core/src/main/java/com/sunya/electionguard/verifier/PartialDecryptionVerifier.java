@@ -35,7 +35,7 @@ public class PartialDecryptionVerifier {
     this.electionRecord = electionRecord;
     this.tally = Preconditions.checkNotNull(decryptedTally);
     this.lagrange_coefficients = electionRecord.availableGuardians.stream().collect(Collectors.toMap(
-            g -> g.guardian_id(), g -> g.lagrangeCoordinate()));
+            g -> g.guardianId(), g -> g.lagrangeCoordinate()));
   }
 
   /** Verify 10.A for available guardians, if there are missing guardians. */
@@ -66,11 +66,11 @@ public class PartialDecryptionVerifier {
     for (AvailableGuardian guardian : guardians) {
       List<Integer> seq_others = new ArrayList<>();
       for (AvailableGuardian other : guardians) {
-        if (!other.guardian_id().equals(guardian.guardian_id())) {
-          seq_others.add(other.sequence());
+        if (!other.guardianId().equals(guardian.guardianId())) {
+          seq_others.add(other.xCoordinate());
         }
       }
-      error |= !this.verify_lagrange_coefficient(guardian.sequence(), seq_others, guardian.lagrangeCoordinate());
+      error |= !this.verify_lagrange_coefficient(guardian.xCoordinate(), seq_others, guardian.lagrangeCoordinate());
     }
 
     if (error) {
@@ -84,10 +84,10 @@ public class PartialDecryptionVerifier {
   //     (∏ j∈(U−{l}) j) mod q = (w_l ⋅ (∏ j∈(U−{l}) (j − l) )) mod q
   boolean verify_lagrange_coefficient(int coordinate, List<Integer> degrees, ElementModQ lagrange) {
     int product = degrees.stream().reduce(1, (a, b)  -> a * b);
-    ElementModQ numerator = Group.int_to_q_unchecked(BigInteger.valueOf(product).mod(Group.getPrimes().small_prime));
+    ElementModQ numerator = Group.int_to_q_unchecked(BigInteger.valueOf(product).mod(Group.getPrimes().smallPrime));
     List<Integer> diff = degrees.stream().map(degree -> degree - coordinate).toList();
     int productDiff = diff.stream().reduce(1, (a, b)  -> a * b);
-    ElementModQ denominator = Group.int_to_q_unchecked(BigInteger.valueOf(productDiff).mod(Group.getPrimes().small_prime));
+    ElementModQ denominator = Group.int_to_q_unchecked(BigInteger.valueOf(productDiff).mod(Group.getPrimes().smallPrime));
     return numerator.equals(Group.mult_q(lagrange, denominator));
   }
 
@@ -112,7 +112,7 @@ public class PartialDecryptionVerifier {
     boolean verify_a_contest() {
       boolean error = false;
       for (PlaintextTally.Selection selection : this.contest.selections().values()) {
-        String id = contest.object_id() + "-" + selection.object_id();
+        String id = contest.contestId() + "-" + selection.selectionId();
         DecryptionSelectionVerifier tsv = new DecryptionSelectionVerifier(id, selection);
         if (!tsv.verify_a_selection()) {
           System.out.printf("  Selection %s decryption failure.%n", id);
@@ -133,7 +133,7 @@ public class PartialDecryptionVerifier {
     DecryptionSelectionVerifier(String id, PlaintextTally.Selection selection) {
       this.id = id; // contest/selection
       this.selection = selection;
-      this.selection_id = selection.object_id();
+      this.selection_id = selection.selectionId();
       this.pad = selection.message().pad();
       this.data = selection.message().data();
     }
@@ -169,11 +169,11 @@ public class PartialDecryptionVerifier {
     boolean verify_all_shares() {
       boolean error = false;
       for (CiphertextDecryptionSelection share : this.shares) {
-        if (share.recovered_parts().isPresent()) {
+        if (share.recoveredParts().isPresent()) {
           if (!this.verify_share_replacement_lagrange(share)) {
             error = true;
             System.out.printf(" 10. ShareVerifier verify replacement lagrangian Guardian %s failed for %s.%n",
-                    share.guardian_id(), id);
+                    share.guardianId(), id);
           }
         }
       }
@@ -184,15 +184,15 @@ public class PartialDecryptionVerifier {
     // in each contest in the ballot coding file for each missing trustee T_i as
     //    M_i = ∏ l∈U (M_i,l)^w_l mod p
     private boolean verify_share_replacement_lagrange(CiphertextDecryptionSelection share) {
-      Preconditions.checkArgument(share.recovered_parts().isPresent());
+      Preconditions.checkArgument(share.recoveredParts().isPresent());
       ElementModP M_i = share.share(); // M_i in the spec, i is missing
 
       List<ElementModP> partial = new ArrayList<>();
-      for (CiphertextCompensatedDecryptionSelection compShare : share.recovered_parts().get().values()) {
+      for (CiphertextCompensatedDecryptionSelection compShare : share.recoveredParts().get().values()) {
         ElementModP M_il = compShare.share(); // M_i,l in the spec
-        ElementModQ lagrange = lagrange_coefficients.get(compShare.guardian_id());
+        ElementModQ lagrange = lagrange_coefficients.get(compShare.guardianId());
         if (lagrange == null) {
-          throw new IllegalStateException("Cant find lagrange coefficient for " + compShare.guardian_id());
+          throw new IllegalStateException("Cant find lagrange coefficient for " + compShare.guardianId());
         } else {
           partial.add(Group.int_to_p_unchecked(Group.pow_pi(M_il.getBigInt(), lagrange.getBigInt())));
         }

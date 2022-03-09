@@ -34,22 +34,22 @@ public class TestUtils {
 
   /** Generates an arbitrary element from [1,Q). from electionguardtest.group. */
   static ElementModQ elements_mod_q_no_zero() {
-    return Group.int_to_q_unchecked(Utils.randbetween(BigInteger.ONE, Group.getPrimes().small_prime));
+    return Group.int_to_q_unchecked(Utils.randbetween(BigInteger.ONE, Group.getPrimes().smallPrime));
   }
 
   /** Generates an arbitrary element from [0,Q). from electionguardtest.group. */
   public static ElementModQ elements_mod_q() {
-    return Group.int_to_q_unchecked(Utils.randbelow(Group.getPrimes().small_prime));
+    return Group.int_to_q_unchecked(Utils.randbelow(Group.getPrimes().smallPrime));
   }
 
   /** Generates an arbitrary element from [1,P). from electionguardtest.group. */
   static ElementModP elements_mod_p_no_zero() {
-    return Group.int_to_p_unchecked(Utils.randbetween(BigInteger.ONE, Group.getPrimes().large_prime));
+    return Group.int_to_p_unchecked(Utils.randbetween(BigInteger.ONE, Group.getPrimes().largePrime));
   }
 
   /** Generates an arbitrary element from [0,Q). from electionguardtest.group. */
   public static ElementModP elements_mod_p() {
-    return Group.int_to_p_unchecked(Utils.randbelow(Group.getPrimes().large_prime));
+    return Group.int_to_p_unchecked(Utils.randbelow(Group.getPrimes().largePrime));
   }
 
   /** Generates a fake ChaumPedersenProof. */

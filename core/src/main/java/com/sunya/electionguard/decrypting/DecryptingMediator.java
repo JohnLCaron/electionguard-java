@@ -153,7 +153,7 @@ public class DecryptingMediator {
     compute_lagrange_coefficients();
 
     // If all Guardians are present decrypt the tally
-    if (this.available_guardians.size() == this.context.number_of_guardians) {
+    if (this.available_guardians.size() == this.context.numberOfGuardians) {
       return DecryptWithShares.decrypt_tally(
               this.ciphertext_tally,
               this.tally_shares,
@@ -162,7 +162,7 @@ public class DecryptingMediator {
 
     // If guardians are missing, compensate
     this.compute_missing_shares_for_tally();
-    if (this.tally_shares.size() != this.context.number_of_guardians) {
+    if (this.tally_shares.size() != this.context.numberOfGuardians) {
       logger.atWarning().log("get plaintext tally failed with share length mismatch");
       return Optional.empty();
     }
@@ -277,12 +277,12 @@ public class DecryptingMediator {
     }
 
     // If guardians are missing, for each ballot compute compensated ballot_shares, add to this.ballot_shares
-    if (this.available_guardians.size() < this.context.number_of_guardians) {
+    if (this.available_guardians.size() < this.context.numberOfGuardians) {
       for (SubmittedBallot ballot : this.ciphertext_ballots) { // LOOK running through ballots
-        if (this.count_ballot_shares(ballot.object_id()) < this.context.number_of_guardians) {
+        if (this.count_ballot_shares(ballot.object_id()) < this.context.numberOfGuardians) {
           this.compute_missing_shares_for_ballot(ballot);
         }
-        if (this.count_ballot_shares(ballot.object_id()) != this.context.number_of_guardians) {
+        if (this.count_ballot_shares(ballot.object_id()) != this.context.numberOfGuardians) {
           logger.atWarning().log("decrypt_spoiled_ballots failed with share length mismatch");
           return false;
         }

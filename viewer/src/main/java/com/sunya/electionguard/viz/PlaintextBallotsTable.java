@@ -111,7 +111,7 @@ public class PlaintextBallotsTable extends JPanel {
 
   void setContest(ContestBean contestBean) {
     java.util.List<SelectionBean> beanList = new ArrayList<>();
-    for (PlaintextBallot.Selection s : contestBean.contest.ballot_selections) {
+    for (PlaintextBallot.Selection s : contestBean.contest.selections) {
       beanList.add(new SelectionBean(s));
     }
     selectionTable.setBeans(beanList);
@@ -140,7 +140,7 @@ public class PlaintextBallotsTable extends JPanel {
     }
 
     public String getStyle() {
-      return ballot.style_id;
+      return ballot.ballotStyleId;
     }
   }
 
@@ -154,7 +154,7 @@ public class PlaintextBallotsTable extends JPanel {
     }
 
     public String getContestId() {
-      return contest.contest_id;
+      return contest.contestId;
     }
   }
 
@@ -168,11 +168,11 @@ public class PlaintextBallotsTable extends JPanel {
     }
 
     public String getSelectionId() {
-      return selection.selection_id;
+      return selection.selectionId;
     }
 
     public boolean isPlaceHolder() {
-      return selection.is_placeholder_selection;
+      return selection.isPlaceholderSelection;
     }
 
     public int getVote() {
@@ -180,8 +180,8 @@ public class PlaintextBallotsTable extends JPanel {
     }
 
     public String getExtendedData() {
-      if (selection.extended_data.isPresent()) {
-        return selection.extended_data.get().value;
+      if (selection.extendedData.isPresent()) {
+        return selection.extendedData.get().value;
       } else {
         return "";
       }

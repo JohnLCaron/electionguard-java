@@ -18,7 +18,7 @@ public class CiphertextTallyInputValidation {
   private final Map<String, ElectionContest> contestMap;
 
   public CiphertextTallyInputValidation(Manifest election) {
-    this.contestMap = election.contests().stream().collect(Collectors.toMap(c -> c.object_id(), ElectionContest::new));
+    this.contestMap = election.contests().stream().collect(Collectors.toMap(c -> c.contestId(), ElectionContest::new));
   }
 
   /** Determine if a tally is valid and well-formed for the given election manifest. */
@@ -79,7 +79,7 @@ public class CiphertextTallyInputValidation {
       }
 
       // Referential integrity of tallySelection cryptoHash
-      if (!manifestSelection.crypto_hash().equals(tallySelection.description_hash())) {
+      if (!manifestSelection.cryptoHash().equals(tallySelection.description_hash())) {
         String msg = String.format("CiphertextTally.A.2.1 Tally Selection '%s-%s' crypto_hash does not match manifest selection",
                 tallyContest.object_id(), tallySelection.object_id());
         messes.add(msg);
@@ -95,13 +95,13 @@ public class CiphertextTallyInputValidation {
     private final Map<String, Manifest.SelectionDescription> selectionMap;
 
     ElectionContest(Manifest.ContestDescription electionContest) {
-      this.contestId = electionContest.object_id();
-      this.cryptoHash = electionContest.crypto_hash();
-      this.allowed = electionContest.votes_allowed();
+      this.contestId = electionContest.contestId();
+      this.cryptoHash = electionContest.cryptoHash();
+      this.allowed = electionContest.votesAllowed();
       // allow same object id
       this.selectionMap = new HashMap<>();
-      for (Manifest.SelectionDescription sel : electionContest.ballot_selections()) {
-        this.selectionMap.put(sel.object_id(), sel);
+      for (Manifest.SelectionDescription sel : electionContest.selections()) {
+        this.selectionMap.put(sel.selectionId(), sel);
       }
     }
   }

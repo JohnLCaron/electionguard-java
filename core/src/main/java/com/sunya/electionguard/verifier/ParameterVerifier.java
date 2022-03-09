@@ -23,11 +23,11 @@ public class ParameterVerifier {
     ElectionConstants primes = Group.getPrimes();
 
     // check if p, q, g are the expected values
-    if (!electionRecord.largePrime().equals(primes.large_prime)) {
+    if (!electionRecord.largePrime().equals(primes.largePrime)) {
       System.out.printf(" Large prime value not equal to P. %s%n", electionRecord.largePrime());
       error = true;
     }
-    if (!electionRecord.smallPrime().equals(primes.small_prime)) {
+    if (!electionRecord.smallPrime().equals(primes.smallPrime)) {
       error = true;
       System.out.printf(" Small prime value not equal to Q. %n");
     }

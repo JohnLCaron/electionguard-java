@@ -55,7 +55,7 @@ public class CompactSubmittedBallot {
             compact_ballot.compact_plaintext_ballot, internal_manifest);
 
     ElementModQ nonce_seed = CiphertextBallot.nonce_seed(
-            internal_manifest.manifest.crypto_hash(),
+            internal_manifest.manifest.cryptoHash(),
             compact_ballot.compact_plaintext_ballot.object_id,
             compact_ballot.ballot_nonce);
 
@@ -65,8 +65,8 @@ public class CompactSubmittedBallot {
 
     return SubmittedBallot.create(
             plaintext_ballot.object_id(),
-            plaintext_ballot.style_id,
-            internal_manifest.manifest.crypto_hash(),
+            plaintext_ballot.ballotStyleId,
+            internal_manifest.manifest.cryptoHash(),
             Optional.of(compact_ballot.code_seed),
             contests,
             compact_ballot.code,

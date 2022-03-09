@@ -108,7 +108,7 @@ public class SubmittedBallotsTable extends JPanel {
 
   void setContest(ContestBean contestBean) {
     java.util.List<SelectionBean> beanList = new ArrayList<>();
-    for (CiphertextBallot.Selection s : contestBean.contest.ballot_selections) {
+    for (CiphertextBallot.Selection s : contestBean.contest.selections) {
       beanList.add(new SelectionBean(s));
     }
     selectionTable.setBeans(beanList);
@@ -149,7 +149,7 @@ public class SubmittedBallotsTable extends JPanel {
     }
 
     public String getStyle() {
-      return ballot.style_id;
+      return ballot.ballotStyleId;
     }
 
     public String getTimeStamp() {
@@ -172,7 +172,7 @@ public class SubmittedBallotsTable extends JPanel {
     }
 
     public String getContestId() {
-      return contest.object_id;
+      return contest.contestId;
     }
 
     public boolean isNonce() {

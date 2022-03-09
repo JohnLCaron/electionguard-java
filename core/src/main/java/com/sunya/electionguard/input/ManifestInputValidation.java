@@ -20,21 +20,21 @@ public class ManifestInputValidation {
 
   public ManifestInputValidation(Manifest election) {
     this.election = election;
-    this.gpUnits = election.geopolitical_units().stream().map(gp -> gp.object_id()).collect(Collectors.toSet());
-    this.candidates = election.candidates().stream().map(c -> c.object_id()).collect(Collectors.toSet());
-    this.parties = election.parties().stream().map(p -> p.object_id()).collect(Collectors.toSet());
+    this.gpUnits = election.geopoliticalUnits().stream().map(gp -> gp.geopoliticalUnitId()).collect(Collectors.toSet());
+    this.candidates = election.candidates().stream().map(c -> c.candidateId()).collect(Collectors.toSet());
+    this.parties = election.parties().stream().map(p -> p.partyId()).collect(Collectors.toSet());
   }
 
   /** Determine if a ballot is valid and well-formed for the given election. */
   public boolean validateElection(Formatter problems) {
-    Messes ballotMesses = new Messes(election.election_scope_id());
+    Messes ballotMesses = new Messes(election.electionScopeId());
 
     // Referential integrity of BallotStyle geopolitical_unit_ids
-    for (Manifest.BallotStyle ballotStyle : election.ballot_styles()) {
-      for (String gpunit : ballotStyle.geopolitical_unit_ids()) {
+    for (Manifest.BallotStyle ballotStyle : election.ballotStyles()) {
+      for (String gpunit : ballotStyle.geopoliticalUnitIds()) {
         if (!gpUnits.contains(gpunit)) {
           String msg = String.format("Manifest.A.1 BallotStyle '%s' has geopolitical_unit_id '%s' that does not exist in election's geopolitical_units",
-                  ballotStyle.object_id(), gpunit);
+                  ballotStyle.ballotStyleId(), gpunit);
           ballotMesses.add(msg);
           logger.atWarning().log(msg);
         }
@@ -43,10 +43,10 @@ public class ManifestInputValidation {
 
     // Referential integrity of Candidate party_id
     for (Manifest.Candidate candidate : election.candidates()) {
-      if (candidate.party_id() != null) {
-        if (!parties.contains(candidate.party_id())) {
+      if (candidate.partyId() != null) {
+        if (!parties.contains(candidate.partyId())) {
           String msg = String.format("Manifest.A.2 Candidate '%s' party_id '%s' does not exist in election's Parties",
-                  candidate.object_id(), candidate.party_id());
+                  candidate.candidateId(), candidate.partyId());
           ballotMesses.add(msg);
           logger.atWarning().log(msg);
         }
@@ -58,31 +58,31 @@ public class ManifestInputValidation {
     Set<String> selectionIds = new HashSet<>();
     for (Manifest.ContestDescription electionContest : election.contests()) {
       // No duplicate contest object_id
-      if (contestIds.contains(electionContest.object_id())) {
-        String msg = String.format("Manifest.B.1 Multiple Contests have same id '%s'", electionContest.object_id());
+      if (contestIds.contains(electionContest.contestId())) {
+        String msg = String.format("Manifest.B.1 Multiple Contests have same id '%s'", electionContest.contestId());
         ballotMesses.add(msg);
         logger.atWarning().log(msg);
       } else {
-        contestIds.add(electionContest.object_id());
+        contestIds.add(electionContest.contestId());
       }
 
       // No duplicate contest sequence
-      if (contestSeqs.contains(electionContest.sequence_order())) {
-        String msg = String.format("Manifest.B.2 Multiple Contests have same sequence order %d", electionContest.sequence_order());
+      if (contestSeqs.contains(electionContest.sequenceOrder())) {
+        String msg = String.format("Manifest.B.2 Multiple Contests have same sequence order %d", electionContest.sequenceOrder());
         ballotMesses.add(msg);
         logger.atWarning().log(msg);
       } else {
-        contestSeqs.add(electionContest.sequence_order());
+        contestSeqs.add(electionContest.sequenceOrder());
       }
 
       // No duplicate sequenceIds across contests
-      for (Manifest.SelectionDescription electionSelection : electionContest.ballot_selections()) {
-        if (selectionIds.contains(electionSelection.object_id())) {
-          String msg = String.format("Manifest.B.6 All SelectionDescription have a unique object_id within the election %s", electionContest.object_id());
+      for (Manifest.SelectionDescription electionSelection : electionContest.selections()) {
+        if (selectionIds.contains(electionSelection.selectionId())) {
+          String msg = String.format("Manifest.B.6 All SelectionDescription have a unique object_id within the election %s", electionContest.contestId());
           ballotMesses.add(msg);
           logger.atWarning().log(msg);
         }
-        selectionIds.add(electionSelection.object_id());
+        selectionIds.add(electionSelection.selectionId());
       }
 
       validateContest(electionContest, ballotMesses);
@@ -93,12 +93,12 @@ public class ManifestInputValidation {
 
   /** Determine if contest is valid for ballot style. */
   void validateContest(Manifest.ContestDescription contest, Messes ballotMesses) {
-    Messes contestMesses = ballotMesses.nested(contest.object_id());
+    Messes contestMesses = ballotMesses.nested(contest.contestId());
 
     // Referential integrity of Contest electoral_district_id
-    if (!gpUnits.contains(contest.electoral_district_id())) {
+    if (!gpUnits.contains(contest.geopoliticalUnitId())) {
       String msg = String.format("Manifest.A.3 Contest's electoral_district_id '%s' does not exist in election's geopolitical_units",
-              contest.electoral_district_id());
+              contest.geopoliticalUnitId());
       contestMesses.add(msg);
       logger.atWarning().log(msg);
     }
@@ -106,38 +106,38 @@ public class ManifestInputValidation {
     Set<String> selectionIds = new HashSet<>();
     Set<Integer> selectionSeqs = new HashSet<>();
     Set<String> candidateIds = new HashSet<>();
-    for (Manifest.SelectionDescription electionSelection : contest.ballot_selections()) {
+    for (Manifest.SelectionDescription electionSelection : contest.selections()) {
       // No duplicate selection ids
-      if (selectionIds.contains(electionSelection.object_id())) {
-        String msg = String.format("Manifest.B.3 Multiple Selections have same id '%s'", electionSelection.object_id());
+      if (selectionIds.contains(electionSelection.selectionId())) {
+        String msg = String.format("Manifest.B.3 Multiple Selections have same id '%s'", electionSelection.selectionId());
         contestMesses.add(msg);
         logger.atWarning().log(msg);
       } else {
-        selectionIds.add(electionSelection.object_id());
+        selectionIds.add(electionSelection.selectionId());
       }
 
       // No duplicate selection sequence_order
-      if (selectionSeqs.contains(electionSelection.sequence_order())) {
-        String msg = String.format("Manifest.B.4 Multiple Selections have same sequence %d", electionSelection.sequence_order());
+      if (selectionSeqs.contains(electionSelection.sequenceOrder())) {
+        String msg = String.format("Manifest.B.4 Multiple Selections have same sequence %d", electionSelection.sequenceOrder());
         contestMesses.add(msg);
         logger.atWarning().log(msg);
       } else {
-        selectionSeqs.add(electionSelection.sequence_order());
+        selectionSeqs.add(electionSelection.sequenceOrder());
       }
 
       // No duplicate selection candidates
-      if (candidateIds.contains(electionSelection.candidate_id())) {
-        String msg = String.format("Manifest.B.5 Multiple Selections have same candidate id '%s'", electionSelection.candidate_id());
+      if (candidateIds.contains(electionSelection.candidateId())) {
+        String msg = String.format("Manifest.B.5 Multiple Selections have same candidate id '%s'", electionSelection.candidateId());
         contestMesses.add(msg);
         logger.atWarning().log(msg);
       } else {
-        candidateIds.add(electionSelection.candidate_id());
+        candidateIds.add(electionSelection.candidateId());
       }
 
       // Referential integrity of Selection candidate ids
-      if (!candidates.contains(electionSelection.candidate_id())) {
+      if (!candidates.contains(electionSelection.candidateId())) {
         String msg = String.format("Manifest.A.4 Ballot Selection '%s' candidate_id '%s' does not exist in election's Candidates",
-                electionSelection.object_id(), electionSelection.candidate_id());
+                electionSelection.selectionId(), electionSelection.candidateId());
         contestMesses.add(msg);
         logger.atWarning().log(msg);
       }

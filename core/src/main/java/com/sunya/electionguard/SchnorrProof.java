@@ -19,7 +19,7 @@ public class SchnorrProof extends Proof {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   /** The commitment K_ij. */
-  public final ElementModP public_key;
+  public final ElementModP publicKey;
   /** h in the spec = g^nonce. LOOK why is this called committment? Confusing*/
   public final ElementModP commitment;
   /** c in the spec */
@@ -27,9 +27,9 @@ public class SchnorrProof extends Proof {
   /** u in the spec */
   public final ElementModQ response;
 
-  public SchnorrProof(ElementModP public_key, ElementModP commitment, ElementModQ challenge, ElementModQ response) {
+  public SchnorrProof(ElementModP publicKey, ElementModP commitment, ElementModQ challenge, ElementModQ response) {
     super("SchnorrProof", SecretValue);
-    this.public_key = Preconditions.checkNotNull(public_key);
+    this.publicKey = Preconditions.checkNotNull(publicKey);
     this.commitment = Preconditions.checkNotNull(commitment);
     this.challenge = Preconditions.checkNotNull(challenge);
     this.response = Preconditions.checkNotNull(response);
@@ -41,7 +41,7 @@ public class SchnorrProof extends Proof {
    * @return true if the proof is valid, false if anything is wrong
    */
   public boolean is_valid() {
-    ElementModP k = this.public_key;
+    ElementModP k = this.publicKey;
     ElementModP h = this.commitment;
     ElementModQ u = this.response;
     boolean valid_public_key = k.is_valid_residue();
@@ -65,7 +65,7 @@ public class SchnorrProof extends Proof {
     if (o == null || getClass() != o.getClass()) return false;
     if (!super.equals(o)) return false;
     SchnorrProof that = (SchnorrProof) o;
-    return public_key.equals(that.public_key) &&
+    return publicKey.equals(that.publicKey) &&
             commitment.equals(that.commitment) &&
             challenge.equals(that.challenge) &&
             response.equals(that.response);
@@ -73,13 +73,13 @@ public class SchnorrProof extends Proof {
 
   @Override
   public int hashCode() {
-    return Objects.hash(super.hashCode(), public_key, commitment, challenge, response);
+    return Objects.hash(super.hashCode(), publicKey, commitment, challenge, response);
   }
 
   @Override
   public String toString() {
     return "SchnorrProof{" +
-            "public_key=" + public_key +
+            "public_key=" + publicKey +
             ", commitment=" + commitment +
             ", challenge=" + challenge +
             ", response=" + response +

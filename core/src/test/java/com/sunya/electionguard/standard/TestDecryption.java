@@ -100,16 +100,16 @@ public class TestDecryption extends TestProperties {
               ballot_factory.get_fake_ballot(this.metadata, "some-unique-ballot-id-spoiled" + i, true));
     }
 
-    assertThat(this.fake_cast_ballot.is_valid(this.election.ballot_styles().get(0).object_id())).isTrue();
-    assertThat(this.fake_spoiled_ballot.is_valid(this.election.ballot_styles().get(0).object_id())).isTrue();
+    assertThat(this.fake_cast_ballot.is_valid(this.election.ballotStyles().get(0).ballotStyleId())).isTrue();
+    assertThat(this.fake_spoiled_ballot.is_valid(this.election.ballotStyles().get(0).ballotStyleId())).isTrue();
     ArrayList<PlaintextBallot> all = new ArrayList<>(more_fake_ballots);
     all.add(this.fake_cast_ballot);
     this.expected_plaintext_tally = TallyTestHelper.accumulate_plaintext_ballots(all);
 
     // Fill in the expected values with any missing selections
     // that were not made on any ballots
-    Set<String> selection_ids = this.election.contests().stream().flatMap(c -> c.ballot_selections().stream())
-            .map(s -> s.object_id()).collect(Collectors.toSet());
+    Set<String> selection_ids = this.election.contests().stream().flatMap(c -> c.selections().stream())
+            .map(s -> s.selectionId()).collect(Collectors.toSet());
     // missing_selection_ids = selection_ids.difference( set(this.expected_plaintext_tally) )
     Sets.SetView<String> missing_selection_ids = Sets.difference(selection_ids, this.expected_plaintext_tally.keySet());
     for (String id : missing_selection_ids) {
@@ -122,9 +122,9 @@ public class TestDecryption extends TestProperties {
     assertThat(temp_encrypted_fake_cast_ballot).isNotNull();
     assertThat(temp_encrypted_fake_spoiled_ballot).isNotNull();
     assertThat(temp_encrypted_fake_cast_ballot.is_valid_encryption(
-            this.election.crypto_hash(),
+            this.election.cryptoHash(),
             this.joint_public_key.joint_public_key(),
-            this.context.crypto_extended_base_hash))
+            this.context.cryptoExtendedBaseHash))
             .isTrue();
 
     // encrypt some more fake ballots
@@ -282,13 +282,13 @@ public class TestDecryption extends TestProperties {
             first_selection.ciphertext(),
             Decryptions.compute_recovery_public_key(available_guardian_1_key, missing_guardian_key),
             comp0.share(),
-            this.context.crypto_extended_base_hash)).isTrue();
+            this.context.cryptoExtendedBaseHash)).isTrue();
 
     assertThat(comp1.proof().is_valid(
             first_selection.ciphertext(),
             Decryptions.compute_recovery_public_key(available_guardian_2_key, missing_guardian_key),
             comp1.share(),
-            this.context.crypto_extended_base_hash)).isTrue();
+            this.context.cryptoExtendedBaseHash)).isTrue();
 
     List<ElementModP> share_pow_p = ImmutableList.of(
             pow_p(comp0.share(), lagrange_0), 
@@ -321,7 +321,7 @@ public class TestDecryption extends TestProperties {
 
                     this.guardians.get(2).object_id,
                     new DecryptionShare.KeyAndSelection(missing_guardian.share_key().key(), share_2)),
-            this.context.crypto_extended_base_hash,
+            this.context.cryptoExtendedBaseHash,
             false);
 
     System.out.printf("%s%n", result);

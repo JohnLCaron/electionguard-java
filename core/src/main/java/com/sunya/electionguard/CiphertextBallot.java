@@ -28,7 +28,7 @@ import static com.sunya.electionguard.Group.add_q;
  * The field object_id is a unique Ballot ID that is relevant to the external system
  */
 @Immutable
-public class CiphertextBallot implements ElectionObjectBaseIF, Hash.CryptoHashCheckable {
+public class CiphertextBallot implements Hash.CryptoHashCheckable {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   /**
@@ -90,11 +90,11 @@ public class CiphertextBallot implements ElectionObjectBaseIF, Hash.CryptoHashCh
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////
   /** Unique internal identifier used by other elements to reference this element. */
-  private final String object_id;
+  private final String ballotId;
   /** The object_id of the Manifest.BallotStyle. */
-  public final String style_id;
+  public final String ballotStyleId;
   /** The Manifest crypto_hash. */
-  public final Group.ElementModQ manifest_hash;
+  public final Group.ElementModQ manifestHash;
   /** Seed for ballot code */
   public final Group.ElementModQ code_seed;
   /** The list of contests for this ballot. */
@@ -109,15 +109,15 @@ public class CiphertextBallot implements ElectionObjectBaseIF, Hash.CryptoHashCh
   /** Optional nonce used in hashed_ballot_nonce(). */
   public final Optional<Group.ElementModQ> nonce;
 
-  public CiphertextBallot(String object_id, String style_id, Group.ElementModQ manifest_hash,
+  public CiphertextBallot(String ballotId, String ballotStyleId, Group.ElementModQ manifestHash,
                           Group.ElementModQ code_seed, List<Contest> contests,
                           Group.ElementModQ code, long timestamp, Group.ElementModQ crypto_hash,
                           Optional<Group.ElementModQ> nonce) {
-    Preconditions.checkArgument(!Strings.isNullOrEmpty(object_id));
-    this.object_id = object_id;
-    Preconditions.checkArgument(!Strings.isNullOrEmpty(style_id));
-    this.style_id = style_id;
-    this.manifest_hash = Preconditions.checkNotNull(manifest_hash);
+    Preconditions.checkArgument(!Strings.isNullOrEmpty(ballotId));
+    this.ballotId = ballotId;
+    Preconditions.checkArgument(!Strings.isNullOrEmpty(ballotStyleId));
+    this.ballotStyleId = ballotStyleId;
+    this.manifestHash = Preconditions.checkNotNull(manifestHash);
     this.code_seed = Preconditions.checkNotNull(code_seed);
     this.contests = ImmutableList.copyOf(Preconditions.checkNotNull(contests));
     this.code = Preconditions.checkNotNull(code);
@@ -126,9 +126,8 @@ public class CiphertextBallot implements ElectionObjectBaseIF, Hash.CryptoHashCh
     this.nonce = Preconditions.checkNotNull(nonce);
   }
 
-  @Override
   public String object_id() {
-    return object_id;
+    return ballotId;
   }
 
   private static ElGamal.Ciphertext ciphertext_ballot_elgamal_accumulate(List<Selection> ballot_selections) {
@@ -178,9 +177,9 @@ public class CiphertextBallot implements ElectionObjectBaseIF, Hash.CryptoHashCh
    */
   SubmittedBallot acceptWithState(BallotBox.State state) {
     return SubmittedBallot.create(
-            this.object_id,
-            this.style_id,
-            this.manifest_hash,
+            this.ballotId,
+            this.ballotStyleId,
+            this.manifestHash,
             Optional.of(this.code_seed),
             this.contests,
             this.code,
@@ -202,10 +201,10 @@ public class CiphertextBallot implements ElectionObjectBaseIF, Hash.CryptoHashCh
    */
   public Optional<Group.ElementModQ> hashed_ballot_nonce() {
     if (this.nonce.isEmpty()) {
-      logger.atWarning().log("missing nonce for ballot %s could not derive from null nonce", this.object_id);
+      logger.atWarning().log("missing nonce for ballot %s could not derive from null nonce", this.ballotId);
       return Optional.empty();
     }
-    return Optional.of(nonce_seed(this.manifest_hash, this.object_id, this.nonce.get()));
+    return Optional.of(nonce_seed(this.manifestHash, this.ballotId, this.nonce.get()));
   }
 
   /**
@@ -219,14 +218,14 @@ public class CiphertextBallot implements ElectionObjectBaseIF, Hash.CryptoHashCh
   @Override
   public Group.ElementModQ crypto_hash_with(Group.ElementModQ seed_hash) {
     if (this.contests.size() == 0) {
-      logger.atWarning().log("mismatching contests state: %s expected(some), actual(none)", object_id);
+      logger.atWarning().log("mismatching contests state: %s expected(some), actual(none)", ballotId);
       return ZERO_MOD_Q;
     }
 
     // LOOK ordering of contests?
     // contest_hashes = [contest.crypto_hash for contest in this.contests]
     List<Group.ElementModQ> selection_hashes = contests.stream().map(s -> s.crypto_hash).toList();
-    return Hash.hash_elems(this.object_id, seed_hash, selection_hashes);
+    return Hash.hash_elems(this.ballotId, seed_hash, selection_hashes);
   }
 
   /**
@@ -243,24 +242,24 @@ public class CiphertextBallot implements ElectionObjectBaseIF, Hash.CryptoHashCh
           Group.ElementModP elgamal_public_key,
           Group.ElementModQ crypto_extended_base_hash) {
 
-    if (!seed_hash.equals(this.manifest_hash)) {
-      logger.atInfo().log("mismatching ballot hash: %s expected(%s) actual(%s)", this.object_id, seed_hash, this.manifest_hash);
+    if (!seed_hash.equals(this.manifestHash)) {
+      logger.atInfo().log("mismatching ballot hash: %s expected(%s) actual(%s)", this.ballotId, seed_hash, this.manifestHash);
       return false;
     }
 
     Group.ElementModQ recalculated_crypto_hash = this.crypto_hash_with(seed_hash);
     if (!recalculated_crypto_hash.equals(this.crypto_hash)) {
-      logger.atInfo().log("mismatching crypto hash: %s expected(%s) actual(%s)", this.object_id, recalculated_crypto_hash, this.crypto_hash);
+      logger.atInfo().log("mismatching crypto hash: %s expected(%s) actual(%s)", this.ballotId, recalculated_crypto_hash, this.crypto_hash);
       return false;
     }
 
     // Check the proofs on the ballot
     boolean valid = true;
     for (Contest contest : this.contests) {
-      for (Selection selection : contest.ballot_selections) {
+      for (Selection selection : contest.selections) {
         valid &= selection.is_valid_encryption(selection.description_hash(), elgamal_public_key, crypto_extended_base_hash);
       }
-      valid &= contest.is_valid_encryption(contest.contest_hash, elgamal_public_key, crypto_extended_base_hash);
+      valid &= contest.is_valid_encryption(contest.contestHash, elgamal_public_key, crypto_extended_base_hash);
     }
     return valid;
   }
@@ -271,9 +270,9 @@ public class CiphertextBallot implements ElectionObjectBaseIF, Hash.CryptoHashCh
     if (o == null || getClass() != o.getClass()) return false;
     CiphertextBallot that = (CiphertextBallot) o;
     return timestamp == that.timestamp &&
-            object_id.equals(that.object_id) &&
-            style_id.equals(that.style_id) &&
-            manifest_hash.equals(that.manifest_hash) &&
+            ballotId.equals(that.ballotId) &&
+            ballotStyleId.equals(that.ballotStyleId) &&
+            manifestHash.equals(that.manifestHash) &&
             code_seed.equals(that.code_seed) &&
             contests.equals(that.contests) &&
             code.equals(that.code) &&
@@ -283,15 +282,15 @@ public class CiphertextBallot implements ElectionObjectBaseIF, Hash.CryptoHashCh
 
   @Override
   public int hashCode() {
-    return Objects.hash(object_id, style_id, manifest_hash, code_seed, contests, code, timestamp, crypto_hash, nonce);
+    return Objects.hash(ballotId, ballotStyleId, manifestHash, code_seed, contests, code, timestamp, crypto_hash, nonce);
   }
 
   @Override
   public String toString() {
     return "CiphertextBallot{" +
-            "object_id='" + object_id + '\'' +
-            ", style_id='" + style_id + '\'' +
-            ", manifest_hash=" + manifest_hash +
+            "object_id='" + ballotId + '\'' +
+            ", style_id='" + ballotStyleId + '\'' +
+            ", manifest_hash=" + manifestHash +
             ", code_seed=" + code_seed +
             ", contests=" + contests +
             ", code=" + code +
@@ -472,7 +471,7 @@ public class CiphertextBallot implements ElectionObjectBaseIF, Hash.CryptoHashCh
               ", object_id='" + object_id() + '\'' +
               ", sequence_order=" + sequence_order() +
               ", description_hash=" + description_hash() +
-              ", is_placeholder=" + is_placeholder +
+              ", is_placeholder=" + isPlaceholderSelection +
               '}';
     }
   }
@@ -493,7 +492,7 @@ public class CiphertextBallot implements ElectionObjectBaseIF, Hash.CryptoHashCh
    * then it is required in order to regenerate the proof.
    */
   @Immutable
-  public static class Contest implements Hash.CryptoHashCheckable, OrderedObjectBaseIF {
+  public static class Contest implements Hash.CryptoHashCheckable {
 
     /**
      * Constructs a CiphertextBallotContest object. Computes a Chaum-Pedersen proof if the
@@ -538,17 +537,17 @@ public class CiphertextBallot implements ElectionObjectBaseIF, Hash.CryptoHashCh
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    public final String object_id;
-    public final int sequence_order;
+    public final String contestId;
+    public final int sequenceOrder;
 
     /** The Manifest.ContestDescription.crypto_hash(). */
-    public final Group.ElementModQ contest_hash;
+    public final Group.ElementModQ contestHash;
     /** The collection of ballot selections. */
-    public final ImmutableList<Selection> ballot_selections;
+    public final ImmutableList<Selection> selections;
     /** This element's crypto_hash. */
     public final Group.ElementModQ crypto_hash; // see ciphertext_ballot_context_crypto_hash()
     /** The contest's encrypted total votes. (A, B) in the spec. */
-    public final ElGamal.Ciphertext encrypted_total; // python name: ciphertext_accumulation
+    public final ElGamal.Ciphertext ciphertextAccumulation;
     /** The nonce used to generate the encrypted_total. Sensitive and should be treated as a secret. */
     public final Optional<Group.ElementModQ> nonce;
 
@@ -556,21 +555,21 @@ public class CiphertextBallot implements ElectionObjectBaseIF, Hash.CryptoHashCh
         available selections for the contest, and that the proof was generated with the nonce. */
     public final Optional<ChaumPedersen.ConstantChaumPedersenProof> proof;
 
-    public Contest(String object_id,
-                   int sequence_order,
-                   Group.ElementModQ contest_hash,
-                   List<Selection> ballot_selections,
+    public Contest(String contestId,
+                   int sequenceOrder,
+                   Group.ElementModQ contestHash,
+                   List<Selection> selections,
                    Group.ElementModQ crypto_hash,
-                   ElGamal.Ciphertext encrypted_total,
+                   ElGamal.Ciphertext ciphertextAccumulation,
                    Optional<Group.ElementModQ> nonce,
                    Optional<ChaumPedersen.ConstantChaumPedersenProof> proof) {
-      Preconditions.checkArgument(!Strings.isNullOrEmpty(object_id));
-      this.object_id = object_id;
-      this.sequence_order = sequence_order;
-      this.contest_hash = Preconditions.checkNotNull(contest_hash);
-      this.ballot_selections = ImmutableList.copyOf(Preconditions.checkNotNull(ballot_selections));
+      Preconditions.checkArgument(!Strings.isNullOrEmpty(contestId));
+      this.contestId = contestId;
+      this.sequenceOrder = sequenceOrder;
+      this.contestHash = Preconditions.checkNotNull(contestHash);
+      this.selections = ImmutableList.copyOf(Preconditions.checkNotNull(selections));
       this.crypto_hash = Preconditions.checkNotNull(crypto_hash);
-      this.encrypted_total = Preconditions.checkNotNull(encrypted_total);
+      this.ciphertextAccumulation = Preconditions.checkNotNull(ciphertextAccumulation);
       this.nonce = Preconditions.checkNotNull(nonce);
       this.proof = Preconditions.checkNotNull(proof);
     }
@@ -578,10 +577,10 @@ public class CiphertextBallot implements ElectionObjectBaseIF, Hash.CryptoHashCh
     /** Remove nonces from selections and return new contest. */
     Contest removeNonces() {
       List<Selection> new_selections =
-              this.ballot_selections.stream().map(s -> s.removeNonce()).toList();
+              this.selections.stream().map(s -> s.removeNonce()).toList();
 
-      return new Contest(this.object_id, this.sequence_order, this.contest_hash, new_selections, this.crypto_hash,
-              this.encrypted_total, Optional.empty(), this.proof);
+      return new Contest(this.contestId, this.sequenceOrder, this.contestHash, new_selections, this.crypto_hash,
+              this.ciphertextAccumulation, Optional.empty(), this.proof);
     }
 
     /**
@@ -593,14 +592,14 @@ public class CiphertextBallot implements ElectionObjectBaseIF, Hash.CryptoHashCh
      * In most cases, the seed_hash is the description_hash
      */
     public Group.ElementModQ crypto_hash_with(Group.ElementModQ seed_hash) {
-      return ciphertext_ballot_context_crypto_hash(this.object_id, this.ballot_selections, seed_hash);
+      return ciphertext_ballot_context_crypto_hash(this.contestId, this.selections, seed_hash);
     }
 
     /**
      * Add the ballot_selections' ciphertext fields together. Used in the Chaum-Pedersen proof.
      */
     ElGamal.Ciphertext elgamal_accumulate() {
-      return ciphertext_ballot_elgamal_accumulate(this.ballot_selections);
+      return ciphertext_ballot_elgamal_accumulate(this.selections);
     }
 
     /**
@@ -617,30 +616,30 @@ public class CiphertextBallot implements ElectionObjectBaseIF, Hash.CryptoHashCh
             Group.ElementModP elgamal_public_key,
             Group.ElementModQ crypto_extended_base_hash) {
 
-      if (!seed_hash.equals(this.contest_hash)) {
+      if (!seed_hash.equals(this.contestHash)) {
         logger.atInfo().log("mismatching contest hash: %s expected(%s), actual(%s)",
-                this.object_id, seed_hash, this.contest_hash);
+                this.contestId, seed_hash, this.contestHash);
         return false;
       }
 
       Group.ElementModQ recalculated_crypto_hash = this.crypto_hash_with(seed_hash);
       if (!this.crypto_hash.equals(recalculated_crypto_hash)) {
-        logger.atInfo().log("mismatching crypto hash: %s expected(%s) actual(%s)", this.object_id, recalculated_crypto_hash, this.crypto_hash);
+        logger.atInfo().log("mismatching crypto hash: %s expected(%s) actual(%s)", this.contestId, recalculated_crypto_hash, this.crypto_hash);
         return false;
       }
 
       // NOTE: this check does not verify the proofs of the individual selections by design.
 
       if (this.proof.isEmpty()) {
-        logger.atInfo().log("no proof exists for: %s", this.object_id);
+        logger.atInfo().log("no proof exists for: %s", this.contestId);
         return false;
       }
 
       ElGamal.Ciphertext elgamal_accumulation = this.elgamal_accumulate();
 
       // Verify that the contest ciphertext matches the elgamal accumulation of all selections
-      if (!this.encrypted_total.equals(elgamal_accumulation)) {
-        logger.atInfo().log("ciphertext does not equal elgamal accumulation for: %s", this.object_id);
+      if (!this.ciphertextAccumulation.equals(elgamal_accumulation)) {
+        logger.atInfo().log("ciphertext does not equal elgamal accumulation for: %s", this.contestId);
         return false;
       }
 
@@ -653,35 +652,33 @@ public class CiphertextBallot implements ElectionObjectBaseIF, Hash.CryptoHashCh
       if (this == o) return true;
       if (o == null || getClass() != o.getClass()) return false;
       Contest contest = (Contest) o;
-      return sequence_order == contest.sequence_order && object_id.equals(contest.object_id) && contest_hash.equals(contest.contest_hash) && ballot_selections.equals(contest.ballot_selections) && crypto_hash.equals(contest.crypto_hash) && encrypted_total.equals(contest.encrypted_total) && nonce.equals(contest.nonce) && proof.equals(contest.proof);
+      return sequenceOrder == contest.sequenceOrder && contestId.equals(contest.contestId) && contestHash.equals(contest.contestHash) && selections.equals(contest.selections) && crypto_hash.equals(contest.crypto_hash) && ciphertextAccumulation.equals(contest.ciphertextAccumulation) && nonce.equals(contest.nonce) && proof.equals(contest.proof);
     }
 
     @Override
     public int hashCode() {
-      return Objects.hash(object_id, sequence_order, contest_hash, ballot_selections, crypto_hash, encrypted_total, nonce, proof);
+      return Objects.hash(contestId, sequenceOrder, contestHash, selections, crypto_hash, ciphertextAccumulation, nonce, proof);
     }
 
     @Override
     public String toString() {
       return "Contest{" +
-              "\n  object_id   ='" + object_id + '\'' +
-              "\n  sequence_order   ='" + sequence_order + '\'' +
-              "\n  contest_hash=" + contest_hash +
+              "\n  object_id   ='" + contestId + '\'' +
+              "\n  sequence_order   ='" + sequenceOrder + '\'' +
+              "\n  contest_hash=" + contestHash +
               "\n  crypto_hash =" + crypto_hash +
-              "\n  encrypted_total=" + encrypted_total +
+              "\n  encrypted_total=" + ciphertextAccumulation +
               "\n  nonce       =" + nonce +
               "\n  proof       =" + proof +
               '}';
     }
 
-    @Override
     public String object_id() {
-      return object_id;
+      return contestId;
     }
 
-    @Override
     public int sequence_order() {
-      return sequence_order;
+      return sequenceOrder;
     }
   }
 }

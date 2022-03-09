@@ -52,7 +52,7 @@ public class RemoteDecryptions {
         texts.add(selection.ciphertext());
       }
     }
-    List<BallotBox.DecryptionProofTuple> results = guardian.partialDecrypt(texts, context.crypto_extended_base_hash, null);
+    List<BallotBox.DecryptionProofTuple> results = guardian.partialDecrypt(texts, context.cryptoExtendedBaseHash, null);
 
     // Create the guardian's DecryptionShare for the tally
     int count = 0;
@@ -63,7 +63,7 @@ public class RemoteDecryptions {
       for (CiphertextSelection tallySelection : tallyContest.selections.values()) {
         BallotBox.DecryptionProofTuple tuple = results.get(count);
         if (tuple.proof.is_valid(tallySelection.ciphertext(), guardian.electionPublicKey(),
-                tuple.decryption, context.crypto_extended_base_hash)) {
+                tuple.decryption, context.cryptoExtendedBaseHash)) {
 
           CiphertextDecryptionSelection share = DecryptionShare.create_ciphertext_decryption_selection(
                   tallySelection.object_id(),
@@ -122,11 +122,11 @@ public class RemoteDecryptions {
     // Get all the Ciphertext that need to be decrypted, and do so in one call
     List<ElGamal.Ciphertext> texts = new ArrayList<>();
     for (CiphertextBallot.Contest ballotContest : ballot.contests) {
-      for (CiphertextBallot.Selection ballotSelection : ballotContest.ballot_selections) {
+      for (CiphertextBallot.Selection ballotSelection : ballotContest.selections) {
         texts.add(ballotSelection.ciphertext());
       }
     }
-    List<BallotBox.DecryptionProofTuple> results = guardian.partialDecrypt(texts, context.crypto_extended_base_hash, null);
+    List<BallotBox.DecryptionProofTuple> results = guardian.partialDecrypt(texts, context.cryptoExtendedBaseHash, null);
 
     // Create the guardian's DecryptionShare for the ballot
     int count = 0;
@@ -134,10 +134,10 @@ public class RemoteDecryptions {
     for (CiphertextBallot.Contest ballotContest : ballot.contests) {
 
       Map<String, CiphertextDecryptionSelection> selections = new HashMap<>();
-      for (CiphertextBallot.Selection ballotSelection : ballotContest.ballot_selections) {
+      for (CiphertextBallot.Selection ballotSelection : ballotContest.selections) {
         BallotBox.DecryptionProofTuple tuple = results.get(count);
         if (tuple.proof.is_valid(ballotSelection.ciphertext(), guardian.electionPublicKey(),
-                tuple.decryption, context.crypto_extended_base_hash)) {
+                tuple.decryption, context.cryptoExtendedBaseHash)) {
 
           CiphertextDecryptionSelection share = DecryptionShare.create_ciphertext_decryption_selection(
                   ballotSelection.object_id(),
@@ -153,8 +153,8 @@ public class RemoteDecryptions {
       }
 
       CiphertextDecryptionContest contest = new CiphertextDecryptionContest(
-              ballotContest.object_id, guardian.id(), ballotContest.contest_hash, selections);
-      contests.put(ballotContest.object_id, contest);
+              ballotContest.contestId, guardian.id(), ballotContest.contestHash, selections);
+      contests.put(ballotContest.contestId, contest);
     }
 
     return new DecryptionShare(
@@ -192,7 +192,7 @@ public class RemoteDecryptions {
     List<DecryptionProofRecovery> results = guardian.compensatedDecrypt(
             missing_guardian_id,
             texts,
-            context.crypto_extended_base_hash,
+            context.cryptoExtendedBaseHash,
             null);
 
     // Create the guardian's DecryptionShare for the tally
@@ -208,7 +208,7 @@ public class RemoteDecryptions {
                 tallySelection.ciphertext(),
                 tuple.recoveryPublicKey(),
                 tuple.decryption(),
-                context.crypto_extended_base_hash)) {
+                context.cryptoExtendedBaseHash)) {
 
           CiphertextCompensatedDecryptionSelection share = new CiphertextCompensatedDecryptionSelection(
                   tallySelection.object_id(),
@@ -259,14 +259,14 @@ public class RemoteDecryptions {
     // Get all the Ciphertext that need to be decrypted, and do so in one call
     List<ElGamal.Ciphertext> texts = new ArrayList<>();
     for (CiphertextBallot.Contest ballotContest : ballot.contests) {
-      for (CiphertextBallot.Selection selection : ballotContest.ballot_selections) {
+      for (CiphertextBallot.Selection selection : ballotContest.selections) {
         texts.add(selection.ciphertext());
       }
     }
     List<DecryptionProofRecovery> results = guardian.compensatedDecrypt(
             missing_guardian_id,
             texts,
-            context.crypto_extended_base_hash,
+            context.cryptoExtendedBaseHash,
             null);
 
     // Create the guardian's DecryptionShare for the tally
@@ -275,14 +275,14 @@ public class RemoteDecryptions {
     for (CiphertextBallot.Contest ballotContest : ballot.contests) {
 
       Map<String, CiphertextCompensatedDecryptionSelection> selections = new HashMap<>();
-      for (CiphertextBallot.Selection selection : ballotContest.ballot_selections) {
+      for (CiphertextBallot.Selection selection : ballotContest.selections) {
         DecryptionProofRecovery tuple = results.get(count);
 
         if (tuple.proof().is_valid(
                 selection.ciphertext(),
                 tuple.recoveryPublicKey(),
                 tuple.decryption(),
-                context.crypto_extended_base_hash)) {
+                context.cryptoExtendedBaseHash)) {
 
           CiphertextCompensatedDecryptionSelection share = new CiphertextCompensatedDecryptionSelection(
                   selection.object_id(),
@@ -300,12 +300,12 @@ public class RemoteDecryptions {
       }
 
       CiphertextCompensatedDecryptionContest contest = new CiphertextCompensatedDecryptionContest(
-              ballotContest.object_id,
+              ballotContest.contestId,
               guardian.id(),
               missing_guardian_id,
-              ballotContest.contest_hash,
+              ballotContest.contestHash,
               selections);
-      contests.put(ballotContest.object_id, contest);
+      contests.put(ballotContest.contestId, contest);
     }
 
     return new CompensatedDecryptionShare(
@@ -366,7 +366,7 @@ public class RemoteDecryptions {
               CiphertextContest.createFrom(contest),
               shares,
               lagrange_coefficients);
-      contests.put(contest.object_id, dcontest);
+      contests.put(contest.contestId, dcontest);
     }
 
     return new DecryptionShare(

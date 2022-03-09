@@ -113,26 +113,26 @@ public class PlaintextBallotPojo {
   private static PlaintextBallotPojo convertPlaintextBallot(PlaintextBallot src) {
      PlaintextBallotPojo pojo = new PlaintextBallotPojo();
     pojo.object_id = src.object_id();
-    pojo.style_id = src.style_id;
+    pojo.style_id = src.ballotStyleId;
     pojo.contests = ConvertPojos.convertList(src.contests, PlaintextBallotPojo::convertPlaintextBallotContest);
     return pojo;
   }
 
   private static PlaintextBallotPojo.PlaintextBallotContest convertPlaintextBallotContest(PlaintextBallot.Contest src) {
     PlaintextBallotPojo.PlaintextBallotContest pojo = new PlaintextBallotPojo.PlaintextBallotContest ();
-    pojo.object_id = src.contest_id;
-    pojo.sequence_order = src.sequence_order;
-    pojo.ballot_selections = ConvertPojos.convertList(src.ballot_selections, PlaintextBallotPojo::convertPlaintextBallotSelection);
+    pojo.object_id = src.contestId;
+    pojo.sequence_order = src.sequenceOrder;
+    pojo.ballot_selections = ConvertPojos.convertList(src.selections, PlaintextBallotPojo::convertPlaintextBallotSelection);
     return pojo;
   }
 
   private static PlaintextBallotPojo.PlaintextBallotSelection convertPlaintextBallotSelection(PlaintextBallot.Selection src) {
     PlaintextBallotPojo.PlaintextBallotSelection pojo = new PlaintextBallotPojo.PlaintextBallotSelection ();
-    pojo.object_id = src.selection_id;
-    pojo.sequence_order = src.sequence_order;
+    pojo.object_id = src.selectionId;
+    pojo.sequence_order = src.sequenceOrder;
     pojo.vote = src.vote;
-    pojo.is_placeholder_selection = src.is_placeholder_selection;
-    src.extended_data.ifPresent(ed -> pojo.extended_data = convertExtendedData(ed));
+    pojo.is_placeholder_selection = src.isPlaceholderSelection;
+    src.extendedData.ifPresent(ed -> pojo.extended_data = convertExtendedData(ed));
     return pojo;
   }
 

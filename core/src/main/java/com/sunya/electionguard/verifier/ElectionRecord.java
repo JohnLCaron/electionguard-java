@@ -72,7 +72,7 @@ public class ElectionRecord {
 
     ImmutableMap.Builder<String, Integer> builder = ImmutableMap.builder();
     for (Manifest.ContestDescription contest : election.contests()) {
-      builder.put(contest.object_id(), contest.votes_allowed());
+      builder.put(contest.contestId(), contest.votesAllowed());
     }
     contestVoteLimits = builder.build();
   }
@@ -104,12 +104,12 @@ public class ElectionRecord {
 
   /** Large prime p in the spec. */
   public BigInteger largePrime() {
-    return this.constants.large_prime;
+    return this.constants.largePrime;
   }
 
   /** Small prime q in the spec. */
   public BigInteger smallPrime() {
-    return this.constants.small_prime;
+    return this.constants.smallPrime;
   }
 
   /** G in the spec. */
@@ -119,22 +119,22 @@ public class ElectionRecord {
 
   /** Manifest description crypto hash */
   public Group.ElementModQ description_hash() {
-    return this.context.manifest_hash;
+    return this.context.manifestHash;
   }
 
   /** The extended base hash, Qbar in the spec. */
   public Group.ElementModQ extendedHash() {
-    return this.context.crypto_extended_base_hash;
+    return this.context.cryptoExtendedBaseHash;
   }
 
   /** The base hash, Q in the spec. */
   public Group.ElementModQ baseHash() {
-    return this.context.crypto_base_hash;
+    return this.context.cryptoBaseHash;
   }
 
   /** Joint election public key, K in the spec. */
   public Group.ElementModP electionPublicKey() {
-    return this.context.elgamal_public_key;
+    return this.context.jointPublicKey;
   }
 
   /** Make a map of guardian_id, guardian's public_key. */

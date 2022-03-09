@@ -16,49 +16,49 @@ import java.util.List;
  * @see <a href="https://developers.google.com/elections-data/reference/election">Civics Common Standard Data Specification</a>
  */
 public record Manifest(
-        String election_scope_id,
-        String spec_version,
+        String electionScopeId,
+        String specVersion,
         ElectionType electionType,
-        OffsetDateTime start_date,
-        OffsetDateTime end_date,
-        List<GeopoliticalUnit> geopolitical_units,
+        OffsetDateTime startDate,
+        OffsetDateTime endDate,
+        List<GeopoliticalUnit> geopoliticalUnits,
         List<Party> parties,
         List<Candidate> candidates,
         List<ContestDescription> contests,
-        List<BallotStyle> ballot_styles,
+        List<BallotStyle> ballotStyles,
         @Nullable InternationalizedText name,
-        @Nullable ContactInformation contact_information,
-        Group.ElementModQ crypto_hash
+        @Nullable ContactInformation contactInformation,
+        Group.ElementModQ cryptoHash
 ) implements Hash.CryptoHashable {
 
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   public Manifest {
-    Preconditions.checkArgument(!Strings.isNullOrEmpty(election_scope_id));
+    Preconditions.checkArgument(!Strings.isNullOrEmpty(electionScopeId));
     Preconditions.checkNotNull(electionType);
-    Preconditions.checkNotNull(start_date);
-    Preconditions.checkNotNull(end_date);
-    if (Strings.isNullOrEmpty(spec_version)) {
-      spec_version = ElectionContext.SPEC_VERSION;
+    Preconditions.checkNotNull(startDate);
+    Preconditions.checkNotNull(endDate);
+    if (Strings.isNullOrEmpty(specVersion)) {
+      specVersion = ElectionContext.SPEC_VERSION;
     }
-    geopolitical_units = toImmutableListEmpty(geopolitical_units);
+    geopoliticalUnits = toImmutableListEmpty(geopoliticalUnits);
     parties = toImmutableListEmpty(parties);
     candidates = toImmutableListEmpty(candidates);
     contests = toImmutableListEmpty(contests);
-    ballot_styles = toImmutableListEmpty(ballot_styles);
-    if (crypto_hash == null) {
-      crypto_hash = Hash.hash_elems(
-              election_scope_id,
+    ballotStyles = toImmutableListEmpty(ballotStyles);
+    if (cryptoHash == null) {
+      cryptoHash = Hash.hash_elems(
+              electionScopeId,
               electionType.name(),
-              start_date.toString(), // python: to_iso_date_string, LOOK isnt all that well defined.
-              end_date.toString(),
+              startDate.toString(), // python: to_iso_date_string, LOOK isnt all that well defined.
+              endDate.toString(),
               name,
-              contact_information,
-              geopolitical_units,
+              contactInformation,
+              geopoliticalUnits,
               parties,
               candidates, // TODO did python add this ?
               contests,
-              ballot_styles);
+              ballotStyles);
     }
   }
 
@@ -73,42 +73,42 @@ public record Manifest(
     HashSet<String> contest_ids = new HashSet<>();
 
     // Validate GP Units
-    for (GeopoliticalUnit gp_unit : this.geopolitical_units) {
-      gp_unit_ids.add(gp_unit.object_id);
+    for (GeopoliticalUnit gp_unit : this.geopoliticalUnits) {
+      gp_unit_ids.add(gp_unit.geopoliticalUnitId);
     }
     // fail if there are duplicates
-    boolean geopolitical_units_valid = gp_unit_ids.size() == this.geopolitical_units.size();
+    boolean geopolitical_units_valid = gp_unit_ids.size() == this.geopoliticalUnits.size();
 
     // Validate Ballot Styles
     boolean ballot_styles_have_valid_gp_unit_ids = true;
-    for (BallotStyle style : this.ballot_styles) {
-      ballot_style_ids.add(style.object_id);
+    for (BallotStyle style : this.ballotStyles) {
+      ballot_style_ids.add(style.ballotStyleId);
 
-      if (style.geopolitical_unit_ids.isEmpty()) {
+      if (style.geopoliticalUnitIds.isEmpty()) {
         ballot_styles_have_valid_gp_unit_ids = false;
         break;
       }
       // validate associated gp unit ids
-      for (String gp_unit_id : style.geopolitical_unit_ids) {
+      for (String gp_unit_id : style.geopoliticalUnitIds) {
         ballot_styles_have_valid_gp_unit_ids &= gp_unit_ids.contains(gp_unit_id);
       }
     }
 
-    boolean ballot_styles_valid = (ballot_style_ids.size() == this.ballot_styles.size() &&
+    boolean ballot_styles_valid = (ballot_style_ids.size() == this.ballotStyles.size() &&
             ballot_styles_have_valid_gp_unit_ids);
 
     // Validate Parties
     for (Party party : this.parties) {
-      party_ids.add(party.object_id);
+      party_ids.add(party.partyId);
     }
     boolean parties_valid = party_ids.size() == this.parties.size();
 
     // Validate Candidates
     boolean candidates_have_valid_party_ids = true;
     for (Candidate candidate : this.candidates) {
-      candidate_ids.add(candidate.object_id);
+      candidate_ids.add(candidate.candidateId);
       // validate the associated party id
-      candidates_have_valid_party_ids &= (candidate.party_id == null) || party_ids.contains(candidate.party_id);
+      candidates_have_valid_party_ids &= (candidate.partyId == null) || party_ids.contains(candidate.partyId);
     }
 
     boolean candidates_have_valid_length = candidate_ids.size() == this.candidates.size();
@@ -124,14 +124,14 @@ public record Manifest(
     for (ContestDescription contest : this.contests) {
       contests_validate_their_properties &= contest.is_valid();
 
-      contest_ids.add(contest.object_id);
-      contest_sequence_ids.add(contest.sequence_order);
+      contest_ids.add(contest.contestId);
+      contest_sequence_ids.add(contest.sequenceOrder);
 
       // validate the associated gp unit id
-      contests_have_valid_electoral_district_id &= gp_unit_ids.contains(contest.electoral_district_id);
+      contests_have_valid_electoral_district_id &= gp_unit_ids.contains(contest.geopoliticalUnitId);
 
-      if (contest.primary_party_ids != null) {
-        for (String primary_party_id : contest.primary_party_ids) {
+      if (contest.primaryPartyIds != null) {
+        for (String primary_party_id : contest.primaryPartyIds) {
           // validate the party ids
           candidate_contests_have_valid_party_ids &= party_ids.contains(primary_party_id);
         }
@@ -419,8 +419,150 @@ public record Manifest(
     }
 
     @Override
-    public Group.ElementModQ crypto_hash() {
+    public Group.ElementModQ cryptoHash() {
       return Hash.hash_elems(this.annotation, this.value);
+    }
+  }
+
+
+  /**
+   * Classifies a set of contests by their set of parties and geopolitical units
+   *
+   * @param ballotStyleId             A unique name
+   * @param geopoliticalUnitIds matches GeoPoliticalUnit.object_id; may be empty
+   * @param partyIds             matches Party.object_id; may be empty
+   * @param imageUri             an optional image_uri for this BallotStyle
+   */
+  public record BallotStyle(
+          String ballotStyleId,
+          List<String> geopoliticalUnitIds,
+          List<String> partyIds,
+          @Nullable String imageUri
+  ) implements Hash.CryptoHashable {
+
+    public BallotStyle {
+      Preconditions.checkArgument(!Strings.isNullOrEmpty(ballotStyleId));
+      geopoliticalUnitIds = toImmutableListEmpty(geopoliticalUnitIds);
+      partyIds = toImmutableListEmpty(partyIds);
+    }
+
+    @Override
+    public Group.ElementModQ cryptoHash() {
+      return Hash.hash_elems(this.ballotStyleId, this.geopoliticalUnitIds, this.partyIds, this.imageUri);
+    }
+  }
+
+  /**
+   * A candidate in a contest.
+   * Note: The ElectionGuard Data Spec deviates from the NIST model in that selections for any contest type
+   * are considered a "candidate". for instance, on a yes-no referendum contest, two `candidate` objects
+   * would be included in the model to represent the `affirmative` and `negative` selections for the contest.
+   *
+   * @see <a href="https://developers.google.com/elections-data/reference/candidate">Civics Common Standard Data Specification</a>
+   */
+  public record Candidate(
+          String candidateId,
+          InternationalizedText name,
+          @Nullable String partyId,
+          @Nullable String imageUri,
+          Boolean isWriteIn
+  ) implements Hash.CryptoHashable {
+
+    /**
+     * A Candidate with only an object_id.
+     */
+    public Candidate(String object_id) {
+      this(object_id, new InternationalizedText(ImmutableList.of()), null, null, false);
+    }
+
+    /**
+     * A Candidate with an object_id and a name, and optional other fields.
+     */
+    public Candidate {
+      Preconditions.checkArgument(!Strings.isNullOrEmpty(candidateId));
+      Preconditions.checkNotNull(name);
+      if (isWriteIn == null) {
+        isWriteIn = false;
+      }
+    }
+
+    String get_candidate_id() {
+      return this.candidateId;
+    }
+
+    @Override
+    public Group.ElementModQ cryptoHash() {
+      return Hash.hash_elems(
+              this.candidateId, this.name, this.partyId, this.imageUri);
+    }
+  }
+
+  /**
+   * Contact information about persons, boards of authorities, organizations, etc.
+   *
+   * @see <a href="https://developers.google.com/elections-data/reference/contact-information">Civics Common Standard Data Specification</a>
+   */
+  public record ContactInformation(
+          List<String> addressLine,
+          List<AnnotatedString> email,
+          List<AnnotatedString> phone,
+          @Nullable String name
+  ) implements Hash.CryptoHashable {
+
+    public ContactInformation {
+      addressLine = toImmutableListEmpty(addressLine);
+      email = toImmutableListEmpty(email);
+      phone = toImmutableListEmpty(phone);
+    }
+
+    @Override
+    public Group.ElementModQ cryptoHash() {
+      return Hash.hash_elems(this.name, this.addressLine, this.email, this.phone);
+    }
+  }
+
+  /**
+   * A physical or virtual unit of representation or vote/seat aggregation.
+   * Use this entity to define geopolitical units such as cities, districts, jurisdictions, or precincts
+   * to associate contests, offices, vote counts, or other information with those geographies.
+   *
+   * @see <a href="https://developers.google.com/elections-data/reference/gp-unit">Civics Common Standard Data Specification</a>
+   */
+  public record GeopoliticalUnit(
+          String geopoliticalUnitId,
+          String name,
+          ReportingUnitType type,
+          @Nullable ContactInformation contactInformation
+  ) implements Hash.CryptoHashable {
+
+    public GeopoliticalUnit {
+      Preconditions.checkArgument(!Strings.isNullOrEmpty(geopoliticalUnitId));
+      Preconditions.checkArgument(!Strings.isNullOrEmpty(name));
+      Preconditions.checkNotNull(type);
+    }
+
+    @Override
+    public Group.ElementModQ cryptoHash() {
+      return Hash.hash_elems(this.geopoliticalUnitId, this.name, this.type.name(), this.contactInformation);
+    }
+  }
+
+  /**
+   * Text that may have translations in multiple languages.
+   *
+   * @see <a href="https://developers.google.com/elections-data/reference/internationalized-text">Civics Common Standard Data Specification</a>
+   */
+  public record InternationalizedText(
+          List<Language> text
+  ) implements Hash.CryptoHashable {
+
+    public InternationalizedText {
+      text = toImmutableListEmpty(text);
+    }
+
+    @Override
+    public Group.ElementModQ cryptoHash() {
+      return Hash.hash_elems(this.text);
     }
   }
 
@@ -440,104 +582,8 @@ public record Manifest(
     }
 
     @Override
-    public Group.ElementModQ crypto_hash() {
+    public Group.ElementModQ cryptoHash() {
       return Hash.hash_elems(this.value, this.language);
-    }
-  }
-
-  /**
-   * Text that may have translations in multiple languages.
-   *
-   * @see <a href="https://developers.google.com/elections-data/reference/internationalized-text">Civics Common Standard Data Specification</a>
-   */
-  public record InternationalizedText(
-          List<Language> text
-  ) implements Hash.CryptoHashable {
-
-    public InternationalizedText {
-      text = toImmutableListEmpty(text);
-    }
-
-    @Override
-    public Group.ElementModQ crypto_hash() {
-      return Hash.hash_elems(this.text);
-    }
-  }
-
-  /**
-   * Contact information about persons, boards of authorities, organizations, etc.
-   *
-   * @see <a href="https://developers.google.com/elections-data/reference/contact-information">Civics Common Standard Data Specification</a>
-   */
-  public record ContactInformation(
-          List<String> address_line,
-          List<AnnotatedString> email,
-          List<AnnotatedString> phone,
-          @Nullable String name
-  ) implements Hash.CryptoHashable {
-
-    public ContactInformation {
-      address_line = toImmutableListEmpty(address_line);
-      email = toImmutableListEmpty(email);
-      phone = toImmutableListEmpty(phone);
-    }
-
-    @Override
-    public Group.ElementModQ crypto_hash() {
-      return Hash.hash_elems(this.name, this.address_line, this.email, this.phone);
-    }
-  }
-
-  /**
-   * A physical or virtual unit of representation or vote/seat aggregation.
-   * Use this entity to define geopolitical units such as cities, districts, jurisdictions, or precincts
-   * to associate contests, offices, vote counts, or other information with those geographies.
-   *
-   * @see <a href="https://developers.google.com/elections-data/reference/gp-unit">Civics Common Standard Data Specification</a>
-   */
-  public record GeopoliticalUnit(
-          String object_id,
-          String name,
-          ReportingUnitType type,
-          @Nullable ContactInformation contact_information
-  ) implements ElectionObjectBaseIF, Hash.CryptoHashable {
-
-    public GeopoliticalUnit {
-      Preconditions.checkArgument(!Strings.isNullOrEmpty(object_id));
-      Preconditions.checkArgument(!Strings.isNullOrEmpty(name));
-      Preconditions.checkNotNull(type);
-    }
-
-    @Override
-    public Group.ElementModQ crypto_hash() {
-      return Hash.hash_elems(this.object_id, this.name, this.type.name(), this.contact_information);
-    }
-  }
-
-  /**
-   * Classifies a set of contests by their set of parties and geopolitical units
-   *
-   * @param object_id             A unique name
-   * @param geopolitical_unit_ids matches GeoPoliticalUnit.object_id; may be empty
-   * @param party_ids             matches Party.object_id; may be empty
-   * @param image_uri             an optional image_uri for this BallotStyle
-   */
-  public record BallotStyle(
-          String object_id,
-          List<String> geopolitical_unit_ids,
-          List<String> party_ids,
-          @Nullable String image_uri
-  ) implements ElectionObjectBaseIF, Hash.CryptoHashable {
-
-    public BallotStyle {
-      Preconditions.checkArgument(!Strings.isNullOrEmpty(object_id));
-      geopolitical_unit_ids = toImmutableListEmpty(geopolitical_unit_ids);
-      party_ids = toImmutableListEmpty(party_ids);
-    }
-
-    @Override
-    public Group.ElementModQ crypto_hash() {
-      return Hash.hash_elems(this.object_id, this.geopolitical_unit_ids, this.party_ids, this.image_uri);
     }
   }
 
@@ -547,12 +593,12 @@ public record Manifest(
    * @see <a href="https://developers.google.com/elections-data/reference/party">Civics Common Standard Data Specification</a>
    */
   public record Party(
-          String object_id,
+          String partyId,
           InternationalizedText name,
           @Nullable String abbreviation,
           @Nullable String color,
-          @Nullable String logo_uri
-  ) implements ElectionObjectBaseIF, Hash.CryptoHashable {
+          @Nullable String logoUri
+  ) implements Hash.CryptoHashable {
 
     /**
      * A Party with only an object_id.
@@ -562,175 +608,104 @@ public record Manifest(
     }
 
     public Party {
-      Preconditions.checkArgument(!Strings.isNullOrEmpty(object_id));
+      Preconditions.checkArgument(!Strings.isNullOrEmpty(partyId));
       Preconditions.checkNotNull(name);
     }
 
     String get_party_id() {
-      return this.object_id;
+      return this.partyId;
     }
 
     @Override
-    public Group.ElementModQ crypto_hash() {
+    public Group.ElementModQ cryptoHash() {
       return Hash.hash_elems(
-              this.object_id,
+              this.partyId,
               this.name,
               this.abbreviation,
               this.color,
-              this.logo_uri);
-    }
-  }
-
-  /**
-   * A candidate in a contest.
-   * Note: The ElectionGuard Data Spec deviates from the NIST model in that selections for any contest type
-   * are considered a "candidate". for instance, on a yes-no referendum contest, two `candidate` objects
-   * would be included in the model to represent the `affirmative` and `negative` selections for the contest.
-   *
-   * @see <a href="https://developers.google.com/elections-data/reference/candidate">Civics Common Standard Data Specification</a>
-   */
-  public record Candidate(
-          String object_id,
-          InternationalizedText name,
-          @Nullable String party_id,
-          @Nullable String image_uri,
-          Boolean is_write_in
-  ) implements ElectionObjectBaseIF, Hash.CryptoHashable {
-
-    /**
-     * A Candidate with only an object_id.
-     */
-    public Candidate(String object_id) {
-      this(object_id, new InternationalizedText(ImmutableList.of()), null, null, false);
-    }
-
-    /**
-     * A Candidate with an object_id and a name, and optional other fields.
-     */
-    public Candidate {
-      Preconditions.checkArgument(!Strings.isNullOrEmpty(object_id));
-      Preconditions.checkNotNull(name);
-      if (is_write_in == null) {
-        is_write_in = false;
-      }
-    }
-
-    String get_candidate_id() {
-      return this.object_id;
-    }
-
-    @Override
-    public Group.ElementModQ crypto_hash() {
-      return Hash.hash_elems(
-              this.object_id, this.name, this.party_id, this.image_uri);
-    }
-  }
-
-  /**
-   * A ballot selection for a specific candidate in a contest.
-   *
-   * @param sequence_order Used for ordering selections in a contest to ensure various encryption primitives are deterministic.
-   *                       The sequence order must be unique and should be representative of how the contests are represented
-   *                       on a "master" ballot in an external system.  The sequence order is not required to be in the order
-   *                       in which they are displayed to a voter.  Any acceptable range of integer values may be provided.
-   * @see <a href="https://developers.google.com/elections-data/reference/ballot-selection">Civics Common Standard Data Specification</a>
-   */
-  public record SelectionDescription(
-          String object_id,
-          String candidate_id,
-          int sequence_order
-  ) implements OrderedObjectBaseIF, Hash.CryptoHashable {
-
-    public SelectionDescription {
-      Preconditions.checkArgument(!Strings.isNullOrEmpty(object_id));
-      Preconditions.checkArgument(!Strings.isNullOrEmpty(candidate_id));
-    }
-
-    @Override
-    public Group.ElementModQ crypto_hash() {
-      return Hash.hash_elems(this.object_id, this.sequence_order, this.candidate_id);
+              this.logoUri);
     }
   }
 
   /**
    * The metadata that describes the structure and type of one contest in the election.
    *
-   * @param sequence_order    Used for ordering contests in a ballot to ensure various encryption primitives are deterministic.
+   * @param sequenceOrder    Used for ordering contests in a ballot to ensure various encryption primitives are deterministic.
    *                          The sequence order must be unique and should be representative of how the contests are represented
    *                          on a "master" ballot in an external system.  The sequence order is not required to be in the order
    *                          in which they are displayed to a voter.  Any acceptable range of integer values may be provided.
-   * @param number_elected    Number of candidates that are elected in the contest ("n" of n-of-m).
+   * @param numberElected    Number of candidates that are elected in the contest ("n" of n-of-m).
    *                          a referendum is considered a specific case of 1-of-m in ElectionGuard
-   * @param votes_allowed     Maximum number of votes/write-ins per voter in this contest. Used in cumulative voting
+   * @param votesAllowed     Maximum number of votes/write-ins per voter in this contest. Used in cumulative voting
    *                          to indicate how many total votes a voter can spread around. In n-of-m elections, this will be None.
    * @param name              Name of the contest, not necessarily as it appears on the ballot
-   * @param ballot_selections For associating a ballot selection for the contest, i.e., a candidate, a ballot measure
-   * @param ballot_title      Title of the contest as it appears on the ballot.
-   * @param ballot_subtitle   Subtitle of the contest as it appears on the ballot.
+   * @param selections For associating a ballot selection for the contest, i.e., a candidate, a ballot measure
+   * @param ballotTitle      Title of the contest as it appears on the ballot.
+   * @param ballotSubtitle   Subtitle of the contest as it appears on the ballot.
    * @see <a href="https://developers.google.com/elections-data/reference/contest">Civics Common Standard Data Specification</a>
    */
   public record ContestDescription(
-          String object_id,
-          String electoral_district_id,
-          int sequence_order,  // LOOK need to sort?
-          VoteVariationType vote_variation,
-          int number_elected,
-          Integer votes_allowed, // LOOK why optional in python ?
+          String contestId,
+          int sequenceOrder,
+          String geopoliticalUnitId,
+          VoteVariationType voteVariation,
+          int numberElected,
+          Integer votesAllowed, // LOOK why optional in python ?
           String name,
-          List<SelectionDescription> ballot_selections,
-          @Nullable InternationalizedText ballot_title,
-          @Nullable InternationalizedText ballot_subtitle,
-          List<String> primary_party_ids
-  ) implements OrderedObjectBaseIF, Hash.CryptoHashable {
+          List<SelectionDescription> selections,
+          @Nullable InternationalizedText ballotTitle,
+          @Nullable InternationalizedText ballotSubtitle,
+          @Nullable List<String> primaryPartyIds // match Party.party_id
+  ) implements Hash.CryptoHashable {
 
     public ContestDescription {
-      Preconditions.checkArgument(!Strings.isNullOrEmpty(object_id));
-      Preconditions.checkArgument(!Strings.isNullOrEmpty(electoral_district_id));
-      Preconditions.checkNotNull(vote_variation);
-      Preconditions.checkNotNull(votes_allowed);
+      Preconditions.checkArgument(!Strings.isNullOrEmpty(contestId));
+      Preconditions.checkArgument(!Strings.isNullOrEmpty(geopoliticalUnitId));
+      Preconditions.checkNotNull(voteVariation);
+      Preconditions.checkNotNull(votesAllowed);
       Preconditions.checkNotNull(name);
-      ballot_selections = toImmutableListEmpty(ballot_selections);
-      primary_party_ids = toImmutableListEmpty(primary_party_ids);
+      selections = toImmutableListEmpty(selections);
+      primaryPartyIds = toImmutableListEmpty(primaryPartyIds);
     }
 
     @Override
-    public Group.ElementModQ crypto_hash() {
+    public Group.ElementModQ cryptoHash() {
       return Hash.hash_elems(
-              this.object_id,
-              this.sequence_order,
-              this.electoral_district_id,
-              this.vote_variation.name(),
-              this.ballot_title,
-              this.ballot_subtitle,
+              this.contestId,
+              this.sequenceOrder,
+              this.geopoliticalUnitId,
+              this.voteVariation.name(),
+              this.ballotTitle,
+              this.ballotSubtitle,
               this.name,
-              this.number_elected,
-              this.votes_allowed,
-              this.ballot_selections,
-              this.primary_party_ids);
+              this.numberElected,
+              this.votesAllowed,
+              this.selections,
+              this.primaryPartyIds);
     }
 
     /**
      * Check the validity of the contest object by verifying its data.
      */
     boolean is_valid() {
-      boolean contest_has_valid_number_elected = this.number_elected <= this.ballot_selections.size();
-      boolean contest_has_valid_votes_allowed = this.number_elected <= this.votes_allowed;
+      boolean contest_has_valid_number_elected = this.numberElected <= this.selections.size();
+      boolean contest_has_valid_votes_allowed = this.numberElected <= this.votesAllowed;
 
       //  verify the candidate_ids, selection object_ids, and sequence_ids are unique
       HashSet<String> candidate_ids = new HashSet<>();
       HashSet<String> selection_ids = new HashSet<>();
       HashSet<Integer> sequence_ids = new HashSet<>();
 
-      int expected_selection_count = this.ballot_selections.size();
+      int expected_selection_count = this.selections.size();
 
       // count unique ids
-      for (SelectionDescription selection : this.ballot_selections) {
+      for (SelectionDescription selection : this.selections) {
         //  validate the object_id
-        selection_ids.add(selection.object_id);
+        selection_ids.add(selection.selectionId);
         //  validate the sequence_order
-        sequence_ids.add(selection.sequence_order);
+        sequence_ids.add(selection.sequenceOrder);
         //  validate the candidate id
-        candidate_ids.add(selection.candidate_id);
+        candidate_ids.add(selection.candidateId);
       }
 
       boolean selections_have_valid_candidate_ids = candidate_ids.size() == expected_selection_count;
@@ -742,7 +717,7 @@ public record Manifest(
 
       if (!success) {
         logger.atWarning().log(
-                "Contest %s failed validation check: %s", this.object_id,
+                "Contest %s failed validation check: %s", this.contestId,
                 String.format("contest_has_valid_number_elected %s%n" +
                                 "contest_has_valid_votes_allowed %s%n" +
                                 "selections_have_valid_candidate_ids %s%n" +
@@ -753,6 +728,32 @@ public record Manifest(
       }
 
       return success;
+    }
+  }
+
+  /**
+   * A ballot selection for a specific candidate in a contest.
+   *
+   * @param sequenceOrder Used for ordering selections in a contest to ensure various encryption primitives are deterministic.
+   *                       The sequence order must be unique and should be representative of how the contests are represented
+   *                       on a "master" ballot in an external system.  The sequence order is not required to be in the order
+   *                       in which they are displayed to a voter.  Any acceptable range of integer values may be provided.
+   * @see <a href="https://developers.google.com/elections-data/reference/ballot-selection">Civics Common Standard Data Specification</a>
+   */
+  public record SelectionDescription(
+          String selectionId,
+          int sequenceOrder,
+          String candidateId
+  ) implements Hash.CryptoHashable {
+
+    public SelectionDescription {
+      Preconditions.checkArgument(!Strings.isNullOrEmpty(selectionId));
+      Preconditions.checkArgument(!Strings.isNullOrEmpty(candidateId));
+    }
+
+    @Override
+    public Group.ElementModQ cryptoHash() {
+      return Hash.hash_elems(this.selectionId, this.sequenceOrder, this.candidateId);
     }
   }
 

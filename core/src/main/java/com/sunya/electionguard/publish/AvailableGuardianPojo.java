@@ -42,8 +42,8 @@ public class AvailableGuardianPojo {
 
   private static AvailableGuardianPojo convertAvailableGuardian(AvailableGuardian org) {
     AvailableGuardianPojo pojo = new AvailableGuardianPojo();
-    pojo.guardian_id = org.guardian_id();
-    pojo.sequence = org.sequence();
+    pojo.guardian_id = org.guardianId();
+    pojo.sequence = org.xCoordinate();
     pojo.lagrangeCoordinate = org.lagrangeCoordinate();
     return pojo;
   }

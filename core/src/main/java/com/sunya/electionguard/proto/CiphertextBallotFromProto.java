@@ -32,9 +32,9 @@ public class CiphertextBallotFromProto {
             ballot.getBallotId(),
             ballot.getBallotStyleId(),
             convertElementModQ(ballot.getManifestHash()),
-            convertElementModQ(ballot.getPreviousTrackingHash()),
+            convertElementModQ(ballot.getCodeSeed()),
             convertList(ballot.getContestsList(), CiphertextBallotFromProto::convertContest),
-            convertElementModQ(ballot.getTrackingHash()),
+            convertElementModQ(ballot.getCode()),
             ballot.getTimestamp(),
             convertElementModQ(ballot.getCryptoHash()),
             convertBallotState(ballot.getState()));

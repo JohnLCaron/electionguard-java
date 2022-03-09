@@ -16,10 +16,10 @@ public class CiphertextBallotToProto {
   public static CiphertextBallotProto.SubmittedBallot translateToProto(SubmittedBallot ballot) {
     CiphertextBallotProto.SubmittedBallot.Builder builder = CiphertextBallotProto.SubmittedBallot.newBuilder();
     builder.setBallotId(ballot.object_id());
-    builder.setBallotStyleId(ballot.style_id);
-    builder.setManifestHash(convertElementModQ(ballot.manifest_hash));
-    builder.setTrackingHash(convertElementModQ(ballot.code));
-    builder.setPreviousTrackingHash(convertElementModQ(ballot.code_seed));
+    builder.setBallotStyleId(ballot.ballotStyleId);
+    builder.setManifestHash(convertElementModQ(ballot.manifestHash));
+    builder.setCode(convertElementModQ(ballot.code));
+    builder.setCodeSeed(convertElementModQ(ballot.code_seed));
     ballot.contests.forEach(value -> builder.addContests(convertContest(value)));
     builder.setTimestamp(ballot.timestamp);
     builder.setCryptoHash(convertElementModQ(ballot.crypto_hash));
@@ -33,12 +33,12 @@ public class CiphertextBallotToProto {
 
   static CiphertextBallotProto.CiphertextBallotContest convertContest(CiphertextBallot.Contest contest) {
     CiphertextBallotProto.CiphertextBallotContest.Builder builder = CiphertextBallotProto.CiphertextBallotContest.newBuilder();
-    builder.setContestId(contest.object_id);
+    builder.setContestId(contest.contestId);
     builder.setSequenceOrder(contest.sequence_order());
-    builder.setContestHash(convertElementModQ(contest.contest_hash));
-    contest.ballot_selections.forEach(value -> builder.addSelections(convertSelection(value)));
+    builder.setContestHash(convertElementModQ(contest.contestHash));
+    contest.selections.forEach(value -> builder.addSelections(convertSelection(value)));
     builder.setCryptoHash(convertElementModQ(contest.crypto_hash));
-    builder.setCiphertextAccumulation(convertCiphertext(contest.encrypted_total));
+    builder.setCiphertextAccumulation(convertCiphertext(contest.ciphertextAccumulation));
     contest.proof.ifPresent(value -> builder.setProof(convertConstantProof(value)));
     return builder.build();
   }

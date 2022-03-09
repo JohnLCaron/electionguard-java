@@ -22,7 +22,7 @@ public class CiphertextContest {
   }
 
   public static CiphertextContest createFrom(CiphertextBallot.Contest ballotContest) {
-    return new CiphertextContest(ballotContest.object_id, ballotContest.contest_hash,
-            new ArrayList<>(ballotContest.ballot_selections));
+    return new CiphertextContest(ballotContest.contestId, ballotContest.contestHash,
+            new ArrayList<>(ballotContest.selections));
   }
 }

@@ -28,7 +28,7 @@ public class TestElgamalProperties extends TestProperties {
     KeyPair keypair = elgamal_keypair_from_secret(secret_key).orElseThrow();
     ElementModP public_key = keypair.public_key();
 
-    assertThat(Group.lessThan(public_key.getBigInt(), Group.getPrimes().large_prime)).isTrue();
+    assertThat(Group.lessThan(public_key.getBigInt(), Group.getPrimes().largePrime)).isTrue();
     ElementModP elem = g_pow_p(ZERO_MOD_Q);
     assertThat(elem).isEqualTo(ONE_MOD_P);  // g^0 == 1
 
@@ -79,8 +79,8 @@ public class TestElgamalProperties extends TestProperties {
   @Property
   public void test_elgamal_generated_keypairs_are_within_range(
           @ForAll("elgamal_keypairs") ElGamal.KeyPair keypair) {
-    assertThat(Group.lessThan(keypair.public_key().getBigInt(), Group.getPrimes().large_prime)).isTrue();
-    assertThat(Group.lessThan(keypair.secret_key().getBigInt(), Group.getPrimes().small_prime)).isTrue();
+    assertThat(Group.lessThan(keypair.public_key().getBigInt(), Group.getPrimes().largePrime)).isTrue();
+    assertThat(Group.lessThan(keypair.secret_key().getBigInt(), Group.getPrimes().smallPrime)).isTrue();
     assertThat(g_pow_p(keypair.secret_key())).isEqualTo(keypair.public_key());
   }
 

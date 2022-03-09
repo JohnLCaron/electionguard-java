@@ -163,7 +163,7 @@ public class DecryptingSimulator {
     this.electionRecord = electionRecord;
     this.election = electionRecord.election;
     this.quorum = electionRecord.context.quorum;
-    this.numberOfGuardians = electionRecord.context.number_of_guardians;
+    this.numberOfGuardians = electionRecord.context.numberOfGuardians;
     this.encryptedTally = electionRecord.ciphertextTally;
 
     this.guardians = provider.guardians();

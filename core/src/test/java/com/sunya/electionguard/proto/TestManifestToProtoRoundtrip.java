@@ -27,19 +27,19 @@ public class TestManifestToProtoRoundtrip {
     ManifestProto.Manifest proto = ManifestToProto.translateToProto(fromPython);
     Manifest roundtrip = ManifestFromProto.translateFromProto(proto);
 
-    assertThat(roundtrip.election_scope_id()).isEqualTo(fromPython.election_scope_id());
+    assertThat(roundtrip.electionScopeId()).isEqualTo(fromPython.electionScopeId());
     assertThat(roundtrip.electionType()).isEqualTo(fromPython.electionType());
-    assertThat(roundtrip.start_date()).isEqualTo(fromPython.start_date());
-    assertThat(roundtrip.end_date()).isEqualTo(fromPython.end_date());
+    assertThat(roundtrip.startDate()).isEqualTo(fromPython.startDate());
+    assertThat(roundtrip.endDate()).isEqualTo(fromPython.endDate());
 
-    assertThat(roundtrip.geopolitical_units()).containsExactlyElementsIn(fromPython.geopolitical_units());
+    assertThat(roundtrip.geopoliticalUnits()).containsExactlyElementsIn(fromPython.geopoliticalUnits());
     assertThat(roundtrip.parties()).containsExactlyElementsIn(fromPython.parties());
     assertThat(roundtrip.candidates()).containsExactlyElementsIn(fromPython.candidates());
     assertThat(roundtrip.contests()).containsExactlyElementsIn(fromPython.contests());
-    assertThat(roundtrip.ballot_styles()).containsExactlyElementsIn(fromPython.ballot_styles());
+    assertThat(roundtrip.ballotStyles()).containsExactlyElementsIn(fromPython.ballotStyles());
 
     assertThat(roundtrip.name()).isEqualTo(fromPython.name());
-    assertThat(roundtrip.contact_information()).isEqualTo(fromPython.contact_information());
+    assertThat(roundtrip.contactInformation()).isEqualTo(fromPython.contactInformation());
 
     assertThat(roundtrip).isEqualTo(fromPython);
   }

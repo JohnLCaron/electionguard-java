@@ -23,11 +23,11 @@ public class TallyTestHelper {
     Map<String, Integer> result = new HashMap<>();
     for (PlaintextBallot ballot : ballots) {
       for (PlaintextBallot.Contest contest : ballot.contests) {
-        for (PlaintextBallot.Selection selection : contest.ballot_selections) {
+        for (PlaintextBallot.Selection selection : contest.selections) {
           assertWithMessage("Placeholder selections should not exist in the plaintext ballots")
-                  .that(selection.is_placeholder_selection).isFalse();
+                  .that(selection.isPlaceholderSelection).isFalse();
           // returns 1 or 0 for n-of-m ballot selections
-          result.merge(selection.selection_id, selection.vote, Integer::sum);
+          result.merge(selection.selectionId, selection.vote, Integer::sum);
         }
       }
     }

@@ -73,7 +73,7 @@ public class GuardianRecordPojo {
 
   private static SchnorrProofPojo convertProof(SchnorrProof org) {
     SchnorrProofPojo pojo = new SchnorrProofPojo();
-    pojo.public_key = org.public_key;
+    pojo.public_key = org.publicKey;
     pojo.commitment = org.commitment;
     pojo.challenge  = org.challenge;
     pojo.response = org.response;

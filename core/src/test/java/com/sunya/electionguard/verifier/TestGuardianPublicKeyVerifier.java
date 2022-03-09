@@ -52,7 +52,7 @@ public class TestGuardianPublicKeyVerifier {
   private void verify_equations(Group.ElementModP genP, GuardianRecord coeff) {
     for (SchnorrProof proof : coeff.coefficientProofs()) {
       Group.ElementModP commitment = proof.commitment; // h
-      Group.ElementModP public_key = proof.public_key; // k
+      Group.ElementModP public_key = proof.publicKey; // k
       Group.ElementModQ challenge = proof.challenge;   // c
       Group.ElementModQ response = proof.response;     // u
 
@@ -64,7 +64,7 @@ public class TestGuardianPublicKeyVerifier {
   private void verify_challenges(GuardianRecord coeff) {
     for (SchnorrProof proof : coeff.coefficientProofs()) {
       Group.ElementModP commitment = proof.commitment; // h
-      Group.ElementModP public_key = proof.public_key; // k
+      Group.ElementModP public_key = proof.publicKey; // k
       Group.ElementModQ challenge = proof.challenge;   // c
 
       // Changed validation spec 2.A. see issue #278

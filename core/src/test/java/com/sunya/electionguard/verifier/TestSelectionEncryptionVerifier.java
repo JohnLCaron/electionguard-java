@@ -60,14 +60,14 @@ public class TestSelectionEncryptionVerifier {
     }
 
     void verify_a_contest(CiphertextBallot.Contest contest) {
-      Integer vote_limit = electionRecord.getVoteLimitForContest(contest.object_id);
+      Integer vote_limit = electionRecord.getVoteLimitForContest(contest.contestId);
       Preconditions.checkNotNull(vote_limit);
 
       int placeholder_count = 0;
       ElementModP selection_alpha_product = Group.ONE_MOD_P;
       ElementModP selection_beta_product = Group.ONE_MOD_P;
 
-      for (CiphertextBallot.Selection selection : contest.ballot_selections) {
+      for (CiphertextBallot.Selection selection : contest.selections) {
         ElementModP this_pad = selection.ciphertext().pad();
         ElementModP this_data = selection.ciphertext().data();
 
@@ -90,7 +90,7 @@ public class TestSelectionEncryptionVerifier {
       }
 
       // verify the placeholder numbers match the maximum votes allowed - contest check
-      boolean placeholder_match = match_vote_limit_by_contest(contest.object_id, placeholder_count);
+      boolean placeholder_match = match_vote_limit_by_contest(contest.contestId, placeholder_count);
       assertThat(placeholder_match).isTrue();
 
       // calculate c = H(Q-bar, (A,B), (a,b))

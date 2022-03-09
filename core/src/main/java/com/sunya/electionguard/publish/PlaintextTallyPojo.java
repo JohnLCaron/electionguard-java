@@ -149,7 +149,7 @@ public class PlaintextTallyPojo {
 
   private static PlaintextTallyPojo convertTally(PlaintextTally org) {
     PlaintextTallyPojo pojo = new PlaintextTallyPojo();
-    pojo.object_id = org.object_id;
+    pojo.object_id = org.tallyId;
 
     pojo.contests = org.contests.entrySet().stream().collect(Collectors.toMap(
             Map.Entry::getKey,
@@ -160,7 +160,7 @@ public class PlaintextTallyPojo {
 
   private static PlaintextTallyContestPojo convertContest(PlaintextTally.Contest org) {
     PlaintextTallyContestPojo pojo = new PlaintextTallyContestPojo();
-    pojo.object_id = org.object_id();
+    pojo.object_id = org.contestId();
     pojo.selections = org.selections().entrySet().stream().collect(Collectors.toMap(
             Map.Entry::getKey,
             e2 -> convertSelection(e2.getValue())));
@@ -169,7 +169,7 @@ public class PlaintextTallyPojo {
 
   private static PlaintextTallySelectionPojo convertSelection(PlaintextTally.Selection org) {
     PlaintextTallySelectionPojo pojo = new PlaintextTallySelectionPojo();
-    pojo.object_id = org.object_id();
+    pojo.object_id = org.selectionId();
     pojo.tally = org.tally();
     pojo.value = org.value();
     pojo.message = CiphertextTallyPojo.convertCiphertext(org.message());
@@ -179,18 +179,18 @@ public class PlaintextTallyPojo {
 
   private static CiphertextDecryptionSelectionPojo convertShare(DecryptionShare.CiphertextDecryptionSelection org) {
     final Map<String, CiphertextCompensatedDecryptionSelectionPojo> recovered = new HashMap<>();
-    org.recovered_parts().ifPresent(org_recoverd ->  {
+    org.recoveredParts().ifPresent(org_recoverd ->  {
       for (Map.Entry<String, DecryptionShare.CiphertextCompensatedDecryptionSelection> entry : org_recoverd.entrySet()) {
         recovered.put(entry.getKey(), convertCompensatedShare(entry.getValue()));
       }
     });
 
     CiphertextDecryptionSelectionPojo pojo = new CiphertextDecryptionSelectionPojo();
-    pojo.object_id = org.selection_id();
-    pojo.guardian_id = org.guardian_id();
+    pojo.object_id = org.selectionId();
+    pojo.guardian_id = org.guardianId();
     pojo.share = org.share();
     org.proof().ifPresent( proof -> pojo.proof = convertProof(proof));
-    pojo.recovered_parts = org.recovered_parts().isPresent() ? recovered : null;
+    pojo.recovered_parts = org.recoveredParts().isPresent() ? recovered : null;
     return pojo;
   }
 
@@ -198,11 +198,11 @@ public class PlaintextTallyPojo {
           DecryptionShare.CiphertextCompensatedDecryptionSelection org) {
 
     CiphertextCompensatedDecryptionSelectionPojo pojo = new CiphertextCompensatedDecryptionSelectionPojo();
-    pojo.object_id = org.selection_id();
-    pojo.guardian_id = org.guardian_id();
+    pojo.object_id = org.selectionId();
+    pojo.guardian_id = org.guardianId();
     pojo.missing_guardian_id = org.missing_guardian_id();
     pojo.share = org.share();
-    pojo.recovery_key = org.recovery_key();
+    pojo.recovery_key = org.recoveryKey();
     pojo.proof = convertProof(org.proof());
     return pojo;
   }

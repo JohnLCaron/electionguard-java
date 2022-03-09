@@ -2,6 +2,7 @@ package com.sunya.electionguard;
 
 import com.google.common.base.Preconditions;
 
+import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import java.math.BigInteger;
 import java.util.Objects;
@@ -80,20 +81,20 @@ public class ElectionConstants {
   //////////////////////////////////////////////////////////////////////////////////////////////
   public final String name;
   /** large prime or P. */
-  public final BigInteger large_prime;
+  public final BigInteger largePrime;
   /** small prime or Q. */
-  public final BigInteger small_prime;
+  public final BigInteger smallPrime;
   /** cofactor or R. */
   public final BigInteger cofactor;
   /** generator or G. */
   public final BigInteger generator;
 
-  public ElectionConstants(String name, BigInteger large_prime, BigInteger small_prime, BigInteger cofactor, BigInteger generator) {
-    this.name = name != null ? name : getPrimeOptionType().name();
-    this.large_prime = Preconditions.checkNotNull(large_prime);
-    this.small_prime = Preconditions.checkNotNull(small_prime);
+  public ElectionConstants(@Nullable String name, BigInteger largePrime, BigInteger smallPrime, BigInteger cofactor, BigInteger generator) {
+    this.largePrime = Preconditions.checkNotNull(largePrime);
+    this.smallPrime = Preconditions.checkNotNull(smallPrime);
     this.cofactor = Preconditions.checkNotNull(cofactor);
     this.generator = Preconditions.checkNotNull(generator);
+    this.name = name != null ? name : getPrimeOptionType().name();
   }
 
   @Override
@@ -101,22 +102,22 @@ public class ElectionConstants {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     ElectionConstants that = (ElectionConstants) o;
-    return large_prime.equals(that.large_prime) &&
-            small_prime.equals(that.small_prime) &&
+    return largePrime.equals(that.largePrime) &&
+            smallPrime.equals(that.smallPrime) &&
             cofactor.equals(that.cofactor) &&
             generator.equals(that.generator);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(large_prime, small_prime, cofactor, generator);
+    return Objects.hash(largePrime, smallPrime, cofactor, generator);
   }
 
   @Override
   public String toString() {
     return "ElectionConstants (" + name +
-            ")\n  large_prime= " + large_prime +
-            "\n  small_prime= " + small_prime +
+            ")\n  large_prime= " + largePrime +
+            "\n  small_prime= " + smallPrime +
             "\n  cofactor= " + cofactor +
             "\n  generator= " + generator +
             "}";

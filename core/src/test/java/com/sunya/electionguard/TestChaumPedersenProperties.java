@@ -126,7 +126,7 @@ public class TestChaumPedersenProperties extends TestProperties {
   ) {
 
     ElGamal.Ciphertext message = ElGamal.elgamal_encrypt(constant, nonce, keypair.public_key()).orElseThrow();
-    Group.ElementModQ  randomHash = Hash.hash_elems("random hash", Utils.randbelow(getPrimes().small_prime));
+    Group.ElementModQ  randomHash = Hash.hash_elems("random hash", Utils.randbelow(getPrimes().smallPrime));
     DisjunctiveChaumPedersenProof proof = make_disjunctive_chaum_pedersen(message, nonce, keypair.public_key(), randomHash, seed, 0);
     DisjunctiveChaumPedersenProof proofOrg = make_disjunctive_chaum_pedersen_org(message, nonce, keypair.public_key(), randomHash, seed, 0);
     assertThat(proof).isEqualTo(proofOrg);

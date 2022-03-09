@@ -16,7 +16,7 @@ import java.util.Optional;
 public class Hash {
 
   interface CryptoHashable {
-    Group.ElementModQ crypto_hash();
+    Group.ElementModQ cryptoHash();
   }
 
   // LOOK not used?
@@ -71,7 +71,7 @@ public class Hash {
       } else if (x instanceof Group.ElementMod) {
         hash_me = ((Group.ElementMod)x).to_hex();
       } else if (x instanceof CryptoHashable) {
-        hash_me = ((CryptoHashable)x).crypto_hash().to_hex();
+        hash_me = ((CryptoHashable)x).cryptoHash().to_hex();
       } else if (x instanceof String) {
           // strings are iterable, so it 's important to handle them before list-like types
         hash_me = (String) x;
@@ -87,7 +87,7 @@ public class Hash {
 
     // must be positive
     BigInteger bi = new BigInteger(1, digest.digest());
-    BigInteger bim = bi.mod(Group.getPrimes().small_prime);
+    BigInteger bim = bi.mod(Group.getPrimes().smallPrime);
     return Group.int_to_q_unchecked(bim);
   }
 }

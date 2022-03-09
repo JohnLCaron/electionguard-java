@@ -34,16 +34,16 @@ public class ElectionFactory {
 
     // Referendum selections are simply a special case of `candidate`in the object model
     List<Manifest.SelectionDescription> fake_referendum_ballot_selections = ImmutableList.of(
-            new Manifest.SelectionDescription("some-object-id-affirmative", "some-candidate-id-1", 0),
-            new Manifest.SelectionDescription("some-object-id-negative", "some-candidate-id-2", 1));
+            new Manifest.SelectionDescription("some-object-id-affirmative", 0, "some-candidate-id-1"),
+            new Manifest.SelectionDescription("some-object-id-negative", 1, "some-candidate-id-2"));
 
     int sequence_order = 0;
     int number_elected = 1;
     int votes_allowed = 1;
     Manifest.ContestDescription fake_referendum_contest = new Manifest.ContestDescription(
             "some-referendum-contest-object-id",
-            "some-geopoltical-unit-id",
             sequence_order,
+            "some-geopoltical-unit-id",
             Manifest.VoteVariationType.one_of_m,
             number_elected,
             votes_allowed,
@@ -52,9 +52,9 @@ public class ElectionFactory {
             null, null, null);
 
     List<Manifest.SelectionDescription> fake_candidate_ballot_selections = ImmutableList.of(
-            new Manifest.SelectionDescription("some-object-id-candidate-1", "some-candidate-id-1", 0),
-            new Manifest.SelectionDescription("some-object-id-candidate-2", "some-candidate-id-2", 1),
-            new Manifest.SelectionDescription("some-object-id-candidate-3", "some-candidate-id-3", 2)
+            new Manifest.SelectionDescription("some-object-id-candidate-1", 0, "some-candidate-id-1"),
+            new Manifest.SelectionDescription("some-object-id-candidate-2", 1, "some-candidate-id-2"),
+            new Manifest.SelectionDescription("some-object-id-candidate-3", 2, "some-candidate-id-3")
     );
 
     int sequence_order_2 = 1;
@@ -62,8 +62,8 @@ public class ElectionFactory {
     int votes_allowed_2 = 2;
     Manifest.ContestDescription fake_candidate_contest = new Manifest.ContestDescription(
             "some-candidate-contest-object-id",
-            "some-geopoltical-unit-id",
             sequence_order_2,
+            "some-geopoltical-unit-id",
             Manifest.VoteVariationType.one_of_m,
             number_elected_2,
             votes_allowed_2,
@@ -105,7 +105,7 @@ public class ElectionFactory {
 
     return new PlaintextBallot(
             ballot_id,
-            election.ballot_styles().get(0).object_id(),
+            election.ballotStyles().get(0).ballotStyleId(),
             ImmutableList.of(Encrypt.contest_from(election.contests().get(0)),
                     Encrypt.contest_from(election.contests().get(1)))
     );
@@ -147,7 +147,7 @@ public class ElectionFactory {
     String candidate_id = String.format("candidate_id-%d", TestUtils.randomInt(20));
     String object_id = String.format("object_id-%d", TestUtils.randomInt());
     int sequence_order = random.nextInt(20);
-    return new SelectionTuple(object_id, new Manifest.SelectionDescription(object_id, candidate_id, sequence_order));
+    return new SelectionTuple(object_id, new Manifest.SelectionDescription(object_id, sequence_order, candidate_id));
   }
 
   public static ContestWithPlaceholders get_contest_description_well_formed() {
@@ -165,14 +165,14 @@ public class ElectionFactory {
     for (int i = 0; i < Math.max(first_int, second_int); i++) {
       String object_id = String.format("object_id-%d", TestUtils.randomInt());
       String candidate_id = String.format("candidate_id-%d", TestUtils.randomInt());
-      Manifest.SelectionDescription selection_description = new Manifest.SelectionDescription(object_id, candidate_id, i);
+      Manifest.SelectionDescription selection_description = new Manifest.SelectionDescription(object_id, i, candidate_id);
       selection_descriptions.add(selection_description);
     }
 
     Manifest.ContestDescription contest_description = new Manifest.ContestDescription(
             String.format("object_id-%d", TestUtils.randomInt()),
-            electoral_district_id,
             sequence_order,
+            electoral_district_id,
             Manifest.VoteVariationType.n_of_m,
             number_elected,
             votes_allowed,

@@ -165,26 +165,26 @@ class ElectionRecordPanel extends JPanel {
       f.format("  version = %s%n", record.protoVersion);
       Manifest manifest = record.election;
       f.format("%nManifest%n");
-      f.format("  election_scope_id = %s%n", manifest.election_scope_id());
+      f.format("  election_scope_id = %s%n", manifest.electionScopeId());
       f.format("  type = %s%n", manifest.electionType());
       f.format("  name = %s%n", manifest.name());
-      f.format("  start_date = %s%n", manifest.start_date());
-      f.format("  end_date = %s%n", manifest.end_date());
-      f.format("  manifest crypto hash = %s%n", manifest.crypto_hash());
+      f.format("  start_date = %s%n", manifest.startDate());
+      f.format("  end_date = %s%n", manifest.endDate());
+      f.format("  manifest crypto hash = %s%n", manifest.cryptoHash());
 
       ElectionContext context = record.context;
       f.format("%nContext%n");
-      f.format("  number_of_guardians = %s%n", context.number_of_guardians);
+      f.format("  number_of_guardians = %s%n", context.numberOfGuardians);
       f.format("  quorum = %s%n", context.quorum);
-      f.format("  election public key = %s%n", context.elgamal_public_key.toShortString());
-      f.format("  description hash = %s%n", context.manifest_hash);
-      f.format("  election base hash = %s%n", context.crypto_base_hash);
-      f.format("  extended base hash = %s%n", context.crypto_extended_base_hash);
-      f.format("  commitment hash = %s%n", context.commitment_hash);
+      f.format("  election public key = %s%n", context.jointPublicKey.toShortString());
+      f.format("  description hash = %s%n", context.manifestHash);
+      f.format("  election base hash = %s%n", context.cryptoBaseHash);
+      f.format("  extended base hash = %s%n", context.cryptoExtendedBaseHash);
+      f.format("  commitment hash = %s%n", context.commitmentHash);
 
       f.format("%n  EncryptionDevices%n");
       for (Encrypt.EncryptionDevice device : record.devices) {
-        f.format("    %d session=%d launch=%d location=%s%n", device.device_id(), device.session_id(), device.launch_code(), device.location());
+        f.format("    %d session=%d launch=%d location=%s%n", device.deviceId(), device.sessionId(), device.launchCode(), device.location());
       }
 
       f.format("%n  Guardian Records id, sequence%n");
@@ -194,14 +194,14 @@ class ElectionRecordPanel extends JPanel {
 
       ElectionConstants constants = record.constants;
       f.format("%nConstants%n");
-      f.format("  large_prime = %s%n", Group.int_to_p_unchecked(constants.large_prime).toShortString());
-      f.format("  small_prime = %s%n", Group.int_to_q_unchecked(constants.small_prime));
+      f.format("  large_prime = %s%n", Group.int_to_p_unchecked(constants.largePrime).toShortString());
+      f.format("  small_prime = %s%n", Group.int_to_q_unchecked(constants.smallPrime));
       f.format("  cofactor    = %s%n", Group.int_to_p_unchecked(constants.cofactor).toShortString());
       f.format("  generator   = %s%n", Group.int_to_p_unchecked(constants.generator).toShortString());
 
       f.format("%n  Available Guardians%n");
       for (AvailableGuardian guardian : record.availableGuardians) {
-        f.format("    %20s %d %s%n", guardian.guardian_id(), guardian.sequence(), guardian.lagrangeCoordinate());
+        f.format("    %20s %d %s%n", guardian.guardianId(), guardian.xCoordinate(), guardian.lagrangeCoordinate());
       }
 
       f.format("%nAcceptedBallots %d%n", Iterables.size(record.acceptedBallots));

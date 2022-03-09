@@ -29,8 +29,8 @@ public class TestBallotBox {
     context = tuple.context;
 
     source = ElectionFactory.get_fake_ballot(election, null);
-    assertThat(election.ballot_styles().isEmpty()).isFalse();
-    assertThat(source.is_valid(election.ballot_styles().get(0).object_id())).isTrue();
+    assertThat(election.ballotStyles().isEmpty()).isFalse();
+    assertThat(source.is_valid(election.ballotStyles().get(0).ballotStyleId())).isTrue();
 
     Optional<CiphertextBallot> dataO = Encrypt.encrypt_ballot(source, tuple.internalManifest, context, SEED_HASH, Optional.empty(), true);
     assertThat(dataO).isPresent();

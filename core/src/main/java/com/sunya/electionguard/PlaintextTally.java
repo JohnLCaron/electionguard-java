@@ -20,16 +20,16 @@ public class PlaintextTally {
   /**
    * Matches the CiphertextTally object_id.
    */
-  public final String object_id;
+  public final String tallyId;
 
   /**
    * The list of contests for this tally, keyed by contest_id.
    */
   public final ImmutableMap<String, Contest> contests;
 
-  public PlaintextTally(String object_id,
+  public PlaintextTally(String tallyId,
                         Map<String, Contest> contests) {
-    this.object_id = Preconditions.checkNotNull(object_id);
+    this.tallyId = Preconditions.checkNotNull(tallyId);
     this.contests = ImmutableMap.copyOf(Preconditions.checkNotNull(contests));
   }
 
@@ -38,19 +38,19 @@ public class PlaintextTally {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     PlaintextTally that = (PlaintextTally) o;
-    return object_id.equals(that.object_id) &&
+    return tallyId.equals(that.tallyId) &&
             contests.equals(that.contests);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(object_id, contests);
+    return Objects.hash(tallyId, contests);
   }
 
   @Override
   public String toString() {
     return "PlaintextTally{" +
-            "object_id='" + object_id + '\'' +
+            "object_id='" + tallyId + '\'' +
             ", contests=" + contests +
             '}';
   }
@@ -62,11 +62,11 @@ public class PlaintextTally {
    * @param selections The collection of selections in the contest, keyed by selection.object_id.
    */
   public record Contest(
-          String object_id,
+          String contestId,
           Map<String, Selection> selections) {
 
     public Contest {
-      Preconditions.checkArgument(!Strings.isNullOrEmpty(object_id));
+      Preconditions.checkArgument(!Strings.isNullOrEmpty(contestId));
       Preconditions.checkNotNull(selections);
       selections = Map.copyOf(selections);
     }
@@ -82,14 +82,14 @@ public class PlaintextTally {
    * @param shares  The Guardians' shares of the decryption of a selection. `M_i` in the spec. Must be nguardians of them.
    */
   public record Selection(
-          String object_id,
+          String selectionId,
           Integer tally,
           ElementModP value,
           ElGamal.Ciphertext message,
           List<DecryptionShare.CiphertextDecryptionSelection> shares) {
 
     public Selection {
-      Preconditions.checkArgument(!Strings.isNullOrEmpty(object_id));
+      Preconditions.checkArgument(!Strings.isNullOrEmpty(selectionId));
       Preconditions.checkNotNull(tally);
       Preconditions.checkNotNull(value);
       Preconditions.checkNotNull(message);
@@ -100,18 +100,18 @@ public class PlaintextTally {
     public String toString() {
       Formatter f = new Formatter();
       f.format("Selection{%n object_id= '%s'%n tally    = %d%n value    = %s%n message  = %s%n shares=%n",
-              object_id(), tally(), value().toShortString(), message());
+              selectionId(), tally(), value().toShortString(), message());
       for (DecryptionShare.CiphertextDecryptionSelection sel : shares()) {
-        f.format("   %s share = %s", sel.guardian_id(), sel.share().toShortString());
+        f.format("   %s share = %s", sel.guardianId(), sel.share().toShortString());
         if (sel.proof().isPresent()) {
           f.format(" %s", sel.proof().get().name);
         }
-        if (sel.recovered_parts().isPresent()) {
+        if (sel.recoveredParts().isPresent()) {
           f.format(" recovered_parts=%n");
           f.format("     %30s %12s %12s %20s %s%n", "selection_id", "guardian", "missing", "proof", "share");
-          Map<String, DecryptionShare.CiphertextCompensatedDecryptionSelection> m = sel.recovered_parts().get();
+          Map<String, DecryptionShare.CiphertextCompensatedDecryptionSelection> m = sel.recoveredParts().get();
           for (DecryptionShare.CiphertextCompensatedDecryptionSelection r : m.values()) {
-            f.format("     %30s %12s %12s %20s %s%n", r.selection_id(), r.guardian_id(), r.missing_guardian_id(),
+            f.format("     %30s %12s %12s %20s %s%n", r.selectionId(), r.guardianId(), r.missing_guardian_id(),
                     r.proof().name, r.share().toShortString());
           }
         } else {

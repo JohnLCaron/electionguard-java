@@ -18,27 +18,26 @@ import java.util.Optional;
  * This is used both as input, and for the roundtrip: input -&gt; encrypt -&gt; decrypt -&gt; output.
  */
 @Immutable
-public class PlaintextBallot implements ElectionObjectBaseIF {
+public class PlaintextBallot {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   /** Unique internal identifier used by other elements to reference this element. */
-  private final String object_id;
+  private final String ballotId;
   /** The object_id of the Manifest.BallotStyle. */
-  public final String style_id;
+  public final String ballotStyleId;
   /** The list of contests for this ballot. */
   public final ImmutableList<Contest> contests;
 
-  public PlaintextBallot(String object_id, String style_id, List<Contest> contests) {
-    Preconditions.checkArgument(!Strings.isNullOrEmpty(object_id));
-    this.object_id = object_id;
-    Preconditions.checkArgument(!Strings.isNullOrEmpty(style_id));
-    this.style_id = style_id;
+  public PlaintextBallot(String ballotId, String ballotStyleId, List<Contest> contests) {
+    Preconditions.checkArgument(!Strings.isNullOrEmpty(ballotId));
+    this.ballotId = ballotId;
+    Preconditions.checkArgument(!Strings.isNullOrEmpty(ballotStyleId));
+    this.ballotStyleId = ballotStyleId;
     this.contests = ImmutableList.copyOf(contests);
   }
 
-  @Override
   public String object_id() {
-    return object_id;
+    return ballotId;
   }
 
   /**
@@ -47,9 +46,9 @@ public class PlaintextBallot implements ElectionObjectBaseIF {
    * @param expected_ballot_style_id: Expected ballot style id
    */
   public boolean is_valid(String expected_ballot_style_id) {
-    if (!this.style_id.equals(expected_ballot_style_id)) {
+    if (!this.ballotStyleId.equals(expected_ballot_style_id)) {
       logger.atWarning().log("invalid ballot_style_id: for: %s expected(%s) actual(%s)",
-              this.object_id, expected_ballot_style_id, this.style_id);
+              this.ballotId, expected_ballot_style_id, this.ballotStyleId);
       return false;
     }
     return true;
@@ -58,8 +57,8 @@ public class PlaintextBallot implements ElectionObjectBaseIF {
   @Override
   public String toString() {
     return "PlaintextBallot{" +
-            "object_id='" + object_id + '\'' +
-            ", style_id='" + style_id + '\'' +
+            "object_id='" + ballotId + '\'' +
+            ", style_id='" + ballotStyleId + '\'' +
             '}';
   }
 
@@ -68,14 +67,14 @@ public class PlaintextBallot implements ElectionObjectBaseIF {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     PlaintextBallot that = (PlaintextBallot) o;
-    return object_id.equals(that.object_id) &&
-            style_id.equals(that.style_id) &&
+    return ballotId.equals(that.ballotId) &&
+            ballotStyleId.equals(that.ballotStyleId) &&
             contests.equals(that.contests);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(object_id, style_id, contests);
+    return Objects.hash(ballotId, ballotStyleId, contests);
   }
 
   /**
@@ -93,16 +92,16 @@ public class PlaintextBallot implements ElectionObjectBaseIF {
   @Immutable
   public static class Contest {
     /** The ContestDescription.object_id. */
-    public final String contest_id;
-    public final int sequence_order;
+    public final String contestId;
+    public final int sequenceOrder;
     /** The Collection of ballot selections. */
-    public final ImmutableList<Selection> ballot_selections;
+    public final ImmutableList<Selection> selections;
 
-    public Contest(String contest_id, int sequence_order, List<Selection> ballot_selections) {
-      Preconditions.checkArgument(!Strings.isNullOrEmpty(contest_id));
-      this.contest_id = contest_id;
-      this.sequence_order = sequence_order;
-      this.ballot_selections = ImmutableList.copyOf(ballot_selections);
+    public Contest(String contestId, int sequenceOrder, List<Selection> selections) {
+      Preconditions.checkArgument(!Strings.isNullOrEmpty(contestId));
+      this.contestId = contestId;
+      this.sequenceOrder = sequenceOrder;
+      this.selections = ImmutableList.copyOf(selections);
     }
 
     /**
@@ -115,13 +114,13 @@ public class PlaintextBallot implements ElectionObjectBaseIF {
             int expected_number_elected,
             Integer votes_allowed) {
 
-      if (!this.contest_id.equals(expected_contest_id)) {
-        logger.atWarning().log("invalid contest_id: expected(%s) actual(%s)", expected_contest_id, this.contest_id);
+      if (!this.contestId.equals(expected_contest_id)) {
+        logger.atWarning().log("invalid contest_id: expected(%s) actual(%s)", expected_contest_id, this.contestId);
         return false;
       }
 
-      if (this.ballot_selections.size() > expected_number_selections) {
-        logger.atWarning().log("invalid number_selections: expected(%s) actual(%s)", expected_number_selections, this.ballot_selections);
+      if (this.selections.size() > expected_number_selections) {
+        logger.atWarning().log("invalid number_selections: expected(%s) actual(%s)", expected_number_selections, this.selections);
         return false;
       }
 
@@ -129,7 +128,7 @@ public class PlaintextBallot implements ElectionObjectBaseIF {
       int votes = 0;
 
       // Verify the selections are well-formed
-      for (Selection selection : this.ballot_selections) {
+      for (Selection selection : this.selections) {
         int selection_count = selection.vote;
         votes += selection_count;
         if (selection_count >= 1) { // LOOK I dont understand this
@@ -153,19 +152,19 @@ public class PlaintextBallot implements ElectionObjectBaseIF {
       if (this == o) return true;
       if (o == null || getClass() != o.getClass()) return false;
       Contest that = (Contest) o;
-      return contest_id.equals(that.contest_id) &&
-              ballot_selections.equals(that.ballot_selections);
+      return contestId.equals(that.contestId) &&
+              selections.equals(that.selections);
     }
 
     @Override
     public int hashCode() {
-      return Objects.hash(contest_id, ballot_selections);
+      return Objects.hash(contestId, selections);
     }
 
     @Override
     public String toString() {
       return "PlaintextBallotContest{" +
-              "contest_id='" + contest_id + '\'' +
+              "contest_id='" + contestId + '\'' +
               '}';
     }
   }
@@ -183,30 +182,30 @@ public class PlaintextBallot implements ElectionObjectBaseIF {
    */
   @Immutable
   public static class Selection {
-    /** Matches the SelectionDescription.object_id. */
-    public final String selection_id;
-    public final int sequence_order;
+    /** Matches the SelectionDescription.selectionId. */
+    public final String selectionId;
+    public final int sequenceOrder;
     /** The vote count. */
     public final int vote;
     /** Is this a placeholder? */
-    public final boolean is_placeholder_selection; // default false
+    public final boolean isPlaceholderSelection; // default false
     /** Optional write-in candidate. */
-    public final Optional<ExtendedData> extended_data; // default None
+    public final Optional<ExtendedData> extendedData; // default None
 
-    public Selection(String selection_id, int sequence_order, int vote, boolean is_placeholder_selection,
-                     @Nullable ExtendedData extended_data) {
-      Preconditions.checkArgument(!Strings.isNullOrEmpty(selection_id));
-      this.selection_id = selection_id;
-      this.sequence_order = sequence_order;
+    public Selection(String selectionId, int sequenceOrder, int vote, boolean isPlaceholderSelection,
+                     @Nullable ExtendedData extendedData) {
+      Preconditions.checkArgument(!Strings.isNullOrEmpty(selectionId));
+      this.selectionId = selectionId;
+      this.sequenceOrder = sequenceOrder;
       this.vote = vote;
-      this.is_placeholder_selection = is_placeholder_selection;
-      this.extended_data = Optional.ofNullable(extended_data);
+      this.isPlaceholderSelection = isPlaceholderSelection;
+      this.extendedData = Optional.ofNullable(extendedData);
     }
 
     public boolean is_valid(String expected_selection_id) {
-      if (!expected_selection_id.equals(selection_id)) {
+      if (!expected_selection_id.equals(selectionId)) {
         logger.atWarning().log("invalid selection_id: expected %s actual %s",
-                expected_selection_id, this.selection_id);
+                expected_selection_id, this.selectionId);
         return false;
       }
       if (vote < 0 || vote > 1) {
@@ -223,25 +222,25 @@ public class PlaintextBallot implements ElectionObjectBaseIF {
       Selection selection = (Selection) o;
       return // sequence_order == selection.sequence_order &&
               vote == selection.vote &&
-              is_placeholder_selection == selection.is_placeholder_selection &&
-              selection_id.equals(selection.selection_id) &&
-              extended_data.equals(selection.extended_data);
+              isPlaceholderSelection == selection.isPlaceholderSelection &&
+              selectionId.equals(selection.selectionId) &&
+              extendedData.equals(selection.extendedData);
     }
 
     @Override
     public int hashCode() {
-      return Objects.hash(selection_id, sequence_order, vote, is_placeholder_selection, extended_data);
+      return Objects.hash(selectionId, sequenceOrder, vote, isPlaceholderSelection, extendedData);
     }
 
 
     @Override
     public String toString() {
       return "Selection{" +
-              "selection_id='" + selection_id + '\'' +
-              ", sequence_order=" + sequence_order +
+              "selection_id='" + selectionId + '\'' +
+              ", sequence_order=" + sequenceOrder +
               ", vote=" + vote +
-              ", is_placeholder_selection=" + is_placeholder_selection +
-              ", extended_data=" + extended_data +
+              ", is_placeholder_selection=" + isPlaceholderSelection +
+              ", extended_data=" + extendedData +
               '}';
     }
   }
@@ -288,10 +287,10 @@ public class PlaintextBallot implements ElectionObjectBaseIF {
   static PlaintextBallot from(CiphertextBallot cballot, PlaintextTally tally) {
     List<Contest> contests = new ArrayList<>();
     for (CiphertextBallot.Contest ccontest : cballot.contests) {
-      PlaintextTally.Contest tcontest = tally.contests.get(ccontest.object_id);
+      PlaintextTally.Contest tcontest = tally.contests.get(ccontest.contestId);
       Preconditions.checkNotNull(tcontest);
       List<Selection> selections = new ArrayList<>();
-      for (CiphertextBallot.Selection cselection : ccontest.ballot_selections) {
+      for (CiphertextBallot.Selection cselection : ccontest.selections) {
         if (!cselection.is_placeholder_selection) {
           PlaintextTally.Selection tselection = tcontest.selections().get(cselection.object_id());
           selections.add(new Selection(cselection.object_id(), -1, tselection.tally(), false, null));
@@ -299,7 +298,7 @@ public class PlaintextBallot implements ElectionObjectBaseIF {
       }
       contests.add(new Contest(ccontest.object_id(), ccontest.sequence_order(), selections));
     }
-    return new PlaintextBallot(cballot.object_id(), cballot.style_id, contests);
+    return new PlaintextBallot(cballot.object_id(), cballot.ballotStyleId, contests);
   }
 
   /* experimental: get ballot from tally alone.

@@ -113,7 +113,7 @@ public class ManifestInputBuilder {
       //                              List<SelectionDescription> ballot_selections,
       //                              @Nullable InternationalizedText ballot_title,
       //                              @Nullable InternationalizedText ballot_subtitle
-      return new Manifest.ContestDescription(id, district, seq, Manifest.VoteVariationType.one_of_m,
+      return new Manifest.ContestDescription(id, seq, district, Manifest.VoteVariationType.one_of_m,
               allowed, allowed, "name",
               selections.stream().map(SelectionBuilder::build).toList(),
               null, null, ImmutableList.of());
@@ -130,7 +130,7 @@ public class ManifestInputBuilder {
       }
 
       Manifest.SelectionDescription build() {
-        return new Manifest.SelectionDescription(id, candidate_id, seq);
+        return new Manifest.SelectionDescription(id, seq, candidate_id);
       }
     }
   }
