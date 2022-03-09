@@ -101,10 +101,10 @@ public class TrusteeDecryptions {
               context);
         if (contest_share.isEmpty()) {
           logger.atInfo().log("could not compute ballot share for guardian %s contest %s",
-                  guardian.id(), contest.object_id);
+                  guardian.id(), contest.contestId);
           return Optional.empty();
         }
-        contests.put(contest.object_id, contest_share.get());
+        contests.put(contest.contestId, contest_share.get());
     }
     return Optional.of(new DecryptionShare(
             ballot.object_id(),
@@ -136,7 +136,7 @@ public class TrusteeDecryptions {
                 guardian.id(), ciphertextContest.object_id);
         return Optional.empty();
       }
-      selections.put(decryption.get().selection_id(), decryption.get());
+      selections.put(decryption.get().selectionId(), decryption.get());
     }
 
     return Optional.of(new CiphertextDecryptionContest(
@@ -157,7 +157,7 @@ public class TrusteeDecryptions {
           ElectionContext context) {
 
     try {
-      List<BallotBox.DecryptionProofTuple> results = guardian.partialDecrypt(ImmutableList.of(selection.ciphertext()), context.crypto_extended_base_hash, null);
+      List<BallotBox.DecryptionProofTuple> results = guardian.partialDecrypt(ImmutableList.of(selection.ciphertext()), context.cryptoExtendedBaseHash, null);
       if (results.isEmpty()) {
         logger.atWarning().log("compute_decryption_share_for_selection guardian.partialDecrypt failed",
                 guardian.id(), selection.object_id());
@@ -165,7 +165,7 @@ public class TrusteeDecryptions {
       }
       BallotBox.DecryptionProofTuple tuple = results.get(0);
       if (tuple.proof.is_valid(selection.ciphertext(), guardian.electionPublicKey(),
-              tuple.decryption, context.crypto_extended_base_hash)) {
+              tuple.decryption, context.cryptoExtendedBaseHash)) {
         return Optional.of(DecryptionShare.create_ciphertext_decryption_selection(
                 selection.object_id(),
                 guardian.id(),
@@ -240,7 +240,7 @@ public class TrusteeDecryptions {
           continue;
           // return Optional.empty();
         }
-        selections.put(decryption.get().selection_id(), decryption.get());
+        selections.put(decryption.get().selectionId(), decryption.get());
       }
 
       return Optional.of(new CiphertextCompensatedDecryptionContest(
@@ -273,10 +273,10 @@ public class TrusteeDecryptions {
               context);
          if (contest_share.isEmpty()) {
           logger.atWarning().log("could not compute compensated spoiled ballot share for guardian %s missing: %s contest %s",
-                  guardian.id(), missing_guardian_id, contest.object_id);
+                  guardian.id(), missing_guardian_id, contest.contestId);
           return Optional.empty();
         }
-      contests.put(contest.object_id, contest_share.get());
+      contests.put(contest.contestId, contest_share.get());
     }
 
     return Optional.of(new CompensatedDecryptionShare(
@@ -307,7 +307,7 @@ public class TrusteeDecryptions {
     List<DecryptionProofRecovery> compensated = guardian.compensatedDecrypt(
             missing_guardian_id,
             ImmutableList.of(selection.ciphertext()),
-            context.crypto_extended_base_hash,
+            context.cryptoExtendedBaseHash,
             null);
 
     if (compensated.isEmpty()) {
@@ -321,7 +321,7 @@ public class TrusteeDecryptions {
             selection.ciphertext(),
             tuple.recoveryPublicKey(),
             tuple.decryption(),
-            context.crypto_extended_base_hash)) {
+            context.cryptoExtendedBaseHash)) {
 
       CiphertextCompensatedDecryptionSelection share = new CiphertextCompensatedDecryptionSelection(
               selection.object_id(),
@@ -448,7 +448,7 @@ public class TrusteeDecryptions {
               CiphertextContest.createFrom(contest),
               shares,
               lagrange_coefficients);
-      contests.put(contest.object_id, dcontest);
+      contests.put(contest.contestId, dcontest);
     }
 
     return new DecryptionShare(

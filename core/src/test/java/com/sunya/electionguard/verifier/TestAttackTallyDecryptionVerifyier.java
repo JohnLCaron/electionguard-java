@@ -46,7 +46,7 @@ public class TestAttackTallyDecryptionVerifyier {
     PlaintextTally tally = electionRecord.decryptedTally;
     assertThat(tally).isNotNull();
 
-    PlaintextTally attack = new PlaintextTally( tally.object_id,
+    PlaintextTally attack = new PlaintextTally( tally.tallyId,
             messContests(tally.contests, this::messTally));
 
     TallyDecryptionVerifier tdv = new TallyDecryptionVerifier(electionRecord.election, attack);
@@ -63,7 +63,7 @@ public class TestAttackTallyDecryptionVerifyier {
     PlaintextTally tally = electionRecord.decryptedTally;
     assertThat(tally).isNotNull();
 
-    PlaintextTally attack = new PlaintextTally( tally.object_id,
+    PlaintextTally attack = new PlaintextTally( tally.tallyId,
             messContests(tally.contests, this::messTallyAndValue));
 
     TallyDecryptionVerifier tdv = new TallyDecryptionVerifier(electionRecord.election, attack);
@@ -80,7 +80,7 @@ public class TestAttackTallyDecryptionVerifyier {
     PlaintextTally tally = electionRecord.decryptedTally;
     assertThat(tally).isNotNull();
 
-    PlaintextTally attack = new PlaintextTally( tally.object_id,
+    PlaintextTally attack = new PlaintextTally( tally.tallyId,
             messContests(tally.contests, this::messTallyMessage));
 
     // Attack fools this verification
@@ -114,7 +114,7 @@ public class TestAttackTallyDecryptionVerifyier {
     Map<String, PlaintextTally.Contest> result = new HashMap<>();
     int count = 0;
     for (PlaintextTally.Contest contest : org.values()) {
-      result.put(contest.object_id(), (count == choose)  ? messContest(contest, messer) : contest);
+      result.put(contest.contestId(), (count == choose)  ? messContest(contest, messer) : contest);
       count++;
     }
     return result;
@@ -122,7 +122,7 @@ public class TestAttackTallyDecryptionVerifyier {
 
   private PlaintextTally.Contest messContest(PlaintextTally.Contest org, Messer messer) {
     // String object_id, Map<String, PlaintextTally.Selection > selections
-    return new PlaintextTally.Contest(org.object_id(), messSelections(org, messer));
+    return new PlaintextTally.Contest(org.contestId(), messSelections(org, messer));
   }
 
   // randomly choose one of the selections to mess with
@@ -132,7 +132,7 @@ public class TestAttackTallyDecryptionVerifyier {
     Map<String, PlaintextTally.Selection> result = new HashMap<>();
     int count = 0;
     for (PlaintextTally.Selection selection : org.selections().values()) {
-      result.put(selection.object_id(), (count == choose)  ? messer.apply(selection) : selection);
+      result.put(selection.selectionId(), (count == choose)  ? messer.apply(selection) : selection);
       count++;
     }
     return result;
@@ -141,21 +141,21 @@ public class TestAttackTallyDecryptionVerifyier {
   interface Messer extends Function<PlaintextTally.Selection, PlaintextTally.Selection> {}
 
   private PlaintextTally.Selection messTally(PlaintextTally.Selection org) {
-    System.out.printf("---messTally with %s%n", org.object_id());
-    return new PlaintextTally.Selection(org.object_id(), org.tally() + 1, org.value(), org.message(), org.shares());
+    System.out.printf("---messTally with %s%n", org.selectionId());
+    return new PlaintextTally.Selection(org.selectionId(), org.tally() + 1, org.value(), org.message(), org.shares());
   }
 
   private PlaintextTally.Selection messTallyAndValue(PlaintextTally.Selection org) {
-    System.out.printf("---messTallyAndValue with %s%n", org.object_id());
+    System.out.printf("---messTallyAndValue with %s%n", org.selectionId());
     int tally = org.tally() + 1;
     Group.ElementModP t = Group.int_to_p_unchecked(BigInteger.valueOf(tally));
     Group.ElementModP value = Group.g_pow_p(t);
-    return new PlaintextTally.Selection(org.object_id(), tally, value, org.message(), org.shares());
+    return new PlaintextTally.Selection(org.selectionId(), tally, value, org.message(), org.shares());
   }
 
   // Try to cheat by increasing the tally by one. Jigger the CiphertextDecryptionSelection to pass spec #11
   private PlaintextTally.Selection messTallyMessage(PlaintextTally.Selection org) {
-    System.out.printf("---messTallyMessage with %s%n", org.object_id());
+    System.out.printf("---messTallyMessage with %s%n", org.selectionId());
     int tally = org.tally() + 1;
     Group.ElementModP t = Group.int_to_p_unchecked(BigInteger.valueOf(tally));
     Group.ElementModP M = Group.g_pow_p(t);
@@ -183,14 +183,14 @@ public class TestAttackTallyDecryptionVerifyier {
       DecryptionShare.CiphertextDecryptionSelection orgShare = org.shares().get(i);
       Group.ElementModP s = i == 0 ? productMi : Group.ONE_MOD_P;
       Optional<Map<String, DecryptionShare.CiphertextCompensatedDecryptionSelection>> recovered_parts =
-              orgShare.recovered_parts().map(r -> r);
+              orgShare.recoveredParts().map(r -> r);
       DecryptionShare.CiphertextDecryptionSelection messShare = new DecryptionShare.CiphertextDecryptionSelection(
-              orgShare.selection_id(), orgShare.guardian_id(), s, orgShare.proof(), recovered_parts);
+              orgShare.selectionId(), orgShare.guardianId(), s, orgShare.proof(), recovered_parts);
       shares.add(messShare);
     }
 
     // Group.ElementModP productMi = Group.mult_p(partialDecryptions);
-    return new PlaintextTally.Selection(org.object_id(), tally, M, org.message(), shares);
+    return new PlaintextTally.Selection(org.selectionId(), tally, M, org.message(), shares);
   }
 
   boolean publish(String inputDir, String publishDir, ElectionRecord electionRecord, PlaintextTally decryptedTally) throws IOException {

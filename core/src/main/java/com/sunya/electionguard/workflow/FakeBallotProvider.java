@@ -40,7 +40,7 @@ public class FakeBallotProvider implements BallotProvider {
   private static class BallotFactory {
     PlaintextBallot get_fake_ballot(InternalManifest metadata, String ballot_id) {
       Preconditions.checkNotNull(ballot_id);
-      String ballotStyleId = metadata.manifest.ballot_styles().get(0).object_id();
+      String ballotStyleId = metadata.manifest.ballotStyles().get(0).ballotStyleId();
       List<PlaintextBallot.Contest> contests = new ArrayList<>();
       for (ContestWithPlaceholders contestp : metadata.get_contests_for_style(ballotStyleId)) {
         contests.add(this.get_random_contest_from(contestp.contest));
@@ -51,22 +51,22 @@ public class FakeBallotProvider implements BallotProvider {
     PlaintextBallot.Contest get_random_contest_from(Manifest.ContestDescription contest) {
       int voted = 0;
       List<PlaintextBallot.Selection> selections = new ArrayList<>();
-      for (Manifest.SelectionDescription selection_description : contest.ballot_selections()) {
+      for (Manifest.SelectionDescription selection_description : contest.selections()) {
         PlaintextBallot.Selection selection = get_random_selection_from(selection_description);
         voted += selection.vote;
-        if (voted <= contest.number_elected()) {
+        if (voted <= contest.numberElected()) {
           selections.add(selection);
         }
       }
       return new PlaintextBallot.Contest(
-              contest.object_id(),
-              contest.sequence_order(),
+              contest.contestId(),
+              contest.sequenceOrder(),
               selections);
     }
 
     static PlaintextBallot.Selection get_random_selection_from(Manifest.SelectionDescription description) {
       boolean choice = random.nextBoolean();
-      return new PlaintextBallot.Selection(description.object_id(), description.sequence_order(),
+      return new PlaintextBallot.Selection(description.selectionId(), description.sequenceOrder(),
               choice ? 1 : 0, false, null);
     }
 

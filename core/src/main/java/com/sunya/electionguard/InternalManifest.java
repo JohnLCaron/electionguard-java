@@ -25,8 +25,8 @@ public class InternalManifest {
     // For each contest, append the `number_elected` number of placeholder selections to the end of the contest collection.
     ImmutableMap.Builder<String, ContestWithPlaceholders> builder = ImmutableMap.builder();
     for (Manifest.ContestDescription contest : manifest.contests()) {
-      List<Manifest.SelectionDescription> placeholders = generate_placeholder_selections_from(contest, contest.number_elected());
-      builder.put(contest.object_id(), new ContestWithPlaceholders(contest, placeholders));
+      List<Manifest.SelectionDescription> placeholders = generate_placeholder_selections_from(contest, contest.numberElected());
+      builder.put(contest.contestId(), new ContestWithPlaceholders(contest, placeholders));
     }
     this.contests = builder.build();
   }
@@ -40,7 +40,7 @@ public class InternalManifest {
    */
   public static List<Manifest.SelectionDescription> generate_placeholder_selections_from(Manifest.ContestDescription contest, int count) {
     //  max_sequence_order = max([selection.sequence_order for selection in contest.ballot_selections]);
-    int max_sequence_order = contest.ballot_selections().stream().map(s -> s.sequence_order()).max(Integer::compare).orElse(0);
+    int max_sequence_order = contest.selections().stream().map(s -> s.sequenceOrder()).max(Integer::compare).orElse(0);
     List<Manifest.SelectionDescription> selections = new ArrayList<>();
     for (int i = 0; i < count; i++) {
       int sequence_order = max_sequence_order + 1 + i;
@@ -60,7 +60,7 @@ public class InternalManifest {
           Manifest.ContestDescription contest, Optional<Integer> use_sequence_idO) {
 
     // sequence_ids = [selection.sequence_order for selection in contest.ballot_selections]
-    List<Integer> sequence_ids = contest.ballot_selections().stream().map(s -> s.sequence_order()).toList();
+    List<Integer> sequence_ids = contest.selections().stream().map(s -> s.sequenceOrder()).toList();
 
     int use_sequence_id;
     if (use_sequence_idO.isEmpty()) {
@@ -74,11 +74,11 @@ public class InternalManifest {
       }
     }
 
-    String placeholder_object_id = String.format("%s-%s", contest.object_id(), use_sequence_id);
+    String placeholder_object_id = String.format("%s-%s", contest.contestId(), use_sequence_id);
     return Optional.of(new Manifest.SelectionDescription(
             String.format("%s-placeholder", placeholder_object_id),
-            String.format("%s-candidate", placeholder_object_id),
-            use_sequence_id));
+            use_sequence_id,
+            String.format("%s-candidate", placeholder_object_id)));
   }
 
   public Optional<ContestWithPlaceholders> getContestById(String contest_id) {
@@ -87,17 +87,17 @@ public class InternalManifest {
 
   /** Find the ballot style for a specified style_id */
   public Optional<Manifest.BallotStyle> get_ballot_style(String style_id) {
-    return manifest.ballot_styles().stream().filter(bs -> bs.object_id().equals(style_id)).findFirst();
+    return manifest.ballotStyles().stream().filter(bs -> bs.ballotStyleId().equals(style_id)).findFirst();
   }
 
   /** Get contests whose electoral_district_id is in the given ballot style's geopolitical_unit_ids. */
   public List<ContestWithPlaceholders> get_contests_for_style(String ballot_style_id) {
     Optional<Manifest.BallotStyle> style = this.get_ballot_style(ballot_style_id);
-    if (style.isEmpty() || style.get().geopolitical_unit_ids().isEmpty()) {
+    if (style.isEmpty() || style.get().geopoliticalUnitIds().isEmpty()) {
       return new ArrayList<>();
     }
-    List<String> gp_wanted = new ArrayList<>(style.get().geopolitical_unit_ids());
-    return this.contests.values().stream().filter(c -> gp_wanted.contains(c.contest.electoral_district_id())).toList();
+    List<String> gp_wanted = new ArrayList<>(style.get().geopoliticalUnitIds());
+    return this.contests.values().stream().filter(c -> gp_wanted.contains(c.contest.geopoliticalUnitId())).toList();
   }
 
   /**
@@ -118,7 +118,7 @@ public class InternalManifest {
 
     public boolean is_valid() {
       boolean contest_description_validates = contest.is_valid();
-      return contest_description_validates && this.placeholder_selections.size() == contest.number_elected();
+      return contest_description_validates && this.placeholder_selections.size() == contest.numberElected();
     }
 
     @Override
@@ -137,14 +137,14 @@ public class InternalManifest {
 
     /** Gets the SelectionDescription from a selection id */
     public Optional<Manifest.SelectionDescription> getSelectionById(String selection_id) {
-      Optional<Manifest.SelectionDescription> first_match = this.contest.ballot_selections().stream()
-              .filter(s -> s.object_id().equals(selection_id)).findFirst();
+      Optional<Manifest.SelectionDescription> first_match = this.contest.selections().stream()
+              .filter(s -> s.selectionId().equals(selection_id)).findFirst();
       if (first_match.isPresent()) {
         return first_match;
       }
       // LOOK actually no way to have this succeed if above fails
       return this.placeholder_selections.stream()
-              .filter(s -> s.object_id().equals(selection_id)).findFirst();
+              .filter(s -> s.selectionId().equals(selection_id)).findFirst();
     }
   }
 

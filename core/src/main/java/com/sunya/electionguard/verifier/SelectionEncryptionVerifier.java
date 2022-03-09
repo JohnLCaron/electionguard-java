@@ -26,7 +26,7 @@ public class SelectionEncryptionVerifier {
       nballots++;
       for (CiphertextBallot.Contest contest : ballot.contests) {
         ncontests++;
-        for (CiphertextBallot.Selection selection : contest.ballot_selections) {
+        for (CiphertextBallot.Selection selection : contest.selections) {
           nselections++;
           SelectionVerifier sv = new SelectionVerifier(selection);
           // check validity of a selection

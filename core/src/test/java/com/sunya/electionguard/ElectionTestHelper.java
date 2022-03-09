@@ -200,7 +200,7 @@ public class ElectionTestHelper {
    * @param geo_units: a list of `GeopoliticalUnit` objects to be used in this ballot style
    */
   Manifest.BallotStyle ballot_styles(List<Manifest.Party> parties, List<Manifest.GeopoliticalUnit> geo_units) {
-    List<String> geopolitical_unit_ids = geo_units.stream().map(g -> g.object_id()).toList();
+    List<String> geopolitical_unit_ids = geo_units.stream().map(g -> g.geopoliticalUnitId()).toList();
     List<String> party_ids = parties.stream().map(p -> p.get_party_id()).toList();
     return new Manifest.BallotStyle(randomString("BallotStyle"), geopolitical_unit_ids, party_ids, urls());
   }
@@ -267,7 +267,7 @@ public class ElectionTestHelper {
    */
   private Manifest.SelectionDescription candidate_to_selection_description(Manifest.Candidate candidate, int sequence_order) {
     return new Manifest.SelectionDescription(
-            String.format("c-%s", candidate.object_id()), candidate.get_candidate_id(), sequence_order);
+            String.format("c-%s", candidate.candidateId()), sequence_order, candidate.get_candidate_id());
   }
 
   public record CandidateTuple(
@@ -318,8 +318,8 @@ public class ElectionTestHelper {
             contest_candidates,
             new Manifest.ContestDescription(
                     randomString("CandidateContestDescription"),
-                    drawList(geo_units).object_id(),
                     sequence_order,
+                    drawList(geo_units).geopoliticalUnitId(),
                     vote_variation,
                     n,
                     n,  // should this be None or n?
@@ -381,8 +381,8 @@ public class ElectionTestHelper {
             contest_candidates,
             new Manifest.ContestDescription(
                     randomString("CandidateContestDescription"),
-                    drawList(geo_units).object_id(),
                     sequence_order,
+                    drawList(geo_units).geopoliticalUnitId(),
                     Manifest.VoteVariationType.one_of_m,
                     1,
                     1,  // should this be None or n?
@@ -469,21 +469,21 @@ public class ElectionTestHelper {
 
   /** Generates an arbitrary `PlaintextBallot` with the choices made randomly. */
   PlaintextBallot plaintext_voted_ballot(InternalManifest metadata) {
-    int num_ballot_styles = metadata.manifest.ballot_styles().size();
+    int num_ballot_styles = metadata.manifest.ballotStyles().size();
     assertWithMessage("invalid election with no ballot styles").that(num_ballot_styles > 0).isTrue();
 
           // pick a ballot style at random
-    Manifest.BallotStyle ballot_style = drawList(metadata.manifest.ballot_styles());
+    Manifest.BallotStyle ballot_style = drawList(metadata.manifest.ballotStyles());
 
-    List<ContestWithPlaceholders> contests = metadata.get_contests_for_style(ballot_style.object_id());
+    List<ContestWithPlaceholders> contests = metadata.get_contests_for_style(ballot_style.ballotStyleId());
     assertWithMessage("invalid ballot style with no contests in it").that(contests.size() > 0).isTrue();
 
     List<PlaintextBallot.Contest> voted_contests = new ArrayList<>();
     for (ContestWithPlaceholders contestp : contests) {
       assertWithMessage("every contest needs to be valid").that(contestp.is_valid()).isTrue();
       // LOOK dont understand "we need exactly this many 1 's, and the rest 0' s"
-      int n = contestp.contest.number_elected(); // we need exactly this many 1 's, and the rest 0' s
-      ArrayList<Manifest.SelectionDescription> ballot_selections = new ArrayList<>(contestp.contest.ballot_selections());
+      int n = contestp.contest.numberElected(); // we need exactly this many 1 's, and the rest 0' s
+      ArrayList<Manifest.SelectionDescription> ballot_selections = new ArrayList<>(contestp.contest.selections());
       assertThat(ballot_selections.size() >= n).isTrue();
       // LOOK shuffle leave this out for now.
       // Collections.shuffle(ballot_selections);
@@ -498,10 +498,10 @@ public class ElectionTestHelper {
       no_votes.stream().map(d -> Encrypt.selection_from(d, false, false))
               .forEach(voted_selections::add);
 
-      voted_contests.add(new PlaintextBallot.Contest(contestp.contest.object_id(), contestp.contest.sequence_order(), voted_selections));
+      voted_contests.add(new PlaintextBallot.Contest(contestp.contest.contestId(), contestp.contest.sequenceOrder(), voted_selections));
     }
 
-    return new PlaintextBallot(randomString("PlaintextBallot"), ballot_style.object_id(), voted_contests);
+    return new PlaintextBallot(randomString("PlaintextBallot"), ballot_style.ballotStyleId(), voted_contests);
   }
 
   static class CIPHERTEXT_ELECTIONS_TUPLE_TYPE {

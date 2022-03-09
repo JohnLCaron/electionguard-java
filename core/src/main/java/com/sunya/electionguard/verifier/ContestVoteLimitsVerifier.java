@@ -37,8 +37,8 @@ public class ContestVoteLimitsVerifier {
       if (show) System.out.printf("Ballot %s.%n", ballot.object_id());
       for (Contest contest : ballot.contests) {
         ncontests++;
-        nselections += contest.ballot_selections.size();
-        if (show) System.out.printf(" Contest %s.%n", contest.object_id);
+        nselections += contest.selections.size();
+        if (show) System.out.printf(" Contest %s.%n", contest.contestId);
         ContestVerifier cv = new ContestVerifier(contest);
         if (!cv.verifyContest()) {
           error = true;
@@ -67,11 +67,11 @@ public class ContestVoteLimitsVerifier {
     ContestVerifier(Contest contest) {
       this.contest = contest;
       this.proof = contest.proof.orElseThrow();
-      this.contest_alpha = contest.encrypted_total.pad();
-      this.contest_beta = contest.encrypted_total.data();
+      this.contest_alpha = contest.ciphertextAccumulation.pad();
+      this.contest_beta = contest.ciphertextAccumulation.data();
       this.contest_response = proof.response;
       this.contest_challenge = proof.challenge;
-      this.contest_id = contest.object_id;
+      this.contest_id = contest.contestId;
     }
 
     boolean verifyContest() {
@@ -87,7 +87,7 @@ public class ContestVoteLimitsVerifier {
       ElementModP selection_alpha_product = Group.ONE_MOD_P;
       ElementModP selection_beta_product = Group.ONE_MOD_P;
 
-      for (Selection selection : contest.ballot_selections) {
+      for (Selection selection : contest.selections) {
         if (show) System.out.printf("   Selection %s.%n", selection.object_id());
         ElementModP alpha = selection.ciphertext().pad();
         ElementModP beta = selection.ciphertext().data();
@@ -119,22 +119,22 @@ public class ContestVoteLimitsVerifier {
       }
 
       // 5.A verify the placeholder numbers match the maximum votes allowed
-      Integer vote_limit = electionRecord.getVoteLimitForContest(this.contest.object_id);
+      Integer vote_limit = electionRecord.getVoteLimitForContest(this.contest.contestId);
       Preconditions.checkNotNull(vote_limit);
       if (vote_limit != placeholder_count) {
         System.out.printf(" 5.A Contest placeholder %d != %d vote limit for contest %s.%n", placeholder_count,
-                vote_limit, contest.object_id);
+                vote_limit, contest.contestId);
         limit_error = true;
       }
 
       // 5.B The contest total (A, B) satisfies A = ∏ αi mod p and B = ∏ βi mod p where the (αi, βi)
       // represent all possible selections (including placeholder selections) for the contest.
       if (!this.contest_alpha.equals(selection_alpha_product)) {
-        System.out.printf(" 5.B Contest total A fails verification for contest %s.%n", contest.object_id);
+        System.out.printf(" 5.B Contest total A fails verification for contest %s.%n", contest.contestId);
         limit_error = true;
       }
       if (!this.contest_beta.equals(selection_beta_product)) {
-        System.out.printf(" 5.B Contest total B fails verification for contest %s.%n", contest.object_id);
+        System.out.printf(" 5.B Contest total B fails verification for contest %s.%n", contest.contestId);
         limit_error = true;
       }
 
@@ -147,7 +147,7 @@ public class ContestVoteLimitsVerifier {
                       selection_alpha_product,
                       selection_beta_product, a, b);
       if (!challenge_computed.equals(this.contest_challenge)) {
-        System.out.printf(" 5.E Challenge fails verification for contest %s.%n", contest.object_id);
+        System.out.printf(" 5.E Challenge fails verification for contest %s.%n", contest.contestId);
         limit_error = true;
       }
 

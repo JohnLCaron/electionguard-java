@@ -10,22 +10,22 @@ import java.util.Objects;
  * Superclass for encrypted selections.
  */
 @Immutable
-public class CiphertextSelection implements OrderedObjectBaseIF {
-  private final String object_id;
-  private final int sequence_order;
+public class CiphertextSelection {
+  private final String selectionId;
+  private final int sequenceOrder;
   /** Manifest.SelectionDescription.crypto_hash(). */
-  private final Group.ElementModQ description_hash;
+  private final Group.ElementModQ selectionHash;
   private final ElGamal.Ciphertext ciphertext; // only accessed through ciphertext(), so subclass can override
-  public final boolean is_placeholder;
+  public final boolean isPlaceholderSelection;
 
-  CiphertextSelection(String object_id, int sequence_order, Group.ElementModQ description_hash,
-                      ElGamal.Ciphertext ciphertext, boolean is_placeholder) {
-    Preconditions.checkArgument(!Strings.isNullOrEmpty(object_id));
-    this.object_id = object_id;
-    this.sequence_order = sequence_order;
-    this.description_hash = Preconditions.checkNotNull(description_hash);
+  CiphertextSelection(String selectionId, int sequenceOrder, Group.ElementModQ selectionHash,
+                      ElGamal.Ciphertext ciphertext, boolean isPlaceholderSelection) {
+    Preconditions.checkArgument(!Strings.isNullOrEmpty(selectionId));
+    this.selectionId = selectionId;
+    this.sequenceOrder = sequenceOrder;
+    this.selectionHash = Preconditions.checkNotNull(selectionHash);
     this.ciphertext = Preconditions.checkNotNull(ciphertext);
-    this.is_placeholder = is_placeholder;
+    this.isPlaceholderSelection = isPlaceholderSelection;
   }
 
   @Override
@@ -33,26 +33,26 @@ public class CiphertextSelection implements OrderedObjectBaseIF {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     CiphertextSelection that = (CiphertextSelection) o;
-    return sequence_order == that.sequence_order &&
-            is_placeholder == that.is_placeholder &&
-            object_id.equals(that.object_id) &&
-            description_hash.equals(that.description_hash) &&
+    return sequenceOrder == that.sequenceOrder &&
+            isPlaceholderSelection == that.isPlaceholderSelection &&
+            selectionId.equals(that.selectionId) &&
+            selectionHash.equals(that.selectionHash) &&
             ciphertext.equals(that.ciphertext);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(object_id, sequence_order, description_hash, ciphertext, is_placeholder);
+    return Objects.hash(selectionId, sequenceOrder, selectionHash, ciphertext, isPlaceholderSelection);
   }
 
   @Override
   public String toString() {
     return "CiphertextSelection{" +
-            "object_id='" + object_id + '\'' +
-            ", sequence_order=" + sequence_order +
-            ", description_hash=" + description_hash +
+            "object_id='" + selectionId + '\'' +
+            ", sequence_order=" + sequenceOrder +
+            ", description_hash=" + selectionHash +
             ", ciphertext=" + ciphertext +
-            ", is_placeholder=" + is_placeholder +
+            ", is_placeholder=" + isPlaceholderSelection +
             '}';
   }
 
@@ -61,17 +61,15 @@ public class CiphertextSelection implements OrderedObjectBaseIF {
     return ciphertext;
   }
 
-  @Override
   public String object_id() {
-    return object_id;
+    return selectionId;
   }
 
-  @Override
   public int sequence_order() {
-    return sequence_order;
+    return sequenceOrder;
   }
 
   public Group.ElementModQ description_hash() {
-    return description_hash;
+    return selectionHash;
   }
 }

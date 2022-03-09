@@ -15,7 +15,7 @@ public class TestNoncesProperties extends TestProperties {
   Nonces nonces;
 
   public TestNoncesProperties() {
-    seed = Group.int_to_q_unchecked(Utils.randbelow(Group.getPrimes().small_prime));
+    seed = Group.int_to_q_unchecked(Utils.randbelow(Group.getPrimes().smallPrime));
     nonces = new Nonces(seed);
   }
 

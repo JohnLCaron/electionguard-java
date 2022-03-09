@@ -9,24 +9,24 @@ public class PlaintextBallotToProto {
   public static PlaintextBallotProto.PlaintextBallot translateToProto(PlaintextBallot ballot) {
     PlaintextBallotProto.PlaintextBallot.Builder builder = PlaintextBallotProto.PlaintextBallot.newBuilder();
     builder.setBallotId(ballot.object_id());
-    builder.setBallotStyleId(ballot.style_id);
+    builder.setBallotStyleId(ballot.ballotStyleId);
     ballot.contests.forEach(value -> builder.addContests(convertContest(value)));
     return builder.build();
   }
 
   static PlaintextBallotProto.PlaintextBallotContest convertContest(PlaintextBallot.Contest contest) {
     PlaintextBallotProto.PlaintextBallotContest.Builder builder = PlaintextBallotProto.PlaintextBallotContest.newBuilder();
-    builder.setContestId(contest.contest_id);
-    contest.ballot_selections.forEach(value -> builder.addSelections(convertSelection(value)));
+    builder.setContestId(contest.contestId);
+    contest.selections.forEach(value -> builder.addSelections(convertSelection(value)));
     return builder.build();
   }
 
   static PlaintextBallotProto.PlaintextBallotSelection convertSelection(PlaintextBallot.Selection selection) {
     PlaintextBallotProto.PlaintextBallotSelection.Builder builder = PlaintextBallotProto.PlaintextBallotSelection.newBuilder();
-    builder.setSelectionId(selection.selection_id);
+    builder.setSelectionId(selection.selectionId);
     builder.setVote(selection.vote);
-    builder.setIsPlaceholderSelection(selection.is_placeholder_selection);
-    selection.extended_data.ifPresent(value -> builder.setExtendedData(convertExtendedData(value)));
+    builder.setIsPlaceholderSelection(selection.isPlaceholderSelection);
+    selection.extendedData.ifPresent(value -> builder.setExtendedData(convertExtendedData(value)));
     return builder.build();
   }
 

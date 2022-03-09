@@ -34,7 +34,7 @@ public class KeyCeremony2 {
     }
 
     public List<ElementModP> coefficientCommitments() {
-      return coefficientProofs().stream().map(p -> p.public_key).collect(ImmutableList.toImmutableList());
+      return coefficientProofs().stream().map(p -> p.publicKey).collect(ImmutableList.toImmutableList());
     }
 
     public boolean isValid() {

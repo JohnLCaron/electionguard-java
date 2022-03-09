@@ -24,9 +24,9 @@ class BallotValidations {
     }
 
     if (!ballot.is_valid_encryption(
-            manifest.manifest.crypto_hash(),
-            context.elgamal_public_key,
-            context.crypto_extended_base_hash)) {
+            manifest.manifest.cryptoHash(),
+            context.jointPublicKey,
+            context.cryptoExtendedBaseHash)) {
       logger.atInfo().log("ballot_is_valid_for_election: mismatching ballot encryption %s", ballot.object_id());
       return false;
     }
@@ -37,9 +37,9 @@ class BallotValidations {
   static boolean selection_is_valid_for_style(
           CiphertextBallot.Selection selection, Manifest.SelectionDescription description) {
 
-    if (!selection.description_hash().equals(description.crypto_hash())) {
+    if (!selection.description_hash().equals(description.cryptoHash())) {
       logger.atInfo().log("ballot is not valid for style: mismatched selection description hash %s for selection %s hash %s",
-              selection.description_hash(), description.object_id(), description.crypto_hash());
+              selection.description_hash(), description.selectionId(), description.cryptoHash());
       return false;
     }
 
@@ -50,17 +50,17 @@ class BallotValidations {
   static boolean contest_is_valid_for_style(CiphertextBallot.Contest contest, ContestWithPlaceholders contestp) {
     Manifest.ContestDescription contestm = contestp.contest;
     // verify the hash matches
-    if (!contest.contest_hash.equals(contestm.crypto_hash())) {
+    if (!contest.contestHash.equals(contestm.cryptoHash())) {
       logger.atInfo().log("ballot is not valid for style: mismatched description hash %s for contest %s hash %s",
-              contest.contest_hash, contestm.object_id(), contestm.crypto_hash());
+              contest.contestHash, contestm.contestId(), contestm.cryptoHash());
       return false;
     }
 
     //  verify the placeholder count
-    if (contest.ballot_selections.size() !=
-            (contestm.ballot_selections().size()) + contestp.placeholder_selections.size()) {
+    if (contest.selections.size() !=
+            (contestm.selections().size()) + contestp.placeholder_selections.size()) {
       logger.atInfo().log("ballot is not valid for style: mismatched selection count for contest %s",
-              contestm.object_id());
+              contestm.contestId());
       return false;
     }
     return true;
@@ -68,16 +68,16 @@ class BallotValidations {
 
   /** Determine if ballot is valid for ballot style. */
   static boolean ballot_is_valid_for_style(CiphertextBallot ballot, InternalManifest manifest) {
-    Map<String, CiphertextBallot.Contest> contestMap = ballot.contests.stream().collect(Collectors.toMap(c -> c.object_id, c -> c));
+    Map<String, CiphertextBallot.Contest> contestMap = ballot.contests.stream().collect(Collectors.toMap(c -> c.contestId, c -> c));
 
-    List<ContestWithPlaceholders> contests = manifest.get_contests_for_style(ballot.style_id);
+    List<ContestWithPlaceholders> contests = manifest.get_contests_for_style(ballot.ballotStyleId);
     for (ContestWithPlaceholders contestp : contests) {
       Manifest.ContestDescription contestm = contestp.contest;
-      CiphertextBallot.Contest use_contest = contestMap.get(contestm.object_id());
+      CiphertextBallot.Contest use_contest = contestMap.get(contestm.contestId());
 
       // verify the contest exists on the ballot LOOK we reject ballots that dont have all contests on them.
       if (use_contest == null) {
-        logger.atInfo().log("ballot is not valid for style: mismatched contest %s", contestm.object_id());
+        logger.atInfo().log("ballot is not valid for style: mismatched contest %s", contestm.contestId());
         return false;
       }
 
@@ -86,17 +86,17 @@ class BallotValidations {
       }
 
       // verify the selection metadata
-      for (Manifest.SelectionDescription selection_description : contestm.ballot_selections()) {
+      for (Manifest.SelectionDescription selection_description : contestm.selections()) {
         CiphertextBallot.Selection use_selection = null;
-        for (CiphertextBallot.Selection selection : use_contest.ballot_selections) {
-          if (selection_description.object_id().equals(selection.object_id())) {
+        for (CiphertextBallot.Selection selection : use_contest.selections) {
+          if (selection_description.selectionId().equals(selection.object_id())) {
             use_selection = selection;
             break;
           }
         }
 
         if (use_selection == null) {
-          logger.atInfo().log("ballot is not valid for style: missing selection %s", selection_description.object_id());
+          logger.atInfo().log("ballot is not valid for style: missing selection %s", selection_description.selectionId());
           return false;
         }
 

@@ -215,7 +215,7 @@ class DecryptingMediatorRunner {
     this.navailable = navailable;
     this.publisher = publisher;
 
-    this.nguardians = electionRecord.context.number_of_guardians;
+    this.nguardians = electionRecord.context.numberOfGuardians;
     this.quorum = electionRecord.context.quorum;
     Preconditions.checkArgument(this.navailable >= this.quorum,
             String.format("Available guardians (%d) must be >= quorum (%d)", this.navailable, this.quorum));

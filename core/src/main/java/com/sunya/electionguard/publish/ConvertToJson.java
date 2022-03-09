@@ -28,7 +28,7 @@ public class ConvertToJson {
   static void writeCoefficients(Iterable<AvailableGuardian> object, Path where) throws IOException {
     LagrangeCoefficientsPojo coeffs = new LagrangeCoefficientsPojo(
             StreamSupport.stream(object.spliterator(), false)
-            .collect(Collectors.toMap(AvailableGuardian::guardian_id, AvailableGuardian::lagrangeCoordinate)));
+            .collect(Collectors.toMap(AvailableGuardian::guardianId, AvailableGuardian::lagrangeCoordinate)));
     try (FileWriter writer = new FileWriter(where.toFile())) {
       enhancedGson.toJson(coeffs, LagrangeCoefficientsPojo.class, writer);
     }

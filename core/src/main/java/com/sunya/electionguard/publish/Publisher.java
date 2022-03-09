@@ -324,7 +324,7 @@ public class Publisher {
 
     if (spoiledBallots != null) {
       for (PlaintextTally ballot : spoiledBallots) {
-        ConvertToJson.writePlaintextTally(ballot, this.spoiledBallotPath(ballot.object_id));
+        ConvertToJson.writePlaintextTally(ballot, this.spoiledBallotPath(ballot.tallyId));
       }
     }
 
@@ -373,7 +373,7 @@ public class Publisher {
 
     if (spoiledBallots != null) {
       for (PlaintextTally ballot : spoiledBallots) {
-        ConvertToJson.writePlaintextTally(ballot, this.spoiledBallotPath(ballot.object_id));
+        ConvertToJson.writePlaintextTally(ballot, this.spoiledBallotPath(ballot.tallyId));
       }
     }
 
@@ -396,9 +396,9 @@ public class Publisher {
       throw new UnsupportedOperationException("Trying to write to readonly election record");
     }
 
-    if (context.number_of_guardians != Iterables.size(guardianRecords)) {
+    if (context.numberOfGuardians != Iterables.size(guardianRecords)) {
       throw new IllegalStateException(String.format("Number of guardians (%d) does not match number of coefficients (%d)",
-              context.number_of_guardians, Iterables.size(guardianRecords)));
+              context.numberOfGuardians, Iterables.size(guardianRecords)));
     }
 
     ElectionRecordProto.ElectionRecord electionRecordProto = ElectionRecordToProto.buildElectionRecord(

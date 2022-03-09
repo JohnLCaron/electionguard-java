@@ -82,8 +82,8 @@ public class ManifestFromProto {
   static Manifest.ContestDescription convertContestDescription(ManifestProto.ContestDescription contest) {
     return new Manifest.ContestDescription(
             contest.getContestId(),
-            contest.getGeopoliticalUnitId(),
             contest.getSequenceOrder(),
+            contest.getGeopoliticalUnitId(),
             convertVoteVariationType(contest.getVoteVariation()),
             contest.getNumberElected(),
             contest.getVotesAllowed(),
@@ -135,7 +135,8 @@ public class ManifestFromProto {
   static Manifest.SelectionDescription convertSelectionDescription(ManifestProto.SelectionDescription selection) {
     return new Manifest.SelectionDescription(
             selection.getSelectionId(),
-            selection.getCandidateId(),
-            selection.getSequenceOrder());
+            selection.getSequenceOrder(),
+            selection.getCandidateId()
+    );
   }
 }

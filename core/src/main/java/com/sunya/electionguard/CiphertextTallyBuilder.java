@@ -67,11 +67,11 @@ public class CiphertextTallyBuilder {
       Manifest.ContestDescription contest = contestp.contest;
       // build a collection of valid selections for the contest description, ignoring the Placeholder Selections.
       Map<String, Selection> contest_selections = new HashMap<>();
-      for (Manifest.SelectionDescription selection : contest.ballot_selections()) {
-        contest_selections.put(selection.object_id(),
-                new Selection(selection.object_id(), selection.sequence_order(), selection.crypto_hash()));
+      for (Manifest.SelectionDescription selection : contest.selections()) {
+        contest_selections.put(selection.selectionId(),
+                new Selection(selection.selectionId(), selection.sequenceOrder(), selection.cryptoHash()));
       }
-      cast_collection.put(contest.object_id(), new Contest(contest.object_id(), contest.sequence_order(), contest.crypto_hash(), contest_selections));
+      cast_collection.put(contest.contestId(), new Contest(contest.contestId(), contest.sequenceOrder(), contest.cryptoHash(), contest_selections));
     }
     return cast_collection;
   }
@@ -91,7 +91,7 @@ public class CiphertextTallyBuilder {
               .forEach(ballot -> {
         // collect the selections so they can be accumulated in parallel
         for (CiphertextBallot.Contest contest : ballot.contests) {
-          for (CiphertextBallot.Selection selection : contest.ballot_selections) {
+          for (CiphertextBallot.Selection selection : contest.selections) {
             Map<String, ElGamal.Ciphertext> map2 = cast_ballot_selections.computeIfAbsent(selection.object_id(), map1 -> new HashMap<>());
             map2.put(ballot.object_id(), selection.ciphertext());
           }
@@ -142,17 +142,17 @@ public class CiphertextTallyBuilder {
     for (CiphertextBallot.Contest contest : ballot.contests) {
       // This should never happen since the ballot is validated against the election metadata
       // but it's possible the local dictionary was modified so we double check.
-      if (!this.contests.containsKey(contest.object_id)) {
-        logger.atWarning().log("add cast missing contest in valid set %s", contest.object_id);
+      if (!this.contests.containsKey(contest.contestId)) {
+        logger.atWarning().log("add cast missing contest in valid set %s", contest.contestId);
         return false;
       }
 
-      Contest use_contest = this.contests.get(contest.object_id);
+      Contest use_contest = this.contests.get(contest.contestId);
       // Potentially parellizable over this ballot's selections.
-      if (!use_contest.accumulate_contest(contest.ballot_selections)) {
+      if (!use_contest.accumulate_contest(contest.selections)) {
         return false;
       }
-      this.contests.put(contest.object_id, use_contest);
+      this.contests.put(contest.contestId, use_contest);
     }
     this.cast_ballot_ids.add(ballot.object_id());
     return true;
@@ -237,7 +237,7 @@ public class CiphertextTallyBuilder {
    * The Contest to be tallied for a specific Manifest.ContestDescription.
    * The object_id is the Manifest.ContestDescription.object_id.
    */
-  static class Contest implements OrderedObjectBaseIF {
+  static class Contest {
     public final String object_id;
     public final int sequence_order;
 
@@ -297,12 +297,10 @@ public class CiphertextTallyBuilder {
       return true;
     }
 
-    @Override
     public String object_id() {
       return object_id;
     }
 
-    @Override
     public int sequence_order() {
       return sequence_order;
     }

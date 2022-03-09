@@ -167,7 +167,7 @@ public class DecryptBallots {
     this.electionRecord = electionRecord;
     this.election = electionRecord.election;
     this.quorum = electionRecord.context.quorum;
-    this.numberOfGuardians = electionRecord.context.number_of_guardians;
+    this.numberOfGuardians = electionRecord.context.numberOfGuardians;
     // LOOK We could do the accumulation if the encryptedTally doesnt exist
     this.encryptedTally = electionRecord.ciphertextTally;
 

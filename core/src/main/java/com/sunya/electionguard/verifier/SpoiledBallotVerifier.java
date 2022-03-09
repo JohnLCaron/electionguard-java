@@ -28,10 +28,10 @@ public class SpoiledBallotVerifier {
     this.electionRecord = electionRecord;
     for (Manifest.ContestDescription contest : electionRecord.election.contests()) {
       HashSet<String> selectionNames = new HashSet<>();
-      for (Manifest.SelectionDescription selection : contest.ballot_selections()) {
-        selectionNames.add(selection.object_id());
+      for (Manifest.SelectionDescription selection : contest.selections()) {
+        selectionNames.add(selection.selectionId());
       }
-      names.put(contest.object_id(), selectionNames);
+      names.put(contest.contestId(), selectionNames);
     }
   }
 
@@ -41,15 +41,15 @@ public class SpoiledBallotVerifier {
     try (Stream<PlaintextTally> ballots = electionRecord.spoiledBallots.iterator().stream()) {
       ballots.forEach(ballot -> {
         for (PlaintextTally.Contest contest : ballot.contests.values()) {
-          Set<String> selectionNames = names.get(contest.object_id());
+          Set<String> selectionNames = names.get(contest.contestId());
           if (selectionNames == null) {
-            System.out.printf(" ***Ballot Contest id (%s) not contained in ballot coding file.%n", contest.object_id());
+            System.out.printf(" ***Ballot Contest id (%s) not contained in ballot coding file.%n", contest.contestId());
             valid.set(false);
             continue;
           }
           for (PlaintextTally.Selection selection : contest.selections().values()) {
-            if (!selectionNames.contains(selection.object_id())) {
-              System.out.printf(" ***Ballot Selection id (%s) not contained in contest (%s).%n", selection.object_id(), contest.object_id());
+            if (!selectionNames.contains(selection.selectionId())) {
+              System.out.printf(" ***Ballot Selection id (%s) not contained in contest (%s).%n", selection.selectionId(), contest.contestId());
               valid.set(false);
             }
           }

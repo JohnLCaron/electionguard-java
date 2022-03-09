@@ -108,10 +108,10 @@ public class Decryptions {
               context);
         if (contest_share.isEmpty()) {
           logger.atInfo().log("could not compute ballot share for guardian %s contest %s",
-                  guardian_keys.owner_id(), contest.object_id);
+                  guardian_keys.owner_id(), contest.contestId);
           return Optional.empty();
         }
-        contests.put(contest.object_id, contest_share.get());
+        contests.put(contest.contestId, contest_share.get());
     }
     return Optional.of(new DecryptionShare(
             ballot.object_id(),
@@ -143,7 +143,7 @@ public class Decryptions {
                 guardian_keys.owner_id(), ciphertextContest.object_id);
         return Optional.empty();
       }
-      selections.put(decryption.get().selection_id(), decryption.get());
+      selections.put(decryption.get().selectionId(), decryption.get());
     }
 
     return Optional.of(new CiphertextDecryptionContest(
@@ -182,10 +182,10 @@ public class Decryptions {
 
     try {
       BallotBox.DecryptionProofTuple tuple =
-              partially_decrypt(guardian_keys, selection.ciphertext(), context.crypto_extended_base_hash, null);
+              partially_decrypt(guardian_keys, selection.ciphertext(), context.cryptoExtendedBaseHash, null);
 
       if (tuple.proof.is_valid(selection.ciphertext(), guardian_keys.key_pair().public_key(),
-              tuple.decryption, context.crypto_extended_base_hash)) {
+              tuple.decryption, context.cryptoExtendedBaseHash)) {
         return Optional.of(DecryptionShare.create_ciphertext_decryption_selection(
                 selection.object_id(),
                 guardian_keys.owner_id(),
@@ -276,7 +276,7 @@ public class Decryptions {
                   missing_guardian_key.owner_id(), contest.object_id);
           return Optional.empty();
         }
-        selections.put(decryption.get().selection_id(), decryption.get());
+        selections.put(decryption.get().selectionId(), decryption.get());
       }
 
       return Optional.of(new CiphertextCompensatedDecryptionContest(
@@ -338,10 +338,10 @@ public class Decryptions {
                       context);
          if (contest_share.isEmpty()) {
           logger.atWarning().log("could not compute compensated spoiled ballot share for guardian %s missing: %s contest %s",
-                  guardian_key.owner_id(), missing_guardian_key.owner_id(), contest.object_id);
+                  guardian_key.owner_id(), missing_guardian_key.owner_id(), contest.contestId);
           return Optional.empty();
         }
-      contests.put(contest.object_id, contest_share.get());
+      contests.put(contest.contestId, contest_share.get());
     }
 
     return Optional.of(new CompensatedDecryptionShare(
@@ -402,7 +402,7 @@ public class Decryptions {
     Optional<BallotBox.DecryptionProofTuple> compensated = compensate_decrypt(
             missing_guardian_backup,
             selection.ciphertext(),
-            context.crypto_extended_base_hash,
+            context.cryptoExtendedBaseHash,
             null);
     if (compensated.isEmpty()) {
       logger.atWarning().log("compute compensated decryption share failed for %s missing: %s %s",
@@ -417,7 +417,7 @@ public class Decryptions {
             selection.ciphertext(),
             recovery_public_key,
             tuple.decryption,
-            context.crypto_extended_base_hash)) {
+            context.cryptoExtendedBaseHash)) {
 
       CiphertextCompensatedDecryptionSelection share = new CiphertextCompensatedDecryptionSelection(
               selection.object_id(),
@@ -693,7 +693,7 @@ public class Decryptions {
               CiphertextContest.createFrom(contest),
               shares,
               lagrange_coefficients);
-      contests.put(contest.object_id, dcontest);
+      contests.put(contest.contestId, dcontest);
     }
 
     return new DecryptionShare(

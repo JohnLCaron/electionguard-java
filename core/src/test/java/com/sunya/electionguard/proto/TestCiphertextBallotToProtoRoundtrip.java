@@ -34,8 +34,8 @@ public class TestCiphertextBallotToProtoRoundtrip {
       for (CiphertextBallot.Contest contest : roundtrip.contests) {
         CiphertextBallot.Contest pcontest = fromPython.contests.get(contestIdx);
         int selectionIdx = 0;
-        for (CiphertextBallot.Selection selection : contest.ballot_selections) {
-          CiphertextBallot.Selection pselection = pcontest.ballot_selections.get(selectionIdx);
+        for (CiphertextBallot.Selection selection : contest.selections) {
+          CiphertextBallot.Selection pselection = pcontest.selections.get(selectionIdx);
           assertThat(selection).isEqualTo(pselection);
           selectionIdx++;
         }

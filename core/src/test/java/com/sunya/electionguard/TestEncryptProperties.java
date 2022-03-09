@@ -31,11 +31,11 @@ public class TestEncryptProperties extends TestProperties {
     KeyPair keypair = elgamal_keypair_from_secret(int_to_q_unchecked(BigInteger.TWO)).orElseThrow();
     ElementModQ nonce = TestUtils.elements_mod_q();
 
-    Manifest.SelectionDescription metadata = new Manifest.SelectionDescription("some-selection-object-id", "some-candidate-id", 1);
-    ElementModQ hash_context = metadata.crypto_hash();
+    Manifest.SelectionDescription metadata = new Manifest.SelectionDescription("some-selection-object-id", 1, "some-candidate-id");
+    ElementModQ hash_context = metadata.cryptoHash();
 
     PlaintextBallot.Selection subject = selection_from(metadata, false, false);
-    assertThat(subject.is_valid(metadata.object_id())).isTrue();
+    assertThat(subject.is_valid(metadata.selectionId())).isTrue();
 
     Optional<CiphertextBallot.Selection> result = encrypt_selection(subject, metadata, keypair.public_key(), ONE_MOD_Q, nonce, false, true);
 
@@ -49,10 +49,10 @@ public class TestEncryptProperties extends TestProperties {
   public void test_encrypt_simple_selection_malformed_data_fails() {
     KeyPair keypair = elgamal_keypair_from_secret(int_to_q_unchecked(BigInteger.TWO)).orElseThrow();
     ElementModQ nonce = TestUtils.elements_mod_q();
-    Manifest.SelectionDescription metadata = new Manifest.SelectionDescription("some-selection-object-id", "some-candidate-id", 1);
-    ElementModQ hash_context = metadata.crypto_hash();
+    Manifest.SelectionDescription metadata = new Manifest.SelectionDescription("some-selection-object-id", 1, "some-candidate-id");
+    ElementModQ hash_context = metadata.cryptoHash();
     PlaintextBallot.Selection subject = selection_from(metadata, false, false);
-    assertThat(subject.is_valid(metadata.object_id())).isTrue();
+    assertThat(subject.is_valid(metadata.selectionId())).isTrue();
 
     Optional<CiphertextBallot.Selection> resultO = encrypt_selection(subject, metadata, keypair.public_key(), ONE_MOD_Q, nonce, false, true);
     assertThat(resultO).isPresent();
@@ -86,7 +86,7 @@ public class TestEncryptProperties extends TestProperties {
     Optional<CiphertextBallot.Selection> result = encrypt_selection(subject, description, keypair.public_key(), ONE_MOD_Q, seed, false, true);
     assertThat(result).isPresent();
     assertThat(result.get().ciphertext()).isNotNull();
-    assertThat(result.get().is_valid_encryption(description.crypto_hash(), keypair.public_key(), ONE_MOD_Q)).isTrue();
+    assertThat(result.get().is_valid_encryption(description.cryptoHash(), keypair.public_key(), ONE_MOD_Q)).isTrue();
   }
 
   @Property(tries = 10, shrinking = ShrinkingMode.OFF)
@@ -99,7 +99,7 @@ public class TestEncryptProperties extends TestProperties {
 
     Optional<CiphertextBallot.Selection> resultO = encrypt_selection(subject, description, keypair.public_key(), ONE_MOD_Q, seed, false, true);
     assertThat(resultO).isPresent();
-    assertThat(resultO.get().is_valid_encryption(description.crypto_hash(), keypair.public_key(), ONE_MOD_Q)).isTrue();
+    assertThat(resultO.get().is_valid_encryption(description.cryptoHash(), keypair.public_key(), ONE_MOD_Q)).isTrue();
     CiphertextBallot.Selection result = resultO.get();
 
     // tamper with the encryption
@@ -129,8 +129,8 @@ public class TestEncryptProperties extends TestProperties {
             Optional.of(malformed_disjunctive), result.extended_data);
 
 
-    assertThat(malformed_encryption.is_valid_encryption(description.crypto_hash(), keypair.public_key(), ONE_MOD_Q)).isFalse();
-    assertThat(malformed_proof.is_valid_encryption(description.crypto_hash(), keypair.public_key(), ONE_MOD_Q)).isFalse();
+    assertThat(malformed_encryption.is_valid_encryption(description.cryptoHash(), keypair.public_key(), ONE_MOD_Q)).isFalse();
+    assertThat(malformed_proof.is_valid_encryption(description.cryptoHash(), keypair.public_key(), ONE_MOD_Q)).isFalse();
   }
 
   @Example
@@ -138,14 +138,14 @@ public class TestEncryptProperties extends TestProperties {
     KeyPair keypair = elgamal_keypair_from_secret(int_to_q_unchecked(BigInteger.TWO)).orElseThrow();
     ElementModQ nonce = TestUtils.elements_mod_q();
 
-    Manifest.SelectionDescription desc1 = new Manifest.SelectionDescription("some-object-id-affirmative", "some-candidate-id-affirmative", 0);
-    Manifest.SelectionDescription desc2 = new Manifest.SelectionDescription("some-object-id-negative", "some-candidate-id-negative", 1);
-    Manifest.SelectionDescription descp = new Manifest.SelectionDescription("some-object-id-placeholder", "some-candidate-id-placeholder", 2);
+    Manifest.SelectionDescription desc1 = new Manifest.SelectionDescription("some-object-id-affirmative", 0, "some-candidate-id-affirmative");
+    Manifest.SelectionDescription desc2 = new Manifest.SelectionDescription("some-object-id-negative", 1, "some-candidate-id-negative");
+    Manifest.SelectionDescription descp = new Manifest.SelectionDescription("some-object-id-placeholder", 2, "some-candidate-id-placeholder");
 
     Manifest.ContestDescription contest = new Manifest.ContestDescription(
             "some-contest-object-id",
-            "some-electoral-district-id",
             0,
+            "some-electoral-district-id",
             Manifest.VoteVariationType.one_of_m,
             1,
             1,
@@ -156,10 +156,10 @@ public class TestEncryptProperties extends TestProperties {
             ImmutableList.of());
 
     ContestWithPlaceholders metadata = new ContestWithPlaceholders(contest, ImmutableList.of(descp));
-    ElementModQ hash_context = contest.crypto_hash();
+    ElementModQ hash_context = contest.cryptoHash();
     PlaintextBallot.Contest subject = contest_from(contest);
 
-    assertThat(subject.is_valid(contest.object_id(), contest.ballot_selections().size(), contest.number_elected(), contest.votes_allowed())).isTrue();
+    assertThat(subject.is_valid(contest.contestId(), contest.selections().size(), contest.numberElected(), contest.votesAllowed())).isTrue();
     Optional<CiphertextBallot.Contest> result = encrypt_contest(subject, metadata, keypair.public_key(), ONE_MOD_Q, nonce, true);
 
     assertThat(result).isPresent();
@@ -178,12 +178,12 @@ public class TestEncryptProperties extends TestProperties {
     assertThat(resultO).isPresent();
     CiphertextBallot.Contest result = resultO.get();
 
-    assertThat(result.is_valid_encryption(description.contest.crypto_hash(), keypair.public_key(), ONE_MOD_Q)).isTrue();
+    assertThat(result.is_valid_encryption(description.contest.cryptoHash(), keypair.public_key(), ONE_MOD_Q)).isTrue();
 
     // The encrypted contest should include an entry for each possible selection nd placeholders for each seat
-    int expected_entries = description.contest.ballot_selections().size() + description.contest.number_elected();
+    int expected_entries = description.contest.selections().size() + description.contest.numberElected();
 
-    assertThat(result.ballot_selections.size()).isEqualTo(expected_entries);
+    assertThat(result.selections.size()).isEqualTo(expected_entries);
   }
 
   @Property(tries = 10, shrinking = ShrinkingMode.OFF)
@@ -199,7 +199,7 @@ public class TestEncryptProperties extends TestProperties {
             subject, description, keypair.public_key(), ONE_MOD_Q, nonce_seed, true);
     assertThat(resultO).isPresent();
     CiphertextBallot.Contest result = resultO.get();
-    assertThat(result.is_valid_encryption(description.contest.crypto_hash(), keypair.public_key(), ONE_MOD_Q)).isTrue();
+    assertThat(result.is_valid_encryption(description.contest.cryptoHash(), keypair.public_key(), ONE_MOD_Q)).isTrue();
 
     // tamper with the proof
     assertThat(result.proof).isPresent();
@@ -209,20 +209,20 @@ public class TestEncryptProperties extends TestProperties {
             altered_a, proof.data, proof.challenge, proof.response, proof.constant);
 
     CiphertextBallot.Contest malformed_proof = new CiphertextBallot.Contest(
-            result.object_id(), result.sequence_order(), result.contest_hash,
-            result.ballot_selections, result.crypto_hash,
+            result.object_id(), result.sequence_order(), result.contestHash,
+            result.selections, result.crypto_hash,
             new ElGamal.Ciphertext(TWO_MOD_P, TWO_MOD_P),
             result.nonce,
             Optional.of(malformed_disjunctive));
-    assertThat(malformed_proof.is_valid_encryption(description.contest.crypto_hash(), keypair.public_key(), ONE_MOD_Q)).isFalse();
+    assertThat(malformed_proof.is_valid_encryption(description.contest.cryptoHash(), keypair.public_key(), ONE_MOD_Q)).isFalse();
 
     // remove the proof
     CiphertextBallot.Contest missing_proof = new CiphertextBallot.Contest(
-            result.object_id(), result.sequence_order(), result.contest_hash,
-            result.ballot_selections, result.crypto_hash,
+            result.object_id(), result.sequence_order(), result.contestHash,
+            result.selections, result.crypto_hash,
             new ElGamal.Ciphertext(TWO_MOD_P, TWO_MOD_P),
             result.nonce, Optional.empty());
-    assertThat(missing_proof.is_valid_encryption(description.contest.crypto_hash(), keypair.public_key(), ONE_MOD_Q)).isFalse();
+    assertThat(missing_proof.is_valid_encryption(description.contest.cryptoHash(), keypair.public_key(), ONE_MOD_Q)).isFalse();
   }
 
   /*  Fails - Dont know what the fix is.
@@ -254,8 +254,8 @@ public class TestEncryptProperties extends TestProperties {
   public void test_encrypt_contest_manually_formed_contest_description_valid_succeeds() {
     Manifest.ContestDescription description = new Manifest.ContestDescription(
             "0@A.com-contest",
-            "0@A.com-gp-unit",
             1,
+            "0@A.com-gp-unit",
             Manifest.VoteVariationType.n_of_m,
             1,
             1,
@@ -263,19 +263,19 @@ public class TestEncryptProperties extends TestProperties {
             ImmutableList.of(
                     new Manifest.SelectionDescription(
                             "0@A.com-selection",
-                            "0@A.com",
-                            0),
+                            0,
+                            "0@A.com"),
                     new Manifest.SelectionDescription(
                             "0@B.com-selection",
-                            "0@B.com",
-                            1)),
+                            1,
+                            "0@B.com")),
             null, null, ImmutableList.of());
 
     KeyPair keypair = elgamal_keypair_from_secret(TWO_MOD_Q).orElseThrow();
 
     PlaintextBallot.Contest data = ballot_factory.get_random_contest_from(description, false, false);
 
-    List<Manifest.SelectionDescription> placeholders = InternalManifest.generate_placeholder_selections_from(description, description.number_elected());
+    List<Manifest.SelectionDescription> placeholders = InternalManifest.generate_placeholder_selections_from(description, description.numberElected());
     ContestWithPlaceholders contestp = new ContestWithPlaceholders(description, placeholders);
 
     Optional<CiphertextBallot.Contest> subject = encrypt_contest(
@@ -296,8 +296,8 @@ public class TestEncryptProperties extends TestProperties {
 
     Manifest.ContestDescription description = new Manifest.ContestDescription(
             "0@A.com-contest",
-            "0@A.com-gp-unit",
             1,
+            "0@A.com-gp-unit",
             Manifest.VoteVariationType.n_of_m,
             1,
             1,
@@ -305,13 +305,13 @@ public class TestEncryptProperties extends TestProperties {
             ImmutableList.of(
                     new Manifest.SelectionDescription(
                             "0@A.com-selection",
-                            "0@A.com",
-                            0),
+                            0,
+                            "0@A.com"),
                     // Note the selection description is the same as the first sequence element
                     new Manifest.SelectionDescription(
                             "0@A.com-selection",
-                            "0@A.com",
-                            1)),
+                            1,
+                            "0@A.com")),
             null, null, ImmutableList.of());
 
     KeyPair keypair = elgamal_keypair_from_secret(TWO_MOD_Q).orElseThrow();
@@ -319,7 +319,7 @@ public class TestEncryptProperties extends TestProperties {
     // Bypass checking the validity of the description
     PlaintextBallot.Contest data = ballot_factory.get_random_contest_from(description, true, false);
 
-    List<Manifest.SelectionDescription> placeholders = InternalManifest.generate_placeholder_selections_from(description, description.number_elected());
+    List<Manifest.SelectionDescription> placeholders = InternalManifest.generate_placeholder_selections_from(description, description.numberElected());
     ContestWithPlaceholders contestp = new ContestWithPlaceholders(description, placeholders);
 
     Optional<CiphertextBallot.Contest> subject = encrypt_contest(
@@ -340,7 +340,7 @@ public class TestEncryptProperties extends TestProperties {
     ElectionContext context = tuple.context;
 
     PlaintextBallot subject = ElectionFactory.get_fake_ballot(election, null);
-    assertThat(subject.is_valid(election.ballot_styles().get(0).object_id())).isTrue();
+    assertThat(subject.is_valid(election.ballotStyles().get(0).ballotStyleId())).isTrue();
 
     Optional<CiphertextBallot> resultO = encrypt_ballot(subject, tuple.internalManifest, context, SEED_HASH, Optional.empty(), true);
     assertThat(resultO).isPresent();
@@ -352,14 +352,14 @@ public class TestEncryptProperties extends TestProperties {
     assertThat(result_from_seed).isPresent();
     assertThat(
             result.is_valid_encryption(
-                    election.crypto_hash(),
+                    election.cryptoHash(),
                     keypair.public_key(),
-                    context.crypto_extended_base_hash)).isTrue();
+                    context.cryptoExtendedBaseHash)).isTrue();
     assertThat(
             result_from_seed.get().is_valid_encryption(
-                    election.crypto_hash(),
+                    election.cryptoHash(),
                     keypair.public_key(),
-                    context.crypto_extended_base_hash)).isTrue();
+                    context.cryptoExtendedBaseHash)).isTrue();
   }
 
 
@@ -371,14 +371,14 @@ public class TestEncryptProperties extends TestProperties {
     ElectionContext context = tuple.context;
 
     PlaintextBallot data = ElectionFactory.get_fake_ballot(election, null);
-    assertThat(data.is_valid(election.ballot_styles().get(0).object_id())).isTrue();
+    assertThat(data.is_valid(election.ballotStyles().get(0).ballotStyleId())).isTrue();
 
     EncryptionDevice device = Encrypt.createDeviceForTest("Location");
     EncryptionMediator subject = new EncryptionMediator(tuple.internalManifest, context, device);
 
     Optional<CiphertextBallot> result = subject.encrypt(data);
     assertThat(result).isPresent();
-    assertThat(result.get().is_valid_encryption(election.crypto_hash(), keypair.public_key(), context.crypto_extended_base_hash)).isTrue();
+    assertThat(result.get().is_valid_encryption(election.cryptoHash(), keypair.public_key(), context.cryptoExtendedBaseHash)).isTrue();
   }
 
   @Example
@@ -389,7 +389,7 @@ public class TestEncryptProperties extends TestProperties {
     ElectionContext context = tuple.context;
 
     PlaintextBallot data = ballot_factory.get_simple_ballot_from_file();
-    assertThat(data.is_valid(election.ballot_styles().get(0).object_id())).isTrue();
+    assertThat(data.is_valid(election.ballotStyles().get(0).ballotStyleId())).isTrue();
 
     EncryptionDevice device = Encrypt.createDeviceForTest("Location");
     EncryptionMediator subject = new EncryptionMediator(tuple.internalManifest, context, device);
@@ -397,7 +397,7 @@ public class TestEncryptProperties extends TestProperties {
     Optional<CiphertextBallot> result = subject.encrypt(data);
     assertThat(result).isPresent();
     assertThat(data.object_id()).isEqualTo(result.get().object_id());
-    assertThat(result.get().is_valid_encryption(election.crypto_hash(), keypair.public_key(), context.crypto_extended_base_hash)).isTrue();
+    assertThat(result.get().is_valid_encryption(election.cryptoHash(), keypair.public_key(), context.cryptoExtendedBaseHash)).isTrue();
   }
 
   /**         This test verifies that we can regenerate the contest and selection proofs from the cached nonce values. */
@@ -412,7 +412,7 @@ public class TestEncryptProperties extends TestProperties {
      ElectionContext context = tuple.context;
 
      PlaintextBallot data = ballot_factory.get_simple_ballot_from_file();
-     assertThat(data.is_valid(election.ballot_styles().get(0).object_id())).isTrue();
+     assertThat(data.is_valid(election.ballotStyles().get(0).ballotStyleId())).isTrue();
 
      EncryptionDevice device = Encrypt.createDeviceForTest("Location");
      EncryptionMediator subject = new EncryptionMediator(tuple.internalManifest, context, device);
@@ -420,35 +420,35 @@ public class TestEncryptProperties extends TestProperties {
      Optional<CiphertextBallot> resultO = subject.encrypt(data);
      assertThat(resultO).isPresent();
      CiphertextBallot result = resultO.get();
-     assertThat(result.is_valid_encryption(election.crypto_hash(), keypair.public_key(), context.crypto_extended_base_hash)).isTrue();
+     assertThat(result.is_valid_encryption(election.cryptoHash(), keypair.public_key(), context.cryptoExtendedBaseHash)).isTrue();
 
      for (CiphertextBallot.Contest contest : result.contests) {
        // Find the contest description
-       ContestWithPlaceholders contestp = tuple.internalManifest.getContestById(contest.object_id).orElseThrow();
+       ContestWithPlaceholders contestp = tuple.internalManifest.getContestById(contest.contestId).orElseThrow();
 
        // Homomorpically accumulate the selection encryptions
-       List<ElGamal.Ciphertext> ciphertexts = contest.ballot_selections.stream().map(s -> s.ciphertext()).toList();
+       List<ElGamal.Ciphertext> ciphertexts = contest.selections.stream().map(s -> s.ciphertext()).toList();
        Ciphertext elgamal_accumulation = elgamal_add(Iterables.toArray(ciphertexts, ElGamal.Ciphertext.class));
 
        // accumulate the selection nonce's
-       List<ElementModQ> nonces = contest.ballot_selections.stream().map(s -> s.nonce.orElseThrow()).toList();
+       List<ElementModQ> nonces = contest.selections.stream().map(s -> s.nonce.orElseThrow()).toList();
        ElementModQ aggregate_nonce = add_q(Iterables.toArray(nonces, ElementModQ.class));
 
        ConstantChaumPedersenProof regenerated_constant = make_constant_chaum_pedersen(
                elgamal_accumulation,
-               contestp.contest.number_elected(),
+               contestp.contest.numberElected(),
                aggregate_nonce,
                keypair.public_key(),
                add_q(contest.nonce.orElseThrow(), TWO_MOD_Q),
-               context.crypto_extended_base_hash);
+               context.cryptoExtendedBaseHash);
 
        assertThat(
                regenerated_constant.is_valid(
                        elgamal_accumulation,
                        keypair.public_key(),
-                       context.crypto_extended_base_hash)).isTrue();
+                       context.cryptoExtendedBaseHash)).isTrue();
 
-       for (CiphertextBallot.Selection selection : contest.ballot_selections) {
+       for (CiphertextBallot.Selection selection : contest.selections) {
          // Since we know the nonce, we can decrypt the plaintext
          Integer representation = selection.ciphertext().decrypt_known_nonce(keypair.public_key(), selection.nonce.orElseThrow());
 
@@ -459,11 +459,11 @@ public class TestEncryptProperties extends TestProperties {
                  selection.ciphertext(),
                  selection.nonce.get(),
                  keypair.public_key(),
-                 context.crypto_extended_base_hash,
+                 context.cryptoExtendedBaseHash,
                  add_q(selection.nonce.get(), TWO_MOD_Q),
                  representation);
 
-         assertThat(regenerated_disjuctive.is_valid(selection.ciphertext(), keypair.public_key(), context.crypto_extended_base_hash))
+         assertThat(regenerated_disjuctive.is_valid(selection.ciphertext(), keypair.public_key(), context.cryptoExtendedBaseHash))
                  .isTrue();
        }
      }

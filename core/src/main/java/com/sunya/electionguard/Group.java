@@ -93,7 +93,7 @@ public class Group {
 
     /** Validates that the element is actually within the bounds of [0,Q). */
     public boolean is_in_bounds() {
-      return between(BigInteger.ZERO, elem, primes.small_prime);
+      return between(BigInteger.ZERO, elem, primes.smallPrime);
     }
 
     @Override
@@ -111,7 +111,7 @@ public class Group {
 
     /** Validates that the element is actually within the bounds of [0,P). */
     public boolean is_in_bounds() {
-      return between(BigInteger.ZERO, elem, primes.large_prime);
+      return between(BigInteger.ZERO, elem, primes.largePrime);
     }
 
     /**
@@ -119,8 +119,8 @@ public class Group {
      * y ∈ Z^r_p if and only if y^q mod p = 1
      */
     public boolean is_valid_residue() {
-      boolean residue = elem.modPow(primes.small_prime, primes.large_prime).equals(BigInteger.ONE);
-      return between(BigInteger.ONE, elem, primes.large_prime) && residue;
+      boolean residue = elem.modPow(primes.smallPrime, primes.largePrime).equals(BigInteger.ONE);
+      return between(BigInteger.ONE, elem, primes.largePrime) && residue;
     }
 
     @Override
@@ -145,7 +145,7 @@ public class Group {
    */
   public static Optional<ElementModQ> hex_to_q(String input) {
     BigInteger b = new BigInteger(input, 16);
-    if (b.compareTo(primes.small_prime) < 0) {
+    if (b.compareTo(primes.smallPrime) < 0) {
       return Optional.of(new ElementModQ(b));
     } else {
       return Optional.empty();
@@ -175,7 +175,7 @@ public class Group {
    * Returns `None` if the number is out of the allowed [0,P) range.
    */
   public static Optional<ElementModP> int_to_p(BigInteger biggy) {
-    if (between(BigInteger.ZERO, biggy, primes.large_prime)) {
+    if (between(BigInteger.ZERO, biggy, primes.largePrime)) {
       return Optional.of(new ElementModP(biggy));
     } else {
       return Optional.empty();
@@ -187,7 +187,7 @@ public class Group {
    * Returns `None` if the number is out of the allowed [0,Q) range.
    */
   public static Optional<ElementModQ> int_to_q(BigInteger biggy) {
-    if (between(BigInteger.ZERO, biggy, primes.small_prime)) {
+    if (between(BigInteger.ZERO, biggy, primes.smallPrime)) {
       return Optional.of(new ElementModQ(biggy));
     } else {
       return Optional.empty();
@@ -219,66 +219,66 @@ public class Group {
   public static ElementModQ add_q(ElementModQ... elems) {
     BigInteger t = BigInteger.ZERO;
     for (ElementModQ e : elems) {
-      t = t.add(e.elem).mod(primes.small_prime);
+      t = t.add(e.elem).mod(primes.smallPrime);
     }
     return int_to_q_unchecked(t);
   }
 
   /** Compute (a-b) mod q. */
   static ElementModQ a_minus_b_q(ElementModQ a, ElementModQ b) {
-    return int_to_q_unchecked(a.elem.subtract(b.elem).mod(primes.small_prime));
+    return int_to_q_unchecked(a.elem.subtract(b.elem).mod(primes.smallPrime));
   }
 
   /** Compute a/b mod p. */
   public static ElementModP div_p(ElementMod a, ElementMod b) {
-    BigInteger inverse = b.elem.modInverse(primes.large_prime);
+    BigInteger inverse = b.elem.modInverse(primes.largePrime);
     BigInteger product = a.elem.multiply(inverse);
-    return int_to_p_unchecked(product.mod(primes.large_prime));
+    return int_to_p_unchecked(product.mod(primes.largePrime));
   }
 
   /** Compute a/b mod q. */
   static ElementModQ div_q(ElementMod a, ElementMod b) {
-    BigInteger inverse = b.elem.modInverse(primes.small_prime);
+    BigInteger inverse = b.elem.modInverse(primes.smallPrime);
     BigInteger product = a.elem.multiply(inverse);
-    return int_to_q_unchecked(product.mod(primes.small_prime));
+    return int_to_q_unchecked(product.mod(primes.smallPrime));
   }
 
   /** Compute (Q - a) mod q. */
   static ElementModQ negate_q(ElementModQ a) {
-    return int_to_q_unchecked(primes.small_prime.subtract(a.elem));
+    return int_to_q_unchecked(primes.smallPrime.subtract(a.elem));
   }
 
   /** Compute (a + b * c) mod q. */
   static ElementModQ a_plus_bc_q(ElementModQ a, ElementModQ b, ElementModQ c) {
-    BigInteger product = b.elem.multiply(c.elem).mod(primes.small_prime);
+    BigInteger product = b.elem.multiply(c.elem).mod(primes.smallPrime);
     BigInteger sum = a.elem.add(product);
-    return int_to_q_unchecked(sum.mod(primes.small_prime));
+    return int_to_q_unchecked(sum.mod(primes.smallPrime));
   }
 
   /** Compute the multiplicative inverse mod p. */
   static ElementModP mult_inv_p(ElementMod elem) {
-    return int_to_p_unchecked(elem.elem.modInverse(primes.large_prime));
+    return int_to_p_unchecked(elem.elem.modInverse(primes.largePrime));
   }
 
   // https://www.electionguard.vote/spec/0.95.0/9_Verifier_construction/#modular-exponentiation
   /** Compute b^e mod p. */
   static ElementModP pow_p(ElementModP b, ElementModP e) {
-    return int_to_p_unchecked(pow_pi(b.elem.mod(primes.large_prime), e.elem));
+    return int_to_p_unchecked(pow_pi(b.elem.mod(primes.largePrime), e.elem));
   }
 
   /** Compute b^e mod p. */
   public static ElementModP pow_p(ElementMod b, ElementMod e) {
-    return int_to_p_unchecked(pow_pi(b.elem.mod(primes.large_prime), e.elem));
+    return int_to_p_unchecked(pow_pi(b.elem.mod(primes.largePrime), e.elem));
   }
 
   /** Compute b^e mod p. */
   static public BigInteger pow_pi(BigInteger b, BigInteger e) {
-    return b.modPow(e, primes.large_prime);
+    return b.modPow(e, primes.largePrime);
   }
 
   /** Compute b^e mod q. */
   public static ElementModQ pow_q(BigInteger b, BigInteger e) {
-    return int_to_q_unchecked(b.modPow(e, primes.small_prime));
+    return int_to_q_unchecked(b.modPow(e, primes.smallPrime));
   }
 
   // https://www.electionguard.vote/spec/0.95.0/9_Verifier_construction/#modular-multiplication
@@ -293,20 +293,20 @@ public class Group {
   static ElementModP mult_p(ElementModP... elems) {
     BigInteger product = BigInteger.ONE;
     for (ElementModP x : elems) {
-      product = product.multiply(x.elem).mod(primes.large_prime);
+      product = product.multiply(x.elem).mod(primes.largePrime);
     }
     return int_to_p_unchecked(product);
   }
 
   public static ElementModP mult_p(ElementMod p1, ElementMod p2) {
-    BigInteger product = p1.elem.multiply(p2.elem).mod(primes.large_prime);
+    BigInteger product = p1.elem.multiply(p2.elem).mod(primes.largePrime);
     return int_to_p_unchecked(product);
   }
 
   public static BigInteger mult_pi(BigInteger... elems) {
     BigInteger product = BigInteger.ONE;
     for (BigInteger x : elems) {
-      product = product.multiply(x).mod(primes.large_prime);
+      product = product.multiply(x).mod(primes.largePrime);
     }
     return product;
   }
@@ -318,7 +318,7 @@ public class Group {
   public static ElementModQ mult_q(ElementModQ... elems) {
     BigInteger product = BigInteger.ONE;
     for (ElementMod x : elems) {
-      product = product.multiply(x.elem).mod(primes.small_prime);
+      product = product.multiply(x.elem).mod(primes.smallPrime);
     }
     return int_to_q_unchecked(product);
   }
@@ -330,13 +330,13 @@ public class Group {
 
   /** Generate random number between 0 and Q. */
   public static ElementModQ rand_q() {
-    BigInteger random = Utils.randbelow(primes.small_prime);
+    BigInteger random = Utils.randbelow(primes.smallPrime);
     return int_to_q_unchecked(random);
   }
 
   /** Generate random number between start and Q. */
   static ElementModQ rand_range_q(ElementMod start) {
-    BigInteger random = Utils.randbetween(start.getBigInt(), primes.small_prime);
+    BigInteger random = Utils.randbetween(start.getBigInt(), primes.smallPrime);
     return int_to_q_unchecked(random);
   }
 
@@ -345,7 +345,7 @@ public class Group {
     if (x.compareTo(BigInteger.ONE) < 0) {
       return false;
     }
-    return x.compareTo(primes.small_prime) < 0;
+    return x.compareTo(primes.smallPrime) < 0;
   }
 
   // is lower <= x < upper, ie is x in [lower, upper) ?

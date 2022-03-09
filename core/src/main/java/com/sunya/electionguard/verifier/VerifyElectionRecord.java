@@ -132,7 +132,7 @@ public class VerifyElectionRecord {
 
     System.out.println("------------ [box 10] Correctness of Replacement Partial Decryptions ------------");
     boolean pdvOk = true;
-    if (Objects.equals(electionRecord.context.number_of_guardians, electionRecord.context.quorum)) {
+    if (Objects.equals(electionRecord.context.numberOfGuardians, electionRecord.context.quorum)) {
       System.out.println("  not needed since there are no missing guardians");
     } else {
       PartialDecryptionVerifier pdv = new PartialDecryptionVerifier(electionRecord, electionRecord.decryptedTally);
@@ -143,7 +143,7 @@ public class VerifyElectionRecord {
     PlaintextTallyInputValidation validator = new PlaintextTallyInputValidation(
             electionRecord.election,
             electionRecord.ciphertextTally,
-            electionRecord.context.number_of_guardians,
+            electionRecord.context.numberOfGuardians,
             electionRecord.availableGuardians.size());
     Formatter errors = new Formatter();
     boolean ptiValid = true;

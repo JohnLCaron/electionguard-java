@@ -26,7 +26,7 @@ public class ElementModPojo {
     Gson gson = GsonTypeAdapters.enhancedGson();
     ElementModPojo pojo = gson.fromJson(jsonElem, ElementModPojo.class);
     return Group.int_to_p(new BigInteger(pojo.data, 16)).orElseThrow(() ->
-            new RuntimeException("deserializeP: "+ pojo.data + "\n with prime " + Group.getPrimes().large_prime));
+            new RuntimeException("deserializeP: "+ pojo.data + "\n with prime " + Group.getPrimes().largePrime));
   }
 
   ////////////////////////////////////////////////////////////////////////////

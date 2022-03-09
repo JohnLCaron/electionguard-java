@@ -197,7 +197,7 @@ public class EncryptBallots {
   public EncryptBallots(ElectionRecord electionRecord, String deviceName) {
     this.electionRecord = electionRecord;
     this.quorum = electionRecord.context.quorum;
-    this.numberOfGuardians = electionRecord.context.number_of_guardians;
+    this.numberOfGuardians = electionRecord.context.numberOfGuardians;
 
     // Configure the Encryption Device
     InternalManifest metadata = new InternalManifest(electionRecord.election);

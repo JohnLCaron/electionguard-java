@@ -162,7 +162,7 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
     Manifest.ContestDescription contest = contestp.contest;
     PlaintextBallot.Contest data = new BallotFactory().get_random_contest_from(contestp.contest, false, false);
 
-    List<Manifest.SelectionDescription> placeholders = InternalManifest.generate_placeholder_selections_from(contest, contest.number_elected());
+    List<Manifest.SelectionDescription> placeholders = InternalManifest.generate_placeholder_selections_from(contest, contest.numberElected());
     ContestWithPlaceholders description_with_placeholders = new ContestWithPlaceholders(contestp.contest, placeholders);
     assertThat(description_with_placeholders.is_valid()).isTrue();
 
@@ -204,51 +204,51 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
     assertThat(result_from_nonce_seed).isPresent();
 
     // The decrypted contest should include an entry for each possible selection// and placeholders for each seat
-    int expected_entries = contest.ballot_selections().size() + contest.number_elected();
+    int expected_entries = contest.selections().size() + contest.numberElected();
     assertThat(
             result_from_key.get().is_valid(
-                    contest.object_id(),
+                    contest.contestId(),
                     expected_entries,
-                    contest.number_elected(),
-                    contest.votes_allowed())).isTrue();
+                    contest.numberElected(),
+                    contest.votesAllowed())).isTrue();
 
     assertThat(
             result_from_nonce.get().is_valid(
-                    contest.object_id(),
+                    contest.contestId(),
                     expected_entries,
-                    contest.number_elected(),
-                    contest.votes_allowed())).isTrue();
+                    contest.numberElected(),
+                    contest.votesAllowed())).isTrue();
 
     assertThat(
             result_from_nonce_seed.get().is_valid(
-                    contest.object_id(),
+                    contest.contestId(),
                     expected_entries,
-                    contest.number_elected(),
-                    contest.votes_allowed())).isTrue();
+                    contest.numberElected(),
+                    contest.votesAllowed())).isTrue();
 
     // Assert the ballot selections sum to the expected number of selections
-    int key_selected = result_from_key.get().ballot_selections.stream().mapToInt(s -> s.vote).sum();
-    int nonce_selected = result_from_nonce.get().ballot_selections.stream().mapToInt(s -> s.vote).sum();
-    int seed_selected = result_from_nonce_seed.get().ballot_selections.stream().mapToInt(s -> s.vote).sum();
+    int key_selected = result_from_key.get().selections.stream().mapToInt(s -> s.vote).sum();
+    int nonce_selected = result_from_nonce.get().selections.stream().mapToInt(s -> s.vote).sum();
+    int seed_selected = result_from_nonce_seed.get().selections.stream().mapToInt(s -> s.vote).sum();
 
     assertThat(key_selected).isEqualTo(nonce_selected);
     assertThat(seed_selected).isEqualTo(nonce_selected);
-    assertThat(contest.number_elected()).isEqualTo(key_selected);
+    assertThat(contest.numberElected()).isEqualTo(key_selected);
 
     //Assert each selection is valid
-    for (Manifest.SelectionDescription selection_description : contest.ballot_selections()) {
+    for (Manifest.SelectionDescription selection_description : contest.selections()) {
 
-      PlaintextBallot.Selection key_selection = result_from_key.get().ballot_selections.stream()
-              .filter(s -> s.selection_id.equals(selection_description.object_id())).findFirst().orElseThrow(IllegalStateException::new);
+      PlaintextBallot.Selection key_selection = result_from_key.get().selections.stream()
+              .filter(s -> s.selectionId.equals(selection_description.selectionId())).findFirst().orElseThrow(IllegalStateException::new);
 
-      PlaintextBallot.Selection nonce_selection = result_from_nonce.get().ballot_selections.stream()
-              .filter(s -> s.selection_id.equals(selection_description.object_id())).findFirst().orElseThrow(IllegalStateException::new);
+      PlaintextBallot.Selection nonce_selection = result_from_nonce.get().selections.stream()
+              .filter(s -> s.selectionId.equals(selection_description.selectionId())).findFirst().orElseThrow(IllegalStateException::new);
 
-      PlaintextBallot.Selection seed_selection = result_from_nonce_seed.get().ballot_selections.stream()
-              .filter(s -> s.selection_id.equals(selection_description.object_id())).findFirst().orElseThrow(IllegalStateException::new);
+      PlaintextBallot.Selection seed_selection = result_from_nonce_seed.get().selections.stream()
+              .filter(s -> s.selectionId.equals(selection_description.selectionId())).findFirst().orElseThrow(IllegalStateException::new);
 
-      List<PlaintextBallot.Selection> data_selections_exist = data.ballot_selections.stream()
-              .filter(s -> s.selection_id.equals(selection_description.object_id())).toList();
+      List<PlaintextBallot.Selection> data_selections_exist = data.selections.stream()
+              .filter(s -> s.selectionId.equals(selection_description.selectionId())).toList();
 
 
       // It 's possible there are no selections in the original data collection
@@ -261,9 +261,9 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
 
       // TODO: also check edge cases such as: placeholder selections are true for under votes
 
-      assertThat(key_selection.is_valid(selection_description.object_id())).isTrue();
-      assertThat(nonce_selection.is_valid(selection_description.object_id())).isTrue();
-      assertThat(seed_selection.is_valid(selection_description.object_id())).isTrue();
+      assertThat(key_selection.is_valid(selection_description.selectionId())).isTrue();
+      assertThat(nonce_selection.is_valid(selection_description.selectionId())).isTrue();
+      assertThat(seed_selection.is_valid(selection_description.selectionId())).isTrue();
     }
   }
 
@@ -276,7 +276,7 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
     Manifest.ContestDescription contest = contestp.contest;
     PlaintextBallot.Contest data = new BallotFactory().get_random_contest_from(contest, false, false);
 
-    List<Manifest.SelectionDescription> placeholders = InternalManifest.generate_placeholder_selections_from(contest, contest.number_elected());
+    List<Manifest.SelectionDescription> placeholders = InternalManifest.generate_placeholder_selections_from(contest, contest.numberElected());
     ContestWithPlaceholders description_with_placeholders = new ContestWithPlaceholders(contest, placeholders);
 
     assertThat(description_with_placeholders.is_valid()).isTrue();
@@ -292,8 +292,8 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
 
     // tamper with the nonce
     CiphertextBallot.Contest bad_subject = new CiphertextBallot.Contest(
-            subject.object_id(), subject.sequence_order(), subject.contest_hash,
-            subject.ballot_selections, subject.crypto_hash,
+            subject.object_id(), subject.sequence_order(), subject.contestHash,
+            subject.selections, subject.crypto_hash,
             new ElGamal.Ciphertext(TWO_MOD_P, TWO_MOD_P),
             Optional.of(int_to_q_unchecked(BigInteger.ONE)), subject.proof);
 
@@ -316,17 +316,17 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
     assertThat(result_from_nonce_seed).isEmpty();
 
     // Tamper with the encryption
-    CiphertextBallot.Selection org = subject.ballot_selections.get(0);
+    CiphertextBallot.Selection org = subject.selections.get(0);
     CiphertextBallot.Selection bad_selection = new CiphertextBallot.Selection(
             org.object_id(), org.sequence_order(), org.description_hash(), new ElGamal.Ciphertext(TWO_MOD_P, TWO_MOD_P),
             org.crypto_hash, org.is_placeholder_selection, org.nonce,
             org.proof, org.extended_data);
 
-    List<CiphertextBallot.Selection> bad_selections = new ArrayList<>(subject.ballot_selections);
+    List<CiphertextBallot.Selection> bad_selections = new ArrayList<>(subject.selections);
     bad_selections.set(0, bad_selection);
 
     CiphertextBallot.Contest bad_contest = new CiphertextBallot.Contest(
-            subject.object_id(), subject.sequence_order(), subject.contest_hash,
+            subject.object_id(), subject.sequence_order(), subject.contestHash,
             bad_selections, subject.crypto_hash, new ElGamal.Ciphertext(TWO_MOD_P, TWO_MOD_P),
             Optional.of(int_to_q_unchecked(BigInteger.ONE)), subject.proof);
 
@@ -385,21 +385,21 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
     Optional<PlaintextBallot> result_from_key = decrypt_ballot_with_secret(
             subject,
             metadata,
-            context.crypto_extended_base_hash,
+            context.cryptoExtendedBaseHash,
             keypair.public_key(),
             keypair.secret_key(),
             false, false);
     Optional<PlaintextBallot> result_from_nonce = decrypt_ballot_with_nonce(
             subject,
             metadata,
-            context.crypto_extended_base_hash,
+            context.cryptoExtendedBaseHash,
             keypair.public_key(),
             Optional.empty(),
             false, false);
     Optional<PlaintextBallot> result_from_nonce_seed = decrypt_ballot_with_nonce(
             subject,
             metadata,
-            context.crypto_extended_base_hash,
+            context.cryptoExtendedBaseHash,
             keypair.public_key(),
             subject.nonce,
             false, false);
@@ -413,21 +413,21 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
     assertThat(data.object_id()).isEqualTo(result_from_nonce.get().object_id());
     assertThat(data.object_id()).isEqualTo(result_from_nonce_seed.get().object_id());
 
-    for (ContestWithPlaceholders contestp : metadata.get_contests_for_style(data.style_id)) {
+    for (ContestWithPlaceholders contestp : metadata.get_contests_for_style(data.ballotStyleId)) {
       Manifest.ContestDescription contest = contestp.contest;
-      int expected_entries = contest.ballot_selections().size() + contest.number_elected();
+      int expected_entries = contest.selections().size() + contest.numberElected();
 
       PlaintextBallot.Contest key_contest = result_from_key.get().contests.stream()
-              .filter(c -> c.contest_id.equals(contest.object_id())).findFirst().orElseThrow(IllegalStateException::new);
+              .filter(c -> c.contestId.equals(contest.contestId())).findFirst().orElseThrow(IllegalStateException::new);
 
       PlaintextBallot.Contest nonce_contest = result_from_nonce.get().contests.stream()
-              .filter(c -> c.contest_id.equals(contest.object_id())).findFirst().orElseThrow(IllegalStateException::new);
+              .filter(c -> c.contestId.equals(contest.contestId())).findFirst().orElseThrow(IllegalStateException::new);
 
       PlaintextBallot.Contest seed_contest = result_from_nonce_seed.get().contests.stream()
-              .filter(c -> c.contest_id.equals(contest.object_id())).findFirst().orElseThrow(IllegalStateException::new);
+              .filter(c -> c.contestId.equals(contest.contestId())).findFirst().orElseThrow(IllegalStateException::new);
 
       List<PlaintextBallot.Contest> data_contest_exists = data.contests.stream()
-              .filter(c -> c.contest_id.equals(contest.object_id())).toList();
+              .filter(c -> c.contestId.equals(contest.contestId())).toList();
 
 
       // Contests may not be voted on the ballot
@@ -435,43 +435,43 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
 
       assertThat(
               key_contest.is_valid(
-                      contest.object_id(),
+                      contest.contestId(),
                       expected_entries,
-                      contest.number_elected(),
-                      contest.votes_allowed())
+                      contest.numberElected(),
+                      contest.votesAllowed())
       ).isTrue();
       assertThat(
               nonce_contest.is_valid(
-                      contest.object_id(),
+                      contest.contestId(),
                       expected_entries,
-                      contest.number_elected(),
-                      contest.votes_allowed())
+                      contest.numberElected(),
+                      contest.votesAllowed())
       ).isTrue();
       assertThat(
               seed_contest.is_valid(
-                      contest.object_id(),
+                      contest.contestId(),
                       expected_entries,
-                      contest.number_elected(),
-                      contest.votes_allowed())
+                      contest.numberElected(),
+                      contest.votesAllowed())
       ).isTrue();
 
-      for (Manifest.SelectionDescription selection_description : contest.ballot_selections()) {
+      for (Manifest.SelectionDescription selection_description : contest.selections()) {
 
-        PlaintextBallot.Selection key_selection = key_contest.ballot_selections.stream()
-                .filter(s -> s.selection_id.equals(selection_description.object_id())).findFirst().orElseThrow(IllegalStateException::new);
+        PlaintextBallot.Selection key_selection = key_contest.selections.stream()
+                .filter(s -> s.selectionId.equals(selection_description.selectionId())).findFirst().orElseThrow(IllegalStateException::new);
 
-        PlaintextBallot.Selection nonce_selection = nonce_contest.ballot_selections.stream()
-                .filter(s -> s.selection_id.equals(selection_description.object_id())).findFirst().orElseThrow(IllegalStateException::new);
+        PlaintextBallot.Selection nonce_selection = nonce_contest.selections.stream()
+                .filter(s -> s.selectionId.equals(selection_description.selectionId())).findFirst().orElseThrow(IllegalStateException::new);
 
-        PlaintextBallot.Selection seed_selection = seed_contest.ballot_selections.stream()
-                .filter(s -> s.selection_id.equals(selection_description.object_id())).findFirst().orElseThrow(IllegalStateException::new);
+        PlaintextBallot.Selection seed_selection = seed_contest.selections.stream()
+                .filter(s -> s.selectionId.equals(selection_description.selectionId())).findFirst().orElseThrow(IllegalStateException::new);
 
         // Selections may be undervoted for a specific contest
         List<PlaintextBallot.Selection> data_selection_exist = new ArrayList<>();
 
         if (data_contest != null) {
-          data_selection_exist = data_contest.ballot_selections.stream()
-                  .filter(s -> s.selection_id.equals(selection_description.object_id())).toList();
+          data_selection_exist = data_contest.selections.stream()
+                  .filter(s -> s.selectionId.equals(selection_description.selectionId())).toList();
         }
 
         if (!data_selection_exist.isEmpty()) {
@@ -483,9 +483,9 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
 
         // TODO: also check edge cases such as: placeholder selections are true for under votes
 
-        assertThat(key_selection.is_valid(selection_description.object_id())).isTrue();
-        assertThat(nonce_selection.is_valid(selection_description.object_id())).isTrue();
-        assertThat(seed_selection.is_valid(selection_description.object_id())).isTrue();
+        assertThat(key_selection.is_valid(selection_description.selectionId())).isTrue();
+        assertThat(nonce_selection.is_valid(selection_description.selectionId())).isTrue();
+        assertThat(seed_selection.is_valid(selection_description.selectionId())).isTrue();
       }
     }
   }
@@ -510,7 +510,7 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
 
     // munge
     CiphertextBallot bad_subject = new CiphertextBallot(
-            subject.object_id(), subject.style_id, subject.manifest_hash,
+            subject.object_id(), subject.ballotStyleId, subject.manifestHash,
             subject.code_seed, subject.contests,
             subject.code, subject.timestamp, subject.crypto_hash,
             Optional.empty());
@@ -520,7 +520,7 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
     Optional<PlaintextBallot> result_from_nonce = decrypt_ballot_with_nonce(
             bad_subject,
             metadata,
-            context.crypto_extended_base_hash,
+            context.cryptoExtendedBaseHash,
             keypair.public_key(),
             Optional.empty(), false, true
     );
@@ -528,7 +528,7 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
     Optional<PlaintextBallot> result_from_nonce_seed = decrypt_ballot_with_nonce(
             bad_subject,
             metadata,
-            context.crypto_extended_base_hash,
+            context.cryptoExtendedBaseHash,
             keypair.public_key(),
             missing_nonce_value, false, true
     );

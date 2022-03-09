@@ -143,7 +143,7 @@ class DecryptionMediator {
        return false;
      }
      // If guardians missing or available not accounted for, not ready
-     if (this.available_guardians.size() + this.missing_guardians.size() != this.context.number_of_guardians) {
+     if (this.available_guardians.size() + this.missing_guardians.size() != this.context.numberOfGuardians) {
        logger.atWarning().log("cannot decrypt without accounting for all guardians missing or present");
        return false;
      }
@@ -153,7 +153,7 @@ class DecryptionMediator {
   boolean ready_to_decrypt(Map<String, DecryptionShare> shares) {
     // If all guardian shares are represented including if necessary
     // the missing guardians reconstructed shares, the decryption can be made
-    return shares.size() == this.context.number_of_guardians;
+    return shares.size() == this.context.numberOfGuardians;
   }
 
    /**  Get all available guardian keys. */
@@ -305,10 +305,10 @@ class DecryptionMediator {
       Optional<PlaintextTally> tallyO = DecryptWithShares.decrypt_ballot(
               ciphertext_ballot,
               ballot_shares,
-              this.context.crypto_extended_base_hash);
+              this.context.cryptoExtendedBaseHash);
 
       // LOOK silent failure
-      tallyO.ifPresent(t -> ballots.put(t.object_id, t));
+      tallyO.ifPresent(t -> ballots.put(t.tallyId, t));
     }
 
     return Optional.of(ballots);

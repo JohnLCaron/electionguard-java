@@ -45,7 +45,7 @@ public class BallotAggregationVerifier {
       ncontests++;
       for (PlaintextTally.Selection selection : contest.selections().values()) {
         nselections++;
-        String key = contest.object_id() + "." + selection.object_id();
+        String key = contest.contestId() + "." + selection.selectionId();
         List<ElGamal.Ciphertext> encryptions = agg.selectionEncryptions.get(key);
         // LOOK its possible no ballots voted one way or another
         if (!encryptions.isEmpty()) {
@@ -77,8 +77,8 @@ public class BallotAggregationVerifier {
         if (ballot.state == BallotBox.State.CAST) {
           nballotsCast++;
           for (CiphertextBallot.Contest contest : ballot.contests) {
-            for (CiphertextBallot.Selection selection : contest.ballot_selections) {
-              String key = contest.object_id + "." + selection.object_id();
+            for (CiphertextBallot.Selection selection : contest.selections) {
+              String key = contest.contestId + "." + selection.object_id();
               selectionEncryptions.put(key, selection.ciphertext());
             }
           }

@@ -120,11 +120,11 @@ public class ElectionPolynomial {
    */
   public static ElementModQ compute_lagrange_coefficient(Integer coordinate, List<Integer> degrees) {
     int product = degrees.stream().reduce(1, (a, b)  -> a * b);
-    ElementModQ numerator = Group.int_to_q_unchecked(BigInteger.valueOf(product).mod(Group.getPrimes().small_prime));
+    ElementModQ numerator = Group.int_to_q_unchecked(BigInteger.valueOf(product).mod(Group.getPrimes().smallPrime));
     // denominator = mult_q(*[(degree - coordinate) for degree in degrees])
     List<Integer> diff = degrees.stream().map(degree -> degree - coordinate).toList();
     int productDiff = diff.stream().reduce(1, (a, b)  -> a * b);
-    ElementModQ denominator = Group.int_to_q_unchecked(BigInteger.valueOf(productDiff).mod(Group.getPrimes().small_prime));
+    ElementModQ denominator = Group.int_to_q_unchecked(BigInteger.valueOf(productDiff).mod(Group.getPrimes().smallPrime));
     return Group.div_q(numerator, denominator);
   }
 

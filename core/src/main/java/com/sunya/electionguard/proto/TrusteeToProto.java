@@ -9,7 +9,6 @@ import java.util.List;
 
 import static com.sunya.electionguard.proto.CommonConvert.convertElementModP;
 
-import electionguard.protogen.CommonProto;
 import electionguard.protogen.TrusteeProto;
 
 
@@ -54,7 +53,7 @@ public class TrusteeToProto {
     TrusteeProto.CommitmentSet.Builder builder = TrusteeProto.CommitmentSet.newBuilder();
     builder.setGuardianId(publicKetSey.ownerId());
     for (SchnorrProof proof : publicKetSey.coefficientProofs()) {
-      builder.addCommitments(convertElementModP(proof.public_key));
+      builder.addCommitments(convertElementModP(proof.publicKey));
     }
     return builder.build();
   }

@@ -16,7 +16,7 @@ public class PlaintextTallyToProto {
 
   public static PlaintextTallyProto.PlaintextTally translateToProto(PlaintextTally tally) {
     PlaintextTallyProto.PlaintextTally.Builder builder = PlaintextTallyProto.PlaintextTally.newBuilder();
-    builder.setTallyId(tally.object_id);
+    builder.setTallyId(tally.tallyId);
     for (Map.Entry<String, PlaintextTally.Contest> entry : tally.contests.entrySet()) {
       builder.addContests(convertContest(entry.getValue()));
     }
@@ -25,7 +25,7 @@ public class PlaintextTallyToProto {
 
   static PlaintextTallyProto.PlaintextTallyContest convertContest(PlaintextTally.Contest contest) {
     PlaintextTallyProto.PlaintextTallyContest.Builder builder = PlaintextTallyProto.PlaintextTallyContest.newBuilder();
-    builder.setContestId(contest.object_id());
+    builder.setContestId(contest.contestId());
     for (Map.Entry<String, PlaintextTally.Selection> selection : contest.selections().entrySet()) {
       builder.addSelections(convertSelection(selection.getValue()));
     }
@@ -39,7 +39,7 @@ public class PlaintextTallyToProto {
                     .toList();
 
     PlaintextTallyProto.PlaintextTallySelection.Builder builder = PlaintextTallyProto.PlaintextTallySelection.newBuilder();
-    builder.setSelectionId(selection.object_id());
+    builder.setSelectionId(selection.selectionId());
     builder.setTally(selection.tally());
     builder.setValue(convertElementModP(selection.value()));
     builder.setMessage(convertCiphertext(selection.message()));
@@ -50,12 +50,12 @@ public class PlaintextTallyToProto {
   private static PlaintextTallyProto.CiphertextDecryptionSelection convertShare(DecryptionShare.CiphertextDecryptionSelection org) {
     PlaintextTallyProto.CiphertextDecryptionSelection.Builder builder = PlaintextTallyProto.CiphertextDecryptionSelection.newBuilder();
 
-    builder.setSelectionId(org.selection_id());
-    builder.setGuardianId(org.guardian_id());
+    builder.setSelectionId(org.selectionId());
+    builder.setGuardianId(org.guardianId());
     builder.setShare(convertElementModP(org.share()));
     // OneOf
     org.proof().ifPresent( proof -> builder.setProof(CommonConvert.convertChaumPedersenProof(proof)));
-    org.recovered_parts().ifPresent(org_recoverd ->  {
+    org.recoveredParts().ifPresent(org_recoverd ->  {
       PlaintextTallyProto.RecoveredParts.Builder partsBuilder = PlaintextTallyProto.RecoveredParts.newBuilder();
       for (Map.Entry<String, DecryptionShare.CiphertextCompensatedDecryptionSelection> entry : org_recoverd.entrySet()) {
         partsBuilder.addFragments(convertCompensatedShare(entry.getValue()));
@@ -69,11 +69,11 @@ public class PlaintextTallyToProto {
           DecryptionShare.CiphertextCompensatedDecryptionSelection org) {
 
     PlaintextTallyProto.CiphertextCompensatedDecryptionSelection.Builder builder = PlaintextTallyProto.CiphertextCompensatedDecryptionSelection.newBuilder();
-    builder.setSelectionId(org.selection_id());
-    builder.setGuardianId(org.guardian_id());
+    builder.setSelectionId(org.selectionId());
+    builder.setGuardianId(org.guardianId());
     builder.setMissingGuardianId(org.missing_guardian_id());
     builder.setShare(convertElementModP(org.share()));
-    builder.setRecoveryKey(convertElementModP(org.recovery_key()));
+    builder.setRecoveryKey(convertElementModP(org.recoveryKey()));
     builder.setProof(CommonConvert.convertChaumPedersenProof(org.proof()));
     return builder.build();
   }

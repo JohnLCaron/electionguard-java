@@ -14,8 +14,8 @@ public class TestInternalManifest {
   public void test_contest_description_valid_input_succeeds() {
     Manifest.ContestDescription contest = new Manifest.ContestDescription(
             "0@A.com-contest",
-            "0@A.com-gp-unit",
             1,
+            "0@A.com-gp-unit",
             VoteVariationType.n_of_m,
             1,
             1,
@@ -23,12 +23,12 @@ public class TestInternalManifest {
             ImmutableList.of(
                     new SelectionDescription(
                             "0@A.com-selection",
-                            "0@A.com",
-                            0),
+                            0,
+                            "0@A.com"),
                     new SelectionDescription(
                             "0@B.com-selection",
-                            "0@B.com",
-                            1)),
+                            1,
+                            "0@B.com")),
             null, null,
             ImmutableList.of());
 
@@ -37,8 +37,8 @@ public class TestInternalManifest {
             ImmutableList.of(
                     new SelectionDescription(
                             "0@A.com-contest-2-placeholder",
-                            "0@A.com-contest-2-candidate",
-                            2)
+                            2,
+                            "0@A.com-contest-2-candidate")
             ));
 
     assertThat(contestp.is_valid()).isTrue();
@@ -48,8 +48,8 @@ public class TestInternalManifest {
   public void test_contest_description_invalid_input_fails() {
     Manifest.ContestDescription contest = new Manifest.ContestDescription(
             "0@A.com-contest",
-            "0@A.com-gp-unit",
             1,
+            "0@A.com-gp-unit",
             VoteVariationType.n_of_m,
             1,
             1,
@@ -57,13 +57,13 @@ public class TestInternalManifest {
             ImmutableList.of(
                     new SelectionDescription(
                             "0@A.com-selection",
-                            "0@A.com",
-                            0),
+                            0,
+                            "0@A.com"),
                     // simulate a bad selection description input
                     new SelectionDescription(
                             "0@A.com-selection",
-                            "0@A.com",
-                            1)),
+                            1,
+                            "0@A.com")),
             null, null, ImmutableList.of());
 
     ContestWithPlaceholders contestp = new ContestWithPlaceholders(
@@ -71,8 +71,8 @@ public class TestInternalManifest {
             ImmutableList.of(
                     new SelectionDescription(
                             "0@A.com-contest-2-placeholder",
-                            "0@A.com-contest-2-candidate",
-                            2)
+                            2,
+                            "0@A.com-contest-2-candidate")
             ));
 
     assertThat(contestp.is_valid()).isFalse();

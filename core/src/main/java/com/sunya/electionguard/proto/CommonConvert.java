@@ -101,7 +101,7 @@ public class CommonConvert {
 
   public static CommonProto.SchnorrProof convertSchnorrProof(SchnorrProof proof) {
     CommonProto.SchnorrProof.Builder builder = CommonProto.SchnorrProof.newBuilder();
-    builder.setPublicKey(convertElementModP(proof.public_key));
+    builder.setPublicKey(convertElementModP(proof.publicKey));
     builder.setCommitment(convertElementModP(proof.commitment));
     builder.setChallenge(convertElementModQ(proof.challenge));
     builder.setResponse(convertElementModQ(proof.response));

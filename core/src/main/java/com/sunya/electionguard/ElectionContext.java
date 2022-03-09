@@ -63,7 +63,7 @@ public class ElectionContext {
             number_of_guardians,
             quorum,
             joint_public_key,
-            description.crypto_hash(),
+            description.cryptoHash(),
             crypto_base_hash,
             crypto_extended_base_hash,
             commitment_hash,
@@ -73,44 +73,44 @@ public class ElectionContext {
   // TODO hash ElementModQ rather than BigInteger: whats the difference?
   public static Group.ElementModQ make_crypto_base_hash(int number_of_guardians, int quorum, Manifest election) {
     ElectionConstants primes = Group.getPrimes();
-    return Hash.hash_elems(int_to_p_unchecked(primes.large_prime),
-                    int_to_q_unchecked(primes.small_prime),
+    return Hash.hash_elems(int_to_p_unchecked(primes.largePrime),
+                    int_to_q_unchecked(primes.smallPrime),
                     int_to_p_unchecked(primes.generator),
-                    number_of_guardians, quorum, election.crypto_hash());
+                    number_of_guardians, quorum, election.cryptoHash());
   }
 
   /////////////////////////////////////////////////////////////////////////////////////////////////
   /** The number of guardians necessary to generate the public key. */
-  public final Integer number_of_guardians;
+  public final Integer numberOfGuardians;
   /** The quorum of guardians necessary to decrypt an election.  Must be less than number_of_guardians. */
   public final Integer quorum;
   /** The joint public key (K) in the ElectionGuard Spec. */
-  public final Group.ElementModP elgamal_public_key;
+  public final Group.ElementModP jointPublicKey;
   /** Hash of all the public commitments for all the guardians = H(K 1,0 , K 1,1 , K 1,2 , ..., K n,k−1 ). */
-  public final Group.ElementModQ commitment_hash; // unused, here for compatibility with python.
+  public final Group.ElementModQ commitmentHash; // unused, here for compatibility with python.
   /** The Manifest.crypto_hash. */
-  public final Group.ElementModQ manifest_hash;
+  public final Group.ElementModQ manifestHash;
   /** The base hash code (𝑄) in the ElectionGuard Spec. */
-  public final Group.ElementModQ crypto_base_hash;
+  public final Group.ElementModQ cryptoBaseHash;
   /** The extended base hash code (𝑄') in the ElectionGuard Spec. */
-  public final Group.ElementModQ crypto_extended_base_hash;
+  public final Group.ElementModQ cryptoExtendedBaseHash;
 
   /** Data to allow extending the context for special cases. */
   @Nullable
   public final Map<String, String> extended_data;
 
   /** Do not use directly, use CiphertextElectionContext.create() */
-  public ElectionContext(int number_of_guardians, int quorum, Group.ElementModP jointPublicKey,
-                         Group.ElementModQ manifest_hash, Group.ElementModQ crypto_base_hash,
-                         Group.ElementModQ crypto_extended_base_hash, Group.ElementModQ commitment_hash,
+  public ElectionContext(int numberOfGuardians, int quorum, Group.ElementModP jointPublicKey,
+                         Group.ElementModQ manifestHash, Group.ElementModQ cryptoBaseHash,
+                         Group.ElementModQ cryptoExtendedBaseHash, Group.ElementModQ commitmentHash,
                          @Nullable Map<String, String> extended_data) {
-    this.number_of_guardians = number_of_guardians;
+    this.numberOfGuardians = numberOfGuardians;
     this.quorum = quorum;
-    this.elgamal_public_key = Preconditions.checkNotNull(jointPublicKey);
-    this.manifest_hash = Preconditions.checkNotNull(manifest_hash);
-    this.crypto_base_hash = Preconditions.checkNotNull(crypto_base_hash);
-    this.crypto_extended_base_hash = Preconditions.checkNotNull(crypto_extended_base_hash);
-    this.commitment_hash = commitment_hash; // Preconditions.checkNotNull(commitment_hash);
+    this.jointPublicKey = Preconditions.checkNotNull(jointPublicKey);
+    this.manifestHash = Preconditions.checkNotNull(manifestHash);
+    this.cryptoBaseHash = Preconditions.checkNotNull(cryptoBaseHash);
+    this.cryptoExtendedBaseHash = Preconditions.checkNotNull(cryptoExtendedBaseHash);
+    this.commitmentHash = commitmentHash; // Preconditions.checkNotNull(commitment_hash);
     this.extended_data = extended_data == null ? null : ImmutableMap.copyOf(extended_data);
   }
 
@@ -119,22 +119,22 @@ public class ElectionContext {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     ElectionContext that = (ElectionContext) o;
-    return Objects.equals(number_of_guardians, that.number_of_guardians) &&
+    return Objects.equals(numberOfGuardians, that.numberOfGuardians) &&
             Objects.equals(quorum, that.quorum) &&
-            elgamal_public_key.equals(that.elgamal_public_key) &&
-            manifest_hash.equals(that.manifest_hash) &&
-            crypto_base_hash.equals(that.crypto_base_hash) &&
-            crypto_extended_base_hash.equals(that.crypto_extended_base_hash);
+            jointPublicKey.equals(that.jointPublicKey) &&
+            manifestHash.equals(that.manifestHash) &&
+            cryptoBaseHash.equals(that.cryptoBaseHash) &&
+            cryptoExtendedBaseHash.equals(that.cryptoExtendedBaseHash);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(number_of_guardians, quorum, elgamal_public_key, manifest_hash, crypto_base_hash, crypto_extended_base_hash);
+    return Objects.hash(numberOfGuardians, quorum, jointPublicKey, manifestHash, cryptoBaseHash, cryptoExtendedBaseHash);
   }
 
   public String toStringOld() {
     return "CiphertextElectionContext{" +
-            "number_of_guardians=" + number_of_guardians +
+            "number_of_guardians=" + numberOfGuardians +
             ", quorum=" + quorum +
             '}';
   }
@@ -142,13 +142,13 @@ public class ElectionContext {
   @Override
   public String toString() {
     return "CiphertextElectionContext{" +
-            "number_of_guardians=" + number_of_guardians +
+            "number_of_guardians=" + numberOfGuardians +
             ", quorum=" + quorum +
-            ", elgamal_public_key=" + elgamal_public_key +
-            ", commitment_hash=" + commitment_hash +
-            ", manifest_hash=" + manifest_hash +
-            ", crypto_base_hash=" + crypto_base_hash +
-            ", crypto_extended_base_hash=" + crypto_extended_base_hash +
+            ", elgamal_public_key=" + jointPublicKey +
+            ", commitment_hash=" + commitmentHash +
+            ", manifest_hash=" + manifestHash +
+            ", crypto_base_hash=" + cryptoBaseHash +
+            ", crypto_extended_base_hash=" + cryptoExtendedBaseHash +
             ", extended_data=" + extended_data +
             '}';
   }

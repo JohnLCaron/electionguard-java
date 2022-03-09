@@ -49,7 +49,7 @@ public class GuardianPublicKeyVerifier {
     int count = 0;
     for (SchnorrProof proof : coefficient_proofs) {
       ElementModP commitment = proof.commitment; // h
-      ElementModP public_key = proof.public_key; // k
+      ElementModP public_key = proof.publicKey; // k
       ElementModQ challenge = proof.challenge;   // c
       ElementModQ response = proof.response;     // u
 

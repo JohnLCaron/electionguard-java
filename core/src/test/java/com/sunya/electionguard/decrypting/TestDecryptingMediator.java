@@ -148,7 +148,7 @@ public class TestDecryptingMediator extends TestProperties {
     List<PlaintextBallot> inputBallots = pdata.inputBallots();
     Map<String, PlaintextBallot> inputBallotsMap = inputBallots.stream().collect(Collectors.toMap(e -> e.object_id(), e -> e));
     for (PlaintextTally decrypted : decrypteds) {
-      PlaintextBallot input_ballot = inputBallotsMap.get(decrypted.object_id);
+      PlaintextBallot input_ballot = inputBallotsMap.get(decrypted.tallyId);
       assertThat(input_ballot).isNotNull();
       checkTallyAgainstBallot(decrypted, input_ballot);
     }
@@ -170,7 +170,7 @@ public class TestDecryptingMediator extends TestProperties {
     Map<String, Integer> counts = new HashMap<>();
     for (PlaintextTally.Contest contest : tally.contests.values()) {
       for (Map.Entry<String, PlaintextTally.Selection> entry : contest.selections().entrySet()) {
-        counts.put(contest.object_id() + ":" + entry.getKey(), entry.getValue().tally());
+        counts.put(contest.contestId() + ":" + entry.getKey(), entry.getValue().tally());
       }
     }
     return counts;
@@ -179,8 +179,8 @@ public class TestDecryptingMediator extends TestProperties {
   private Map<String, Integer> convertToCounts(PlaintextBallot tally) {
     Map<String, Integer> counts = new HashMap<>();
     for (PlaintextBallot.Contest contest : tally.contests) {
-      for (PlaintextBallot.Selection selection : contest.ballot_selections) {
-        counts.put(contest.contest_id + ":" + selection.selection_id, selection.vote);
+      for (PlaintextBallot.Selection selection : contest.selections) {
+        counts.put(contest.contestId + ":" + selection.selectionId, selection.vote);
       }
     }
     return counts;
