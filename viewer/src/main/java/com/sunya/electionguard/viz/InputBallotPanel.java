@@ -1,6 +1,5 @@
 package com.sunya.electionguard.viz;
 
-import com.google.common.collect.ImmutableList;
 import com.sunya.electionguard.PlaintextBallot;
 import com.sunya.electionguard.publish.CloseableIterableAdapter;
 import com.sunya.electionguard.publish.PrivateData;
@@ -99,6 +98,10 @@ class InputBallotPanel extends JPanel {
     File file = new File(fileOrDir);
     try {
       List<PlaintextBallot> inputs = PrivateData.inputBallots(file.toPath());
+      if (inputs.isEmpty()) {
+        System.out.printf("No ballots in %s%n", file.toPath());
+        return false;
+      }
       inputBallotsTable.setBallots(CloseableIterableAdapter.wrap(inputs));
     } catch (IOException e) {
       e.printStackTrace();

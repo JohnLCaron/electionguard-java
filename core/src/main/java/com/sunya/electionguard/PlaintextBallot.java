@@ -14,8 +14,7 @@ import java.util.Optional;
 
 /**
  * The plaintext representation of a voter's ballot selections for all the contests in an election.
- * The object_id is a unique Ballot ID created by the external system.
- * This is used both as input, and for the roundtrip: input -&gt; encrypt -&gt; decrypt -&gt; output.
+ * The ballotId is a unique Ballot ID created by the external system.
  */
 @Immutable
 public class PlaintextBallot {

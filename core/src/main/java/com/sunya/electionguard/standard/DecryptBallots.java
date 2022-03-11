@@ -58,7 +58,6 @@ public class DecryptBallots {
     String outputDir;
 
     @Parameter(names = {"-h", "--help"},  order = 4, description = "Display this help and exit", help = true)
-    final
     boolean help = false;
 
     private final JCommander jc;

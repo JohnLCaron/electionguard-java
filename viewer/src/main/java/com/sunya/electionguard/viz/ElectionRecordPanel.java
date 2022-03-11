@@ -194,6 +194,7 @@ class ElectionRecordPanel extends JPanel {
 
       ElectionConstants constants = record.constants;
       f.format("%nConstants%n");
+      f.format("  name = %s%n", constants.name);
       f.format("  large_prime = %s%n", Group.int_to_p_unchecked(constants.largePrime).toShortString());
       f.format("  small_prime = %s%n", Group.int_to_q_unchecked(constants.smallPrime));
       f.format("  cofactor    = %s%n", Group.int_to_p_unchecked(constants.cofactor).toShortString());

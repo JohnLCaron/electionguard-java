@@ -11,10 +11,10 @@ import java.util.Objects;
  */
 @Immutable
 public class CiphertextSelection {
-  private final String selectionId;
-  private final int sequenceOrder;
+  public final String selectionId;
+  public final int sequenceOrder;
   /** Manifest.SelectionDescription.crypto_hash(). */
-  private final Group.ElementModQ selectionHash;
+  public final Group.ElementModQ selectionHash;
   private final ElGamal.Ciphertext ciphertext; // only accessed through ciphertext(), so subclass can override
   public final boolean isPlaceholderSelection;
 

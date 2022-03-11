@@ -36,18 +36,18 @@ public class CiphertextBallot implements Hash.CryptoHashCheckable {
    * python: make_ciphertext_ballot()
    * <p>
    *
-   * @param object_id:               The object_id of this specific ballot
-   * @param style_id:                The `object_id` of the `BallotStyle` in the `Manifest` Manifest
-   * @param manifest_hash:           Hash of the election manifest
+   * @param ballotId:                Matches PlaintextBallot.ballot_id
+   * @param ballotStyleId:           The `object_id` of the `BallotStyle` in the Manifest
+   * @param manifestHash:           Hash of the election manifest
    * @param code_seed:               Seed for ballot code
    * @param contests:                List of contests for this ballot
    * @param nonce:                   optional nonce used as part of the encryption process
    * @param timestamp:               Timestamp at which the ballot encryption is generated in seconds since the epoch.
    */
   public static CiphertextBallot create(
-          String object_id,
-          String style_id,
-          Group.ElementModQ manifest_hash,
+          String ballotId,
+          String ballotStyleId,
+          Group.ElementModQ manifestHash,
           Group.ElementModQ code_seed,
           List<Contest> contests,
           Optional<Group.ElementModQ> nonce,
@@ -55,42 +55,42 @@ public class CiphertextBallot implements Hash.CryptoHashCheckable {
           Optional<Group.ElementModQ> tracking_hashO) {
 
     if (contests.isEmpty()) {
-      logger.atInfo().log("ciphertext ballot with no contests: %s", object_id);
+      logger.atInfo().log("ciphertext ballot with no contests: %s", ballotId);
     }
 
-    Group.ElementModQ contest_hash = create_ballot_hash(object_id, manifest_hash, contests);
+    Group.ElementModQ crypto_hash = create_ballot_hash(ballotId, manifestHash, contests);
 
     long time = timestamp.orElse(System.currentTimeMillis() / 1000);
-    Group.ElementModQ ballot_code = tracking_hashO.orElse(BallotCodes.get_rotating_ballot_code(code_seed, time, contest_hash));
+    Group.ElementModQ ballot_code = tracking_hashO.orElse(BallotCodes.get_rotating_ballot_code(code_seed, time, crypto_hash));
 
     return new CiphertextBallot(
-            object_id,
-            style_id,
-            manifest_hash,
+            ballotId,
+            ballotStyleId,
+            manifestHash,
             code_seed,
             contests,
             ballot_code,
             time,
-            contest_hash,
+            crypto_hash,
             nonce);
   }
 
   /** Create the hash of the ballot contests. */
   static Group.ElementModQ create_ballot_hash(
-          String ballot_id,
-          Group.ElementModQ description_hash,
+          String ballotId,
+          Group.ElementModQ manifestHash,
           List<CiphertextBallot.Contest> contests) {
 
     // contest_hashes = [contest.crypto_hash for contest in sequence_order_sort(contests)]
     List<Group.ElementModQ> contest_hashes = contests.stream()
             .sorted(Comparator.comparingInt(CiphertextBallot.Contest::sequence_order))
             .map(c -> c.crypto_hash).toList();
-    return Hash.hash_elems(ballot_id, description_hash, contest_hashes);
+    return Hash.hash_elems(ballotId, manifestHash, contest_hashes);
   }
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////
   /** Unique internal identifier used by other elements to reference this element. */
-  private final String ballotId;
+  public final String ballotId;
   /** The object_id of the Manifest.BallotStyle. */
   public final String ballotStyleId;
   /** The Manifest crypto_hash. */
@@ -249,15 +249,16 @@ public class CiphertextBallot implements Hash.CryptoHashCheckable {
 
     Group.ElementModQ recalculated_crypto_hash = this.crypto_hash_with(seed_hash);
     if (!recalculated_crypto_hash.equals(this.crypto_hash)) {
-      logger.atInfo().log("mismatching crypto hash: %s expected(%s) actual(%s)", this.ballotId, recalculated_crypto_hash, this.crypto_hash);
-      return false;
+      logger.atInfo().log("CiphertextBallot mismatching crypto hash: %s expected(%s) actual(%s)", this.ballotId, recalculated_crypto_hash, this.crypto_hash);
+      throw new IllegalStateException("CiphertextBallot mismatching crypto hash");
+      // return false;
     }
 
     // Check the proofs on the ballot
     boolean valid = true;
     for (Contest contest : this.contests) {
       for (Selection selection : contest.selections) {
-        valid &= selection.is_valid_encryption(selection.description_hash(), elgamal_public_key, crypto_extended_base_hash);
+        valid &= selection.is_valid_encryption(selection.selectionHash, elgamal_public_key, crypto_extended_base_hash);
       }
       valid &= contest.is_valid_encryption(contest.contestHash, elgamal_public_key, crypto_extended_base_hash);
     }
@@ -325,9 +326,9 @@ public class CiphertextBallot implements Hash.CryptoHashCheckable {
      * python: make_ciphertext_ballot_selection
      */
     static Selection create(
-            String object_id,
+            String selectionId,
             int sequence_order,
-            Group.ElementModQ description_hash,
+            Group.ElementModQ selectionHash,
             ElGamal.Ciphertext ciphertext,
             Group.ElementModP elgamal_public_key,
             Group.ElementModQ crypto_extended_base_hash,
@@ -341,7 +342,7 @@ public class CiphertextBallot implements Hash.CryptoHashCheckable {
 
       if (crypto_hash.isEmpty()) {
         // python: _ciphertext_ballot_selection_crypto_hash_with
-        crypto_hash = Optional.of(Hash.hash_elems(object_id, description_hash, ciphertext.crypto_hash()));
+        crypto_hash = Optional.of(Hash.hash_elems(selectionId, selectionHash, ciphertext.crypto_hash()));
       }
 
       if (proof.isEmpty() && nonce.isPresent()) { // LOOK python?
@@ -357,9 +358,9 @@ public class CiphertextBallot implements Hash.CryptoHashCheckable {
       }
 
       return new Selection(
-              object_id,
+              selectionId,
               sequence_order,
-              description_hash,
+              selectionHash,
               ciphertext,
               crypto_hash.get(),
               is_placeholder_selection,
@@ -381,10 +382,10 @@ public class CiphertextBallot implements Hash.CryptoHashCheckable {
     /** encryption of the write-in candidate. */
     public final Optional<ElGamal.Ciphertext> extended_data; // LOOK not used, see Encrypt line 177.
 
-    public Selection(String object_id, int sequence_order, Group.ElementModQ description_hash, ElGamal.Ciphertext ciphertext,
+    public Selection(String selectionId, int sequence_order, Group.ElementModQ selectionHash, ElGamal.Ciphertext ciphertext,
                      Group.ElementModQ crypto_hash, boolean is_placeholder_selection, Optional<Group.ElementModQ> nonce,
                      Optional<ChaumPedersen.DisjunctiveChaumPedersenProof> proof, Optional<ElGamal.Ciphertext> extended_data) {
-      super(object_id, sequence_order, description_hash, ciphertext, is_placeholder_selection);
+      super(selectionId, sequence_order, selectionHash, ciphertext, is_placeholder_selection);
 
       this.crypto_hash = Preconditions.checkNotNull(crypto_hash);
       this.is_placeholder_selection = is_placeholder_selection;
@@ -420,7 +421,7 @@ public class CiphertextBallot implements Hash.CryptoHashCheckable {
 
       Group.ElementModQ recalculated_crypto_hash = crypto_hash_with(seed_hash);
       if (!recalculated_crypto_hash.equals(this.crypto_hash)) {
-        logger.atInfo().log("mismatching crypto hash: %s expected(%s), actual(%s)",
+        logger.atInfo().log("Selection mismatching crypto hash: %s expected(%s), actual(%s)",
                 this.object_id(), recalculated_crypto_hash, this.crypto_hash);
         return false;
       }
@@ -439,11 +440,12 @@ public class CiphertextBallot implements Hash.CryptoHashCheckable {
      * This is deliberate, allowing for the possibility of ElectionGuard variants running on
      * much more limited hardware, where the Disjunctive Chaum-Pedersen proofs might be computed later.
      * <p>
-     * In most cases the seed_hash should match the `description_hash`
+     * In most cases the seed_hash should match the `selectionHash`
      */
     Group.ElementModQ crypto_hash_with(Group.ElementModQ seedHash) {
       // python: _ciphertext_ballot_selection_crypto_hash_with
-      return Hash.hash_elems(this.object_id(), seedHash, this.ciphertext().crypto_hash());
+      // crypto_hash = Hash.hash_elems(selectionId, selectionHash, ciphertext.crypto_hash());
+      return Hash.hash_elems(this.selectionId, seedHash, this.ciphertext().crypto_hash());
     }
 
     @Override
@@ -500,9 +502,9 @@ public class CiphertextBallot implements Hash.CryptoHashCheckable {
      * Changed for Issue #280: A crypto_hash and a contest_total are always computed and saved.
      */
     static Contest create(
-            String object_id,
+            String contestId,
             int sequence_order,
-            Group.ElementModQ description_hash,
+            Group.ElementModQ contestHash,
             List<Selection> ballot_selections,
             Group.ElementModP elgamal_public_key,
             Group.ElementModQ crypto_extended_base_hash,
@@ -510,9 +512,9 @@ public class CiphertextBallot implements Hash.CryptoHashCheckable {
             int number_elected,
             Optional<Group.ElementModQ> nonce) {
 
-      Group.ElementModQ crypto_hash = ciphertext_ballot_context_crypto_hash(object_id, ballot_selections, description_hash);
+      Group.ElementModQ crypto_hash = ciphertext_ballot_context_crypto_hash(contestId, ballot_selections, contestHash);
       ElGamal.Ciphertext contest_total = ciphertext_ballot_elgamal_accumulate(ballot_selections);
-      Optional<Group.ElementModQ> aggregate = ciphertext_ballot_contest_aggregate_nonce(object_id, ballot_selections);
+      Optional<Group.ElementModQ> aggregate = ciphertext_ballot_contest_aggregate_nonce(contestId, ballot_selections);
 
       Optional<ChaumPedersen.ConstantChaumPedersenProof> proof = aggregate.map(ag ->
               ChaumPedersen.make_constant_chaum_pedersen(
@@ -526,9 +528,9 @@ public class CiphertextBallot implements Hash.CryptoHashCheckable {
       );
 
       return new Contest(
-              object_id,
+              contestId,
               sequence_order,
-              description_hash,
+              contestHash,
               ballot_selections,
               crypto_hash,
               contest_total,
@@ -624,7 +626,7 @@ public class CiphertextBallot implements Hash.CryptoHashCheckable {
 
       Group.ElementModQ recalculated_crypto_hash = this.crypto_hash_with(seed_hash);
       if (!this.crypto_hash.equals(recalculated_crypto_hash)) {
-        logger.atInfo().log("mismatching crypto hash: %s expected(%s) actual(%s)", this.contestId, recalculated_crypto_hash, this.crypto_hash);
+        logger.atInfo().log("Contest mismatching crypto hash: %s expected(%s) actual(%s)", this.contestId, recalculated_crypto_hash, this.crypto_hash);
         return false;
       }
 
