@@ -138,7 +138,7 @@ class ElectionRecordPanel extends JPanel {
         return false;
       }
       this.record = consumer.readElectionRecord();
-      manifestTable.setElectionManifest(record.election);
+      manifestTable.setElectionManifest(record.manifest);
 
       if (record.acceptedBallots != null) {
         submittedBallotsTable.setAcceptedBallots(record.acceptedBallots);
@@ -163,7 +163,7 @@ class ElectionRecordPanel extends JPanel {
     f.format("Election Record %s%n", this.electionRecordDir);
     if (this.record != null) {
       f.format("  version = %s%n", record.protoVersion);
-      Manifest manifest = record.election;
+      Manifest manifest = record.manifest;
       f.format("%nManifest%n");
       f.format("  election_scope_id = %s%n", manifest.electionScopeId());
       f.format("  type = %s%n", manifest.electionType());

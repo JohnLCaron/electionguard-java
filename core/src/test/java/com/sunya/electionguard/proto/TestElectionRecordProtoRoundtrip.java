@@ -53,7 +53,7 @@ public class TestElectionRecordProtoRoundtrip {
             consumer.availableGuardians());
 
     ElectionRecord roundtrip = ElectionRecordFromProto.translateFromProto(protoFromJson);
-    assertThat(roundtrip.election).isEqualTo(consumer.election());
+    assertThat(roundtrip.manifest).isEqualTo(consumer.election());
     assertThat(roundtrip.context).isEqualTo(consumer.context());
     assertThat(roundtrip.constants).isEqualTo(consumer.constants());
     assertThat(roundtrip.devices).isEqualTo(consumer.devices());
@@ -95,7 +95,7 @@ public class TestElectionRecordProtoRoundtrip {
     Consumer consumer2 = new Consumer(publisher);
     ElectionRecord roundtrip = consumer2.readElectionRecordProto();
 
-    assertThat(roundtrip.election).isEqualTo(consumer.election());
+    assertThat(roundtrip.manifest).isEqualTo(consumer.election());
     assertThat(roundtrip.context).isEqualTo(consumer.context());
     assertThat(roundtrip.constants).isEqualTo(consumer.constants());
     assertThat(roundtrip.devices).isEqualTo(consumer.devices());

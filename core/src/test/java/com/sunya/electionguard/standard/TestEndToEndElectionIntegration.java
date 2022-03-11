@@ -410,7 +410,7 @@ public class TestEndToEndElectionIntegration {
     Consumer consumer = new Consumer(publisher);
     ElectionRecord roundtrip = consumer.readElectionRecordJson();
 
-    assertThat(roundtrip.election).isEqualTo(this.election);
+    assertThat(roundtrip.manifest).isEqualTo(this.election);
     assertThat(roundtrip.context).isEqualTo(this.context);
     assertThat(roundtrip.constants).isEqualTo(this.constants);
     assertThat(roundtrip.devices.size()).isEqualTo(1);

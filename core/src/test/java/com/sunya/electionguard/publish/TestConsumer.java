@@ -14,7 +14,7 @@ public class TestConsumer {
   public void testConsumerJson() throws IOException {
     Consumer consumer = new Consumer(TestParameterVerifier.topdirJson);
     ElectionRecord record = consumer.readElectionRecord();
-    assertThat(record.election).isNotNull();
+    assertThat(record.manifest).isNotNull();
     assertThat(record.context).isNotNull();
     assertThat(record.constants).isNotNull();
     assertThat(record.ciphertextTally).isNotNull();
@@ -31,7 +31,7 @@ public class TestConsumer {
   public void testConsumerJsonPython() throws IOException {
     Consumer consumer = new Consumer(TestParameterVerifier.topdirJsonPython);
     ElectionRecord record = consumer.readElectionRecord();
-    assertThat(record.election).isNotNull();
+    assertThat(record.manifest).isNotNull();
     assertThat(record.context).isNotNull();
     assertThat(record.constants).isNotNull();
     assertThat(record.ciphertextTally).isNotNull();
@@ -47,7 +47,7 @@ public class TestConsumer {
   public void testConsumerProto() throws IOException {
     Consumer consumer = new Consumer(TestParameterVerifier.topdirProto);
     ElectionRecord record = consumer.readElectionRecord();
-    assertThat(record.election).isNotNull();
+    assertThat(record.manifest).isNotNull();
     assertThat(record.context).isNotNull();
     assertThat(record.constants).isNotNull();
     assertThat(record.ciphertextTally).isNotNull();

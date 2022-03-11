@@ -30,7 +30,7 @@ public class ElectionRecord {
   public final String protoVersion;
   public final ElectionConstants constants;
   public final ElectionContext context;
-  public final Manifest election;
+  public final Manifest manifest;
   public final ImmutableList<GuardianRecord> guardianRecords;
   public final ImmutableList<Encrypt.EncryptionDevice> devices; // may be empty
   public final CloseableIterable<SubmittedBallot> acceptedBallots; // All ballots, not just cast! // may be empty
@@ -44,7 +44,7 @@ public class ElectionRecord {
   public ElectionRecord(String version,
                         ElectionConstants constants,
                         ElectionContext context,
-                        Manifest election,
+                        Manifest manifest,
                         List<GuardianRecord> guardianRecords,
                         @Nullable List<Encrypt.EncryptionDevice> devices,
                         @Nullable CiphertextTally encryptedTally,
@@ -55,7 +55,7 @@ public class ElectionRecord {
     this.protoVersion = version;
     this.constants = constants;
     this.context = context;
-    this.election = election;
+    this.manifest = manifest;
     this.guardianRecords = ImmutableList.copyOf(guardianRecords);
     this.devices = devices == null ? ImmutableList.of() : ImmutableList.copyOf(devices);
     this.acceptedBallots = acceptedBallots == null ? CloseableIterableAdapter.empty() : acceptedBallots;
@@ -71,7 +71,7 @@ public class ElectionRecord {
     } */
 
     ImmutableMap.Builder<String, Integer> builder = ImmutableMap.builder();
-    for (Manifest.ContestDescription contest : election.contests()) {
+    for (Manifest.ContestDescription contest : manifest.contests()) {
       builder.put(contest.contestId(), contest.votesAllowed());
     }
     contestVoteLimits = builder.build();
@@ -82,7 +82,7 @@ public class ElectionRecord {
     return new ElectionRecord(currentVersion,
             this.constants,
             this.context,
-            this.election,
+            this.manifest,
             this.guardianRecords,
             this.devices,
             this.ciphertextTally,
@@ -174,7 +174,7 @@ public class ElectionRecord {
     ElectionRecord that = (ElectionRecord) o;
     return constants.equals(that.constants) &&
             context.equals(that.context) &&
-            election.equals(that.election) &&
+            manifest.equals(that.manifest) &&
             Objects.equals(devices, that.devices) &&
             Objects.equals(acceptedBallots, that.acceptedBallots) &&
             Objects.equals(ciphertextTally, that.ciphertextTally) &&
@@ -186,6 +186,6 @@ public class ElectionRecord {
 
   @Override
   public int hashCode() {
-    return Objects.hash(constants, context, election, devices, acceptedBallots, ciphertextTally, decryptedTally, guardianRecords, spoiledBallots, contestVoteLimits);
+    return Objects.hash(constants, context, manifest, devices, acceptedBallots, ciphertextTally, decryptedTally, guardianRecords, spoiledBallots, contestVoteLimits);
   }
 }

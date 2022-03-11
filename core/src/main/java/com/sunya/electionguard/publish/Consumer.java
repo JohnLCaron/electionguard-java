@@ -77,7 +77,7 @@ public class Consumer {
 
   public Manifest readManifest() throws IOException {
     if (Files.exists(publisher.electionRecordProtoPath())) {
-      return readElectionRecordProto().election;
+      return readElectionRecordProto().manifest;
     } else {
       return election();
     }

@@ -91,7 +91,7 @@ public class DecryptingSimulator {
       Consumer consumer = new Consumer(cmdLine.encryptDir);
       ElectionRecord electionRecord = consumer.readElectionRecord();
       // LOOK how to validate guardians??
-      ManifestInputValidation validator = new ManifestInputValidation(electionRecord.election);
+      ManifestInputValidation validator = new ManifestInputValidation(electionRecord.manifest);
       Formatter errors = new Formatter();
       if (!validator.validateElection(errors)) {
         System.out.printf("*** ElectionInputValidation FAILED on %s%n%s", cmdLine.encryptDir, errors);
@@ -161,7 +161,7 @@ public class DecryptingSimulator {
   public DecryptingSimulator(Consumer consumer, ElectionRecord electionRecord, RemoteGuardiansProvider provider) {
     this.consumer = consumer;
     this.electionRecord = electionRecord;
-    this.election = electionRecord.election;
+    this.election = electionRecord.manifest;
     this.quorum = electionRecord.context.quorum;
     this.numberOfGuardians = electionRecord.context.numberOfGuardians;
     this.encryptedTally = electionRecord.ciphertextTally;

@@ -98,7 +98,7 @@ public class EncryptBallots {
 
     Consumer consumer = new Consumer(cmdLine.inputDir);
     ElectionRecord electionRecord = consumer.readElectionRecord();
-    ManifestInputValidation validator = new ManifestInputValidation(electionRecord.election);
+    ManifestInputValidation validator = new ManifestInputValidation(electionRecord.manifest);
     Formatter errors = new Formatter();
     if (!validator.validateElection(errors)) {
       System.out.printf("*** ElectionInputValidation FAILED on %s%n%s", cmdLine.inputDir, errors);
@@ -108,13 +108,13 @@ public class EncryptBallots {
     BallotProvider ballotProvider = null;
     if (cmdLine.ballotProviderClass != null) {
       try {
-        ballotProvider = makeBallotProvider(cmdLine.ballotProviderClass, electionRecord.election, cmdLine.nballots);
+        ballotProvider = makeBallotProvider(cmdLine.ballotProviderClass, electionRecord.manifest, cmdLine.nballots);
       } catch (Throwable t) {
         t.printStackTrace();
         System.exit(3);
       }
     } else {
-      ballotProvider = new FakeBallotProvider(electionRecord.election, cmdLine.nballots);
+      ballotProvider = new FakeBallotProvider(electionRecord.manifest, cmdLine.nballots);
     }
 
     System.out.printf(" EncryptBallots: read context from %s%n", cmdLine.inputDir);
@@ -126,7 +126,7 @@ public class EncryptBallots {
     System.out.printf("   Write to %s%n", cmdLine.encryptDir);
     EncryptBallots encryptor = new EncryptBallots(electionRecord, cmdLine.deviceName);
 
-    BallotInputValidation ballotValidator = new BallotInputValidation(electionRecord.election);
+    BallotInputValidation ballotValidator = new BallotInputValidation(electionRecord.manifest);
     List<PlaintextBallot> originalBallots = new ArrayList<>();
     List<PlaintextBallot> invalidBallots = new ArrayList<>();
     try {
@@ -200,11 +200,11 @@ public class EncryptBallots {
     this.numberOfGuardians = electionRecord.context.numberOfGuardians;
 
     // Configure the Encryption Device
-    InternalManifest metadata = new InternalManifest(electionRecord.election);
+    InternalManifest metadata = new InternalManifest(electionRecord.manifest);
     this.device = Encrypt.createDeviceForTest(deviceName);
     this.encryptor = new Encrypt.EncryptionMediator(metadata, electionRecord.context, this.device);
 
-    this.ballotBox = new BallotBox(electionRecord.election, electionRecord.context);
+    this.ballotBox = new BallotBox(electionRecord.manifest, electionRecord.context);
     System.out.printf("%nReady to encrypt with device: '%s'%n", this.device.location());
   }
 

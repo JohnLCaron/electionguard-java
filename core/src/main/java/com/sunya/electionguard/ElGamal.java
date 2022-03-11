@@ -84,7 +84,7 @@ public class ElGamal {
     }
 
     /** Computes a cryptographic hash of this ciphertext. */
-    ElementModQ crypto_hash() {
+    public ElementModQ crypto_hash() {
       return Hash.hash_elems(this.pad, this.data);
     }
   }

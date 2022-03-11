@@ -76,7 +76,7 @@ public class AccumulateTally {
     try {
       Consumer consumer = new Consumer(cmdLine.encryptDir);
       ElectionRecord electionRecord = consumer.readElectionRecord();
-      ManifestInputValidation validator = new ManifestInputValidation(electionRecord.election);
+      ManifestInputValidation validator = new ManifestInputValidation(electionRecord.manifest);
       Formatter errors = new Formatter();
       if (!validator.validateElection(errors)) {
         System.out.printf("*** ElectionInputValidation FAILED on %s%n%s", cmdLine.encryptDir, errors);
@@ -110,13 +110,13 @@ public class AccumulateTally {
   public AccumulateTally(Consumer consumer, ElectionRecord electionRecord) {
     this.consumer = consumer;
     this.electionRecord = electionRecord;
-    this.election = electionRecord.election;
+    this.election = electionRecord.manifest;
     System.out.printf("%nReady to accumulate%n");
   }
 
   void accumulateTally() {
     System.out.printf("%nAccumulate tally%n");
-    InternalManifest manifest = new InternalManifest(electionRecord.election);
+    InternalManifest manifest = new InternalManifest(electionRecord.manifest);
     CiphertextTallyBuilder ciphertextTally = new CiphertextTallyBuilder("accumulateTally", manifest, electionRecord.context);
     int nballots = ciphertextTally.batch_append(electionRecord.acceptedBallots);
     this.encryptedTally = ciphertextTally.build();

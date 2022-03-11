@@ -13,7 +13,6 @@ class BallotValidations {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   /** Determine if a ballot is valid for this election . */
-  // LOOK why ElectionDescriptionWithPlaceholders?
   static boolean ballot_is_valid_for_election(
           CiphertextBallot ballot,
           InternalManifest manifest,

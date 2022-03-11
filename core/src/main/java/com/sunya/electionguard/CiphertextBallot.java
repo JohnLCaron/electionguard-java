@@ -137,7 +137,7 @@ public class CiphertextBallot implements Hash.CryptoHashCheckable {
     return ElGamal.elgamal_add(Iterables.toArray(texts, ElGamal.Ciphertext.class));
   }
 
-  private static Group.ElementModQ ciphertext_ballot_context_crypto_hash(
+  public static Group.ElementModQ ciphertext_ballot_context_crypto_hash(
           String object_id,
           List<Selection> ballot_selections,
           Group.ElementModQ seed_hash) {
@@ -224,8 +224,8 @@ public class CiphertextBallot implements Hash.CryptoHashCheckable {
 
     // LOOK ordering of contests?
     // contest_hashes = [contest.crypto_hash for contest in this.contests]
-    List<Group.ElementModQ> selection_hashes = contests.stream().map(s -> s.crypto_hash).toList();
-    return Hash.hash_elems(this.ballotId, seed_hash, selection_hashes);
+    List<Group.ElementModQ> contest_hashes = contests.stream().map(s -> s.crypto_hash).toList();
+    return Hash.hash_elems(this.ballotId, seed_hash, contest_hashes);
   }
 
   /**
@@ -423,7 +423,8 @@ public class CiphertextBallot implements Hash.CryptoHashCheckable {
       if (!recalculated_crypto_hash.equals(this.crypto_hash)) {
         logger.atInfo().log("Selection mismatching crypto hash: %s expected(%s), actual(%s)",
                 this.object_id(), recalculated_crypto_hash, this.crypto_hash);
-        return false;
+        throw new IllegalStateException("CiphertextBallot.Selection mismatching crypto hash");
+        // return false;
       }
 
       if (this.proof.isEmpty()) {
@@ -627,7 +628,8 @@ public class CiphertextBallot implements Hash.CryptoHashCheckable {
       Group.ElementModQ recalculated_crypto_hash = this.crypto_hash_with(seed_hash);
       if (!this.crypto_hash.equals(recalculated_crypto_hash)) {
         logger.atInfo().log("Contest mismatching crypto hash: %s expected(%s) actual(%s)", this.contestId, recalculated_crypto_hash, this.crypto_hash);
-        return false;
+        throw new IllegalStateException("CiphertextBallot.Contest mismatching crypto hash");
+        // return false;
       }
 
       // NOTE: this check does not verify the proofs of the individual selections by design.
