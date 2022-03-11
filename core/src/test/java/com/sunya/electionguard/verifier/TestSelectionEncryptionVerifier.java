@@ -16,29 +16,17 @@ public class TestSelectionEncryptionVerifier {
 
   @Example
   public void testSelectionEncryptionValidationProto() throws IOException {
-    String topdir = TestParameterVerifier.topdirProto;
-
-    Consumer consumer = new Consumer(topdir);
-    ElectionRecord electionRecord = consumer.readElectionRecordProto();
-    SelectionEncryptionVerifier sev = new SelectionEncryptionVerifier(electionRecord);
-
-    boolean sevOk = sev.verify_all_selections();
-    assertThat(sevOk).isTrue();
-
-    Tester tester = new Tester(electionRecord);
-    for (SubmittedBallot ballot : electionRecord.acceptedBallots) {
-      for (CiphertextBallot.Contest contest : ballot.contests) {
-        tester.verify_a_contest(contest);
-      }
-    }
+    Consumer consumer = new Consumer(TestParameterVerifier.topdirProto);
+    testSelectionEncryptionValidation(consumer.readElectionRecordProto());
   }
 
   @Example
   public void testSelectionEncryptionValidationJson() throws IOException {
-    String topdir = TestParameterVerifier.topdirJson;
+    Consumer consumer = new Consumer(TestParameterVerifier.topdirJson);
+    testSelectionEncryptionValidation(consumer.readElectionRecordJson());
+  }
 
-    Consumer consumer = new Consumer(topdir);
-    ElectionRecord electionRecord = consumer.readElectionRecordJson();
+  static void testSelectionEncryptionValidation(ElectionRecord electionRecord) {
     SelectionEncryptionVerifier sev = new SelectionEncryptionVerifier(electionRecord);
 
     boolean sevOk = sev.verify_all_selections();
@@ -50,9 +38,29 @@ public class TestSelectionEncryptionVerifier {
         tester.verify_a_contest(contest);
       }
     }
+
+    for (SubmittedBallot ballot : electionRecord.acceptedBallots) {
+      ElementModQ crypto_hash = ballot.crypto_hash;
+      ElementModQ prev_hash = ballot.code_seed;
+      ElementModQ curr_hash = ballot.code;
+      ElementModQ curr_hash_computed = Hash.hash_elems(prev_hash, ballot.timestamp, crypto_hash);
+      assertThat(curr_hash).isEqualTo(curr_hash_computed);
+    }
+
+    for (SubmittedBallot ballot : electionRecord.acceptedBallots) {
+      for (CiphertextBallot.Contest contest : ballot.contests) {
+        for (CiphertextBallot.Selection selection : contest.selections) {
+          assertThat(selection.is_valid_encryption(
+                    selection.selectionHash,
+                    electionRecord.electionPublicKey(),
+                    electionRecord.extendedHash()))
+                  .isTrue();
+        }
+      }
+    }
   }
 
-  private static class Tester {
+  static class Tester {
     ElectionRecord electionRecord;
 
     public Tester(ElectionRecord electionRecord) {
@@ -179,9 +187,6 @@ public class TestSelectionEncryptionVerifier {
       return !error;
     }
 
-    /**
-     * check if the given values are each in the set zq
-     */
     private boolean check_params_within_zq(ElementModQ... params) {
       boolean error = false;
       for (ElementModQ param : params) {
@@ -192,23 +197,7 @@ public class TestSelectionEncryptionVerifier {
       return !error;
     }
 
-    /**
-     * check if Chaum-Pedersen proof zero proof(given challenge c0, response v0) is satisfied.
-     * <p>
-     * To prove the zero proof, two equations g ^ v0 = a0 * alpha ^ c0 mod p, K ^ v0 = b0 * beta ^ c0 mod p
-     * have to be satisfied.
-     * In the verification process, the challenge c of a selection is allowed to be broken into two components
-     * in any way as long as c = (c0 + c1) mod p, c0 here is the first component broken from c.
-     * <p>
-     *
-     * @param pad:       alpha of a selection
-     * @param data:      beta of a selection
-     * @param zero_pad:  zero_pad of a selection
-     * @param zero_data: zero_data of a selection
-     * @param zero_chal: zero_challenge of a selection
-     * @param zero_res:  zero_response of a selection
-     * @return True if both equations of the zero proof are satisfied, False if either is not satisfied
-     */
+
     private boolean check_cp_proof_zero_proof(ElementModP pad, ElementModP data, ElementModP zero_pad, ElementModP zero_data,
                                               ElementModQ zero_chal, ElementModQ zero_res) {
       // g ^ v0 = a0 * alpha ^ c0 mod p
@@ -227,23 +216,7 @@ public class TestSelectionEncryptionVerifier {
       return eq1ok && eq2ok;
     }
 
-    /**
-     * check if Chaum-Pedersen proof one proof(given challenge c1, response v1) is satisfied.
-     * <p>
-     * To proof the zero proof, two equations g ^ v1 = a1 * alpha ^ c1 mod p, g ^ c1 * K ^ v1 = b1 * beta ^ c1 mod p
-     * have to be satisfied.
-     * In the verification process, the challenge c of a selection is allowed to be broken into two components
-     * in any way as long as c = (c0 + c1) mod p, c1 here is the second component broken from c.
-     * <p>
-     *
-     * @param pad:      alpha of a selection
-     * @param data:     beta of a selection
-     * @param one_pad:  one_pad of a selection
-     * @param one_data: one_data of a selection
-     * @param one_chal: one_challenge of a selection
-     * @param one_res:  one_response of a selection
-     * @return True if both equations of the one proof are satisfied, False if either is not satisfied
-     */
+
     private boolean check_cp_proof_one_proof(ElementModP pad, ElementModP data, ElementModP one_pad, ElementModP one_data,
                                              ElementModQ one_chal, ElementModQ one_res) {
 
@@ -264,13 +237,7 @@ public class TestSelectionEncryptionVerifier {
       return eq1ok && eq2ok;
     }
 
-    /**
-     * check if the hash computation is correct, equation c = c0 + c1 mod q is satisfied.
-     *
-     * @param chal:      challenge of a selection
-     * @param zero_chal: zero_challenge of a selection
-     * @param one_chal:  one_challenge of a selection
-     */
+
     private boolean check_hash_comp(ElementModQ chal, ElementModQ zero_chal, ElementModQ one_chal) {
       // calculated expected challenge value: c0 + c1 mod q
       ElementModQ expected = Group.add_q(zero_chal, one_chal);
@@ -281,9 +248,7 @@ public class TestSelectionEncryptionVerifier {
       return res;
     }
 
-    /**
-     * check if a selection's a and b are in set Z_r^p
-     */
+
     boolean verify_selection_limit(CiphertextBallot.Selection selection) {
       ElementModP this_pad = selection.ciphertext().pad();
       ElementModP this_data = selection.ciphertext().data();
@@ -310,14 +275,7 @@ public class TestSelectionEncryptionVerifier {
       return res;
     }
 
-    /**
-     * check if equation g ^ v = a * A ^ c mod p is satisfied,
-     * This function checks the first part of aggregate encryption, A in (A, B), is used together with
-     * check_cp_proof_beta() to form a pair-wise check on a complete encryption value pair (A,B)
-     *
-     * @param alpha_product: the accumulative product of all the alpha/pad values on all selections within a contest
-     * @return True if the equation is satisfied, False if not
-     */
+
     private boolean check_cp_proof_alpha(CiphertextBallot.Contest contest, ElementModP alpha_product) {
       ChaumPedersen.ConstantChaumPedersenProof proof = contest.proof.orElseThrow(IllegalStateException::new);
 
@@ -331,15 +289,6 @@ public class TestSelectionEncryptionVerifier {
       return res;
     }
 
-    /**
-     * check if equation g ^ (L * c) * K ^ v = b * B ^ C mod p is satisfied
-     * This function checks the second part of aggregate encryption, B in (A, B), is used together with
-     * __check_cp_proof_alpha() to form a pair-wise check on a complete encryption value pair (A,B)
-     *
-     * @param beta_product:  the accumalative product of pad/beta values of all the selections within a contest
-     * @param votes_allowed: the maximum votes allowed for this contest
-     * @return True if the equation is satisfied, False if not
-     */
     private boolean check_cp_proof_beta(CiphertextBallot.Contest contest, ElementModP beta_product, ElementModQ votes_allowed) {
       ChaumPedersen.ConstantChaumPedersenProof proof = contest.proof.orElseThrow(IllegalStateException::new);
 
@@ -354,17 +303,6 @@ public class TestSelectionEncryptionVerifier {
         System.out.printf("Contest selection limit check equation 2 error.%n");
       }
       return res;
-    }
-
-    @Example
-    public void testTrackingHashes() {
-      for (SubmittedBallot ballot : electionRecord.acceptedBallots) {
-        ElementModQ crypto_hash = ballot.crypto_hash;
-        ElementModQ prev_hash = ballot.code_seed;
-        ElementModQ curr_hash = ballot.code;
-        ElementModQ curr_hash_computed = Hash.hash_elems(prev_hash, ballot.timestamp, crypto_hash);
-        assertThat(curr_hash).isEqualTo(curr_hash_computed);
-      }
     }
   }
 

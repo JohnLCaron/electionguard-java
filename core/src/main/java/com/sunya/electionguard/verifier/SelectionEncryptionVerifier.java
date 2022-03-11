@@ -46,7 +46,7 @@ public class SelectionEncryptionVerifier {
     return !error;
   }
 
-  private class SelectionVerifier {
+  public class SelectionVerifier {
     final CiphertextBallot.Selection selection;
     final ElementModP alpha;
     final ElementModP beta;

@@ -28,8 +28,8 @@ public class SubmittedBallot extends CiphertextBallot {
    * python: make_ciphertext_submitted_ballot()
    * <p>
    *
-   * @param object_id:               the object_id of this specific ballot
-   * @param style_id:                The `object_id` of the `BallotStyle` in the `Manifest` Manifest
+   * @param ballotId:               the object_id of this specific ballot
+   * @param ballotStyleId:                The `object_id` of the `BallotStyle` in the `Manifest` Manifest
    * @param manifest_hash:           Hash of the election manifest
    * @param code_seedO:              Seed for ballot code
    * @param contests:                List of contests for this ballot
@@ -38,8 +38,8 @@ public class SubmittedBallot extends CiphertextBallot {
    * @param state:                   ballot state
    */
   static SubmittedBallot create(
-          String object_id,
-          String style_id,
+          String ballotId,
+          String ballotStyleId,
           Group.ElementModQ manifest_hash,
           Optional<Group.ElementModQ> code_seedO,
           List<Contest> contests,
@@ -48,7 +48,7 @@ public class SubmittedBallot extends CiphertextBallot {
           BallotBox.State state) { // default BallotBoxState.UNKNOWN,
 
     if (contests.isEmpty()) {
-      logger.atInfo().log("ciphertext ballot with no contest: %s", object_id);
+      logger.atInfo().log("ciphertext ballot with no contest: %s", ballotId);
     }
 
     // contest_hashes = [contest.crypto_hash for contest in sequence_order_sort(contests)]
@@ -57,7 +57,7 @@ public class SubmittedBallot extends CiphertextBallot {
             .map(c -> c.crypto_hash)
             .toList();
 
-    Group.ElementModQ contest_hash = Hash.hash_elems(object_id, manifest_hash, contest_hashes);
+    Group.ElementModQ crypto_hash = Hash.hash_elems(ballotId, manifest_hash, contest_hashes);
 
     long timestamp = timestampO.orElse(System.currentTimeMillis());
     Group.ElementModQ code_seed = code_seedO.orElse(manifest_hash); // LOOK spec #6.A says H0 = H(Qbar)
@@ -66,14 +66,14 @@ public class SubmittedBallot extends CiphertextBallot {
     List<Contest> new_contests = contests.stream().map(Contest::removeNonces).toList();
 
     return new SubmittedBallot(
-            object_id,
-            style_id,
+            ballotId,
+            ballotStyleId,
             manifest_hash,
             code_seed,
             new_contests,
             ballot_code,
             timestamp,
-            contest_hash,
+            crypto_hash,
             state);
   }
 
@@ -82,8 +82,8 @@ public class SubmittedBallot extends CiphertextBallot {
   public final BallotBox.State state;
 
   // public to allow proto serialization; use SubmittedBallot.create()
-  public SubmittedBallot(String object_id,
-                         String style_id,
+  public SubmittedBallot(String ballotId,
+                         String ballotStyleId,
                          Group.ElementModQ manifest_hash,
                          Group.ElementModQ code_seed,
                          List<Contest> contests,
@@ -91,7 +91,7 @@ public class SubmittedBallot extends CiphertextBallot {
                          long timestamp,
                          Group.ElementModQ crypto_hash,
                          BallotBox.State state) {
-    super(object_id, style_id, manifest_hash, code_seed, contests, code, timestamp, crypto_hash, Optional.empty());
+    super(ballotId, ballotStyleId, manifest_hash, code_seed, contests, code, timestamp, crypto_hash, Optional.empty());
     this.state = state;
   }
 

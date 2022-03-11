@@ -22,7 +22,7 @@ import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 /** A Remote Trustee with a DecryptingTrustee delegate, communicating over gRpc. */
-class DecryptingRemoteTrustee extends DecryptingTrusteeServiceGrpc.DecryptingTrusteeServiceImplBase {
+public class DecryptingRemoteTrustee extends DecryptingTrusteeServiceGrpc.DecryptingTrusteeServiceImplBase {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
   private static final Random random = new Random();
 

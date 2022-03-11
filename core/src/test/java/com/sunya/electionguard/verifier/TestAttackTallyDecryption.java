@@ -22,7 +22,7 @@ import java.util.function.Function;
 
 import static com.google.common.truth.Truth.assertThat;
 
-public class TestAttackTallyDecryptionVerifyier {
+public class TestAttackTallyDecryption {
   private static final Random random = new Random(System.currentTimeMillis());
 
   @Example

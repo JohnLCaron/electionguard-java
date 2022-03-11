@@ -48,7 +48,7 @@ import java.util.stream.Collectors;
  * </pre>
  * </strong>
  */
-class DecryptingMediatorRunner {
+public class DecryptingMediatorRunner {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   private static class CommandLine {
