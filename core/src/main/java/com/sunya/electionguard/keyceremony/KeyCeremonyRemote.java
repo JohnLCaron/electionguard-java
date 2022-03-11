@@ -5,8 +5,11 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.google.common.base.Stopwatch;
 import com.google.common.flogger.FluentLogger;
+import com.sunya.electionguard.ElectionConstants;
+import com.sunya.electionguard.Group;
 import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.input.ManifestInputValidation;
+import com.sunya.electionguard.verifier.ElectionRecord;
 import electionguard.protogen.RemoteKeyCeremonyProto;
 import electionguard.protogen.RemoteKeyCeremonyServiceGrpc;
 import com.sunya.electionguard.publish.Consumer;
@@ -36,7 +39,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * </pre>
  * </strong>
  */
-class KeyCeremonyRemote {
+public class KeyCeremonyRemote {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   private static class CommandLine {
@@ -92,17 +95,20 @@ class KeyCeremonyRemote {
     boolean allOk = false;
     KeyCeremonyRemote keyCeremony = null;
     try {
-      // all we need from election record is the ElectionDescription.
       Consumer consumer = new Consumer(cmdLine.inputDir);
-      Manifest election = consumer.readManifest();
-      ManifestInputValidation validator = new ManifestInputValidation(election);
+      ElectionRecord election = consumer.readElectionRecord();
+      ManifestInputValidation validator = new ManifestInputValidation(election.manifest);
       Formatter errors = new Formatter();
       if (!validator.validateElection(errors)) {
         System.out.printf("*** ElectionInputValidation FAILED on %s%n%s", cmdLine.inputDir, errors);
         System.exit(1);
       }
 
-      keyCeremony = new KeyCeremonyRemote(election, cmdLine.nguardians, cmdLine.quorum, cmdLine.outputDir);
+      if (election.constants != null) {
+        Group.setPrimes(election.constants);
+      }
+
+      keyCeremony = new KeyCeremonyRemote(election.manifest, cmdLine.nguardians, cmdLine.quorum, cmdLine.outputDir);
       keyCeremony.start(cmdLine.port);
 
       System.out.print("Waiting for guardians to register: elapsed seconds = ");
@@ -276,6 +282,9 @@ class KeyCeremonyRemote {
         response.setGuardianId(trustee.id());
         response.setGuardianXCoordinate(trustee.xCoordinate());
         response.setQuorum(trustee.quorum());
+        if (Group.getPrimes().getPrimeOptionType() != ElectionConstants.PrimeOption.Standard) {
+          response.setConstants(Group.getPrimes().getPrimeOptionType().name());
+        }
         responseObserver.onNext(response.build());
         responseObserver.onCompleted();
         logger.atInfo().log("KeyCeremonyRemote registerTrustee '%s'", trustee.id());

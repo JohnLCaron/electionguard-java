@@ -385,6 +385,24 @@ public class Publisher {
   //////////////////////////////////////////////////////////////////
   // Proto
 
+  /** Publishes the starting election record as proto. */
+  public void writeStartingProto(
+          Manifest description,
+          ElectionConstants constants) throws IOException {
+
+    if (createMode == Mode.readonly) {
+      throw new UnsupportedOperationException("Trying to write to readonly election record");
+    }
+
+    ElectionRecordProto.ElectionRecord electionRecordProto = ElectionRecordToProto.buildElectionRecord(
+            description, constants, null, null,
+            null, null, null, null);
+    try (FileOutputStream out = new FileOutputStream(electionRecordProtoPath().toFile())) {
+      electionRecordProto.writeTo(out);
+    }
+  }
+
+
   /** Publishes the KeyCeremony part of the election record as proto. */
   public void writeKeyCeremonyProto(
           Manifest description,
@@ -402,7 +420,7 @@ public class Publisher {
     }
 
     ElectionRecordProto.ElectionRecord electionRecordProto = ElectionRecordToProto.buildElectionRecord(
-            description, context, constants, guardianRecords,
+            description, constants, context, guardianRecords,
             null, null, null, null);
     try (FileOutputStream out = new FileOutputStream(electionRecordProtoPath().toFile())) {
       electionRecordProto.writeTo(out);
@@ -432,8 +450,8 @@ public class Publisher {
 
     ElectionRecordProto.ElectionRecord electionRecordProto = ElectionRecordToProto.buildElectionRecord(
             electionRecord.manifest,
-            electionRecord.context,
             electionRecord.constants,
+            electionRecord.context,
             electionRecord.guardianRecords,
             devices, null, null, null);
 
@@ -451,7 +469,7 @@ public class Publisher {
     }
 
     ElectionRecordProto.ElectionRecord electionRecordProto = ElectionRecordToProto.buildElectionRecord(
-            electionRecord.manifest, electionRecord.context, electionRecord.constants,
+            electionRecord.manifest, electionRecord.constants, electionRecord.context,
             electionRecord.guardianRecords,
             electionRecord.devices,
             encryptedTally,
@@ -470,7 +488,7 @@ public class Publisher {
     }
 
     ElectionRecordProto.ElectionRecord ElectionRecordProto = ElectionRecordToProto.buildElectionRecord(
-            electionRecord.manifest, electionRecord.context, electionRecord.constants,
+            electionRecord.manifest, electionRecord.constants, electionRecord.context,
             electionRecord.guardianRecords, electionRecord.devices,
             electionRecord.ciphertextTally,
             decryptedTally,
@@ -504,7 +522,7 @@ public class Publisher {
     }
 
     ElectionRecordProto.ElectionRecord electionRecordProto = ElectionRecordToProto.buildElectionRecord(
-            electionRecord.manifest, electionRecord.context, electionRecord.constants,
+            electionRecord.manifest, electionRecord.constants, electionRecord.context,
             electionRecord.guardianRecords, electionRecord.devices,
             encryptedTally,
             decryptedTally,
@@ -551,7 +569,7 @@ public class Publisher {
     }
 
     ElectionRecordProto.ElectionRecord electionRecordProto = ElectionRecordToProto.buildElectionRecord(
-            description, context, constants, guardianRecords,
+            description, constants, context, guardianRecords,
             devices,
             ciphertext_tally,
             decryptedTally,

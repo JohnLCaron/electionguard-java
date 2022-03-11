@@ -172,15 +172,25 @@ class ElectionRecordPanel extends JPanel {
       f.format("  end_date = %s%n", manifest.endDate());
       f.format("  manifest crypto hash = %s%n", manifest.cryptoHash());
 
+      ElectionConstants constants = record.constants;
+      f.format("%nConstants%n");
+      f.format("  name = %s%n", constants.name);
+      f.format("  large_prime = %s%n", Group.int_to_p_unchecked(constants.largePrime).toShortString());
+      f.format("  small_prime = %s%n", Group.int_to_q_unchecked(constants.smallPrime));
+      f.format("  cofactor    = %s%n", Group.int_to_p_unchecked(constants.cofactor).toShortString());
+      f.format("  generator   = %s%n", Group.int_to_p_unchecked(constants.generator).toShortString());
+
       ElectionContext context = record.context;
-      f.format("%nContext%n");
-      f.format("  number_of_guardians = %s%n", context.numberOfGuardians);
-      f.format("  quorum = %s%n", context.quorum);
-      f.format("  election public key = %s%n", context.jointPublicKey.toShortString());
-      f.format("  description hash = %s%n", context.manifestHash);
-      f.format("  election base hash = %s%n", context.cryptoBaseHash);
-      f.format("  extended base hash = %s%n", context.cryptoExtendedBaseHash);
-      f.format("  commitment hash = %s%n", context.commitmentHash);
+      if (context != null) {
+        f.format("%nContext%n");
+        f.format("  number_of_guardians = %s%n", context.numberOfGuardians);
+        f.format("  quorum = %s%n", context.quorum);
+        f.format("  election public key = %s%n", context.jointPublicKey.toShortString());
+        f.format("  description hash = %s%n", context.manifestHash);
+        f.format("  election base hash = %s%n", context.cryptoBaseHash);
+        f.format("  extended base hash = %s%n", context.cryptoExtendedBaseHash);
+        f.format("  commitment hash = %s%n", context.commitmentHash);
+      }
 
       f.format("%n  EncryptionDevices%n");
       for (Encrypt.EncryptionDevice device : record.devices) {
@@ -192,14 +202,6 @@ class ElectionRecordPanel extends JPanel {
         f.format("    %s %d%n", gr.guardianId(), gr.xCoordinate());
       }
 
-      ElectionConstants constants = record.constants;
-      f.format("%nConstants%n");
-      f.format("  name = %s%n", constants.name);
-      f.format("  large_prime = %s%n", Group.int_to_p_unchecked(constants.largePrime).toShortString());
-      f.format("  small_prime = %s%n", Group.int_to_q_unchecked(constants.smallPrime));
-      f.format("  cofactor    = %s%n", Group.int_to_p_unchecked(constants.cofactor).toShortString());
-      f.format("  generator   = %s%n", Group.int_to_p_unchecked(constants.generator).toShortString());
-
       f.format("%n  Available Guardians%n");
       for (AvailableGuardian guardian : record.availableGuardians) {
         f.format("    %20s %d %s%n", guardian.guardianId(), guardian.xCoordinate(), guardian.lagrangeCoordinate());
@@ -209,7 +211,6 @@ class ElectionRecordPanel extends JPanel {
       f.format("SpoiledBallots %d%n", Iterables.size(record.spoiledBallots));
       f.format("EncryptedTally present = %s%n", record.ciphertextTally != null);
       f.format("DecryptedTally present = %s%n", record.decryptedTally != null);
-
     }
   }
 

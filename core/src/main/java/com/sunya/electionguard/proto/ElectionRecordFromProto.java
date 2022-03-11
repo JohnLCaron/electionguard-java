@@ -38,9 +38,9 @@ public class ElectionRecordFromProto {
 
   public static ElectionRecord translateFromProto(ElectionRecordProto.ElectionRecord proto) {
     String version = proto.getProtoVersion();
+    Manifest manifest = ManifestFromProto.translateFromProto(proto.getManifest());
     ElectionConstants constants = convertConstants(proto.getConstants());
-    ElectionContext context = convertContext(proto.getContext());
-    Manifest description = ManifestFromProto.translateFromProto(proto.getManifest());
+    ElectionContext context = proto.hasContext() ? convertContext(proto.getContext()) : null;
 
     List<GuardianRecord> guardianRecords =
             proto.getGuardianRecordsList().stream()
@@ -60,7 +60,7 @@ public class ElectionRecordFromProto {
                     .map(ElectionRecordFromProto::convertAvailableGuardian)
                     .toList();
 
-    return new ElectionRecord(version, constants, context, description, guardianRecords,
+    return new ElectionRecord(version, manifest, constants, context, guardianRecords,
             devices, ciphertextTally, decryptedTally, null, null, guardians);
   }
 
@@ -85,6 +85,9 @@ public class ElectionRecordFromProto {
   }
 
   static ElectionContext convertContext(ElectionRecordProto.ElectionContext context) {
+    if (context == null) {
+      return null;
+    }
     return new ElectionContext(
             context.getNumberOfGuardians(),
             context.getQuorum(),

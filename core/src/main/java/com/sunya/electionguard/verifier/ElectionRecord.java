@@ -28,10 +28,10 @@ public class ElectionRecord {
   public static final String currentVersion = "1.2.2";
 
   public final String protoVersion;
-  public final ElectionConstants constants;
-  public final ElectionContext context;
   public final Manifest manifest;
-  public final ImmutableList<GuardianRecord> guardianRecords;
+  public final ElectionConstants constants;
+  @Nullable public final ElectionContext context;
+  public final ImmutableList<GuardianRecord> guardianRecords; // may be empty
   public final ImmutableList<Encrypt.EncryptionDevice> devices; // may be empty
   public final CloseableIterable<SubmittedBallot> acceptedBallots; // All ballots, not just cast! // may be empty
   @Nullable public final CiphertextTally ciphertextTally;
@@ -42,10 +42,10 @@ public class ElectionRecord {
   private final ImmutableMap<String, Integer> contestVoteLimits;
 
   public ElectionRecord(String version,
-                        ElectionConstants constants,
-                        ElectionContext context,
                         Manifest manifest,
-                        List<GuardianRecord> guardianRecords,
+                        ElectionConstants constants,
+                        @Nullable ElectionContext context,
+                        @Nullable List<GuardianRecord> guardianRecords,
                         @Nullable List<Encrypt.EncryptionDevice> devices,
                         @Nullable CiphertextTally encryptedTally,
                         @Nullable PlaintextTally decryptedTally,
@@ -53,10 +53,10 @@ public class ElectionRecord {
                         @Nullable CloseableIterable<PlaintextTally> spoiledBallots,
                         @Nullable List<AvailableGuardian> availableGuardians) {
     this.protoVersion = version;
+    this.manifest = manifest;
     this.constants = constants;
     this.context = context;
-    this.manifest = manifest;
-    this.guardianRecords = ImmutableList.copyOf(guardianRecords);
+    this.guardianRecords = guardianRecords == null ? ImmutableList.of() : ImmutableList.copyOf(guardianRecords);
     this.devices = devices == null ? ImmutableList.of() : ImmutableList.copyOf(devices);
     this.acceptedBallots = acceptedBallots == null ? CloseableIterableAdapter.empty() : acceptedBallots;
     this.ciphertextTally = encryptedTally;
@@ -80,9 +80,9 @@ public class ElectionRecord {
   public ElectionRecord setBallots(CloseableIterable<SubmittedBallot> acceptedBallots,
                                    CloseableIterable<PlaintextTally> spoiledBallots) {
     return new ElectionRecord(currentVersion,
+            this.manifest,
             this.constants,
             this.context,
-            this.manifest,
             this.guardianRecords,
             this.devices,
             this.ciphertextTally,
@@ -115,11 +115,6 @@ public class ElectionRecord {
   /** G in the spec. */
   public BigInteger cofactor() {
     return this.constants.cofactor;
-  }
-
-  /** Manifest description crypto hash */
-  public Group.ElementModQ description_hash() {
-    return this.context.manifestHash;
   }
 
   /** The extended base hash, Qbar in the spec. */

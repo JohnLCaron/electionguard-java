@@ -9,6 +9,7 @@ import com.google.common.flogger.FluentLogger;
 import com.sunya.electionguard.AvailableGuardian;
 import com.sunya.electionguard.CiphertextTally;
 import com.sunya.electionguard.CiphertextTallyBuilder;
+import com.sunya.electionguard.ElectionConstants;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.InternalManifest;
 import com.sunya.electionguard.PlaintextTally;
@@ -16,7 +17,6 @@ import com.sunya.electionguard.Scheduler;
 import com.sunya.electionguard.input.CiphertextTallyInputValidation;
 import com.sunya.electionguard.input.ManifestInputValidation;
 import com.sunya.electionguard.proto.CommonConvert;
-import electionguard.protogen.CommonRpcProto;
 import electionguard.protogen.DecryptingProto;
 import electionguard.protogen.DecryptingServiceGrpc;
 import com.sunya.electionguard.publish.Consumer;
@@ -108,6 +108,10 @@ public class DecryptingMediatorRunner {
       if (!validator.validateElection(errors)) {
         System.out.printf("*** ElectionInputValidation FAILED on %s%n%s", cmdLine.encryptDir, errors);
         System.exit(1);
+      }
+
+      if (electionRecord.constants != null) {
+        Group.setPrimes(electionRecord.constants);
       }
 
       // check that outputDir exists and can be written to
@@ -361,20 +365,23 @@ public class DecryptingMediatorRunner {
 
     @Override
     public void registerTrustee(DecryptingProto.RegisterDecryptingTrusteeRequest request,
-                                StreamObserver<CommonRpcProto.ErrorResponse> responseObserver) {
+                                StreamObserver<DecryptingProto.RegisterDecryptingTrusteeResponse> responseObserver) {
 
       System.out.printf("DecryptingRemote registerTrustee %s url %s %n", request.getGuardianId(), request.getRemoteUrl());
 
       if (startedDecryption) {
-        responseObserver.onNext(CommonRpcProto.ErrorResponse.newBuilder()
+        responseObserver.onNext(DecryptingProto.RegisterDecryptingTrusteeResponse.newBuilder()
                 .setError("Already started Decryption").build());
         responseObserver.onCompleted();
         return;
       }
 
-      CommonRpcProto.ErrorResponse.Builder response = CommonRpcProto.ErrorResponse.newBuilder();
+      DecryptingProto.RegisterDecryptingTrusteeResponse.Builder response = DecryptingProto.RegisterDecryptingTrusteeResponse.newBuilder();
       try {
         DecryptingRemoteTrusteeProxy trustee = DecryptingMediatorRunner.this.registerTrustee(request);
+        if (Group.getPrimes().getPrimeOptionType() != ElectionConstants.PrimeOption.Standard) {
+          response.setConstants(Group.getPrimes().getPrimeOptionType().name());
+        }
         responseObserver.onNext(response.build());
         responseObserver.onCompleted();
         logger.atInfo().log("DecryptingRemote registerTrustee %s", trustee.id());

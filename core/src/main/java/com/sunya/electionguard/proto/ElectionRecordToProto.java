@@ -25,9 +25,9 @@ public class ElectionRecordToProto {
 
   public static ElectionRecordProto.ElectionRecord buildElectionRecord(
           Manifest description,
-          ElectionContext context,
           ElectionConstants constants,
-          Iterable<GuardianRecord> guardianRecords,
+          @Nullable ElectionContext context,
+          @Nullable Iterable<GuardianRecord> guardianRecords,
           @Nullable Iterable<Encrypt.EncryptionDevice> devices,
           @Nullable CiphertextTally ciphertext_tally,
           @Nullable PlaintextTally decryptedTally,
@@ -37,10 +37,14 @@ public class ElectionRecordToProto {
     builder.setProtoVersion(PROTO_VERSION);
     builder.setConstants( convertConstants(constants));
     builder.setManifest( ManifestToProto.translateToProto(description));
-    builder.setContext( convertContext(context));
+    if (context != null) {
+      builder.setContext(convertContext(context));
+    }
 
-    for (GuardianRecord guardianRecord : guardianRecords) {
-      builder.addGuardianRecords(convertGuardianRecord(guardianRecord));
+    if (guardianRecords != null) {
+      for (GuardianRecord guardianRecord : guardianRecords) {
+        builder.addGuardianRecords(convertGuardianRecord(guardianRecord));
+      }
     }
 
     if (devices != null) {

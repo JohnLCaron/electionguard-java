@@ -40,7 +40,7 @@ class DecryptingMediatorRunnerProxy {
   }
 
   @Nullable
-  CommonRpcProto.ErrorResponse registerTrustee(String guardianId, String remoteUrl, int coordinate,
+  DecryptingProto.RegisterDecryptingTrusteeResponse registerTrustee(String guardianId, String remoteUrl, int coordinate,
                                                Group.ElementModP publicKey) {
     try {
       DecryptingProto.RegisterDecryptingTrusteeRequest request = DecryptingProto.RegisterDecryptingTrusteeRequest.newBuilder()
@@ -49,7 +49,8 @@ class DecryptingMediatorRunnerProxy {
               .setGuardianXCoordinate(coordinate)
               .setPublicKey(CommonConvert.convertElementModP(publicKey))
               .build();
-      CommonRpcProto.ErrorResponse response = blockingStub.registerTrustee(request);
+
+      DecryptingProto.RegisterDecryptingTrusteeResponse response = blockingStub.registerTrustee(request);
       if (!response.getError().isEmpty()) {
         logger.atSevere().log("registerTrustee failed: %s", response.getError());
         return null;

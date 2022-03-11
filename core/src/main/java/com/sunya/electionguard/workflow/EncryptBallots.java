@@ -1,9 +1,11 @@
 package com.sunya.electionguard.workflow;
 
 import com.beust.jcommander.*;
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.sunya.electionguard.BallotBox;
+import com.sunya.electionguard.Group;
 import com.sunya.electionguard.InternalManifest;
 import com.sunya.electionguard.SubmittedBallot;
 import com.sunya.electionguard.input.BallotInputValidation;
@@ -24,6 +26,7 @@ import java.util.Formatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A command line program to encrypt a collection of ballots.
@@ -105,6 +108,10 @@ public class EncryptBallots {
       System.exit(1);
     }
 
+    if (electionRecord.constants != null) {
+      Group.setPrimes(electionRecord.constants);
+    }
+
     BallotProvider ballotProvider = null;
     if (cmdLine.ballotProviderClass != null) {
       try {
@@ -125,6 +132,7 @@ public class EncryptBallots {
     }
     System.out.printf("   Write to %s%n", cmdLine.encryptDir);
     EncryptBallots encryptor = new EncryptBallots(electionRecord, cmdLine.deviceName);
+    Stopwatch stopwatch = Stopwatch.createStarted();
 
     BallotInputValidation ballotValidator = new BallotInputValidation(electionRecord.manifest);
     List<PlaintextBallot> originalBallots = new ArrayList<>();
@@ -138,6 +146,8 @@ public class EncryptBallots {
             Optional<SubmittedBallot> accepted = encryptor.castOrSpoil(encrypted_ballot.get(), random.nextBoolean());
             if (accepted.isEmpty()) {
               System.out.printf("***castOrSpoil failed%n");
+            } else {
+              System.out.printf("***castOrSpoil success %s%n", encrypted_ballot.get().ballotId);
             }
           } else {
             System.out.printf("***Encryption failed%n");
@@ -152,6 +162,9 @@ public class EncryptBallots {
       t.printStackTrace();
       System.exit(4);
     }
+    long msecs = stopwatch.elapsed(TimeUnit.MILLISECONDS);
+    double secsPer = (.001 * msecs) / cmdLine.nballots;
+    System.out.printf("*** encryptBallots elapsed = %d sec %.3f per ballot%n", stopwatch.elapsed(TimeUnit.SECONDS), secsPer);
 
     try {
       // publish

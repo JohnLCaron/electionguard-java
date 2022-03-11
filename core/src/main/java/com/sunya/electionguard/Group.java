@@ -29,6 +29,14 @@ public class Group {
     }
     primes = usePrimes;
   }
+  public static void setPrimesByName(String name) {
+    ElectionConstants want = ElectionConstants.getByName(name);
+    if (want == null) {
+      System.out.printf("Cant find non-standard prime %s%n", name);
+    } else {
+      setPrimes(want);
+    }
+  }
   public static void reset() {
     primes = ElectionConstants.STANDARD_CONSTANTS;
   }

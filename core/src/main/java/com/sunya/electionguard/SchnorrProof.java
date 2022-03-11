@@ -54,7 +54,8 @@ public class SchnorrProof extends Proof {
 
     boolean success = valid_public_key && in_bounds_h && in_bounds_u && valid_2A && valid_2B;
     if (!success) {
-      logger.atWarning().log("found an invalid Schnorr proof: %s", this);
+      logger.atWarning().log("found an invalid Schnorr proof: %s constants = %s", this, Group.getPrimes().name);
+      throw new IllegalStateException();
     }
     return success;
   }
