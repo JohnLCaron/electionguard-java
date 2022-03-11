@@ -74,7 +74,7 @@ public class VerifyElectionRecord {
     try {
       Consumer consumer = new Consumer(cmdLine.inputDir);
       ElectionRecord electionRecord = consumer.readElectionRecord();
-      ManifestInputValidation validator = new ManifestInputValidation(electionRecord.election);
+      ManifestInputValidation validator = new ManifestInputValidation(electionRecord.manifest);
       Formatter errors = new Formatter();
       if (!validator.validateElection(errors)) {
         System.out.printf("*** ElectionInputValidation FAILED on %s%n%s", cmdLine.inputDir, errors);
@@ -141,7 +141,7 @@ public class VerifyElectionRecord {
 
     System.out.println("------------ PlaintextTallyInputValidation ------------");
     PlaintextTallyInputValidation validator = new PlaintextTallyInputValidation(
-            electionRecord.election,
+            electionRecord.manifest,
             electionRecord.ciphertextTally,
             electionRecord.context.numberOfGuardians,
             electionRecord.availableGuardians.size());
@@ -153,7 +153,7 @@ public class VerifyElectionRecord {
     }
 
     System.out.println("------------ [box 11] Correct Decryption of Tallies ------------");
-    TallyDecryptionVerifier tdv = new TallyDecryptionVerifier(electionRecord.election, electionRecord.decryptedTally);
+    TallyDecryptionVerifier tdv = new TallyDecryptionVerifier(electionRecord.manifest, electionRecord.decryptedTally);
     boolean tdvOk = tdv.verify_tally_decryption();
 
     System.out.println("------------ [box 12] Correct Decryption of Spoiled Ballots ------------");

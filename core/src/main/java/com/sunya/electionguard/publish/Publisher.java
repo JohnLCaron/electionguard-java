@@ -314,7 +314,7 @@ public class Publisher {
       throw new UnsupportedOperationException("Trying to write to readonly election record");
     }
 
-    ConvertToJson.writeElection(election.election, this.manifestPath());
+    ConvertToJson.writeElection(election.manifest, this.manifestPath());
     ConvertToJson.writeContext(election.context, this.contextPath());
     ConvertToJson.writeConstants(election.constants, this.constantsPath());
     // TODO election.devices
@@ -431,7 +431,7 @@ public class Publisher {
     System.out.printf("Save %d accepted ballots in %s%n", count, submittedBallotProtoPath());
 
     ElectionRecordProto.ElectionRecord electionRecordProto = ElectionRecordToProto.buildElectionRecord(
-            electionRecord.election,
+            electionRecord.manifest,
             electionRecord.context,
             electionRecord.constants,
             electionRecord.guardianRecords,
@@ -451,7 +451,7 @@ public class Publisher {
     }
 
     ElectionRecordProto.ElectionRecord electionRecordProto = ElectionRecordToProto.buildElectionRecord(
-            electionRecord.election, electionRecord.context, electionRecord.constants,
+            electionRecord.manifest, electionRecord.context, electionRecord.constants,
             electionRecord.guardianRecords,
             electionRecord.devices,
             encryptedTally,
@@ -470,7 +470,7 @@ public class Publisher {
     }
 
     ElectionRecordProto.ElectionRecord ElectionRecordProto = ElectionRecordToProto.buildElectionRecord(
-            electionRecord.election, electionRecord.context, electionRecord.constants,
+            electionRecord.manifest, electionRecord.context, electionRecord.constants,
             electionRecord.guardianRecords, electionRecord.devices,
             electionRecord.ciphertextTally,
             decryptedTally,
@@ -504,7 +504,7 @@ public class Publisher {
     }
 
     ElectionRecordProto.ElectionRecord electionRecordProto = ElectionRecordToProto.buildElectionRecord(
-            electionRecord.election, electionRecord.context, electionRecord.constants,
+            electionRecord.manifest, electionRecord.context, electionRecord.constants,
             electionRecord.guardianRecords, electionRecord.devices,
             encryptedTally,
             decryptedTally,

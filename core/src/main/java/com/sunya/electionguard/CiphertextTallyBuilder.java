@@ -87,7 +87,7 @@ public class CiphertextTallyBuilder {
     AtomicInteger count = new AtomicInteger();
     try (Stream<SubmittedBallot> ballots = ballotsIterable.iterator().stream()) {
       ballots.filter(b -> b.state == State.CAST && !cast_ballot_ids.contains(b.object_id()) &&
-                    BallotValidations.ballot_is_valid_for_election(b, this.manifest, this.context))
+                      BallotValidations.ballot_is_valid_for_election(b, this.manifest, this.context))
               .forEach(ballot -> {
         // collect the selections so they can be accumulated in parallel
         for (CiphertextBallot.Contest contest : ballot.contests) {

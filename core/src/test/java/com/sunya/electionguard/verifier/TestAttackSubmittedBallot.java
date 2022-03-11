@@ -1,6 +1,8 @@
 package com.sunya.electionguard.verifier;
 
 import com.sunya.electionguard.CiphertextBallot;
+import com.sunya.electionguard.Group;
+import com.sunya.electionguard.Hash;
 import com.sunya.electionguard.SubmittedBallot;
 import com.sunya.electionguard.publish.Consumer;
 import com.sunya.electionguard.publish.Publisher;
@@ -14,12 +16,12 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.sunya.electionguard.publish.Publisher.Mode.createIfMissing;
 
 // try to modify a SubmittedBallot and see if it still validates
-public class TestAttackSelectionEncryption {
+public class TestAttackSubmittedBallot {
   private static final boolean write = true;
   private static final String output = "/home/snake/tmp/electionguard/attack/encrypted";
   private static final String ballotId = "ballot-id--790149674";
 
-  public TestAttackSelectionEncryption() throws IOException {
+  public TestAttackSubmittedBallot() throws IOException {
     String topdir = TestParameterVerifier.topdirProto;
 
     Consumer consumer = new Consumer(topdir);
@@ -34,7 +36,7 @@ public class TestAttackSelectionEncryption {
     for (SubmittedBallot ballot : electionRecord.acceptedBallots) {
       if (ballot.ballotId.equals(ballotId)) { // random ballot to change
         CiphertextBallot.Contest contestChanged = null;
-        int idx  = 0;
+        int idx = 0;
         int wantIdx = -1;
         for (CiphertextBallot.Contest contest : ballot.contests) {
           if (contest.contestId.equals("justice-supreme-court")) {
@@ -48,16 +50,19 @@ public class TestAttackSelectionEncryption {
         List<CiphertextBallot.Contest> contests = new ArrayList<>(ballot.contests);
         contests.set(wantIdx, contestChanged);
 
-        ballots.add( new SubmittedBallot(
-          ballot.ballotId,
-          ballot.ballotStyleId,
-          ballot.manifestHash,
-          ballot.code_seed,
-          contests,
-          ballot.code,
-          ballot.timestamp,
-          ballot.crypto_hash,
-          ballot.state
+        List<Group.ElementModQ> contest_hashes = contests.stream().map(s -> s.crypto_hash).toList();
+        Group.ElementModQ change_crypto = Hash.hash_elems(ballot.ballotId, ballot.manifestHash, contest_hashes);
+
+        ballots.add(new SubmittedBallot(
+                ballot.ballotId,
+                ballot.ballotStyleId,
+                ballot.manifestHash,
+                ballot.code_seed,
+                contests,
+                ballot.code,
+                ballot.timestamp,
+                change_crypto,
+                ballot.state
         ));
         System.out.printf("changed ballot %s %s.%n", ballot.ballotId, ballot.state);
 
@@ -96,26 +101,32 @@ public class TestAttackSelectionEncryption {
     selections2.set(benIdx, bens2);
     selections2.set(johnIdx, johns2);
 
+    Group.ElementModQ change_crypto = CiphertextBallot.ciphertext_ballot_context_crypto_hash(
+            contest.contestId,
+            selections2,
+            contest.contestHash
+    );
+
     return new CiphertextBallot.Contest(
-      contest.contestId,
-      contest.sequenceOrder,
-      contest.contestHash,
-      selections2,
-      contest.crypto_hash,
-      contest.ciphertextAccumulation,
-      contest.nonce,
-      contest.proof
+            contest.contestId,
+            contest.sequenceOrder,
+            contest.contestHash,
+            selections2,
+            change_crypto,
+            contest.ciphertextAccumulation,
+            contest.nonce,
+            contest.proof
     );
   }
 
   // this fails in CiphertextBallot.Selection.is_valid_encryption() because the crypto_hash includes the
   // selection_id and the ciphertext.
-  // perhaps that test should be added to the SelectionEncryptionVerifier?
   private CiphertextBallot.Selection switchVote(CiphertextBallot.Selection s1, CiphertextBallot.Selection s2) {
+    Group.ElementModQ change_hash = Hash.hash_elems(s1.selectionId, s1.selectionHash, s2.ciphertext().crypto_hash());
     return new CiphertextBallot.Selection(
             s1.selectionId, s1.sequenceOrder, s1.selectionHash,
             s2.ciphertext(),
-            s2.crypto_hash, s2.is_placeholder_selection, s2.nonce, s2.proof, s2.extended_data
+            change_hash, s2.is_placeholder_selection, s2.nonce, s2.proof, s2.extended_data
     );
   }
 

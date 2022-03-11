@@ -9,6 +9,7 @@ import java.math.BigInteger;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static com.google.common.truth.Truth.assertWithMessage;
 import static com.sunya.electionguard.Group.ElementModP;
 import static com.sunya.electionguard.Group.ElementModQ;
 
@@ -32,6 +33,7 @@ public class TestSelectionEncryptionVerifier {
     boolean sevOk = sev.verify_all_selections();
     assertThat(sevOk).isTrue();
 
+    // not sure how different this is from SelectionEncryptionVerifier ??
     Tester tester = new Tester(electionRecord);
     for (SubmittedBallot ballot : electionRecord.acceptedBallots) {
       for (CiphertextBallot.Contest contest : ballot.contests) {
@@ -39,24 +41,20 @@ public class TestSelectionEncryptionVerifier {
       }
     }
 
+    // not currently part of SelectionEncryptionVerifier
+    for (SubmittedBallot ballot : electionRecord.acceptedBallots) {
+      assertThat(ballot.is_valid_encryption(electionRecord.manifest.cryptoHash(),
+              electionRecord.context.jointPublicKey,
+              electionRecord.context.cryptoExtendedBaseHash));
+    }
+
+    // ballot chaining (box 6)
     for (SubmittedBallot ballot : electionRecord.acceptedBallots) {
       ElementModQ crypto_hash = ballot.crypto_hash;
       ElementModQ prev_hash = ballot.code_seed;
       ElementModQ curr_hash = ballot.code;
       ElementModQ curr_hash_computed = Hash.hash_elems(prev_hash, ballot.timestamp, crypto_hash);
-      assertThat(curr_hash).isEqualTo(curr_hash_computed);
-    }
-
-    for (SubmittedBallot ballot : electionRecord.acceptedBallots) {
-      for (CiphertextBallot.Contest contest : ballot.contests) {
-        for (CiphertextBallot.Selection selection : contest.selections) {
-          assertThat(selection.is_valid_encryption(
-                    selection.selectionHash,
-                    electionRecord.electionPublicKey(),
-                    electionRecord.extendedHash()))
-                  .isTrue();
-        }
-      }
+      assertWithMessage("Ballot chaining on '%s' fails", ballot.ballotId).that(curr_hash).isEqualTo(curr_hash_computed);
     }
   }
 

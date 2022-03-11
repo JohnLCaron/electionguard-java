@@ -103,7 +103,7 @@ public class DecryptingMediatorRunner {
     try {
       Consumer consumer = new Consumer(cmdLine.encryptDir);
       ElectionRecord electionRecord = consumer.readElectionRecord();
-      ManifestInputValidation validator = new ManifestInputValidation(electionRecord.election);
+      ManifestInputValidation validator = new ManifestInputValidation(electionRecord.manifest);
       Formatter errors = new Formatter();
       if (!validator.validateElection(errors)) {
         System.out.printf("*** ElectionInputValidation FAILED on %s%n%s", cmdLine.encryptDir, errors);
@@ -238,7 +238,7 @@ public class DecryptingMediatorRunner {
       accumulateTally();
     } else {
       this.encryptedTally = this.electionRecord.ciphertextTally;
-      CiphertextTallyInputValidation validator = new CiphertextTallyInputValidation(electionRecord.election);
+      CiphertextTallyInputValidation validator = new CiphertextTallyInputValidation(electionRecord.manifest);
       Formatter errors = new Formatter();
       if (!validator.validateTally(this.encryptedTally, errors)) {
         System.out.printf("*** CiphertextTallyInputValidation FAILED on electionRecord%n%s", errors);
@@ -263,7 +263,7 @@ public class DecryptingMediatorRunner {
 
   void accumulateTally() {
     System.out.printf("%nAccumulate tally%n");
-    InternalManifest metadata = new InternalManifest(this.electionRecord.election);
+    InternalManifest metadata = new InternalManifest(this.electionRecord.manifest);
     CiphertextTallyBuilder ciphertextTally = new CiphertextTallyBuilder("DecryptingMediatorRunner", metadata, electionRecord.context);
     int nballots = ciphertextTally.batch_append(electionRecord.acceptedBallots);
     this.encryptedTally = ciphertextTally.build();

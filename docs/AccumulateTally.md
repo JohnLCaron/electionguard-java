@@ -1,6 +1,6 @@
 # 🗳 ElectionGuard Java 
 
-## DecryptBallots
+## AccumulateTally
 
 The _com.sunya.electionguard.workflow.AccumulateTally_ command line utility simulates
 [Ballot Aggregation](https://www.electionguard.vote/spec/0.95.0/6_Ballot_aggregation/)

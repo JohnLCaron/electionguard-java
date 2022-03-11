@@ -111,7 +111,7 @@ public class DecryptBallots {
     try {
       Consumer consumer = new Consumer(cmdLine.encryptDir);
       ElectionRecord electionRecord = consumer.readElectionRecord();
-      ManifestInputValidation validator = new ManifestInputValidation(electionRecord.election);
+      ManifestInputValidation validator = new ManifestInputValidation(electionRecord.manifest);
       Formatter errors = new Formatter();
       if (!validator.validateElection(errors)) {
         System.out.printf("*** ElectionInputValidation FAILED on %s%n%s", cmdLine.encryptDir, errors);
@@ -164,7 +164,7 @@ public class DecryptBallots {
   public DecryptBallots(Consumer consumer, ElectionRecord electionRecord, GuardiansProvider provider) {
     this.consumer = consumer;
     this.electionRecord = electionRecord;
-    this.election = electionRecord.election;
+    this.election = electionRecord.manifest;
     this.quorum = electionRecord.context.quorum;
     this.numberOfGuardians = electionRecord.context.numberOfGuardians;
     // LOOK We could do the accumulation if the encryptedTally doesnt exist
