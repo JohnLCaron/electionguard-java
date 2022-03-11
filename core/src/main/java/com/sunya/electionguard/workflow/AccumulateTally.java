@@ -5,6 +5,7 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.sunya.electionguard.CiphertextTally;
 import com.sunya.electionguard.CiphertextTallyBuilder;
+import com.sunya.electionguard.Group;
 import com.sunya.electionguard.InternalManifest;
 import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.Scheduler;
@@ -81,6 +82,10 @@ public class AccumulateTally {
       if (!validator.validateElection(errors)) {
         System.out.printf("*** ElectionInputValidation FAILED on %s%n%s", cmdLine.encryptDir, errors);
         System.exit(1);
+      }
+
+      if (electionRecord.constants != null) {
+        Group.setPrimes(electionRecord.constants);
       }
 
       System.out.printf(" AccumulateTally read from %s%n Write to %s%n", cmdLine.encryptDir, cmdLine.outputDir);

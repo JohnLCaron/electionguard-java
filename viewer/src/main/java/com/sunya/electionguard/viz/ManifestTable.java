@@ -222,7 +222,7 @@ public class ManifestTable extends JPanel {
       return gpunit.name();
     }
     public String getContactInformation() {
-      return gpunit.contactInformation().toString();
+      return gpunit.contactInformation() == null ? "N/A" : gpunit.contactInformation().toString();
     }
   }
 

@@ -27,6 +27,17 @@ public class ElectionConstants {
     throw new IllegalStateException();
   }
 
+  public static @Nullable ElectionConstants getByName(String name) {
+    return switch (name.toLowerCase()) {
+      case "standard" -> STANDARD_CONSTANTS;
+      case "largetest" -> LARGE_TEST_CONSTANTS;
+      case "mediumtest" -> MEDIUM_TEST_CONSTANTS;
+      case "smalltest" -> SMALL_TEST_CONSTANTS;
+      case "extrasmalltest" -> EXTRA_SMALL_TEST_CONSTANTS;
+      default -> null;
+    };
+  }
+
   // BigInteger large_prime, BigInteger small_prime, BigInteger cofactor, BigInteger generator
   public static final ElectionConstants STANDARD_CONSTANTS = new ElectionConstants(
           PrimeOption.Standard.name(),

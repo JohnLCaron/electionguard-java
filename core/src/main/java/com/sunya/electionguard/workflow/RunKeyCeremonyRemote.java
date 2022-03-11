@@ -9,7 +9,6 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
-import com.sunya.electionguard.publish.PrivateData;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,37 +21,40 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 /**
- * Runs the decryption, using remote guardians. Encryption and Tally Accumulation has already been run.
+ * Runs the KeyCeremony remote workflow from start to finish, using remote guardians.
  * Runs the components out of the fatJar, so be sure to build that first: "./gradlew clean assemble fatJar"
  * Also be sure to keep RunStandardWorkflow.classpath synched with fatjar SHAPSHOT version.
  * <p>
  * For command line help:
  * <strong>
  * <pre>
- *  java -classpath electionguard-java-all.jar com.sunya.electionguard.workflow.RunDecryption --help
+ *  java -classpath electionguard-java-all.jar com.sunya.electionguard.workflow.RunKeyCeremonyRemote --help
  * </pre>
  * </strong>
  */
-public class RunDecryption {
-  public static final String classpath = "core/build/libs/core-0.9.5-SNAPSHOT-all.jar";
+public class RunKeyCeremonyRemote {
+  public static final String classpath = RunRemoteWorkflow.classpath;
   private static final String REMOTE_TRUSTEE = "remoteTrustee";
-  private static final String CMD_OUTPUT = "/home/snake/tmp/runDecryption/";
+  private static final String CMD_OUTPUT = "/home/snake/tmp/RunKeyCeremonyRemote/";
 
   private static class CommandLine {
+    @Parameter(names = {"-in"}, order = 0,
+            description = "Directory containing input election manifest", required = true)
+    String inputDir;
+
+    @Parameter(names = {"-nguardians"}, order = 2, description = "Number of guardians to create", required = true)
+    int nguardians = 6;
+
+    @Parameter(names = {"-quorum"}, order = 3, description = "Number of guardians that make a quorum", required = true)
+    int quorum = 5;
+
     @Parameter(names = {"-trusteeDir"}, order = 4,
             description = "Directory containing Guardian serializations", required = true)
     String trusteeDir;
 
-    @Parameter(names = {"-in"}, order = 5,
-            description = "Directory containing ballot encryption and tally", required = true)
+    @Parameter(names = {"-out"}, order = 5,
+            description = "Directory containing output election record", required = true)
     String encryptDir;
-
-    @Parameter(names = {"-navailable"}, order = 7, description = "Number of guardians available for decryption", required = true)
-    int navailable = 0;
-
-    @Parameter(names = {"-out"}, order = 8,
-            description = "Directory where complete election record is published", required = true)
-    String outputDir;
 
     @Parameter(names = {"-h", "--help"}, order = 99, description = "Display this help and exit", help = true)
     boolean help = false;
@@ -71,7 +73,7 @@ public class RunDecryption {
   }
 
   public static void main(String[] args) {
-    String progName = RunDecryption.class.getName();
+    String progName = RunKeyCeremonyRemote.class.getName();
     CommandLine cmdLine;
     Stopwatch stopwatchAll = Stopwatch.createStarted();
     Stopwatch stopwatch = Stopwatch.createStarted();
@@ -92,19 +94,18 @@ public class RunDecryption {
     ListeningExecutorService service = MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(11));
     List<RunCommand> running = new ArrayList<>();
 
-    System.out.printf("%n4=============================================================%n");
-    // DecryptBallots
-    int navailable = cmdLine.navailable;
-    RunCommand decryptBallots = new RunCommand("DecryptingRemote", service,
+    System.out.printf("%n1=============================================================%n");
+    // PerformKeyCeremony
+    RunCommand keyCeremonyRemote = new RunCommand("KeyCeremonyRemote", service,
             "java",
             "-classpath", classpath,
-            "com.sunya.electionguard.decrypting.DecryptingMediatorRunner",
-            "-in", cmdLine.encryptDir,
-            "-out", cmdLine.outputDir,
-            "-navailable", Integer.toString(navailable)
-    );
-
-    running.add(decryptBallots);
+            "com.sunya.electionguard.keyceremony.KeyCeremonyRemote",
+            "-in", cmdLine.inputDir,
+            "-out", cmdLine.encryptDir,
+            "-nguardians", Integer.toString(cmdLine.nguardians),
+            "-quorum", Integer.toString(cmdLine.quorum)
+            );
+    running.add(keyCeremonyRemote);
     try {
       Thread.sleep(1000);
     } catch (Throwable e) {
@@ -112,55 +113,27 @@ public class RunDecryption {
       System.exit(1);
     }
 
-    PrivateData privatePublisher = null;
-    try {
-      privatePublisher = new PrivateData(cmdLine.trusteeDir, false, false);
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-    for (int i=1; i <= cmdLine.navailable; i++) {
-      RunCommand command = new RunCommand("DecryptingRemoteTrustee" + i, service,
+    for (int i=1; i <= cmdLine.nguardians; i++) {
+      RunCommand command = new RunCommand("KeyCeremonyRemoteTrustee" + i, service,
               "java",
               "-classpath", classpath,
-              "com.sunya.electionguard.decrypting.DecryptingRemoteTrustee",
-              "-trusteeFile", privatePublisher.trusteePath(REMOTE_TRUSTEE + i).toString() );
+              "com.sunya.electionguard.keyceremony.KeyCeremonyRemoteTrustee",
+              "-name", REMOTE_TRUSTEE + i,
+              "-out", cmdLine.trusteeDir);
       running.add(command);
     }
 
     try {
-      if (!decryptBallots.waitFor(300)) {
-        System.out.format("Kill decryptBallots = %d%n", decryptBallots.kill());
+      if (!keyCeremonyRemote.waitFor(30)) {
+        System.out.format("Kill keyCeremonyRemote = %d%n", keyCeremonyRemote.kill());
       }
     } catch (Throwable e) {
       e.printStackTrace();
     }
+    System.out.printf("*** keyCeremonyRemote elapsed = %d ms%n", stopwatch.elapsed(TimeUnit.MILLISECONDS));
 
-    System.out.printf("*** decryptBallots elapsed = %d sec%n", stopwatch.elapsed(TimeUnit.SECONDS));
+    System.out.printf("%n2=============================================================%n");
     stopwatch.reset().start();
-    System.out.printf("%n5=============================================================%n");
-
-    // VerifyElectionRecord
-    RunCommand verifyElectionRecord = new RunCommand("VerifyElectionRecord", service,
-            "java",
-            "-classpath", classpath,
-            "com.sunya.electionguard.verifier.VerifyElectionRecord",
-            "-in", cmdLine.outputDir);
-    running.add(verifyElectionRecord);
-    try {
-      Thread.sleep(1000);
-    } catch (Throwable e) {
-      e.printStackTrace();
-      System.exit(1);
-    }
-
-    try {
-      if (!verifyElectionRecord.waitFor(10)) {
-        System.out.format("Kill verifyElectionRecord =%d%n", verifyElectionRecord.kill());
-      }
-    } catch (Throwable e) {
-      e.printStackTrace();
-    }
-    System.out.printf("*** verifyElectionRecord elapsed = %d sec%n", stopwatch.elapsed(TimeUnit.SECONDS));
 
     System.out.printf("%n*** All took = %d sec%n", stopwatchAll.elapsed(TimeUnit.SECONDS));
 

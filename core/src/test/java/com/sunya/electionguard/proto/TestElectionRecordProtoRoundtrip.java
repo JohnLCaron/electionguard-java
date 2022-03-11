@@ -44,8 +44,8 @@ public class TestElectionRecordProtoRoundtrip {
   public void testElectionRecordRoundtrip() throws IOException {
     ElectionRecordProto.ElectionRecord protoFromJson = ElectionRecordToProto.buildElectionRecord(
             consumer.election(),
-            consumer.context(),
             consumer.constants(),
+            consumer.context(),
             consumer.guardianRecords(),
             consumer.devices(),
             consumer.ciphertextTally(),

@@ -6,7 +6,9 @@ import com.sunya.electionguard.Manifest;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class ManifestInputBuilder {
   public static final String districtDef = "district";
@@ -14,6 +16,7 @@ public class ManifestInputBuilder {
 
   private final String manifest_name;
   private final ArrayList<ContestBuilder> contests = new ArrayList<>();
+  private final Set<Manifest.Candidate> candidates = new HashSet<>();
   private String style = styleDef;
   private Manifest.BallotStyle ballotStyle;
   private String district = districtDef;
@@ -43,13 +46,17 @@ public class ManifestInputBuilder {
     return c;
   }
 
+  public void addCandidate(String candidate_id) {
+    Manifest.Candidate c = new Manifest.Candidate(candidate_id);
+    candidates.add(c);
+  }
+
   public Manifest build() {
     Manifest.GeopoliticalUnit gpUnit = new Manifest.GeopoliticalUnit(district, "name", Manifest.ReportingUnitType.congressional, null);
     Manifest.BallotStyle ballotStyle = this.ballotStyle != null ? this.ballotStyle :
             new Manifest.BallotStyle(style, ImmutableList.of(district), null, null);
 
     List<Manifest.Party> parties = ImmutableList.of(new Manifest.Party("dog"), new Manifest.Party("cat"));
-    List<Manifest.Candidate> candidates = ImmutableList.of(new Manifest.Candidate("candidate_1"), new Manifest.Candidate("candidate_2"));
 
     // String election_scope_id,
     //                  ElectionType type,
@@ -64,7 +71,7 @@ public class ManifestInputBuilder {
     //                  @Nullable ContactInformation contact_information
     return new Manifest(manifest_name, ElectionContext.SPEC_VERSION, Manifest.ElectionType.general,
             OffsetDateTime.now(), OffsetDateTime.now(),
-            ImmutableList.of(gpUnit), parties, candidates,
+            ImmutableList.of(gpUnit), parties, candidates.stream().toList(),
             contests.stream().map(ContestBuilder::build).toList(),
             ImmutableList.of(ballotStyle), null, null, null);
   }
@@ -95,6 +102,7 @@ public class ManifestInputBuilder {
     public ContestBuilder addSelection(String id, String candidate_id) {
       SelectionBuilder s = new SelectionBuilder(id, candidate_id);
       selections.add(s);
+      addCandidate(candidate_id);
       return this;
     }
 

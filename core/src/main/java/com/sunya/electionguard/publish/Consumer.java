@@ -88,10 +88,10 @@ public class Consumer {
   public ElectionRecord readElectionRecordJson() throws IOException {
     return new ElectionRecord(
             ElectionRecord.currentVersion, // logic is that it would fail on an earlier version TODO add to Json
-            this.constants(), // required
-            this.context(), // required
             this.election(), // required
-            this.guardianRecords(), // required
+            this.constants(), // required
+            this.context(),
+            this.guardianRecords(),
             this.devices(),
             this.ciphertextTally(),
             this.decryptedTally(),

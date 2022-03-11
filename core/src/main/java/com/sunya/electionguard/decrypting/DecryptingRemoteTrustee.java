@@ -6,8 +6,10 @@ import com.beust.jcommander.ParameterException;
 import com.google.common.flogger.FluentLogger;
 import com.sunya.electionguard.BallotBox;
 import com.sunya.electionguard.ElGamal;
+import com.sunya.electionguard.Group;
 import com.sunya.electionguard.proto.CommonConvert;
 import electionguard.protogen.CommonRpcProto;
+import electionguard.protogen.DecryptingProto;
 import electionguard.protogen.DecryptingTrusteeProto;
 import electionguard.protogen.DecryptingTrusteeServiceGrpc;
 import com.sunya.electionguard.proto.TrusteeFromProto;
@@ -87,7 +89,7 @@ public class DecryptingRemoteTrustee extends DecryptingTrusteeServiceGrpc.Decryp
       if (cmdLine.serverPort != 0) {
         // register with the DecryptingRemote "server".
         DecryptingMediatorRunnerProxy proxy = new DecryptingMediatorRunnerProxy(serverUrl);
-        CommonRpcProto.ErrorResponse response = proxy.registerTrustee(trustee.id(), url,
+        DecryptingProto.RegisterDecryptingTrusteeResponse response = proxy.registerTrustee(trustee.id(), url,
                 trustee.delegate.xCoordinate(), trustee.delegate.electionPublicKey());
         proxy.shutdown();
 
@@ -98,6 +100,9 @@ public class DecryptingRemoteTrustee extends DecryptingTrusteeServiceGrpc.Decryp
         if (!response.getError().isEmpty()) {
           System.out.printf("    registerTrustee error %s%n", response.getError());
           throw new RuntimeException(response.getError());
+        }
+        if (!response.getConstants().isEmpty()) {
+          Group.setPrimesByName(response.getConstants());
         }
         System.out.printf("    registered with DecryptingRemote %n");
       }

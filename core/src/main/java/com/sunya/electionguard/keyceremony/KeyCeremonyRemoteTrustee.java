@@ -4,6 +4,7 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.google.common.flogger.FluentLogger;
+import com.sunya.electionguard.Group;
 import com.sunya.electionguard.SchnorrProof;
 import com.sunya.electionguard.proto.CommonConvert;
 import electionguard.protogen.CommonRpcProto;
@@ -97,9 +98,15 @@ class KeyCeremonyRemoteTrustee extends RemoteKeyCeremonyTrusteeServiceGrpc.Remot
       System.out.printf("    registerTrustee error %s%n", response.getError());
       throw new RuntimeException(response.getError());
     }
-    System.out.printf("    response %s %d %d %n", response.getGuardianId(),
+    System.out.printf("    response %s %d %d %s%n", response.getGuardianId(),
             response.getGuardianXCoordinate(),
-            response.getQuorum());
+            response.getQuorum(),
+            response.getConstants()
+            );
+
+    if (!response.getConstants().isEmpty()) {
+      Group.setPrimesByName(response.getConstants());
+    }
 
     // Now start up our own 'RemoteTrustee' Service
     try {
