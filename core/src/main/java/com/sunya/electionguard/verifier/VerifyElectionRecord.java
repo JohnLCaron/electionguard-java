@@ -3,6 +3,7 @@ package com.sunya.electionguard.verifier;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
+import com.sunya.electionguard.ElectionConstants;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.input.ManifestInputValidation;
 import com.sunya.electionguard.input.PlaintextTallyInputValidation;
@@ -83,7 +84,9 @@ public class VerifyElectionRecord {
       System.out.printf(" VerifyElectionRecord read from %s%n", cmdLine.inputDir);
       if (cmdLine.usePrimes) {
         Group.setPrimes(electionRecord.constants);
-        System.out.printf(" Use primes from electionRecord = %s%n", electionRecord.constants);
+        if (electionRecord.constants.getPrimeOptionType() != ElectionConstants.PrimeOption.Standard) {
+          System.out.printf(" Use primes from electionRecord = %s%n", electionRecord.constants);
+        }
       }
       boolean ok = verifyElectionRecord(electionRecord, cmdLine.skip10);
       System.exit(ok ? 0 : 1);

@@ -100,7 +100,7 @@ public class KeyCeremonyRemote {
       ManifestInputValidation validator = new ManifestInputValidation(election.manifest);
       Formatter errors = new Formatter();
       if (!validator.validateElection(errors)) {
-        System.out.printf("*** ElectionInputValidation FAILED on %s%n%s", cmdLine.inputDir, errors);
+        System.out.printf("*** ManifestInputValidation FAILED on %s%n%s", cmdLine.inputDir, errors);
         System.exit(1);
       }
 

@@ -23,6 +23,8 @@ import java.util.stream.Collectors;
 
 import electionguard.protogen.*;
 
+import javax.annotation.Nullable;
+
 
 /** Helper class for consumers of published election records in Json or protobuf. */
 public class Consumer {
@@ -79,7 +81,7 @@ public class Consumer {
     if (Files.exists(publisher.electionRecordProtoPath())) {
       return readElectionRecordProto().manifest;
     } else {
-      return election();
+      return manifest();
     }
   }
 
@@ -88,7 +90,7 @@ public class Consumer {
   public ElectionRecord readElectionRecordJson() throws IOException {
     return new ElectionRecord(
             ElectionRecord.currentVersion, // logic is that it would fail on an earlier version TODO add to Json
-            this.election(), // required
+            this.manifest(), // required
             this.constants(), // required
             this.context(),
             this.guardianRecords(),
@@ -100,24 +102,36 @@ public class Consumer {
             this.availableGuardians());
   }
 
-  public Manifest election() throws IOException {
+  public Manifest manifest() throws IOException {
     return ConvertFromJson.readManifest(publisher.manifestPath().toString());
-  }
-
-  public ElectionContext context() throws IOException {
-    return ConvertFromJson.readContext(publisher.contextPath().toString());
   }
 
   public ElectionConstants constants() throws IOException {
     return ConvertFromJson.readConstants(publisher.constantsPath().toString());
   }
 
-  public PlaintextTally decryptedTally() throws IOException {
-    return ConvertFromJson.readPlaintextTally(publisher.tallyPath().toString());
+  @Nullable
+  public ElectionContext context() throws IOException {
+    if (Files.exists(publisher.contextPath())) {
+      return ConvertFromJson.readContext(publisher.contextPath().toString());
+    }
+    return null;
   }
 
+  @Nullable
+  public PlaintextTally decryptedTally() throws IOException {
+    if (Files.exists(publisher.tallyPath())) {
+      return ConvertFromJson.readPlaintextTally(publisher.tallyPath().toString());
+    }
+    return null;
+  }
+
+  @Nullable
   public CiphertextTally ciphertextTally() throws IOException {
-    return ConvertFromJson.readCiphertextTally(publisher.encryptedTallyPath().toString());
+    if (Files.exists(publisher.encryptedTallyPath())) {
+      return ConvertFromJson.readCiphertextTally(publisher.encryptedTallyPath().toString());
+    }
+    return null;
   }
 
   public List<Encrypt.EncryptionDevice> devices() throws IOException {
