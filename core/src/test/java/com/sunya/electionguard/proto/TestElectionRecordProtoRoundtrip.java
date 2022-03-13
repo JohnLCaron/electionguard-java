@@ -27,7 +27,7 @@ public class TestElectionRecordProtoRoundtrip {
 
   @Example
   public void testConsumer() throws IOException {
-    assertThat(consumer.election()).isNotNull();
+    assertThat(consumer.manifest()).isNotNull();
     assertThat(consumer.context()).isNotNull();
     assertThat(consumer.constants()).isNotNull();
     assertThat(consumer.ciphertextTally()).isNotNull();
@@ -43,7 +43,7 @@ public class TestElectionRecordProtoRoundtrip {
   @Example
   public void testElectionRecordRoundtrip() throws IOException {
     ElectionRecordProto.ElectionRecord protoFromJson = ElectionRecordToProto.buildElectionRecord(
-            consumer.election(),
+            consumer.manifest(),
             consumer.constants(),
             consumer.context(),
             consumer.guardianRecords(),
@@ -53,7 +53,7 @@ public class TestElectionRecordProtoRoundtrip {
             consumer.availableGuardians());
 
     ElectionRecord roundtrip = ElectionRecordFromProto.translateFromProto(protoFromJson);
-    assertThat(roundtrip.manifest).isEqualTo(consumer.election());
+    assertThat(roundtrip.manifest).isEqualTo(consumer.manifest());
     assertThat(roundtrip.context).isEqualTo(consumer.context());
     assertThat(roundtrip.constants).isEqualTo(consumer.constants());
     assertThat(roundtrip.devices).isEqualTo(consumer.devices());
@@ -95,7 +95,7 @@ public class TestElectionRecordProtoRoundtrip {
     Consumer consumer2 = new Consumer(publisher);
     ElectionRecord roundtrip = consumer2.readElectionRecordProto();
 
-    assertThat(roundtrip.manifest).isEqualTo(consumer.election());
+    assertThat(roundtrip.manifest).isEqualTo(consumer.manifest());
     assertThat(roundtrip.context).isEqualTo(consumer.context());
     assertThat(roundtrip.constants).isEqualTo(consumer.constants());
     assertThat(roundtrip.devices).isEqualTo(consumer.devices());

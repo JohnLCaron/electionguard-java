@@ -33,7 +33,7 @@ public class MakeManifestForTesting {
       System.exit(1);
     }
 
-    ElectionConstants constants = ElectionConstants.get(ElectionConstants.PrimeOption.LargeTest);
+    ElectionConstants constants = ElectionConstants.get(ElectionConstants.PrimeOption.Standard);
 
     Publisher publisher = new Publisher(output, createIfMissing, false);
     publisher.writeStartingProto(manifest, constants);

@@ -5,6 +5,7 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Stopwatch;
+import com.google.common.collect.ImmutableList;
 import com.google.common.flogger.FluentLogger;
 import com.sunya.electionguard.AvailableGuardian;
 import com.sunya.electionguard.CiphertextTally;
@@ -66,6 +67,9 @@ public class DecryptingMediatorRunner {
     @Parameter(names = {"-port"}, order = 3, description = "The port to run the server on")
     int port = 17711;
 
+    @Parameter(names = {"-decryptSpoiled"}, order = 3, description = "Decrypt the spoiled ballots")
+    boolean decryptSpoiled = false;
+
     @Parameter(names = {"-h", "--help"}, order = 9, description = "Display this help and exit", help = true)
     boolean help = false;
 
@@ -122,7 +126,7 @@ public class DecryptingMediatorRunner {
       }
 
       decryptor = new DecryptingMediatorRunner(consumer, electionRecord, cmdLine.encryptDir, cmdLine.outputDir,
-              cmdLine.navailable, publisher);
+              cmdLine.navailable, cmdLine.decryptSpoiled, publisher);
       decryptor.start(cmdLine.port);
 
       System.out.print("Waiting for guardians to register: elapsed seconds = ");
@@ -202,7 +206,8 @@ public class DecryptingMediatorRunner {
   final int nguardians;
   final int quorum;
   final List<DecryptingRemoteTrusteeProxy> trusteeProxies = Collections.synchronizedList(new ArrayList<>());
-  final boolean startedDecryption = false;
+  boolean startedDecryption = false;
+  boolean decryptSpoiled;
 
   CiphertextTally encryptedTally;
   PlaintextTally decryptedTally;
@@ -211,13 +216,14 @@ public class DecryptingMediatorRunner {
   final Publisher publisher;
 
   DecryptingMediatorRunner(Consumer consumer, ElectionRecord electionRecord, String encryptDir, String outputDir,
-                           int navailable, Publisher publisher) {
+                           int navailable, boolean decryptSpoiled, Publisher publisher) {
     this.consumer = consumer;
     this.electionRecord = electionRecord;
     this.encryptDir = encryptDir;
     this.outputDir = outputDir;
     this.navailable = navailable;
     this.publisher = publisher;
+    this.decryptSpoiled = decryptSpoiled;
 
     this.nguardians = electionRecord.context.numberOfGuardians;
     this.quorum = electionRecord.context.quorum;
@@ -275,8 +281,8 @@ public class DecryptingMediatorRunner {
   }
 
   void decryptTally() {
-    // LOOK validate tally is well formed
     System.out.printf("%nDecrypt tally%n");
+    this.startedDecryption = true;
 
     // The guardians' election public key is in the electionRecord.guardianRecords.
     Map<String, Group.ElementModP> guardianPublicKeys = electionRecord.guardianRecords.stream().collect(
@@ -284,7 +290,7 @@ public class DecryptingMediatorRunner {
 
     DecryptingMediator mediator = new DecryptingMediator(electionRecord.context,
             this.encryptedTally,
-            consumer.submittedSpoiledBallotsProto(),
+            this.decryptSpoiled ? consumer.submittedSpoiledBallotsProto() : ImmutableList.of(),
             guardianPublicKeys);
 
     int count = 0;
@@ -303,8 +309,10 @@ public class DecryptingMediatorRunner {
     this.decryptedTally = mediator.get_plaintext_tally().orElseThrow();
 
     // Here's where the spoiled ballots are decrypted.
-    this.spoiledDecryptedTallies = mediator.decrypt_spoiled_ballots().orElseThrow();
-    System.out.printf("SpoiledBallotAndTally = %d%n", spoiledDecryptedTallies.size());
+    if (this.decryptSpoiled) {
+      this.spoiledDecryptedTallies = mediator.decrypt_spoiled_ballots().orElseThrow();
+      System.out.printf("SpoiledBallotAndTally = %d%n", spoiledDecryptedTallies.size());
+    }
 
     this.availableGuardians = mediator.getAvailableGuardians();
     System.out.printf("Done decrypting tally%n%n");

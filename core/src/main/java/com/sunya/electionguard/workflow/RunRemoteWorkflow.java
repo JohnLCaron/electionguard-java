@@ -36,7 +36,7 @@ import java.util.stream.Stream;
 public class RunRemoteWorkflow {
   public static final String classpath = "core/build/libs/core-0.9.5-SNAPSHOT-all.jar";
   private static final String REMOTE_TRUSTEE = "remoteTrustee";
-  private static final String CMD_OUTPUT = "/home/snake/tmp/runRemoteWorkflow/";
+  private static final String CMD_OUTPUT = "/home/snake/tmp/RunRemoteWorkflow/";
 
   private static class CommandLine {
     @Parameter(names = {"-in"}, order = 0,
@@ -52,6 +52,10 @@ public class RunRemoteWorkflow {
     @Parameter(names = {"-trusteeDir"}, order = 4,
             description = "Directory containing Guardian serializations", required = true)
     String trusteeDir;
+
+    @Parameter(names = {"-keyDir"}, order = 5,
+            description = "Directory containing keyCeremony output election record", required = true)
+    String keyDir;
 
     @Parameter(names = {"-encryptDir"}, order = 5,
             description = "Directory containing ballot encryption", required = true)
@@ -84,7 +88,7 @@ public class RunRemoteWorkflow {
     }
   }
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws IOException {
     String progName = RunRemoteWorkflow.class.getName();
     CommandLine cmdLine;
     Stopwatch stopwatchAll = Stopwatch.createStarted();
@@ -105,187 +109,224 @@ public class RunRemoteWorkflow {
 
     ListeningExecutorService service = MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(11));
     List<RunCommand> running = new ArrayList<>();
+    int exitStatus = 0;
 
-    System.out.printf("%n1=============================================================%n");
-    // PerformKeyCeremony
-    RunCommand keyCeremonyRemote = new RunCommand("KeyCeremonyRemote", service,
-            "java",
-            "-classpath", classpath,
-            "com.sunya.electionguard.keyceremony.KeyCeremonyRemote",
-            "-in", cmdLine.inputDir,
-            "-out", cmdLine.encryptDir,
-            "-nguardians", Integer.toString(cmdLine.nguardians),
-            "-quorum", Integer.toString(cmdLine.quorum));
-    running.add(keyCeremonyRemote);
     try {
-      Thread.sleep(1000);
-    } catch (Throwable e) {
-      e.printStackTrace();
-      System.exit(1);
-    }
 
-    for (int i=1; i <= cmdLine.nguardians; i++) {
-      RunCommand command = new RunCommand("KeyCeremonyRemoteTrustee" + i, service,
+      System.out.printf("%n1=============================================================%n");
+      // PerformKeyCeremony
+      RunCommand keyCeremonyRemoteCmd = new RunCommand("KeyCeremonyRemote", service,
               "java",
               "-classpath", classpath,
-              "com.sunya.electionguard.keyceremony.KeyCeremonyRemoteTrustee",
-              "-name", REMOTE_TRUSTEE + i,
-              "-out", cmdLine.trusteeDir);
-      running.add(command);
-    }
-
-    try {
-      if (!keyCeremonyRemote.waitFor(30)) {
-        System.out.format("Kill keyCeremonyRemote = %d%n", keyCeremonyRemote.kill());
+              "com.sunya.electionguard.keyceremony.KeyCeremonyRemote",
+              "-in", cmdLine.inputDir,
+              "-out", cmdLine.keyDir,
+              "-nguardians", Integer.toString(cmdLine.nguardians),
+              "-quorum", Integer.toString(cmdLine.quorum));
+      running.add(keyCeremonyRemoteCmd);
+      try {
+        Thread.sleep(1000);
+      } catch (Throwable e) {
+        e.printStackTrace();
+        exitStatus = 1;
+        return;
       }
-    } catch (Throwable e) {
-      e.printStackTrace();
-    }
-    System.out.printf("*** keyCeremonyRemote elapsed = %d ms%n", stopwatch.elapsed(TimeUnit.MILLISECONDS));
 
-    System.out.printf("%n2=============================================================%n");
-    stopwatch.reset().start();
-
-    // EncryptBallots
-    RunCommand encryptBallots = new RunCommand("EncryptBallots", service,
-            "java",
-            "-classpath", classpath,
-            "com.sunya.electionguard.workflow.EncryptBallots",
-            "-in", cmdLine.encryptDir,
-            "-nballots", Integer.toString(cmdLine.nballots),
-            "-out", cmdLine.encryptDir,
-            "-device", "deviceName",
-            "--save"
-    );
-    running.add(encryptBallots);
-    try {
-      Thread.sleep(1000);
-    } catch (Throwable e) {
-      e.printStackTrace();
-      System.exit(1);
-    }
-
-    try {
-      if (!encryptBallots.waitFor(2 * cmdLine.nballots)) {
-        System.out.format("Kill encryptBallots = %d%n", encryptBallots.kill());
+      for (int i = 1; i <= cmdLine.nguardians; i++) {
+        RunCommand command = new RunCommand("KeyCeremonyRemoteTrustee" + i, service,
+                "java",
+                "-classpath", classpath,
+                "com.sunya.electionguard.keyceremony.KeyCeremonyRemoteTrustee",
+                "-name", REMOTE_TRUSTEE + i,
+                "-out", cmdLine.trusteeDir);
+        running.add(command);
       }
-    } catch (Throwable e) {
-      e.printStackTrace();
-    }
-    System.out.printf("*** encryptBallots elapsed = %d sec%n", stopwatch.elapsed(TimeUnit.SECONDS));
-    stopwatch.reset().start();
 
-    System.out.printf("%n3=============================================================%n");
-    stopwatch.reset().start();
-
-    // -in /home/snake/tmp/electionguard/remoteWorkflow/encryptor -out /home/snake/tmp/electionguard/remoteWorkflow/accumTally
-    // Accumulate the Tally
-    RunCommand accumTally = new RunCommand("AccumTally", service,
-            "java",
-            "-classpath", classpath,
-            "com.sunya.electionguard.workflow.AccumulateTally",
-            "-in", cmdLine.encryptDir,
-            "-out", cmdLine.encryptDir
-    );
-    running.add(accumTally);
-    try {
-      Thread.sleep(1000);
-    } catch (Throwable e) {
-      e.printStackTrace();
-      System.exit(1);
-    }
-
-    try {
-      if (!accumTally.waitFor(30)) {
-        System.out.format("Kill accumTally = %d%n", accumTally.kill());
+      try {
+        if (!keyCeremonyRemoteCmd.waitFor(30)) {
+          System.out.format("Kill keyCeremonyRemote = %d%n", keyCeremonyRemoteCmd.kill());
+        }
+      } catch (Throwable e) {
+        e.printStackTrace();
       }
-    } catch (Throwable e) {
-      e.printStackTrace();
-    }
-    System.out.printf("*** accumTally elapsed = %d sec%n", stopwatch.elapsed(TimeUnit.SECONDS));
-    stopwatch.reset().start();
+      System.out.printf("*** keyCeremonyRemote elapsed = %d ms%n", stopwatch.elapsed(TimeUnit.MILLISECONDS));
 
-    System.out.printf("%n4=============================================================%n");
-    // DecryptBallots
-    int navailable = cmdLine.navailable > 0 ? cmdLine.navailable : cmdLine.quorum;
-    RunCommand decryptBallots = new RunCommand("DecryptingRemote", service,
-            "java",
-            "-classpath", classpath,
-            "com.sunya.electionguard.decrypting.DecryptingMediatorRunner",
-            "-in", cmdLine.encryptDir,
-            "-out", cmdLine.outputDir,
-            "-navailable", Integer.toString(navailable)
-    );
-    running.add(decryptBallots);
-    try {
-      Thread.sleep(1000);
-    } catch (Throwable e) {
-      e.printStackTrace();
-      System.exit(1);
-    }
+      // bail out if this fails
+      if (keyCeremonyRemoteCmd.process.exitValue() != 0) {
+        System.out.printf("*** keyCeremonyRemote failed exit = %d, exiting workflow%n", keyCeremonyRemoteCmd.process.exitValue());
+        exitStatus = 1;
+        return;
+      }
 
-    PrivateData privatePublisher = null;
-    try {
-      privatePublisher = new PrivateData(cmdLine.trusteeDir, false, false);
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-    for (int i=1; i <= cmdLine.quorum; i++) {
-      RunCommand command = new RunCommand("DecryptingRemoteTrustee" + i, service,
+      System.out.printf("%n2=============================================================%n");
+      stopwatch.reset().start();
+
+      // EncryptBallots
+      RunCommand encryptBallotsCmd = new RunCommand("EncryptBallots", service,
               "java",
               "-classpath", classpath,
-              "com.sunya.electionguard.decrypting.DecryptingRemoteTrustee",
-              "-trusteeFile", privatePublisher.trusteePath(REMOTE_TRUSTEE + i).toString() );
-      running.add(command);
-    }
-
-    try {
-      if (!decryptBallots.waitFor(300)) {
-        System.out.format("Kill decryptBallots = %d%n", decryptBallots.kill());
+              "com.sunya.electionguard.workflow.EncryptBallots",
+              "-in", cmdLine.keyDir,
+              "-nballots", Integer.toString(cmdLine.nballots),
+              "-out", cmdLine.encryptDir,
+              "-device", "deviceName",
+              "--save"
+      );
+      running.add(encryptBallotsCmd);
+      try {
+        Thread.sleep(1000);
+      } catch (Throwable e) {
+        e.printStackTrace();
+        exitStatus = 2;
+        return;
       }
-    } catch (Throwable e) {
-      e.printStackTrace();
-    }
 
-    System.out.printf("*** decryptBallots elapsed = %d sec%n", stopwatch.elapsed(TimeUnit.SECONDS));
-    stopwatch.reset().start();
-    System.out.printf("%n5=============================================================%n");
-
-    // VerifyElectionRecord
-    RunCommand verifyElectionRecord = new RunCommand("VerifyElectionRecord", service,
-            "java",
-            "-classpath", classpath,
-            "com.sunya.electionguard.verifier.VerifyElectionRecord",
-            "-in", cmdLine.outputDir);
-    running.add(verifyElectionRecord);
-    try {
-      Thread.sleep(1000);
-    } catch (Throwable e) {
-      e.printStackTrace();
-      System.exit(1);
-    }
-
-    try {
-      if (!verifyElectionRecord.waitFor(10)) {
-        System.out.format("Kill verifyElectionRecord =%d%n", verifyElectionRecord.kill());
+      try {
+        encryptBallotsCmd.waitFor();
+      } catch (Throwable e) {
+        e.printStackTrace();
       }
-    } catch (Throwable e) {
-      e.printStackTrace();
-    }
-    System.out.printf("*** verifyElectionRecord elapsed = %d sec%n", stopwatch.elapsed(TimeUnit.SECONDS));
 
-    System.out.printf("%n*** All took = %d sec%n", stopwatchAll.elapsed(TimeUnit.SECONDS));
+      long msecs = stopwatch.elapsed(TimeUnit.MILLISECONDS);
+      double secsPer = (.001 * msecs) / cmdLine.nballots;
+      System.out.printf("*** encryptBallots elapsed = %d sec %.3f per ballot%n", stopwatch.elapsed(TimeUnit.SECONDS), secsPer);
+      stopwatch.reset().start();
 
-    try {
-      for (RunCommand command : running) {
-        command.kill();
-        command.show();
+      // bail out if this fails
+      if (encryptBallotsCmd.process.exitValue() != 0) {
+        System.out.printf("*** encryptBallotsCmd failed exit = %d, exiting workflow%n", encryptBallotsCmd.process.exitValue());
+        exitStatus = 2;
+        return;
       }
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
 
-    System.exit(0);
+      System.out.printf("%n3=============================================================%n");
+      stopwatch.reset().start();
+
+      // -in /home/snake/tmp/electionguard/remoteWorkflow/encryptor -out /home/snake/tmp/electionguard/remoteWorkflow/accumTally
+      // Accumulate the Tally
+      RunCommand accumTallyCmd = new RunCommand("AccumTally", service,
+              "java",
+              "-classpath", classpath,
+              "com.sunya.electionguard.workflow.AccumulateTally",
+              "-in", cmdLine.encryptDir,
+              "-out", cmdLine.encryptDir
+      );
+      running.add(accumTallyCmd);
+      try {
+        Thread.sleep(1000);
+      } catch (Throwable e) {
+        e.printStackTrace();
+        exitStatus = 3;
+        return;
+      }
+
+      try {
+        accumTallyCmd.waitFor();
+      } catch (Throwable e) {
+        e.printStackTrace();
+      }
+
+      System.out.printf("*** accumTally elapsed = %d sec%n", stopwatch.elapsed(TimeUnit.SECONDS));
+      stopwatch.reset().start();
+
+      // bail out if this fails
+      if (accumTallyCmd.process.exitValue() != 0) {
+        System.out.printf("*** accumTallyCmd failed exit = %d, exiting workflow%n", accumTallyCmd.process.exitValue());
+        exitStatus = 3;
+        return;
+      }
+
+      System.out.printf("%n4=============================================================%n");
+      // DecryptBallots
+      int navailable = cmdLine.navailable > 0 ? cmdLine.navailable : cmdLine.quorum;
+      RunCommand decryptBallotsCmd = new RunCommand("DecryptingRemote", service,
+              "java",
+              "-classpath", classpath,
+              "com.sunya.electionguard.decrypting.DecryptingMediatorRunner",
+              "-in", cmdLine.encryptDir,
+              "-out", cmdLine.outputDir,
+              "-navailable", Integer.toString(navailable)
+      );
+      running.add(decryptBallotsCmd);
+      try {
+        Thread.sleep(1000);
+      } catch (Throwable e) {
+        e.printStackTrace();
+        exitStatus = 4;
+        return;
+      }
+
+      PrivateData privatePublisher = null;
+      try {
+        privatePublisher = new PrivateData(cmdLine.trusteeDir, false, false);
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+      for (int i = 1; i <= cmdLine.quorum; i++) {
+        RunCommand command = new RunCommand("DecryptingRemoteTrustee" + i, service,
+                "java",
+                "-classpath", classpath,
+                "com.sunya.electionguard.decrypting.DecryptingRemoteTrustee",
+                "-trusteeFile", privatePublisher.trusteePath(REMOTE_TRUSTEE + i).toString());
+        running.add(command);
+      }
+
+      try {
+        decryptBallotsCmd.waitFor();
+      } catch (Throwable e) {
+        e.printStackTrace();
+      }
+
+      System.out.printf("*** decryptBallots elapsed = %d sec%n", stopwatch.elapsed(TimeUnit.SECONDS));
+      stopwatch.reset().start();
+
+      // bail out if this fails
+      if (decryptBallotsCmd.process.exitValue() != 0) {
+        System.out.printf("*** decryptBallotsCmd failed exit = %d, exiting workflow%n", decryptBallotsCmd.process.exitValue());
+        exitStatus = 4;
+        return;
+      }
+
+      System.out.printf("%n5=============================================================%n");
+
+      // VerifyElectionRecord
+      RunCommand verifyElectionRecord = new RunCommand("VerifyElectionRecord", service,
+              "java",
+              "-classpath", classpath,
+              "com.sunya.electionguard.verifier.VerifyElectionRecord",
+              "-in", cmdLine.outputDir,
+              "-usePrimes"
+      );
+      running.add(verifyElectionRecord);
+      try {
+        Thread.sleep(1000);
+      } catch (Throwable e) {
+        e.printStackTrace();
+        exitStatus = 5;
+        return;
+      }
+
+      try {
+        verifyElectionRecord.waitFor();
+      } catch (Throwable e) {
+        e.printStackTrace();
+      }
+
+      System.out.printf("*** verifyElectionRecord elapsed = %d sec%n", stopwatch.elapsed(TimeUnit.SECONDS));
+
+      System.out.printf("%n*** All took = %d sec%n", stopwatchAll.elapsed(TimeUnit.SECONDS));
+
+    } finally {
+      try {
+        for (RunCommand command : running) {
+          command.show();
+          command.kill();
+        }
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+      System.exit(exitStatus);
+    }
   }
 
   /** Run a command line program asynchronously */
@@ -294,7 +335,7 @@ public class RunRemoteWorkflow {
     final String[] args;
 
     Process process;
-    boolean statusReturn;
+    boolean statusReturn = false;
     Throwable thrownException;
 
     RunCommand(String name, ListeningExecutorService service, String... args) {
@@ -325,6 +366,13 @@ public class RunRemoteWorkflow {
         return process.waitFor(nsecs, TimeUnit.SECONDS);
       }
       return false;
+    }
+
+    public int waitFor() throws InterruptedException {
+      if (process != null) {
+        return process.waitFor();
+      }
+      return process.exitValue();
     }
 
     public int kill() {

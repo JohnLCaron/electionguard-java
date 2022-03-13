@@ -90,12 +90,12 @@ public class DecryptingMediator {
       return false;
     }
 
-    // LOOK Compute the Decryption Share for the guardian, right now. Should be a seperate step??
+    // LOOK Compute the Decryption Share for the guardian, right now. Should be a separate step??
     DecryptionShare tally_share =
             RemoteDecryptions.computeDecryptionShareForTally(guardian, this.ciphertext_tally, this.context);
     this.tally_shares.put(guardian.id(), tally_share);
 
-    // LOOK Compute the spoiled ballot decryption shares. Should be a seperate step??
+    // LOOK Compute the spoiled ballot decryption shares. Should be a separate step??
     Optional<Map<String, DecryptionShare>> ballot_shares =
             RemoteDecryptions.computeDecryptionShareForBallots(guardian, this.ciphertext_ballots, context);
     if (ballot_shares.isEmpty()) {
