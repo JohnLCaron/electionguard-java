@@ -5,6 +5,8 @@
 
 package com.sunya.electionguard.viz;
 
+import com.sunya.electionguard.InternalManifest;
+import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.SubmittedBallot;
 import com.sunya.electionguard.CiphertextBallot;
 import com.sunya.electionguard.publish.CloseableIterable;
@@ -21,6 +23,7 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Optional;
 
 public class SubmittedBallotsTable extends JPanel {
   private final PreferencesExt prefs;
@@ -31,6 +34,8 @@ public class SubmittedBallotsTable extends JPanel {
 
   private final JSplitPane split1, split2;
   private final IndependentWindow infoWindow;
+
+  private InternalManifest manifest;
 
   public SubmittedBallotsTable(PreferencesExt prefs) {
     this.prefs = prefs;
@@ -58,12 +63,12 @@ public class SubmittedBallotsTable extends JPanel {
       }
     });
     contestTable.addPopupOption("Show Contest", contestTable.makeShowAction(infoTA, infoWindow,
-            bean -> ((ContestBean)bean).contest.toString()));
+            bean -> bean.toString()));
 
     selectionTable = new BeanTable<>(SelectionBean.class, (PreferencesExt) prefs.node("SelectionTable"), false,
             "Selection", "CiphertextBallot.Selection", null);
     selectionTable.addPopupOption("Show Selection", selectionTable.makeShowAction(infoTA, infoWindow,
-            bean -> ((SelectionBean)bean).selection.toString()));
+            bean -> bean.toString()));
 
     // layout
     split1 = new JSplitPane(JSplitPane.VERTICAL_SPLIT, false, ballotTable, contestTable);
@@ -76,7 +81,8 @@ public class SubmittedBallotsTable extends JPanel {
     add(split2, BorderLayout.CENTER);
   }
 
-  void setAcceptedBallots(CloseableIterable<SubmittedBallot> acceptedBallots) {
+  void setAcceptedBallots(Manifest manifest, CloseableIterable<SubmittedBallot> acceptedBallots) {
+    this.manifest = new InternalManifest(manifest);
     try (CloseableIterator<SubmittedBallot> iter = acceptedBallots.iterator())  {
       java.util.List<SubmittedBallotBean> beanList = new ArrayList<>();
       while (iter.hasNext()) {
@@ -109,7 +115,7 @@ public class SubmittedBallotsTable extends JPanel {
   void setContest(ContestBean contestBean) {
     java.util.List<SelectionBean> beanList = new ArrayList<>();
     for (CiphertextBallot.Selection s : contestBean.contest.selections) {
-      beanList.add(new SelectionBean(s));
+      beanList.add(new SelectionBean(s, contestBean));
     }
     selectionTable.setBeans(beanList);
   }
@@ -162,13 +168,15 @@ public class SubmittedBallotsTable extends JPanel {
 
   }
 
-  public static class ContestBean {
+  public class ContestBean {
     CiphertextBallot.Contest contest;
+    Optional<InternalManifest.ContestWithPlaceholders> descOpt;
 
     public ContestBean(){}
 
     ContestBean(CiphertextBallot.Contest contest) {
       this.contest = contest;
+      this.descOpt= manifest.getContestById(contest.contestId);
     }
 
     public String getContestId() {
@@ -183,19 +191,43 @@ public class SubmittedBallotsTable extends JPanel {
       return contest.proof.isPresent();
     }
 
+    public String getName() {
+      return descOpt.map( desc -> desc.contest.name()).orElse( "N/A");
+    }
+
+    public String getVoteVariation() {
+      return descOpt.map( desc -> desc.contest.voteVariation().toString()).orElse( "N/A");
+    }
+
+    @Override
+    public String toString() {
+      return String.format("CiphertextBallot.Contest%n %s%n%nManifest.ContestDescription%n%s%n",
+              contest , descOpt.map( d -> d.contest.toString()).orElse("N/A"));
+    }
   }
 
-  public static class SelectionBean {
+  public class SelectionBean {
     CiphertextBallot.Selection selection;
+    Optional<Manifest.SelectionDescription> descOpt;
 
     public SelectionBean(){}
 
-    SelectionBean(CiphertextBallot.Selection selection) {
+    SelectionBean(CiphertextBallot.Selection selection, ContestBean contestBean) {
       this.selection = selection;
+      if (contestBean.descOpt.isPresent()) {
+        InternalManifest.ContestWithPlaceholders contestDesc = contestBean.descOpt.get();
+        this.descOpt = contestDesc.getSelectionById(selection.selectionId);
+      } else {
+        this.descOpt = Optional.empty();
+      }
     }
 
     public String getSelectionId() {
       return selection.object_id();
+    }
+
+    public String getCandidateId() {
+      return descOpt.map( desc -> desc.candidateId()).orElse( "N/A");
     }
 
     public String getCryptoHash() {
@@ -214,6 +246,11 @@ public class SubmittedBallotsTable extends JPanel {
       return selection.proof.isPresent();
     }
 
+    @Override
+    public String toString() {
+      return String.format("CiphertextBallot.Selection%n %s%n%nManifest.SelectionDescription%n%s%n",
+              selection , descOpt.map(d -> d.toString()).orElse("N/A"));
+    }
   }
 
 }

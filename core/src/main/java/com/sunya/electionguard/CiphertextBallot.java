@@ -289,11 +289,11 @@ public class CiphertextBallot implements Hash.CryptoHashCheckable {
   @Override
   public String toString() {
     return "CiphertextBallot{" +
-            "object_id='" + ballotId + '\'' +
-            ", style_id='" + ballotStyleId + '\'' +
-            ", manifest_hash=" + manifestHash +
+            "ballotId='" + ballotId + '\'' +
+            ", ballotStyleId='" + ballotStyleId + '\'' +
+            ", manifestHash=" + manifestHash +
             ", code_seed=" + code_seed +
-            ", contests=" + contests +
+            ", #contests=" + contests.size() +
             ", code=" + code +
             ", timestamp=" + timestamp +
             ", crypto_hash=" + crypto_hash +
@@ -466,15 +466,14 @@ public class CiphertextBallot implements Hash.CryptoHashCheckable {
     @Override
     public String toString() {
       return "Selection{" +
-              "crypto_hash=" + crypto_hash +
-              ", is_placeholder_selection=" + is_placeholder_selection +
-              ", nonce=" + nonce +
-              ", proof=" + proof +
-              ", extended_data=" + extended_data +
-              ", object_id='" + object_id() + '\'' +
-              ", sequence_order=" + sequence_order() +
-              ", description_hash=" + description_hash() +
-              ", is_placeholder=" + isPlaceholderSelection +
+              "\n selectionId  ='" + selectionId + '\'' +
+              "\n sequenceOrder=" + sequenceOrder +
+              "\n selectionHash=" + selectionHash +
+              "\n crypto_hash  =" + crypto_hash +
+              "\n nonce        =" + nonce +
+              "\n proof        =" + proof +
+              "\n extended_data=" + extended_data +
+              "\n isPlaceholderSelection=" + isPlaceholderSelection +
               '}';
     }
   }
@@ -667,13 +666,13 @@ public class CiphertextBallot implements Hash.CryptoHashCheckable {
     @Override
     public String toString() {
       return "Contest{" +
-              "\n  object_id   ='" + contestId + '\'' +
-              "\n  sequence_order   ='" + sequenceOrder + '\'' +
-              "\n  contest_hash=" + contestHash +
-              "\n  crypto_hash =" + crypto_hash +
-              "\n  encrypted_total=" + ciphertextAccumulation +
-              "\n  nonce       =" + nonce +
-              "\n  proof       =" + proof +
+              "\n  contestId       ='" + contestId + '\'' +
+              "\n  sequenceOrder   =" + sequenceOrder +
+              "\n  contestHash     =" + contestHash +
+              "\n  crypto_hash     =" + crypto_hash +
+              "\n  ciphertextAccumulation=" + ciphertextAccumulation +
+              "\n  nonce           =" + nonce +
+              "\n  proof           =" + proof +
               '}';
     }
 

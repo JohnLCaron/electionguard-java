@@ -177,7 +177,7 @@ public class TestBallotInputValidation {
   ElectionAndBallot testZeroOrOne() {
     ManifestInputBuilder ebuilder = new ManifestInputBuilder("ballot_id");
     Manifest election = ebuilder.addContest("contest_id")
-            .setAllowedVotes(2)
+            .setVoteVariationType(Manifest.VoteVariationType.n_of_m, 2)
             .addSelection("selection_id", "candidate_1")
             .addSelection("selection_id2", "candidate_2")
             .done()
@@ -266,7 +266,8 @@ public class TestBallotInputValidation {
 
   private ElectionAndBallot testSelectionDeclaredTwice() {
     ManifestInputBuilder ebuilder = new ManifestInputBuilder("ballot_id");
-    Manifest election = ebuilder.addContest("contest_id").setAllowedVotes(2)
+    Manifest election = ebuilder.addContest("contest_id")
+            .setVoteVariationType(Manifest.VoteVariationType.n_of_m, 2)
             .addSelection("selection_id", "candidate_1")
             .addSelection("selection_id2", "candidate_2")
             .done()
@@ -308,6 +309,7 @@ public class TestBallotInputValidation {
     }
   }
 
+  // check that the ballot can be encrypted and is valid
   void testEncrypt(ElectionAndBallot eandb, boolean expectValid) {
     ElGamal.KeyPair keypair = elgamal_keypair_from_secret(int_to_q_unchecked(BigInteger.TWO)).orElseThrow();
     ElectionBuilder.DescriptionAndContext tuple = ElectionFactory.get_fake_ciphertext_election(eandb.election, keypair.public_key()).orElseThrow();

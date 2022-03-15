@@ -64,7 +64,7 @@ public class ElectionFactory {
             "some-candidate-contest-object-id",
             sequence_order_2,
             "some-geopoltical-unit-id",
-            Manifest.VoteVariationType.one_of_m,
+            Manifest.VoteVariationType.n_of_m,
             number_elected_2,
             votes_allowed_2,
             "some-candidate-contest-name",

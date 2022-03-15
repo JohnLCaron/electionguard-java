@@ -141,16 +141,16 @@ class ElectionRecordPanel extends JPanel {
       manifestTable.setElectionManifest(record.manifest);
 
       if (record.acceptedBallots != null) {
-        submittedBallotsTable.setAcceptedBallots(record.acceptedBallots);
+        submittedBallotsTable.setAcceptedBallots(record.manifest, record.acceptedBallots);
       }
       if (record.ciphertextTally != null) {
         ciphertextTallyTable.setCiphertextTally(record.ciphertextTally);
       }
       if (record.decryptedTally != null) {
-        plaintextTallyTable.setPlaintextTallies(CloseableIterableAdapter.wrap(ImmutableList.of(record.decryptedTally)));
+        plaintextTallyTable.setPlaintextTallies(record.manifest, CloseableIterableAdapter.wrap(ImmutableList.of(record.decryptedTally)));
       }
       if (record.spoiledBallots != null) {
-        spoiledBallotsTable.setPlaintextTallies(record.spoiledBallots);
+        spoiledBallotsTable.setPlaintextTallies(record.manifest, record.spoiledBallots);
       }
     } catch (Exception e) {
       e.printStackTrace();

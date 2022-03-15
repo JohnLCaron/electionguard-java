@@ -1,10 +1,8 @@
 package com.sunya.electionguard.viz;
 
+import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.publish.CloseableIterable;
-import com.sunya.electionguard.publish.CloseableIterableAdapter;
-import com.sunya.electionguard.publish.Consumer;
-import ucar.ui.prefs.ComboBox;
 import ucar.ui.widget.BAMutil;
 import ucar.ui.widget.FileManager;
 import ucar.ui.widget.IndependentWindow;
@@ -65,8 +63,8 @@ class SpoiledBallotPanel extends JPanel {
     add(tabbedPane, BorderLayout.CENTER);
   }
 
-  boolean setSpoiledBallots(CloseableIterable<PlaintextTally> ballots) {
-    spoiledBallotsTable.setPlaintextTallies(ballots);
+  boolean setSpoiledBallots(Manifest manifest, CloseableIterable<PlaintextTally> ballots) {
+    spoiledBallotsTable.setPlaintextTallies(manifest, ballots);
     return true;
   }
 

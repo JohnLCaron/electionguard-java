@@ -103,6 +103,58 @@ public class ManifestInputValidation {
       logger.atWarning().log(msg);
     }
 
+    // Contest VoteVariationTypes
+    switch (contest.voteVariation()) {
+      case one_of_m:
+      case n_of_m:
+      case approval:
+        break;
+      default:
+        String msg = String.format("Manifest.C.1 Contest's voteVariation '%s' not supported", contest.voteVariation());
+        contestMesses.add(msg);
+        logger.atWarning().log(msg);
+    }
+
+    if (contest.numberElected() != contest.votesAllowed()) {
+      String msg = String.format("Manifest.C.2 Contest's numberElected %d != %d votesAllowed", contest.numberElected(),
+              contest.votesAllowed());
+      contestMesses.add(msg);
+      logger.atWarning().log(msg);
+    }
+
+    switch (contest.voteVariation()) {
+      case one_of_m:
+        if (contest.votesAllowed() != 1) {
+          String msg = String.format("Manifest.C.3 one_of_m Contest votesAllowed (%d) must be 1",
+                  contest.votesAllowed());
+          contestMesses.add(msg);
+          logger.atWarning().log(msg);
+        }
+        break;
+      case n_of_m: {
+        if (contest.votesAllowed() > contest.selections().size()) {
+          String msg = String.format("Manifest.C.4 n_of_m Contest votesAllowed (%d) must be <= selections (%d)",
+                  contest.votesAllowed(), contest.selections().size());
+          contestMesses.add(msg);
+          logger.atWarning().log(msg);
+        }
+      }
+      break;
+      case approval: {
+        if (contest.votesAllowed() != contest.selections().size()) {
+          String msg = String.format("Manifest.C.5 approval Contest votesAllowed (%d) must be == selections (%d)",
+                  contest.votesAllowed(), contest.selections().size());
+          contestMesses.add(msg);
+          logger.atWarning().log(msg);
+        }
+      }
+      break;
+    }
+
+    validateContestSelections(contest, contestMesses);
+  }
+
+  void validateContestSelections(Manifest.ContestDescription contest, Messes contestMesses) {
     Set<String> selectionIds = new HashSet<>();
     Set<Integer> selectionSeqs = new HashSet<>();
     Set<String> candidateIds = new HashSet<>();

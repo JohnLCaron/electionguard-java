@@ -108,7 +108,7 @@ public class VerifyElectionRecord {
     GuardianPublicKeyVerifier gpkv = new GuardianPublicKeyVerifier(electionRecord);
     boolean gpkvOk = gpkv.verify_all_guardians();
 
-    System.out.println("------------ [box 3] Manifest Public-Key Validation ------------");
+    System.out.println("------------ [box 3] Election Public-Key Validation ------------");
     ElectionPublicKeyVerifier epkv = new ElectionPublicKeyVerifier(electionRecord);
     boolean epkvOk = epkv.verify_public_keys();
 

@@ -630,16 +630,12 @@ public record Manifest(
   /**
    * The metadata that describes the structure and type of one contest in the election.
    *
+   * @param contestId        Contest id, must be unique.
    * @param sequenceOrder    Used for ordering contests in a ballot to ensure various encryption primitives are deterministic.
-   *                          The sequence order must be unique and should be representative of how the contests are represented
-   *                          on a "master" ballot in an external system.  The sequence order is not required to be in the order
-   *                          in which they are displayed to a voter.  Any acceptable range of integer values may be provided.
    * @param numberElected    Number of candidates that are elected in the contest ("n" of n-of-m).
-   *                          a referendum is considered a specific case of 1-of-m in ElectionGuard
-   * @param votesAllowed     Maximum number of votes/write-ins per voter in this contest. Used in cumulative voting
-   *                          to indicate how many total votes a voter can spread around. In n-of-m elections, this will be None.
-   * @param name              Name of the contest, not necessarily as it appears on the ballot
-   * @param selections For associating a ballot selection for the contest, i.e., a candidate, a ballot measure
+   * @param votesAllowed     Maximum number of selections per voter in this contest.
+   * @param name             Name of the contest, not necessarily as it appears on the ballot
+   * @param selections       The possible ballot selections for the contest.
    * @param ballotTitle      Title of the contest as it appears on the ballot.
    * @param ballotSubtitle   Subtitle of the contest as it appears on the ballot.
    * @see <a href="https://developers.google.com/elections-data/reference/contest">Civics Common Standard Data Specification</a>
@@ -650,7 +646,7 @@ public record Manifest(
           String geopoliticalUnitId,
           VoteVariationType voteVariation,
           int numberElected,
-          Integer votesAllowed, // LOOK why optional in python ?
+          Integer votesAllowed, // LOOK may be missing in python/JSON, unknown semantics.
           String name,
           List<SelectionDescription> selections,
           @Nullable InternationalizedText ballotTitle,
@@ -682,6 +678,24 @@ public record Manifest(
               this.votesAllowed,
               this.selections,
               this.primaryPartyIds);
+    }
+
+    @Override
+    public String toString() {
+      return "ContestDescription{" +
+              "\n contestId='" + contestId + '\'' +
+              "\n sequenceOrder=" + sequenceOrder +
+              "\n contestHash=" + cryptoHash() +
+              "\n geopoliticalUnitId='" + geopoliticalUnitId + '\'' +
+              "\n voteVariation=" + voteVariation +
+              "\n numberElected=" + numberElected +
+              "\n votesAllowed=" + votesAllowed +
+              "\n name='" + name + '\'' +
+              "\n selections=" + selections.size() +
+              "\n ballotTitle=" + ballotTitle +
+              "\n ballotSubtitle=" + ballotSubtitle +
+              "\n primaryPartyIds=" + primaryPartyIds +
+              '}';
     }
 
     /**
@@ -734,10 +748,10 @@ public record Manifest(
   /**
    * A ballot selection for a specific candidate in a contest.
    *
+   * @param selectionId   Contest id, must be unique across all contests.
    * @param sequenceOrder Used for ordering selections in a contest to ensure various encryption primitives are deterministic.
-   *                       The sequence order must be unique and should be representative of how the contests are represented
-   *                       on a "master" ballot in an external system.  The sequence order is not required to be in the order
-   *                       in which they are displayed to a voter.  Any acceptable range of integer values may be provided.
+   *                      Unique within the contest, consider making unique across the ballot.
+   * @param candidateId   Candidate id, must match a Candidate.candidateId.
    * @see <a href="https://developers.google.com/elections-data/reference/ballot-selection">Civics Common Standard Data Specification</a>
    */
   public record SelectionDescription(
@@ -754,6 +768,16 @@ public record Manifest(
     @Override
     public Group.ElementModQ cryptoHash() {
       return Hash.hash_elems(this.selectionId, this.sequenceOrder, this.candidateId);
+    }
+
+    @Override
+    public String toString() {
+      return "SelectionDescription{" +
+              "\n selectionId='" + selectionId + '\'' +
+              "\n sequenceOrder=" + sequenceOrder +
+              "\n candidateId='" + candidateId + '\'' +
+              "\n selectionHash='" + cryptoHash() + '\'' +
+              '}';
     }
   }
 

@@ -17,6 +17,7 @@ import static com.sunya.electionguard.Proof.Usage.SecretValue;
 @Immutable
 public class SchnorrProof extends Proof {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
+  private static final boolean throwException = false;
 
   /** The commitment K_ij. */
   public final ElementModP publicKey;
@@ -54,8 +55,11 @@ public class SchnorrProof extends Proof {
 
     boolean success = valid_public_key && in_bounds_h && in_bounds_u && valid_2A && valid_2B;
     if (!success) {
-      logger.atWarning().log("found an invalid Schnorr proof: %s constants = %s", this, Group.getPrimes().name);
-      throw new IllegalStateException();
+      logger.atWarning().log("found an invalid Schnorr proof: %s constants = %s",
+              this, Group.getPrimes().name);
+      if (throwException) {
+        throw new IllegalStateException();
+      }
     }
     return success;
   }
@@ -80,8 +84,8 @@ public class SchnorrProof extends Proof {
   @Override
   public String toString() {
     return "SchnorrProof{" +
-            "public_key=" + publicKey +
-            ", commitment=" + commitment +
+            "public_key=" + publicKey.toShortString() +
+            ", commitment=" + commitment.toShortString() +
             ", challenge=" + challenge +
             ", response=" + response +
             "} " + super.toString();

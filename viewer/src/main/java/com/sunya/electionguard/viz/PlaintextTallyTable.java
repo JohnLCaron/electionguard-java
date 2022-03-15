@@ -5,6 +5,8 @@
 
 package com.sunya.electionguard.viz;
 
+import com.sunya.electionguard.InternalManifest;
+import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.publish.CloseableIterable;
 import com.sunya.electionguard.publish.CloseableIterator;
@@ -19,22 +21,25 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Formatter;
+import java.util.Optional;
 
 public class PlaintextTallyTable extends JPanel {
-  private PreferencesExt prefs;
+  private final PreferencesExt prefs;
 
-  private BeanTable<PlaintextTallyBean> tallyTable;
-  private BeanTable<ContestBean> contestTable;
-  private BeanTable<SelectionBean> selectionTable;
+  private final BeanTable<PlaintextTallyBean> tallyTable;
+  private final BeanTable<ContestBean> contestTable;
+  private final BeanTable<SelectionBean> selectionTable;
 
-  private JSplitPane split1, split2;
+  private final JSplitPane split1;
+  private final JSplitPane split2;
 
-  private TextHistoryPane infoTA;
-  private IndependentWindow infoWindow;
+  private final IndependentWindow infoWindow;
+
+  private InternalManifest manifest;
 
   public PlaintextTallyTable(PreferencesExt prefs) {
     this.prefs = prefs;
-    infoTA = new TextHistoryPane();
+    TextHistoryPane infoTA = new TextHistoryPane();
     infoWindow = new IndependentWindow("Extra Information", BAMutil.getImage("electionguard-logo.png"), infoTA);
     infoWindow.setBounds((Rectangle) prefs.getBean("InfoWindowBounds", new Rectangle(300, 300, 800, 100)));
 
@@ -58,12 +63,12 @@ public class PlaintextTallyTable extends JPanel {
       }
     });
     contestTable.addPopupOption("Show Contest", contestTable.makeShowAction(infoTA, infoWindow,
-            bean -> ((ContestBean)bean).contest.toString()));
+            bean -> bean.toString()));
 
     selectionTable = new BeanTable<>(SelectionBean.class, (PreferencesExt) prefs.node("SelectionTable"), false,
             "Selection", "PlaintextTally.Selection", null);
     selectionTable.addPopupOption("Show Selection", selectionTable.makeShowAction(infoTA, infoWindow,
-            bean -> ((SelectionBean)bean).selection.toString()));
+            bean -> bean.toString()));
 
     // layout
     split1 = new JSplitPane(JSplitPane.VERTICAL_SPLIT, false, tallyTable, contestTable);
@@ -76,7 +81,8 @@ public class PlaintextTallyTable extends JPanel {
     add(split2, BorderLayout.CENTER);
   }
 
-  void setPlaintextTallies(CloseableIterable<PlaintextTally> tallies) {
+  void setPlaintextTallies(Manifest manifest, CloseableIterable<PlaintextTally> tallies) {
+    this.manifest = new InternalManifest(manifest);
     try (CloseableIterator<PlaintextTally> iter = tallies.iterator())  {
       java.util.List<PlaintextTallyBean> beanList = new ArrayList<>();
       while (iter.hasNext()) {
@@ -109,7 +115,7 @@ public class PlaintextTallyTable extends JPanel {
   void setContest(ContestBean contestBean) {
     java.util.List<SelectionBean> beanList = new ArrayList<>();
     for (PlaintextTally.Selection s : contestBean.contest.selections().values()) {
-      beanList.add(new SelectionBean(s));
+      beanList.add(new SelectionBean(s, contestBean));
     }
     selectionTable.setBeans(beanList);
   }
@@ -143,28 +149,74 @@ public class PlaintextTallyTable extends JPanel {
 
   public class ContestBean {
     PlaintextTally.Contest contest;
+    Optional<InternalManifest.ContestWithPlaceholders> descOpt;
 
     public ContestBean(){}
 
     ContestBean(PlaintextTally.Contest contest) {
       this.contest = contest;
+      this.descOpt= manifest.getContestById(contest.contestId());
     }
     public String getContestId() {
       return contest.contestId();
+    }
+
+    public String getName() {
+      return descOpt.map( desc -> desc.contest.name()).orElse( "N/A");
+    }
+
+    public String getVoteVariation() {
+      return descOpt.map( desc -> desc.contest.voteVariation().toString()).orElse( "N/A");
+    }
+
+    public String getVotes() {
+      Formatter f = new Formatter();
+      java.util.List<PlaintextTally.Selection> sorted = contest.selections().values().stream()
+              .sorted((s1, s2) -> s2.tally().compareTo(s1.tally())).toList();
+      for (PlaintextTally.Selection s : sorted) {
+        Manifest.SelectionDescription sd = descOpt.get().getSelectionById(s.selectionId()).get();
+        f.format("%s:%d, ", sd.candidateId(), s.tally());
+      }
+      return f.toString();
+    }
+
+    public String getWinner() {
+      java.util.List<PlaintextTally.Selection> sorted = contest.selections().values().stream()
+              .sorted((s1, s2) -> s2.tally().compareTo(s1.tally())).toList();
+      PlaintextTally.Selection s = sorted.get(0);
+      Manifest.SelectionDescription sd = descOpt.get().getSelectionById(s.selectionId()).get();
+      return sd.candidateId();
+    }
+
+    @Override
+    public String toString() {
+      return String.format("PlaintextTally.Contest%n %s%n%nManifest.ContestDescription%n%s%n",
+              contest , descOpt.map( d -> d.contest.toString()).orElse("N/A"));
     }
   }
 
   public class SelectionBean {
     PlaintextTally.Selection selection;
+    Optional<Manifest.SelectionDescription> descOpt;
 
     public SelectionBean(){}
 
-    SelectionBean(PlaintextTally.Selection selection) {
+    SelectionBean(PlaintextTally.Selection selection, ContestBean contestBean) {
       this.selection = selection;
+      if (contestBean.descOpt.isPresent()) {
+        InternalManifest.ContestWithPlaceholders contestDesc = contestBean.descOpt.get();
+        this.descOpt = contestDesc.getSelectionById(selection.selectionId());
+      } else {
+        this.descOpt = Optional.empty();
+      }
     }
 
     public String getSelectionId() {
       return selection.selectionId();
+    }
+
+    public String getCandidateId() {
+      return descOpt.map( desc -> desc.candidateId()).orElse( "N/A");
     }
 
     public int getTally() {
@@ -173,6 +225,12 @@ public class PlaintextTallyTable extends JPanel {
 
     public int getNShares() {
       return selection.shares().size();
+    }
+
+    @Override
+    public String toString() {
+      return String.format("PlaintextTally.Selection%n %s%n%nManifest.SelectionDescription%n%s%n",
+              selection , descOpt.map(d -> d.toString()).orElse("N/A"));
     }
 
   }

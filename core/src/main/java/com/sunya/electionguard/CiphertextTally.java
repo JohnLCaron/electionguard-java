@@ -43,8 +43,8 @@ public class CiphertextTally {
   @Override
   public String toString() {
     return "CiphertextTally{" +
-            "object_id='" + tallyId + '\'' +
-            ", contests=" + contests +
+            "tallyId='" + tallyId + '\'' +
+            ", contests=" + contests.size() +
             '}';
   }
 
@@ -54,7 +54,7 @@ public class CiphertextTally {
    */
   @Immutable
   public static class Contest {
-    private final String contextId;
+    private final String contestId;
     private final int sequenceOrder;
 
     /** The ContestDescription crypto_hash. */
@@ -63,9 +63,9 @@ public class CiphertextTally {
     /** The collection of selections in the contest, keyed by selection.object_id. */
     public final ImmutableMap<String, Selection> selections; // Map(SELECTION_ID, CiphertextTally.Selection)
 
-    public Contest(String contextId, int sequence_order, ElementModQ contestDescriptionHash, Map<String, Selection> selections) {
-      Preconditions.checkArgument(!Strings.isNullOrEmpty(contextId));
-      this.contextId = contextId;
+    public Contest(String contestId, int sequence_order, ElementModQ contestDescriptionHash, Map<String, Selection> selections) {
+      Preconditions.checkArgument(!Strings.isNullOrEmpty(contestId));
+      this.contestId = contestId;
       this.sequenceOrder = sequence_order;
       this.contestDescriptionHash = contestDescriptionHash;
       this.selections = ImmutableMap.copyOf(selections);
@@ -77,28 +77,28 @@ public class CiphertextTally {
       if (o == null || getClass() != o.getClass()) return false;
       Contest contest = (Contest) o;
       return sequenceOrder == contest.sequenceOrder &&
-              contextId.equals(contest.contextId) &&
+              contestId.equals(contest.contestId) &&
               contestDescriptionHash.equals(contest.contestDescriptionHash) &&
               selections.equals(contest.selections);
     }
 
     @Override
     public int hashCode() {
-      return Objects.hash(contextId, sequenceOrder, contestDescriptionHash, selections);
+      return Objects.hash(contestId, sequenceOrder, contestDescriptionHash, selections);
     }
 
     @Override
     public String toString() {
       return "Contest{" +
-              "object_id='" + contextId + '\'' +
-              ", sequence_order=" + sequenceOrder +
+              "contestId='" + contestId + '\'' +
+              ", sequenceOrder=" + sequenceOrder +
               ", contestDescriptionHash=" + contestDescriptionHash +
-              ", selections=" + selections +
+              ", selections=" + selections.size() +
               '}';
     }
 
     public String object_id() {
-      return contextId;
+      return contestId;
     }
 
     public int sequence_order() {
