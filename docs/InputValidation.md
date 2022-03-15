@@ -37,6 +37,17 @@ A specific validation is referenced as, eg, Manifest.B.5 and Ballot.A.2.1
 
 6. All SelectionDescription have a unique object_id within the election (see get_shares_for_selection in decryption_share)
 
+### C. Contest VoteVariationType
+
+1. A ContestDescription has VoteVariationType = n_of_m, one_of_m, or approval.
+
+2. For all contests, votes_allowed == number_elected.
+
+3. A one_of_m contest has votes_allowed == 1.
+
+4. A n_of_m contest has 0 < votes_allowed <= number of selections in the contest. 
+
+5. An approval contest has votes_allowed == number of selections in the contest.
 
 ## Input Ballot
 

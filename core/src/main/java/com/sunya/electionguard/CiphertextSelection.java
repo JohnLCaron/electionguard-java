@@ -48,11 +48,11 @@ public class CiphertextSelection {
   @Override
   public String toString() {
     return "CiphertextSelection{" +
-            "object_id='" + selectionId + '\'' +
-            ", sequence_order=" + sequenceOrder +
-            ", description_hash=" + selectionHash +
-            ", ciphertext=" + ciphertext +
-            ", is_placeholder=" + isPlaceholderSelection +
+            "\n selectionId='" + selectionId + '\'' +
+            "\n sequenceOrder=" + sequenceOrder +
+            "\n selectionHash=" + selectionHash +
+            "\n ciphertext=" + ciphertext +
+            "\n isPlaceholderSelection=" + isPlaceholderSelection +
             '}';
   }
 

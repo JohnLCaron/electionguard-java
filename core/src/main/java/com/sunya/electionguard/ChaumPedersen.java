@@ -49,15 +49,15 @@ public class ChaumPedersen {
     @Override
     public String toString() {
       return "DisjunctiveChaumPedersenProof{" +
-              "proof_zero_pad=" + proof_zero_pad +
-              ", proof_zero_data=" + proof_zero_data +
-              ", proof_one_pad=" + proof_one_pad +
-              ", proof_one_data=" + proof_one_data +
-              ", proof_zero_challenge=" + proof_zero_challenge +
-              ", proof_one_challenge=" + proof_one_challenge +
-              ", challenge=" + challenge +
-              ", proof_zero_response=" + proof_zero_response +
-              ", proof_one_response=" + proof_one_response +
+              "\n proof_zero_pad=" + proof_zero_pad.toShortString() +
+              "\n proof_zero_data=" + proof_zero_data.toShortString() +
+              "\n proof_one_pad=" + proof_one_pad.toShortString() +
+              "\n proof_one_data=" + proof_one_data.toShortString() +
+              "\n proof_zero_challenge=" + proof_zero_challenge +
+              "\n proof_one_challenge=" + proof_one_challenge +
+              "\n challenge=" + challenge +
+              "\n proof_zero_response=" + proof_zero_response +
+              "\n proof_one_response=" + proof_one_response +
               '}';
     }
 

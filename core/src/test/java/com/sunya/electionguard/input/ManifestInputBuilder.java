@@ -1,25 +1,26 @@
 package com.sunya.electionguard.input;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.sunya.electionguard.ElectionContext;
 import com.sunya.electionguard.Manifest;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 public class ManifestInputBuilder {
-  public static final String districtDef = "district";
-  public static final String styleDef = "styling";
+  public static final String districtDefault = "district";
+  public static final String styleDefault = "styling";
 
   private final String manifest_name;
   private final ArrayList<ContestBuilder> contests = new ArrayList<>();
-  private final Set<Manifest.Candidate> candidates = new HashSet<>();
-  private String style = styleDef;
+  private final Map<String, Manifest.Candidate> candidates = new HashMap<>();
+  private String style = styleDefault;
+  private String district = districtDefault;
   private Manifest.BallotStyle ballotStyle;
-  private String district = districtDef;
 
   public ManifestInputBuilder(String manifest_name) {
     this.manifest_name = manifest_name;
@@ -48,7 +49,12 @@ public class ManifestInputBuilder {
 
   public void addCandidate(String candidate_id) {
     Manifest.Candidate c = new Manifest.Candidate(candidate_id);
-    candidates.add(c);
+    candidates.put(candidate_id, c);
+  }
+
+  public ManifestInputBuilder removeCandidate(String candidate_id) {
+    candidates.remove(candidate_id);
+    return this;
   }
 
   public Manifest build() {
@@ -58,20 +64,9 @@ public class ManifestInputBuilder {
 
     List<Manifest.Party> parties = ImmutableList.of(new Manifest.Party("dog"), new Manifest.Party("cat"));
 
-    // String election_scope_id,
-    //                  ElectionType type,
-    //                  OffsetDateTime start_date,
-    //                  OffsetDateTime end_date,
-    //                  List<GeopoliticalUnit> geopolitical_units,
-    //                  List<Party> parties,
-    //                  List<Candidate> candidates,
-    //                  List<ContestDescription> contests,
-    //                  List<BallotStyle> ballot_styles,
-    //                  @Nullable InternationalizedText name,
-    //                  @Nullable ContactInformation contact_information
     return new Manifest(manifest_name, ElectionContext.SPEC_VERSION, Manifest.ElectionType.general,
             OffsetDateTime.now(), OffsetDateTime.now(),
-            ImmutableList.of(gpUnit), parties, candidates.stream().toList(),
+            ImmutableList.of(gpUnit), parties, candidates.values().stream().toList(),
             contests.stream().map(ContestBuilder::build).toList(),
             ImmutableList.of(ballotStyle), null, null, null);
   }
@@ -82,20 +77,29 @@ public class ManifestInputBuilder {
     private final String id;
     private final int seq = contest_seq++;
     private final ArrayList<SelectionBuilder> selections = new ArrayList<>();
+    private Manifest.VoteVariationType type = Manifest.VoteVariationType.one_of_m;
     private int allowed = 1;
-    private String district = districtDef;
+    private String district = districtDefault;
+    private String name = "name";
 
     ContestBuilder(String id) {
       this.id = id;
     }
 
-    ContestBuilder setAllowedVotes(int allowed) {
-      this.allowed = allowed;
+    ContestBuilder setVoteVariationType(Manifest.VoteVariationType type, int allowed) {
+      Preconditions.checkArgument(allowed > 0);
+      this.type = type;
+      this.allowed = type == Manifest.VoteVariationType.one_of_m ? 1 : allowed;
       return this;
     }
 
     ContestBuilder setGpunit(String gpunit) {
       this.district = gpunit;
+      return this;
+    }
+
+    ContestBuilder setName(String name) {
+      this.name = name;
       return this;
     }
 
@@ -111,7 +115,16 @@ public class ManifestInputBuilder {
     }
 
     public Manifest.ContestDescription build() {
-      // String object_id,
+
+      Preconditions.checkArgument(selections.size() > 0);
+      if (type == Manifest.VoteVariationType.approval) {
+        allowed = selections.size();
+      }
+      if (type == Manifest.VoteVariationType.n_of_m) {
+        Preconditions.checkArgument(allowed <= selections.size());
+      }
+
+      // String contestId,
       //                              String electoral_district_id,
       //                              int sequence_order,
       //                              VoteVariationType vote_variation,
@@ -121,8 +134,8 @@ public class ManifestInputBuilder {
       //                              List<SelectionDescription> ballot_selections,
       //                              @Nullable InternationalizedText ballot_title,
       //                              @Nullable InternationalizedText ballot_subtitle
-      return new Manifest.ContestDescription(id, seq, district, Manifest.VoteVariationType.one_of_m,
-              allowed, allowed, "name",
+      return new Manifest.ContestDescription(id, seq, district,
+              type, allowed, allowed, name,
               selections.stream().map(SelectionBuilder::build).toList(),
               null, null, ImmutableList.of());
     }

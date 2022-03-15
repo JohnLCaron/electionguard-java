@@ -50,8 +50,8 @@ public class PlaintextTally {
   @Override
   public String toString() {
     return "PlaintextTally{" +
-            "object_id='" + tallyId + '\'' +
-            ", contests=" + contests +
+            "tallyId='" + tallyId + '\'' +
+            ", contests=" + contests.size() +
             '}';
   }
 
@@ -69,6 +69,13 @@ public class PlaintextTally {
       Preconditions.checkArgument(!Strings.isNullOrEmpty(contestId));
       Preconditions.checkNotNull(selections);
       selections = Map.copyOf(selections);
+    }
+
+    public String toString() {
+      return "PlaintextTally.Contest{" +
+              "contestId='" + contestId + '\'' +
+              ", selections=" + selections.size() +
+              '}';
     }
   }
 
@@ -99,7 +106,7 @@ public class PlaintextTally {
     @Override
     public String toString() {
       Formatter f = new Formatter();
-      f.format("Selection{%n object_id= '%s'%n tally    = %d%n value    = %s%n message  = %s%n shares=%n",
+      f.format("Selection{%n selectionId= '%s'%n tally    = %d%n value    = %s%n message  = %s%n shares=%n",
               selectionId(), tally(), value().toShortString(), message());
       for (DecryptionShare.CiphertextDecryptionSelection sel : shares()) {
         f.format("   %s share = %s", sel.guardianId(), sel.share().toShortString());

@@ -40,6 +40,14 @@ public class ElGamal {
       Preconditions.checkNotNull(data);
     }
 
+    @Override
+    public String toString() {
+      return "Ciphertext{" +
+              "pad=" + pad.toShortString() +
+              ", data=" + data.toShortString() +
+              '}';
+    }
+
     /**
      * Decrypts an ElGamal ciphertext with a "known product" (the blinding factor used in the encryption).
      *

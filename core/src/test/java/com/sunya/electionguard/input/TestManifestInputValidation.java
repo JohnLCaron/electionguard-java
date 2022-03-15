@@ -148,6 +148,7 @@ public class TestManifestInputValidation {
             .addSelection("selection_id", "candidate_1")
             .addSelection("selection_id2", "manchurian")
             .done()
+            .removeCandidate("manchurian")
             .build();
 
     ManifestInputValidation validator = new ManifestInputValidation(election);
