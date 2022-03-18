@@ -382,9 +382,15 @@ public class CiphertextBallot implements Hash.CryptoHashCheckable {
     /** encryption of the write-in candidate. */
     public final Optional<ElGamal.Ciphertext> extended_data; // LOOK not used, see Encrypt line 177.
 
-    public Selection(String selectionId, int sequence_order, Group.ElementModQ selectionHash, ElGamal.Ciphertext ciphertext,
-                     Group.ElementModQ crypto_hash, boolean is_placeholder_selection, Optional<Group.ElementModQ> nonce,
-                     Optional<ChaumPedersen.DisjunctiveChaumPedersenProof> proof, Optional<ElGamal.Ciphertext> extended_data) {
+    public Selection(String selectionId,
+                     int sequence_order,
+                     Group.ElementModQ selectionHash,
+                     ElGamal.Ciphertext ciphertext,
+                     Group.ElementModQ crypto_hash,
+                     boolean is_placeholder_selection,
+                     Optional<Group.ElementModQ> nonce,
+                     Optional<ChaumPedersen.DisjunctiveChaumPedersenProof> proof,
+                     Optional<ElGamal.Ciphertext> extended_data) {
       super(selectionId, sequence_order, selectionHash, ciphertext, is_placeholder_selection);
 
       this.crypto_hash = Preconditions.checkNotNull(crypto_hash);

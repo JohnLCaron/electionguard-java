@@ -50,13 +50,13 @@ public record Manifest(
       cryptoHash = Hash.hash_elems(
               electionScopeId,
               electionType.name(),
-              startDate.toString(), // python: to_iso_date_string, LOOK isnt all that well defined.
-              endDate.toString(),
+              startDate.format(Utils.dtf), // python: to_iso_date_string, eg 2020-03-01T13:00:00Z
+              endDate.format(Utils.dtf),
               name,
               contactInformation,
               geopoliticalUnits,
               parties,
-              candidates, // TODO did python add this ?
+              // candidates,
               contests,
               ballotStyles);
     }
@@ -651,7 +651,7 @@ public record Manifest(
           List<SelectionDescription> selections,
           @Nullable InternationalizedText ballotTitle,
           @Nullable InternationalizedText ballotSubtitle,
-          @Nullable List<String> primaryPartyIds // match Party.party_id
+          @Nullable List<String> primaryPartyIds // match Party.party_id, only in CandidateContestDescription
   ) implements Hash.CryptoHashable {
 
     public ContestDescription {
@@ -676,8 +676,9 @@ public record Manifest(
               this.name,
               this.numberElected,
               this.votesAllowed,
-              this.selections,
-              this.primaryPartyIds);
+              this.selections);
+      // this.primaryPartyIds);
+
     }
 
     @Override
