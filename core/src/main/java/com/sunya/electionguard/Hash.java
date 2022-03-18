@@ -77,10 +77,12 @@ public class Hash {
         hash_me = (String) x;
       } else if (x instanceof Iterable) {
           // The simplest way to deal with lists, tuples, and such are to crunch them recursively.
-        hash_me = hash_elems(Iterables.toArray((Iterable) x, Object.class)).to_hex();
+        Object[] asArray = Iterables.toArray((Iterable) x, Object.class);
+        hash_me = (asArray.length == 0) ? "null" : hash_elems(asArray).to_hex();
       } else {
         hash_me = x.toString();
       }
+      // System.out.printf("  hash_me: %s%n", hash_me);
       hash_me += "|";
       digest.update(hash_me.getBytes(StandardCharsets.UTF_8));
     }

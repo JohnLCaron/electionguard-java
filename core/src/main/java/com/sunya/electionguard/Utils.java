@@ -6,12 +6,17 @@ import com.google.common.io.BaseEncoding;
 
 import java.math.BigInteger;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 /** Static replacements for Python library methods. */
 class Utils {
+  public static final DateTimeFormatter dtf =
+          DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'").withZone(ZoneOffset.UTC);
+
   private static final List<String> truthy = ImmutableList.of("y", "yes", "t", "true", "on", "1");
   private static final List<String> falsey = ImmutableList.of("n", "no", "f", "false", "off", "0");
 

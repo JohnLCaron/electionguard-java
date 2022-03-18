@@ -107,7 +107,7 @@ public class Publisher {
     }
   }
 
-  Publisher(Path electionRecordDir, Mode createMode, boolean isJsonOutput) throws IOException {
+  public Publisher(Path electionRecordDir, Mode createMode, boolean isJsonOutput) throws IOException {
     this.createMode = createMode;
     this.topdir = electionRecordDir.toAbsolutePath().toString();
     this.isJsonOutput = isJsonOutput;

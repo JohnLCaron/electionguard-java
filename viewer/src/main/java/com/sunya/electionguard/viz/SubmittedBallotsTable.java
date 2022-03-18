@@ -23,6 +23,7 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Formatter;
 import java.util.Optional;
 
 public class SubmittedBallotsTable extends JPanel {
@@ -53,6 +54,8 @@ public class SubmittedBallotsTable extends JPanel {
     });
     ballotTable.addPopupOption("Show Ballot", ballotTable.makeShowAction(infoTA, infoWindow,
             bean -> ((SubmittedBallotBean)bean).ballot.toString()));
+    ballotTable.addPopupOption("Compute Ballot Size", ballotTable.makeShowAction(infoTA, infoWindow,
+            bean -> computeBallotSize(((SubmittedBallotBean)bean).ballot)));
 
     contestTable = new BeanTable<>(ContestBean.class, (PreferencesExt) prefs.node("ContestTable"), false,
             "Contest", "CiphertextBallot.Contest", null);
@@ -127,6 +130,78 @@ public class SubmittedBallotsTable extends JPanel {
     prefs.putBeanObject("InfoWindowBounds", infoWindow.getBounds());
     prefs.putInt("splitPos1", split1.getDividerLocation());
     prefs.putInt("splitPos2", split2.getDividerLocation());
+  }
+
+  String computeBallotSize(SubmittedBallot ballot) {
+    int intSizes = 0;
+    int stringSizes = 0;
+    int countContests = 0;
+    int countSelections = 0;
+    int countCipher = 0;
+    int countConstantProof = 0;
+    int countDisjunctProof = 0;
+    int countQ = 0;
+
+    countQ += 4;
+    intSizes += 2;
+    stringSizes += ballot.ballotId.length();
+    stringSizes += ballot.ballotStyleId.length();
+
+    for (CiphertextBallot.Contest contest : ballot.contests) {
+      countContests++;
+      stringSizes += contest.contestId.length();
+      intSizes++;
+      countQ += 2;
+      countCipher++;
+      if (contest.nonce.isPresent()) {
+        countQ++;
+      }
+      if (contest.proof.isPresent()) {
+        countConstantProof++;
+      }
+
+      for (CiphertextBallot.Selection selection : contest.selections) {
+        countSelections++;
+        stringSizes += selection.selectionId.length();
+        intSizes++;
+        countQ += 2;
+        countCipher++;
+        if (selection.nonce.isPresent()) {
+          countQ++;
+        }
+        if (selection.proof.isPresent()) {
+          countDisjunctProof++;
+        }
+        if (selection.extended_data.isPresent()) {
+          countCipher++;
+        }
+      }
+    }
+
+    int sizeQ = 32;
+    int sizeP = 512;
+    int constantProofSize = 2 * sizeQ + 2 * sizeP;
+    int disjunctProofSize = 5 * sizeQ + 4 * sizeP;
+    int cipherSize = 2 * sizeP;
+
+    Formatter f = new Formatter();
+    f.format(" string sizes    = %d, intSize = %d%n", stringSizes, intSizes * 4);
+    int count = stringSizes + intSizes * 4;
+    f.format(" countContests   = %3d, constantProofSize (2Q, 2P)=%4d, total = %6d%n",
+              countConstantProof, constantProofSize, countConstantProof * constantProofSize);
+    count += countConstantProof * constantProofSize;
+    f.format(" countSelections = %3d, disjunctProofSize (5Q, 4P)=%4d, total = %6d%n",
+              countDisjunctProof, disjunctProofSize, countDisjunctProof * disjunctProofSize);
+    count += countDisjunctProof * disjunctProofSize;
+    f.format(" countCipher     = %3d, cipherSize (2P)           =%4d  total = %6d%n",
+            countCipher, cipherSize, countCipher * cipherSize);
+    count += countCipher * cipherSize;
+    f.format(" countQ          = %3d, sizeQ                     =%4d, total = %6d%n",
+            countQ, sizeQ, countQ * sizeQ);
+    count += countQ * sizeQ;
+    f.format("%ntotal= %d%n", count);
+
+    return f.toString();
   }
 
   public static class SubmittedBallotBean {

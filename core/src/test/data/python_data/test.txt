@@ -1,0 +1,1568 @@
+  hash_me: hamilton-county-general-election
+  hash_me: general
+  hash_me: 2020-03-01T13:00:00Z
+  hash_me: 2020-03-02T01:00:00Z
+  hash_me: Hamiltion County General Election
+  hash_me: en
+  hash_me: 2569
+  hash_me: Elección general del condado de Hamilton
+  hash_me: es
+  hash_me: 85DF
+  hash_me: C125
+  hash_me: 4B18
+  hash_me: Hamilton State Election Commission
+  hash_me: 1234 Paul Revere Run
+  hash_me: Hamilton, Ozark 99999
+  hash_me: 488F
+  hash_me: press
+  hash_me: inquiries@hamilton.state.gov
+  hash_me: B782
+  hash_me: federal
+  hash_me: commissioner@hamilton.state.gov
+  hash_me: 337B
+  hash_me: DB10
+  hash_me: domestic
+  hash_me: 123-456-7890
+  hash_me: 5682
+  hash_me: international
+  hash_me: +1-123-456-7890
+  hash_me: 3A21
+  hash_me: C7C4
+  hash_me: 36A7
+  hash_me: hamilton-county
+  hash_me: Hamilton County
+  hash_me: county
+  hash_me: Hamilton County Clerk
+  hash_me: 1234 Samuel Adams Way
+  hash_me: Hamilton, Ozark 99999
+  hash_me: 8221
+  hash_me: inquiries
+  hash_me: inquiries@hamiltoncounty.gov
+  hash_me: 65B1
+  hash_me: 773D
+  hash_me: domestic
+  hash_me: 123-456-7890
+  hash_me: 5682
+  hash_me: 2539
+  hash_me: BC7B
+  hash_me: 2E40
+  hash_me: congress-district-5
+  hash_me: Congressional District 5
+  hash_me: congressional
+  hash_me: Medford Town Hall
+  hash_me: 1234 Somerville Gateway
+  hash_me: Medford, Ozark 999999
+  hash_me: C253
+  hash_me: inquiries
+  hash_me: inquiries@congressional-district-5.gov
+  hash_me: 5312
+  hash_me: F6D0
+  hash_me: domestic
+  hash_me: 123-456-7890
+  hash_me: 5682
+  hash_me: 2539
+  hash_me: E9D6
+  hash_me: 349A
+  hash_me: congress-district-7
+  hash_me: Congressional District 7
+  hash_me: congressional
+  hash_me: Arlington Town Hall
+  hash_me: 1234 Somerville Gateway
+  hash_me: Arlington, Ozark 999999
+  hash_me: A880
+  hash_me: inquiries
+  hash_me: inquiries@congressional-district-7.gov
+  hash_me: 58A2
+  hash_me: A0E5
+  hash_me: domestic
+  hash_me: 123-456-7890
+  hash_me: 5682
+  hash_me: 2539
+  hash_me: 2EA2
+  hash_me: EB98
+  hash_me: lacroix-township-precinct-1
+  hash_me: LaCroix Township Precinct 1
+  hash_me: precinct
+  hash_me: LaCroix Town Hall
+  hash_me: 1234 Thorton Drive
+  hash_me: LaCroix, Ozark 99999
+  hash_me: 1481
+  hash_me: inquiries
+  hash_me: inquiries@lacrox.gov
+  hash_me: D4A7
+  hash_me: 64AE
+  hash_me: domestic
+  hash_me: 123-456-7890
+  hash_me: 5682
+  hash_me: 2539
+  hash_me: CD03
+  hash_me: 7B46
+  hash_me: lacroix-exeter-utility-district
+  hash_me: Exeter Utility District
+  hash_me: utility
+  hash_me: Exeter Utility District coordinator
+  hash_me: 1234 Watt Drive
+  hash_me: LaCroix, Ozark 99999
+  hash_me: A4B5
+  hash_me: inquiries
+  hash_me: inquiries@exeter-utility.com
+  hash_me: 98DD
+  hash_me: 3CAF
+  hash_me: domestic
+  hash_me: 123-456-7890
+  hash_me: 5682
+  hash_me: 2539
+  hash_me: 6ED5
+  hash_me: 2B29
+  hash_me: arlington-township-precinct-1
+  hash_me: Arlington Township Precinct 1
+  hash_me: precinct
+  hash_me: Arlington Town Hall
+  hash_me: 1234 Pahk Avenue
+  hash_me: Arlinton, Ozark 99999
+  hash_me: 7A43
+  hash_me: inquiries
+  hash_me: inquiries@arlington-township.gov
+  hash_me: 317F
+  hash_me: 4ED4
+  hash_me: domestic
+  hash_me: 123-456-7890
+  hash_me: 5682
+  hash_me: 2539
+  hash_me: 33DE
+  hash_me: 6E3F
+  hash_me: pismo-beach-school-district-precinct-1
+  hash_me: Pismo Beach School District Precinct 1
+  hash_me: school
+  hash_me: Pismo Beah Elementary
+  hash_me: 1234 Pismo Beach Elementary
+  hash_me: Arlington, Ozark 99999
+  hash_me: CE03
+  hash_me: inquiries
+  hash_me: inquiries@pismo-beach-school.edu
+  hash_me: C539
+  hash_me: 1065
+  hash_me: domestic
+  hash_me: 123-456-7890
+  hash_me: 5682
+  hash_me: 2539
+  hash_me: 3CC6
+  hash_me: 22D6
+  hash_me: somerset-school-district-precinct-1
+  hash_me: Somerset School District
+  hash_me: school
+  hash_me: Someset Elementary
+  hash_me: 1234 Somerset Avenue
+  hash_me: Arlinton, Ozark 99999
+  hash_me: EF1C
+  hash_me: inquiries
+  hash_me: inquiries@somerset-elementary.edu
+  hash_me: 7C35
+  hash_me: C023
+  hash_me: domestic
+  hash_me: 123-456-7890
+  hash_me: 5682
+  hash_me: 2539
+  hash_me: 1168
+  hash_me: 824A
+  hash_me: harris-township
+  hash_me: Harris Township
+  hash_me: township
+  hash_me: harris Town Hall
+  hash_me: 1234 Pahk Avenue
+  hash_me: Harris, Ozark 99999
+  hash_me: 6E7F
+  hash_me: inquiries
+  hash_me: inquiries@harris-township.gov
+  hash_me: B7EF
+  hash_me: 8686
+  hash_me: domestic
+  hash_me: 123-456-7890
+  hash_me: 5682
+  hash_me: 2539
+  hash_me: 8A33
+  hash_me: 29B4
+  hash_me: 4F5E
+  hash_me: whig
+  hash_me: Whig Party
+  hash_me: en
+  hash_me: 4B0F
+  hash_me: 2C42
+  hash_me: D5FF
+  hash_me: WHI
+  hash_me: AAAAAA
+  hash_me: http://some/path/to/whig.svg
+  hash_me: AEF7
+  hash_me: federalist
+  hash_me: Federalist Party
+  hash_me: en
+  hash_me: 9F4A
+  hash_me: 9F29
+  hash_me: 9293
+  hash_me: FED
+  hash_me: BBBBBB
+  hash_me: http://some/path/to/federalist.svg
+  hash_me: 5DAA
+  hash_me: peoples
+  hash_me: People's Party
+  hash_me: en
+  hash_me: 206A
+  hash_me: ECBF
+  hash_me: ADD4
+  hash_me: PPL
+  hash_me: CCCCCC
+  hash_me: http://some/path/to/people-s.svg
+  hash_me: 8A32
+  hash_me: liberty
+  hash_me: Liberty Party
+  hash_me: en
+  hash_me: 9F4F
+  hash_me: AA55
+  hash_me: B228
+  hash_me: LIB
+  hash_me: DDDDDD
+  hash_me: http://some/path/to/liberty.svg
+  hash_me: 7740
+  hash_me: constitution
+  hash_me: Constitution Party
+  hash_me: en
+  hash_me: E16E
+  hash_me: 4A2A
+  hash_me: 5608
+  hash_me: CONST
+  hash_me: EEEEEE
+  hash_me: http://some/path/to/democratic-repulbican.svg
+  hash_me: BA19
+  hash_me: labor
+  hash_me: Labor Party
+  hash_me: en
+  hash_me: BF14
+  hash_me: 56A6
+  hash_me: 025F
+  hash_me: LBR
+  hash_me: FFFFFF
+  hash_me: http://some/path/to/laobr.svg
+  hash_me: 8F22
+  hash_me: independent
+  hash_me: Independent
+  hash_me: en
+  hash_me: B2A6
+  hash_me: 6040
+  hash_me: F5E4
+  hash_me: IND
+  hash_me: 000000
+  hash_me: http://some/path/to/independent.svg
+  hash_me: 1065
+  hash_me: F663
+  hash_me: president-vice-president-contest
+  hash_me: 0
+  hash_me: hamilton-county
+  hash_me: one_of_m
+  hash_me: President and Vice President of the United States
+  hash_me: en
+  hash_me: 3B0E
+  hash_me: Presidente y Vicepresidente de los Estados Unidos
+  hash_me: es
+  hash_me: 2933
+  hash_me: 8A59
+  hash_me: 5E4D
+  hash_me: Vote for one
+  hash_me: en
+  hash_me: 1248
+  hash_me: Votar por uno
+  hash_me: es
+  hash_me: 5612
+  hash_me: D9DC
+  hash_me: B2AA
+  hash_me: President and Vice President of the United States
+  hash_me: 1
+  hash_me: 1
+  hash_me: barchi-hallaren-selection
+  hash_me: 0
+  hash_me: barchi-hallaren
+  hash_me: 968E
+  hash_me: cramer-vuocolo-selection
+  hash_me: 1
+  hash_me: cramer-vuocolo
+  hash_me: C556
+  hash_me: court-blumhardt-selection
+  hash_me: 2
+  hash_me: court-blumhardt
+  hash_me: B1F4
+  hash_me: boone-lian-selection
+  hash_me: 3
+  hash_me: boone-lian
+  hash_me: FB71
+  hash_me: hildebrand-garritty-selection
+  hash_me: 4
+  hash_me: hildebrand-garritty
+  hash_me: 3001
+  hash_me: patterson-lariviere-selection
+  hash_me: 5
+  hash_me: patterson-lariviere
+  hash_me: 37BC
+  hash_me: write-in-selection-president
+  hash_me: 6
+  hash_me: write-in
+  hash_me: 2412
+  hash_me: 6AC3
+  hash_me: 670E
+  hash_me: ozark-governor
+  hash_me: 1
+  hash_me: hamilton-county
+  hash_me: one_of_m
+  hash_me: Governor of the Commonwealth of Ozark
+  hash_me: en
+  hash_me: A8C3
+  hash_me: Gobernador de la Mancomunidad de Ozark
+  hash_me: es
+  hash_me: E997
+  hash_me: 088F
+  hash_me: 548B
+  hash_me: Vote for one
+  hash_me: en
+  hash_me: 1248
+  hash_me: Votar por uno
+  hash_me: es
+  hash_me: 5612
+  hash_me: D9DC
+  hash_me: B2AA
+  hash_me: Governor of the Commonwealth of Ozark
+  hash_me: 1
+  hash_me: 1
+  hash_me: franz-selection
+  hash_me: 0
+  hash_me: franz
+  hash_me: FC52
+  hash_me: harris-selection
+  hash_me: 1
+  hash_me: harris
+  hash_me: 9693
+  hash_me: bargmann-selection
+  hash_me: 2
+  hash_me: bargmann
+  hash_me: 5A83
+  hash_me: abcock-selection
+  hash_me: 3
+  hash_me: abcock
+  hash_me: 555C
+  hash_me: steel-loy-selection
+  hash_me: 4
+  hash_me: steel-loy
+  hash_me: 3664
+  hash_me: sharp-selection
+  hash_me: 5
+  hash_me: sharp
+  hash_me: 02C0
+  hash_me: walace-selection
+  hash_me: 6
+  hash_me: wallace
+  hash_me: 063A
+  hash_me: williams-selection
+  hash_me: 7
+  hash_me: williams
+  hash_me: 1E62
+  hash_me: alpern-selection
+  hash_me: 9
+  hash_me: alpern
+  hash_me: 37A6
+  hash_me: windbeck-selection
+  hash_me: 10
+  hash_me: windbeck
+  hash_me: B117
+  hash_me: sharp-althea-selection
+  hash_me: 11
+  hash_me: sharp-althea
+  hash_me: 3E40
+  hash_me: greher-selection
+  hash_me: 12
+  hash_me: greher
+  hash_me: B156
+  hash_me: alexander-selection
+  hash_me: 13
+  hash_me: alexander
+  hash_me: AD0D
+  hash_me: mitchell-selection
+  hash_me: 14
+  hash_me: mitchell
+  hash_me: 860C
+  hash_me: lee-selection
+  hash_me: 15
+  hash_me: lee
+  hash_me: 1A43
+  hash_me: ash-selection
+  hash_me: 16
+  hash_me: ash
+  hash_me: A806
+  hash_me: kennedy-selection
+  hash_me: 17
+  hash_me: kennedy
+  hash_me: E0F4
+  hash_me: jackson-selection
+  hash_me: 18
+  hash_me: jackson
+  hash_me: C819
+  hash_me: brown-selection
+  hash_me: 19
+  hash_me: brown
+  hash_me: 158A
+  hash_me: teller-selection
+  hash_me: 20
+  hash_me: teller
+  hash_me: 455F
+  hash_me: ward-selection
+  hash_me: 21
+  hash_me: ward
+  hash_me: 18D1
+  hash_me: murphy-selection
+  hash_me: 22
+  hash_me: murphy
+  hash_me: 79B7
+  hash_me: newman-selection
+  hash_me: 23
+  hash_me: newman
+  hash_me: 3666
+  hash_me: callanann-selection
+  hash_me: 24
+  hash_me: callanann
+  hash_me: 19F0
+  hash_me: york-selection
+  hash_me: 25
+  hash_me: york
+  hash_me: 0FE1
+  hash_me: chandler-selection
+  hash_me: 26
+  hash_me: chandler
+  hash_me: 9FF4
+  hash_me: write-in-selection-governor
+  hash_me: 27
+  hash_me: write-in
+  hash_me: 3623
+  hash_me: EC3D
+  hash_me: A371
+  hash_me: congress-district-5-contest
+  hash_me: 2
+  hash_me: congress-district-5
+  hash_me: one_of_m
+  hash_me: House of Representatives Congressional District 5
+  hash_me: en
+  hash_me: 340F
+  hash_me: Cámara de Representantes de Distrito 5 del Congreso de Ozark
+  hash_me: es
+  hash_me: 7529
+  hash_me: BABC
+  hash_me: DAE3
+  hash_me: Vote for one
+  hash_me: en
+  hash_me: 1248
+  hash_me: Votar por uno
+  hash_me: es
+  hash_me: 5612
+  hash_me: D9DC
+  hash_me: B2AA
+  hash_me: Congressional District 5
+  hash_me: 1
+  hash_me: 1
+  hash_me: soliz-selection
+  hash_me: 0
+  hash_me: soliz
+  hash_me: 7708
+  hash_me: keller-selection
+  hash_me: 1
+  hash_me: keller
+  hash_me: AF3E
+  hash_me: rangel-selection
+  hash_me: 2
+  hash_me: rengel
+  hash_me: 9A1C
+  hash_me: argent-selection
+  hash_me: 3
+  hash_me: argent
+  hash_me: 2189
+  hash_me: witherspoon-smithson-selection
+  hash_me: 4
+  hash_me: witherspoon-smithson
+  hash_me: 5D52
+  hash_me: write-in-selection-us-congress-district-5
+  hash_me: 5
+  hash_me: write-in
+  hash_me: 74B8
+  hash_me: 6686
+  hash_me: 7325
+  hash_me: congress-district-7-contest
+  hash_me: 3
+  hash_me: congress-district-7
+  hash_me: one_of_m
+  hash_me: House of Representatives Ozark Congressional District 7
+  hash_me: en
+  hash_me: 1241
+  hash_me: Cámara de Representantes de Distrito 7 del Congreso de Ozark
+  hash_me: es
+  hash_me: 83E6
+  hash_me: 35E0
+  hash_me: 1DC6
+  hash_me: Vote for one
+  hash_me: en
+  hash_me: 1248
+  hash_me: Votar por uno
+  hash_me: es
+  hash_me: 5612
+  hash_me: D9DC
+  hash_me: B2AA
+  hash_me: Congressional District 7
+  hash_me: 1
+  hash_me: 1
+  hash_me: bainbridge-selection
+  hash_me: 0
+  hash_me: bainbridge
+  hash_me: 3DE2
+  hash_me: hennessey-selection
+  hash_me: 1
+  hash_me: hennessey
+  hash_me: 66FF
+  hash_me: savoy-selection
+  hash_me: 2
+  hash_me: savoy
+  hash_me: 8803
+  hash_me: tawa-selection
+  hash_me: 3
+  hash_me: tawa
+  hash_me: 58EE
+  hash_me: tawa-mary-selection
+  hash_me: 4
+  hash_me: tawa-mary
+  hash_me: 13D9
+  hash_me: write-in-selection-us-congress-district-7
+  hash_me: 5
+  hash_me: write-in
+  hash_me: A1B5
+  hash_me: F533
+  hash_me: D2DB
+  hash_me: pismo-beach-school-board-contest
+  hash_me: 4
+  hash_me: pismo-beach-school-district-precinct-1
+  hash_me: n_of_m
+  hash_me: Pismo Beach School Board
+  hash_me: en
+  hash_me: 97F0
+  hash_me: Junta Escolar de Pismo Beach
+  hash_me: es
+  hash_me: 3DA8
+  hash_me: 929F
+  hash_me: D54D
+  hash_me: Vote for up to 3
+  hash_me: en
+  hash_me: 4248
+  hash_me: Vote por hasta 3
+  hash_me: es
+  hash_me: 02E2
+  hash_me: 290F
+  hash_me: 3FF1
+  hash_me: Pismo Beach School Board
+  hash_me: 3
+  hash_me: 3
+  hash_me: moore-selection
+  hash_me: 0
+  hash_me: moore
+  hash_me: EEB6
+  hash_me: white-selection
+  hash_me: 1
+  hash_me: white
+  hash_me: 3623
+  hash_me: smallberries-selection
+  hash_me: 2
+  hash_me: smallberries
+  hash_me: 8559
+  hash_me: warfin-selection
+  hash_me: 3
+  hash_me: warfin
+  hash_me: DB04
+  hash_me: norberg-selection
+  hash_me: 4
+  hash_me: norberg
+  hash_me: 547E
+  hash_me: parks-selection
+  hash_me: 5
+  hash_me: parks
+  hash_me: 6A64
+  hash_me: savannah-selection
+  hash_me: 6
+  hash_me: savannah
+  hash_me: 3440
+  hash_me: write-in-selection-1-pismo-beach-school-board
+  hash_me: 7
+  hash_me: write-in-1
+  hash_me: 5272
+  hash_me: write-in-selection-2-pismo-beach-school-board
+  hash_me: 8
+  hash_me: write-in-2
+  hash_me: 0D67
+  hash_me: write-in-selection-3-pismo-beach-school-board
+  hash_me: 9
+  hash_me: write-in-3
+  hash_me: 769E
+  hash_me: 4D5C
+  hash_me: 6B18
+  hash_me: somerset-school-board-contest
+  hash_me: 5
+  hash_me: somerset-school-district-precinct-1
+  hash_me: n_of_m
+  hash_me: Pismo Beach School Board
+  hash_me: en
+  hash_me: 97F0
+  hash_me: Junta Escolar de Somerset
+  hash_me: es
+  hash_me: 5049
+  hash_me: C51C
+  hash_me: C215
+  hash_me: Vote for up to 2
+  hash_me: en
+  hash_me: F5AC
+  hash_me: Vote por hasta 2
+  hash_me: es
+  hash_me: 421B
+  hash_me: C40C
+  hash_me: AECE
+  hash_me: Somerset School Board
+  hash_me: 2
+  hash_me: 2
+  hash_me: summers-selection
+  hash_me: 0
+  hash_me: summers
+  hash_me: 2501
+  hash_me: chase-selection
+  hash_me: 1
+  hash_me: chase
+  hash_me: 69CE
+  hash_me: osborne-selection
+  hash_me: 2
+  hash_me: osborne
+  hash_me: A800
+  hash_me: rosenberg-selection
+  hash_me: 3
+  hash_me: rosenberg
+  hash_me: 764D
+  hash_me: head-selection
+  hash_me: 4
+  hash_me: head
+  hash_me: 881F
+  hash_me: marsters-selection
+  hash_me: 5
+  hash_me: marsters
+  hash_me: 7444
+  hash_me: write-in-selection-1-somerset-school-board
+  hash_me: 6
+  hash_me: write-in-1
+  hash_me: EC37
+  hash_me: write-in-selection-2-somerset-school-board
+  hash_me: 7
+  hash_me: write-in-2
+  hash_me: D54D
+  hash_me: 2E4F
+  hash_me: 0FFF
+  hash_me: arlington-chief-justice-retain-demergue
+  hash_me: 6
+  hash_me: arlington-township-precinct-1
+  hash_me: one_of_m
+  hash_me: Retain Robert Demergue as Chief Justice?
+  hash_me: en
+  hash_me: 9433
+  hash_me: ¿Retener a Robert Demergue como Presidente del Tribunal Supremo?
+  hash_me: es
+  hash_me: E286
+  hash_me: 09FD
+  hash_me: 50C8
+  hash_me: Choose 'Accept' or 'Reject'
+  hash_me: en
+  hash_me: AEE7
+  hash_me: Elija 'Aceptar' o 'Rechazar'
+  hash_me: es
+  hash_me: E7AE
+  hash_me: 6D31
+  hash_me: AFE7
+  hash_me: Retain Robert Demergue as Chief Justice?
+  hash_me: 1
+  hash_me: 1
+  hash_me: ozark-chief-justice-retain-demergue-affirmative-selection
+  hash_me: 0
+  hash_me: ozark-chief-justice-retain-demergue-affirmative
+  hash_me: D785
+  hash_me: ozark-chief-justice-retain-demergue-negative-selection
+  hash_me: 1
+  hash_me: ozark-chief-justice-retain-demergue-negative
+  hash_me: 7B12
+  hash_me: D41B
+  hash_me: 10A4
+  hash_me: exeter-utility-district-referendum-contest
+  hash_me: 7
+  hash_me: lacroix-exeter-utility-district
+  hash_me: one_of_m
+  hash_me: Levy Lift to Maintain Public Safety and Other Core Utility Services
+  hash_me: en
+  hash_me: A457
+  hash_me: Levy Lift para Mantener la Seguridad Pública y Otros Servicios Básicos
+  hash_me: es
+  hash_me: FC00
+  hash_me: 87D5
+  hash_me: 2544
+  hash_me: Should this Proposition be approved?
+  hash_me: en
+  hash_me: F38D
+  hash_me: Uno
+  hash_me: es
+  hash_me: 66E3
+  hash_me: F5A2
+  hash_me: 3F09
+  hash_me: Capital Projects Levy
+  hash_me: 1
+  hash_me: 1
+  hash_me: exeter-utility-district-referendum-affirmative-selection
+  hash_me: 0
+  hash_me: exeter-utility-district-referendum-affirmative
+  hash_me: 41C8
+  hash_me: exeter-utility-district-referendum-selection
+  hash_me: 1
+  hash_me: exeter-utility-district-referendum-negative
+  hash_me: EAAE
+  hash_me: A24C
+  hash_me: BABD
+  hash_me: 7458
+  hash_me: congress-district-7-hamilton-county
+  hash_me: hamilton-county
+  hash_me: congress-district-7
+  hash_me: 60B2
+  hash_me: null
+  hash_me: null
+  hash_me: 586E
+  hash_me: congress-district-7-lacroix
+  hash_me: hamilton-county
+  hash_me: congress-district-7
+  hash_me: lacroix-township-precinct-1
+  hash_me: 4CDE
+  hash_me: null
+  hash_me: null
+  hash_me: 63D9
+  hash_me: congress-district-7-lacroix-exeter
+  hash_me: hamilton-county
+  hash_me: congress-district-7
+  hash_me: lacroix-township-precinct-1
+  hash_me: lacroix-exeter-utility-district
+  hash_me: 9BAD
+  hash_me: null
+  hash_me: null
+  hash_me: A1F9
+  hash_me: congress-district-7-arlington
+  hash_me: hamilton-county
+  hash_me: congress-district-7
+  hash_me: arlington-township-precinct-1
+  hash_me: D84C
+  hash_me: null
+  hash_me: null
+  hash_me: F171
+  hash_me: congress-district-7-arlington-pismo-beach
+  hash_me: hamilton-county
+  hash_me: congress-district-7
+  hash_me: arlington-township-precinct-1
+  hash_me: pismo-beach-school-district-precinct-1
+  hash_me: A7D8
+  hash_me: null
+  hash_me: null
+  hash_me: A0A1
+  hash_me: congress-district-7-arlington-somerset
+  hash_me: hamilton-county
+  hash_me: congress-district-7
+  hash_me: arlington-township-precinct-1
+  hash_me: somerset-school-district-precinct-1
+  hash_me: 1E6C
+  hash_me: null
+  hash_me: null
+  hash_me: 3C31
+  hash_me: congress-district-5-hamilton-county
+  hash_me: hamilton-county
+  hash_me: congress-district-5
+  hash_me: B96E
+  hash_me: null
+  hash_me: null
+  hash_me: E0AC
+  hash_me: congress-district-5-lacroix
+  hash_me: hamilton-county
+  hash_me: congress-district-5
+  hash_me: lacroix-township-precinct-1
+  hash_me: E891
+  hash_me: null
+  hash_me: null
+  hash_me: 7495
+  hash_me: congress-district-5-harris
+  hash_me: hamilton-county
+  hash_me: congress-district-5
+  hash_me: harris-township
+  hash_me: C907
+  hash_me: null
+  hash_me: null
+  hash_me: 7EDC
+  hash_me: congress-district-5-arlington-pismo-beach
+  hash_me: hamilton-county
+  hash_me: congress-district-5
+  hash_me: arlington-township-precinct-1
+  hash_me: pismo-beach-school-district-precinct-1
+  hash_me: 16E8
+  hash_me: null
+  hash_me: null
+  hash_me: 811D
+  hash_me: congress-district-5-arlington-somerset
+  hash_me: hamilton-county
+  hash_me: congress-district-5
+  hash_me: arlington-township-precinct-1
+  hash_me: somerset-school-district-precinct-1
+  hash_me: 3955
+  hash_me: null
+  hash_me: null
+  hash_me: 5726
+  hash_me: 6744
+Manifest crypto_hash: 0369
+Manifest crypto_hash: 2020-03-01T13:00:00Z
+Manifest crypto_hash: 2020-03-02T01:00:00Z
+  hash_me: president-vice-president-contest
+  hash_me: 0
+  hash_me: hamilton-county
+  hash_me: one_of_m
+  hash_me: President and Vice President of the United States
+  hash_me: en
+  hash_me: 3B0E
+  hash_me: Presidente y Vicepresidente de los Estados Unidos
+  hash_me: es
+  hash_me: 2933
+  hash_me: 8A59
+  hash_me: 5E4D
+  hash_me: Vote for one
+  hash_me: en
+  hash_me: 1248
+  hash_me: Votar por uno
+  hash_me: es
+  hash_me: 5612
+  hash_me: D9DC
+  hash_me: B2AA
+  hash_me: President and Vice President of the United States
+  hash_me: 1
+  hash_me: 1
+  hash_me: barchi-hallaren-selection
+  hash_me: 0
+  hash_me: barchi-hallaren
+  hash_me: 968E
+  hash_me: cramer-vuocolo-selection
+  hash_me: 1
+  hash_me: cramer-vuocolo
+  hash_me: C556
+  hash_me: court-blumhardt-selection
+  hash_me: 2
+  hash_me: court-blumhardt
+  hash_me: B1F4
+  hash_me: boone-lian-selection
+  hash_me: 3
+  hash_me: boone-lian
+  hash_me: FB71
+  hash_me: hildebrand-garritty-selection
+  hash_me: 4
+  hash_me: hildebrand-garritty
+  hash_me: 3001
+  hash_me: patterson-lariviere-selection
+  hash_me: 5
+  hash_me: patterson-lariviere
+  hash_me: 37BC
+  hash_me: write-in-selection-president
+  hash_me: 6
+  hash_me: write-in
+  hash_me: 2412
+  hash_me: 6AC3
+  Contest president-vice-president-contest crypto_hash: 670E
+  hash_me: barchi-hallaren-selection
+  hash_me: 0
+  hash_me: barchi-hallaren
+    Selection barchi-hallaren-selection crypto_hash: 968E
+  hash_me: cramer-vuocolo-selection
+  hash_me: 1
+  hash_me: cramer-vuocolo
+    Selection cramer-vuocolo-selection crypto_hash: C556
+  hash_me: court-blumhardt-selection
+  hash_me: 2
+  hash_me: court-blumhardt
+    Selection court-blumhardt-selection crypto_hash: B1F4
+  hash_me: boone-lian-selection
+  hash_me: 3
+  hash_me: boone-lian
+    Selection boone-lian-selection crypto_hash: FB71
+  hash_me: hildebrand-garritty-selection
+  hash_me: 4
+  hash_me: hildebrand-garritty
+    Selection hildebrand-garritty-selection crypto_hash: 3001
+  hash_me: patterson-lariviere-selection
+  hash_me: 5
+  hash_me: patterson-lariviere
+    Selection patterson-lariviere-selection crypto_hash: 37BC
+  hash_me: write-in-selection-president
+  hash_me: 6
+  hash_me: write-in
+    Selection write-in-selection-president crypto_hash: 2412
+  hash_me: ozark-governor
+  hash_me: 1
+  hash_me: hamilton-county
+  hash_me: one_of_m
+  hash_me: Governor of the Commonwealth of Ozark
+  hash_me: en
+  hash_me: A8C3
+  hash_me: Gobernador de la Mancomunidad de Ozark
+  hash_me: es
+  hash_me: E997
+  hash_me: 088F
+  hash_me: 548B
+  hash_me: Vote for one
+  hash_me: en
+  hash_me: 1248
+  hash_me: Votar por uno
+  hash_me: es
+  hash_me: 5612
+  hash_me: D9DC
+  hash_me: B2AA
+  hash_me: Governor of the Commonwealth of Ozark
+  hash_me: 1
+  hash_me: 1
+  hash_me: franz-selection
+  hash_me: 0
+  hash_me: franz
+  hash_me: FC52
+  hash_me: harris-selection
+  hash_me: 1
+  hash_me: harris
+  hash_me: 9693
+  hash_me: bargmann-selection
+  hash_me: 2
+  hash_me: bargmann
+  hash_me: 5A83
+  hash_me: abcock-selection
+  hash_me: 3
+  hash_me: abcock
+  hash_me: 555C
+  hash_me: steel-loy-selection
+  hash_me: 4
+  hash_me: steel-loy
+  hash_me: 3664
+  hash_me: sharp-selection
+  hash_me: 5
+  hash_me: sharp
+  hash_me: 02C0
+  hash_me: walace-selection
+  hash_me: 6
+  hash_me: wallace
+  hash_me: 063A
+  hash_me: williams-selection
+  hash_me: 7
+  hash_me: williams
+  hash_me: 1E62
+  hash_me: alpern-selection
+  hash_me: 9
+  hash_me: alpern
+  hash_me: 37A6
+  hash_me: windbeck-selection
+  hash_me: 10
+  hash_me: windbeck
+  hash_me: B117
+  hash_me: sharp-althea-selection
+  hash_me: 11
+  hash_me: sharp-althea
+  hash_me: 3E40
+  hash_me: greher-selection
+  hash_me: 12
+  hash_me: greher
+  hash_me: B156
+  hash_me: alexander-selection
+  hash_me: 13
+  hash_me: alexander
+  hash_me: AD0D
+  hash_me: mitchell-selection
+  hash_me: 14
+  hash_me: mitchell
+  hash_me: 860C
+  hash_me: lee-selection
+  hash_me: 15
+  hash_me: lee
+  hash_me: 1A43
+  hash_me: ash-selection
+  hash_me: 16
+  hash_me: ash
+  hash_me: A806
+  hash_me: kennedy-selection
+  hash_me: 17
+  hash_me: kennedy
+  hash_me: E0F4
+  hash_me: jackson-selection
+  hash_me: 18
+  hash_me: jackson
+  hash_me: C819
+  hash_me: brown-selection
+  hash_me: 19
+  hash_me: brown
+  hash_me: 158A
+  hash_me: teller-selection
+  hash_me: 20
+  hash_me: teller
+  hash_me: 455F
+  hash_me: ward-selection
+  hash_me: 21
+  hash_me: ward
+  hash_me: 18D1
+  hash_me: murphy-selection
+  hash_me: 22
+  hash_me: murphy
+  hash_me: 79B7
+  hash_me: newman-selection
+  hash_me: 23
+  hash_me: newman
+  hash_me: 3666
+  hash_me: callanann-selection
+  hash_me: 24
+  hash_me: callanann
+  hash_me: 19F0
+  hash_me: york-selection
+  hash_me: 25
+  hash_me: york
+  hash_me: 0FE1
+  hash_me: chandler-selection
+  hash_me: 26
+  hash_me: chandler
+  hash_me: 9FF4
+  hash_me: write-in-selection-governor
+  hash_me: 27
+  hash_me: write-in
+  hash_me: 3623
+  hash_me: EC3D
+  Contest ozark-governor crypto_hash: A371
+  hash_me: franz-selection
+  hash_me: 0
+  hash_me: franz
+    Selection franz-selection crypto_hash: FC52
+  hash_me: harris-selection
+  hash_me: 1
+  hash_me: harris
+    Selection harris-selection crypto_hash: 9693
+  hash_me: bargmann-selection
+  hash_me: 2
+  hash_me: bargmann
+    Selection bargmann-selection crypto_hash: 5A83
+  hash_me: abcock-selection
+  hash_me: 3
+  hash_me: abcock
+    Selection abcock-selection crypto_hash: 555C
+  hash_me: steel-loy-selection
+  hash_me: 4
+  hash_me: steel-loy
+    Selection steel-loy-selection crypto_hash: 3664
+  hash_me: sharp-selection
+  hash_me: 5
+  hash_me: sharp
+    Selection sharp-selection crypto_hash: 02C0
+  hash_me: walace-selection
+  hash_me: 6
+  hash_me: wallace
+    Selection walace-selection crypto_hash: 063A
+  hash_me: williams-selection
+  hash_me: 7
+  hash_me: williams
+    Selection williams-selection crypto_hash: 1E62
+  hash_me: alpern-selection
+  hash_me: 9
+  hash_me: alpern
+    Selection alpern-selection crypto_hash: 37A6
+  hash_me: windbeck-selection
+  hash_me: 10
+  hash_me: windbeck
+    Selection windbeck-selection crypto_hash: B117
+  hash_me: sharp-althea-selection
+  hash_me: 11
+  hash_me: sharp-althea
+    Selection sharp-althea-selection crypto_hash: 3E40
+  hash_me: greher-selection
+  hash_me: 12
+  hash_me: greher
+    Selection greher-selection crypto_hash: B156
+  hash_me: alexander-selection
+  hash_me: 13
+  hash_me: alexander
+    Selection alexander-selection crypto_hash: AD0D
+  hash_me: mitchell-selection
+  hash_me: 14
+  hash_me: mitchell
+    Selection mitchell-selection crypto_hash: 860C
+  hash_me: lee-selection
+  hash_me: 15
+  hash_me: lee
+    Selection lee-selection crypto_hash: 1A43
+  hash_me: ash-selection
+  hash_me: 16
+  hash_me: ash
+    Selection ash-selection crypto_hash: A806
+  hash_me: kennedy-selection
+  hash_me: 17
+  hash_me: kennedy
+    Selection kennedy-selection crypto_hash: E0F4
+  hash_me: jackson-selection
+  hash_me: 18
+  hash_me: jackson
+    Selection jackson-selection crypto_hash: C819
+  hash_me: brown-selection
+  hash_me: 19
+  hash_me: brown
+    Selection brown-selection crypto_hash: 158A
+  hash_me: teller-selection
+  hash_me: 20
+  hash_me: teller
+    Selection teller-selection crypto_hash: 455F
+  hash_me: ward-selection
+  hash_me: 21
+  hash_me: ward
+    Selection ward-selection crypto_hash: 18D1
+  hash_me: murphy-selection
+  hash_me: 22
+  hash_me: murphy
+    Selection murphy-selection crypto_hash: 79B7
+  hash_me: newman-selection
+  hash_me: 23
+  hash_me: newman
+    Selection newman-selection crypto_hash: 3666
+  hash_me: callanann-selection
+  hash_me: 24
+  hash_me: callanann
+    Selection callanann-selection crypto_hash: 19F0
+  hash_me: york-selection
+  hash_me: 25
+  hash_me: york
+    Selection york-selection crypto_hash: 0FE1
+  hash_me: chandler-selection
+  hash_me: 26
+  hash_me: chandler
+    Selection chandler-selection crypto_hash: 9FF4
+  hash_me: write-in-selection-governor
+  hash_me: 27
+  hash_me: write-in
+    Selection write-in-selection-governor crypto_hash: 3623
+  hash_me: congress-district-5-contest
+  hash_me: 2
+  hash_me: congress-district-5
+  hash_me: one_of_m
+  hash_me: House of Representatives Congressional District 5
+  hash_me: en
+  hash_me: 340F
+  hash_me: Cámara de Representantes de Distrito 5 del Congreso de Ozark
+  hash_me: es
+  hash_me: 7529
+  hash_me: BABC
+  hash_me: DAE3
+  hash_me: Vote for one
+  hash_me: en
+  hash_me: 1248
+  hash_me: Votar por uno
+  hash_me: es
+  hash_me: 5612
+  hash_me: D9DC
+  hash_me: B2AA
+  hash_me: Congressional District 5
+  hash_me: 1
+  hash_me: 1
+  hash_me: soliz-selection
+  hash_me: 0
+  hash_me: soliz
+  hash_me: 7708
+  hash_me: keller-selection
+  hash_me: 1
+  hash_me: keller
+  hash_me: AF3E
+  hash_me: rangel-selection
+  hash_me: 2
+  hash_me: rengel
+  hash_me: 9A1C
+  hash_me: argent-selection
+  hash_me: 3
+  hash_me: argent
+  hash_me: 2189
+  hash_me: witherspoon-smithson-selection
+  hash_me: 4
+  hash_me: witherspoon-smithson
+  hash_me: 5D52
+  hash_me: write-in-selection-us-congress-district-5
+  hash_me: 5
+  hash_me: write-in
+  hash_me: 74B8
+  hash_me: 6686
+  Contest congress-district-5-contest crypto_hash: 7325
+  hash_me: soliz-selection
+  hash_me: 0
+  hash_me: soliz
+    Selection soliz-selection crypto_hash: 7708
+  hash_me: keller-selection
+  hash_me: 1
+  hash_me: keller
+    Selection keller-selection crypto_hash: AF3E
+  hash_me: rangel-selection
+  hash_me: 2
+  hash_me: rengel
+    Selection rangel-selection crypto_hash: 9A1C
+  hash_me: argent-selection
+  hash_me: 3
+  hash_me: argent
+    Selection argent-selection crypto_hash: 2189
+  hash_me: witherspoon-smithson-selection
+  hash_me: 4
+  hash_me: witherspoon-smithson
+    Selection witherspoon-smithson-selection crypto_hash: 5D52
+  hash_me: write-in-selection-us-congress-district-5
+  hash_me: 5
+  hash_me: write-in
+    Selection write-in-selection-us-congress-district-5 crypto_hash: 74B8
+  hash_me: congress-district-7-contest
+  hash_me: 3
+  hash_me: congress-district-7
+  hash_me: one_of_m
+  hash_me: House of Representatives Ozark Congressional District 7
+  hash_me: en
+  hash_me: 1241
+  hash_me: Cámara de Representantes de Distrito 7 del Congreso de Ozark
+  hash_me: es
+  hash_me: 83E6
+  hash_me: 35E0
+  hash_me: 1DC6
+  hash_me: Vote for one
+  hash_me: en
+  hash_me: 1248
+  hash_me: Votar por uno
+  hash_me: es
+  hash_me: 5612
+  hash_me: D9DC
+  hash_me: B2AA
+  hash_me: Congressional District 7
+  hash_me: 1
+  hash_me: 1
+  hash_me: bainbridge-selection
+  hash_me: 0
+  hash_me: bainbridge
+  hash_me: 3DE2
+  hash_me: hennessey-selection
+  hash_me: 1
+  hash_me: hennessey
+  hash_me: 66FF
+  hash_me: savoy-selection
+  hash_me: 2
+  hash_me: savoy
+  hash_me: 8803
+  hash_me: tawa-selection
+  hash_me: 3
+  hash_me: tawa
+  hash_me: 58EE
+  hash_me: tawa-mary-selection
+  hash_me: 4
+  hash_me: tawa-mary
+  hash_me: 13D9
+  hash_me: write-in-selection-us-congress-district-7
+  hash_me: 5
+  hash_me: write-in
+  hash_me: A1B5
+  hash_me: F533
+  Contest congress-district-7-contest crypto_hash: D2DB
+  hash_me: bainbridge-selection
+  hash_me: 0
+  hash_me: bainbridge
+    Selection bainbridge-selection crypto_hash: 3DE2
+  hash_me: hennessey-selection
+  hash_me: 1
+  hash_me: hennessey
+    Selection hennessey-selection crypto_hash: 66FF
+  hash_me: savoy-selection
+  hash_me: 2
+  hash_me: savoy
+    Selection savoy-selection crypto_hash: 8803
+  hash_me: tawa-selection
+  hash_me: 3
+  hash_me: tawa
+    Selection tawa-selection crypto_hash: 58EE
+  hash_me: tawa-mary-selection
+  hash_me: 4
+  hash_me: tawa-mary
+    Selection tawa-mary-selection crypto_hash: 13D9
+  hash_me: write-in-selection-us-congress-district-7
+  hash_me: 5
+  hash_me: write-in
+    Selection write-in-selection-us-congress-district-7 crypto_hash: A1B5
+  hash_me: pismo-beach-school-board-contest
+  hash_me: 4
+  hash_me: pismo-beach-school-district-precinct-1
+  hash_me: n_of_m
+  hash_me: Pismo Beach School Board
+  hash_me: en
+  hash_me: 97F0
+  hash_me: Junta Escolar de Pismo Beach
+  hash_me: es
+  hash_me: 3DA8
+  hash_me: 929F
+  hash_me: D54D
+  hash_me: Vote for up to 3
+  hash_me: en
+  hash_me: 4248
+  hash_me: Vote por hasta 3
+  hash_me: es
+  hash_me: 02E2
+  hash_me: 290F
+  hash_me: 3FF1
+  hash_me: Pismo Beach School Board
+  hash_me: 3
+  hash_me: 3
+  hash_me: moore-selection
+  hash_me: 0
+  hash_me: moore
+  hash_me: EEB6
+  hash_me: white-selection
+  hash_me: 1
+  hash_me: white
+  hash_me: 3623
+  hash_me: smallberries-selection
+  hash_me: 2
+  hash_me: smallberries
+  hash_me: 8559
+  hash_me: warfin-selection
+  hash_me: 3
+  hash_me: warfin
+  hash_me: DB04
+  hash_me: norberg-selection
+  hash_me: 4
+  hash_me: norberg
+  hash_me: 547E
+  hash_me: parks-selection
+  hash_me: 5
+  hash_me: parks
+  hash_me: 6A64
+  hash_me: savannah-selection
+  hash_me: 6
+  hash_me: savannah
+  hash_me: 3440
+  hash_me: write-in-selection-1-pismo-beach-school-board
+  hash_me: 7
+  hash_me: write-in-1
+  hash_me: 5272
+  hash_me: write-in-selection-2-pismo-beach-school-board
+  hash_me: 8
+  hash_me: write-in-2
+  hash_me: 0D67
+  hash_me: write-in-selection-3-pismo-beach-school-board
+  hash_me: 9
+  hash_me: write-in-3
+  hash_me: 769E
+  hash_me: 4D5C
+  Contest pismo-beach-school-board-contest crypto_hash: 6B18
+  hash_me: moore-selection
+  hash_me: 0
+  hash_me: moore
+    Selection moore-selection crypto_hash: EEB6
+  hash_me: white-selection
+  hash_me: 1
+  hash_me: white
+    Selection white-selection crypto_hash: 3623
+  hash_me: smallberries-selection
+  hash_me: 2
+  hash_me: smallberries
+    Selection smallberries-selection crypto_hash: 8559
+  hash_me: warfin-selection
+  hash_me: 3
+  hash_me: warfin
+    Selection warfin-selection crypto_hash: DB04
+  hash_me: norberg-selection
+  hash_me: 4
+  hash_me: norberg
+    Selection norberg-selection crypto_hash: 547E
+  hash_me: parks-selection
+  hash_me: 5
+  hash_me: parks
+    Selection parks-selection crypto_hash: 6A64
+  hash_me: savannah-selection
+  hash_me: 6
+  hash_me: savannah
+    Selection savannah-selection crypto_hash: 3440
+  hash_me: write-in-selection-1-pismo-beach-school-board
+  hash_me: 7
+  hash_me: write-in-1
+    Selection write-in-selection-1-pismo-beach-school-board crypto_hash: 5272
+  hash_me: write-in-selection-2-pismo-beach-school-board
+  hash_me: 8
+  hash_me: write-in-2
+    Selection write-in-selection-2-pismo-beach-school-board crypto_hash: 0D67
+  hash_me: write-in-selection-3-pismo-beach-school-board
+  hash_me: 9
+  hash_me: write-in-3
+    Selection write-in-selection-3-pismo-beach-school-board crypto_hash: 769E
+  hash_me: somerset-school-board-contest
+  hash_me: 5
+  hash_me: somerset-school-district-precinct-1
+  hash_me: n_of_m
+  hash_me: Pismo Beach School Board
+  hash_me: en
+  hash_me: 97F0
+  hash_me: Junta Escolar de Somerset
+  hash_me: es
+  hash_me: 5049
+  hash_me: C51C
+  hash_me: C215
+  hash_me: Vote for up to 2
+  hash_me: en
+  hash_me: F5AC
+  hash_me: Vote por hasta 2
+  hash_me: es
+  hash_me: 421B
+  hash_me: C40C
+  hash_me: AECE
+  hash_me: Somerset School Board
+  hash_me: 2
+  hash_me: 2
+  hash_me: summers-selection
+  hash_me: 0
+  hash_me: summers
+  hash_me: 2501
+  hash_me: chase-selection
+  hash_me: 1
+  hash_me: chase
+  hash_me: 69CE
+  hash_me: osborne-selection
+  hash_me: 2
+  hash_me: osborne
+  hash_me: A800
+  hash_me: rosenberg-selection
+  hash_me: 3
+  hash_me: rosenberg
+  hash_me: 764D
+  hash_me: head-selection
+  hash_me: 4
+  hash_me: head
+  hash_me: 881F
+  hash_me: marsters-selection
+  hash_me: 5
+  hash_me: marsters
+  hash_me: 7444
+  hash_me: write-in-selection-1-somerset-school-board
+  hash_me: 6
+  hash_me: write-in-1
+  hash_me: EC37
+  hash_me: write-in-selection-2-somerset-school-board
+  hash_me: 7
+  hash_me: write-in-2
+  hash_me: D54D
+  hash_me: 2E4F
+  Contest somerset-school-board-contest crypto_hash: 0FFF
+  hash_me: summers-selection
+  hash_me: 0
+  hash_me: summers
+    Selection summers-selection crypto_hash: 2501
+  hash_me: chase-selection
+  hash_me: 1
+  hash_me: chase
+    Selection chase-selection crypto_hash: 69CE
+  hash_me: osborne-selection
+  hash_me: 2
+  hash_me: osborne
+    Selection osborne-selection crypto_hash: A800
+  hash_me: rosenberg-selection
+  hash_me: 3
+  hash_me: rosenberg
+    Selection rosenberg-selection crypto_hash: 764D
+  hash_me: head-selection
+  hash_me: 4
+  hash_me: head
+    Selection head-selection crypto_hash: 881F
+  hash_me: marsters-selection
+  hash_me: 5
+  hash_me: marsters
+    Selection marsters-selection crypto_hash: 7444
+  hash_me: write-in-selection-1-somerset-school-board
+  hash_me: 6
+  hash_me: write-in-1
+    Selection write-in-selection-1-somerset-school-board crypto_hash: EC37
+  hash_me: write-in-selection-2-somerset-school-board
+  hash_me: 7
+  hash_me: write-in-2
+    Selection write-in-selection-2-somerset-school-board crypto_hash: D54D
+  hash_me: arlington-chief-justice-retain-demergue
+  hash_me: 6
+  hash_me: arlington-township-precinct-1
+  hash_me: one_of_m
+  hash_me: Retain Robert Demergue as Chief Justice?
+  hash_me: en
+  hash_me: 9433
+  hash_me: ¿Retener a Robert Demergue como Presidente del Tribunal Supremo?
+  hash_me: es
+  hash_me: E286
+  hash_me: 09FD
+  hash_me: 50C8
+  hash_me: Choose 'Accept' or 'Reject'
+  hash_me: en
+  hash_me: AEE7
+  hash_me: Elija 'Aceptar' o 'Rechazar'
+  hash_me: es
+  hash_me: E7AE
+  hash_me: 6D31
+  hash_me: AFE7
+  hash_me: Retain Robert Demergue as Chief Justice?
+  hash_me: 1
+  hash_me: 1
+  hash_me: ozark-chief-justice-retain-demergue-affirmative-selection
+  hash_me: 0
+  hash_me: ozark-chief-justice-retain-demergue-affirmative
+  hash_me: D785
+  hash_me: ozark-chief-justice-retain-demergue-negative-selection
+  hash_me: 1
+  hash_me: ozark-chief-justice-retain-demergue-negative
+  hash_me: 7B12
+  hash_me: D41B
+  Contest arlington-chief-justice-retain-demergue crypto_hash: 10A4
+  hash_me: ozark-chief-justice-retain-demergue-affirmative-selection
+  hash_me: 0
+  hash_me: ozark-chief-justice-retain-demergue-affirmative
+    Selection ozark-chief-justice-retain-demergue-affirmative-selection crypto_hash: D785
+  hash_me: ozark-chief-justice-retain-demergue-negative-selection
+  hash_me: 1
+  hash_me: ozark-chief-justice-retain-demergue-negative
+    Selection ozark-chief-justice-retain-demergue-negative-selection crypto_hash: 7B12
+  hash_me: exeter-utility-district-referendum-contest
+  hash_me: 7
+  hash_me: lacroix-exeter-utility-district
+  hash_me: one_of_m
+  hash_me: Levy Lift to Maintain Public Safety and Other Core Utility Services
+  hash_me: en
+  hash_me: A457
+  hash_me: Levy Lift para Mantener la Seguridad Pública y Otros Servicios Básicos
+  hash_me: es
+  hash_me: FC00
+  hash_me: 87D5
+  hash_me: 2544
+  hash_me: Should this Proposition be approved?
+  hash_me: en
+  hash_me: F38D
+  hash_me: Uno
+  hash_me: es
+  hash_me: 66E3
+  hash_me: F5A2
+  hash_me: 3F09
+  hash_me: Capital Projects Levy
+  hash_me: 1
+  hash_me: 1
+  hash_me: exeter-utility-district-referendum-affirmative-selection
+  hash_me: 0
+  hash_me: exeter-utility-district-referendum-affirmative
+  hash_me: 41C8
+  hash_me: exeter-utility-district-referendum-selection
+  hash_me: 1
+  hash_me: exeter-utility-district-referendum-negative
+  hash_me: EAAE
+  hash_me: A24C
+  Contest exeter-utility-district-referendum-contest crypto_hash: BABD
+  hash_me: exeter-utility-district-referendum-affirmative-selection
+  hash_me: 0
+  hash_me: exeter-utility-district-referendum-affirmative
+    Selection exeter-utility-district-referendum-affirmative-selection crypto_hash: 41C8
+  hash_me: exeter-utility-district-referendum-selection
+  hash_me: 1
+  hash_me: exeter-utility-district-referendum-negative
+    Selection exeter-utility-district-referendum-selection crypto_hash: EAAE
