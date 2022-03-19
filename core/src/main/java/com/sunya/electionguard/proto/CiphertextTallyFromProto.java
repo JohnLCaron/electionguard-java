@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.sunya.electionguard.proto.CommonConvert.convertCiphertext;
-import static com.sunya.electionguard.proto.CommonConvert.convertElementModQ;
+import static com.sunya.electionguard.proto.CommonConvert.convertUInt256;
 
 import electionguard.protogen.CiphertextTallyProto;
 
@@ -27,7 +27,7 @@ public class CiphertextTallyFromProto {
     return new CiphertextTally.Contest(
             proto.getContestId(),
             proto.getSequenceOrder(),
-            convertElementModQ(proto.getContestDescriptionHash()),
+            convertUInt256(proto.getContestDescriptionHash()),
             selections);
   }
 
@@ -36,7 +36,7 @@ public class CiphertextTallyFromProto {
     return new CiphertextTally.Selection(
             proto.getSelectionId(),
             proto.getSequenceOrder(),
-            convertElementModQ(proto.getSelectionDescriptionHash()),
+            convertUInt256(proto.getSelectionDescriptionHash()),
             convertCiphertext(proto.getCiphertext()));
   }
 }

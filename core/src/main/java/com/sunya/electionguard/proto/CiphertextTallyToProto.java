@@ -5,7 +5,7 @@ import com.sunya.electionguard.CiphertextTally;
 import java.util.Map;
 
 import static com.sunya.electionguard.proto.CommonConvert.convertCiphertext;
-import static com.sunya.electionguard.proto.CommonConvert.convertElementModQ;
+import static com.sunya.electionguard.proto.CommonConvert.convertUInt256;
 
 import electionguard.protogen.CiphertextTallyProto;
 
@@ -24,7 +24,7 @@ public class CiphertextTallyToProto {
     CiphertextTallyProto.CiphertextTallyContest.Builder builder = CiphertextTallyProto.CiphertextTallyContest.newBuilder();
     builder.setContestId(contest.object_id());
     builder.setSequenceOrder(contest.sequence_order());
-    builder.setContestDescriptionHash(convertElementModQ(contest.contestDescriptionHash));
+    builder.setContestDescriptionHash(convertUInt256(contest.contestDescriptionHash));
     for (Map.Entry<String, CiphertextTally.Selection> selection : contest.selections.entrySet()) {
       builder.addSelections(convertSelection(selection.getValue()));
     }
@@ -35,7 +35,7 @@ public class CiphertextTallyToProto {
     CiphertextTallyProto.CiphertextTallySelection.Builder builder = CiphertextTallyProto.CiphertextTallySelection.newBuilder();
     builder.setSelectionId(selection.object_id());
     builder.setSequenceOrder(selection.sequence_order());
-    builder.setSelectionDescriptionHash(convertElementModQ(selection.description_hash()));
+    builder.setSelectionDescriptionHash(convertUInt256(selection.description_hash()));
     builder.setCiphertext(convertCiphertext(selection.ciphertext()));
     return builder.build();
   }

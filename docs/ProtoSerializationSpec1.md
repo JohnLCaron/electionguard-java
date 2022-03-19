@@ -1,6 +1,6 @@
 # 🗳 Election Record serialization (proposed specification)
 
-draft 3/10/2022 for proto_version = 1.0.0 (MAJOR.MINOR.PATCH)
+draft 3/18/2022 for proto_version = 1.0.0 (MAJOR.MINOR.PATCH)
 
 This covers only the election record, and not any serialized classes used in remote procedure calls.
 
@@ -49,6 +49,16 @@ Notes
 | challenge  |           | ElementModQ     |         |
 | response   |           | ElementModQ     |         |
 
+### class UInt256
+
+Used as a hash, when Group operations are no longer needed on it.
+JSON uses ElementModQ.
+
+| Name  | Type | Notes                                      |
+|-------|------|--------------------------------------------|
+| value | bytes | bigint is 32 bytes, unsigned, big-endian  |
+
+
 ## Election
 
 ### class election_record.proto
@@ -94,10 +104,10 @@ There is no python SDK version of this class. Can be constructed from the Lagran
 | number_of_guardians       |           | uint32                |          |
 | quorum                    |           | uint32                |          |
 | elgamal_public_key        |           | ElementModP           |          |
-| commitment_hash           |           | ElementModQ           |          |
-| manifest_hash             |           | ElementModQ           |          |
-| crypto_base_hash          |           | ElementModQ           |          |
-| crypto_extended_base_hash |           | ElementModQ           |          |
+| commitment_hash           |           | UInt256               |          |
+| manifest_hash             |           | UInt256               |          |
+| crypto_base_hash          |           | UInt256               |          |
+| crypto_extended_base_hash |           | UInt256               |          |
 | extended_data             |           | map\<string, string\> | optional |
 
 ### class EncryptionDevice
@@ -294,7 +304,7 @@ captures all the metadata that election software need, which is a superset of th
 |--------------------------|------------------|----------------------------------|-------------------------------------------|
 | contest_id               | object_id        | string                           | matches ContestDescription.contest_id     |
 | sequence_order           |                  | uint32                           | matches ContestDescription.sequence_order |
-| contest_description_hash | description_hash | ElementModQ                      | matches ContestDescription.crypto_hash    |
+| contest_description_hash | description_hash | UInt256                          | matches ContestDescription.crypto_hash    |
 | selections               |                  | List\<CiphertextTallySelection\> | removed unneeded map                      |
 
 ### class CiphertextTallySelection|
@@ -303,7 +313,7 @@ captures all the metadata that election software need, which is a superset of th
 |----------------------------|------------------|-------------------|---------------------------------------------|
 | selection_id               | object_id        | string            | matches SelectionDescription.selection_id   |
 | sequence_order             |                  | uint32            | matches SelectionDescription.sequence_order |
-| selection_description_hash | description_hash | ElementModQ       | matches SelectionDescription.crypto_hash    |
+| selection_description_hash | description_hash | UInt256           | matches SelectionDescription.crypto_hash    |
 | ciphertext                 |                  | ElGamalCiphertext |                                             |
 
 ## plaintext_ballot.proto
@@ -334,7 +344,7 @@ captures all the metadata that election software need, which is a superset of th
 | is_placeholder_selection |           | bool         |                                             |
 | extended_data            |           | ExtendedData | optional                                    |
 
-### class ExtendedData|
+### class ExtendedData
 
 | Name   | JSON Name | Type   | Notes |
 |--------|-----------|--------|-------|
@@ -349,12 +359,12 @@ captures all the metadata that election software need, which is a superset of th
 |-------------------|-----------|---------------------------------|-------------------------------------|
 | ballot_id         | object_id | string                          | matches PlaintextBallot.ballot_id   |
 | ballot_style_id   | style_id  | string                          | matches BallotStyle.ballot_style_id |
-| manifest_hash     |           | ElementModQ                     | matches Manifest.crypto_hash        |
-| code_seed         |           | ElementModQ                     |                                     |
-| code              |           | ElementModQ                     |                                     |
+| manifest_hash     |           | UInt256                         | matches Manifest.crypto_hash        |
+| code_seed         |           | UInt256                         |                                     |
+| code              |           | UInt256                         |                                     |
 | contests          |           | List\<CiphertextBallotContest\> |                                     |
 | timestamp         |           | int64                           | seconds since the unix epoch UTC    |
-| crypto_hash       |           | ElementModQ                     |                                     |
+| crypto_hash       |           | UInt256                         |                                     |
 |                   | nonce     | ElementModQ                     | removed                             |
 | state             |           | enum BallotState                | CAST, SPOILED                       |
 
@@ -364,10 +374,10 @@ captures all the metadata that election software need, which is a superset of th
 |-------------------------|-------------------|-----------------------------------|-------------------------------------------|
 | contest_id              | object_id         | string                            | matches ContestDescription.contest_id     |
 | sequence_order          |                   | uint32                            | matches ContestDescription.sequence_order |
-| contest_hash            | description_hash  | ElementModQ                       | matches ContestDescription.crypto_hash    |                                                                     |
+| contest_hash            | description_hash  | UInt256                           | matches ContestDescription.crypto_hash    |                                                                     |
 | selections              | ballot_selections | List\<CiphertextBallotSelection\> |                                           |
 | ciphertext_accumulation |                   | ElGamalCiphertext                 |                                           |
-| crypto_hash             |                   | ElementModQ                       |                                           |
+| crypto_hash             |                   | UInt256                           |                                           |
 |                         | nonce             | ElementModQ                       | removed                                   |
 | proof                   |                   | ConstantChaumPedersenProof        |                                           |
 
@@ -377,9 +387,9 @@ captures all the metadata that election software need, which is a superset of th
 |--------------------------|------------------|-------------------------------|---------------------------------------------|
 | selection_id             | object_id        | string                        | matches SelectionDescription.selection_id   |
 | sequence_order           |                  | uint32                        | matches SelectionDescription.sequence_order |
-| selection_hash           | description_hash | ElementModQ                   | matches SelectionDescription.crypto_hash    |
+| selection_hash           | description_hash | UInt256                       | matches SelectionDescription.crypto_hash    |
 | ciphertext               |                  | ElGamalCiphertext             |                                             |
-| crypto_hash              |                  | ElementModQ                   |                                             |
+| crypto_hash              |                  | UInt256                       |                                             |
 | is_placeholder_selection |                  | bool                          |                                             |
 |                          | nonce            | ElementModQ                   | removed                                     |
 | proof                    |                  | DisjunctiveChaumPedersenProof |                                             |

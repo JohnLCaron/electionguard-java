@@ -11,11 +11,13 @@ message ChaumPedersenProof {
   ElementModQ response = 4; // v in the spec
 }
 
+// A 4096 bit unsigned int, big-endian.
 // A member of the group Z mod P
 message ElementModP {
   bytes value = 1;
 }
 
+// A 256 bit unsigned int, big-endian.
 // A member of the group Z mod Q
 message ElementModQ {
   bytes value = 1;
@@ -31,4 +33,10 @@ message SchnorrProof {
   ElementModP commitment = 2; // h in the spec
   ElementModQ challenge = 3; // c in the spec
   ElementModQ response = 4; // u in the spec
+}
+
+// A 256 bit unsigned int, big-endian. Always exactly 32 bytes.
+// Used as a hash, when Group operations are no longer needed on it.
+message UInt256 {
+  bytes value = 1;
 }
