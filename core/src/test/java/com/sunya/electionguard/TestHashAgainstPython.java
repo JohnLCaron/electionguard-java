@@ -31,6 +31,7 @@ public class TestHashAgainstPython {
                 selection.selectionId(), selection.cryptoHash().to_hex());
       }
     }
+    Group.setPrimes(ElectionConstants.STANDARD_CONSTANTS);
   }
   @Example
   public void testBallotStyleHash() throws IOException {
@@ -44,7 +45,7 @@ public class TestHashAgainstPython {
             );
 
     System.out.printf("BallotStyle crypto_hash: %s%n", bs.cryptoHash().to_hex());
-
+    Group.setPrimes(ElectionConstants.STANDARD_CONSTANTS);
   }
 
 

@@ -47,17 +47,17 @@ message ElectionContext {
   // The `joint public key (K)` in the [ElectionGuard Spec]
   ElementModP joint_public_key = 3;
 
-  // The hash of the manifest
-  ElementModQ manifest_hash = 4;
+  // Matches Manifest.crypto_hash
+  UInt256 manifest_hash = 4;
 
   // the `base hash code (𝑄)` in the [ElectionGuard Spec]
-  ElementModQ crypto_base_hash = 5;
+  UInt256 crypto_base_hash = 5;
 
   // the `extended base hash code (𝑄')` in the [ElectionGuard Spec]
-  ElementModQ crypto_extended_base_hash = 6;
+  UInt256 crypto_extended_base_hash = 6;
 
   // Hash of all the public commitments for all the guardians = H(K 1,0 , K 1,1 , K 1,2 , ..., K n,k−1 ).
-  ElementModQ commitment_hash = 7;
+  UInt256 commitment_hash = 7;
 
   map<string, string> extended_data = 8;
 }

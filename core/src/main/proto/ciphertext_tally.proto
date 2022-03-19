@@ -13,15 +13,15 @@ message CiphertextTally {
 
 message CiphertextTallyContest {
   string contest_id = 1; // matches ContestDescription.contest_id
-  uint32 sequence_order = 2;
-  ElementModQ contest_description_hash = 3;
+  uint32 sequence_order = 2; // matches ContestDescription.sequence_order
+  UInt256 contest_description_hash = 3; // matches ContestDescription.crypto_hash
   repeated CiphertextTallySelection selections = 4;
 }
 
 // A homomorphic accumulation of CiphertextBallotSelections.
 message CiphertextTallySelection {
   string selection_id = 1; // matches SelectionDescription.selection_id
-  uint32 sequence_order = 2;
-  ElementModQ selection_description_hash = 3;
+  uint32 sequence_order = 2; // matches SelectionDescription.sequence_order
+  UInt256 selection_description_hash = 3; // matches SelectionDescription.crypto_hash
   ElGamalCiphertext ciphertext = 4;  // accumulation over all the cast ballots for this selection
 }

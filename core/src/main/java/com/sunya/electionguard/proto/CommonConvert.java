@@ -22,6 +22,15 @@ public class CommonConvert {
 
   /////////////////////////////////////////////////////////////////////////////////////////
   // from proto
+
+  @Nullable
+  public static Group.ElementModQ convertUInt256(@Nullable CommonProto.UInt256 modQ) {
+    if (modQ == null || modQ.getValue().isEmpty()) {
+      return null;
+    }
+    BigInteger elem = new BigInteger(modQ.getValue().toByteArray());
+    return Group.int_to_q_unchecked(elem);
+  }
   
   @Nullable
   public static Group.ElementModQ convertElementModQ(@Nullable CommonProto.ElementModQ modQ) {
@@ -70,6 +79,12 @@ public class CommonConvert {
 
   /////////////////////////////////////////////////////////////////////////////////////////
   // to proto
+
+  public static CommonProto.UInt256 convertUInt256(Group.ElementModQ modQ) {
+    CommonProto.UInt256.Builder builder = CommonProto.UInt256.newBuilder();
+    builder.setValue(ByteString.copyFrom(modQ.getBigInt().toByteArray()));
+    return builder.build();
+  }
 
   public static CommonProto.ElementModQ convertElementModQ(Group.ElementModQ modQ) {
     CommonProto.ElementModQ.Builder builder = CommonProto.ElementModQ.newBuilder();

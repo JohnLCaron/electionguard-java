@@ -21,6 +21,7 @@ import java.util.List;
 
 import static com.sunya.electionguard.proto.CommonConvert.convertElementModP;
 import static com.sunya.electionguard.proto.CommonConvert.convertElementModQ;
+import static com.sunya.electionguard.proto.CommonConvert.convertUInt256;
 
 import electionguard.protogen.ElectionRecordProto;
 
@@ -92,10 +93,10 @@ public class ElectionRecordFromProto {
             context.getNumberOfGuardians(),
             context.getQuorum(),
             convertElementModP(context.getJointPublicKey()),
-            convertElementModQ(context.getManifestHash()),
-            convertElementModQ(context.getCryptoBaseHash()),
-            convertElementModQ(context.getCryptoExtendedBaseHash()),
-            convertElementModQ(context.getCommitmentHash()),
+            convertUInt256(context.getManifestHash()),
+            convertUInt256(context.getCryptoBaseHash()),
+            convertUInt256(context.getCryptoExtendedBaseHash()),
+            convertUInt256(context.getCommitmentHash()),
             context.getExtendedDataMap());
   }
 

@@ -1,4 +1,9 @@
 {
+  "election_scope_id": "jefferson-county-primary",
+  "spec_version": null,
+  "type": "primary",
+  "start_date": "2020-03-01T08:00-05:00",
+  "end_date": "2020-03-01T20:00-05:00",
   "name": {
     "text": [
       {
@@ -11,10 +16,6 @@
       }
     ]
   },
-  "election_scope_id": "jefferson-county-primary",
-  "type": "primary",
-  "start_date": "2020-03-01T08:00-05:00",
-  "end_date": "2020-03-01T20:00-05:00",
   "contact_information": {
     "address_line": [
       "1234 Paul Revere Run",
@@ -277,30 +278,30 @@
   "contests": [
     {
       "electoral_district_id": "jefferson-county",
-      "sequence_order": "0",
+      "sequence_order": 0,
       "vote_variation": "n_of_m",
-      "number_elected": "2",
-      "votes_allowed": "2",
+      "number_elected": 2,
+      "votes_allowed": 2,
       "name": "Justice of the Supreme Court",
       "ballot_selections": [
         {
           "candidate_id": "john-adams",
-          "sequence_order": "0",
+          "sequence_order": 0,
           "object_id": "john-adams-selection"
         },
         {
           "candidate_id": "benjamin-franklin",
-          "sequence_order": "1",
+          "sequence_order": 1,
           "object_id": "benjamin-franklin-selection"
         },
         {
           "candidate_id": "john-hancock",
-          "sequence_order": "2",
+          "sequence_order": 2,
           "object_id": "john-hancock-selection"
         },
         {
           "candidate_id": "write-in",
-          "sequence_order": "3",
+          "sequence_order": 3,
           "object_id": "write-in-selection"
         }
       ],
@@ -333,20 +334,20 @@
     },
     {
       "electoral_district_id": "harrison-township",
-      "sequence_order": "1",
+      "sequence_order": 1,
       "vote_variation": "one_of_m",
-      "number_elected": "1",
-      "votes_allowed": "1",
+      "number_elected": 1,
+      "votes_allowed": 1,
       "name": "The Pineapple Question",
       "ballot_selections": [
         {
           "candidate_id": "referendum-pineapple-affirmative",
-          "sequence_order": "0",
+          "sequence_order": 0,
           "object_id": "referendum-pineapple-affirmative-selection"
         },
         {
           "candidate_id": "referendum-pineapple-negative",
-          "sequence_order": "1",
+          "sequence_order": 1,
           "object_id": "referendum-pineapple-negative-selection"
         }
       ],
