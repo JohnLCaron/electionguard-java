@@ -31,7 +31,8 @@ public class TestEncryptProperties extends TestProperties {
     KeyPair keypair = elgamal_keypair_from_secret(int_to_q_unchecked(BigInteger.TWO)).orElseThrow();
     ElementModQ nonce = TestUtils.elements_mod_q();
 
-    Manifest.SelectionDescription metadata = new Manifest.SelectionDescription("some-selection-object-id", 1, "some-candidate-id");
+    Manifest.SelectionDescription metadata = new Manifest.SelectionDescription(
+            "some-selection-object-id", 1, "some-candidate-id", null);
     ElementModQ hash_context = metadata.cryptoHash();
 
     PlaintextBallot.Selection subject = selection_from(metadata, false, false);
@@ -49,7 +50,8 @@ public class TestEncryptProperties extends TestProperties {
   public void test_encrypt_simple_selection_malformed_data_fails() {
     KeyPair keypair = elgamal_keypair_from_secret(int_to_q_unchecked(BigInteger.TWO)).orElseThrow();
     ElementModQ nonce = TestUtils.elements_mod_q();
-    Manifest.SelectionDescription metadata = new Manifest.SelectionDescription("some-selection-object-id", 1, "some-candidate-id");
+    Manifest.SelectionDescription metadata = new Manifest.SelectionDescription(
+            "some-selection-object-id", 1, "some-candidate-id", null);
     ElementModQ hash_context = metadata.cryptoHash();
     PlaintextBallot.Selection subject = selection_from(metadata, false, false);
     assertThat(subject.is_valid(metadata.selectionId())).isTrue();
@@ -138,9 +140,12 @@ public class TestEncryptProperties extends TestProperties {
     KeyPair keypair = elgamal_keypair_from_secret(int_to_q_unchecked(BigInteger.TWO)).orElseThrow();
     ElementModQ nonce = TestUtils.elements_mod_q();
 
-    Manifest.SelectionDescription desc1 = new Manifest.SelectionDescription("some-object-id-affirmative", 0, "some-candidate-id-affirmative");
-    Manifest.SelectionDescription desc2 = new Manifest.SelectionDescription("some-object-id-negative", 1, "some-candidate-id-negative");
-    Manifest.SelectionDescription descp = new Manifest.SelectionDescription("some-object-id-placeholder", 2, "some-candidate-id-placeholder");
+    Manifest.SelectionDescription desc1 = new Manifest.SelectionDescription(
+            "some-object-id-affirmative", 0, "some-candidate-id-affirmative", null);
+    Manifest.SelectionDescription desc2 = new Manifest.SelectionDescription(
+            "some-object-id-negative", 1, "some-candidate-id-negative", null);
+    Manifest.SelectionDescription descp = new Manifest.SelectionDescription(
+            "some-object-id-placeholder", 2, "some-candidate-id-placeholder", null);
 
     Manifest.ContestDescription contest = new Manifest.ContestDescription(
             "some-contest-object-id",
@@ -153,7 +158,8 @@ public class TestEncryptProperties extends TestProperties {
             ImmutableList.of(desc1, desc2),
             null,
             null,
-            ImmutableList.of());
+            ImmutableList.of(),
+            null);
 
     ContestWithPlaceholders metadata = new ContestWithPlaceholders(contest, ImmutableList.of(descp));
     ElementModQ hash_context = contest.cryptoHash();
@@ -264,12 +270,15 @@ public class TestEncryptProperties extends TestProperties {
                     new Manifest.SelectionDescription(
                             "0@A.com-selection",
                             0,
-                            "0@A.com"),
+                            "0@A.com",
+                            null),
                     new Manifest.SelectionDescription(
                             "0@B.com-selection",
                             1,
-                            "0@B.com")),
-            null, null, ImmutableList.of());
+                            "0@B.com",
+                            null)),
+            null, null, ImmutableList.of(),
+            null);
 
     KeyPair keypair = elgamal_keypair_from_secret(TWO_MOD_Q).orElseThrow();
 
@@ -306,13 +315,16 @@ public class TestEncryptProperties extends TestProperties {
                     new Manifest.SelectionDescription(
                             "0@A.com-selection",
                             0,
-                            "0@A.com"),
+                            "0@A.com",
+                            null),
                     // Note the selection description is the same as the first sequence element
                     new Manifest.SelectionDescription(
                             "0@A.com-selection",
                             1,
-                            "0@A.com")),
-            null, null, ImmutableList.of());
+                            "0@A.com",
+                            null)),
+            null, null, ImmutableList.of(),
+            null);
 
     KeyPair keypair = elgamal_keypair_from_secret(TWO_MOD_Q).orElseThrow();
 

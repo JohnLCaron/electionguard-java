@@ -78,7 +78,8 @@ public class InternalManifest {
     return Optional.of(new Manifest.SelectionDescription(
             String.format("%s-placeholder", placeholder_object_id),
             use_sequence_id,
-            String.format("%s-candidate", placeholder_object_id)));
+            String.format("%s-candidate", placeholder_object_id),
+            null));
   }
 
   public Optional<ContestWithPlaceholders> getContestById(String contest_id) {

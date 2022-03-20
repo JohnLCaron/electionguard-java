@@ -267,7 +267,7 @@ public class ElectionTestHelper {
    */
   private Manifest.SelectionDescription candidate_to_selection_description(Manifest.Candidate candidate, int sequence_order) {
     return new Manifest.SelectionDescription(
-            String.format("c-%s", candidate.candidateId()), sequence_order, candidate.get_candidate_id());
+            String.format("c-%s", candidate.candidateId()), sequence_order, candidate.get_candidate_id(), null);
   }
 
   public record CandidateTuple(
@@ -327,7 +327,8 @@ public class ElectionTestHelper {
                     selection_descriptions,
                     internationalized_texts(),
                     internationalized_texts(),
-                    party_ids));
+                    party_ids,
+                    null));
   }
 
 
@@ -390,7 +391,8 @@ public class ElectionTestHelper {
                     selection_descriptions,
                     internationalized_texts(),
                     internationalized_texts(),
-                    ImmutableList.of()));
+                    ImmutableList.of(),
+                    null));
   }
 
   /**

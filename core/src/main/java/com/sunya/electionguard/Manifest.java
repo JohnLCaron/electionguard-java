@@ -47,19 +47,44 @@ public record Manifest(
     contests = toImmutableListEmpty(contests);
     ballotStyles = toImmutableListEmpty(ballotStyles);
     if (cryptoHash == null) {
-      cryptoHash = Hash.hash_elems(
+      cryptoHash = recalcCryptoHash(
               electionScopeId,
-              electionType.name(),
-              startDate.format(Utils.dtf), // python: to_iso_date_string, eg 2020-03-01T13:00:00Z
-              endDate.format(Utils.dtf),
-              name,
-              contactInformation,
+              electionType,
+              startDate,
+              endDate,
               geopoliticalUnits,
               parties,
-              // candidates,
+              candidates,
               contests,
-              ballotStyles);
+              ballotStyles,
+              name,
+              contactInformation);
     }
+  }
+
+  public static Group.ElementModQ recalcCryptoHash(String electionScopeId,
+                                                   ElectionType electionType,
+                                                   OffsetDateTime startDate,
+                                                   OffsetDateTime endDate,
+                                                   List<GeopoliticalUnit> geopoliticalUnits,
+                                                   List<Party> parties,
+                                                   List<Candidate> candidates,
+                                                   List<ContestDescription> contests,
+                                                   List<BallotStyle> ballotStyles,
+                                                   @Nullable InternationalizedText name,
+                                                   @Nullable ContactInformation contactInformation) {
+    return Hash.hash_elems(
+            electionScopeId,
+            electionType.name(),
+            startDate.format(Utils.dtf), // python: to_iso_date_string, eg 2020-03-01T13:00:00Z
+            endDate.format(Utils.dtf),
+            name,
+            contactInformation,
+            geopoliticalUnits,
+            parties,
+            // candidates,
+            contests,
+            ballotStyles);
   }
 
   /**
@@ -428,10 +453,10 @@ public record Manifest(
   /**
    * Classifies a set of contests by their set of parties and geopolitical units
    *
-   * @param ballotStyleId             A unique name
+   * @param ballotStyleId       A unique name
    * @param geopoliticalUnitIds matches GeoPoliticalUnit.object_id; may be empty
-   * @param partyIds             matches Party.object_id; may be empty
-   * @param imageUri             an optional image_uri for this BallotStyle
+   * @param partyIds            matches Party.object_id; may be empty
+   * @param imageUri            an optional image_uri for this BallotStyle
    */
   public record BallotStyle(
           String ballotStyleId,
@@ -630,14 +655,14 @@ public record Manifest(
   /**
    * The metadata that describes the structure and type of one contest in the election.
    *
-   * @param contestId        Contest id, must be unique.
-   * @param sequenceOrder    Used for ordering contests in a ballot to ensure various encryption primitives are deterministic.
-   * @param numberElected    Number of candidates that are elected in the contest ("n" of n-of-m).
-   * @param votesAllowed     Maximum number of selections per voter in this contest.
-   * @param name             Name of the contest, not necessarily as it appears on the ballot
-   * @param selections       The possible ballot selections for the contest.
-   * @param ballotTitle      Title of the contest as it appears on the ballot.
-   * @param ballotSubtitle   Subtitle of the contest as it appears on the ballot.
+   * @param contestId      Contest id, must be unique.
+   * @param sequenceOrder  Used for ordering contests in a ballot to ensure various encryption primitives are deterministic.
+   * @param numberElected  Number of candidates that are elected in the contest ("n" of n-of-m).
+   * @param votesAllowed   Maximum number of selections per voter in this contest.
+   * @param name           Name of the contest, not necessarily as it appears on the ballot
+   * @param selections     The possible ballot selections for the contest.
+   * @param ballotTitle    Title of the contest as it appears on the ballot.
+   * @param ballotSubtitle Subtitle of the contest as it appears on the ballot.
    * @see <a href="https://developers.google.com/elections-data/reference/contest">Civics Common Standard Data Specification</a>
    */
   public record ContestDescription(
@@ -646,12 +671,13 @@ public record Manifest(
           String geopoliticalUnitId,
           VoteVariationType voteVariation,
           int numberElected,
-          Integer votesAllowed, // LOOK may be missing in python/JSON, unknown semantics.
+          Integer votesAllowed,
           String name,
           List<SelectionDescription> selections,
           @Nullable InternationalizedText ballotTitle,
           @Nullable InternationalizedText ballotSubtitle,
-          @Nullable List<String> primaryPartyIds // match Party.party_id, only in CandidateContestDescription
+          @Nullable List<String> primaryPartyIds, // match Party.party_id, only in CandidateContestDescription
+          Group.ElementModQ cryptoHash
   ) implements Hash.CryptoHashable {
 
     public ContestDescription {
@@ -662,23 +688,47 @@ public record Manifest(
       Preconditions.checkNotNull(name);
       selections = toImmutableListEmpty(selections);
       primaryPartyIds = toImmutableListEmpty(primaryPartyIds);
+      if (cryptoHash == null) {
+        cryptoHash = recalcCryptoHash(
+                contestId,
+                sequenceOrder,
+                geopoliticalUnitId,
+                voteVariation,
+                numberElected,
+                votesAllowed,
+                name,
+                selections,
+                ballotTitle,
+                ballotSubtitle,
+                primaryPartyIds
+        );
+      }
     }
 
-    @Override
-    public Group.ElementModQ cryptoHash() {
+    public static Group.ElementModQ recalcCryptoHash(
+            String contestId,
+            int sequenceOrder,
+            String geopoliticalUnitId,
+            VoteVariationType voteVariation,
+            int numberElected,
+            Integer votesAllowed,
+            String name,
+            List<SelectionDescription> selections,
+            @Nullable InternationalizedText ballotTitle,
+            @Nullable InternationalizedText ballotSubtitle,
+            @Nullable List<String> primaryPartyIds) {
       return Hash.hash_elems(
-              this.contestId,
-              this.sequenceOrder,
-              this.geopoliticalUnitId,
-              this.voteVariation.name(),
-              this.ballotTitle,
-              this.ballotSubtitle,
-              this.name,
-              this.numberElected,
-              this.votesAllowed,
-              this.selections);
+              contestId,
+              sequenceOrder,
+              geopoliticalUnitId,
+              voteVariation.name(),
+              ballotTitle,
+              ballotSubtitle,
+              name,
+              numberElected,
+              votesAllowed,
+              selections);
       // this.primaryPartyIds);
-
     }
 
     @Override
@@ -758,17 +808,22 @@ public record Manifest(
   public record SelectionDescription(
           String selectionId,
           int sequenceOrder,
-          String candidateId
+          String candidateId,
+          Group.ElementModQ cryptoHash
   ) implements Hash.CryptoHashable {
 
     public SelectionDescription {
       Preconditions.checkArgument(!Strings.isNullOrEmpty(selectionId));
       Preconditions.checkArgument(!Strings.isNullOrEmpty(candidateId));
+      if (cryptoHash == null) {
+        cryptoHash = recalcCryptoHash(selectionId, sequenceOrder, candidateId);
+      }
     }
 
-    @Override
-    public Group.ElementModQ cryptoHash() {
-      return Hash.hash_elems(this.selectionId, this.sequenceOrder, this.candidateId);
+    public static Group.ElementModQ recalcCryptoHash(String selectionId,
+                                                     int sequenceOrder,
+                                                     String candidateId) {
+      return Hash.hash_elems(selectionId, sequenceOrder, candidateId);
     }
 
     @Override

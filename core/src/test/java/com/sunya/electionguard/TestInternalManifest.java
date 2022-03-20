@@ -24,13 +24,13 @@ public class TestInternalManifest {
                     new SelectionDescription(
                             "0@A.com-selection",
                             0,
-                            "0@A.com"),
+                            "0@A.com", null),
                     new SelectionDescription(
                             "0@B.com-selection",
                             1,
-                            "0@B.com")),
+                            "0@B.com", null)),
             null, null,
-            ImmutableList.of());
+            ImmutableList.of(), null);
 
     ContestWithPlaceholders contestp = new ContestWithPlaceholders(
             contest,
@@ -38,7 +38,8 @@ public class TestInternalManifest {
                     new SelectionDescription(
                             "0@A.com-contest-2-placeholder",
                             2,
-                            "0@A.com-contest-2-candidate")
+                            "0@A.com-contest-2-candidate",
+                            null)
             ));
 
     assertThat(contestp.is_valid()).isTrue();
@@ -58,13 +59,13 @@ public class TestInternalManifest {
                     new SelectionDescription(
                             "0@A.com-selection",
                             0,
-                            "0@A.com"),
+                            "0@A.com", null),
                     // simulate a bad selection description input
                     new SelectionDescription(
                             "0@A.com-selection",
                             1,
-                            "0@A.com")),
-            null, null, ImmutableList.of());
+                            "0@A.com", null)),
+            null, null, ImmutableList.of(), null);
 
     ContestWithPlaceholders contestp = new ContestWithPlaceholders(
             contest,
@@ -72,7 +73,8 @@ public class TestInternalManifest {
                     new SelectionDescription(
                             "0@A.com-contest-2-placeholder",
                             2,
-                            "0@A.com-contest-2-candidate")
+                            "0@A.com-contest-2-candidate",
+                            null)
             ));
 
     assertThat(contestp.is_valid()).isFalse();

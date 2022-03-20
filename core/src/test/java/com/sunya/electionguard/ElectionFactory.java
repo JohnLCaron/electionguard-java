@@ -34,8 +34,10 @@ public class ElectionFactory {
 
     // Referendum selections are simply a special case of `candidate`in the object model
     List<Manifest.SelectionDescription> fake_referendum_ballot_selections = ImmutableList.of(
-            new Manifest.SelectionDescription("some-object-id-affirmative", 0, "some-candidate-id-1"),
-            new Manifest.SelectionDescription("some-object-id-negative", 1, "some-candidate-id-2"));
+            new Manifest.SelectionDescription(
+                    "some-object-id-affirmative", 0, "some-candidate-id-1", null),
+            new Manifest.SelectionDescription(
+                    "some-object-id-negative", 1, "some-candidate-id-2", null));
 
     int sequence_order = 0;
     int number_elected = 1;
@@ -49,12 +51,12 @@ public class ElectionFactory {
             votes_allowed,
             "some-referendum-contest-name",
             fake_referendum_ballot_selections,
-            null, null, null);
+            null, null, null, null);
 
     List<Manifest.SelectionDescription> fake_candidate_ballot_selections = ImmutableList.of(
-            new Manifest.SelectionDescription("some-object-id-candidate-1", 0, "some-candidate-id-1"),
-            new Manifest.SelectionDescription("some-object-id-candidate-2", 1, "some-candidate-id-2"),
-            new Manifest.SelectionDescription("some-object-id-candidate-3", 2, "some-candidate-id-3")
+            new Manifest.SelectionDescription("some-object-id-candidate-1", 0, "some-candidate-id-1", null),
+            new Manifest.SelectionDescription("some-object-id-candidate-2", 1, "some-candidate-id-2", null),
+            new Manifest.SelectionDescription("some-object-id-candidate-3", 2, "some-candidate-id-3", null)
     );
 
     int sequence_order_2 = 1;
@@ -69,7 +71,7 @@ public class ElectionFactory {
             votes_allowed_2,
             "some-candidate-contest-name",
             fake_candidate_ballot_selections,
-            null, null, null);
+            null, null, null, null);
 
     return new Manifest(
             "some-scope-id", ElectionContext.SPEC_VERSION,
@@ -147,7 +149,7 @@ public class ElectionFactory {
     String candidate_id = String.format("candidate_id-%d", TestUtils.randomInt(20));
     String object_id = String.format("object_id-%d", TestUtils.randomInt());
     int sequence_order = random.nextInt(20);
-    return new SelectionTuple(object_id, new Manifest.SelectionDescription(object_id, sequence_order, candidate_id));
+    return new SelectionTuple(object_id, new Manifest.SelectionDescription(object_id, sequence_order, candidate_id, null));
   }
 
   public static ContestWithPlaceholders get_contest_description_well_formed() {
@@ -165,7 +167,7 @@ public class ElectionFactory {
     for (int i = 0; i < Math.max(first_int, second_int); i++) {
       String object_id = String.format("object_id-%d", TestUtils.randomInt());
       String candidate_id = String.format("candidate_id-%d", TestUtils.randomInt());
-      Manifest.SelectionDescription selection_description = new Manifest.SelectionDescription(object_id, i, candidate_id);
+      Manifest.SelectionDescription selection_description = new Manifest.SelectionDescription(object_id, i, candidate_id, null);
       selection_descriptions.add(selection_description);
     }
 
@@ -178,7 +180,7 @@ public class ElectionFactory {
             votes_allowed,
             "draw(text)",
             selection_descriptions,
-            null, null, null);
+            null, null, null, null);
 
     List<Manifest.SelectionDescription> placeholder_selections = InternalManifest.generate_placeholder_selections_from(contest_description, number_elected);
     return  new ContestWithPlaceholders(contest_description, placeholder_selections);

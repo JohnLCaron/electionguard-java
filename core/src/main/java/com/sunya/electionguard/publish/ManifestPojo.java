@@ -188,7 +188,8 @@ public class ManifestPojo {
             ConvertPojos.convertList(pojo.ballot_selections, ManifestPojo::convertSelectionDescription),
             convertInternationalizedText(pojo.ballot_title),
             convertInternationalizedText(pojo.ballot_subtitle),
-            pojo.primary_party_ids);
+            pojo.primary_party_ids,
+            null);
   }
 
   @Nullable
@@ -241,7 +242,8 @@ public class ManifestPojo {
     return new Manifest.SelectionDescription(
             pojo.object_id,
             pojo.sequence_order,
-            pojo.candidate_id
+            pojo.candidate_id,
+            null
     );
   }
 
