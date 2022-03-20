@@ -1,6 +1,6 @@
 # 🗳 Election Record serialization (proposed specification)
 
-draft 3/18/2022 for proto_version = 1.0.0 (MAJOR.MINOR.PATCH)
+draft 3/19/2022 for proto_version = 1.0.0 (MAJOR.MINOR.PATCH)
 
 This covers only the election record, and not any serialized classes used in remote procedure calls.
 
@@ -54,9 +54,9 @@ Notes
 Used as a hash, when Group operations are no longer needed on it.
 JSON uses ElementModQ.
 
-| Name  | Type | Notes                                      |
-|-------|------|--------------------------------------------|
-| value | bytes | bigint is 32 bytes, unsigned, big-endian  |
+| Name  | Type   | Notes                                     |
+|-------|--------|-------------------------------------------|
+| value | bytes  | bigint is 32 bytes, unsigned, big-endian  |
 
 
 ## Election
@@ -134,6 +134,8 @@ There is no python SDK version of this class. Can be constructed from the Lagran
 Could simplify to be just the fields needed by electionguard library. Assume that there is an existing system that
 captures all the metadata that election software need, which is a superset of this.
 
+When the optional crypto_hash are passed, they are verified. If not passed in, they are recomputed.
+
 ### class Manifest
 
 | Name                | JSON Name | Type                       | Notes                           |
@@ -150,6 +152,7 @@ captures all the metadata that election software need, which is a superset of th
 | ballot_styles       |           | List\<BallotStyle\>        |                                 |
 | name                |           | InternationalizedText      | optional                        |
 | contact_information |           | ContactInformation         | optional                        |
+| crypto_hash         |           | UInt256                    | optional                        |
 
 ### class AnnotatedString
 
@@ -233,14 +236,16 @@ captures all the metadata that election software need, which is a superset of th
 | ballot_title         |                       | InternationalizedText        | optional                                      |
 | ballot_subtitle      |                       | InternationalizedText        | optional                                      |
 | primary_party_ids    |                       | List\<string\>               | optional, match Party.party_id                |
+| crypto_hash          |                       | UInt256                      | optional                                      |
 
 ### class SelectionDescription
 
-| Name           | JSON Name | Type   | Notes                          |
-|----------------|-----------|--------|--------------------------------|
-| selection_id   | object_id | string |                                |
-| sequence_order |           | uint32 | deterministic sorting          |
-| candidate_id   |           | string | matches Candidate.candidate_id |
+| Name           | JSON Name | Type     | Notes                          |
+|----------------|-----------|----------|--------------------------------|
+| selection_id   | object_id | string   |                                |
+| sequence_order |           | uint32   | deterministic sorting          |
+| candidate_id   |           | string   | matches Candidate.candidate_id |
+| crypto_hash    |           | UInt256  | optional                       |
 
 ## plaintext_tally.proto
 

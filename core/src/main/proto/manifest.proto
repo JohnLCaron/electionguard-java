@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+import "common.proto";
+
 option java_package = "electionguard.protogen";
 option java_outer_classname = "ManifestProto";
 
@@ -28,6 +30,7 @@ message Manifest {
   repeated BallotStyle ballot_styles = 10;
   InternationalizedText name = 11;
   ContactInformation contact_information = 12;
+  UInt256 crypto_hash = 13;
 }
 
 message AnnotatedString {
@@ -142,10 +145,12 @@ message ContestDescription {
   InternationalizedText ballot_title = 9;
   InternationalizedText ballot_subtitle = 10;
   repeated string primary_party_ids = 11;
+  UInt256 crypto_hash = 12;
 }
 
 message SelectionDescription {
   string selection_id = 1;
   uint32 sequence_order = 2;
   string candidate_id = 3;   // matches Candidate.candidate_id
+  UInt256 crypto_hash = 4;
 }

@@ -137,7 +137,7 @@ public class ManifestInputBuilder {
       return new Manifest.ContestDescription(id, seq, district,
               type, allowed, allowed, name,
               selections.stream().map(SelectionBuilder::build).toList(),
-              null, null, ImmutableList.of());
+              null, null, ImmutableList.of(), null);
     }
 
     public class SelectionBuilder {
@@ -151,7 +151,7 @@ public class ManifestInputBuilder {
       }
 
       Manifest.SelectionDescription build() {
-        return new Manifest.SelectionDescription(id, seq, candidate_id);
+        return new Manifest.SelectionDescription(id, seq, candidate_id, null);
       }
     }
   }

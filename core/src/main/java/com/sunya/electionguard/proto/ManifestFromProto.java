@@ -6,6 +6,7 @@ import javax.annotation.Nullable;
 import java.time.OffsetDateTime;
 
 import static com.sunya.electionguard.proto.CommonConvert.convertList;
+import static com.sunya.electionguard.proto.CommonConvert.convertUInt256;
 
 import electionguard.protogen.ManifestProto;
 
@@ -43,7 +44,8 @@ public class ManifestFromProto {
             convertList(election.getBallotStylesList(), ManifestFromProto::convertBallotStyle),
             name,
             contact,
-            null);
+            election.hasCryptoHash() ? convertUInt256(election.getCryptoHash()) : null
+    );
   }
 
   static Manifest.AnnotatedString convertAnnotatedString(ManifestProto.AnnotatedString annotated) {
@@ -91,7 +93,8 @@ public class ManifestFromProto {
             convertList(contest.getSelectionsList(), ManifestFromProto::convertSelectionDescription),
             contest.hasBallotTitle() ? convertInternationalizedText(contest.getBallotTitle()) : null,
             contest.hasBallotSubtitle() ? convertInternationalizedText(contest.getBallotSubtitle()) : null,
-            contest.getPrimaryPartyIdsList()
+            contest.getPrimaryPartyIdsList(),
+            contest.hasCryptoHash() ? convertUInt256(contest.getCryptoHash()) : null
             );
   }
 
@@ -136,7 +139,8 @@ public class ManifestFromProto {
     return new Manifest.SelectionDescription(
             selection.getSelectionId(),
             selection.getSequenceOrder(),
-            selection.getCandidateId()
+            selection.getCandidateId(),
+            selection.hasCryptoHash() ? convertUInt256(selection.getCryptoHash()) : null
     );
   }
 }
