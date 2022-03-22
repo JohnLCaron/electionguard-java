@@ -19,6 +19,11 @@ public class Hash {
     Group.ElementModQ cryptoHash();
   }
 
+  public interface CryptoHashableString {
+    /** Returns a string suitable for input to a cryptographic hash function. */
+    String cryptoHashString();
+  }
+
   // LOOK not used?
   interface CryptoHashCheckable {
     Group.ElementModQ crypto_hash_with(Group.ElementModQ seed);
@@ -72,6 +77,8 @@ public class Hash {
         hash_me = ((Group.ElementMod)x).to_hex();
       } else if (x instanceof CryptoHashable) {
         hash_me = ((CryptoHashable)x).cryptoHash().to_hex();
+      } else if (x instanceof CryptoHashableString) {
+        hash_me = ((CryptoHashableString)x).cryptoHashString();
       } else if (x instanceof String) {
           // strings are iterable, so it 's important to handle them before list-like types
         hash_me = (String) x;

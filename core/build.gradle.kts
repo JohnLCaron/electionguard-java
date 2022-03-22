@@ -23,6 +23,7 @@ description = "electionguard-java-core"
 dependencies {
     api(platform(libs.protobufBom))
 
+    implementation(libs.bytesLib)
     implementation(platform(libs.grpcBom))
     implementation(libs.grpcProtobuf)
     implementation(libs.grpcStub)
