@@ -1,4 +1,5 @@
 [versions]
+bytes = "1.5.0"
 flogger = "0.5.1"
 grpc = "1.42.1"
 gson = "2.8.6"
@@ -24,6 +25,7 @@ owaspDepCheckPlugin = "6.5.1"
 protobufPlugin = "0.8.18"
 
 [libraries]
+bytesLib = { group = "at.favre.lib", name = "bytes", version.ref = "bytes" }
 grpcBom = { group = "io.grpc", name = "grpc-bom", version.ref = "grpc" }
 grpcProtobuf = { group = "io.grpc", name = "grpc-protobuf" }
 grpcNettyShaded = { group = "io.grpc", name = "grpc-netty-shaded" }

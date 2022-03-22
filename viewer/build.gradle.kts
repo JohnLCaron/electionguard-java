@@ -16,6 +16,7 @@ dependencies {
     api(project(":core"))
     api(platform(libs.protobufBom))
 
+    implementation(libs.bytesLib)
     implementation(libs.guava)
     implementation(libs.jcommander)
     implementation(libs.jsr305)

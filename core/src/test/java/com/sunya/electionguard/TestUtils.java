@@ -22,7 +22,7 @@ public class TestUtils {
   }
 
   /** Generates an arbitrary ElGamal secret/public keypair. from electionguardtest.elgamal. */
-  static ElGamal.KeyPair elgamal_keypairs() {
+  public static ElGamal.KeyPair elgamal_keypairs() {
     ElementModQ e = elements_mod_q_no_zero();
     return ElGamal.elgamal_keypair_from_secret(!e.equals(ONE_MOD_Q) ? e : TWO_MOD_Q).orElseThrow();
   }

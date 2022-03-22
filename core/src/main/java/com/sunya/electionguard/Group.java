@@ -1,5 +1,6 @@
 package com.sunya.electionguard;
 
+import at.favre.lib.bytes.Bytes;
 import com.google.common.collect.Iterables;
 
 import javax.annotation.concurrent.Immutable;
@@ -71,6 +72,10 @@ public class Group {
      */
     byte[] to_bytes() {
       return Utils.b16decode(this.to_hex());
+    }
+
+    public Bytes bytes() {
+      return Bytes.wrap(elem.toByteArray());
     }
 
     @Override
