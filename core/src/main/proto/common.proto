@@ -3,7 +3,6 @@ syntax = "proto3";
 option java_package = "electionguard.protogen";
 option java_outer_classname = "CommonProto";
 
-
 message GenericChaumPedersenProof {
   ElementModP pad = 1; // a in the spec  // 1.0 only
   ElementModP data = 2; // b in the spec  // 1.0 only

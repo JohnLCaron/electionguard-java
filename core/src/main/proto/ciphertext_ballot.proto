@@ -48,7 +48,7 @@ message CiphertextBallotSelection {
 }
 
 message ConstantChaumPedersenProof {
-  ElementModP pad = 1;
+  ElementModP pad = 1; // 1-4 are 1.0
   ElementModP data = 2;
   ElementModQ challenge = 3;
   ElementModQ response = 4;
@@ -57,7 +57,7 @@ message ConstantChaumPedersenProof {
 }
 
 message DisjunctiveChaumPedersenProof {
-  ElementModP proof_zero_pad = 1;
+  ElementModP proof_zero_pad = 1;  // 1-8 are 1.0
   ElementModP proof_zero_data = 2;
   ElementModQ proof_zero_challenge = 3;
   ElementModQ proof_zero_response = 4;
