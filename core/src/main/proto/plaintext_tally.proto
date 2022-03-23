@@ -32,7 +32,7 @@ message CiphertextDecryptionSelection {
 
   // The Proof that the share was decrypted correctly
   oneof proof_or_parts {
-    ChaumPedersenProof proof = 4; // When the guardian generates the share directly
+    GenericChaumPedersenProof proof = 4; // When the guardian generates the share directly
     RecoveredParts recovered_parts = 5; // When the share is generated on behalf of this guardian by other guardians
   }
 }
@@ -47,5 +47,5 @@ message CiphertextCompensatedDecryptionSelection {
   string missing_guardian_id = 3; //  // The Missing Guardian for whom this share is calculated on behalf of.
   ElementModP share = 4; // The Share of the decryption of a selection. M_il in the spec.
   ElementModP recovery_key = 5; // The Public Key for the missing_guardian that corresponds to the available guardian's share of the secret.
-  ChaumPedersenProof proof = 6; // The Proof that the share was decrypted correctly.
+  GenericChaumPedersenProof proof = 6; // The Proof that the share was decrypted correctly.
 }

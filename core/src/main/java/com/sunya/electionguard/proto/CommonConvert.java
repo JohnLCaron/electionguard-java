@@ -61,7 +61,7 @@ public class CommonConvert {
     );
   }
 
-  public static ChaumPedersen.ChaumPedersenProof convertChaumPedersenProof(CommonProto.ChaumPedersenProof proof) {
+  public static ChaumPedersen.ChaumPedersenProof convertChaumPedersenProof(CommonProto.GenericChaumPedersenProof proof) {
     return new ChaumPedersen.ChaumPedersenProof(
             convertElementModP(proof.getPad()),
             convertElementModP(proof.getData()),
@@ -105,8 +105,8 @@ public class CommonConvert {
     return builder.build();
   }
 
-  public static CommonProto.ChaumPedersenProof convertChaumPedersenProof(ChaumPedersen.ChaumPedersenProof proof) {
-    CommonProto.ChaumPedersenProof.Builder builder = CommonProto.ChaumPedersenProof.newBuilder();
+  public static CommonProto.GenericChaumPedersenProof convertChaumPedersenProof(ChaumPedersen.ChaumPedersenProof proof) {
+    CommonProto.GenericChaumPedersenProof.Builder builder = CommonProto.GenericChaumPedersenProof.newBuilder();
     builder.setPad(convertElementModP(proof.pad));
     builder.setData(convertElementModP(proof.data));
     builder.setChallenge(convertElementModQ(proof.challenge));

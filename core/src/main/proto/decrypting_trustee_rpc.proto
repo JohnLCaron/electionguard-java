@@ -24,7 +24,7 @@ message PartialDecryptionResponse {
 
 message PartialDecryptionResult {
   ElementModP decryption = 1;
-  ChaumPedersenProof proof = 2;
+  GenericChaumPedersenProof proof = 2;
 }
 
 message CompensatedDecryptionRequest {
@@ -40,7 +40,7 @@ message CompensatedDecryptionResponse {
 
 message CompensatedDecryptionResult {
   ElementModP decryption = 1;
-  ChaumPedersenProof proof = 2;
+  GenericChaumPedersenProof proof = 2;
   ElementModP recoveryPublicKey = 3;
 }
 

@@ -42,7 +42,7 @@ The entire workflow, consisting of the above steps plus verification can be run 
 
 ### Serialization
   * [JSON serialization](https://github.com/JohnLCaron/electionguard-java/blob/master/docs/JsonElectionSpec.md)
-  * [Proto serialization](https://github.com/danwallach/electionguard-kotlin-multiplatform/blob/main/docs/SerializationSpec.md)
+  * [Proto serialization](https://github.com/JohnLCaron/electionguard-java/blob/master/docs/ProtoSerializationSpec1.md)
 
 ### Election Record Visualization
 

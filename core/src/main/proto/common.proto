@@ -3,10 +3,9 @@ syntax = "proto3";
 option java_package = "electionguard.protogen";
 option java_outer_classname = "CommonProto";
 
-
-message ChaumPedersenProof {
-  ElementModP pad = 1; // a in the spec
-  ElementModP data = 2; // b in the spec
+message GenericChaumPedersenProof {
+  ElementModP pad = 1; // a in the spec  // 1.0 only
+  ElementModP data = 2; // b in the spec  // 1.0 only
   ElementModQ challenge = 3; // c in the spec
   ElementModQ response = 4; // v in the spec
 }
@@ -30,7 +29,7 @@ message ElGamalCiphertext {
 
 message SchnorrProof {
   ElementModP public_key = 1; // k in the spec
-  ElementModP commitment = 2; // h in the spec
+  ElementModP commitment = 2; // h in the spec // 1.0 only
   ElementModQ challenge = 3; // c in the spec
   ElementModQ response = 4; // u in the spec
 }
