@@ -53,7 +53,7 @@ public class TestHashedElGamal {
     System.out.printf("publicKey='%s'%n", publicKey.to_hex());
 
     HashedElGamal subject = HashedElGamal.create(
-            Bytes.from(0), // "message"
+            Bytes.from("message"),
             publicKey,
             nonce);
 

@@ -1,20 +1,19 @@
 # 🗳 Election Record serialization (proposed specification)
 
-draft 3/19/2022 for proto_version = 1.0.0 (MAJOR.MINOR.PATCH)
+draft 3/22/2022 for proto_version = 1.0.0 (MAJOR.MINOR.PATCH)
 
-This covers only the election record, and not any serialized classes used in remote procedure calls.
+This covers only the election record, and not any serialized messagees used in remote procedure calls.
 
 Notes
 
 1. All fields must be present unless marked as optional.
-2. This specification will be mapped (in both directions) to the 1.0 JSON specification, when thats done.
+2. This specification will be mapped (in both directions) to the 1.0 JSON specification.
 3. Proto_version uses [semantic versioning](https://semver.org/), and all versions will be
-   [forward and backwards compatible](https://developers.google.com/protocol-buffers/docs/proto3#updating)
-   starting with ? (1.0 I hope, if the JSON spec is finalized by then).
+   [forward and backwards compatible](https://developers.google.com/protocol-buffers/docs/proto3#updating).
 
 ## common.proto
 
-### class ChaumPedersenProof
+### message GenericChaumPedersenProof
 
 | Name      | JSON Name | Type            | Notes   |
 |-----------|-----------|-----------------|---------|
@@ -25,20 +24,20 @@ Notes
 | challenge |           | ElementModQ     |         |
 | response  |           | ElementModQ     |         |
 
-### class ElementModQ, ElementModP
+### message ElementModQ, ElementModP
 
 | Name  | JSON Name | Type  | Notes                                           |
 |-------|-----------|-------|-------------------------------------------------|
 | value | data      | bytes | bigint is variable length, unsigned, big-endian |
 
-### class ElGamalCiphertext
+### message ElGamalCiphertext
 
 | Name | JSON Name | Type        | Notes |
 |------|-----------|-------------|-------|
 | pad  |           | ElementModP |       |
 | data |           | ElementModP |       |
 
-### class SchnorrProof
+### message SchnorrProof
 
 | Name       | JSON Name | Type            | Notes   |
 |------------|-----------|-----------------|---------|
@@ -49,7 +48,7 @@ Notes
 | challenge  |           | ElementModQ     |         |
 | response   |           | ElementModQ     |         |
 
-### class UInt256
+### message UInt256
 
 Used as a hash, when Group operations are no longer needed on it.
 JSON uses ElementModQ.
@@ -59,11 +58,11 @@ JSON uses ElementModQ.
 | value | bytes  | bigint is 32 bytes, unsigned, big-endian  |
 
 
-## Election
+## election_record.proto
 
-### class election_record.proto
+### message ElectionRecord
 
-There is no python SDK version of this class.
+There is no python SDK version of this message.
 
 | Name                | Type                      | Notes                |
 |---------------------|---------------------------|----------------------|
@@ -77,9 +76,9 @@ There is no python SDK version of this class.
 | plaintext_tally     | PlaintextTally            | decrypt tally        |
 | available_guardians | List\<AvailableGuardian\> | decrypt tally        |
 
-### class AvailableGuardian
+### message AvailableGuardian
 
-There is no python SDK version of this class. Can be constructed from the LagrangeCoefficients JSON.
+There is no python SDK version of this message. Can be constructed from the LagrangeCoefficients JSON.
 
 | Name                | Type        | Notes                          |
 |---------------------|-------------|--------------------------------|
@@ -87,7 +86,7 @@ There is no python SDK version of this class. Can be constructed from the Lagran
 | x_coordinate        | string      | x_coordinate in the polynomial |
 | lagrange_coordinate | ElementModQ |                                |
 
-### class ElectionConstants
+### message ElectionConstants
 
 | Name        | JSON Name | Type   | Notes                             |
 |-------------|-----------|--------|-----------------------------------|
@@ -97,7 +96,7 @@ There is no python SDK version of this class. Can be constructed from the Lagran
 | cofactor    |           | bytes  | bigint is unsigned and big-endian |
 | generator   |           | bytes  | bigint is unsigned and big-endian |
 
-### class ElectionContext
+### message ElectionContext
 
 | Name                      | JSON Name | Type                  | Notes    |
 |---------------------------|-----------|-----------------------|----------|
@@ -110,7 +109,7 @@ There is no python SDK version of this class. Can be constructed from the Lagran
 | crypto_extended_base_hash |           | UInt256               |          |
 | extended_data             |           | map\<string, string\> | optional |
 
-### class EncryptionDevice
+### message EncryptionDevice
 
 | Name        | JSON Name | Type   | Notes                                  |
 |-------------|-----------|--------|----------------------------------------|
@@ -119,7 +118,7 @@ There is no python SDK version of this class. Can be constructed from the Lagran
 | launch_code |           | int64  |                                        |
 | location    |           | string |                                        |
 
-### class GuardianRecord
+### message GuardianRecord
 
 | Name                    | JSON Name            | Type                 | Notes                          |
 |-------------------------|----------------------|----------------------|--------------------------------|
@@ -136,7 +135,7 @@ captures all the metadata that election software need, which is a superset of th
 
 When the optional crypto_hash are passed, they are verified. If not passed in, they are recomputed.
 
-### class Manifest
+### message Manifest
 
 | Name                | JSON Name | Type                       | Notes                           |
 |---------------------|-----------|----------------------------|---------------------------------|
@@ -154,14 +153,14 @@ When the optional crypto_hash are passed, they are verified. If not passed in, t
 | contact_information |           | ContactInformation         | optional                        |
 | crypto_hash         |           | UInt256                    | optional                        |
 
-### class AnnotatedString
+### message AnnotatedString
 
 | Name       | JSON Name | Type   | Notes |
 |------------|-----------|--------|-------|
 | annotation |           | string |       |
 | value      |           | string |       |
 
-### class BallotStyle
+### message BallotStyle
 
 | Name                  | JSON Name | Type           | Notes                                         |
 |-----------------------|-----------|----------------|-----------------------------------------------|
@@ -170,7 +169,7 @@ When the optional crypto_hash are passed, they are verified. If not passed in, t
 | party_ids             |           | List\<string\> | optional matches Party.party_id               |
 | image_uri             |           | string         | optional                                      |
 
-### class Candidate
+### message Candidate
 
 | Name         | JSON Name | Type                  | Notes                           |
 |--------------|-----------|-----------------------|---------------------------------|
@@ -180,7 +179,7 @@ When the optional crypto_hash are passed, they are verified. If not passed in, t
 | image_uri    |           | string                | optional                        |
 | is_write_in  |           | bool                  |                                 |
 
-### class ContactInformation
+### message ContactInformation
 
 | Name         | JSON Name | Type           | Notes    |
 |--------------|-----------|----------------|----------|
@@ -189,7 +188,7 @@ When the optional crypto_hash are passed, they are verified. If not passed in, t
 | email        |           | List\<string\> | optional |
 | phone        |           | List\<string\> | optional |
 
-### class GeopoliticalUnit
+### message GeopoliticalUnit
 
 | Name                 | JSON Name | Type                   | Notes    |
 |----------------------|-----------|------------------------|----------|
@@ -198,20 +197,20 @@ When the optional crypto_hash are passed, they are verified. If not passed in, t
 | type                 |           | enum ReportingUnitType |          |
 | contact_information  |           | ContactInformation     | optional |
 
-### class InternationalizedText
+### message InternationalizedText
 
 | Name | JSON Name | Type             | Notes |
 |------|-----------|------------------|-------|
 | text |           | List\<Language\> |       |
 
-### class Language
+### message Language
 
 | Name     | JSON Name | Type   | Notes |
 |----------|-----------|--------|-------|
 | value    |           | string |       |
 | language |           | string |       |
 
-### class Party
+### message Party
 
 | Name         | JSON Name | Type                  | Notes    |
 |--------------|-----------|-----------------------|----------|
@@ -221,7 +220,7 @@ When the optional crypto_hash are passed, they are verified. If not passed in, t
 | color        |           | string                | optional |
 | logo_uri     |           | string                | optional |
 
-### class ContestDescription
+### message ContestDescription
 
 | Name                 | JSON Name             | Type                         | Notes                                         |
 |----------------------|-----------------------|------------------------------|-----------------------------------------------|
@@ -238,7 +237,7 @@ When the optional crypto_hash are passed, they are verified. If not passed in, t
 | primary_party_ids    |                       | List\<string\>               | optional, match Party.party_id                |
 | crypto_hash          |                       | UInt256                      | optional                                      |
 
-### class SelectionDescription
+### message SelectionDescription
 
 | Name           | JSON Name | Type     | Notes                          |
 |----------------|-----------|----------|--------------------------------|
@@ -249,21 +248,21 @@ When the optional crypto_hash are passed, they are verified. If not passed in, t
 
 ## plaintext_tally.proto
 
-### class PlaintextTally
+### message PlaintextTally
 
 | Name     | JSON Name | Type                          | Notes                                                             |
 |----------|-----------|-------------------------------|-------------------------------------------------------------------|
 | tally_id | object_id | string                        | when decrypted spoiled ballots, matches SubmittedBallot.ballot_id |
 | contests |           | List\<PlaintextTallyContest\> |                                                                   |
 
-### class PlaintextTallyContest
+### message PlaintextTallyContest
 
 | Name       | JSON Name | Type                            | Notes                                  |
 |------------|-----------|---------------------------------|----------------------------------------|
 | contest_id | object_id | string                          | matches ContestDescription.contest_id. |
 | selections |           | List\<PlaintextTallySelection\> | removed unneeded map                   |
 
-### class PlaintextTallySelection
+### message PlaintextTallySelection
 
 | Name         | JSON Name | Type                                  | Notes                                     |
 |--------------|-----------|---------------------------------------|-------------------------------------------|
@@ -273,37 +272,37 @@ When the optional crypto_hash are passed, they are verified. If not passed in, t
 | message      |           | ElGamalCiphertext                     |                                           |
 | shares       |           | List\<CiphertextDecryptionSelection\> | removed unneeded map                      |
 
-### class CiphertextDecryptionSelection
+### message CiphertextDecryptionSelection
 
 | Name            | JSON Name | Type                                             | Notes                          |
 |-----------------|-----------|--------------------------------------------------|--------------------------------|
 | selection_id    | object_id | string                                           | get_tally_shares_for_selection |
 | guardian_id     |           | string                                           |                                |
 | share           |           | ElementModP                                      |                                |
-| proof           |           | ChaumPedersenProof                               |                                |
+| proof           |           | GenericChaumPedersenProof                        |                                |
 | recovered_parts |           | List\<CiphertextCompensatedDecryptionSelection\> | removed unneeded map           |
 
-### class CiphertextCompensatedDecryptionSelection(ElectionObjectBase)
+### message CiphertextCompensatedDecryptionSelection(ElectionObjectBase)
 
-| Name                | JSON Name | Type               | Notes    |
-|---------------------|-----------|--------------------|----------|
-| selection_id        | object_id | string             | unneeded |
-| guardian_id         |           | string             |          |
-| missing_guardian_id |           | string             |          |
-| share               |           | ElementModP        |          |
-| recovery_key        |           | ElementModP        |          |
-| proof               |           | ChaumPedersenProof |          |
+| Name                | JSON Name | Type                       | Notes    |
+|---------------------|-----------|----------------------------|----------|
+| selection_id        | object_id | string                     | unneeded |
+| guardian_id         |           | string                     |          |
+| missing_guardian_id |           | string                     |          |
+| share               |           | ElementModP                |          |
+| recovery_key        |           | ElementModP                |          |
+| proof               |           | GenericChaumPedersenProof  |          |
 
 ## ciphertext_tally.proto
 
-### class CiphertextTally
+### message CiphertextTally
 
 | Name     | JSON Name | Type                           | Notes                                                             |
 |----------|-----------|--------------------------------|-------------------------------------------------------------------|
 | tally_id | object_id | string                         | when decrypted spoiled ballots, matches SubmittedBallot.ballot_id |
 | contests |           | List\<CiphertextTallyContest\> | removed unneeded map                                              | 
 
-### class CiphertextTallyContest
+### message CiphertextTallyContest
 
 | Name                     | JSON Name        | Type                             | Notes                                     |
 |--------------------------|------------------|----------------------------------|-------------------------------------------|
@@ -312,7 +311,7 @@ When the optional crypto_hash are passed, they are verified. If not passed in, t
 | contest_description_hash | description_hash | UInt256                          | matches ContestDescription.crypto_hash    |
 | selections               |                  | List\<CiphertextTallySelection\> | removed unneeded map                      |
 
-### class CiphertextTallySelection|
+### message CiphertextTallySelection|
 
 | Name                       | JSON Name        | Type              | Notes                                       |
 |----------------------------|------------------|-------------------|---------------------------------------------|
@@ -323,7 +322,7 @@ When the optional crypto_hash are passed, they are verified. If not passed in, t
 
 ## plaintext_ballot.proto
 
-### class PlaintextBallot
+### message PlaintextBallot
 
 | Name            | JSON Name | Type                           | Notes                               |
 |-----------------|-----------|--------------------------------|-------------------------------------|
@@ -331,7 +330,7 @@ When the optional crypto_hash are passed, they are verified. If not passed in, t
 | ballot_style_id | style_id  | string                         | matches BallotStyle.ballot_style_id |
 | contests        |           | List\<PlaintextBallotContest\> |                                     |
 
-### class PlaintextBallotContest
+### message PlaintextBallotContest
 
 | Name           | JSON Name | Type                             | Notes                                     |
 |----------------|-----------|----------------------------------|-------------------------------------------|
@@ -339,7 +338,7 @@ When the optional crypto_hash are passed, they are verified. If not passed in, t
 | sequence_order |           | uint32                           | matches ContestDescription.sequence_order |
 | selections     |           | List\<PlaintextBallotSelection\> |                                           |
 
-### class PlaintextBallotSelection
+### message PlaintextBallotSelection
 
 | Name                     | JSON Name | Type         | Notes                                       |
 |--------------------------|-----------|--------------|---------------------------------------------|
@@ -349,7 +348,7 @@ When the optional crypto_hash are passed, they are verified. If not passed in, t
 | is_placeholder_selection |           | bool         |                                             |
 | extended_data            |           | ExtendedData | optional                                    |
 
-### class ExtendedData
+### message ExtendedData
 
 | Name   | JSON Name | Type   | Notes |
 |--------|-----------|--------|-------|
@@ -358,7 +357,7 @@ When the optional crypto_hash are passed, they are verified. If not passed in, t
 
 ## ciphertext_ballot.proto
 
-### class SubmittedBallot
+### message SubmittedBallot
 
 | Name              | JSON Name | Type                            | Notes                               |
 |-------------------|-----------|---------------------------------|-------------------------------------|
@@ -373,7 +372,7 @@ When the optional crypto_hash are passed, they are verified. If not passed in, t
 |                   | nonce     | ElementModQ                     | removed                             |
 | state             |           | enum BallotState                | CAST, SPOILED                       |
 
-### class CiphertextBallotContest
+### message CiphertextBallotContest
 
 | Name                    | JSON Name         | Type                              | Notes                                     |
 |-------------------------|-------------------|-----------------------------------|-------------------------------------------|
@@ -386,7 +385,7 @@ When the optional crypto_hash are passed, they are verified. If not passed in, t
 |                         | nonce             | ElementModQ                       | removed                                   |
 | proof                   |                   | ConstantChaumPedersenProof        |                                           |
 
-### class CiphertextBallotSelection
+### message CiphertextBallotSelection
 
 | Name                     | JSON Name        | Type                          | Notes                                       |
 |--------------------------|------------------|-------------------------------|---------------------------------------------|
@@ -400,7 +399,7 @@ When the optional crypto_hash are passed, they are verified. If not passed in, t
 | proof                    |                  | DisjunctiveChaumPedersenProof |                                             |
 | extended_data            |                  | ElGamalCiphertext             | optional                                    |
 
-### class ConstantChaumPedersenProof
+### message ConstantChaumPedersenProof
 
 | Name      | JSON Name | Type            | Notes   |
 |-----------|-----------|-----------------|---------|
@@ -412,7 +411,7 @@ When the optional crypto_hash are passed, they are verified. If not passed in, t
 | response  |           | ElementModQ     |         |
 | constant  |           | uint32          |         |
 
-### class DisjunctiveChaumPedersenProof
+### message DisjunctiveChaumPedersenProof
 
 | Name                 | JSON Name | Type            | Notes   |
 |----------------------|-----------|-----------------|---------|

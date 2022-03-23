@@ -53,6 +53,7 @@ message ConstantChaumPedersenProof {
   ElementModQ challenge = 3;
   ElementModQ response = 4;
   uint32 constant = 5;
+  GenericChaumPedersenProof proof = 6; // 2.0
 }
 
 message DisjunctiveChaumPedersenProof {
@@ -65,4 +66,6 @@ message DisjunctiveChaumPedersenProof {
   ElementModQ proof_one_challenge = 7;
   ElementModQ proof_one_response = 8;
   ElementModQ challenge = 9;
+  GenericChaumPedersenProof proof0 = 10; // 2.0
+  GenericChaumPedersenProof proof1 = 11; // 2.0
 }
