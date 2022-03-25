@@ -33,16 +33,6 @@ import static at.favre.lib.bytes.BytesTransformers.hmacSha256;
 
     List<Bytes> blocks = chunk(message, BLOCK_SIZE);
 
-    /*
-     this.toList()
-            .chunked(32) { block ->
-            // pad each block of the message to 32 bytes
-            val result = ByteArray(32) { 0 }
-      block.forEachIndexed { index, byte -> result[index] = byte }
-      UInt256(result)
-    }
-    */
-
     // ElectionGuard spec: (alpha, beta) = (g^R mod p, K^R mod p)
     Group.ElementModP alpha = Group.g_pow_p(nonce);
     Group.ElementModP beta = Group.pow_p(publicKey, nonce);
@@ -73,23 +63,22 @@ import static at.favre.lib.bytes.BytesTransformers.hmacSha256;
    */
   @Nullable
   Bytes decrypt(Group.ElementModQ secretKey) {
-    Group.ElementModP alpha = c0;
-    Group.ElementModP beta = Group.pow_p(c0, secretKey);
-    Group.ElementModQ kdfKey = Hash.hash_elems(alpha, beta);
-    KDF kdf = new KDF(UInt256.fromModQ(kdfKey), "", "", numBytes * 8);
+    Group.ElementModP beta = Group.pow_p(this.c0, secretKey);
+    Group.ElementModQ kdfKey = Hash.hash_elems(this.c0, beta);
+    KDF kdf = new KDF(UInt256.fromModQ(kdfKey), "", "", this.numBytes * 8);
     Bytes k0 = kdf.get(0);
 
     Bytes input = Bytes.from(
-            Bytes.from(c0.bytes()),
-            c1);
+            Bytes.from(this.c0.bytes()),
+            this.c1);
     UInt256 expectedHmac = new UInt256(input.transform(hmacSha256(k0.array())).array());
 
-    if (!expectedHmac.equals(c2)) {
+    if (!expectedHmac.equals(this.c2)) {
       logger.atSevere().log("HashedElGamalCiphertext decryption failure: HMAC doesn't match");
       return null;
     }
 
-    List<Bytes> blocks = chunk(c1, BLOCK_SIZE);
+    List<Bytes> blocks = chunk(this.c1, BLOCK_SIZE);
     List<Bytes> xorList = new ArrayList<>();
     int count = 0;
     for (Bytes block : blocks) {
@@ -98,10 +87,10 @@ import static at.favre.lib.bytes.BytesTransformers.hmacSha256;
     }
     Bytes plaintext = Bytes.from(xorList.toArray(new Bytes[0]));
 
-    if (plaintext.length() > numBytes) {
+    if (plaintext.length() > this.numBytes) {
       // Truncate trailing values, which should be zeros. No need to check, because
       // we've already validated the HMAC on the data.
-      plaintext = plaintext.copy(0, numBytes);
+      plaintext = plaintext.copy(0, this.numBytes);
     }
 
     return plaintext;
@@ -130,8 +119,7 @@ import static at.favre.lib.bytes.BytesTransformers.hmacSha256;
    *  - The [key] must be 32 bytes long, suitable for use in HMAC-SHA256.
    *  - The [label] is a string that identifies the purpose for the derived keying material.
    *  - The [context] is a string containing the information related to the derived keying material.
-   *    It may include identities of parties who are deriving and/or using the derived keying
-   *    material.
+   *    It may include identities of parties who are deriving and/or using the derived keying material.
    *  - The [length] specifies the length of the encrypted message in *bits*, not bytes.
    */
   private static class KDF {

@@ -41,6 +41,7 @@ public record UInt256(byte[] val) implements Hash.CryptoHashableString {
     return Bytes.wrap(val);
   }
 
+  // TODO why does default record equals() fail?
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;

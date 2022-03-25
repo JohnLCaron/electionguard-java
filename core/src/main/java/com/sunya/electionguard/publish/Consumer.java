@@ -248,15 +248,17 @@ public class Consumer {
         if (input == null) {
           this.input = new FileInputStream(filename);
         }
-        CiphertextBallotProto.SubmittedBallot ballotProto = CiphertextBallotProto.SubmittedBallot.parseDelimitedFrom(input);
-        if (ballotProto == null) {
-          input.close();
-          return endOfData();
+        while (true) {
+          CiphertextBallotProto.SubmittedBallot ballotProto = CiphertextBallotProto.SubmittedBallot.parseDelimitedFrom(input);
+          if (ballotProto == null) {
+            input.close();
+            return endOfData();
+          }
+          if (!filter.test(ballotProto)) {
+            continue; // skip it
+          }
+          return CiphertextBallotFromProto.translateFromProto(ballotProto);
         }
-        if (!filter.test(ballotProto)) {
-          return computeNext(); // LOOK fix recursion
-        }
-        return CiphertextBallotFromProto.translateFromProto(ballotProto);
       } catch (IOException e) {
         throw new RuntimeException(e);
       }
