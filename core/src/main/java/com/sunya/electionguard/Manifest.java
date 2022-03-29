@@ -19,8 +19,8 @@ public record Manifest(
         String electionScopeId,
         String specVersion,
         ElectionType electionType,
-        OffsetDateTime startDate,
-        OffsetDateTime endDate,
+        String startDate, // OffsetDateTime
+        String endDate,  // OffsetDateTime
         List<GeopoliticalUnit> geopoliticalUnits,
         List<Party> parties,
         List<Candidate> candidates,
@@ -64,8 +64,8 @@ public record Manifest(
 
   public static Group.ElementModQ recalcCryptoHash(String electionScopeId,
                                                    ElectionType electionType,
-                                                   OffsetDateTime startDate,
-                                                   OffsetDateTime endDate,
+                                                   String startDate,
+                                                   String endDate,
                                                    List<GeopoliticalUnit> geopoliticalUnits,
                                                    List<Party> parties,
                                                    List<Candidate> candidates,
@@ -76,8 +76,8 @@ public record Manifest(
     return Hash.hash_elems(
             electionScopeId,
             electionType.name(),
-            startDate.format(Utils.dtf), // python: to_iso_date_string, eg 2020-03-01T13:00:00Z
-            endDate.format(Utils.dtf),
+            startDate, // .format(Utils.dtf), // python: to_iso_date_string, eg 2020-03-01T13:00:00Z
+            endDate, // .format(Utils.dtf),
             name,
             contactInformation,
             geopoliticalUnits,
@@ -517,8 +517,7 @@ public record Manifest(
 
     @Override
     public Group.ElementModQ cryptoHash() {
-      return Hash.hash_elems(
-              this.candidateId, this.name, this.partyId, this.imageUri);
+      return Hash.hash_elems(this.candidateId, this.name, this.partyId, this.imageUri);
     }
   }
 

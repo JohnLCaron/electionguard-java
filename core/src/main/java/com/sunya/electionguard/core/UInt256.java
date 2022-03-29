@@ -24,6 +24,9 @@ public record UInt256(byte[] val) implements Hash.CryptoHashableString {
         }
       }
       b =  b.copy(leading, 32);
+    } else if (b.length() < 32) {
+      Bytes prepend = Bytes.allocate(32 - b.length());
+      b = Bytes.from(prepend, b);
     }
     return new UInt256(b.array());
   }
@@ -34,7 +37,7 @@ public record UInt256(byte[] val) implements Hash.CryptoHashableString {
 
   @Override
   public String cryptoHashString() {
-    return Bytes.wrap(val).encodeHex();
+    return Bytes.wrap(val).encodeHex(true);
   }
 
   public Bytes toBytes() {

@@ -15,10 +15,6 @@ public class ManifestFromProto {
   public static Manifest translateFromProto(ManifestProto.Manifest election) {
     OffsetDateTime start_date = OffsetDateTime.parse(election.getStartDate());
     OffsetDateTime end_date = OffsetDateTime.parse(election.getEndDate());
-    Manifest.InternationalizedText name = election.hasName() ?
-            convertInternationalizedText(election.getName()) : null;
-    Manifest.ContactInformation contact = election.hasContactInformation() ?
-            convertContactInformation(election.getContactInformation()) : null;
 
     // String election_scope_id,
     //            Manifest.ElectionType type,
@@ -34,17 +30,17 @@ public class ManifestFromProto {
     return new Manifest(
             election.getElectionScopeId(),
             election.getSpecVersion(),
-            convert(election.getElectionType()),
-            start_date,
-            end_date,
+            convertElectionType(election.getElectionType()),
+            election.getStartDate(),
+            election.getEndDate(),
             convertList(election.getGeopoliticalUnitsList(), ManifestFromProto::convertGeopoliticalUnit),
             convertList(election.getPartiesList(), ManifestFromProto::convertParty),
             convertList(election.getCandidatesList(), ManifestFromProto::convertCandidate),
             convertList(election.getContestsList(), ManifestFromProto::convertContestDescription),
             convertList(election.getBallotStylesList(), ManifestFromProto::convertBallotStyle),
-            name,
-            contact,
-            election.hasCryptoHash() ? convertUInt256(election.getCryptoHash()) : null
+            election.hasName() ? convertInternationalizedText(election.getName()) : null,
+            election.hasContactInformation() ? convertContactInformation(election.getContactInformation()) : null,
+            null // LOOK election.hasCryptoHash() ? convertUInt256(election.getCryptoHash()) : null
     );
   }
 
@@ -102,7 +98,7 @@ public class ManifestFromProto {
     return Manifest.VoteVariationType.valueOf(type.name());
   }
 
-  static Manifest.ElectionType convert(ManifestProto.Manifest.ElectionType type) {
+  static Manifest.ElectionType convertElectionType(ManifestProto.Manifest.ElectionType type) {
     return Manifest.ElectionType.valueOf(type.name());
   }
 

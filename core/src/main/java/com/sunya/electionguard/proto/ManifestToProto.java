@@ -15,8 +15,8 @@ public class ManifestToProto {
       builder.setSpecVersion(election.specVersion());
     }
     builder.setElectionType(convertElectionType(election.electionType()));
-    builder.setStartDate(election.startDate().toString());
-    builder.setEndDate(election.endDate().toString());
+    builder.setStartDate(election.startDate());
+    builder.setEndDate(election.endDate());
 
     election.geopoliticalUnits().forEach(value -> builder.addGeopoliticalUnits(convertGeopoliticalUnit(value)));
     election.parties().forEach(value -> builder.addParties(convertParty(value)));

@@ -22,6 +22,18 @@ import static org.junit.Assert.fail;
 public class TestElgamalProperties extends TestProperties {
 
   @Example
+  public void test_simple_elgamal_encryption1() {
+    assertThat(elgamal_encrypt(0, TWO_MOD_Q, TWO_MOD_P)).isPresent();
+  }
+
+  @Example
+  public void test_simple_elgamal_encryption() {
+    ElementModQ nonce = Group.hex_to_q_unchecked("3db4e800fcc6e54e94d7972c61fd7b65ac5936f684b9eaf6fdd6094feacf62fe");
+    assertThat(elgamal_encrypt(0, nonce, TWO_MOD_P)).isPresent();
+  }
+
+
+  @Example
   public void test_simple_elgamal_encryption_decryption() {
     ElementModQ nonce = ONE_MOD_Q;
     ElementModQ secret_key = TWO_MOD_Q;

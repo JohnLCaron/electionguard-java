@@ -38,6 +38,9 @@ public class ElGamal {
     public Ciphertext {
       Preconditions.checkNotNull(pad);
       Preconditions.checkNotNull(data);
+      if (!data.is_valid_residue()) {
+        throw new IllegalStateException();
+      }
     }
 
     @Override

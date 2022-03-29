@@ -65,7 +65,7 @@ public class ManifestInputBuilder {
     List<Manifest.Party> parties = ImmutableList.of(new Manifest.Party("dog"), new Manifest.Party("cat"));
 
     return new Manifest(manifest_name, ElectionContext.SPEC_VERSION, Manifest.ElectionType.general,
-            OffsetDateTime.now(), OffsetDateTime.now(),
+            OffsetDateTime.now().toString(), OffsetDateTime.now().toString(),
             ImmutableList.of(gpUnit), parties, candidates.values().stream().toList(),
             contests.stream().map(ContestBuilder::build).toList(),
             ImmutableList.of(ballotStyle), null, null, null);
