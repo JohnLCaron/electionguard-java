@@ -448,8 +448,8 @@ public class ElectionTestHelper {
             randomString("election_scope_id"),
             ElectionContext.SPEC_VERSION,
             Manifest.ElectionType.general,  // good enough for now
-            start_date,
-            end_date,
+            start_date.toString(),
+            end_date.toString(),
             geo_units,
             parties,
             candidates_,

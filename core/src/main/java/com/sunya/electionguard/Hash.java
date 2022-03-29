@@ -40,39 +40,26 @@ public class Hash {
    * <p>
    */
   public static Group.ElementModQ hash_elems(Object... a) {
-    // TODO is Guava Hashing.sha256() better?
-    MessageDigest digest;
-    try {
-      digest = MessageDigest.getInstance("SHA-256");
-      digest.update("|".getBytes(StandardCharsets.UTF_8));
-    } catch (NoSuchAlgorithmException e) {
-      throw new RuntimeException(e);
-    }
+    // System.out.printf("elements: %s%n%n", Arrays.toString(a));
+
+    StringBuilder hashAll = new StringBuilder();
+    hashAll.append("|");
 
     if (a.length == 0) {
       String hash_me = "null|";
-      digest.update(hash_me.getBytes(StandardCharsets.UTF_8));
+      hashAll.append(hash_me);
     }
 
     for (Object x : a) {
-          //We could just use str(x) for everything, but then we 'd have a resulting string
-          //that 's a bit Python-specific, and we' d rather make it easier for other languages
-        //to exactly match this hash function.
+      // unwrap Optional, following python
+      if (x instanceof Optional) {
+        Optional xO = (Optional) x;
+        x = (xO.isPresent()) ? xO.get() : null;
+      }
 
       String hash_me;
       if (x == null) {
-        // This case captures empty lists and None, nicely guaranteeing that we don 't
-        // need to do a recursive call if the list is empty.So we need a string to
-        //feed in for both of these cases."None" would be a Python -specific thing,
-        // so we 'll go with the more JSON-ish "null".
         hash_me = "null";
-      } else if (x instanceof Optional) {
-        Optional xopt = (Optional) x;
-        if (xopt.isEmpty()) {
-          hash_me = "null";
-        } else {
-          hash_me = hash_elems(xopt.get()).to_hex();
-        }
       } else if (x instanceof Group.ElementMod) {
         hash_me = ((Group.ElementMod)x).to_hex();
       } else if (x instanceof CryptoHashable) {
@@ -89,14 +76,18 @@ public class Hash {
       } else {
         hash_me = x.toString();
       }
-      // System.out.printf("  hash_me: %s%n", hash_me);
       hash_me += "|";
-      digest.update(hash_me.getBytes(StandardCharsets.UTF_8));
+      hashAll.append(hash_me);
     }
-
-    // must be positive
-    BigInteger bi = new BigInteger(1, digest.digest());
-    BigInteger bim = bi.mod(Group.getPrimes().smallPrime);
-    return Group.int_to_q_unchecked(bim);
+    // System.out.printf("  hashAll: %s%n", hashAll);
+    try {
+      MessageDigest digest = MessageDigest.getInstance("SHA-256");
+      digest.update(hashAll.toString().getBytes(StandardCharsets.UTF_8));
+      BigInteger bi = new BigInteger(1, digest.digest());
+      BigInteger bim = bi.mod(Group.getPrimes().smallPrime);
+      return Group.int_to_q_unchecked(bim);
+    } catch (NoSuchAlgorithmException e) {
+      throw new RuntimeException(e);
+    }
   }
 }

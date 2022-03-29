@@ -2,6 +2,7 @@ package com.sunya.electionguard;
 
 import at.favre.lib.bytes.Bytes;
 import com.google.common.collect.Iterables;
+import com.sunya.electionguard.core.UInt256;
 
 import javax.annotation.concurrent.Immutable;
 import java.math.BigInteger;
@@ -111,7 +112,12 @@ public class Group {
 
     @Override
     public String toString() {
-      return "ElementModQ{" + elem + '}';
+      // return "ElementModQ{elem=" + elem + '}';
+      return UInt256.fromModQ(this).toString();
+    }
+
+    public String to_hex() {
+      return UInt256.fromModQ(this).cryptoHashString();
     }
   }
 
@@ -171,6 +177,11 @@ public class Group {
    */
   public static ElementModQ hex_to_q_unchecked(String input) {
     BigInteger b = new BigInteger(input, 16);
+    return new ElementModQ(b);
+  }
+
+  public static ElementModQ dec_to_q_unchecked(String input) {
+    BigInteger b = new BigInteger(input, 10);
     return new ElementModQ(b);
   }
 

@@ -28,23 +28,54 @@ public class Encrypt {
 
   /**
    * The device that is doing the encryption.
-   * @param deviceId Unique identifier for device
-   * @param sessionId Used to identify session and protect the timestamp
-   * @param launchCode Election initialization value
-   * @param location Arbitrary string to designate the location of the device
    */
-  public record EncryptionDevice(
-    long deviceId,
-    long sessionId,
-    long launchCode,
-    String location) {
+  public static class EncryptionDevice {
+    private long deviceId;
+    private long sessionId;
+    private long launchCode;
+    private String location;
+    private ElementModQ cryptoHash;
 
-    public EncryptionDevice {
+    /**
+     * @param deviceId   Unique identifier for device
+     * @param sessionId  Used to identify session and protect the timestamp
+     * @param launchCode Election initialization value
+     * @param location   Arbitrary string to designate the location of the device
+     */
+    public EncryptionDevice(long deviceId,
+                            long sessionId,
+                            long launchCode,
+                            String location) {
       Preconditions.checkNotNull(location);
+      this.deviceId = deviceId;
+      this.sessionId = sessionId;
+      this.launchCode = launchCode;
+      this.location = location;
+      this.cryptoHash = BallotCodes.get_hash_for_device(deviceId, sessionId, launchCode, location);
+    }
+
+    public EncryptionDevice(ElementModQ cryptoHash) {
+      this.cryptoHash =  cryptoHash;
+    }
+
+    public long deviceId() {
+      return deviceId;
+    }
+
+    public long sessionId() {
+      return sessionId;
+    }
+
+    public long launchCode() {
+      return launchCode;
+    }
+
+    public String location() {
+      return location;
     }
 
     public ElementModQ get_hash() {
-      return BallotCodes.get_hash_for_device(deviceId, sessionId, launchCode, location);
+      return cryptoHash;
     }
   }
 
@@ -54,27 +85,28 @@ public class Encrypt {
    * See discussion on Issue #272 about "ballot chaining".
    */
   public static class EncryptionMediator {
-    private final InternalManifest metadata;
+    private final InternalManifest internalManifest;
     private final ElectionContext context;
-    private ElementModQ previous_tracking_hash;
+    private ElementModQ encryption_seed;
 
-    public EncryptionMediator(InternalManifest metadata, ElectionContext context,
+    public EncryptionMediator(InternalManifest internalManifest, ElectionContext context,
                               EncryptionDevice encryption_device) {
-      this.metadata = metadata;
+      this.internalManifest = internalManifest;
       this.context = context;
       // LOOK does not follow validation spec 6.A, which calls for crypto_base_hash.
       //   Ok to use device hash see Issue #272. Spec should be updated.
-      this.previous_tracking_hash = encryption_device.get_hash();
+      this.encryption_seed = encryption_device.get_hash();
     }
 
     /** Encrypt the plaintext ballot using the joint public key K. */
     public Optional<CiphertextBallot> encrypt(PlaintextBallot ballot) {
       Optional<CiphertextBallot> encrypted_ballot =
-              encrypt_ballot(ballot, this.metadata, this.context, this.previous_tracking_hash, Optional.empty(), true);
-      encrypted_ballot.ifPresent(ciphertextBallot -> this.previous_tracking_hash = ciphertextBallot.code);
+              encrypt_ballot(ballot, this.internalManifest, this.context, this.encryption_seed, Optional.empty(), true);
+      encrypted_ballot.ifPresent(ciphertextBallot -> this.encryption_seed = ciphertextBallot.code);
       return encrypted_ballot;
     }
   }
+
 
   /**
    * Construct a `BallotSelection` from a specific `SelectionDescription`.
@@ -351,7 +383,7 @@ public class Encrypt {
    * @param ballot:               the ballot in the valid input form
    * @param internal_manifest:    the InternalManifest which defines this ballot's structure
    * @param context:              all the cryptographic context for the election
-   * @param previous_tracking_hash Hash from previous ballot or starting hash from device. python: seed_hash
+   * @param encryption_seed Hash from previous ballot or starting hash from device. python: seed_hash
    * @param nonce:                an optional nonce used to encrypt this contest
    *                              if this value is not provided, a random nonce is used.
    * @param should_verify_proofs: specify if the proofs should be verified prior to returning (default True)
@@ -360,7 +392,7 @@ public class Encrypt {
           PlaintextBallot ballot,
           InternalManifest internal_manifest,
           ElectionContext context,
-          ElementModQ previous_tracking_hash,
+          ElementModQ encryption_seed,
           Optional<ElementModQ> nonce,
           boolean should_verify_proofs)  {
 
@@ -383,22 +415,24 @@ public class Encrypt {
 
     // Include a representation of the election and the ballot Id in the nonce's used
     // to derive other nonce values on the ballot
-    ElementModQ nonce_seed = CiphertextBallot.nonce_seed(internal_manifest.manifest.cryptoHash(), ballot.object_id(), random_master_nonce);
+    ElementModQ ballotNonce = Hash.hash_elems(internal_manifest.manifest.cryptoHash(), ballot.object_id(), random_master_nonce);
 
     Optional<List<CiphertextBallot.Contest>> encrypted_contests = encrypt_ballot_contests(
-            ballot, internal_manifest, context, nonce_seed);
+            ballot, internal_manifest, context, ballotNonce);
     if (encrypted_contests.isEmpty()) {
       return Optional.empty();
     }
 
     // Create the return object
     CiphertextBallot encrypted_ballot = CiphertextBallot.create(
-          ballot.object_id(),
-          ballot.ballotStyleId,
-          internal_manifest.manifest.cryptoHash(),
-          previous_tracking_hash, // python uses Optional
-          encrypted_contests.get(),
-          Optional.of(random_master_nonce), Optional.empty(), Optional.empty());
+            ballot.object_id(),
+            ballot.ballotStyleId,
+            internal_manifest.manifest.cryptoHash(),
+            encryption_seed, // python uses Optional
+            encrypted_contests.get(),
+            Optional.of(random_master_nonce),
+            Optional.empty(),
+            Optional.empty());
 
     if (!should_verify_proofs) {
       return Optional.of(encrypted_ballot);
@@ -430,8 +464,7 @@ public class Encrypt {
       Manifest.ContestDescription contestm = contestp.contest;
       PlaintextBallot.Contest use_contest = plaintext_contests.get(contestm.contestId());
 
-      // no selections provided for the contest, so create a placeholder contest
-      // LOOK says "create a placeholder contest" but selections are not placeholders.
+      // no selections provided for the contest, so create a blank contest
       if (use_contest == null) {
         use_contest = contest_from(contestm);
       }

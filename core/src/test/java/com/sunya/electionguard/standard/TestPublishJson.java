@@ -44,7 +44,7 @@ public class TestPublishJson {
 
   @Example
   public void testPublishJson() throws IOException {
-    OffsetDateTime now = OffsetDateTime.now();
+    String now = OffsetDateTime.now().toString();
     Manifest election = new Manifest(
             "scope", ElectionContext.SPEC_VERSION, Manifest.ElectionType.unknown, now, now, ImmutableList.of(), ImmutableList.of(),
             ImmutableList.of(), ImmutableList.of(), ImmutableList.of(), null, null, null);

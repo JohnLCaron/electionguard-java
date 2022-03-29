@@ -11,14 +11,21 @@ import java.util.Arrays;
  * This is useful to avoid various kinds of subtle cryptographic attacks.
  */
 public class Nonces {
-  private final Group.ElementModQ seed;
+  final Group.ElementModQ internalSeed;
 
   public Nonces(Group.ElementModQ seed, Object... headers) {
-    this.seed = (headers.length > 0) ? Hash.hash_elems(seed, Arrays.asList(headers)) : seed;
+    if (headers.length > 0) {
+      Object[] allArgs = new Object[headers.length + 1];
+      allArgs[0] = seed;
+      System.arraycopy(headers, 0, allArgs, 1, headers.length);
+      this.internalSeed = Hash.hash_elems(allArgs);
+    } else {
+      this.internalSeed = seed;
+    }
   }
 
   public Group.ElementModQ get(int index) {
     Preconditions.checkArgument(index >= 0, "Nonces do not support negative indices.");
-    return Hash.hash_elems(seed, index);
+    return Hash.hash_elems(this.internalSeed, index);
   }
 }

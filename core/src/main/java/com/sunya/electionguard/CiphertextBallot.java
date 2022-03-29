@@ -52,7 +52,7 @@ public class CiphertextBallot implements Hash.CryptoHashCheckable {
           List<Contest> contests,
           Optional<Group.ElementModQ> nonce,
           Optional<Long> timestamp,
-          Optional<Group.ElementModQ> tracking_hashO) {
+          Optional<Group.ElementModQ> ballot_codeO) {
 
     if (contests.isEmpty()) {
       logger.atInfo().log("ciphertext ballot with no contests: %s", ballotId);
@@ -60,8 +60,9 @@ public class CiphertextBallot implements Hash.CryptoHashCheckable {
 
     Group.ElementModQ crypto_hash = create_ballot_hash(ballotId, manifestHash, contests);
 
+    // Ticks are defined here as number of seconds since the unix epoch (00:00:00 UTC on 1 January 1970)
     long time = timestamp.orElse(System.currentTimeMillis() / 1000);
-    Group.ElementModQ ballot_code = tracking_hashO.orElse(BallotCodes.get_rotating_ballot_code(code_seed, time, crypto_hash));
+    Group.ElementModQ ballot_code = ballot_codeO.orElse(BallotCodes.get_rotating_ballot_code(code_seed, time, crypto_hash));
 
     return new CiphertextBallot(
             ballotId,
@@ -75,7 +76,7 @@ public class CiphertextBallot implements Hash.CryptoHashCheckable {
             nonce);
   }
 
-  /** Create the hash of the ballot contests. */
+  /** Create the crypto hash of the ballot. */
   static Group.ElementModQ create_ballot_hash(
           String ballotId,
           Group.ElementModQ manifestHash,
@@ -342,7 +343,8 @@ public class CiphertextBallot implements Hash.CryptoHashCheckable {
 
       if (crypto_hash.isEmpty()) {
         // python: _ciphertext_ballot_selection_crypto_hash_with
-        crypto_hash = Optional.of(Hash.hash_elems(selectionId, selectionHash, ciphertext.crypto_hash()));
+        Group.ElementModQ elgamalCrypto = ciphertext.crypto_hash();
+        crypto_hash = Optional.of(Hash.hash_elems(selectionId, selectionHash, elgamalCrypto));
       }
 
       if (proof.isEmpty() && nonce.isPresent()) { // LOOK python?
@@ -476,6 +478,7 @@ public class CiphertextBallot implements Hash.CryptoHashCheckable {
               "\n sequenceOrder=" + sequenceOrder +
               "\n selectionHash=" + selectionHash +
               "\n crypto_hash  =" + crypto_hash +
+              "\n ciphertext   =" + ciphertext() +
               "\n nonce        =" + nonce +
               "\n proof        =" + proof +
               "\n extended_data=" + extended_data +
