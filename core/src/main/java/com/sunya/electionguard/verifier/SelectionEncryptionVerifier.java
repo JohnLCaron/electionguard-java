@@ -66,14 +66,14 @@ public class SelectionEncryptionVerifier {
 
       // get values
       String selection_id = this.selection.object_id();
-      ElementModP a0 = proof.proof_zero_pad; // a0
-      ElementModP a1 = proof.proof_one_pad; // a1
-      ElementModP b0 = proof.proof_zero_data; // b0
-      ElementModP b1 = proof.proof_one_data; // b1
-      ElementModQ c0 = proof.proof_zero_challenge; // c0
-      ElementModQ c1 = proof.proof_one_challenge; // c1
-      ElementModQ v0 = proof.proof_zero_response; // v0
-      ElementModQ v1 = proof.proof_one_response; // v1
+      ElementModP a0 = proof.proof0.pad; // a0
+      ElementModP a1 = proof.proof1.pad; // a1
+      ElementModP b0 = proof.proof0.data; // b0
+      ElementModP b1 = proof.proof1.data; // b1
+      ElementModQ c0 = proof.proof0.challenge; // c0
+      ElementModQ c1 = proof.proof1.challenge; // c1
+      ElementModQ v0 = proof.proof0.response; // v0
+      ElementModQ v1 = proof.proof1.response; // v1
       ElementModQ challenge = proof.challenge; // c
 
       // 4.A: check alpha, beta, a0, b0, a1, b1 are all in set Zrp

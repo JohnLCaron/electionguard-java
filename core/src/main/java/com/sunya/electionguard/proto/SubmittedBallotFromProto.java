@@ -8,6 +8,7 @@ import com.sunya.electionguard.CiphertextBallot;
 import javax.annotation.Nullable;
 import java.util.Optional;
 
+import static com.sunya.electionguard.proto.CommonConvert.convertChaumPedersenProof;
 import static com.sunya.electionguard.proto.CommonConvert.convertCiphertext;
 import static com.sunya.electionguard.proto.CommonConvert.convertElementModQ;
 import static com.sunya.electionguard.proto.CommonConvert.convertElementModP;
@@ -17,7 +18,7 @@ import static com.sunya.electionguard.proto.CommonConvert.convertUInt256;
 import electionguard.protogen.CiphertextBallotProto;
 
 
-public class CiphertextBallotFromProto {
+public class SubmittedBallotFromProto {
 
   //           String object_id,
   //                         String style_id,
@@ -34,7 +35,7 @@ public class CiphertextBallotFromProto {
             ballot.getBallotStyleId(),
             convertUInt256(ballot.getManifestHash()),
             convertUInt256(ballot.getCodeSeed()),
-            convertList(ballot.getContestsList(), CiphertextBallotFromProto::convertContest),
+            convertList(ballot.getContestsList(), SubmittedBallotFromProto::convertContest),
             convertUInt256(ballot.getCode()),
             ballot.getTimestamp(),
             convertUInt256(ballot.getCryptoHash()),
@@ -50,7 +51,7 @@ public class CiphertextBallotFromProto {
             contest.getContestId(),
             contest.getSequenceOrder(),
             convertUInt256(contest.getContestHash()),
-            convertList(contest.getSelectionsList(), CiphertextBallotFromProto::convertSelection),
+            convertList(contest.getSelectionsList(), SubmittedBallotFromProto::convertSelection),
             convertUInt256(contest.getCryptoHash()),
             convertCiphertext(contest.getCiphertextAccumulation()),
             Optional.empty(),
@@ -85,9 +86,18 @@ public class CiphertextBallotFromProto {
 
   @Nullable
   static ChaumPedersen.DisjunctiveChaumPedersenProof convertDisjunctiveProof(@Nullable CiphertextBallotProto.DisjunctiveChaumPedersenProof proof) {
-    if (proof == null || !proof.hasProofZeroPad()) {
+    if (proof == null || !proof.hasChallenge()) {
       return null;
     }
+    // 2.0
+    if (proof.hasProof0() && proof.hasProof1()) {
+      return new ChaumPedersen.DisjunctiveChaumPedersenProof(
+              convertChaumPedersenProof(proof.getProof0()),
+              convertChaumPedersenProof(proof.getProof1()),
+              convertElementModQ(proof.getChallenge())
+      );
+    }
+    // 1.0
     return new ChaumPedersen.DisjunctiveChaumPedersenProof(
             convertElementModP(proof.getProofZeroPad()),
             convertElementModP(proof.getProofZeroData()),

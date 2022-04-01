@@ -144,7 +144,7 @@ public class Group {
 
     @Override
     public String toString() {
-      return "ElementModP{" + elem + '}';
+      return "ElementModP{" + elem.toString(16) + '}';
     }
 
     public String toShortString() {
@@ -268,7 +268,7 @@ public class Group {
   }
 
   /** Compute (Q - a) mod q. */
-  static ElementModQ negate_q(ElementModQ a) {
+  public static ElementModQ negate_q(ElementModQ a) {
     return int_to_q_unchecked(primes.smallPrime.subtract(a.elem));
   }
 
@@ -280,7 +280,7 @@ public class Group {
   }
 
   /** Compute the multiplicative inverse mod p. */
-  static ElementModP mult_inv_p(ElementMod elem) {
+  public static ElementModP mult_inv_p(ElementMod elem) {
     return int_to_p_unchecked(elem.elem.modInverse(primes.largePrime));
   }
 
@@ -359,7 +359,7 @@ public class Group {
   }
 
   /** Generate random number between start and Q. */
-  static ElementModQ rand_range_q(ElementMod start) {
+  public static ElementModQ rand_range_q(ElementMod start) {
     BigInteger random = Utils.randbetween(start.getBigInt(), primes.smallPrime);
     return int_to_q_unchecked(random);
   }

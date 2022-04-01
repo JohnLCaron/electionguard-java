@@ -37,7 +37,7 @@ public class TestSchnorrProperties extends TestProperties {
 
     SchnorrProof proof = make_schnorr_proof(keypair, nonce);
     assertThat(other).isNotEqualTo(proof.response); // otherwise wont fail
-    SchnorrProof proof2 = new SchnorrProof(proof.publicKey, proof.commitment, proof.challenge, other);
+    SchnorrProof proof2 = new SchnorrProof(proof.publicKey, proof.getCommitment(), proof.challenge, other);
     assertThat(proof2.is_valid()).isFalse();
   }
 
@@ -48,7 +48,7 @@ public class TestSchnorrProperties extends TestProperties {
           @ForAll("elements_mod_p_no_zero") Group.ElementModP other) {
 
     SchnorrProof proof = make_schnorr_proof(keypair, nonce);
-    assertThat(other).isNotEqualTo(proof.commitment); // otherwise wont fail
+    assertThat(other).isNotEqualTo(proof.getCommitment()); // otherwise wont fail
     SchnorrProof proof_bad = new SchnorrProof(proof.publicKey, other, proof.challenge, proof.response);
     assertThat(proof_bad.is_valid()).isFalse();
   }
@@ -61,7 +61,7 @@ public class TestSchnorrProperties extends TestProperties {
 
     SchnorrProof proof = make_schnorr_proof(keypair, nonce);
     assertThat(other).isNotEqualTo(proof.publicKey); // otherwise wont fail
-    SchnorrProof proof2 = new SchnorrProof(other, proof.commitment, proof.challenge, proof.response);
+    SchnorrProof proof2 = new SchnorrProof(other, proof.getCommitment(), proof.challenge, proof.response);
     assertThat(proof2.is_valid()).isFalse();
   }
 
@@ -70,8 +70,8 @@ public class TestSchnorrProperties extends TestProperties {
           @ForAll("elgamal_keypairs") ElGamal.KeyPair keypair,
           @ForAll("elements_mod_q") Group.ElementModQ nonce) {
     SchnorrProof proof = make_schnorr_proof(keypair, nonce);
-    SchnorrProof proof2 = new SchnorrProof(ZERO_MOD_P, proof.commitment, proof.challenge, proof.response);
-    SchnorrProof proof3 = new SchnorrProof(int_to_p_unchecked(Group.getPrimes().largePrime), proof.commitment, proof.challenge, proof.response);
+    SchnorrProof proof2 = new SchnorrProof(ZERO_MOD_P, proof.getCommitment(), proof.challenge, proof.response);
+    SchnorrProof proof3 = new SchnorrProof(int_to_p_unchecked(Group.getPrimes().largePrime), proof.getCommitment(), proof.challenge, proof.response);
     assertThat(proof2.is_valid()).isFalse();
     assertThat(proof3.is_valid()).isFalse();
   }

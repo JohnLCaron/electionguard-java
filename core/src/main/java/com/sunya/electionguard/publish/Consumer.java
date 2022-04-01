@@ -2,7 +2,7 @@ package com.sunya.electionguard.publish;
 
 import com.google.common.collect.AbstractIterator;
 import com.sunya.electionguard.*;
-import com.sunya.electionguard.proto.CiphertextBallotFromProto;
+import com.sunya.electionguard.proto.SubmittedBallotFromProto;
 import com.sunya.electionguard.proto.ElectionRecordFromProto;
 import com.sunya.electionguard.proto.PlaintextBallotFromProto;
 import com.sunya.electionguard.proto.PlaintextTallyFromProto;
@@ -257,7 +257,7 @@ public class Consumer {
           if (!filter.test(ballotProto)) {
             continue; // skip it
           }
-          return CiphertextBallotFromProto.translateFromProto(ballotProto);
+          return SubmittedBallotFromProto.translateFromProto(ballotProto);
         }
       } catch (IOException e) {
         throw new RuntimeException(e);

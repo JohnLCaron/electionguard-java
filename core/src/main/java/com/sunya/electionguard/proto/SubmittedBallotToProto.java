@@ -5,6 +5,7 @@ import com.sunya.electionguard.ChaumPedersen;
 import com.sunya.electionguard.SubmittedBallot;
 import com.sunya.electionguard.CiphertextBallot;
 
+import static com.sunya.electionguard.proto.CommonConvert.convertChaumPedersenProof;
 import static com.sunya.electionguard.proto.CommonConvert.convertCiphertext;
 import static com.sunya.electionguard.proto.CommonConvert.convertElementModQ;
 import static com.sunya.electionguard.proto.CommonConvert.convertElementModP;
@@ -12,7 +13,7 @@ import static com.sunya.electionguard.proto.CommonConvert.convertUInt256;
 
 import electionguard.protogen.CiphertextBallotProto;
 
-public class CiphertextBallotToProto {
+public class SubmittedBallotToProto {
 
   public static CiphertextBallotProto.SubmittedBallot translateToProto(SubmittedBallot ballot) {
     CiphertextBallotProto.SubmittedBallot.Builder builder = CiphertextBallotProto.SubmittedBallot.newBuilder();
@@ -69,15 +70,9 @@ public class CiphertextBallotToProto {
 
   static CiphertextBallotProto.DisjunctiveChaumPedersenProof convertDisjunctiveProof(ChaumPedersen.DisjunctiveChaumPedersenProof proof) {
     CiphertextBallotProto.DisjunctiveChaumPedersenProof.Builder builder = CiphertextBallotProto.DisjunctiveChaumPedersenProof.newBuilder();
-    builder.setProofZeroPad(convertElementModP(proof.proof_zero_pad));
-    builder.setProofZeroData(convertElementModP(proof.proof_zero_data));
-    builder.setProofOnePad(convertElementModP(proof.proof_one_pad));
-    builder.setProofOneData(convertElementModP(proof.proof_one_data));
-    builder.setProofZeroChallenge(convertElementModQ(proof.proof_zero_challenge));
-    builder.setProofOneChallenge(convertElementModQ(proof.proof_one_challenge));
-    builder.setProofZeroResponse(convertElementModQ(proof.proof_zero_response));
+    builder.setProof0(convertChaumPedersenProof(proof.proof0));
+    builder.setProof1(convertChaumPedersenProof(proof.proof1));
     builder.setChallenge(convertElementModQ(proof.challenge));
-    builder.setProofOneResponse(convertElementModQ(proof.proof_one_response));
     return builder.build();
   }
 }

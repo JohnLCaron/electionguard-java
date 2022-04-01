@@ -12,7 +12,7 @@ import static com.sunya.electionguard.Group.*;
  * Should run efficiently when called multiple times when the exponent is at most in the single-digit millions.
  * Performance will degrade if it's much larger.
  */
-class Dlog {
+public class Dlog {
   private static final int MAX = 1000; // max vote count - TODO should be settable
   private static final Cache<BigInteger, Integer> cache = CacheBuilder.newBuilder().build();
   static {
@@ -21,7 +21,7 @@ class Dlog {
   private static BigInteger dlog_max_elem = BigInteger.ONE;
   private static int dlog_max_exp = 0;
 
-  static Integer discrete_log(ElementModP elem) {
+  public static Integer discrete_log(ElementModP elem) {
     Integer result = cache.getIfPresent(elem.elem);
     if (result != null) {
       // System.out.printf("Got a hit on %d%n", result);

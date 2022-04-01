@@ -114,13 +114,16 @@ tasks {
         archiveClassifier.set("all")
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
         manifest {
-            attributes("Main-Class" to "com.sunya.electionguard.verifier.VerifyElectionRecord")
+            attributes("Main-Class" to "com.sunya.electionguard.Simple")
         }
         from(configurations.runtimeClasspath.get()
-            .onEach { println("add from dependencies: ${it.name}") }
-            .map { if (it.isDirectory) it else zipTree(it) })
-        val sourcesMain = sourceSets.main.get()
-        sourcesMain.allSource.forEach { println("add from sources: ${it.name}") }
+            // .onEach { println("add from dependencies: ${it.name}") }
+            .map { if (it.isDirectory) it else zipTree(it) }
+        )
+        val sourcesMain = sourceSets.main.get(
+        )
+        exclude("/META-INF/PFOPENSO.*")
+        // sourcesMain.allSource.forEach { println("add from sources: ${it.name}") }
         from(sourcesMain.output)
     }
 }

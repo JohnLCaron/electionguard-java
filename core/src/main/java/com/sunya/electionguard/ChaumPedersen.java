@@ -3,6 +3,7 @@ package com.sunya.electionguard;
 import com.google.common.base.Preconditions;
 import com.google.common.flogger.FluentLogger;
 
+import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import java.math.BigInteger;
 import java.util.Formatter;
@@ -13,81 +14,80 @@ import static com.sunya.electionguard.Group.*;
 /**
  * Implements the Chaum-Pedersen publicly verifiable secret sharing scheme.
  * Uses unpublished Microsoft Note "Efficient Implementation of ElectionGuard Ballot Encryption and Proofs"
+ *
  * @see <a href="https://en.wikipedia.org/wiki/Publicly_Verifiable_Secret_Sharing#Chaum-Pedersen_Protocol">Chaum-Pedersen Protocol</a>
  */
 public class ChaumPedersen {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
-  /** A disjunctive Chaum-Pederson proof. */
+  /**
+   * A disjunctive Chaum-Pederson proof.
+   */
   @Immutable
   public static class DisjunctiveChaumPedersenProof extends Proof {
-    public final ElementModP proof_zero_pad; // a0 in the spec
-    public final ElementModP proof_zero_data; // b0 in the spec
-    public final ElementModP proof_one_pad; // a1 in the spec
-    public final ElementModP proof_one_data; // b1 in the spec
-    public final ElementModQ proof_zero_challenge; // c0 in the spec
-    public final ElementModQ proof_one_challenge; // c1 in the spec
+    public final ChaumPedersenProof proof0;
+    public final ChaumPedersenProof proof1;
     public final ElementModQ challenge; // c in the spec
-    public final ElementModQ proof_zero_response; // proof_zero_response in the spec
-    public final ElementModQ proof_one_response; // proof_one_response in the spec
 
+    // 1.0
     public DisjunctiveChaumPedersenProof(ElementModP proof_zero_pad, ElementModP proof_zero_data,
                                          ElementModP proof_one_pad, ElementModP proof_one_data, ElementModQ proof_zero_challenge,
                                          ElementModQ proof_one_challenge, ElementModQ challenge, ElementModQ proof_zero_response, ElementModQ proof_one_response) {
       super("DisjunctiveChaumPedersenProof", Proof.Usage.SelectionValue);
-      this.proof_zero_pad = Preconditions.checkNotNull(proof_zero_pad);
-      this.proof_zero_data = Preconditions.checkNotNull(proof_zero_data);
-      this.proof_one_pad = Preconditions.checkNotNull(proof_one_pad);
-      this.proof_one_data = Preconditions.checkNotNull(proof_one_data);
-      this.proof_zero_challenge = Preconditions.checkNotNull(proof_zero_challenge);
-      this.proof_one_challenge = Preconditions.checkNotNull(proof_one_challenge);
+      this.proof0 = new ChaumPedersenProof(proof_zero_pad, proof_zero_data, proof_zero_challenge, proof_zero_response);
+      this.proof1 = new ChaumPedersenProof(proof_one_pad, proof_one_data, proof_one_challenge, proof_one_response);
       this.challenge = Preconditions.checkNotNull(challenge);
-      this.proof_zero_response = Preconditions.checkNotNull(proof_zero_response);
-      this.proof_one_response = Preconditions.checkNotNull(proof_one_response);
+    }
+
+    // 2.0
+    public DisjunctiveChaumPedersenProof(ChaumPedersenProof proof0, ChaumPedersenProof proof1, ElementModQ challenge) {
+      super("DisjunctiveChaumPedersenProof2", Proof.Usage.SelectionValue);
+      this.proof0 = Preconditions.checkNotNull(proof0);
+      this.proof1 = Preconditions.checkNotNull(proof1);
+      this.challenge = Preconditions.checkNotNull(challenge);
     }
 
     @Override
     public String toString() {
       return "DisjunctiveChaumPedersenProof{" +
-              "\n proof_zero_pad=" + proof_zero_pad.toShortString() +
-              "\n proof_zero_data=" + proof_zero_data.toShortString() +
-              "\n proof_one_pad=" + proof_one_pad.toShortString() +
-              "\n proof_one_data=" + proof_one_data.toShortString() +
-              "\n proof_zero_challenge=" + proof_zero_challenge +
-              "\n proof_one_challenge=" + proof_one_challenge +
+              "\n proof_zero " + proof0 +
+              "\n proof_one " + proof1 +
               "\n challenge=" + challenge +
-              "\n proof_zero_response=" + proof_zero_response +
-              "\n proof_one_response=" + proof_one_response +
               '}';
     }
 
     /**
      * Validates a "disjunctive" Chaum-Pedersen (zero or one) proof.
      * <p>
+     *
      * @param message: The ciphertext message
-     * @param k: The public key of the election
-     * @param qbar: The extended base hash of the election
+     * @param k:       The public key of the election
+     * @param qbar:    The extended base hash of the election
      */
     boolean is_valid(ElGamal.Ciphertext message, ElementModP k, ElementModQ qbar) {
       ElementModP alpha = message.pad();
       ElementModP beta = message.data();
 
-      ElementModP a0 = this.proof_zero_pad;
-      ElementModP b0 = this.proof_zero_data;
-      ElementModP a1 = this.proof_one_pad;
-      ElementModP b1 = this.proof_one_data;
-      ElementModQ c0 = this.proof_zero_challenge;
-      ElementModQ c1 = this.proof_one_challenge;
+      ChaumPedersenProof expanded0 = this.proof0.expand(message, k);
+      ChaumPedersenProof expanded1 = this.proof1.expand(message, k);
+
+
+      ElementModP a0 = expanded0.pad;
+      ElementModP b0 = expanded0.data;
+      ElementModP a1 = expanded1.pad;
+      ElementModP b1 = expanded1.data;
+      ElementModQ c0 = expanded0.challenge;
+      ElementModQ c1 = expanded1.challenge;
       ElementModQ c = this.challenge;
-      ElementModQ v0 = this.proof_zero_response;
-      ElementModQ v1 = this.proof_one_response;
+      ElementModQ v0 = expanded0.response;
+      ElementModQ v1 = expanded1.response;
 
       boolean in_bounds_alpha = alpha.is_valid_residue();
       boolean in_bounds_beta = beta.is_valid_residue();
-      boolean in_bounds_a0 = a0.is_valid_residue();
-      boolean in_bounds_b0 = b0.is_valid_residue();
-      boolean in_bounds_a1 = a1.is_valid_residue();
-      boolean in_bounds_b1 = b1.is_valid_residue();
+      boolean in_bounds_a0 = a0 == null || a0.is_valid_residue();
+      boolean in_bounds_b0 = b0 == null || b0.is_valid_residue();
+      boolean in_bounds_a1 = a1 == null || a1.is_valid_residue();
+      boolean in_bounds_b1 = b1 == null || b1.is_valid_residue();
       boolean in_bounds_c0 = c0.is_in_bounds();
       boolean in_bounds_c1 = c1.is_in_bounds();
       boolean in_bounds_v0 = v0.is_in_bounds();
@@ -140,10 +140,10 @@ public class ChaumPedersen {
     public final ElementModQ challenge; // c in the spec
     public final ElementModQ response; // v in the spec
 
-    public ChaumPedersenProof(ElementModP pad, ElementModP data, ElementModQ challenge, ElementModQ response) {
+    public ChaumPedersenProof(@Nullable ElementModP pad, @Nullable ElementModP data, ElementModQ challenge, ElementModQ response) {
       super("ChaumPedersenProof", Proof.Usage.SecretValue);
-      this.pad = Preconditions.checkNotNull(pad);
-      this.data = Preconditions.checkNotNull(data);
+      this.pad = pad;
+      this.data = data;
       this.challenge = Preconditions.checkNotNull(challenge);
       this.response = Preconditions.checkNotNull(response);
     }
@@ -151,11 +151,30 @@ public class ChaumPedersen {
     @Override
     public String toString() {
       return "ChaumPedersenProof{" +
-              "\n   pad      =" + pad.toShortString() +
-              "\n   data     =" + data.toShortString() +
+              "\n   pad      =" + (pad == null ? "null" : pad.toShortString()) +
+              "\n   data     =" + (data == null ? "null" : data.toShortString()) +
               "\n   challenge=" + challenge +
               "\n   response =" + response +
               '}';
+    }
+
+    ChaumPedersenProof expand(ElGamal.Ciphertext ciphertext, ElementModP publicKey) {
+      if (this.pad != null) {
+        return this;
+      }
+        // version 2.0
+      //             g = context.G_MOD_P,
+      //            gx = ciphertext.pad,
+      //            h = publicKey.key,
+      //            hx = ciphertext.data,
+      //     val negC = -c
+      //    val a = (g powP r) * (gx powP negC)
+      //    val b = (h powP r) * (hx powP negC)
+      ElementModQ negC = Group.negate_q(this.challenge);
+      Group.g_pow_p(this.response);
+      ElementModP a = Group.mult_p(Group.g_pow_p(this.response), Group.pow_p(ciphertext.pad(), negC));
+      ElementModP b = Group.mult_p(Group.pow_p(publicKey, this.response), Group.pow_p(ciphertext.data(), negC));
+      return new ChaumPedersenProof(a, b, this.challenge, this.response);
     }
 
     /**
@@ -166,19 +185,22 @@ public class ChaumPedersen {
      * - The challenge value 𝑐 satisfies 𝑐 = 𝐻(𝑄, (𝐴, 𝐵), (𝑎 , 𝑏 ), 𝑀 ).
      * - that the equations 𝑔^𝑣𝑖 = 𝑎𝑖𝐾^𝑐𝑖 mod 𝑝 and 𝐴^𝑣𝑖 = 𝑏𝑖𝑀𝑖^𝑐𝑖 mod 𝑝 are satisfied.
      * <p>
+     *
      * @param message: The ciphertext message
-     * @param k: The public key corresponding to the private key used to encrypt
-     * (e.g. the Guardian public election key)
-     * @param m: The value being checked for validity
-     * @param q: The extended base hash of the election
+     * @param k:       The public key corresponding to the private key used to encrypt
+     *                 (e.g. the Guardian public election key)
+     * @param m:       The value being checked for validity
+     * @param q:       The extended base hash of the election
      */
     public boolean is_valid(ElGamal.Ciphertext message, ElementModP k, ElementModP m, ElementModQ q) {
+      ChaumPedersenProof expanded = this.expand(message, k);
       ElementModP alpha = message.pad();
       ElementModP beta = message.data();
-      ElementModP a = this.pad;
-      ElementModP b = this.data;
-      ElementModQ c = this.challenge;
-      ElementModQ v = this.response;
+      ElementModP a = expanded.pad;
+      ElementModP b = expanded.data;
+      ElementModQ c = expanded.challenge;
+      ElementModQ v = expanded.response;
+
       boolean in_bounds_alpha = alpha.is_valid_residue();
       boolean in_bounds_beta = beta.is_valid_residue();
       boolean in_bounds_k = k.is_valid_residue();
@@ -215,8 +237,8 @@ public class ChaumPedersen {
                 String.format(" same_c %s%n", same_c) +
                 String.format(" consistent_gv %s%n", consistent_gv) +
                 String.format(" consistent_av %s%n", consistent_av) +
-                String.format("%n pad %s%n", this.pad.toShortString()) +
-                String.format(" data %s%n", this.data.toShortString()) +
+                String.format("%n pad %s%n", a.toShortString()) +
+                String.format(" data %s%n", b.toShortString()) +
                 String.format(" challenge %s%n", this.challenge) +
                 String.format(" response %s%n", this.response) +
                 String.format(" g_pow_p(v) %s%n", g_pow_p(v).toShortString()) +
@@ -262,9 +284,10 @@ public class ChaumPedersen {
      * Validates a "constant" Chaum-Pedersen proof.
      * e.g. that the equations 𝑔𝑉 = 𝑎𝐴𝐶 mod 𝑝 and 𝑔𝐿𝐾𝑣 = 𝑏𝐵𝐶 mod 𝑝 are satisfied.
      * <p>
+     *
      * @param message: The ciphertext message
-     * @param k: The public key of the election
-     * @param q: The extended base hash of the election
+     * @param k:       The public key of the election
+     * @param q:       The extended base hash of the election
      */
     boolean is_valid(ElGamal.Ciphertext message, ElementModP k, ElementModQ q) {
 
@@ -344,11 +367,12 @@ public class ChaumPedersen {
    * This is just a front-end helper for `make_disjunctive_chaum_pedersen_zero` and
    * `make_disjunctive_chaum_pedersen_one`.
    * <p>
-   * @param message: An ElGamal ciphertext
-   * @param r: The nonce used creating the ElGamal ciphertext
-   * @param k: The ElGamal public key for the election
-   * @param q: A value used when generating the challenge, usually the election extended base hash (𝑄')
-   * @param seed: Used to generate other random values here
+   *
+   * @param message:   An ElGamal ciphertext
+   * @param r:         The nonce used creating the ElGamal ciphertext
+   * @param k:         The ElGamal public key for the election
+   * @param q:         A value used when generating the challenge, usually the election extended base hash (𝑄')
+   * @param seed:      Used to generate other random values here
    * @param plaintext: Zero or one
    */
   static DisjunctiveChaumPedersenProof make_disjunctive_chaum_pedersen(
@@ -368,11 +392,12 @@ public class ChaumPedersen {
   /**
    * Produces a "disjunctive" proof that an encryption of zero is either an encrypted zero or one.
    * <p>
+   *
    * @param message: An ElGamal ciphertext
-   * @param r: The nonce used creating the ElGamal ciphertext
-   * @param k: The ElGamal public key for the election
-   * @param qbar: A value used when generating the challenge, usually the election extended base hash (𝑄')
-   * @param seed: Used to generate other random values here
+   * @param r:       The nonce used creating the ElGamal ciphertext
+   * @param k:       The ElGamal public key for the election
+   * @param qbar:    A value used when generating the challenge, usually the election extended base hash (𝑄')
+   * @param seed:    Used to generate other random values here
    */
   static DisjunctiveChaumPedersenProof make_disjunctive_chaum_pedersen_zero(
           ElGamal.Ciphertext message,
@@ -408,11 +433,12 @@ public class ChaumPedersen {
   /**
    * Produces a "disjunctive" proof that an encryption of one is either an encrypted zero or one.
    * <p>
+   *
    * @param message: An ElGamal ciphertext
-   * @param r: The nonce used creating the ElGamal ciphertext
-   * @param k: The ElGamal public key for the election
-   * @param qbar: A value used when generating the challenge, usually the election extended base hash (𝑄')
-   * @param seed: Used to generate other random values here
+   * @param r:       The nonce used creating the ElGamal ciphertext
+   * @param k:       The ElGamal public key for the election
+   * @param qbar:    A value used when generating the challenge, usually the election extended base hash (𝑄')
+   * @param seed:    Used to generate other random values here
    */
   static DisjunctiveChaumPedersenProof make_disjunctive_chaum_pedersen_one(
           ElGamal.Ciphertext message,
@@ -446,15 +472,15 @@ public class ChaumPedersen {
   }
 
   /**
-   *     Produces a proof that a given value corresponds to a specific encryption.
-   *     computes: 𝑀 =𝐴^𝑠𝑖 mod 𝑝 and 𝐾𝑖 = 𝑔^𝑠𝑖 mod 𝑝
+   * Produces a proof that a given value corresponds to a specific encryption.
+   * computes: 𝑀 =𝐴^𝑠𝑖 mod 𝑝 and 𝐾𝑖 = 𝑔^𝑠𝑖 mod 𝑝
    *
-   *     @param message: An ElGamal ciphertext
-   *     @param s: The nonce or secret used to derive the value
-   *     @param m: The value we are trying to prove
-   *     @param seed: Used to generate other random values here
-   *     @param hash_header: A value used when generating the challenge,
-   *                         usually the election extended base hash (𝑄')
+   * @param message:     An ElGamal ciphertext
+   * @param s:           The nonce or secret used to derive the value
+   * @param m:           The value we are trying to prove
+   * @param seed:        Used to generate other random values here
+   * @param hash_header: A value used when generating the challenge,
+   *                     usually the election extended base hash (𝑄')
    */
   public static ChaumPedersenProof make_chaum_pedersen(
           ElGamal.Ciphertext message,
@@ -479,11 +505,12 @@ public class ChaumPedersen {
   /**
    * Produces a proof that a given encryption corresponds to a specific total value.
    * <p>
-   * @param message: An ElGamal ciphertext
-   * @param constant: The plaintext constant value used to make the ElGamal ciphertext (L in the spec)
-   * @param r: The aggregate nonce used creating the ElGamal ciphertext
-   * @param k: The ElGamal public key for the election
-   * @param seed: Used to generate other random values here
+   *
+   * @param message:                   An ElGamal ciphertext
+   * @param constant:                  The plaintext constant value used to make the ElGamal ciphertext (L in the spec)
+   * @param r:                         The aggregate nonce used creating the ElGamal ciphertext
+   * @param k:                         The ElGamal public key for the election
+   * @param seed:                      Used to generate other random values here
    * @param crypto_extended_base_hash: usually the election extended base hash (𝑄')
    */
   static ConstantChaumPedersenProof make_constant_chaum_pedersen(
@@ -526,11 +553,12 @@ public class ChaumPedersen {
   /**
    * Produces a "disjunctive" proof that an encryption of zero is either an encrypted zero or one.
    * <p>
+   *
    * @param message: An ElGamal ciphertext
-   * @param r: The nonce used creating the ElGamal ciphertext
-   * @param k: The ElGamal public key for the election
-   * @param qbar: A value used when generating the challenge, usually the election extended base hash (𝑄')
-   * @param seed: Used to generate other random values here
+   * @param r:       The nonce used creating the ElGamal ciphertext
+   * @param k:       The ElGamal public key for the election
+   * @param qbar:    A value used when generating the challenge, usually the election extended base hash (𝑄')
+   * @param seed:    Used to generate other random values here
    */
   static DisjunctiveChaumPedersenProof make_disjunctive_chaum_pedersen_zero_org(
           ElGamal.Ciphertext message,
@@ -565,11 +593,12 @@ public class ChaumPedersen {
   /**
    * Produces a "disjunctive" proof that an encryption of one is either an encrypted zero or one.
    * <p>
+   *
    * @param message: An ElGamal ciphertext
-   * @param r: The nonce used creating the ElGamal ciphertext
-   * @param k: The ElGamal public key for the election
-   * @param qbar: A value used when generating the challenge, usually the election extended base hash (𝑄')
-   * @param seed: Used to generate other random values here
+   * @param r:       The nonce used creating the ElGamal ciphertext
+   * @param k:       The ElGamal public key for the election
+   * @param qbar:    A value used when generating the challenge, usually the election extended base hash (𝑄')
+   * @param seed:    Used to generate other random values here
    */
   static DisjunctiveChaumPedersenProof make_disjunctive_chaum_pedersen_one_org(
           ElGamal.Ciphertext message,

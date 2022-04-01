@@ -28,7 +28,7 @@ public class CommonConvert {
     if (modQ == null || modQ.getValue().isEmpty()) {
       return null;
     }
-    BigInteger elem = new BigInteger(modQ.getValue().toByteArray());
+    BigInteger elem = new BigInteger(1, modQ.getValue().toByteArray());
     return Group.int_to_q_unchecked(elem);
   }
   
@@ -37,7 +37,7 @@ public class CommonConvert {
     if (modQ == null || modQ.getValue().isEmpty()) {
       return null;
     }
-    BigInteger elem = new BigInteger(modQ.getValue().toByteArray());
+    BigInteger elem = new BigInteger(1, modQ.getValue().toByteArray());
     return Group.int_to_q_unchecked(elem);
   }
 
@@ -46,7 +46,7 @@ public class CommonConvert {
     if (modP == null || modP.getValue().isEmpty()) {
       return null;
     }
-    BigInteger elem = new BigInteger(modP.getValue().toByteArray());
+    BigInteger elem = new BigInteger(1, modP.getValue().toByteArray());
     return Group.int_to_p_unchecked(elem);
   }
 
@@ -107,8 +107,12 @@ public class CommonConvert {
 
   public static CommonProto.GenericChaumPedersenProof convertChaumPedersenProof(ChaumPedersen.ChaumPedersenProof proof) {
     CommonProto.GenericChaumPedersenProof.Builder builder = CommonProto.GenericChaumPedersenProof.newBuilder();
-    builder.setPad(convertElementModP(proof.pad));
-    builder.setData(convertElementModP(proof.data));
+    if (proof.pad != null) {
+      builder.setPad(convertElementModP(proof.pad));
+    }
+    if (proof.data != null) {
+      builder.setData(convertElementModP(proof.data));
+    }
     builder.setChallenge(convertElementModQ(proof.challenge));
     builder.setResponse(convertElementModQ(proof.response));
     return builder.build();
@@ -117,7 +121,7 @@ public class CommonConvert {
   public static CommonProto.SchnorrProof convertSchnorrProof(SchnorrProof proof) {
     CommonProto.SchnorrProof.Builder builder = CommonProto.SchnorrProof.newBuilder();
     builder.setPublicKey(convertElementModP(proof.publicKey));
-    builder.setCommitment(convertElementModP(proof.commitment));
+    builder.setCommitment(convertElementModP(proof.getCommitment()));
     builder.setChallenge(convertElementModQ(proof.challenge));
     builder.setResponse(convertElementModQ(proof.response));
     return builder.build();

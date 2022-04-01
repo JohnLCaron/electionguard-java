@@ -3,6 +3,7 @@ package com.sunya.electionguard;
 import com.google.common.base.Preconditions;
 import com.google.common.flogger.FluentLogger;
 
+import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import java.util.Objects;
 
@@ -21,19 +22,25 @@ public class SchnorrProof extends Proof {
 
   /** The commitment K_ij. */
   public final ElementModP publicKey;
-  /** h in the spec = g^nonce. LOOK why is this called committment? Confusing*/
-  public final ElementModP commitment;
+  /** h in the spec = g^nonce.*/
+  @Nullable
+  private final ElementModP commitment;
   /** c in the spec */
   public final ElementModQ challenge;
   /** u in the spec */
   public final ElementModQ response;
 
-  public SchnorrProof(ElementModP publicKey, ElementModP commitment, ElementModQ challenge, ElementModQ response) {
+  public SchnorrProof(ElementModP publicKey, @Nullable ElementModP commitment, ElementModQ challenge, ElementModQ response) {
     super("SchnorrProof", SecretValue);
     this.publicKey = Preconditions.checkNotNull(publicKey);
-    this.commitment = Preconditions.checkNotNull(commitment);
+    this.commitment = commitment;
     this.challenge = Preconditions.checkNotNull(challenge);
     this.response = Preconditions.checkNotNull(response);
+  }
+
+  public ElementModP getCommitment() {
+    return (commitment != null) ? commitment :
+            Group.div_p( Group.g_pow_p(this.response), Group.pow_p(this.publicKey, this.challenge)); // h
   }
 
   /**
@@ -43,7 +50,7 @@ public class SchnorrProof extends Proof {
    */
   public boolean is_valid() {
     ElementModP k = this.publicKey;
-    ElementModP h = this.commitment;
+    ElementModP h = this.getCommitment();
     ElementModQ u = this.response;
     boolean valid_public_key = k.is_valid_residue();
     boolean in_bounds_h = h.is_in_bounds();
@@ -70,10 +77,7 @@ public class SchnorrProof extends Proof {
     if (o == null || getClass() != o.getClass()) return false;
     if (!super.equals(o)) return false;
     SchnorrProof that = (SchnorrProof) o;
-    return publicKey.equals(that.publicKey) &&
-            commitment.equals(that.commitment) &&
-            challenge.equals(that.challenge) &&
-            response.equals(that.response);
+    return publicKey.equals(that.publicKey) && Objects.equals(commitment, that.commitment) && challenge.equals(that.challenge) && response.equals(that.response);
   }
 
   @Override
@@ -85,7 +89,7 @@ public class SchnorrProof extends Proof {
   public String toString() {
     return "SchnorrProof{" +
             "public_key=" + publicKey.toShortString() +
-            ", commitment=" + commitment.toShortString() +
+            ", commitment=" + getCommitment().toShortString() +
             ", challenge=" + challenge +
             ", response=" + response +
             "} " + super.toString();

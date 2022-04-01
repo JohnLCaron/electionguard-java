@@ -82,7 +82,7 @@ public class ElectionRecordFromProto {
   }
 
   static BigInteger convertBigInteger(ByteString bs) {
-    return new BigInteger(bs.toByteArray());
+    return new BigInteger(1, bs.toByteArray());
   }
 
   static ElectionContext convertContext(ElectionRecordProto.ElectionContext context) {
