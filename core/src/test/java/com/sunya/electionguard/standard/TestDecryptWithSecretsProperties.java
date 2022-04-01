@@ -83,18 +83,18 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
 
     // tamper with the proof
     assertThat(subject.proof).isPresent();
-    ElementModP altered_a0 = mult_p(subject.proof.get().proof_zero_pad, TWO_MOD_P);
+    ElementModP altered_a0 = mult_p(subject.proof.get().proof0.pad, TWO_MOD_P);
     ChaumPedersen.DisjunctiveChaumPedersenProof proof = subject.proof.get();
     ChaumPedersen.DisjunctiveChaumPedersenProof malformed_disjunctive = new ChaumPedersen.DisjunctiveChaumPedersenProof(
             altered_a0,
-            proof.proof_zero_data,
-            proof.proof_one_pad,
-            proof.proof_one_data,
-            proof.proof_zero_challenge,
-            proof.proof_one_challenge,
+            proof.proof0.data,
+            proof.proof1.pad,
+            proof.proof1.data,
+            proof.proof0.challenge,
+            proof.proof1.challenge,
             proof.challenge,
-            proof.proof_zero_response,
-            proof.proof_one_response
+            proof.proof0.response,
+            proof.proof1.response
     );
     CiphertextBallot.Selection malformed_proof = new CiphertextBallot.Selection(
             subject.object_id(), subject.sequence_order(), TWO_MOD_Q, malformed_message,

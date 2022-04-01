@@ -14,7 +14,7 @@ import java.io.IOException;
 
 import static com.google.common.truth.Truth.assertThat;
 
-public class TestCiphertextBallotToProtoRoundtrip {
+public class TestSubmittedBallotToProtoRoundtrip {
   private static Publisher publisher;
 
   @BeforeContainer
@@ -28,8 +28,8 @@ public class TestCiphertextBallotToProtoRoundtrip {
     for (File file : publisher.ballotFiles()) {
       SubmittedBallot fromPython = ConvertFromJson.readSubmittedBallot(file.getAbsolutePath());
       assertThat(fromPython).isNotNull();
-      CiphertextBallotProto.SubmittedBallot proto = CiphertextBallotToProto.translateToProto(fromPython);
-      SubmittedBallot roundtrip = CiphertextBallotFromProto.translateFromProto(proto);
+      CiphertextBallotProto.SubmittedBallot proto = SubmittedBallotToProto.translateToProto(fromPython);
+      SubmittedBallot roundtrip = SubmittedBallotFromProto.translateFromProto(proto);
       int contestIdx = 0;
       for (CiphertextBallot.Contest contest : roundtrip.contests) {
         CiphertextBallot.Contest pcontest = fromPython.contests.get(contestIdx);

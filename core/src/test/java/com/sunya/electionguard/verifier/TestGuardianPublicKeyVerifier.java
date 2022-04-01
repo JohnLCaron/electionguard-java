@@ -51,7 +51,7 @@ public class TestGuardianPublicKeyVerifier {
 
   private void verify_equations(Group.ElementModP genP, GuardianRecord coeff) {
     for (SchnorrProof proof : coeff.coefficientProofs()) {
-      Group.ElementModP commitment = proof.commitment; // h
+      Group.ElementModP commitment = proof.getCommitment(); // h
       Group.ElementModP public_key = proof.publicKey; // k
       Group.ElementModQ challenge = proof.challenge;   // c
       Group.ElementModQ response = proof.response;     // u
@@ -63,7 +63,7 @@ public class TestGuardianPublicKeyVerifier {
 
   private void verify_challenges(GuardianRecord coeff) {
     for (SchnorrProof proof : coeff.coefficientProofs()) {
-      Group.ElementModP commitment = proof.commitment; // h
+      Group.ElementModP commitment = proof.getCommitment(); // h
       Group.ElementModP public_key = proof.publicKey; // k
       Group.ElementModQ challenge = proof.challenge;   // c
 

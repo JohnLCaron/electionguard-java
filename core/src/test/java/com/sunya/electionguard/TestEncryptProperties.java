@@ -112,18 +112,18 @@ public class TestEncryptProperties extends TestProperties {
             result.proof, result.extended_data);
 
     // tamper with the proof
-    ElementModP altered_a0 = mult_p(result.proof.orElseThrow().proof_zero_pad, TWO_MOD_P);
+    ElementModP altered_a0 = mult_p(result.proof.orElseThrow().proof0.pad, TWO_MOD_P);
     DisjunctiveChaumPedersenProof proof = result.proof.get();
     DisjunctiveChaumPedersenProof malformed_disjunctive = new DisjunctiveChaumPedersenProof(
             altered_a0,
-            proof.proof_zero_data,
-            proof.proof_one_pad,
-            proof.proof_one_data,
-            proof.proof_zero_challenge,
-            proof.proof_one_challenge,
+            proof.proof0.data,
+            proof.proof1.pad,
+            proof.proof1.data,
+            proof.proof0.challenge,
+            proof.proof1.challenge,
             proof.challenge,
-            proof.proof_zero_response,
-            proof.proof_one_response
+            proof.proof0.response,
+            proof.proof1.response
     );
     CiphertextBallot.Selection malformed_proof = new CiphertextBallot.Selection(
             result.object_id(), result.sequence_order(), TWO_MOD_Q, malformed_message,

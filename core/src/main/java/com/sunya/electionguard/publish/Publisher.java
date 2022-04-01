@@ -2,7 +2,7 @@ package com.sunya.electionguard.publish;
 
 import com.google.common.collect.Iterables;
 import com.sunya.electionguard.*;
-import com.sunya.electionguard.proto.CiphertextBallotToProto;
+import com.sunya.electionguard.proto.SubmittedBallotToProto;
 import com.sunya.electionguard.proto.ElectionRecordToProto;
 import com.sunya.electionguard.proto.PlaintextTallyToProto;
 import electionguard.protogen.PlaintextTallyProto;
@@ -441,7 +441,7 @@ public class Publisher {
     int count = 0;
     try (FileOutputStream out = new FileOutputStream(submittedBallotProtoPath().toFile())) {
       for (SubmittedBallot ballot : submittedBallots) {
-        CiphertextBallotProto.SubmittedBallot ballotProto = CiphertextBallotToProto.translateToProto(ballot);
+        CiphertextBallotProto.SubmittedBallot ballotProto = SubmittedBallotToProto.translateToProto(ballot);
         ballotProto.writeDelimitedTo(out);
         count++;
       }
@@ -553,7 +553,7 @@ public class Publisher {
     // the accepted ballots are written into their own file
     try (FileOutputStream out = new FileOutputStream(submittedBallotProtoPath().toFile())) {
       for (SubmittedBallot ballot : accepted_ballots) {
-        CiphertextBallotProto.SubmittedBallot ballotProto = CiphertextBallotToProto.translateToProto(ballot);
+        CiphertextBallotProto.SubmittedBallot ballotProto = SubmittedBallotToProto.translateToProto(ballot);
         ballotProto.writeDelimitedTo(out);
       }
     }

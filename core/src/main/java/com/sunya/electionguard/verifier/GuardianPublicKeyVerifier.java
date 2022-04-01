@@ -48,7 +48,9 @@ public class GuardianPublicKeyVerifier {
 
     int count = 0;
     for (SchnorrProof proof : coefficient_proofs) {
-      ElementModP commitment = proof.commitment; // h
+      // LOOK
+      // ElementModP commitment = proof.commitment; // h
+      ElementModP commitment = proof.getCommitment(); // h
       ElementModP public_key = proof.publicKey; // k
       ElementModQ challenge = proof.challenge;   // c
       ElementModQ response = proof.response;     // u
@@ -60,6 +62,7 @@ public class GuardianPublicKeyVerifier {
         System.out.printf("Guardian %s coefficient_proof %d: equation 2A challenge validation failed.%n", coeffSet.guardianId(), count);
       }
 
+      // this is now a tautology
       // check equation 2.B
       if (!this.verify_individual_key_computation(response, commitment, public_key, challenge)) {
         error = true;

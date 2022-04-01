@@ -131,14 +131,14 @@ public class TestSelectionEncryptionVerifier {
 
       // get values
       String selection_id = selection.object_id();
-      ElementModP zero_pad = proof.proof_zero_pad; // a0
-      ElementModP one_pad = proof.proof_one_pad; // a1
-      ElementModP zero_data = proof.proof_zero_data; // b0
-      ElementModP one_data = proof.proof_one_data; // b1
-      ElementModQ zero_challenge = proof.proof_zero_challenge; // c0
-      ElementModQ one_challenge = proof.proof_one_challenge; // c1
-      ElementModQ zero_response = proof.proof_zero_response; // v0
-      ElementModQ one_response = proof.proof_one_response; // v1
+      ElementModP zero_pad = proof.proof0.pad; // a0
+      ElementModP one_pad = proof.proof1.pad; // a1
+      ElementModP zero_data = proof.proof0.data; // b0
+      ElementModP one_data = proof.proof1.data; // b1
+      ElementModQ zero_challenge = proof.proof0.challenge; // c0
+      ElementModQ one_challenge = proof.proof1.challenge; // c1
+      ElementModQ zero_response = proof.proof0.response; // v0
+      ElementModQ one_response = proof.proof1.response; // v1
 
       // point 1: check alpha, beta, a0, b0, a1, b1 are all in set Zrp
       if (!(this.check_params_within_zrp(cipher.pad(), cipher.data(), zero_pad, one_pad, zero_data, one_data))) {

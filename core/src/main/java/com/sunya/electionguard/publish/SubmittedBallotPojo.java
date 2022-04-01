@@ -237,15 +237,15 @@ public class SubmittedBallotPojo {
 
   private static DisjunctiveChaumPedersenProofPojo convertDisjunctiveProof(ChaumPedersen.DisjunctiveChaumPedersenProof proof) {
     DisjunctiveChaumPedersenProofPojo pojo = new DisjunctiveChaumPedersenProofPojo();
-    pojo.proof_zero_pad = proof.proof_zero_pad;
-    pojo.proof_zero_data = proof.proof_zero_data;
-    pojo.proof_one_pad = proof.proof_one_pad;
-    pojo.proof_one_data = proof.proof_one_data;
-    pojo.proof_zero_challenge = proof.proof_zero_challenge;
-    pojo.proof_one_challenge = proof.proof_one_challenge;
+    pojo.proof_zero_pad = proof.proof0.pad;
+    pojo.proof_zero_data = proof.proof0.data;
+    pojo.proof_one_pad = proof.proof1.pad;
+    pojo.proof_one_data = proof.proof1.data;
+    pojo.proof_zero_challenge = proof.proof0.challenge;
+    pojo.proof_one_challenge = proof.proof1.challenge;
     pojo.challenge = proof.challenge;
-    pojo.proof_zero_response = proof.proof_zero_response;
-    pojo.proof_one_response = proof.proof_one_response;
+    pojo.proof_zero_response = proof.proof0.response;
+    pojo.proof_one_response = proof.proof1.response;
     return pojo;
   }
 }

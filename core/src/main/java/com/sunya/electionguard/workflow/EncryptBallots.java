@@ -255,7 +255,10 @@ public class EncryptBallots {
     PrivateData pdata = publisher.makePrivateData(true, true);
     // LOOK JSON !!
     pdata.publish_private_data(ballots, null);
+    // LOOK Proto
+    pdata.writePrivateDataProto(ballots, null);
     System.out.printf("Save %d original ballots in %s%n", ballots.size(), pdata.privateDirectory());
+
   }
 
   void saveInvalidBallots(Publisher publisher, List<PlaintextBallot> ballots) throws IOException {

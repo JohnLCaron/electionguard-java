@@ -1,9 +1,11 @@
 package com.sunya.electionguard.publish;
 
 import com.sunya.electionguard.decrypting.DecryptingTrustee;
+import com.sunya.electionguard.proto.PlaintextBallotToProto;
 import com.sunya.electionguard.proto.TrusteeFromProto;
 import com.sunya.electionguard.standard.GuardianPrivateRecord;
 import com.sunya.electionguard.PlaintextBallot;
+import electionguard.protogen.PlaintextBallotProto;
 import electionguard.protogen.TrusteeProto;
 
 import javax.annotation.Nullable;
@@ -28,6 +30,7 @@ public class PrivateData {
 
   //// proto
   static final String TRUSTEES_FILE = "trustees" + Publisher.PROTO_SUFFIX;
+  static final String PROTO_BALLOTS_FILE = "plaintextBallots" + Publisher.PROTO_SUFFIX;
 
   private final Path privateDirectory;
 
@@ -101,6 +104,10 @@ public class PrivateData {
     return privateDirectory.resolve(PRIVATE_BALLOT_DIR);
   }
 
+  public Path privateBallotsProtoPath() {
+    return privateBallotsPath().resolve(PROTO_BALLOTS_FILE);
+  }
+
   public Path guardiansPrivatePath(String id) {
     String fileName = id + Publisher.JSON_SUFFIX;
     return privateDirectory.resolve(fileName);
@@ -158,6 +165,29 @@ public class PrivateData {
       }
     }
     return result;
+  }
+
+  public void writePrivateDataProto(
+          @Nullable Iterable<PlaintextBallot> original_ballots,
+          @Nullable Iterable<GuardianPrivateRecord> guardians) throws IOException {
+
+    Files.createDirectories(privateDirectory);
+
+    if (guardians != null) {
+      throw new UnsupportedOperationException();
+    }
+
+    if (original_ballots != null) {
+      Files.createDirectories(privateBallotsPath());
+      try (FileOutputStream out = new FileOutputStream(privateBallotsProtoPath().toFile())) {
+        for (PlaintextBallot ballot : original_ballots) {
+          PlaintextBallotProto.PlaintextBallot ballotProto = PlaintextBallotToProto.translateToProto(ballot);
+          ballotProto.writeDelimitedTo(out);
+        }
+      }
+    }
+
+    // TODO CIPHERTEXT_BALLOT_PREFIX?
   }
 
   ////////////////////////////////////////////////////////////////////////////////
