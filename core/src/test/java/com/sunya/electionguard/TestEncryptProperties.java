@@ -38,12 +38,12 @@ public class TestEncryptProperties extends TestProperties {
     PlaintextBallot.Selection subject = selection_from(metadata, false, false);
     assertThat(subject.is_valid(metadata.selectionId())).isTrue();
 
-    Optional<CiphertextBallot.Selection> result = encrypt_selection(subject, metadata, keypair.public_key(), ONE_MOD_Q, nonce, false, true);
+    Optional<CiphertextBallot.Selection> result = encrypt_selection("test", subject, metadata, keypair.public_key(), ONE_MOD_Q, nonce, false, true);
 
     // Assert
     assertThat(result).isPresent();
     assertThat(result.get().ciphertext()).isNotNull();
-    assertThat(result.get().is_valid_encryption(hash_context, keypair.public_key(), ONE_MOD_Q)).isTrue();
+    assertThat(result.get().is_valid_encryption("test", hash_context, keypair.public_key(), ONE_MOD_Q)).isTrue();
   }
 
   @Example
@@ -56,7 +56,7 @@ public class TestEncryptProperties extends TestProperties {
     PlaintextBallot.Selection subject = selection_from(metadata, false, false);
     assertThat(subject.is_valid(metadata.selectionId())).isTrue();
 
-    Optional<CiphertextBallot.Selection> resultO = encrypt_selection(subject, metadata, keypair.public_key(), ONE_MOD_Q, nonce, false, true);
+    Optional<CiphertextBallot.Selection> resultO = encrypt_selection("test", subject, metadata, keypair.public_key(), ONE_MOD_Q, nonce, false, true);
     assertThat(resultO).isPresent();
     CiphertextBallot.Selection result = resultO.get();
 
@@ -74,8 +74,8 @@ public class TestEncryptProperties extends TestProperties {
             result.crypto_hash, result.is_placeholder_selection, result.nonce,
             Optional.empty(), result.extended_data);
 
-    assertThat(malformed_description_hash.is_valid_encryption(hash_context, keypair.public_key(), ONE_MOD_Q)).isFalse();
-    assertThat(missing_proof.is_valid_encryption(hash_context, keypair.public_key(), ONE_MOD_Q)).isFalse();
+    assertThat(malformed_description_hash.is_valid_encryption("test", hash_context, keypair.public_key(), ONE_MOD_Q)).isFalse();
+    assertThat(missing_proof.is_valid_encryption("test", hash_context, keypair.public_key(), ONE_MOD_Q)).isFalse();
   }
 
   @Property(tries = 10, shrinking = ShrinkingMode.OFF)
@@ -85,10 +85,10 @@ public class TestEncryptProperties extends TestProperties {
           @ForAll("elements_mod_q_no_zero") ElementModQ seed) {
     PlaintextBallot.Selection subject = BallotFactory.get_random_selection_from(description);
 
-    Optional<CiphertextBallot.Selection> result = encrypt_selection(subject, description, keypair.public_key(), ONE_MOD_Q, seed, false, true);
+    Optional<CiphertextBallot.Selection> result = encrypt_selection("test", subject, description, keypair.public_key(), ONE_MOD_Q, seed, false, true);
     assertThat(result).isPresent();
     assertThat(result.get().ciphertext()).isNotNull();
-    assertThat(result.get().is_valid_encryption(description.cryptoHash(), keypair.public_key(), ONE_MOD_Q)).isTrue();
+    assertThat(result.get().is_valid_encryption("test", description.cryptoHash(), keypair.public_key(), ONE_MOD_Q)).isTrue();
   }
 
   @Property(tries = 10, shrinking = ShrinkingMode.OFF)
@@ -99,9 +99,9 @@ public class TestEncryptProperties extends TestProperties {
           @ForAll @IntRange(min = 0, max = 100) int random_seed) {
     PlaintextBallot.Selection subject = BallotFactory.get_random_selection_from(description);
 
-    Optional<CiphertextBallot.Selection> resultO = encrypt_selection(subject, description, keypair.public_key(), ONE_MOD_Q, seed, false, true);
+    Optional<CiphertextBallot.Selection> resultO = encrypt_selection("test", subject, description, keypair.public_key(), ONE_MOD_Q, seed, false, true);
     assertThat(resultO).isPresent();
-    assertThat(resultO.get().is_valid_encryption(description.cryptoHash(), keypair.public_key(), ONE_MOD_Q)).isTrue();
+    assertThat(resultO.get().is_valid_encryption("test", description.cryptoHash(), keypair.public_key(), ONE_MOD_Q)).isTrue();
     CiphertextBallot.Selection result = resultO.get();
 
     // tamper with the encryption
@@ -131,8 +131,8 @@ public class TestEncryptProperties extends TestProperties {
             Optional.of(malformed_disjunctive), result.extended_data);
 
 
-    assertThat(malformed_encryption.is_valid_encryption(description.cryptoHash(), keypair.public_key(), ONE_MOD_Q)).isFalse();
-    assertThat(malformed_proof.is_valid_encryption(description.cryptoHash(), keypair.public_key(), ONE_MOD_Q)).isFalse();
+    assertThat(malformed_encryption.is_valid_encryption("test", description.cryptoHash(), keypair.public_key(), ONE_MOD_Q)).isFalse();
+    assertThat(malformed_proof.is_valid_encryption("test", description.cryptoHash(), keypair.public_key(), ONE_MOD_Q)).isFalse();
   }
 
   @Example
@@ -166,10 +166,10 @@ public class TestEncryptProperties extends TestProperties {
     PlaintextBallot.Contest subject = contest_from(contest);
 
     assertThat(subject.is_valid(contest.contestId(), contest.selections().size(), contest.numberElected(), contest.votesAllowed())).isTrue();
-    Optional<CiphertextBallot.Contest> result = encrypt_contest(subject, metadata, keypair.public_key(), ONE_MOD_Q, nonce, true);
+    Optional<CiphertextBallot.Contest> result = encrypt_contest("test", subject, metadata, keypair.public_key(), ONE_MOD_Q, nonce, true);
 
     assertThat(result).isPresent();
-    assertThat(result.get().is_valid_encryption(hash_context, keypair.public_key(), ONE_MOD_Q)).isTrue();
+    assertThat(result.get().is_valid_encryption("test", hash_context, keypair.public_key(), ONE_MOD_Q)).isTrue();
   }
 
   @Property(tries = 10, shrinking = ShrinkingMode.OFF)
@@ -180,11 +180,11 @@ public class TestEncryptProperties extends TestProperties {
           @ForAll @IntRange(min = 0, max = 100) int random_seed) {
 
     PlaintextBallot.Contest subject = ballot_factory.get_random_contest_from(description.contest, false, false);
-    Optional<CiphertextBallot.Contest> resultO = encrypt_contest(subject, description, keypair.public_key(), ONE_MOD_Q, nonce_seed, true);
+    Optional<CiphertextBallot.Contest> resultO = encrypt_contest("test", subject, description, keypair.public_key(), ONE_MOD_Q, nonce_seed, true);
     assertThat(resultO).isPresent();
     CiphertextBallot.Contest result = resultO.get();
 
-    assertThat(result.is_valid_encryption(description.contest.cryptoHash(), keypair.public_key(), ONE_MOD_Q)).isTrue();
+    assertThat(result.is_valid_encryption("test", description.contest.cryptoHash(), keypair.public_key(), ONE_MOD_Q)).isTrue();
 
     // The encrypted contest should include an entry for each possible selection nd placeholders for each seat
     int expected_entries = description.contest.selections().size() + description.contest.numberElected();
@@ -202,10 +202,10 @@ public class TestEncryptProperties extends TestProperties {
     PlaintextBallot.Contest subject = ballot_factory.get_random_contest_from(description.contest, false, false);
 
     Optional<CiphertextBallot.Contest> resultO = encrypt_contest(
-            subject, description, keypair.public_key(), ONE_MOD_Q, nonce_seed, true);
+            "test", subject, description, keypair.public_key(), ONE_MOD_Q, nonce_seed, true);
     assertThat(resultO).isPresent();
     CiphertextBallot.Contest result = resultO.get();
-    assertThat(result.is_valid_encryption(description.contest.cryptoHash(), keypair.public_key(), ONE_MOD_Q)).isTrue();
+    assertThat(result.is_valid_encryption("test", description.contest.cryptoHash(), keypair.public_key(), ONE_MOD_Q)).isTrue();
 
     // tamper with the proof
     assertThat(result.proof).isPresent();
@@ -220,7 +220,7 @@ public class TestEncryptProperties extends TestProperties {
             new ElGamal.Ciphertext(TWO_MOD_P, TWO_MOD_P),
             result.nonce,
             Optional.of(malformed_disjunctive));
-    assertThat(malformed_proof.is_valid_encryption(description.contest.cryptoHash(), keypair.public_key(), ONE_MOD_Q)).isFalse();
+    assertThat(malformed_proof.is_valid_encryption("test", description.contest.cryptoHash(), keypair.public_key(), ONE_MOD_Q)).isFalse();
 
     // remove the proof
     CiphertextBallot.Contest missing_proof = new CiphertextBallot.Contest(
@@ -228,7 +228,7 @@ public class TestEncryptProperties extends TestProperties {
             result.selections, result.crypto_hash,
             new ElGamal.Ciphertext(TWO_MOD_P, TWO_MOD_P),
             result.nonce, Optional.empty());
-    assertThat(missing_proof.is_valid_encryption(description.contest.cryptoHash(), keypair.public_key(), ONE_MOD_Q)).isFalse();
+    assertThat(missing_proof.is_valid_encryption("test", description.contest.cryptoHash(), keypair.public_key(), ONE_MOD_Q)).isFalse();
   }
 
   /*  Fails - Dont know what the fix is.
@@ -288,6 +288,7 @@ public class TestEncryptProperties extends TestProperties {
     ContestWithPlaceholders contestp = new ContestWithPlaceholders(description, placeholders);
 
     Optional<CiphertextBallot.Contest> subject = encrypt_contest(
+            "test",
             data,
             contestp,
             keypair.public_key(),
@@ -335,6 +336,7 @@ public class TestEncryptProperties extends TestProperties {
     ContestWithPlaceholders contestp = new ContestWithPlaceholders(description, placeholders);
 
     Optional<CiphertextBallot.Contest> subject = encrypt_contest(
+            "test",
             data,
             contestp,
             keypair.public_key(),

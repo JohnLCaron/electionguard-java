@@ -5,6 +5,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.flogger.FluentLogger;
+import com.sunya.electionguard.core.HashedElGamalCiphertext;
 
 import javax.annotation.concurrent.Immutable;
 import java.util.ArrayList;
@@ -250,7 +251,8 @@ public class CiphertextBallot implements Hash.CryptoHashCheckable {
 
     Group.ElementModQ recalculated_crypto_hash = this.crypto_hash_with(seed_hash);
     if (!recalculated_crypto_hash.equals(this.crypto_hash)) {
-      logger.atInfo().log("CiphertextBallot mismatching crypto hash: %s expected(%s) actual(%s)", this.ballotId, recalculated_crypto_hash, this.crypto_hash);
+      logger.atInfo().log("CiphertextBallot mismatching crypto hash: %s expected(%s) actual(%s)",
+              this.ballotId, recalculated_crypto_hash, this.crypto_hash);
       throw new IllegalStateException("CiphertextBallot mismatching crypto hash");
       // return false;
     }
@@ -259,9 +261,12 @@ public class CiphertextBallot implements Hash.CryptoHashCheckable {
     boolean valid = true;
     for (Contest contest : this.contests) {
       for (Selection selection : contest.selections) {
-        valid &= selection.is_valid_encryption(selection.selectionHash, elgamal_public_key, crypto_extended_base_hash);
+        if (!selection.is_placeholder_selection) {
+          valid &= selection.is_valid_encryption(this.ballotId + " " + contest.contestId,
+                  selection.selectionHash, elgamal_public_key, crypto_extended_base_hash);
+        }
       }
-      valid &= contest.is_valid_encryption(contest.contestHash, elgamal_public_key, crypto_extended_base_hash);
+      valid &= contest.is_valid_encryption(this.ballotId , contest.contestHash, elgamal_public_key, crypto_extended_base_hash);
     }
     return valid;
   }
@@ -339,12 +344,11 @@ public class CiphertextBallot implements Hash.CryptoHashCheckable {
             Optional<Group.ElementModQ> nonce,
             Optional<Group.ElementModQ> crypto_hash,
             Optional<ChaumPedersen.DisjunctiveChaumPedersenProof> proof,
-            Optional<ElGamal.Ciphertext> extended_data) {
+            Optional<HashedElGamalCiphertext> extended_data) {
 
       if (crypto_hash.isEmpty()) {
         // python: _ciphertext_ballot_selection_crypto_hash_with
-        Group.ElementModQ elgamalCrypto = ciphertext.crypto_hash();
-        crypto_hash = Optional.of(Hash.hash_elems(selectionId, selectionHash, elgamalCrypto));
+        crypto_hash = Optional.of(Hash.hash_elems(selectionId, selectionHash, ciphertext.crypto_hash()));
       }
 
       if (proof.isEmpty() && nonce.isPresent()) { // LOOK python?
@@ -382,7 +386,7 @@ public class CiphertextBallot implements Hash.CryptoHashCheckable {
     /** The proof of knowledge of the vote count. */
     public final Optional<ChaumPedersen.DisjunctiveChaumPedersenProof> proof;
     /** encryption of the write-in candidate. */
-    public final Optional<ElGamal.Ciphertext> extended_data; // LOOK not used, see Encrypt line 177.
+    public final Optional<HashedElGamalCiphertext> extended_data; // LOOK not used, see Encrypt.encrypt_selection().
 
     public Selection(String selectionId,
                      int sequence_order,
@@ -392,7 +396,7 @@ public class CiphertextBallot implements Hash.CryptoHashCheckable {
                      boolean is_placeholder_selection,
                      Optional<Group.ElementModQ> nonce,
                      Optional<ChaumPedersen.DisjunctiveChaumPedersenProof> proof,
-                     Optional<ElGamal.Ciphertext> extended_data) {
+                     Optional<HashedElGamalCiphertext> extended_data) {
       super(selectionId, sequence_order, selectionHash, ciphertext, is_placeholder_selection);
 
       this.crypto_hash = Preconditions.checkNotNull(crypto_hash);
@@ -415,32 +419,32 @@ public class CiphertextBallot implements Hash.CryptoHashCheckable {
      * with the elgamal encrypted `message` field populated along with the DisjunctiveChaumPedersenProof `proof` populated.
      * the ElementModQ `description_hash` and the ElementModQ `crypto_hash` are also checked.
      *
-     * @param seed_hash:             the hash of the SelectionDescription, or
+     * @param selectionHash:     the hash of the SelectionDescription, or
      *                               whatever `ElementModQ` was used to populate the `description_hash` field.
-     * @param elgamelPublicKey:      The election key
+     * @param publicKey:      The election key
      * @param cryptoExtendedBaseHash crypto_extended_base_hash for the election (Qbar)
      */
-    public boolean is_valid_encryption(Group.ElementModQ seed_hash, Group.ElementModP elgamelPublicKey, Group.ElementModQ cryptoExtendedBaseHash) {
-      if (!seed_hash.equals(this.description_hash())) {
+    public boolean is_valid_encryption(String where, Group.ElementModQ selectionHash, Group.ElementModP publicKey, Group.ElementModQ cryptoExtendedBaseHash) {
+      if (!selectionHash.equals(this.selectionHash)) {
         logger.atInfo().log("mismatching selection hash: %s expected(%s), actual(%s)",
-                this.object_id(), seed_hash, this.description_hash());
+                this.selectionId, selectionHash, this.selectionHash);
         return false;
       }
 
-      Group.ElementModQ recalculated_crypto_hash = crypto_hash_with(seed_hash);
+      Group.ElementModQ recalculated_crypto_hash = crypto_hash_with(selectionHash);
       if (!recalculated_crypto_hash.equals(this.crypto_hash)) {
-        logger.atInfo().log("Selection mismatching crypto hash: %s expected(%s), actual(%s)",
-                this.object_id(), recalculated_crypto_hash, this.crypto_hash);
-        throw new IllegalStateException("CiphertextBallot.Selection mismatching crypto hash");
-        // return false;
+        logger.atInfo().log("Selection mismatching crypto hash: %s %s expected(%s), actual(%s)",
+                where, this.selectionId, recalculated_crypto_hash, this.crypto_hash);
+        // throw new IllegalStateException("CiphertextBallot.Selection mismatching crypto hash");
+        return false;
       }
 
       if (this.proof.isEmpty()) {
-        logger.atInfo().log("no proof exists for: %s", this.object_id());
+        logger.atInfo().log("no proof exists for selection: %s", this.selectionId);
         return false;
       }
 
-      return proof.get().is_valid(ciphertext(), elgamelPublicKey, cryptoExtendedBaseHash);
+      return proof.get().is_valid(ciphertext(), publicKey, cryptoExtendedBaseHash);
     }
 
     /**
@@ -453,7 +457,8 @@ public class CiphertextBallot implements Hash.CryptoHashCheckable {
      */
     Group.ElementModQ crypto_hash_with(Group.ElementModQ seedHash) {
       // python: _ciphertext_ballot_selection_crypto_hash_with
-      // crypto_hash = Hash.hash_elems(selectionId, selectionHash, ciphertext.crypto_hash());
+      // crypto_hash = Hash.hash_elems(selectionId, selectionHash, ciphertext.crypto_hash())
+      // val cryptoHash = hashElements(selectionId, selectionDescription.cryptoHash, elgamalEncryption.cryptoHashUInt256())
       return Hash.hash_elems(this.selectionId, seedHash, this.ciphertext().crypto_hash());
     }
 
@@ -463,7 +468,11 @@ public class CiphertextBallot implements Hash.CryptoHashCheckable {
       if (o == null || getClass() != o.getClass()) return false;
       if (!super.equals(o)) return false;
       Selection selection = (Selection) o;
-      return is_placeholder_selection == selection.is_placeholder_selection && crypto_hash.equals(selection.crypto_hash) && nonce.equals(selection.nonce) && proof.equals(selection.proof) && extended_data.equals(selection.extended_data);
+      return is_placeholder_selection == selection.is_placeholder_selection &&
+              crypto_hash.equals(selection.crypto_hash) &&
+              nonce.equals(selection.nonce) &&
+              proof.equals(selection.proof) &&
+              extended_data.equals(selection.extended_data);
     }
 
     @Override
@@ -623,6 +632,7 @@ public class CiphertextBallot implements Hash.CryptoHashCheckable {
      * or whatever `ElementModQ` was used to populate the `description_hash` field.
      */
     public boolean is_valid_encryption(
+            String where,
             Group.ElementModQ seed_hash,
             Group.ElementModP elgamal_public_key,
             Group.ElementModQ crypto_extended_base_hash) {
@@ -635,15 +645,15 @@ public class CiphertextBallot implements Hash.CryptoHashCheckable {
 
       Group.ElementModQ recalculated_crypto_hash = this.crypto_hash_with(seed_hash);
       if (!this.crypto_hash.equals(recalculated_crypto_hash)) {
-        logger.atInfo().log("Contest mismatching crypto hash: %s expected(%s) actual(%s)", this.contestId, recalculated_crypto_hash, this.crypto_hash);
+        logger.atInfo().log("Contest mismatching crypto hash: %s %s expected(%s) actual(%s)",
+                where, this.contestId, recalculated_crypto_hash, this.crypto_hash);
         throw new IllegalStateException("CiphertextBallot.Contest mismatching crypto hash");
         // return false;
       }
 
       // NOTE: this check does not verify the proofs of the individual selections by design.
-
       if (this.proof.isEmpty()) {
-        logger.atInfo().log("no proof exists for: %s", this.contestId);
+        logger.atInfo().log("no proof exists for contest: %s", this.contestId);
         return false;
       }
 

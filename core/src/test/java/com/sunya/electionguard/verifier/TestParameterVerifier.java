@@ -10,8 +10,9 @@ import java.io.IOException;
 import static com.google.common.truth.Truth.assertThat;
 
 public class TestParameterVerifier {
-  public static final String topdirProto = "src/test/data/workflow/decryptor/";
-  // public static final String topdirProto = "/home/snake/tmp/electionguard/remoteWorkflow/decryptor/";
+  // public static final String topdirProto = "src/test/data/workflow/decryptor/";
+  public static final String topdirProto = "/home/snake/tmp/electionguard/remoteWorkflow/encryptor/";
+  // public static final String topdirProto = "/home/snake/tmp/electionguard/kickstart/decryptor/";
   // public static final String topdirSimProto = "/home/snake/tmp/electionguard/remoteWorkflowSimulated/decryptor/";
   public static final String topdirJson = "src/test/data/publishEndToEnd/";
   // public static final String topdirJson = "/home/snake/tmp/electionguard/publishEndToEnd/";

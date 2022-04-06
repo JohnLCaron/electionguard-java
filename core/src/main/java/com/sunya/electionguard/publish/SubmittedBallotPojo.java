@@ -123,7 +123,7 @@ public class SubmittedBallotPojo {
             selection.is_placeholder_selection,
             Optional.ofNullable(selection.nonce),
             Optional.ofNullable(translateDisjunctiveProof(selection.proof)),
-            Optional.ofNullable(translateCiphertext(selection.extended_data)));
+            Optional.empty());
   }
 
   @Nullable
@@ -214,7 +214,6 @@ public class SubmittedBallotPojo {
     pojo.is_placeholder_selection = selection.is_placeholder_selection;
     pojo.nonce = selection.nonce.orElse(null);
     selection.proof.ifPresent(proof -> pojo.proof = convertDisjunctiveProof(proof));
-    selection.extended_data.ifPresent(ciphertext -> pojo.extended_data = convertCiphertext(ciphertext));
     return pojo;
   }
 

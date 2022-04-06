@@ -21,7 +21,6 @@ import java.util.List;
 
 import static com.sunya.electionguard.proto.CommonConvert.convertElementModP;
 import static com.sunya.electionguard.proto.CommonConvert.convertElementModQ;
-import static com.sunya.electionguard.proto.CommonConvert.convertUInt256;
 
 import electionguard.protogen.ElectionRecordProto;
 
@@ -69,7 +68,9 @@ public class ElectionRecordFromProto {
     return new AvailableGuardian(
             proto.getGuardianId(),
             proto.getXCoordinate(),
-            convertElementModQ(proto.getLagrangeCoordinate()));
+            convertElementModQ(proto.getLagrangeCoordinate()),
+            proto.getLagrangeCoordinateInt() == 0 ? null : proto.getLagrangeCoordinateInt()
+    );
   }
 
   static ElectionConstants convertConstants(ElectionRecordProto.ElectionConstants constants) {
@@ -93,10 +94,10 @@ public class ElectionRecordFromProto {
             context.getNumberOfGuardians(),
             context.getQuorum(),
             convertElementModP(context.getJointPublicKey()),
-            convertUInt256(context.getManifestHash()),
-            convertUInt256(context.getCryptoBaseHash()),
-            convertUInt256(context.getCryptoExtendedBaseHash()),
-            convertUInt256(context.getCommitmentHash()),
+            CommonConvert.convertUInt256toQ(context.getManifestHash()),
+            CommonConvert.convertUInt256toQ(context.getCryptoBaseHash()),
+            CommonConvert.convertUInt256toQ(context.getCryptoExtendedBaseHash()),
+            CommonConvert.convertUInt256toQ(context.getCommitmentHash()),
             context.getExtendedDataMap());
   }
 

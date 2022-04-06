@@ -41,16 +41,16 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
     PlaintextBallot.Selection data = BallotFactory.get_random_selection_from(description);
 
     Optional<CiphertextBallot.Selection> subjectO = Encrypt.encrypt_selection(
-            data, description, keypair.public_key(), ONE_MOD_Q, nonce_seed, false, true);
+            "test", data, description, keypair.public_key(), ONE_MOD_Q, nonce_seed, false, true);
     assertThat(subjectO).isPresent();
     CiphertextBallot.Selection subject = subjectO.get();
 
     Optional<PlaintextBallot.Selection> result_from_key =
-            decrypt_selection_with_secret(subject, description, keypair.public_key(), keypair.secret_key(), ONE_MOD_Q, false);
+            decrypt_selection_with_secret("test", subject, description, keypair.public_key(), keypair.secret_key(), ONE_MOD_Q, false);
     Optional<PlaintextBallot.Selection> result_from_nonce =
-            decrypt_selection_with_nonce(subject, description, keypair.public_key(), ONE_MOD_Q, Optional.empty(), false);
+            decrypt_selection_with_nonce("test", subject, description, keypair.public_key(), ONE_MOD_Q, Optional.empty(), false);
     Optional<PlaintextBallot.Selection> result_from_nonce_seed =
-            decrypt_selection_with_nonce(subject, description, keypair.public_key(), ONE_MOD_Q, Optional.of(nonce_seed), false);
+            decrypt_selection_with_nonce("test", subject, description, keypair.public_key(), ONE_MOD_Q, Optional.of(nonce_seed), false);
 
     assertThat(result_from_key).isPresent();
     assertThat(result_from_nonce).isPresent();
@@ -69,7 +69,7 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
     PlaintextBallot.Selection data = BallotFactory.get_random_selection_from(description);
 
     // Act
-    Optional<CiphertextBallot.Selection> subjectO = Encrypt.encrypt_selection(data, description, keypair.public_key(), ONE_MOD_Q, seed, false, true);
+    Optional<CiphertextBallot.Selection> subjectO = Encrypt.encrypt_selection("test", data, description, keypair.public_key(), ONE_MOD_Q, seed, false, true);
     assertThat(subjectO).isPresent();
     CiphertextBallot.Selection subject = subjectO.get();
 
@@ -102,23 +102,23 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
             Optional.of(malformed_disjunctive), subject.extended_data);
 
     Optional<PlaintextBallot.Selection> result_from_key_malformed_encryption = decrypt_selection_with_secret(
-            malformed_encryption,
+            "test", malformed_encryption,
             description,
             keypair.public_key(),
             keypair.secret_key(),
             ONE_MOD_Q, false);
 
     Optional<PlaintextBallot.Selection> result_from_key_malformed_proof = decrypt_selection_with_secret(
-            malformed_proof,
+            "test", malformed_proof,
             description,
             keypair.public_key(),
             keypair.secret_key(),
             ONE_MOD_Q, false);
 
     Optional<PlaintextBallot.Selection> result_from_nonce_malformed_encryption = decrypt_selection_with_nonce(
-            malformed_encryption, description, keypair.public_key(), ONE_MOD_Q, Optional.empty(), false);
+            "test", malformed_encryption, description, keypair.public_key(), ONE_MOD_Q, Optional.empty(), false);
     Optional<PlaintextBallot.Selection> result_from_nonce_malformed_proof = decrypt_selection_with_nonce(
-            malformed_proof, description, keypair.public_key(), ONE_MOD_Q, Optional.empty(), false);
+            "test", malformed_proof, description, keypair.public_key(), ONE_MOD_Q, Optional.empty(), false);
 
     // Assert
     assertThat(result_from_key_malformed_encryption).isEmpty();
@@ -137,7 +137,7 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
     PlaintextBallot.Selection data = BallotFactory.get_random_selection_from(description);
 
     // Act
-    Optional<CiphertextBallot.Selection> subjectO = Encrypt.encrypt_selection(data, description, keypair.public_key(), ONE_MOD_Q, nonce_seed, false, true);
+    Optional<CiphertextBallot.Selection> subjectO = Encrypt.encrypt_selection("test", data, description, keypair.public_key(), ONE_MOD_Q, nonce_seed, false, true);
     assertThat(subjectO).isPresent();
     CiphertextBallot.Selection subject = subjectO.get();
 
@@ -148,7 +148,7 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
             subject.proof, subject.extended_data);
 
     Optional<PlaintextBallot.Selection> result_from_nonce_seed =
-            decrypt_selection_with_nonce(bad_subject, description, keypair.public_key(), ONE_MOD_Q, Optional.of(nonce_seed), false);
+            decrypt_selection_with_nonce("test", bad_subject, description, keypair.public_key(), ONE_MOD_Q, Optional.of(nonce_seed), false);
 
     assertThat(result_from_nonce_seed).isEmpty();
   }
@@ -167,7 +167,7 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
     assertThat(description_with_placeholders.is_valid()).isTrue();
 
     Optional<CiphertextBallot.Contest> subjectO = Encrypt.encrypt_contest(
-            data,
+            "test", data,
             description_with_placeholders,
             keypair.public_key(),
             ONE_MOD_Q,
@@ -177,21 +177,21 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
 
     // Decrypt the contest, but keep the placeholders so we can verify the selection count matches as expected in the test
     Optional<PlaintextBallot.Contest> result_from_key = decrypt_contest_with_secret(
-            subject,
+            "test", subject,
             description_with_placeholders,
             keypair.public_key(),
             keypair.secret_key(),
             ONE_MOD_Q,
             false, false);
     Optional<PlaintextBallot.Contest> result_from_nonce = DecryptWithSecrets.decrypt_contest_with_nonce(
-            subject,
+            "test", subject,
             description_with_placeholders,
             keypair.public_key(),
             ONE_MOD_Q,
             Optional.empty(), false, false);
 
     Optional<PlaintextBallot.Contest> result_from_nonce_seed = DecryptWithSecrets.decrypt_contest_with_nonce(
-            subject,
+            "test", subject,
             description_with_placeholders,
             keypair.public_key(),
             ONE_MOD_Q,
@@ -282,7 +282,7 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
     assertThat(description_with_placeholders.is_valid()).isTrue();
 
     Optional<CiphertextBallot.Contest> subjectO = Encrypt.encrypt_contest(
-            data,
+            "test", data,
             description_with_placeholders,
             keypair.public_key(),
             ONE_MOD_Q,
@@ -298,14 +298,14 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
             Optional.of(int_to_q_unchecked(BigInteger.ONE)), subject.proof);
 
     Optional<PlaintextBallot.Contest> result_from_nonce = DecryptWithSecrets.decrypt_contest_with_nonce(
-            bad_subject,
+            "test", bad_subject,
             description_with_placeholders,
             keypair.public_key(),
             ONE_MOD_Q,
             Optional.empty(),
             false, false);
     Optional<PlaintextBallot.Contest> result_from_nonce_seed = DecryptWithSecrets.decrypt_contest_with_nonce(
-            bad_subject,
+            "test", bad_subject,
             description_with_placeholders,
             keypair.public_key(),
             ONE_MOD_Q,
@@ -331,21 +331,21 @@ public class TestDecryptWithSecretsProperties extends TestProperties {
             Optional.of(int_to_q_unchecked(BigInteger.ONE)), subject.proof);
 
     Optional<PlaintextBallot.Contest> result_from_key_tampered = decrypt_contest_with_secret(
-            bad_contest,
+            "test", bad_contest,
             description_with_placeholders,
             keypair.public_key(),
             keypair.secret_key(),
             ONE_MOD_Q,
             false, false);
     Optional<PlaintextBallot.Contest> result_from_nonce_tampered = DecryptWithSecrets.decrypt_contest_with_nonce(
-            bad_contest,
+            "test", bad_contest,
             description_with_placeholders,
             keypair.public_key(),
             ONE_MOD_Q,
             Optional.empty(),
             false, false);
     Optional<PlaintextBallot.Contest> result_from_nonce_seed_tampered = DecryptWithSecrets.decrypt_contest_with_nonce(
-            bad_contest,
+            "test", bad_contest,
             description_with_placeholders,
             keypair.public_key(),
             ONE_MOD_Q,

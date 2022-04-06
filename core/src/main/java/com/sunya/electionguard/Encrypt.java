@@ -28,7 +28,29 @@ public class Encrypt {
 
   /**
    * The device that is doing the encryption.
+   * @param deviceId Unique identifier for device
+   * @param sessionId Used to identify session and protect the timestamp
+   * @param launchCode Election initialization value
+   * @param location Arbitrary string to designate the location of the device
    */
+  public record EncryptionDevice(
+          long deviceId,
+          long sessionId,
+          long launchCode,
+          String location) {
+
+    public EncryptionDevice {
+      Preconditions.checkNotNull(location);
+    }
+
+    public ElementModQ get_hash() {
+      return BallotCodes.get_hash_for_device(deviceId, sessionId, launchCode, location);
+    }
+  }
+
+  /*
+   * The device that is doing the encryption.
+   *
   public static class EncryptionDevice {
     private long deviceId;
     private long sessionId;
@@ -36,12 +58,12 @@ public class Encrypt {
     private String location;
     private ElementModQ cryptoHash;
 
-    /**
+    /*
      * @param deviceId   Unique identifier for device
      * @param sessionId  Used to identify session and protect the timestamp
      * @param launchCode Election initialization value
      * @param location   Arbitrary string to designate the location of the device
-     */
+     *
     public EncryptionDevice(long deviceId,
                             long sessionId,
                             long launchCode,
@@ -77,7 +99,7 @@ public class Encrypt {
     public ElementModQ get_hash() {
       return cryptoHash;
     }
-  }
+  } */
 
   /**
    * Orchestrates the encryption of Ballots.
@@ -150,6 +172,7 @@ public class Encrypt {
    * @param should_verify_proofs:      specify if the proofs should be verified prior to returning (default True)
    */
   public static Optional<CiphertextBallot.Selection> encrypt_selection(
+          String where,
           PlaintextBallot.Selection selection,
           Manifest.SelectionDescription selection_description,
           ElementModP elgamal_public_key,
@@ -208,7 +231,7 @@ public class Encrypt {
     }
 
     // verify the selection.
-    if (encrypted_selection.is_valid_encryption(selection_description_hash, elgamal_public_key, crypto_extended_base_hash)) {
+    if (encrypted_selection.is_valid_encryption(where, selection_description_hash, elgamal_public_key, crypto_extended_base_hash)) {
       return Optional.of(encrypted_selection);
     } else {
       logger.atWarning().log("Failed selection proof for selection: %s", encrypted_selection.object_id());
@@ -233,6 +256,7 @@ public class Encrypt {
    * @param should_verify_proofs:      specify if the proofs should be verified prior to returning (default True)
    */
   public static Optional<CiphertextBallot.Contest> encrypt_contest(
+          String where,
           PlaintextBallot.Contest contest,
           ContestWithPlaceholders contestp,
           ElementModP elgamal_public_key,
@@ -281,6 +305,7 @@ public class Encrypt {
           // appropriate number of true placeholder votes
           selection_count += plaintext_selection.vote;
           encrypted_selection = encrypt_selection(
+                  where + " " + contest.contestId,
                   plaintext_selection,
                   description,
                   elgamal_public_key,
@@ -291,6 +316,7 @@ public class Encrypt {
         } else {
           // No selection was made for this possible value so we explicitly set it to false
           encrypted_selection = encrypt_selection(
+                  where + " " + contest.contestId,
                   selection_from(description, false, false),
                   description,
                   elgamal_public_key,
@@ -321,7 +347,9 @@ public class Encrypt {
       }
 
       Optional<CiphertextBallot.Selection> encrypted_selection = encrypt_selection(
-         selection_from(placeholder, true, select_placeholder),
+              where + " " + contest.contestId,
+
+              selection_from(placeholder, true, select_placeholder),
          placeholder,
          elgamal_public_key,
          crypto_extended_base_hash,
@@ -357,10 +385,10 @@ public class Encrypt {
     }
 
     // Verify the proof
-    if (encrypted_contest.is_valid_encryption(contest_description_hash, elgamal_public_key, crypto_extended_base_hash)) {
+    if (encrypted_contest.is_valid_encryption(where, contest_description_hash, elgamal_public_key, crypto_extended_base_hash)) {
       return Optional.of(encrypted_contest);
     } else {
-      encrypted_contest.is_valid_encryption(contest_description_hash, elgamal_public_key, crypto_extended_base_hash);
+      encrypted_contest.is_valid_encryption(where, contest_description_hash, elgamal_public_key, crypto_extended_base_hash);
       logger.atWarning().log("mismatching contest proof for contest %s", encrypted_contest.contestId);
       return Optional.empty();
     }
@@ -470,6 +498,7 @@ public class Encrypt {
       }
 
       Optional<CiphertextBallot.Contest> encrypted_contest = encrypt_contest(
+              ballot.object_id(),
               use_contest,
               contestp,
               context.jointPublicKey,

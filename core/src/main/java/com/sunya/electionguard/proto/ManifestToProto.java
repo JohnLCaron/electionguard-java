@@ -4,7 +4,7 @@ import com.sunya.electionguard.Manifest;
 
 import electionguard.protogen.ManifestProto;
 
-import static com.sunya.electionguard.proto.CommonConvert.convertUInt256;
+import static com.sunya.electionguard.proto.CommonConvert.convertUInt256fromQ;
 
 public class ManifestToProto {
 
@@ -30,7 +30,7 @@ public class ManifestToProto {
     if (election.contactInformation() != null) {
       builder.setContactInformation(convertContactInformation(election.contactInformation()));
     }
-    builder.setCryptoHash(convertUInt256(election.cryptoHash()));
+    builder.setCryptoHash(CommonConvert.convertUInt256fromQ(election.cryptoHash()));
 
     return builder.build();
   }
@@ -98,7 +98,7 @@ public class ManifestToProto {
       builder.setBallotSubtitle(convertInternationalizedText(contest.ballotSubtitle()));
     }
     builder.addAllPrimaryPartyIds(contest.primaryPartyIds());
-    builder.setCryptoHash(convertUInt256(contest.cryptoHash()));
+    builder.setCryptoHash(CommonConvert.convertUInt256fromQ(contest.cryptoHash()));
     return builder.build();
   }
 
@@ -163,7 +163,7 @@ public class ManifestToProto {
     builder.setSelectionId(selection.selectionId());
     builder.setCandidateId(selection.candidateId());
     builder.setSequenceOrder(selection.sequenceOrder());
-    builder.setCryptoHash(convertUInt256(selection.cryptoHash()));
+    builder.setCryptoHash(CommonConvert.convertUInt256fromQ(selection.cryptoHash()));
     return builder.build();
   }
 }

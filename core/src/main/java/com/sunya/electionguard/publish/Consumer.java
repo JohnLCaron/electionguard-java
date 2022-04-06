@@ -164,7 +164,7 @@ public class Consumer {
     List<AvailableGuardian> result = new ArrayList<>();
     for (Map.Entry<String, Group.ElementModQ> entry : coeffPojo.coefficients.entrySet()) {
       GuardianRecord gr = grMap.get(entry.getKey());
-      AvailableGuardian avail = new AvailableGuardian(entry.getKey(), gr.xCoordinate(), entry.getValue());
+      AvailableGuardian avail = new AvailableGuardian(entry.getKey(), gr.xCoordinate(), entry.getValue(), null);
       result.add(avail);
     }
     return result;

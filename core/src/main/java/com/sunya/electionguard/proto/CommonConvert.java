@@ -11,6 +11,8 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.function.Function;
 
+import com.sunya.electionguard.core.HashedElGamalCiphertext;
+import com.sunya.electionguard.core.UInt256;
 import electionguard.protogen.*;
 
 public class CommonConvert {
@@ -24,7 +26,15 @@ public class CommonConvert {
   // from proto
 
   @Nullable
-  public static Group.ElementModQ convertUInt256(@Nullable CommonProto.UInt256 modQ) {
+  public static UInt256 convertUInt256fromQ(@Nullable CommonProto.UInt256 modQ) {
+    if (modQ == null || modQ.getValue().isEmpty()) {
+      return null;
+    }
+    return UInt256.fromModQ(convertUInt256toQ(modQ));
+  }
+
+  @Nullable
+  public static Group.ElementModQ convertUInt256toQ(@Nullable CommonProto.UInt256 modQ) {
     if (modQ == null || modQ.getValue().isEmpty()) {
       return null;
     }
@@ -61,6 +71,20 @@ public class CommonConvert {
     );
   }
 
+  @Nullable
+  public static HashedElGamalCiphertext convertHashedCiphertext(CommonProto.HashedElGamalCiphertext ciphertext) {
+    if (ciphertext == null || !ciphertext.hasC0()) {
+      return null;
+    }
+
+    return new HashedElGamalCiphertext(
+            convertElementModP(ciphertext.getC0()),
+            ciphertext.getC1().toByteArray(),
+            convertUInt256fromQ(ciphertext.getC2()),
+            ciphertext.getNumBytes()
+    );
+  }
+
   public static ChaumPedersen.ChaumPedersenProof convertChaumPedersenProof(CommonProto.GenericChaumPedersenProof proof) {
     return new ChaumPedersen.ChaumPedersenProof(
             convertElementModP(proof.getPad()),
@@ -80,7 +104,13 @@ public class CommonConvert {
   /////////////////////////////////////////////////////////////////////////////////////////
   // to proto
 
-  public static CommonProto.UInt256 convertUInt256(Group.ElementModQ modQ) {
+  public static CommonProto.UInt256 convertUInt256(UInt256 modQ) {
+    CommonProto.UInt256.Builder builder = CommonProto.UInt256.newBuilder();
+    builder.setValue(ByteString.copyFrom(modQ.toBytes().array()));
+    return builder.build();
+  }
+
+  public static CommonProto.UInt256 convertUInt256fromQ(Group.ElementModQ modQ) {
     CommonProto.UInt256.Builder builder = CommonProto.UInt256.newBuilder();
     builder.setValue(ByteString.copyFrom(modQ.getBigInt().toByteArray()));
     return builder.build();
@@ -105,6 +135,15 @@ public class CommonConvert {
     return builder.build();
   }
 
+  public static CommonProto.HashedElGamalCiphertext convertHashedCiphertext(HashedElGamalCiphertext ciphertext) {
+    CommonProto.HashedElGamalCiphertext.Builder builder = CommonProto.HashedElGamalCiphertext.newBuilder();
+    builder.setC0(convertElementModP(ciphertext.c0()));
+    builder.setC1(ByteString.copyFrom(ciphertext.c1()));
+    builder.setC2(convertUInt256(ciphertext.c2()));
+    builder.setNumBytes(ciphertext.numBytes());
+    return builder.build();
+  }
+
   public static CommonProto.GenericChaumPedersenProof convertChaumPedersenProof(ChaumPedersen.ChaumPedersenProof proof) {
     CommonProto.GenericChaumPedersenProof.Builder builder = CommonProto.GenericChaumPedersenProof.newBuilder();
     if (proof.pad != null) {
@@ -120,8 +159,12 @@ public class CommonConvert {
 
   public static CommonProto.SchnorrProof convertSchnorrProof(SchnorrProof proof) {
     CommonProto.SchnorrProof.Builder builder = CommonProto.SchnorrProof.newBuilder();
-    builder.setPublicKey(convertElementModP(proof.publicKey));
-    builder.setCommitment(convertElementModP(proof.getCommitment()));
+    if (proof.publicKey != null) {
+      builder.setPublicKey(convertElementModP(proof.publicKey));
+    }
+    if (proof.commitment != null) {
+      builder.setCommitment(convertElementModP(proof.commitment));
+    }
     builder.setChallenge(convertElementModQ(proof.challenge));
     builder.setResponse(convertElementModQ(proof.response));
     return builder.build();

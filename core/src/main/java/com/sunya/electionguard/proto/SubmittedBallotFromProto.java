@@ -12,8 +12,8 @@ import static com.sunya.electionguard.proto.CommonConvert.convertChaumPedersenPr
 import static com.sunya.electionguard.proto.CommonConvert.convertCiphertext;
 import static com.sunya.electionguard.proto.CommonConvert.convertElementModQ;
 import static com.sunya.electionguard.proto.CommonConvert.convertElementModP;
+import static com.sunya.electionguard.proto.CommonConvert.convertHashedCiphertext;
 import static com.sunya.electionguard.proto.CommonConvert.convertList;
-import static com.sunya.electionguard.proto.CommonConvert.convertUInt256;
 
 import electionguard.protogen.CiphertextBallotProto;
 
@@ -33,12 +33,12 @@ public class SubmittedBallotFromProto {
     return new SubmittedBallot(
             ballot.getBallotId(),
             ballot.getBallotStyleId(),
-            convertUInt256(ballot.getManifestHash()),
-            convertUInt256(ballot.getCodeSeed()),
+            CommonConvert.convertUInt256toQ(ballot.getManifestHash()),
+            CommonConvert.convertUInt256toQ(ballot.getCodeSeed()),
             convertList(ballot.getContestsList(), SubmittedBallotFromProto::convertContest),
-            convertUInt256(ballot.getCode()),
+            CommonConvert.convertUInt256toQ(ballot.getCode()),
             ballot.getTimestamp(),
-            convertUInt256(ballot.getCryptoHash()),
+            CommonConvert.convertUInt256toQ(ballot.getCryptoHash()),
             convertBallotState(ballot.getState()));
   }
 
@@ -50,9 +50,9 @@ public class SubmittedBallotFromProto {
     return new CiphertextBallot.Contest(
             contest.getContestId(),
             contest.getSequenceOrder(),
-            convertUInt256(contest.getContestHash()),
+            CommonConvert.convertUInt256toQ(contest.getContestHash()),
             convertList(contest.getSelectionsList(), SubmittedBallotFromProto::convertSelection),
-            convertUInt256(contest.getCryptoHash()),
+            CommonConvert.convertUInt256toQ(contest.getCryptoHash()),
             convertCiphertext(contest.getCiphertextAccumulation()),
             Optional.empty(),
             Optional.ofNullable(convertConstantProof(contest.getProof())));
@@ -62,19 +62,27 @@ public class SubmittedBallotFromProto {
     return new CiphertextBallot.Selection(
             selection.getSelectionId(),
             selection.getSequenceOrder(),
-            convertUInt256(selection.getSelectionHash()),
+            CommonConvert.convertUInt256toQ(selection.getSelectionHash()),
             convertCiphertext(selection.getCiphertext()),
-            convertUInt256(selection.getCryptoHash()),
+            CommonConvert.convertUInt256toQ(selection.getCryptoHash()),
             selection.getIsPlaceholderSelection(),
             Optional.empty(),
             Optional.ofNullable(convertDisjunctiveProof(selection.getProof())),
-            Optional.ofNullable(convertCiphertext(selection.getExtendedData())));
+            Optional.ofNullable(convertHashedCiphertext(selection.getExtendedData())));
   }
 
   @Nullable
   static ChaumPedersen.ConstantChaumPedersenProof convertConstantProof(@Nullable CiphertextBallotProto.ConstantChaumPedersenProof proof) {
-    if (proof == null || !proof.hasPad()) {
+    if (proof == null) {
       return null;
+    }
+    if (proof.hasProof()) {
+      electionguard.protogen.CommonProto.GenericChaumPedersenProof gproof = proof.getProof();
+      return new ChaumPedersen.ConstantChaumPedersenProof(
+              convertElementModQ(gproof.getChallenge()),
+              convertElementModQ(gproof.getResponse()),
+              proof.getConstant());
+
     }
     return new ChaumPedersen.ConstantChaumPedersenProof(
             convertElementModP(proof.getPad()),

@@ -27,7 +27,8 @@ public class AvailableGuardianPojo {
     return new AvailableGuardian(
             pojo.guardian_id,
             pojo.sequence,
-            pojo.lagrangeCoordinate);
+            pojo.lagrangeCoordinate,
+            null);
   }
 
   ////////////////////////////////////////////////////////////////////////////

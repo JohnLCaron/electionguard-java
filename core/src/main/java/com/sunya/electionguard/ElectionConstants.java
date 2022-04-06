@@ -99,12 +99,15 @@ public class ElectionConstants {
   public final BigInteger cofactor;
   /** generator or G. */
   public final BigInteger generator;
+  /** generator as ElementModP. */
+  public final Group.ElementModP generatorP;
 
   public ElectionConstants(@Nullable String name, BigInteger largePrime, BigInteger smallPrime, BigInteger cofactor, BigInteger generator) {
     this.largePrime = Preconditions.checkNotNull(largePrime);
     this.smallPrime = Preconditions.checkNotNull(smallPrime);
     this.cofactor = Preconditions.checkNotNull(cofactor);
     this.generator = Preconditions.checkNotNull(generator);
+    this.generatorP = Group.int_to_p_unchecked(generator);
     this.name = name != null ? name : getPrimeOptionType().name();
   }
 

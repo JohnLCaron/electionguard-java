@@ -2,11 +2,13 @@ package com.sunya.electionguard;
 
 import com.google.common.base.Preconditions;
 import com.google.common.flogger.FluentLogger;
+import com.sunya.electionguard.core.ChaumPedersenKt;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import java.math.BigInteger;
 import java.util.Formatter;
+import java.util.Objects;
 import java.util.Optional;
 
 import static com.sunya.electionguard.Group.*;
@@ -48,6 +50,19 @@ public class ChaumPedersen {
     }
 
     @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      DisjunctiveChaumPedersenProof that = (DisjunctiveChaumPedersenProof) o;
+      return proof0.equals(that.proof0) && proof1.equals(that.proof1) && challenge.equals(that.challenge);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(super.hashCode(), proof0, proof1, challenge);
+    }
+
+    @Override
     public String toString() {
       return "DisjunctiveChaumPedersenProof{" +
               "\n proof_zero " + proof0 +
@@ -58,19 +73,26 @@ public class ChaumPedersen {
 
     /**
      * Validates a "disjunctive" Chaum-Pedersen (zero or one) proof.
-     * <p>
      *
      * @param message: The ciphertext message
      * @param k:       The public key of the election
      * @param qbar:    The extended base hash of the election
      */
     boolean is_valid(ElGamal.Ciphertext message, ElementModP k, ElementModQ qbar) {
+      if (this.name.endsWith("2")) {
+        return is_valid2(message, k, qbar);
+      } else {
+        return is_valid1(message, k, qbar);
+      }
+    }
+
+    // version 1
+    boolean is_valid1(ElGamal.Ciphertext message, ElementModP k, ElementModQ qbar) {
       ElementModP alpha = message.pad();
       ElementModP beta = message.data();
 
       ChaumPedersenProof expanded0 = this.proof0.expand(message, k);
       ChaumPedersenProof expanded1 = this.proof1.expand(message, k);
-
 
       ElementModP a0 = expanded0.pad;
       ElementModP b0 = expanded0.data;
@@ -93,7 +115,9 @@ public class ChaumPedersen {
       boolean in_bounds_v0 = v0.is_in_bounds();
       boolean in_bounds_v1 = v1.is_in_bounds();
 
-      boolean consistent_c = add_q(c0, c1).equals(c) && c.equals(Hash.hash_elems(qbar, alpha, beta, a0, b0, a1, b1));
+      // LOOK 2.0 change from python 1.0, no longer check the hash
+      boolean consistent_c = add_q(c0, c1).equals(c); // && c.equals(Hash.hash_elems(qbar, alpha, beta, a0, b0, a1, b1));
+
       boolean consistent_gv0 = g_pow_p(v0).equals(mult_p(a0, pow_p(alpha, c0)));
       boolean consistent_gv1 = g_pow_p(v1).equals(mult_p(a1, pow_p(alpha, c1)));
       boolean consistent_kv0 = pow_p(k, v0).equals(mult_p(b0, pow_p(beta, c0)));
@@ -130,6 +154,13 @@ public class ChaumPedersen {
       }
       return success;
     }
+
+    // version 2, from kotlin library
+    boolean is_valid2(ElGamal.Ciphertext ciphertext, ElementModP publicKey, ElementModQ hashHeader) {
+      ChaumPedersenKt.DisjunctiveChaumPedersenProofKnownNonce kt =
+              new ChaumPedersenKt.DisjunctiveChaumPedersenProofKnownNonce(this);
+      return kt.isValid(ciphertext, publicKey, hashHeader);
+    }
   }
 
   /** A generic Chaum-Pedersen Zero Knowledge proof. */
@@ -146,6 +177,20 @@ public class ChaumPedersen {
       this.data = data;
       this.challenge = Preconditions.checkNotNull(challenge);
       this.response = Preconditions.checkNotNull(response);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      if (!super.equals(o)) return false;
+      ChaumPedersenProof that = (ChaumPedersenProof) o;
+      return Objects.equals(pad, that.pad) && Objects.equals(data, that.data) && challenge.equals(that.challenge) && response.equals(that.response);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(super.hashCode(), pad, data, challenge, response);
     }
 
     @Override
@@ -254,7 +299,9 @@ public class ChaumPedersen {
   /** A constant Chaum-Pederson proof */
   @Immutable
   public static class ConstantChaumPedersenProof extends Proof {
+    @Nullable
     public final ElementModP pad; // a in the spec
+    @Nullable
     public final ElementModP data; // b in the spec
     public final ElementModQ challenge; // c in the spec
     public final ElementModQ response; // v in the spec
@@ -269,15 +316,32 @@ public class ChaumPedersen {
       this.constant = constant;
     }
 
+    public ConstantChaumPedersenProof(ElementModQ challenge, ElementModQ response, int constant) {
+      super("ConstantChaumPedersenProof2", Proof.Usage.SelectionLimit);
+      this.pad = null;
+      this.data = null;
+      this.challenge = Preconditions.checkNotNull(challenge);
+      this.response = Preconditions.checkNotNull(response);
+      this.constant = constant;
+    }
+
     @Override
     public String toString() {
       return "ConstantChaumPedersenProof{" +
-              "\n   pad      =" + pad.toShortString() +
-              "\n   data     =" + data.toShortString() +
+              "\n   pad      =" + (pad == null ? "null" : pad.toShortString()) +
+              "\n   data     =" + (data == null ? "null" : data.toShortString()) +
               "\n   challenge=" + challenge +
               "\n   response =" + response +
               "\n   constant =" + constant +
               '}';
+    }
+
+    boolean is_valid(ElGamal.Ciphertext message, ElementModP k, ElementModQ qbar) {
+      if (this.name.endsWith("2")) {
+        return is_valid2(message, k, qbar);
+      } else {
+        return is_valid1(message, k, qbar);
+      }
     }
 
     /**
@@ -285,12 +349,11 @@ public class ChaumPedersen {
      * e.g. that the equations 𝑔𝑉 = 𝑎𝐴𝐶 mod 𝑝 and 𝑔𝐿𝐾𝑣 = 𝑏𝐵𝐶 mod 𝑝 are satisfied.
      * <p>
      *
-     * @param message: The ciphertext message
-     * @param k:       The public key of the election
-     * @param q:       The extended base hash of the election
+     * @param message:            The ciphertext message
+     * @param publicKey:                  The public key of the election
+     * @param extendedHash:       The extended base hash of the election
      */
-    boolean is_valid(ElGamal.Ciphertext message, ElementModP k, ElementModQ q) {
-
+    boolean is_valid1(ElGamal.Ciphertext message, ElementModP publicKey, ElementModQ extendedHash) {
       ElementModP alpha = message.pad();
       ElementModP beta = message.data();
       ElementModP a = this.pad;
@@ -318,14 +381,19 @@ public class ChaumPedersen {
       // this is an arbitrary constant check to verify that decryption will be performant
       // in some use cases this value may need to be increased
       boolean sane_constant = 0 <= constant && constant < 1_000_000_000;
-      boolean same_c = c.equals(Hash.hash_elems(q, alpha, beta, a, b));
+      //     ElementModQ c = Hash.hash_elems(crypto_extended_base_hash, alpha, beta, a, b); // sha256(𝑄', A, B, a, b)
+      boolean same_c = c.equals(Hash.hash_elems(extendedHash, alpha, beta, a, b));
+      if (!same_c) {
+        System.out.printf("HEY");
+      }
       boolean consistent_gv = in_bounds_v && in_bounds_a && in_bounds_alpha && in_bounds_c &&
               // The equation 𝑔^𝑉 = 𝑎𝐴^𝐶 mod 𝑝
               g_pow_p(v).equals(mult_p(a, pow_p(alpha, c)));
 
+      // LOOK
       // The equation 𝑔^𝐿𝐾^𝑣 = 𝑏𝐵^𝐶 mod 𝑝
       boolean consistent_kv = in_bounds_constant &&
-              mult_p(g_pow_p(mult_p(c, constant_q)), pow_p(k, v)).equals(mult_p(b, pow_p(beta, c)));
+              mult_p(g_pow_p(mult_p(c, constant_q)), pow_p(publicKey, v)).equals(mult_p(b, pow_p(beta, c)));
 
       boolean success = (
               in_bounds_alpha
@@ -359,6 +427,14 @@ public class ChaumPedersen {
         throw new IllegalStateException(err);
       }
       return success;
+    }
+
+    // version 2, from kotlin library
+    boolean is_valid2(ElGamal.Ciphertext ciphertext, ElementModP publicKey, ElementModQ hashHeader) {
+      ChaumPedersenKt.ConstantChaumPedersenProofKnownNonce kt =
+              new ChaumPedersenKt.ConstantChaumPedersenProofKnownNonce(
+                      new ChaumPedersenKt.GenericChaumPedersenProof(this.challenge, this.response), this.constant);
+      return kt.isValid(ciphertext, publicKey, hashHeader, this.constant);
     }
   }
 
@@ -479,8 +555,7 @@ public class ChaumPedersen {
    * @param s:           The nonce or secret used to derive the value
    * @param m:           The value we are trying to prove
    * @param seed:        Used to generate other random values here
-   * @param hash_header: A value used when generating the challenge,
-   *                     usually the election extended base hash (𝑄')
+   * @param hash_header:  extended base hash (𝑄')
    */
   public static ChaumPedersenProof make_chaum_pedersen(
           ElGamal.Ciphertext message,
@@ -511,7 +586,7 @@ public class ChaumPedersen {
    * @param r:                         The aggregate nonce used creating the ElGamal ciphertext
    * @param k:                         The ElGamal public key for the election
    * @param seed:                      Used to generate other random values here
-   * @param crypto_extended_base_hash: usually the election extended base hash (𝑄')
+   * @param extendedHash: usually the election extended base hash (𝑄')
    */
   static ConstantChaumPedersenProof make_constant_chaum_pedersen(
           ElGamal.Ciphertext message,
@@ -519,7 +594,7 @@ public class ChaumPedersen {
           ElementModQ r,
           ElementModP k,
           ElementModQ seed,
-          ElementModQ crypto_extended_base_hash) {
+          ElementModQ extendedHash) {
 
     ElementModP alpha = message.pad();
     ElementModP beta = message.data();
@@ -528,10 +603,19 @@ public class ChaumPedersen {
     ElementModQ u = new Nonces(seed, "constant-chaum-pedersen-proof").get(0);
     ElementModP a = g_pow_p(u);  // 𝑔^𝑢𝑖 mod 𝑝
     ElementModP b = pow_p(k, u);  // 𝐴^𝑢𝑖 mod 𝑝
-    ElementModQ c = Hash.hash_elems(crypto_extended_base_hash, alpha, beta, a, b); // sha256(𝑄', A, B, a, b)
+    ElementModQ c = Hash.hash_elems(extendedHash, alpha, beta, a, b); // sha256(𝑄', A, B, a, b)
     ElementModQ v = a_plus_bc_q(u, c, r);
 
-    return new ConstantChaumPedersenProof(a, b, c, v, constant);
+    ConstantChaumPedersenProof result =  new ConstantChaumPedersenProof(a, b, c, v, constant);
+    // ElGamal.Ciphertext message, ElementModP publicKey, ElementModQ extendedHash
+    if (!result.is_valid(message, k, extendedHash)) {
+      throw new IllegalStateException("make_constant_chaum_pedersen");
+    }
+    System.out.printf("***ConstantChaumPedersenProof result = %s%n", result);
+    System.out.printf("    message = %s%n", message);
+    System.out.printf("    extendedHash = %s%n", extendedHash);
+    System.out.printf("    publicKey = %s%n", k.toShortString());
+    return result;
   }
 
   /////////////////////////////////////////////////////////////////////

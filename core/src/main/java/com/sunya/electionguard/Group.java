@@ -22,6 +22,7 @@ public class Group {
   public static final ElementModP TWO_MOD_P = new ElementModP(BigInteger.TWO);
 
   private static ElectionConstants primes = ElectionConstants.get(ElectionConstants.PrimeOption.Standard);
+
   public static ElectionConstants getPrimes() { return primes; }
   public static void setPrimes(ElectionConstants usePrimes) {
     if (!usePrimes.getPrimeOptionType().equals(ElectionConstants.PrimeOption.Standard)) {

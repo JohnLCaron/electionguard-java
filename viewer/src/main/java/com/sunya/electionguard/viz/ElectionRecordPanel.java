@@ -141,7 +141,7 @@ class ElectionRecordPanel extends JPanel {
       manifestTable.setElectionManifest(record.manifest);
 
       if (record.acceptedBallots != null) {
-        submittedBallotsTable.setAcceptedBallots(record.manifest, record.acceptedBallots);
+        submittedBallotsTable.setAcceptedBallots(record.manifest, record.context, record.acceptedBallots);
       }
       if (record.ciphertextTally != null) {
         ciphertextTallyTable.setCiphertextTally(record.ciphertextTally);
@@ -162,9 +162,10 @@ class ElectionRecordPanel extends JPanel {
   void showInfo(Formatter f) {
     f.format("Election Record %s%n", this.electionRecordDir);
     if (this.record != null) {
-      f.format("  version = %s%n", record.protoVersion);
+      f.format("  protoVersion = %s%n", record.protoVersion);
       Manifest manifest = record.manifest;
       f.format("%nManifest%n");
+      f.format("  spec_version = %s%n", manifest.specVersion());
       f.format("  election_scope_id = %s%n", manifest.electionScopeId());
       f.format("  type = %s%n", manifest.electionType());
       f.format("  name = %s%n", manifest.name());
