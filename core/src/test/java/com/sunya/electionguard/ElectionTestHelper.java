@@ -503,7 +503,7 @@ public class ElectionTestHelper {
       voted_contests.add(new PlaintextBallot.Contest(contestp.contest.contestId(), contestp.contest.sequenceOrder(), voted_selections));
     }
 
-    return new PlaintextBallot(randomString("PlaintextBallot"), ballot_style.ballotStyleId(), voted_contests);
+    return new PlaintextBallot(randomString("PlaintextBallot"), ballot_style.ballotStyleId(), voted_contests, null);
   }
 
   static class CIPHERTEXT_ELECTIONS_TUPLE_TYPE {

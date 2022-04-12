@@ -11,6 +11,9 @@ public class PlaintextBallotToProto {
     builder.setBallotId(ballot.object_id());
     builder.setBallotStyleId(ballot.ballotStyleId);
     ballot.contests.forEach(value -> builder.addContests(convertContest(value)));
+    if (ballot.errors != null) {
+      builder.setErrors(ballot.errors);
+    }
     return builder.build();
   }
 
@@ -24,6 +27,7 @@ public class PlaintextBallotToProto {
   static PlaintextBallotProto.PlaintextBallotSelection convertSelection(PlaintextBallot.Selection selection) {
     PlaintextBallotProto.PlaintextBallotSelection.Builder builder = PlaintextBallotProto.PlaintextBallotSelection.newBuilder();
     builder.setSelectionId(selection.selectionId);
+    builder.setSequenceOrder(selection.sequenceOrder);
     builder.setVote(selection.vote);
     builder.setIsPlaceholderSelection(selection.isPlaceholderSelection);
     selection.extendedData.ifPresent(value -> builder.setExtendedData(convertExtendedData(value)));

@@ -1,15 +1,19 @@
 package com.sunya.electionguard.publish;
 
 import com.sunya.electionguard.decrypting.DecryptingTrustee;
+import com.sunya.electionguard.proto.PlaintextBallotFromProto;
 import com.sunya.electionguard.proto.PlaintextBallotToProto;
+import com.sunya.electionguard.proto.SubmittedBallotFromProto;
 import com.sunya.electionguard.proto.TrusteeFromProto;
 import com.sunya.electionguard.standard.GuardianPrivateRecord;
 import com.sunya.electionguard.PlaintextBallot;
+import electionguard.protogen.CiphertextBallotProto;
 import electionguard.protogen.PlaintextBallotProto;
 import electionguard.protogen.TrusteeProto;
 
 import javax.annotation.Nullable;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -280,8 +284,21 @@ public class PrivateData {
       for (File file : dir.listFiles((parent, name) -> name.endsWith(Publisher.JSON_SUFFIX))) {
         result.add(ConvertFromJson.readPlaintextBallot(file.getAbsolutePath()));
       }
-    } else {
+    } else if (dir.getAbsolutePath().endsWith("json")) {
       result.add(ConvertFromJson.readPlaintextBallot(dir.getAbsolutePath()));
+
+    } else if (dir.getAbsolutePath().endsWith("protobuf")) {
+      // multiple input ballots in a protobuf
+      try (FileInputStream input = new FileInputStream(dir.getAbsolutePath())) {
+      while (true) {
+          PlaintextBallotProto.PlaintextBallot ballotProto = PlaintextBallotProto.PlaintextBallot.parseDelimitedFrom(input);
+          if (ballotProto == null) {
+            input.close();
+            break;
+          }
+          result.add(PlaintextBallotFromProto.translateFromProto(ballotProto));
+        }
+      }
     }
 
     return result;

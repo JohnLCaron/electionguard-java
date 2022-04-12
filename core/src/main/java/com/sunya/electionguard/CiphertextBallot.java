@@ -666,7 +666,13 @@ public class CiphertextBallot implements Hash.CryptoHashCheckable {
       }
 
       // Verify the sum of the selections matches the proof
-      return this.proof.get().is_valid(elgamal_accumulation, elgamal_public_key, crypto_extended_base_hash);
+      try {
+        Hash.setDebug(false);
+        // System.out.printf("is_valid_encryption '%s'%n", where);
+        return this.proof.get().is_valid(this.ciphertextAccumulation, elgamal_public_key, crypto_extended_base_hash);
+      } finally {
+        Hash.setDebug(false);
+      }
     }
 
     @Override

@@ -3,11 +3,12 @@ syntax = "proto3";
 option java_package = "electionguard.protogen";
 option java_outer_classname = "PlaintextBallotProto";
 
-// A decrypted ballot.
+// The original input ballot.
 message PlaintextBallot {
-  string ballot_id = 1; // a unique Ballot ID created by the external system
+  string ballot_id = 1; // a unique ballot ID created by the external system
   string ballot_style_id = 2; // matches a BallotStyle.ballot_style_id
   repeated PlaintextBallotContest contests = 3;
+  string errors = 4; // error messages from processing, eg when invalid
 }
 
 message PlaintextBallotContest {
@@ -19,7 +20,7 @@ message PlaintextBallotContest {
 message PlaintextBallotSelection {
   string selection_id = 1; // matches the SelectionDescription.selection_id
   uint32 sequence_order = 2;
-  uint32 vote = 3;
+  uint32 vote = 3;  // 0 or 1
   bool is_placeholder_selection = 4;
   ExtendedData extended_data = 5; // TODO not used
 }

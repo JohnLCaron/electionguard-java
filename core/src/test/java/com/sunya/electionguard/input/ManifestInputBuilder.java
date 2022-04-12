@@ -7,6 +7,7 @@ import com.sunya.electionguard.Manifest;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,25 +20,40 @@ public class ManifestInputBuilder {
   private final ArrayList<ContestBuilder> contests = new ArrayList<>();
   private final Map<String, Manifest.Candidate> candidates = new HashMap<>();
   private String style = styleDefault;
-  private String district = districtDefault;
-  private Manifest.BallotStyle ballotStyle;
+  List<Manifest.GeopoliticalUnit> districts = new ArrayList<>();
+  List<Manifest.BallotStyle> ballotStyles = new ArrayList<>();
 
   public ManifestInputBuilder(String manifest_name) {
     this.manifest_name = manifest_name;
   }
 
-  ManifestInputBuilder setGpunit(String gpunit) {
-    this.district = gpunit;
+  ManifestInputBuilder addGpunit(String gpunitName) {
+    districts.add(new Manifest.GeopoliticalUnit(gpunitName, "name", Manifest.ReportingUnitType.congressional, null));
     return this;
   }
 
-  ManifestInputBuilder setStyle(String style) {
+  ManifestInputBuilder setDefaultStyle(String style) {
     this.style = style;
     return this;
   }
 
-  ManifestInputBuilder setBallotStyle(Manifest.BallotStyle ballotStyle) {
-    this.ballotStyle = ballotStyle;
+  ManifestInputBuilder addStyle(String style, String... gpunits) {
+    for (String gpunit : gpunits) {
+      districts.add(new Manifest.GeopoliticalUnit(gpunit, "name", Manifest.ReportingUnitType.congressional, null));
+    }
+    ballotStyles.add(new Manifest.BallotStyle(style, Arrays.asList(gpunits), null, null));
+
+    return this;
+  }
+
+  public ManifestInputBuilder addCandidateAndParty(String candidate_id, String party) {
+    Manifest.Candidate c = new Manifest.Candidate(candidate_id, new Manifest.InternationalizedText(ImmutableList.of()), party, null, null);
+    candidates.put(candidate_id, c);
+    return this;
+  }
+
+  ManifestInputBuilder addBallotStyle(Manifest.BallotStyle ballotStyle) {
+    ballotStyles.add(ballotStyle);
     return this;
   }
 
@@ -46,6 +62,12 @@ public class ManifestInputBuilder {
     contests.add(c);
     return c;
   }
+  public ContestBuilder addContest(String contest_id, int seq) {
+    ContestBuilder c = new ContestBuilder(contest_id).setSequence(seq);
+    contests.add(c);
+    return c;
+  }
+
 
   public void addCandidate(String candidate_id) {
     Manifest.Candidate c = new Manifest.Candidate(candidate_id);
@@ -58,24 +80,27 @@ public class ManifestInputBuilder {
   }
 
   public Manifest build() {
-    Manifest.GeopoliticalUnit gpUnit = new Manifest.GeopoliticalUnit(district, "name", Manifest.ReportingUnitType.congressional, null);
-    Manifest.BallotStyle ballotStyle = this.ballotStyle != null ? this.ballotStyle :
-            new Manifest.BallotStyle(style, ImmutableList.of(district), null, null);
+    if (districts.isEmpty()) {
+      districts.add(new Manifest.GeopoliticalUnit(districtDefault, "name", Manifest.ReportingUnitType.congressional, null));
+    }
+    if (ballotStyles.isEmpty()) {
+      ballotStyles.add(new Manifest.BallotStyle(style, ImmutableList.of(districtDefault), null, null));
+    }
 
     List<Manifest.Party> parties = ImmutableList.of(new Manifest.Party("dog"), new Manifest.Party("cat"));
 
     return new Manifest(manifest_name, ElectionContext.SPEC_VERSION, Manifest.ElectionType.general,
             OffsetDateTime.now().toString(), OffsetDateTime.now().toString(),
-            ImmutableList.of(gpUnit), parties, candidates.values().stream().toList(),
+            districts, parties, candidates.values().stream().toList(),
             contests.stream().map(ContestBuilder::build).toList(),
-            ImmutableList.of(ballotStyle), null, null, null);
+            ballotStyles, null, null, null);
   }
 
   private static int contest_seq = 0;
   private static int selection_seq = 0;
   public class ContestBuilder {
     private final String id;
-    private final int seq = contest_seq++;
+    private int seq = contest_seq++;
     private final ArrayList<SelectionBuilder> selections = new ArrayList<>();
     private Manifest.VoteVariationType type = Manifest.VoteVariationType.one_of_m;
     private int allowed = 1;
@@ -98,13 +123,20 @@ public class ManifestInputBuilder {
       return this;
     }
 
-    ContestBuilder setName(String name) {
-      this.name = name;
+    ContestBuilder setSequence(int seq) {
+      this.seq = seq;
       return this;
     }
 
     public ContestBuilder addSelection(String id, String candidate_id) {
       SelectionBuilder s = new SelectionBuilder(id, candidate_id);
+      selections.add(s);
+      addCandidate(candidate_id);
+      return this;
+    }
+
+    public ContestBuilder addSelection(String id, String candidate_id, int seq) {
+      SelectionBuilder s = new SelectionBuilder(id, candidate_id).setSequence(seq);
       selections.add(s);
       addCandidate(candidate_id);
       return this;
@@ -143,11 +175,16 @@ public class ManifestInputBuilder {
     public class SelectionBuilder {
       private final String id;
       private final String candidate_id;
-      private final int seq = selection_seq++;
+      private int seq = selection_seq++;
 
       SelectionBuilder(String id, String candidate_id) {
         this.id = id;
         this.candidate_id = candidate_id;
+      }
+
+      SelectionBuilder setSequence(int seq) {
+        this.seq = seq;
+        return this;
       }
 
       Manifest.SelectionDescription build() {

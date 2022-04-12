@@ -45,7 +45,7 @@ public class FakeBallotProvider implements BallotProvider {
       for (ContestWithPlaceholders contestp : metadata.get_contests_for_style(ballotStyleId)) {
         contests.add(this.get_random_contest_from(contestp.contest));
       }
-      return new PlaintextBallot(ballot_id, ballotStyleId, contests);
+      return new PlaintextBallot(ballot_id, ballotStyleId, contests, null);
     }
 
     PlaintextBallot.Contest get_random_contest_from(Manifest.ContestDescription contest) {

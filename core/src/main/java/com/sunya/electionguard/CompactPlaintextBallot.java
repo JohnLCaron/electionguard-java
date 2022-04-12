@@ -70,7 +70,8 @@ public class CompactPlaintextBallot {
     return new PlaintextBallot(
             compact_ballot.object_id,
             compact_ballot.style_id,
-            get_plaintext_contests(compact_ballot, internal_manifest));
+            get_plaintext_contests(compact_ballot, internal_manifest),
+            null);
   }
 
   /** Get ballot contests from compact plaintext ballot. */

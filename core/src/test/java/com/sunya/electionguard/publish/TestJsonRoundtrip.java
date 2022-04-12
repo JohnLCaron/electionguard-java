@@ -189,7 +189,8 @@ public class TestJsonRoundtrip {
     PlaintextBallot org = new PlaintextBallot(
             "testBallotRoundtrip",
             "ballotStyle",
-            ImmutableList.of(contest));
+            ImmutableList.of(contest),
+            null);
 
     // write json
     ConvertToJson.writePlaintextBallot(org, file.toPath());

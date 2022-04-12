@@ -8,6 +8,7 @@ import com.google.common.flogger.FluentLogger;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import java.util.ArrayList;
+import java.util.Formatter;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -26,13 +27,16 @@ public class PlaintextBallot {
   public final String ballotStyleId;
   /** The list of contests for this ballot. */
   public final ImmutableList<Contest> contests;
+  @Nullable
+  public final String errors;
 
-  public PlaintextBallot(String ballotId, String ballotStyleId, List<Contest> contests) {
+  public PlaintextBallot(String ballotId, String ballotStyleId, List<Contest> contests, @Nullable String errors) {
     Preconditions.checkArgument(!Strings.isNullOrEmpty(ballotId));
     this.ballotId = ballotId;
     Preconditions.checkArgument(!Strings.isNullOrEmpty(ballotStyleId));
     this.ballotStyleId = ballotStyleId;
     this.contests = ImmutableList.copyOf(contests);
+    this.errors = errors;
   }
 
   public String object_id() {
@@ -55,10 +59,15 @@ public class PlaintextBallot {
 
   @Override
   public String toString() {
-    return "PlaintextBallot{" +
+    Formatter f = new Formatter();
+    f.format("%s", "PlaintextBallot{" +
             "object_id='" + ballotId + '\'' +
-            ", style_id='" + ballotStyleId + '\'' +
-            '}';
+            ", style_id='" + ballotStyleId + '\'');
+    if (errors != null) {
+      f.format(", errors = %n%s%n", errors);
+    }
+    f.format("}");
+    return f.toString();
   }
 
   @Override
@@ -297,7 +306,7 @@ public class PlaintextBallot {
       }
       contests.add(new Contest(ccontest.object_id(), ccontest.sequence_order(), selections));
     }
-    return new PlaintextBallot(cballot.object_id(), cballot.ballotStyleId, contests);
+    return new PlaintextBallot(cballot.object_id(), cballot.ballotStyleId, contests, null);
   }
 
   /* experimental: get ballot from tally alone.

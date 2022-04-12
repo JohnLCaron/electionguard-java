@@ -12,6 +12,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static com.sunya.electionguard.Group.*;
+import static com.sunya.electionguard.core.ElGamalKt.ciphertextOf;
 
 /**
  * Implements the Chaum-Pedersen publicly verifiable secret sharing scheme.
@@ -336,7 +337,7 @@ public class ChaumPedersen {
               '}';
     }
 
-    boolean is_valid(ElGamal.Ciphertext message, ElementModP k, ElementModQ qbar) {
+    public boolean is_valid(ElGamal.Ciphertext message, ElementModP k, ElementModQ qbar) {
       if (this.name.endsWith("2")) {
         return is_valid2(message, k, qbar);
       } else {
@@ -383,9 +384,6 @@ public class ChaumPedersen {
       boolean sane_constant = 0 <= constant && constant < 1_000_000_000;
       //     ElementModQ c = Hash.hash_elems(crypto_extended_base_hash, alpha, beta, a, b); // sha256(𝑄', A, B, a, b)
       boolean same_c = c.equals(Hash.hash_elems(extendedHash, alpha, beta, a, b));
-      if (!same_c) {
-        System.out.printf("HEY");
-      }
       boolean consistent_gv = in_bounds_v && in_bounds_a && in_bounds_alpha && in_bounds_c &&
               // The equation 𝑔^𝑉 = 𝑎𝐴^𝐶 mod 𝑝
               g_pow_p(v).equals(mult_p(a, pow_p(alpha, c)));
@@ -433,8 +431,9 @@ public class ChaumPedersen {
     boolean is_valid2(ElGamal.Ciphertext ciphertext, ElementModP publicKey, ElementModQ hashHeader) {
       ChaumPedersenKt.ConstantChaumPedersenProofKnownNonce kt =
               new ChaumPedersenKt.ConstantChaumPedersenProofKnownNonce(
-                      new ChaumPedersenKt.GenericChaumPedersenProof(this.challenge, this.response), this.constant);
-      return kt.isValid(ciphertext, publicKey, hashHeader, this.constant);
+                      new ChaumPedersenKt.GenericChaumPedersenProof(this.challenge, this.response),
+                      this.constant);
+      return kt.isValid(ciphertextOf(ciphertext), publicKey, hashHeader, this.constant);
     }
   }
 
@@ -588,7 +587,7 @@ public class ChaumPedersen {
    * @param seed:                      Used to generate other random values here
    * @param extendedHash: usually the election extended base hash (𝑄')
    */
-  static ConstantChaumPedersenProof make_constant_chaum_pedersen(
+  public static ConstantChaumPedersenProof make_constant_chaum_pedersen(
           ElGamal.Ciphertext message,
           int constant,
           ElementModQ r,
@@ -607,14 +606,14 @@ public class ChaumPedersen {
     ElementModQ v = a_plus_bc_q(u, c, r);
 
     ConstantChaumPedersenProof result =  new ConstantChaumPedersenProof(a, b, c, v, constant);
-    // ElGamal.Ciphertext message, ElementModP publicKey, ElementModQ extendedHash
-    if (!result.is_valid(message, k, extendedHash)) {
-      throw new IllegalStateException("make_constant_chaum_pedersen");
-    }
+    /* ElGamal.Ciphertext message, ElementModP publicKey, ElementModQ extendedHash
+    // if (!result.is_valid(message, k, extendedHash)) {
+    //  throw new IllegalStateException("make_constant_chaum_pedersen");
+    // }
     System.out.printf("***ConstantChaumPedersenProof result = %s%n", result);
     System.out.printf("    message = %s%n", message);
     System.out.printf("    extendedHash = %s%n", extendedHash);
-    System.out.printf("    publicKey = %s%n", k.toShortString());
+    System.out.printf("    publicKey = %s%n", k.toShortString()); */
     return result;
   }
 

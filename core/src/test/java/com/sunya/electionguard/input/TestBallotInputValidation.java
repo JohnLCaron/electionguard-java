@@ -41,6 +41,8 @@ public class TestBallotInputValidation {
     boolean isValid = validator.validateElection(problems);
     if (!isValid) {
       System.out.printf("Manifest Problems=%n%s", problems);
+    } else if (!election.is_valid()) {
+      System.out.printf("Manifest is_valid() FAIL%n");
     }
     return isValid;
   }
@@ -89,7 +91,7 @@ public class TestBallotInputValidation {
 
   ElectionAndBallot testStylingNotExist() {
     ManifestInputBuilder ebuilder = new ManifestInputBuilder("ballot_id")
-            .setStyle("badHairDay");
+            .setDefaultStyle("badHairDay");
     Manifest election = ebuilder.addContest("contest_id")
             .addSelection("selection_id", "candidate_1")
             .addSelection("selection_id2", "candidate_2")
@@ -108,12 +110,42 @@ public class TestBallotInputValidation {
 
   @Example
   public void testStylingNotExistValidate() {
-    testValidate(testStylingNotExist(), "Ballot Style 'styling' does not exist in election");
+    testValidate(testStylingNotExist(), "Ballot.A.1");
   }
 
   @Example
   public void testStylingNotExistEncrypt() {
     testEncrypt(testStylingNotExist(), false);
+  }
+
+  ElectionAndBallot testGpunitListed(boolean listed) {
+    ManifestInputBuilder ebuilder = new ManifestInputBuilder("ballot_id")
+            .addStyle("styling", "orphan", "annie");
+    Manifest election = ebuilder.addContest("contest_id")
+            .addSelection("selection_id", "candidate_1")
+            .addSelection("selection_id2", "candidate_2")
+            .setGpunit(listed ? "orphan" : "parented")
+            .done()
+            .build();
+    assertThat(validate(election)).isEqualTo(listed);
+
+    BallotInputBuilder builder = new BallotInputBuilder("ballot_id");
+    PlaintextBallot ballot = builder.addContest("contest_id")
+            .addSelection("selection_id", 1)
+            .done()
+            .build();
+
+    return new ElectionAndBallot(election, ballot);
+  }
+
+  @Example
+  public void testGpunitListedValidate() {
+    testValidate(testGpunitListed(true), null);
+  }
+
+  @Example
+  public void testGpunitNotListedValidate() {
+    testValidate(testGpunitListed(false), "Ballot.A.3");
   }
 
   ElectionAndBallot testInvalidContest() {
@@ -137,7 +169,7 @@ public class TestBallotInputValidation {
 
   @Example
   public void testInvalidContestValidate() {
-    testValidate(testInvalidContest(), "Ballot Contest 'contest_bad' does not exist in election");
+    testValidate(testInvalidContest(), "Ballot.A.2");
   }
 
   @Example
@@ -166,7 +198,7 @@ public class TestBallotInputValidation {
 
   @Example
   public void testInvalidSelectionValidate() {
-    testValidate(testInvalidSelection(), "Ballot Selection 'selection_bad' does not exist in contest");
+    testValidate(testInvalidSelection(), "Ballot.B.2.1");
   }
 
   @Example
@@ -196,7 +228,7 @@ public class TestBallotInputValidation {
 
   @Example
   public void testZeroOrOneValidate() {
-    testValidate(testZeroOrOne(), "Ballot Selection 'selection_id2' vote (2) must be 0 or 1");
+    testValidate(testZeroOrOne(), "Ballot.C.1");
   }
 
   @Example
@@ -225,7 +257,7 @@ public class TestBallotInputValidation {
 
   @Example
   public void testOvervoteValidate() {
-    testValidate(testOvervote(), "Ballot Selection votes (2) exceeds limit (1)");
+    testValidate(testOvervote(), "Ballot.C.2");
   }
 
   @Example
@@ -256,7 +288,7 @@ public class TestBallotInputValidation {
 
   @Example
   public void testContestDeclaredTwiceValidate() {
-    testValidate(testContestDeclaredTwice(), "Multiple Ballot contests have same id 'contest_id'");
+    testValidate(testContestDeclaredTwice(), "Ballot.B.1");
   }
 
   @Example
@@ -286,12 +318,42 @@ public class TestBallotInputValidation {
 
   @Example
   public void testSelectionDeclaredTwiceValidate() {
-    testValidate(testSelectionDeclaredTwice(), "Multiple Ballot selections have same id 'selection_id'");
+    testValidate(testSelectionDeclaredTwice(), "Ballot.B.2");
   }
 
   @Example
   public void testSelectionDeclaredTwiceEncrypt() {
     testEncrypt(testSelectionDeclaredTwice(), false);
+  }
+
+  private ElectionAndBallot testSelectionNoMatch() {
+    ManifestInputBuilder ebuilder = new ManifestInputBuilder("ballot_id");
+    Manifest election = ebuilder.addContest("contest_id")
+            .setVoteVariationType(Manifest.VoteVariationType.n_of_m, 2)
+            .addSelection("selection_id", "candidate_1")
+            .addSelection("selection_id2", "candidate_2")
+            .done()
+            .build();
+    assertThat(validate(election)).isTrue();
+
+    BallotInputBuilder builder = new BallotInputBuilder("ballot_id");
+    PlaintextBallot ballot = builder.addContest("contest_id")
+            .addSelection("selection_id", 1)
+            .addSelection("selection_id3", 0) // voting for same candidate twice
+            .done()
+            .build();
+
+    return new ElectionAndBallot(election, ballot);
+  }
+
+  @Example
+  public void testSelectionNoMatchValidate() {
+    testValidate(testSelectionNoMatch(), "Ballot.B.2.1");
+  }
+
+  @Example
+  public void testSelectionNoMatchEncrypt() {
+    testEncrypt(testSelectionNoMatch(), false);
   }
 
   void testValidate(ElectionAndBallot eanb, String expectMessage) {

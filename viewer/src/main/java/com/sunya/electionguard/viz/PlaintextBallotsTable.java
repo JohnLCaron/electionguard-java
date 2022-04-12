@@ -142,6 +142,10 @@ public class PlaintextBallotsTable extends JPanel {
     public String getStyle() {
       return ballot.ballotStyleId;
     }
+
+    public String getErrors() {
+      return ballot.errors == null ? "none" : ballot.errors;
+    }
   }
 
   public static class ContestBean {
@@ -156,6 +160,10 @@ public class PlaintextBallotsTable extends JPanel {
     public String getContestId() {
       return contest.contestId;
     }
+
+    public int getSequenceOrder() {
+      return contest.sequenceOrder;
+    }
   }
 
   public static class SelectionBean {
@@ -169,6 +177,10 @@ public class PlaintextBallotsTable extends JPanel {
 
     public String getSelectionId() {
       return selection.selectionId;
+    }
+
+    public int getSequenceOrder() {
+      return selection.sequenceOrder;
     }
 
     public boolean isPlaceHolder() {

@@ -1,6 +1,6 @@
 # 🗳 Election Record serialization (proposed specification)
 
-draft 4/6/2022 for proto_version = 1.0.0 (MAJOR.MINOR.PATCH)
+draft 4/12/2022 for proto_version = 1.0.0 (MAJOR.MINOR.PATCH)
 
 This covers only the election record, and not any serialized messagees used in remote procedure calls.
 
@@ -251,11 +251,12 @@ When the optional crypto_hash are passed, they are verified. If not passed in, t
 
 ### message PlaintextBallot
 
-| Name            | JSON Name | Type                           | Notes                               |
-|-----------------|-----------|--------------------------------|-------------------------------------|
-| ballot_id       | object_id | string                         | unique input ballot id              |
-| ballot_style_id | style_id  | string                         | matches BallotStyle.ballot_style_id |
-| contests        |           | List\<PlaintextBallotContest\> |                                     |
+| Name            | JSON Name   | Type                           | Notes                               |
+|-----------------|-------------|--------------------------------|-------------------------------------|
+| ballot_id       | object_id   | string                         | unique input ballot id              |
+| ballot_style_id | style_id    | string                         | matches BallotStyle.ballot_style_id |
+| contests        |             | List\<PlaintextBallotContest\> |                                     |
+| errors          | not present | string                         | optional eg an invalid ballot       |
 
 ### message PlaintextBallotContest
 
@@ -417,7 +418,7 @@ When the optional crypto_hash are passed, they are verified. If not passed in, t
 | proof           |           | GenericChaumPedersenProof                        | proof or recovered_parts       |
 | recovered_parts |           | List\<CiphertextCompensatedDecryptionSelection\> | removed unneeded map           |
 
-### message CiphertextCompensatedDecryptionSelection(ElectionObjectBase)
+### message CiphertextCompensatedDecryptionSelection
 
 | Name                | JSON Name | Type                       | Notes |
 |---------------------|-----------|----------------------------|-------|

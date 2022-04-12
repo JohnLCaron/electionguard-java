@@ -197,7 +197,7 @@ public class Encrypt {
 
     // Generate the encryption
     Optional<ElGamal.Ciphertext> elgamal_encryption =
-            ElGamal.elgamal_encrypt(selection.vote, selection_nonce, elgamal_public_key);
+            ElGamal.elgamal_encrypt_ver1(selection.vote, selection_nonce, elgamal_public_key);
 
     if (elgamal_encryption.isEmpty()){
       // will have logged about the failure earlier, so no need to log anything here

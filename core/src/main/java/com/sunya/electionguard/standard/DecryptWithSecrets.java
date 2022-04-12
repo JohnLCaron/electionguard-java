@@ -310,7 +310,7 @@ class DecryptWithSecrets {
       }
     }
 
-    return Optional.of(new PlaintextBallot(ballot.object_id(), ballot.ballotStyleId, plaintext_contests));
+    return Optional.of(new PlaintextBallot(ballot.object_id(), ballot.ballotStyleId, plaintext_contests, null));
   }
 
   /**
@@ -373,7 +373,7 @@ class DecryptWithSecrets {
         return Optional.empty();
       }
     }
-    return Optional.of(new PlaintextBallot(ballot.object_id(), ballot.ballotStyleId, plaintext_contests));
+    return Optional.of(new PlaintextBallot(ballot.object_id(), ballot.ballotStyleId, plaintext_contests, null));
   }
 
 }

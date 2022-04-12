@@ -71,7 +71,7 @@ public class BallotFactory {
       contests.add(this.get_random_contest_from(contestp.contest, true, with_trues));
     }
 
-    return new PlaintextBallot(ballot_id, ballotStyleId, contests);
+    return new PlaintextBallot(ballot_id, ballotStyleId, contests, null);
   }
 
   ///////////////////////////////////////////////////

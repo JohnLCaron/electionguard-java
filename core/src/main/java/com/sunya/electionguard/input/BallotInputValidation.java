@@ -54,7 +54,8 @@ public class BallotInputValidation {
         String msg = String.format("Ballot.A.2 Ballot Contest '%s' does not exist in election", ballotContest.contestId);
         ballotMesses.add(msg);
         logger.atWarning().log(msg);
-      } else {
+
+      } else if (ballotStyle != null) {
         validateContest(ballotContest, ballotStyle, contest, ballotMesses);
       }
     }
@@ -64,6 +65,14 @@ public class BallotInputValidation {
   /** Determine if contest is valid for ballot style. */
   void validateContest(PlaintextBallot.Contest ballotContest, Manifest.BallotStyle ballotStyle, ElectionContest electionContest, BallotMessenger ballotMesses) {
     BallotMessenger contestMesses = ballotMesses.nested(ballotContest.contestId);
+
+    // Contest geopoliticalUnitId ok for this BallotStyle
+    if (!ballotStyle.geopoliticalUnitIds().contains(electionContest.geopoliticalUnitId)) {
+      String msg = String.format("Ballot.A.3 Contest's geopoliticalUnitId '%s' not listed in BallotStyle '%s' geopoliticalUnitIds",
+              electionContest.geopoliticalUnitId, ballotStyle.ballotStyleId());
+      contestMesses.add(msg);
+      logger.atWarning().log(msg);
+    }
 
     int total = 0;
     Set<String> selectionIds = new HashSet<>();
@@ -80,7 +89,7 @@ public class BallotInputValidation {
       Manifest.SelectionDescription electionSelection = electionContest.selectionMap.get(selection.selectionId);
       // Referential integrity of ballotSelection id
       if (electionSelection == null) {
-        String msg = String.format("Ballot.A.3 Ballot Selection '%s' does not exist in contest", selection.selectionId);
+        String msg = String.format("Ballot.B.2.1 Ballot Selection '%s' does not exist in contest", selection.selectionId);
         contestMesses.add(msg);
         logger.atWarning().log(msg);
       } else {
@@ -105,11 +114,13 @@ public class BallotInputValidation {
 
   private static class ElectionContest {
     private final String contestId;
+    private final String geopoliticalUnitId;
     private final int allowed;
     private final Map<String, Manifest.SelectionDescription> selectionMap;
 
     ElectionContest(Manifest.ContestDescription electionContest) {
       this.contestId = electionContest.contestId();
+      this.geopoliticalUnitId = electionContest.geopoliticalUnitId();
       this.allowed = electionContest.votesAllowed();
       // this.selectionMap = electionContest.ballot_selections.stream().collect(Collectors.toMap(b -> b.object_id, b -> b));
       // allow same object id

@@ -3,6 +3,7 @@ package com.sunya.electionguard.core;
 import com.google.common.base.Preconditions;
 import com.google.common.flogger.FluentLogger;
 import com.sunya.electionguard.Dlog;
+import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.Hash;
 
@@ -14,8 +15,6 @@ import static com.sunya.electionguard.Group.TWO_MOD_Q;
 import static com.sunya.electionguard.Group.ZERO_MOD_Q;
 import static com.sunya.electionguard.Group.g_pow_p;
 import static com.sunya.electionguard.Group.int_to_q_unchecked;
-import static com.sunya.electionguard.Group.mult_p;
-import static com.sunya.electionguard.Group.pow_p;
 import static com.sunya.electionguard.Group.rand_range_q;
 
 public class ElGamalKt {
@@ -34,6 +33,10 @@ public class ElGamalKt {
     }
   }
 
+  public static Ciphertext ciphertextOf(ElGamal.Ciphertext ciphertext) {
+    return new Ciphertext(ciphertext.pad(), ciphertext.data());
+  }
+
   /**
    * An "exponential ElGamal ciphertext" (i.e., with the plaintext in the exponent to allow for
    * homomorphic addition).
@@ -47,9 +50,6 @@ public class ElGamalKt {
     public Ciphertext {
       Preconditions.checkNotNull(pad);
       Preconditions.checkNotNull(data);
-      if (!data.is_valid_residue()) {
-        throw new IllegalStateException();
-      }
     }
 
     /**
@@ -127,7 +127,7 @@ public class ElGamalKt {
    * @param public_key ElGamal public key.
    * @return An ElGamal.Ciphertext.
    */
-  public static Ciphertext encrypt(int message, ElementModP public_key, ElementModQ nonce) {
+  public static Ciphertext encryptVer2(int message, ElementModP public_key, ElementModQ nonce) {
     if (nonce.equals(ZERO_MOD_Q)) {
       logger.atSevere().log("ElGamal encryption requires a non-zero nonce");
       throw new ArithmeticException("ElGamal encryption requires a non-zero nonce");
@@ -138,9 +138,10 @@ public class ElGamalKt {
     }
 
     ElementModP pad = g_pow_p(nonce);
-    ElementModP gpowp_m = g_pow_p(int_to_q_unchecked(BigInteger.valueOf(message)));
-    ElementModP pubkey_pow_n = pow_p(public_key, nonce);
-    ElementModP data = mult_p(gpowp_m, pubkey_pow_n);
+
+    ElementModQ messQ = int_to_q_unchecked(BigInteger.valueOf(message));
+    ElementModP sum = Group.add_p(nonce, messQ);
+    ElementModP data = Group.pow_p(public_key, sum);
 
     return new Ciphertext(pad, data);
   }

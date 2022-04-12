@@ -16,6 +16,11 @@ public class BallotInputBuilder {
     this.id = ballot_id;
   }
 
+  BallotInputBuilder setStyle(String style) {
+    this.style = style;
+    return this;
+  }
+
   ContestBuilder addContest(String contest_id) {
     ContestBuilder c = new ContestBuilder(contest_id);
     contests.add(c);
@@ -23,7 +28,7 @@ public class BallotInputBuilder {
   }
 
   PlaintextBallot build() {
-    return new PlaintextBallot(id, style, contests.stream().map(ContestBuilder::build).toList());
+    return new PlaintextBallot(id, style, contests.stream().map(ContestBuilder::build).toList(), null);
   }
 
   public class ContestBuilder {
