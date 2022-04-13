@@ -51,7 +51,7 @@ class InputBallotPanel extends JPanel {
     AbstractAction fileAction = new AbstractAction() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        String dirName = fileChooser.chooseDirectory("");
+        String dirName = fileChooser.chooseFileOrDirectory("");
         if (dirName != null) {
           inputBallotDirCB.setSelectedItem(dirName);
         }

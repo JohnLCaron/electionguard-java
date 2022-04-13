@@ -1,5 +1,6 @@
 package com.sunya.electionguard.proto;
 
+import com.sunya.electionguard.ChaumPedersen;
 import com.sunya.electionguard.CiphertextBallot;
 import com.sunya.electionguard.SubmittedBallot;
 import electionguard.protogen.CiphertextBallotProto;

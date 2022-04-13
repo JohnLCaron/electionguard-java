@@ -23,13 +23,13 @@ public class TestElgamalProperties extends TestProperties {
 
   @Example
   public void test_simple_elgamal_encryption1() {
-    assertThat(elgamal_encrypt(0, TWO_MOD_Q, TWO_MOD_P)).isPresent();
+    assertThat(elgamal_encrypt_ver1(0, TWO_MOD_Q, TWO_MOD_P)).isPresent();
   }
 
   @Example
   public void test_simple_elgamal_encryption() {
     ElementModQ nonce = Group.hex_to_q_unchecked("3db4e800fcc6e54e94d7972c61fd7b65ac5936f684b9eaf6fdd6094feacf62fe");
-    assertThat(elgamal_encrypt(0, nonce, TWO_MOD_P)).isPresent();
+    assertThat(elgamal_encrypt_ver1(0, nonce, TWO_MOD_P)).isPresent();
   }
 
 
@@ -44,7 +44,7 @@ public class TestElgamalProperties extends TestProperties {
     ElementModP elem = g_pow_p(ZERO_MOD_Q);
     assertThat(elem).isEqualTo(ONE_MOD_P);  // g^0 == 1
 
-    Ciphertext ciphertext = elgamal_encrypt(0, nonce, keypair.public_key()).orElseThrow();
+    Ciphertext ciphertext = elgamal_encrypt_ver1(0, nonce, keypair.public_key()).orElseThrow();
     assertThat(getPrimes().generator).isEqualTo(ciphertext.pad().getBigInt());
     assertThat(pow_pi(ciphertext.pad().getBigInt(), secret_key.getBigInt()))
             .isEqualTo(pow_pi(public_key.getBigInt(), nonce.getBigInt()));
@@ -59,7 +59,7 @@ public class TestElgamalProperties extends TestProperties {
   public void test_elgamal_encrypt_requires_nonzero_nonce(
           @ForAll("elgamal_keypairs") ElGamal.KeyPair keypair,
           @ForAll @IntRange(min = 0, max = 100) int message) {
-      assertThat(elgamal_encrypt(message, ZERO_MOD_Q, keypair.public_key())).isEmpty();
+      assertThat(elgamal_encrypt_ver1(message, ZERO_MOD_Q, keypair.public_key())).isEmpty();
   }
 
   @Example
@@ -73,7 +73,7 @@ public class TestElgamalProperties extends TestProperties {
           @ForAll("elgamal_keypairs") ElGamal.KeyPair keypair,
           @ForAll @IntRange(min = 0, max = 100) int message,
           @ForAll("elements_mod_q_no_zero") ElementModQ nonce) {
-      Ciphertext ciphertext = elgamal_encrypt(message, nonce, keypair.public_key()).orElseThrow();
+      Ciphertext ciphertext = elgamal_encrypt_ver1(message, nonce, keypair.public_key()).orElseThrow();
       Integer plaintext = ciphertext.decrypt(keypair.secret_key());
       assertThat(plaintext).isEqualTo(message);
   }
@@ -83,7 +83,7 @@ public class TestElgamalProperties extends TestProperties {
           @ForAll("elgamal_keypairs") ElGamal.KeyPair keypair,
           @ForAll @IntRange(min = 0, max = 100) int message,
           @ForAll("elements_mod_q_no_zero") ElementModQ nonce) {
-      Ciphertext ciphertext = elgamal_encrypt(message, nonce, keypair.public_key()).orElseThrow();
+      Ciphertext ciphertext = elgamal_encrypt_ver1(message, nonce, keypair.public_key()).orElseThrow();
       Integer plaintext = ciphertext.decrypt_known_nonce(keypair.public_key(), nonce);
       assertThat(plaintext).isEqualTo(message); // TODO FAILS
   }
@@ -103,8 +103,8 @@ public class TestElgamalProperties extends TestProperties {
           @ForAll("elements_mod_q_no_zero") ElementModQ r1,
           @ForAll @IntRange(min = 0, max = 100) int m2,
           @ForAll("elements_mod_q_no_zero") ElementModQ r2) {
-    Ciphertext c1 = elgamal_encrypt(m1, r1, keypair.public_key()).orElseThrow();
-    Ciphertext c2 = elgamal_encrypt(m2, r2, keypair.public_key()).orElseThrow();
+    Ciphertext c1 = elgamal_encrypt_ver1(m1, r1, keypair.public_key()).orElseThrow();
+    Ciphertext c2 = elgamal_encrypt_ver1(m2, r2, keypair.public_key()).orElseThrow();
     Ciphertext c_sum = elgamal_add(c1, c2);
     Integer total = c_sum.decrypt(keypair.secret_key());
     assertThat(total).isEqualTo(m1 + m2);

@@ -31,7 +31,7 @@ public class TestJsonRoundtrip {
     List<AvailableGuardian> ags = new ArrayList<>();
     for (int i=0; i<n; i++) {
       String key = "test"+i+1;
-      ags.add(new AvailableGuardian(key, i+1, coeffs.get(key)));
+      ags.add(new AvailableGuardian(key, i+1, coeffs.get(key), null));
     }
 
     // original
@@ -65,7 +65,7 @@ public class TestJsonRoundtrip {
     String outputFile = file.getAbsolutePath();
 
     // original
-    AvailableGuardian org = new AvailableGuardian("test", 42, Group.TWO_MOD_Q);
+    AvailableGuardian org = new AvailableGuardian("test", 42, Group.TWO_MOD_Q, null);
     // write json
     ConvertToJson.writeAvailableGuardian(org, file.toPath());
     // read it back
@@ -189,7 +189,8 @@ public class TestJsonRoundtrip {
     PlaintextBallot org = new PlaintextBallot(
             "testBallotRoundtrip",
             "ballotStyle",
-            ImmutableList.of(contest));
+            ImmutableList.of(contest),
+            null);
 
     // write json
     ConvertToJson.writePlaintextBallot(org, file.toPath());

@@ -31,7 +31,7 @@ public class TestManifestInputValidation {
   public void testBallotStyleBadGpUnit() {
     Manifest.BallotStyle bs = new Manifest.BallotStyle("bad", ImmutableList.of("badGP"), null, null);
     ManifestInputBuilder ebuilder = new ManifestInputBuilder("election_scope_id")
-            .setBallotStyle(bs);
+            .addBallotStyle(bs);
     Manifest election = ebuilder.addContest("contest_id")
             .addSelection("selection_id", "candidate_1")
             .addSelection("selection_id2", "candidate_2")
@@ -43,7 +43,64 @@ public class TestManifestInputValidation {
     boolean isValid = validator.validateElection(problems);
     System.out.printf("Problems=%n%s", problems);
     assertThat(isValid).isFalse();
-    assertThat(problems.toString()).contains("BallotStyle 'bad' has geopolitical_unit_id 'badGP' that does not exist in election's geopolitical_units");
+    assertThat(problems.toString()).contains("Manifest.A.1");
+    assertThat(problems.toString()).contains("Manifest.A.5");
+  }
+
+  @Example
+  public void testBadParty() {
+    ManifestInputBuilder ebuilder = new ManifestInputBuilder("election_scope_id")
+            .addCandidateAndParty("candide", "wayne");
+    Manifest election = ebuilder.addContest("contest_id")
+            .addSelection("selection_id", "candidate_1")
+            .addSelection("selection_id2", "candidate_2")
+            .done()
+            .build();
+
+    ManifestInputValidation validator = new ManifestInputValidation(election);
+    Formatter problems = new Formatter();
+    boolean isValid = validator.validateElection(problems);
+    System.out.printf("Problems=%n%s", problems);
+    assertThat(isValid).isFalse();
+    assertThat(problems.toString()).contains("Manifest.A.2");
+  }
+
+  @Example
+  public void testContestGpunit() {
+    ManifestInputBuilder ebuilder = new ManifestInputBuilder("election_scope_id")
+            .addGpunit("district9");
+    Manifest election = ebuilder.addContest("contest_id")
+            .setGpunit("district1")
+            .addSelection("selection_id", "candidate_1")
+            .addSelection("selection_id2", "candidate_2")
+            .done()
+            .build();
+
+    ManifestInputValidation validator = new ManifestInputValidation(election);
+    Formatter problems = new Formatter();
+    boolean isValid = validator.validateElection(problems);
+    System.out.printf("Problems=%n%s", problems);
+    assertThat(isValid).isFalse();
+    assertThat(problems.toString()).contains("Manifest.A.3");
+    assertThat(problems.toString()).contains("Manifest.A.5");
+  }
+
+  @Example
+  public void testBadCandidateId() {
+    ManifestInputBuilder ebuilder = new ManifestInputBuilder("election_scope_id");
+    Manifest election = ebuilder.addContest("contest_id")
+            .addSelection("selection_id", "candidate_1")
+            .addSelection("selection_id2", "manchurian")
+            .done()
+            .removeCandidate("manchurian")
+            .build();
+
+    ManifestInputValidation validator = new ManifestInputValidation(election);
+    Formatter problems = new Formatter();
+    boolean isValid = validator.validateElection(problems);
+    System.out.printf("Problems=%n%s", problems);
+    assertThat(isValid).isFalse();
+    assertThat(problems.toString()).contains("Manifest.A.4");
   }
 
   @Example
@@ -64,26 +121,31 @@ public class TestManifestInputValidation {
     boolean isValid = validator.validateElection(problems);
     System.out.printf("Problems=%n%s", problems);
     assertThat(isValid).isFalse();
-    assertThat(problems.toString()).contains("Multiple Contests have same id 'contest_id'");
+    assertThat(problems.toString()).contains("Manifest.B.1");
+    assertThat(problems.toString()).contains("Manifest.B.6");
   }
 
   @Example
-  public void testContestGpunit() {
-    ManifestInputBuilder ebuilder = new ManifestInputBuilder("election_scope_id")
-            .setGpunit("district9");
-    Manifest election = ebuilder.addContest("contest_id")
-            .setGpunit("district1")
+  public void testBadSequence() {
+    ManifestInputBuilder ebuilder = new ManifestInputBuilder("election_scope_id");
+    Manifest election = ebuilder
+         .addContest("contest_id", 42)
             .addSelection("selection_id", "candidate_1")
-            .addSelection("selection_id2", "candidate_2")
+            .addSelection("selection_id2", "manchurian")
             .done()
-            .build();
+         .addContest("contest_id2", 42)
+            .addSelection("selection_id3", "candidate_3", 6)
+            .addSelection("selection_id4", "mongolian", 6)
+            .done()
+         .build();
 
     ManifestInputValidation validator = new ManifestInputValidation(election);
     Formatter problems = new Formatter();
     boolean isValid = validator.validateElection(problems);
     System.out.printf("Problems=%n%s", problems);
     assertThat(isValid).isFalse();
-    assertThat(problems.toString()).contains("Contest's electoral_district_id 'district1' does not exist in election's geopolitical_units");
+    assertThat(problems.toString()).contains("Manifest.B.2");
+    assertThat(problems.toString()).contains("Manifest.B.4");
   }
 
   @Example
@@ -100,7 +162,8 @@ public class TestManifestInputValidation {
     boolean isValid = validator.validateElection(problems);
     System.out.printf("Problems=%n%s", problems);
     assertThat(isValid).isFalse();
-    assertThat(problems.toString()).contains("Multiple Selections have same id 'selection_id'");
+    assertThat(problems.toString()).contains("Manifest.B.6");
+    assertThat(problems.toString()).contains("Manifest.B.3");
   }
 
   @Example
@@ -138,25 +201,7 @@ public class TestManifestInputValidation {
     boolean isValid = validator.validateElection(problems);
     System.out.printf("Problems=%n%s", problems);
     assertThat(isValid).isFalse();
-    assertThat(problems.toString()).contains("Multiple Selections have same candidate id 'candidate_1'");
-  }
-
-  @Example
-  public void testBadCandidateId() {
-    ManifestInputBuilder ebuilder = new ManifestInputBuilder("election_scope_id");
-    Manifest election = ebuilder.addContest("contest_id")
-            .addSelection("selection_id", "candidate_1")
-            .addSelection("selection_id2", "manchurian")
-            .done()
-            .removeCandidate("manchurian")
-            .build();
-
-    ManifestInputValidation validator = new ManifestInputValidation(election);
-    Formatter problems = new Formatter();
-    boolean isValid = validator.validateElection(problems);
-    System.out.printf("Problems=%n%s", problems);
-    assertThat(isValid).isFalse();
-    assertThat(problems.toString()).contains("Ballot Selection 'selection_id2' candidate_id 'manchurian' does not exist in election's Candidates");
+    assertThat(problems.toString()).contains("Manifest.B.5");
   }
 
 }

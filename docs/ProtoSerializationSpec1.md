@@ -1,6 +1,6 @@
 # 🗳 Election Record serialization (proposed specification)
 
-draft 3/28/2022 for proto_version = 1.0.0 (MAJOR.MINOR.PATCH)
+draft 4/12/2022 for proto_version = 1.0.0 (MAJOR.MINOR.PATCH)
 
 This covers only the election record, and not any serialized messagees used in remote procedure calls.
 
@@ -14,17 +14,6 @@ Notes
 
 ## common.proto
 
-### message GenericChaumPedersenProof
-
-| Name      | JSON Name | Type            | Notes   |
-|-----------|-----------|-----------------|---------|
-|           | name      | string          | removed |
-|           | usage     | enum ProofUsage | removed |
-| pad       |           | ElementModP     |         |
-| data      |           | ElementModP     |         |
-| challenge |           | ElementModQ     |         |
-| response  |           | ElementModQ     |         |
-
 ### message ElementModQ, ElementModP
 
 | Name  | JSON Name | Type  | Notes                                           |
@@ -37,6 +26,17 @@ Notes
 |------|-----------|-------------|-------|
 | pad  |           | ElementModP |       |
 | data |           | ElementModP |       |
+
+### message GenericChaumPedersenProof
+
+| Name      | JSON Name | Type            | Notes   |
+|-----------|-----------|-----------------|---------|
+|           | name      | string          | removed |
+|           | usage     | enum ProofUsage | removed |
+| pad       |           | ElementModP     |         |
+| data      |           | ElementModP     |         |
+| challenge |           | ElementModQ     |         |
+| response  |           | ElementModQ     |         |
 
 ### message SchnorrProof
 
@@ -103,11 +103,11 @@ There is no python SDK version of this message. Can be constructed from the Lagr
 |---------------------------|-----------|-----------------------|----------|
 | number_of_guardians       |           | uint32                |          |
 | quorum                    |           | uint32                |          |
-| elgamal_public_key        |           | ElementModP           |          |
-| commitment_hash           |           | UInt256               |          |
+| joint_public_key          |           | ElementModP           |          |
 | manifest_hash             |           | UInt256               |          |
 | crypto_base_hash          |           | UInt256               |          |
 | crypto_extended_base_hash |           | UInt256               |          |
+| commitment_hash           |           | UInt256               |          |
 | extended_data             |           | map\<string, string\> | optional |
 
 ### message EncryptionDevice
@@ -138,21 +138,21 @@ When the optional crypto_hash are passed, they are verified. If not passed in, t
 
 ### message Manifest
 
-| Name                | JSON Name | Type                       | Notes                           |
-|---------------------|-----------|----------------------------|---------------------------------|
-| election_scope_id   |           | string                     |                                 |
-| spec_version        |           | string                     | Probably the python SDK version |
-| election_type       | type      | enum ElectionType          |                                 |
-| start_date          |           | string                     | ISO 8601 formatted date/time    |
-| end_date            |           | string                     | ISO 8601 formatted date/time    |
-| geopolitical_units  |           | List\<GeopoliticalUnit\>   |                                 |
-| parties             |           | List\<Party\>              |                                 |
-| candidates          |           | List\<Candidate\>          |                                 |
-| contests            |           | List\<ContestDescription\> |                                 |
-| ballot_styles       |           | List\<BallotStyle\>        |                                 |
-| name                |           | InternationalizedText      | optional                        |
-| contact_information |           | ContactInformation         | optional                        |
-| crypto_hash         |           | UInt256                    | optional                        |
+| Name                | JSON Name     | Type                       | Notes                           |
+|---------------------|---------------|----------------------------|---------------------------------|
+| election_scope_id   |               | string                     |                                 |
+| spec_version        |               | string                     | the reference SDK version |
+| election_type       | type          | enum ElectionType          |                                 |
+| start_date          |               | string                     | ISO 8601 formatted date/time    |
+| end_date            |               | string                     | ISO 8601 formatted date/time    |
+| geopolitical_units  |               | List\<GeopoliticalUnit\>   |                                 |
+| parties             |               | List\<Party\>              |                                 |
+| candidates          |               | List\<Candidate\>          |                                 |
+| contests            |               | List\<ContestDescription\> |                                 |
+| ballot_styles       |               | List\<BallotStyle\>        |                                 |
+| name                |               | InternationalizedText      | optional                        |
+| contact_information |               | ContactInformation         | optional                        |
+| crypto_hash         | not present   |  UInt256                   | optional                        |
 
 ### message AnnotatedString
 
@@ -236,100 +236,27 @@ When the optional crypto_hash are passed, they are verified. If not passed in, t
 | ballot_title         |                       | InternationalizedText        | optional                                      |
 | ballot_subtitle      |                       | InternationalizedText        | optional                                      |
 | primary_party_ids    |                       | List\<string\>               | optional, match Party.party_id                |
-| crypto_hash          |                       | UInt256                      | optional                                      |
+| crypto_hash          | not present           | UInt256                      | optional                                      |
 
 ### message SelectionDescription
 
-| Name           | JSON Name | Type     | Notes                          |
-|----------------|-----------|----------|--------------------------------|
-| selection_id   | object_id | string   |                                |
-| sequence_order |           | uint32   | deterministic sorting          |
-| candidate_id   |           | string   | matches Candidate.candidate_id |
-| crypto_hash    |           | UInt256  | optional                       |
-
-## plaintext_tally.proto
-
-### message PlaintextTally
-
-| Name     | JSON Name | Type                          | Notes                                                             |
-|----------|-----------|-------------------------------|-------------------------------------------------------------------|
-| tally_id | object_id | string                        | when decrypted spoiled ballots, matches SubmittedBallot.ballot_id |
-| contests |           | List\<PlaintextTallyContest\> |                                                                   |
-
-### message PlaintextTallyContest
-
-| Name       | JSON Name | Type                            | Notes                                  |
-|------------|-----------|---------------------------------|----------------------------------------|
-| contest_id | object_id | string                          | matches ContestDescription.contest_id. |
-| selections |           | List\<PlaintextTallySelection\> | removed unneeded map                   |
-
-### message PlaintextTallySelection
-
-| Name         | JSON Name | Type                                  | Notes                                     |
-|--------------|-----------|---------------------------------------|-------------------------------------------|
-| selection_id | object_id | string                                | matches SelectionDescription.selection_id |
-| tally        |           | int                                   |                                           |
-| value        |           | ElementModP                           |                                           |
-| message      |           | ElGamalCiphertext                     |                                           |
-| shares       |           | List\<CiphertextDecryptionSelection\> | removed unneeded map                      |
-
-### message CiphertextDecryptionSelection
-
-| Name            | JSON Name | Type                                             | Notes                          |
-|-----------------|-----------|--------------------------------------------------|--------------------------------|
-| selection_id    | object_id | string                                           | get_tally_shares_for_selection |
-| guardian_id     |           | string                                           |                                |
-| share           |           | ElementModP                                      |                                |
-| proof           |           | GenericChaumPedersenProof                        |                                |
-| recovered_parts |           | List\<CiphertextCompensatedDecryptionSelection\> | removed unneeded map           |
-
-### message CiphertextCompensatedDecryptionSelection(ElectionObjectBase)
-
-| Name                | JSON Name | Type                       | Notes    |
-|---------------------|-----------|----------------------------|----------|
-| selection_id        | object_id | string                     | unneeded |
-| guardian_id         |           | string                     |          |
-| missing_guardian_id |           | string                     |          |
-| share               |           | ElementModP                |          |
-| recovery_key        |           | ElementModP                |          |
-| proof               |           | GenericChaumPedersenProof  |          |
-
-## ciphertext_tally.proto
-
-### message CiphertextTally
-
-| Name     | JSON Name | Type                           | Notes                                                             |
-|----------|-----------|--------------------------------|-------------------------------------------------------------------|
-| tally_id | object_id | string                         | when decrypted spoiled ballots, matches SubmittedBallot.ballot_id |
-| contests |           | List\<CiphertextTallyContest\> | removed unneeded map                                              | 
-
-### message CiphertextTallyContest
-
-| Name                     | JSON Name        | Type                             | Notes                                     |
-|--------------------------|------------------|----------------------------------|-------------------------------------------|
-| contest_id               | object_id        | string                           | matches ContestDescription.contest_id     |
-| sequence_order           |                  | uint32                           | matches ContestDescription.sequence_order |
-| contest_description_hash | description_hash | UInt256                          | matches ContestDescription.crypto_hash    |
-| selections               |                  | List\<CiphertextTallySelection\> | removed unneeded map                      |
-
-### message CiphertextTallySelection|
-
-| Name                       | JSON Name        | Type              | Notes                                       |
-|----------------------------|------------------|-------------------|---------------------------------------------|
-| selection_id               | object_id        | string            | matches SelectionDescription.selection_id   |
-| sequence_order             |                  | uint32            | matches SelectionDescription.sequence_order |
-| selection_description_hash | description_hash | UInt256           | matches SelectionDescription.crypto_hash    |
-| ciphertext                 |                  | ElGamalCiphertext |                                             |
+| Name           | JSON Name    | Type     | Notes                          |
+|----------------|--------------|----------|--------------------------------|
+| selection_id   | object_id    | string   |                                |
+| sequence_order |              | uint32   | deterministic sorting          |
+| candidate_id   |              | string   | matches Candidate.candidate_id |
+| crypto_hash    | not present  | UInt256  | optional                       |
 
 ## plaintext_ballot.proto
 
 ### message PlaintextBallot
 
-| Name            | JSON Name | Type                           | Notes                               |
-|-----------------|-----------|--------------------------------|-------------------------------------|
-| ballot_id       | object_id | string                         | unique input ballot id              |
-| ballot_style_id | style_id  | string                         | matches BallotStyle.ballot_style_id |
-| contests        |           | List\<PlaintextBallotContest\> |                                     |
+| Name            | JSON Name   | Type                           | Notes                               |
+|-----------------|-------------|--------------------------------|-------------------------------------|
+| ballot_id       | object_id   | string                         | unique input ballot id              |
+| ballot_style_id | style_id    | string                         | matches BallotStyle.ballot_style_id |
+| contests        |             | List\<PlaintextBallotContest\> |                                     |
+| errors          | not present | string                         | optional eg an invalid ballot       |
 
 ### message PlaintextBallotContest
 
@@ -354,7 +281,7 @@ When the optional crypto_hash are passed, they are verified. If not passed in, t
 | Name   | JSON Name | Type   | Notes |
 |--------|-----------|--------|-------|
 | value  |           | string |       |
-| length |           | uint32 | why?  | 
+| length |           | uint32 | why?  |
 
 ## ciphertext_ballot.proto
 
@@ -427,3 +354,77 @@ When the optional crypto_hash are passed, they are verified. If not passed in, t
 | proof_one_challenge  |           | ElementModQ     |         |
 | proof_one_response   |           | ElementModQ     |         |
 | challenge            |           | ElementModQ     |         |
+
+## ciphertext_tally.proto
+
+### message CiphertextTally
+
+| Name     | JSON Name | Type                           | Notes                                                             |
+|----------|-----------|--------------------------------|-------------------------------------------------------------------|
+| tally_id | object_id | string                         | when decrypted spoiled ballots, matches SubmittedBallot.ballot_id |
+| contests |           | List\<CiphertextTallyContest\> | removed unneeded map                                              | 
+
+### message CiphertextTallyContest
+
+| Name                     | JSON Name        | Type                             | Notes                                     |
+|--------------------------|------------------|----------------------------------|-------------------------------------------|
+| contest_id               | object_id        | string                           | matches ContestDescription.contest_id     |
+| sequence_order           |                  | uint32                           | matches ContestDescription.sequence_order |
+| contest_description_hash | description_hash | UInt256                          | matches ContestDescription.crypto_hash    |
+| selections               |                  | List\<CiphertextTallySelection\> | removed unneeded map                      |
+
+### message CiphertextTallySelection|
+
+| Name                       | JSON Name        | Type              | Notes                                       |
+|----------------------------|------------------|-------------------|---------------------------------------------|
+| selection_id               | object_id        | string            | matches SelectionDescription.selection_id   |
+| sequence_order             |                  | uint32            | matches SelectionDescription.sequence_order |
+| selection_description_hash | description_hash | UInt256           | matches SelectionDescription.crypto_hash    |
+| ciphertext                 |                  | ElGamalCiphertext |                                             |
+
+## plaintext_tally.proto
+
+### message PlaintextTally
+
+| Name     | JSON Name | Type                          | Notes                                                             |
+|----------|-----------|-------------------------------|-------------------------------------------------------------------|
+| tally_id | object_id | string                        | when decrypted spoiled ballots, matches SubmittedBallot.ballot_id |
+| contests |           | List\<PlaintextTallyContest\> |                                                                   |
+
+### message PlaintextTallyContest
+
+| Name       | JSON Name | Type                            | Notes                                  |
+|------------|-----------|---------------------------------|----------------------------------------|
+| contest_id | object_id | string                          | matches ContestDescription.contest_id. |
+| selections |           | List\<PlaintextTallySelection\> | removed unneeded map                   |
+
+### message PlaintextTallySelection
+
+| Name         | JSON Name | Type                                  | Notes                                     |
+|--------------|-----------|---------------------------------------|-------------------------------------------|
+| selection_id | object_id | string                                | matches SelectionDescription.selection_id |
+| tally        |           | int                                   |                                           |
+| value        |           | ElementModP                           |                                           |
+| message      |           | ElGamalCiphertext                     |                                           |
+| shares       |           | List\<CiphertextDecryptionSelection\> | removed unneeded map                      |
+
+### message CiphertextDecryptionSelection
+
+| Name            | JSON Name | Type                                             | Notes                          |
+|-----------------|-----------|--------------------------------------------------|--------------------------------|
+| selection_id    | object_id | string                                           | get_tally_shares_for_selection |
+| guardian_id     |           | string                                           |                                |
+| share           |           | ElementModP                                      |                                |
+| proof           |           | GenericChaumPedersenProof                        | proof or recovered_parts       |
+| recovered_parts |           | List\<CiphertextCompensatedDecryptionSelection\> | removed unneeded map           |
+
+### message CiphertextCompensatedDecryptionSelection
+
+| Name                | JSON Name | Type                       | Notes |
+|---------------------|-----------|----------------------------|-------|
+| selection_id        | object_id | string                     |       |
+| guardian_id         |           | string                     |       |
+| missing_guardian_id |           | string                     |       |
+| share               |           | ElementModP                |       |
+| recovery_key        |           | ElementModP                |       |
+| proof               |           | GenericChaumPedersenProof  |       |

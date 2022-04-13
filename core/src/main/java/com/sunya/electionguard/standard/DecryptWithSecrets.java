@@ -30,6 +30,7 @@ class DecryptWithSecrets {
    * @param suppress_validity_check: do not validate the encryption prior to decrypting (useful for tests)
    */
   static Optional<PlaintextBallot.Selection> decrypt_selection_with_secret(
+          String where,
           CiphertextBallot.Selection selection,
           Manifest.SelectionDescription description,
           ElementModP public_key,
@@ -39,7 +40,7 @@ class DecryptWithSecrets {
     ) {
 
     if (!suppress_validity_check &&
-            !selection.is_valid_encryption(description.cryptoHash(), public_key, crypto_extended_base_hash)) {
+            !selection.is_valid_encryption(where, description.cryptoHash(), public_key, crypto_extended_base_hash)) {
       logger.atWarning().log("selection: %s failed secret validity check", selection.object_id());
       return Optional.empty();
     }
@@ -68,6 +69,7 @@ class DecryptWithSecrets {
    * @param suppress_validity_check: do not validate the encryption prior to decrypting (useful for tests)
    */
   static Optional<PlaintextBallot.Selection> decrypt_selection_with_nonce(
+          String where,
           CiphertextBallot.Selection selection,
           Manifest.SelectionDescription description,
           ElementModP public_key,
@@ -77,7 +79,7 @@ class DecryptWithSecrets {
     ) {
 
     if (!suppress_validity_check &&
-            !selection.is_valid_encryption(description.cryptoHash(), public_key, crypto_extended_base_hash)) {
+            !selection.is_valid_encryption(where, description.cryptoHash(), public_key, crypto_extended_base_hash)) {
       logger.atWarning().log("selection: %s failed nonce validity check", selection.object_id());
       return Optional.empty();
     }
@@ -128,6 +130,7 @@ class DecryptWithSecrets {
    * @param remove_placeholders: filter out placeholder ciphertext selections after decryption
    */
   static Optional<PlaintextBallot.Contest> decrypt_contest_with_secret(
+          String where,
           CiphertextBallot.Contest contestb,
           ContestWithPlaceholders contestp,
           ElementModP public_key,
@@ -138,7 +141,7 @@ class DecryptWithSecrets {
     ) {
 
     if (!suppress_validity_check &&
-            !contestb.is_valid_encryption(contestp.contest.cryptoHash(), public_key, crypto_extended_base_hash)) {
+            !contestb.is_valid_encryption(where, contestp.contest.cryptoHash(), public_key, crypto_extended_base_hash)) {
       logger.atWarning().log("contest: %s failed secret validity check", contestb.contestId);
       return Optional.empty();
     }
@@ -147,6 +150,7 @@ class DecryptWithSecrets {
       Manifest.SelectionDescription selection_description =
               contestp.getSelectionById(selection.object_id()).orElseThrow(IllegalStateException::new);
       Optional<PlaintextBallot.Selection> plaintext_selection = decrypt_selection_with_secret(
+              where + " " + contestb.contestId,
               selection,
               selection_description,
               public_key,
@@ -184,6 +188,7 @@ class DecryptWithSecrets {
    * @param remove_placeholders: filter out placeholder ciphertext selections after decryption
    */
   static Optional<PlaintextBallot.Contest> decrypt_contest_with_nonce(
+          String where,
           CiphertextBallot.Contest contest,
           ContestWithPlaceholders description,
           ElementModP public_key,
@@ -194,6 +199,7 @@ class DecryptWithSecrets {
     ) {
 
     if (!suppress_validity_check && !contest.is_valid_encryption(
+            where + " " + contest.contestId,
             description.contest.cryptoHash(), public_key, crypto_extended_base_hash)) {
       logger.atWarning().log("contest: %s failed nonce validity check", contest.contestId);
       return Optional.empty();
@@ -228,6 +234,7 @@ class DecryptWithSecrets {
       Manifest.SelectionDescription selection_description =
               description.getSelectionById(selection.object_id()).orElseThrow(IllegalStateException::new);
       Optional<PlaintextBallot.Selection> plaintext_selection = decrypt_selection_with_nonce(
+              where + " " + contest.contestId,
               selection,
               selection_description,
               public_key,
@@ -285,6 +292,7 @@ class DecryptWithSecrets {
       ContestWithPlaceholders description =
               metadata.getContestById(contest.contestId).orElseThrow(IllegalStateException::new);
       Optional<PlaintextBallot.Contest> plaintext_contest = decrypt_contest_with_secret(
+              ballot.ballotId,
               contest,
               description,
               public_key,
@@ -302,7 +310,7 @@ class DecryptWithSecrets {
       }
     }
 
-    return Optional.of(new PlaintextBallot(ballot.object_id(), ballot.ballotStyleId, plaintext_contests));
+    return Optional.of(new PlaintextBallot(ballot.object_id(), ballot.ballotStyleId, plaintext_contests, null));
   }
 
   /**
@@ -348,6 +356,7 @@ class DecryptWithSecrets {
       ContestWithPlaceholders description =
               metadata.getContestById(contest.contestId).orElseThrow(IllegalStateException::new);
       Optional<PlaintextBallot.Contest> plaintext_contest = decrypt_contest_with_nonce(
+              ballot.ballotId,
               contest,
               description,
               public_key,
@@ -364,7 +373,7 @@ class DecryptWithSecrets {
         return Optional.empty();
       }
     }
-    return Optional.of(new PlaintextBallot(ballot.object_id(), ballot.ballotStyleId, plaintext_contests));
+    return Optional.of(new PlaintextBallot(ballot.object_id(), ballot.ballotStyleId, plaintext_contests, null));
   }
 
 }

@@ -1,5 +1,5 @@
 # 🗳 ElectionGuard Input Validation
-_last changed: Mar 2, 2022_
+_last changed: April 12, 2022_
 
 The election manifest and each input plaintext ballot are expected to be validated before being passed to the 
 electionguard library. Both the encrypted and decrypted tallies may also be validated against the manifest,
@@ -11,29 +11,32 @@ A specific validation is referenced as, eg, Manifest.B.5 and Ballot.A.2.1
 
 ### A. Referential integrity
 
-1. Referential integrity of BallotStyle's geopolitical_unit_ids.
-    * For each BallotStyle, all geopolitical_unit_ids reference a GeopoliticalUnit in Manifest.geopolitical_units
+1. Referential integrity of BallotStyle's geopoliticalUnitIds.
+    * For each BallotStyle, all geopoliticalUnitIds reference a GeopoliticalUnit in Manifest.geopoliticalUnitIds
 
-2. Referential integrity of Candidate party_id.
-    * For each Candidate, the party_id references a Party in Manifest.parties
+2. Referential integrity of Candidate partyId.
+    * For each Candidate, the partyId is null or references a Party in Manifest.parties
     
-3. Referential integrity of ContestDescription electoral_district_id.
-    * For each ContestDescription, the electoral_district_id references a GeopoliticalUnit in Manifest.geopolitical_units    
+3. Referential integrity of ContestDescription geopoliticalUnitId.
+    * For each ContestDescription, the geopoliticalUnitId references a GeopoliticalUnit in Manifest.geopoliticalUnitIds    
 
-4. Referential integrity of SelectionDescription candidate_id.
-    * For each SelectionDescription, the candidate_id references a Candidate in Manifest.candidates    
-    
+4. Referential integrity of SelectionDescription candidateId.
+    * For each SelectionDescription, the candidateId references a Candidate in Manifest.candidates    
+
+5. Every ContestDescription geopoliticalUnitId exists in some BallotStyle
+   * For each ContestDescription, the geopoliticalUnitId exists in at least one Manifest.ballotStyles.geopoliticalUnitIds
+
 ### B. Duplication
 
 1. All ContestDescription have a unique object_id.   
 
 2. All ContestDescription have a unique sequence_order.  
 
-3. Within a ContestDescription, all SelectionDescription have a unique object_id.
+3. Within a ContestDescription, all SelectionDescription have a unique selectionId.
 
-4. Within a ContestDescription, all SelectionDescription have a unique sequence_order.
+4. Within a ContestDescription, all SelectionDescription have a unique sequenceOrder.
 
-5. Within a ContestDescription, all SelectionDescription have a unique candidate_id.
+5. Within a ContestDescription, all SelectionDescription have a unique candidateIdd.
 
 6. All SelectionDescription have a unique object_id within the election (see get_shares_for_selection in decryption_share)
 
@@ -49,21 +52,26 @@ A specific validation is referenced as, eg, Manifest.B.5 and Ballot.A.2.1
 
 5. An approval contest has votes_allowed == number of selections in the contest.
 
+
 ## Input Ballot
 
 ### A. Referential integrity
 
-1. A PlaintextBallot's style_id must match a BallotStyle object_id in Manifest.ballot_styles.
+1. A PlaintextBallot's ballotStyleId must match a BallotStyle in Manifest.ballotStyles.
 
-2. For each PlaintextBallotContest on the ballot, the contest_id must match a ContestDescription.object_id in Manifest.contests.
+2. For each PlaintextBallotContest on the ballot, the contestId must match a ContestDescription.contestId in Manifest.contests.
    
-   2.1 Within the PlaintextBallotContest and matching ContestDescription, each PlaintextBallotSelection.selection_id must match a SelectionDescription.object_id.
-   
+   2.1 Within the PlaintextBallotContest and matching ContestDescription, each PlaintextBallotSelection.selectionId must match a SelectionDescription.selectionId.
+
+3. PlaintextBallot.Contest's geopoliticalUnitId must be listed in the PlaintextBallot's BallotStyle geopoliticalUnitIds.
+
 ### B. Duplication
 
 1. All PlaintextBallotContest have a unique contest_id.   
 
-2. Within a PlaintextBallotContest, all PlaintextBallotSelection have a unique selection_id.
+2. Within a PlaintextBallotContest, all PlaintextBallotSelection have a unique selectionId.
+
+3Within a PlaintextBallotContest, all PlaintextBallotSelection have a unique sequenceOrder.
 
 ### C. Voting limits
 
@@ -76,19 +84,23 @@ A specific validation is referenced as, eg, Manifest.B.5 and Ballot.A.2.1
 
 ### A. Referential integrity
 
-1. For each CiphertextTally.Contest in the tally, the object_id must match a ContestDescription.object_id in Manifest.contests.
+1. For each CiphertextTally.Contest in the tally, the contestId must match a ContestDescription.contestId in Manifest.contests.
 
    1.1 CiphertextTally.Contest description_hash must match the ContestDescription.crypto_hash.
    
-2. Within the CiphertextTally.Contest and matching ContestDescription, each CiphertextTally.Selection.object_id must match a SelectionDescription.object_id.
+2. Within the CiphertextTally.Contest and matching ContestDescription, each CiphertextTally.Selection.selectionId must match a SelectionDescription.selectionId.
    
    2.1 CiphertextTally.Selection description_hash must match the SelectionDescription.crypto_hash.
 
 ### B. Duplication
 
-1. All CiphertextTally.Contest must have a unique contest_id. In the contests map, the key must match the value.object_id.  
+1. All CiphertextTally.Contest must have a unique contestId.
 
-2. Within a CiphertextTally.Contest, all CiphertextTally.Selection have a unique object_id. In the selections map, the key must match the value.object_id.
+   1.1 In the contests map, the key must match the value.object_id. (JSON only)
+
+2. Within a CiphertextTally.Contest, all CiphertextTally.Selection have a unique object_id. 
+
+   2.1 In the selections map, the key must match the value.object_id.  (JSON only)
 
 
 ## Plaintext Tally
@@ -101,9 +113,9 @@ A specific validation is referenced as, eg, Manifest.B.5 and Ballot.A.2.1
 
 ### B. Referential integrity with Ciphertext Tally
 
-1. For each PlaintextTally.Contest in the tally, the object_id must match a CiphertextTally.Contest.object_id.
+1. For each PlaintextTally.Contest in the tally, the contestId must match a CiphertextTally.Contest.contestId.
    
-2. Within the PlaintextTally.Contest and matching CiphertextTally.Contest, each PlaintextTally.Selection.object_id must match a CiphertextTally.Selection.object_id.
+2. Within the PlaintextTally.Contest and matching CiphertextTally.Contest, each PlaintextTally.Selection.selectionId must match a CiphertextTally.Selection.selectionId.
 
   2.1 The PlaintextTally.Selection.message must match the CiphertextTally.Selection.message.
    

@@ -3,13 +3,6 @@ syntax = "proto3";
 option java_package = "electionguard.protogen";
 option java_outer_classname = "CommonProto";
 
-message GenericChaumPedersenProof {
-  ElementModP pad = 1; // a in the spec  // 1.0 only
-  ElementModP data = 2; // b in the spec  // 1.0 only
-  ElementModQ challenge = 3; // c in the spec
-  ElementModQ response = 4; // v in the spec
-}
-
 // A 4096 bit unsigned int, big-endian.
 // A member of the group Z mod P
 message ElementModP {
@@ -25,6 +18,20 @@ message ElementModQ {
 message ElGamalCiphertext {
   ElementModP pad = 1;
   ElementModP data = 2;
+}
+
+message GenericChaumPedersenProof {
+  ElementModP pad = 1; // a in the spec  // 1.0 only
+  ElementModP data = 2; // b in the spec  // 1.0 only
+  ElementModQ challenge = 3; // c in the spec
+  ElementModQ response = 4; // v in the spec
+}
+
+message HashedElGamalCiphertext {
+  ElementModP c0 = 1;
+  bytes c1 = 2;
+  UInt256 c2 = 3;
+  uint32 numBytes = 4;
 }
 
 message SchnorrProof {

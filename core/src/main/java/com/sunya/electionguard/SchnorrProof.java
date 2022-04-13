@@ -21,36 +21,35 @@ public class SchnorrProof extends Proof {
   private static final boolean throwException = false;
 
   /** The commitment K_ij. */
+  @Nullable
   public final ElementModP publicKey;
   /** h in the spec = g^nonce.*/
   @Nullable
-  private final ElementModP commitment;
+  public final ElementModP commitment;
   /** c in the spec */
   public final ElementModQ challenge;
   /** u in the spec */
   public final ElementModQ response;
 
-  public SchnorrProof(ElementModP publicKey, @Nullable ElementModP commitment, ElementModQ challenge, ElementModQ response) {
+  public SchnorrProof(@Nullable ElementModP publicKey, @Nullable ElementModP commitment, ElementModQ challenge, ElementModQ response) {
     super("SchnorrProof", SecretValue);
-    this.publicKey = Preconditions.checkNotNull(publicKey);
-    this.commitment = commitment;
+    this.publicKey = publicKey;  // ver 2 has null
+    this.commitment = commitment;  // ver 2 has null
     this.challenge = Preconditions.checkNotNull(challenge);
     this.response = Preconditions.checkNotNull(response);
   }
 
-  public ElementModP getCommitment() {
-    return (commitment != null) ? commitment :
-            Group.div_p( Group.g_pow_p(this.response), Group.pow_p(this.publicKey, this.challenge)); // h
-  }
-
   /**
    * Check validity of the proof of possession of the private key corresponding to public_key.
-   * This is specification 2A and 2.B.
+   * This is specification 2A and 2.B of ver 1.0
    * @return true if the proof is valid, false if anything is wrong
    */
   public boolean is_valid() {
+    if (this.publicKey == null || this.commitment == null) {
+      return false;
+    }
     ElementModP k = this.publicKey;
-    ElementModP h = this.getCommitment();
+    ElementModP h = this.commitment;
     ElementModQ u = this.response;
     boolean valid_public_key = k.is_valid_residue();
     boolean in_bounds_h = h.is_in_bounds();
@@ -77,7 +76,7 @@ public class SchnorrProof extends Proof {
     if (o == null || getClass() != o.getClass()) return false;
     if (!super.equals(o)) return false;
     SchnorrProof that = (SchnorrProof) o;
-    return publicKey.equals(that.publicKey) && Objects.equals(commitment, that.commitment) && challenge.equals(that.challenge) && response.equals(that.response);
+    return Objects.equals(publicKey, that.publicKey) && Objects.equals(commitment, that.commitment) && challenge.equals(that.challenge) && response.equals(that.response);
   }
 
   @Override
@@ -88,11 +87,11 @@ public class SchnorrProof extends Proof {
   @Override
   public String toString() {
     return "SchnorrProof{" +
-            "public_key=" + publicKey.toShortString() +
-            ", commitment=" + getCommitment().toShortString() +
+            "publicKey=" + (publicKey == null ? "null" : publicKey.toShortString()) +
+            ", commitment=" + (commitment == null ? "null" : commitment.toShortString()) +
             ", challenge=" + challenge +
             ", response=" + response +
-            "} " + super.toString();
+            '}';
   }
 
   /**

@@ -44,7 +44,7 @@ message CiphertextBallotSelection {
   UInt256 crypto_hash = 5;
   bool is_placeholder_selection = 6;
   DisjunctiveChaumPedersenProof proof = 7; // The proof the selection is an encryption of 0 or 1
-  ElGamalCiphertext extended_data = 8; // encrypted representation of the extended_data field. Not used
+  HashedElGamalCiphertext extended_data = 8; // encrypted representation of the extended_data field.
 }
 
 message ConstantChaumPedersenProof {

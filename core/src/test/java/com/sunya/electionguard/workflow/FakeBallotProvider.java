@@ -10,7 +10,7 @@ public class FakeBallotProvider {
   public static PlaintextBallot makeBallot(Manifest election, String ballotStyle, int contestIdx, int selectionIdx) {
     ArrayList<PlaintextBallot.Contest> contests = new ArrayList<>();
     contests.add(makeContest(election.contests().get(contestIdx), selectionIdx));
-    return new PlaintextBallot("id", ballotStyle, contests);
+    return new PlaintextBallot("id", ballotStyle, contests, null);
   }
 
   public static PlaintextBallot.Contest makeContest(Manifest.ContestDescription contest, int selectionIdx) {

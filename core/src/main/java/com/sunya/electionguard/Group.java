@@ -22,6 +22,7 @@ public class Group {
   public static final ElementModP TWO_MOD_P = new ElementModP(BigInteger.TWO);
 
   private static ElectionConstants primes = ElectionConstants.get(ElectionConstants.PrimeOption.Standard);
+
   public static ElectionConstants getPrimes() { return primes; }
   public static void setPrimes(ElectionConstants usePrimes) {
     if (!usePrimes.getPrimeOptionType().equals(ElectionConstants.PrimeOption.Standard)) {
@@ -79,6 +80,24 @@ public class Group {
       return Bytes.wrap(elem.toByteArray());
     }
 
+    public Bytes normalize(int size) {
+      Bytes b = bytes();
+      if (b.length() > size) {
+        // BigInteger sometimes has leading zeroes, so remove them
+        int leading = b.length() - size;
+        for (int idx = 0; idx < leading; idx++) {
+          if (b.byteAt(idx) != 0) {
+            throw new IllegalArgumentException(String.format("Input has %d bytes; cannot normalize to %d", b.length(), size));
+          }
+        }
+        b =  b.copy(leading, size);
+      } else if (b.length() < size) {
+        Bytes prepend = Bytes.allocate(size - b.length());
+        b = Bytes.from(prepend, b);
+      }
+      return b;
+    }
+
     @Override
     public boolean equals(Object o) {
       if (this == o) return true;
@@ -117,7 +136,7 @@ public class Group {
     }
 
     public String to_hex() {
-      return UInt256.fromModQ(this).cryptoHashString();
+      return this.normalize(32).encodeHex(true);
     }
   }
 
@@ -155,6 +174,10 @@ public class Group {
         return longString.substring(0, 13 + ndigitsShort) + "..." + longString.substring(len - ndigitsShort - 1, len);
       }
       return toString();
+    }
+
+    public String to_hex() {
+      return this.normalize(512).encodeHex(true);
     }
   }
 
@@ -248,6 +271,11 @@ public class Group {
     return int_to_q_unchecked(t);
   }
 
+  public static ElementModP add_p(ElementMod m1, ElementMod m2) {
+    BigInteger sum = m1.elem.add(m2.elem).mod(primes.largePrime);
+    return int_to_p_unchecked(sum);
+  }
+
   /** Compute (a-b) mod q. */
   static ElementModQ a_minus_b_q(ElementModQ a, ElementModQ b) {
     return int_to_q_unchecked(a.elem.subtract(b.elem).mod(primes.smallPrime));
@@ -273,7 +301,7 @@ public class Group {
   }
 
   /** Compute (a + b * c) mod q. */
-  static ElementModQ a_plus_bc_q(ElementModQ a, ElementModQ b, ElementModQ c) {
+  public static ElementModQ a_plus_bc_q(ElementModQ a, ElementModQ b, ElementModQ c) {
     BigInteger product = b.elem.multiply(c.elem).mod(primes.smallPrime);
     BigInteger sum = a.elem.add(product);
     return int_to_q_unchecked(sum.mod(primes.smallPrime));

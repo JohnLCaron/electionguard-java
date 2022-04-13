@@ -38,9 +38,9 @@ public class ElGamal {
     public Ciphertext {
       Preconditions.checkNotNull(pad);
       Preconditions.checkNotNull(data);
-      if (!data.is_valid_residue()) {
+      /* if (!data.is_valid_residue()) {
         throw new IllegalStateException();
-      }
+      } */
     }
 
     @Override
@@ -137,7 +137,7 @@ public class ElGamal {
    * @param public_key ElGamal public key.
    * @return An ElGamal.Ciphertext.
    */
-  public static Optional<Ciphertext> elgamal_encrypt(int message, ElementModQ nonce, ElementModP public_key) {
+  public static Optional<Ciphertext> elgamal_encrypt_ver1(int message, ElementModQ nonce, ElementModP public_key) {
     if (nonce.equals(ZERO_MOD_Q)) {
       logger.atSevere().log("ElGamal encryption requires a non-zero nonce");
       return Optional.empty();

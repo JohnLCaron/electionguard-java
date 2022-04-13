@@ -5,6 +5,7 @@
 
 package com.sunya.electionguard.viz;
 
+import com.sunya.electionguard.ElectionContext;
 import com.sunya.electionguard.InternalManifest;
 import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.SubmittedBallot;
@@ -37,6 +38,7 @@ public class SubmittedBallotsTable extends JPanel {
   private final IndependentWindow infoWindow;
 
   private InternalManifest manifest;
+  private ElectionContext context;
 
   public SubmittedBallotsTable(PreferencesExt prefs) {
     this.prefs = prefs;
@@ -84,8 +86,9 @@ public class SubmittedBallotsTable extends JPanel {
     add(split2, BorderLayout.CENTER);
   }
 
-  void setAcceptedBallots(Manifest manifest, CloseableIterable<SubmittedBallot> acceptedBallots) {
+  void setAcceptedBallots(Manifest manifest, ElectionContext context, CloseableIterable<SubmittedBallot> acceptedBallots) {
     this.manifest = new InternalManifest(manifest);
+    this.context = context;
     try (CloseableIterator<SubmittedBallot> iter = acceptedBallots.iterator())  {
       java.util.List<SubmittedBallotBean> beanList = new ArrayList<>();
       while (iter.hasNext()) {
@@ -319,6 +322,11 @@ public class SubmittedBallotsTable extends JPanel {
 
     public boolean isProof() {
       return selection.proof.isPresent();
+    }
+
+    // String where, Group.ElementModQ selectionHash, Group.ElementModP publicKey, Group.ElementModQ cryptoExtendedBaseHash
+    public boolean isValid() {
+      return selection.is_valid_encryption("test", selection.selectionHash, context.jointPublicKey, context.cryptoExtendedBaseHash);
     }
 
     @Override

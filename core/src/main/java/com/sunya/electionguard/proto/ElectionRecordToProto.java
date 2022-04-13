@@ -16,7 +16,7 @@ import javax.annotation.Nullable;
 
 import static com.sunya.electionguard.proto.CommonConvert.convertElementModP;
 import static com.sunya.electionguard.proto.CommonConvert.convertElementModQ;
-import static com.sunya.electionguard.proto.CommonConvert.convertUInt256;
+import static com.sunya.electionguard.proto.CommonConvert.convertUInt256fromQ;
 
 import electionguard.protogen.ElectionRecordProto;
 
@@ -92,10 +92,10 @@ public class ElectionRecordToProto {
     builder.setNumberOfGuardians(context.numberOfGuardians);
     builder.setQuorum(context.quorum);
     builder.setJointPublicKey(convertElementModP(context.jointPublicKey));
-    builder.setManifestHash(convertUInt256(context.manifestHash));
-    builder.setCryptoBaseHash(convertUInt256(context.cryptoBaseHash));
-    builder.setCryptoExtendedBaseHash(convertUInt256(context.cryptoExtendedBaseHash));
-    builder.setCommitmentHash(convertUInt256(context.commitmentHash));
+    builder.setManifestHash(CommonConvert.convertUInt256fromQ(context.manifestHash));
+    builder.setCryptoBaseHash(CommonConvert.convertUInt256fromQ(context.cryptoBaseHash));
+    builder.setCryptoExtendedBaseHash(CommonConvert.convertUInt256fromQ(context.cryptoExtendedBaseHash));
+    builder.setCommitmentHash(CommonConvert.convertUInt256fromQ(context.commitmentHash));
     if (context.extended_data != null && !context.extended_data.isEmpty()) {
       builder.putAllExtendedData(context.extended_data);
     }

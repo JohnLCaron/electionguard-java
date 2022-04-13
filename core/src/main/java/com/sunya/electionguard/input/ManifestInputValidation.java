@@ -4,6 +4,7 @@ import com.google.common.flogger.FluentLogger;
 import com.sunya.electionguard.Manifest;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Formatter;
 import java.util.HashSet;
 import java.util.Set;
@@ -15,14 +16,17 @@ public class ManifestInputValidation {
 
   private final Manifest election;
   private final Set<String> gpUnits;
+  private final Set<String> gpUnitInStyles;
   private final Set<String> candidates;
   private final Set<String> parties;
 
   public ManifestInputValidation(Manifest election) {
     this.election = election;
-    this.gpUnits = election.geopoliticalUnits().stream().map(gp -> gp.geopoliticalUnitId()).collect(Collectors.toSet());
-    this.candidates = election.candidates().stream().map(c -> c.candidateId()).collect(Collectors.toSet());
-    this.parties = election.parties().stream().map(p -> p.partyId()).collect(Collectors.toSet());
+    this.gpUnits = election.geopoliticalUnits().stream().map(Manifest.GeopoliticalUnit::geopoliticalUnitId).collect(Collectors.toSet());
+    this.gpUnitInStyles = election.ballotStyles().stream().map(Manifest.BallotStyle::geopoliticalUnitIds)
+            .flatMap(Collection::stream).collect(Collectors.toSet());
+    this.candidates = election.candidates().stream().map(Manifest.Candidate::candidateId).collect(Collectors.toSet());
+    this.parties = election.parties().stream().map(Manifest.Party::partyId).collect(Collectors.toSet());
   }
 
   /** Determine if a ballot is valid and well-formed for the given election. */
@@ -78,7 +82,7 @@ public class ManifestInputValidation {
       // No duplicate sequenceIds across contests
       for (Manifest.SelectionDescription electionSelection : electionContest.selections()) {
         if (selectionIds.contains(electionSelection.selectionId())) {
-          String msg = String.format("Manifest.B.6 All SelectionDescription have a unique object_id within the election %s", electionContest.contestId());
+          String msg = String.format("Manifest.B.6 Multiple Selections have same id within the manifest %s", electionSelection.selectionId());
           ballotMesses.add(msg);
           logger.atWarning().log(msg);
         }
@@ -99,6 +103,13 @@ public class ManifestInputValidation {
     if (!gpUnits.contains(contest.geopoliticalUnitId())) {
       String msg = String.format("Manifest.A.3 Contest's electoral_district_id '%s' does not exist in election's geopolitical_units",
               contest.geopoliticalUnitId());
+      contestMesses.add(msg);
+      logger.atWarning().log(msg);
+    }
+
+    // Contest electoral_district_id exists in some BallotStyle
+    if (!gpUnitInStyles.contains(contest.geopoliticalUnitId())) {
+      String msg = String.format("Manifest.A.5 Contest's electoral_district_id '%s' does not exist in any BallotStyle", contest.geopoliticalUnitId());
       contestMesses.add(msg);
       logger.atWarning().log(msg);
     }

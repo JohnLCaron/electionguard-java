@@ -11,11 +11,11 @@ import com.google.common.base.Preconditions;
 public record AvailableGuardian(
   String guardianId,
   Integer xCoordinate,
-  Group.ElementModQ lagrangeCoordinate) {
+  Group.ElementModQ lagrangeCoordinate,
+  Integer lagrangeCoordinateInt) {
 
   public AvailableGuardian {
     Preconditions.checkNotNull(guardianId);
     Preconditions.checkArgument(xCoordinate > 0);
-    Preconditions.checkNotNull(lagrangeCoordinate);
   }
 }

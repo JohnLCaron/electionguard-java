@@ -109,7 +109,8 @@ public class ElectionFactory {
             ballot_id,
             election.ballotStyles().get(0).ballotStyleId(),
             ImmutableList.of(Encrypt.contest_from(election.contests().get(0)),
-                    Encrypt.contest_from(election.contests().get(1)))
+                    Encrypt.contest_from(election.contests().get(1))),
+            null
     );
   }
 

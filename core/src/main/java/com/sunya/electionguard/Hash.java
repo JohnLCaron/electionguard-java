@@ -79,7 +79,9 @@ public class Hash {
       hash_me += "|";
       hashAll.append(hash_me);
     }
-    // System.out.printf("  hashAll: %s%n", hashAll);
+    if (debug) {
+      System.out.printf("  hashAll: %s%n", hashAll);
+    }
     try {
       MessageDigest digest = MessageDigest.getInstance("SHA-256");
       digest.update(hashAll.toString().getBytes(StandardCharsets.UTF_8));
@@ -90,4 +92,9 @@ public class Hash {
       throw new RuntimeException(e);
     }
   }
+
+  public static void setDebug(boolean d) {
+    debug = d;
+  }
+  private static boolean debug = false;
 }

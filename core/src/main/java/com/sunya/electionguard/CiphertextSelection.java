@@ -13,7 +13,6 @@ import java.util.Objects;
 public class CiphertextSelection {
   public final String selectionId;
   public final int sequenceOrder;
-  /** Manifest.SelectionDescription.crypto_hash(). */
   public final Group.ElementModQ selectionHash;
   private final ElGamal.Ciphertext ciphertext; // only accessed through ciphertext(), so subclass can override
   public final boolean isPlaceholderSelection;
