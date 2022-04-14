@@ -162,7 +162,7 @@ public class PartialDecryptionVerifier {
       this.shares = shares;
       this.selection_pad = selection_pad;
       this.selection_data = selection_data;
-      this.public_keys = electionRecord.public_keys_of_all_guardians();
+      this.public_keys = electionRecord.publicKeysOfAllGuardians();
     }
 
     /** Verify all shares of a tally decryption, when there are missing guardians */

@@ -32,7 +32,7 @@ public class TestAttackTallyDecryption {
     ElectionRecord electionRecord = consumer.readElectionRecordProto();
     Manifest fakeElection = ElectionFactory.get_fake_manifest();
 
-    TallyDecryptionVerifier tdv = new TallyDecryptionVerifier(fakeElection, electionRecord.decryptedTally);
+    TallyDecryptionVerifier tdv = new TallyDecryptionVerifier(electionRecord, fakeElection, electionRecord.decryptedTally);
     boolean tdvOk = tdv.verify_tally_decryption();
     assertThat(tdvOk).isFalse();
   }
@@ -49,7 +49,7 @@ public class TestAttackTallyDecryption {
     PlaintextTally attack = new PlaintextTally( tally.tallyId,
             messContests(tally.contests, this::messTally));
 
-    TallyDecryptionVerifier tdv = new TallyDecryptionVerifier(electionRecord.manifest, attack);
+    TallyDecryptionVerifier tdv = new TallyDecryptionVerifier(electionRecord, electionRecord.manifest, attack);
     boolean tdvOk = tdv.verify_tally_decryption();
     assertThat(tdvOk).isFalse();
   }
@@ -66,7 +66,7 @@ public class TestAttackTallyDecryption {
     PlaintextTally attack = new PlaintextTally( tally.tallyId,
             messContests(tally.contests, this::messTallyAndValue));
 
-    TallyDecryptionVerifier tdv = new TallyDecryptionVerifier(electionRecord.manifest, attack);
+    TallyDecryptionVerifier tdv = new TallyDecryptionVerifier(electionRecord, electionRecord.manifest, attack);
     boolean tdvOk = tdv.verify_tally_decryption();
     assertThat(tdvOk).isFalse();
   }
@@ -85,7 +85,7 @@ public class TestAttackTallyDecryption {
 
     // Attack fools this verification
     System.out.println("------------ [box 11] Correctness of Decryption of Tallies ------------");
-    TallyDecryptionVerifier tdv = new TallyDecryptionVerifier(electionRecord.manifest, attack);
+    TallyDecryptionVerifier tdv = new TallyDecryptionVerifier(electionRecord, electionRecord.manifest, attack);
     boolean tdvOk = tdv.verify_tally_decryption();
     assertThat(tdvOk).isTrue();
 

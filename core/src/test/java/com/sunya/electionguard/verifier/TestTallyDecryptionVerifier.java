@@ -15,7 +15,7 @@ public class TestTallyDecryptionVerifier {
     Consumer consumer = new Consumer(topdir);
     ElectionRecord electionRecord = consumer.readElectionRecordProto();
 
-    TallyDecryptionVerifier tdv = new TallyDecryptionVerifier(electionRecord.manifest, electionRecord.decryptedTally);
+    TallyDecryptionVerifier tdv = new TallyDecryptionVerifier(electionRecord, electionRecord.manifest, electionRecord.decryptedTally);
     boolean tdvOk = tdv.verify_tally_decryption();
     assertThat(tdvOk).isTrue();
   }
@@ -26,7 +26,7 @@ public class TestTallyDecryptionVerifier {
     Consumer consumer = new Consumer(topdir);
     ElectionRecord electionRecord = consumer.readElectionRecordJson();
 
-    TallyDecryptionVerifier tdv = new TallyDecryptionVerifier(electionRecord.manifest, electionRecord.decryptedTally);
+    TallyDecryptionVerifier tdv = new TallyDecryptionVerifier(electionRecord, electionRecord.manifest, electionRecord.decryptedTally);
     boolean tdvOk = tdv.verify_tally_decryption();
     assertThat(tdvOk).isTrue();
   }

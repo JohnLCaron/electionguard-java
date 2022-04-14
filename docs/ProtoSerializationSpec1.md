@@ -121,13 +121,13 @@ There is no python SDK version of this message. Can be constructed from the Lagr
 
 ### message GuardianRecord
 
-| Name                    | JSON Name            | Type                 | Notes                          |
-|-------------------------|----------------------|----------------------|--------------------------------|
-| guardian_id             |                      | string               |                                |
-| x_coordinate            | sequence_order       | uint32               | x_coordinate in the polynomial |
-| guardian_public_key     | election_public_key  | ElementModP          |                                |
-| coefficient_commitments | election_commitments | List\<ElementModP\>  |                                |
-| coefficient_proofs      | election_proofs      | List\<SchnorrProof\> |                                |
+| Name                    | JSON Name            | Type                 | Notes                           |
+|-------------------------|----------------------|----------------------|---------------------------------|
+| guardian_id             |                      | string               |                                 |
+| x_coordinate            | sequence_order       | uint32               | x_coordinate in the polynomial  |
+| guardian_public_key     | election_public_key  | ElementModP          | not needed = commitment0        |
+| coefficient_commitments | election_commitments | List\<ElementModP\>  | not needed, in proof.public_key |
+| coefficient_proofs      | election_proofs      | List\<SchnorrProof\> |                                 |
 
 ## manifest.proto
 

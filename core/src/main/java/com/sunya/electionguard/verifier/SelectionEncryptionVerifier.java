@@ -58,11 +58,16 @@ public class SelectionEncryptionVerifier {
     }
 
     boolean verifySelection() {
-      boolean error = false;
-
-      // get dictionaries
       ChaumPedersen.DisjunctiveChaumPedersenProof proof = this.selection.proof.orElseThrow();
-      ElGamal.Ciphertext cipher = this.selection.ciphertext();
+      if (proof.name.endsWith("2")) {
+        return verifySelectionVer2(proof);
+      } else {
+        return verifySelectionVer1(proof);
+      }
+    }
+
+    boolean verifySelectionVer1(ChaumPedersen.DisjunctiveChaumPedersenProof proof) {
+      boolean error = false;
 
       // get values
       String selection_id = this.selection.object_id();
@@ -77,7 +82,7 @@ public class SelectionEncryptionVerifier {
       ElementModQ challenge = proof.challenge; // c
 
       // 4.A: check alpha, beta, a0, b0, a1, b1 are all in set Zrp
-      if (!(this.check_params_within_zrp(cipher.pad(), cipher.data(), a0, a1, b0, b1))) {
+      if (!(this.check_params_within_zrp(alpha, beta, a0, a1, b0, b1))) {
         error = true;
       }
 
@@ -141,7 +146,9 @@ public class SelectionEncryptionVerifier {
       return !error;
     }
 
-    /** check if the given values are each in set Zrp */
+    /**
+     * check if the given values are each in set Zrp
+     */
     private boolean check_params_within_zrp(ElementModP... params) {
       boolean error = false;
       for (ElementModP param : params) {
@@ -152,7 +159,9 @@ public class SelectionEncryptionVerifier {
       return !error;
     }
 
-    /** check if the given values are each in the set zq */
+    /**
+     * check if the given values are each in the set zq
+     */
     private boolean check_params_within_zq(ElementModQ... params) {
       boolean error = false;
       for (ElementModQ param : params) {
@@ -161,6 +170,14 @@ public class SelectionEncryptionVerifier {
         }
       }
       return !error;
+    }
+
+    boolean verifySelectionVer2(ChaumPedersen.DisjunctiveChaumPedersenProof proof) {
+      // ElGamal.Ciphertext message, ElementModP k, ElementModQ qbar
+      return proof.is_valid(
+              selection.ciphertext(),
+              electionRecord.context.jointPublicKey,
+              electionRecord.context.cryptoExtendedBaseHash);
     }
   }
 

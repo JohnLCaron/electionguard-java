@@ -2,10 +2,7 @@ package com.sunya.electionguard.verifier;
 
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.GuardianRecord;
-import com.sunya.electionguard.Hash;
 import com.sunya.electionguard.SchnorrProof;
-
-import java.util.List;
 
 import static com.sunya.electionguard.Group.ElementModQ;
 import static com.sunya.electionguard.Group.ElementModP;
@@ -27,7 +24,7 @@ public class GuardianPublicKeyVerifier {
 
     int count = 0;
     for (GuardianRecord gr : this.electionRecord.guardianRecords) {
-      boolean res = this.verifyGuardianVer1(gr);
+      boolean res = this.verifyGuardian(gr);
       if (!res) {
         error = true;
         System.out.printf(" Guardian %d key generation verification failure. %n", count);
@@ -42,33 +39,21 @@ public class GuardianPublicKeyVerifier {
     return !error;
   }
 
-  // spec version 1 has non-null SchnorrProof publicKey and commitment
-  boolean verifyGuardianVer1(GuardianRecord coeffSet) {
+  boolean verifyGuardian(GuardianRecord guardian) {
     boolean error = false;
-    List<SchnorrProof> coefficient_proofs = coeffSet.coefficientProofs();
 
     int count = 0;
-    for (SchnorrProof proof : coefficient_proofs) {
-      if (proof.publicKey == null || proof.commitment == null) {
-        return false;
+    for (SchnorrProof proof : guardian.coefficientProofs()) {
+      boolean proofOk;
+      if (proof.publicKey == null) {
+        ElementModP publicKey = guardian.coefficientCommitments().get(count);
+        proofOk = proof.isValidVer2(publicKey);
+      } else {
+        proofOk = proof.isValidVer1();
       }
-      ElementModP commitment = proof.commitment; // h
-      ElementModP public_key = proof.publicKey; // k
-      ElementModQ challenge = proof.challenge;   // c
-      ElementModQ response = proof.response;     // u
-
-      // Changed validation spec 2.A. see issue #278
-      ElementModQ challenge_computed =  Hash.hash_elems(public_key, commitment);
-      if (!challenge_computed.equals(challenge)) {
+      if (!proofOk) {
         error = true;
-        System.out.printf("Guardian %s coefficient_proof %d: equation 2A challenge validation failed.%n", coeffSet.guardianId(), count);
-      }
-
-      // this is a tautology is ver2
-      // check equation 2.B
-      if (!this.verify_individual_key_computation(response, commitment, public_key, challenge)) {
-        error = true;
-        System.out.printf("Guardian %s coefficient_proof %d: equation 2B validation failed.%n", coeffSet.guardianId(), count);
+        System.out.printf("Guardian %s coefficient_proof %d: validation failed.%n", guardian.guardianId(), count);
       }
       count++;
     }
