@@ -39,7 +39,7 @@ public class KeyCeremony2 {
 
     public boolean isValid() {
       for (SchnorrProof proof : this.coefficientProofs()) {
-        if (!proof.is_valid()) {
+        if (!proof.isValidVer1()) {
           return false;
         }
       }

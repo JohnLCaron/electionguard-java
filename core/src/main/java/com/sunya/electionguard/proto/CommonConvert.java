@@ -86,9 +86,16 @@ public class CommonConvert {
   }
 
   public static ChaumPedersen.ChaumPedersenProof convertChaumPedersenProof(CommonProto.GenericChaumPedersenProof proof) {
+    if (proof.hasPad() && proof.hasData()) {
+      // ver1
+      return new ChaumPedersen.ChaumPedersenProof(
+              convertElementModP(proof.getPad()),
+              convertElementModP(proof.getData()),
+              convertElementModQ(proof.getChallenge()),
+              convertElementModQ(proof.getResponse()));
+    }
+    // ver2
     return new ChaumPedersen.ChaumPedersenProof(
-            convertElementModP(proof.getPad()),
-            convertElementModP(proof.getData()),
             convertElementModQ(proof.getChallenge()),
             convertElementModQ(proof.getResponse()));
   }

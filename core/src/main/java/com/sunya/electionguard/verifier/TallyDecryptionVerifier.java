@@ -2,12 +2,14 @@ package com.sunya.electionguard.verifier;
 
 import com.google.common.base.Preconditions;
 import com.google.common.flogger.FluentLogger;
+import com.sunya.electionguard.DecryptionShare;
+import com.sunya.electionguard.ElGamal;
+import com.sunya.electionguard.GuardianRecord;
 import com.sunya.electionguard.InternalManifest;
 import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.PlaintextTally;
 
-import java.math.BigInteger;
 import java.util.List;
 
 import static com.sunya.electionguard.Group.ElementModP;
@@ -19,12 +21,16 @@ import static com.sunya.electionguard.Group.ElementModP;
 public class TallyDecryptionVerifier {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
+  final ElectionRecord electionRecord;
+  final Group.ElementModQ qbar;
   final InternalManifest manifest;
   final PlaintextTally decryptedTally;
 
-  TallyDecryptionVerifier(Manifest election, PlaintextTally decryptedTally) {
-    this.manifest = new InternalManifest(election);
-    this.decryptedTally = decryptedTally;
+  TallyDecryptionVerifier(ElectionRecord electionRecord, Manifest manifest, PlaintextTally tally) {
+    this.electionRecord = electionRecord;
+    this.qbar = electionRecord.extendedHash();
+    this.manifest = new InternalManifest(manifest);
+    this.decryptedTally = tally;
   }
 
   /**
@@ -54,6 +60,21 @@ public class TallyDecryptionVerifier {
                   contest.contestId(), selection.selectionId());
           error = true;
         }
+         ElGamal.Ciphertext message = selection.message();
+
+        for (DecryptionShare.CiphertextDecryptionSelection share : selection.shares()) {
+          GuardianRecord guardian = electionRecord.findGuardian(share.guardianId()).orElseThrow();
+          share.proof().ifPresent(proof -> {
+            if (!proof.is_valid(
+                    selection.message(),
+                    guardian.guardianPublicKey(),
+                    share.share(),
+                    qbar)) {
+              System.out.printf(" 11.A Tally Decryption proof failed for %s.%n", proof);
+            }
+          });
+        }
+
         String key = contest.contestId() + "." + selection.selectionId();
         List<ElementModP> partialDecryptions = selection.shares().stream()
                 .map(s -> s.share())
@@ -66,11 +87,11 @@ public class TallyDecryptionVerifier {
           error = true;
         }
 
-        ElementModP t = Group.int_to_p_unchecked(BigInteger.valueOf(selection.tally()));
+        /* ElementModP t = Group.int_to_p_unchecked(BigInteger.valueOf(selection.tally()));
         if (!M.equals(Group.g_pow_p(t))) {
           System.out.printf(" 11.B Tally Decryption failed for %s.%n", key);
           error = true;
-        }
+        } */
       }
     }
 

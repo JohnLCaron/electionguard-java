@@ -8,6 +8,7 @@ import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import java.math.BigInteger;
 import java.util.Formatter;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -79,7 +80,7 @@ public class ChaumPedersen {
      * @param k:       The public key of the election
      * @param qbar:    The extended base hash of the election
      */
-    boolean is_valid(ElGamal.Ciphertext message, ElementModP k, ElementModQ qbar) {
+    public boolean is_valid(ElGamal.Ciphertext message, ElementModP k, ElementModQ qbar) {
       if (this.name.endsWith("2")) {
         return is_valid2(message, k, qbar);
       } else {
@@ -167,15 +168,25 @@ public class ChaumPedersen {
   /** A generic Chaum-Pedersen Zero Knowledge proof. */
   @Immutable
   public static class ChaumPedersenProof extends Proof {
+    @Nullable
     public final ElementModP pad; // a in the spec
+    @Nullable
     public final ElementModP data; // b in the spec
     public final ElementModQ challenge; // c in the spec
     public final ElementModQ response; // v in the spec
 
-    public ChaumPedersenProof(@Nullable ElementModP pad, @Nullable ElementModP data, ElementModQ challenge, ElementModQ response) {
+    public ChaumPedersenProof(ElementModP pad, ElementModP data, ElementModQ challenge, ElementModQ response) {
       super("ChaumPedersenProof", Proof.Usage.SecretValue);
       this.pad = pad;
       this.data = data;
+      this.challenge = Preconditions.checkNotNull(challenge);
+      this.response = Preconditions.checkNotNull(response);
+    }
+
+    public ChaumPedersenProof(ElementModQ challenge, ElementModQ response) {
+      super("ChaumPedersenProof2", Proof.Usage.SecretValue);
+      this.pad = null;
+      this.data = null;
       this.challenge = Preconditions.checkNotNull(challenge);
       this.response = Preconditions.checkNotNull(response);
     }
@@ -236,34 +247,62 @@ public class ChaumPedersen {
      * @param k:       The public key corresponding to the private key used to encrypt
      *                 (e.g. the Guardian public election key)
      * @param m:       The value being checked for validity
-     * @param q:       The extended base hash of the election
+     * @param extBaseHash:       The extended base hash of the election
      */
-    public boolean is_valid(ElGamal.Ciphertext message, ElementModP k, ElementModP m, ElementModQ q) {
+    public boolean is_valid(ElGamal.Ciphertext message, ElementModP k, ElementModP m, ElementModQ extBaseHash) {
+      if (name.endsWith("2")) {
+        return isValidVer2(message, k, m, extBaseHash);
+      } else {
+        return isValidVer1(message, k, m, extBaseHash);
+      }
+    }
+
+    boolean isValidVer2(ElGamal.Ciphertext ciphertext, ElementModP publicKey, ElementModP m, ElementModQ qbar) {
+      ChaumPedersenKt.GenericChaumPedersenProof kt =
+                      new ChaumPedersenKt.GenericChaumPedersenProof(this.challenge, this.response);
+      // ElementModP g,
+      //            ElementModP gx, // Ki = public key
+      //            ElementModP h, // pad
+      //            ElementModP hx, // Mi = partial_decrypt = pad ^ si
+      //            List<Object> hashHeader,
+      //            List<Object> hashFooter,
+      //            boolean checkC
+      return kt.isValid(
+              getPrimes().generatorP,
+              publicKey,
+              ciphertext.pad(),
+              m,
+              List.of(qbar, publicKey, ciphertext.pad(), ciphertext.data()),
+              List.of(m),
+              true);
+    }
+
+    boolean isValidVer1(ElGamal.Ciphertext message, ElementModP k, ElementModP m, ElementModQ extBaseHash) {
       ChaumPedersenProof expanded = this.expand(message, k);
-      ElementModP alpha = message.pad();
-      ElementModP beta = message.data();
+      ElementModP A = message.pad();
+      ElementModP B = message.data();
       ElementModP a = expanded.pad;
       ElementModP b = expanded.data;
       ElementModQ c = expanded.challenge;
       ElementModQ v = expanded.response;
 
-      boolean in_bounds_alpha = alpha.is_valid_residue();
-      boolean in_bounds_beta = beta.is_valid_residue();
+      boolean in_bounds_alpha = A.is_valid_residue();
+      boolean in_bounds_beta = B.is_valid_residue();
       boolean in_bounds_k = k.is_valid_residue();
       boolean in_bounds_m = m.is_valid_residue();
       boolean in_bounds_a = a.is_valid_residue();
       boolean in_bounds_b = b.is_valid_residue();
       boolean in_bounds_c = c.is_in_bounds();
       boolean in_bounds_v = v.is_in_bounds();
-      boolean in_bounds_q = q.is_in_bounds();
+      boolean in_bounds_q = extBaseHash.is_in_bounds();
 
-      boolean same_c = c.equals(Hash.hash_elems(q, alpha, beta, a, b, m));
+      boolean same_c = c.equals(Hash.hash_elems(extBaseHash, A, B, a, b, m));
       boolean consistent_gv = (in_bounds_v && in_bounds_a && in_bounds_c &&
               // The equation 𝑔^𝑣𝑖 = 𝑎𝑖𝐾^𝑐𝑖
               g_pow_p(v).equals(mult_p(a, pow_p(k, c))));
 
       // The equation 𝐴^𝑣𝑖 = 𝑏𝑖𝑀𝑖^𝑐𝑖 mod 𝑝
-      boolean temp = pow_p(alpha, v).equals(mult_p(b, pow_p(m, c)));
+      boolean temp = pow_p(A, v).equals(mult_p(b, pow_p(m, c)));
       boolean consistent_av = (in_bounds_alpha && in_bounds_b && in_bounds_c && in_bounds_v && temp);
 
       boolean success = in_bounds_alpha && in_bounds_beta && in_bounds_k && in_bounds_m && in_bounds_a && in_bounds_b
@@ -552,7 +591,7 @@ public class ChaumPedersen {
    *
    * @param message:     An ElGamal ciphertext
    * @param s:           The nonce or secret used to derive the value
-   * @param m:           The value we are trying to prove
+   * @param m:           The value we are trying to prove, 𝑀𝑖
    * @param seed:        Used to generate other random values here
    * @param hash_header:  extended base hash (𝑄')
    */
@@ -563,15 +602,15 @@ public class ChaumPedersen {
           ElementModQ seed,
           ElementModQ hash_header) {
 
-    ElementModP alpha = message.pad();
-    ElementModP beta = message.data();
+    ElementModP A = message.pad();
+    ElementModP B = message.data();
 
     // Pick one random number in Q.
     ElementModQ u = new Nonces(seed, "constant-chaum-pedersen-proof").get(0);
     ElementModP a = g_pow_p(u);  // 𝑔^𝑢𝑖 mod 𝑝
-    ElementModP b = pow_p(alpha, u);  // 𝐴^𝑢𝑖 mod 𝑝
-    ElementModQ c = Hash.hash_elems(hash_header, alpha, beta, a, b, m);  // sha256(𝑄', A, B, a𝑖, b𝑖, 𝑀𝑖)
-    ElementModQ v = a_plus_bc_q(u, c, s);  // (𝑢𝑖 + 𝑐𝑖𝑠𝑖) mod 𝑞
+    ElementModP b = pow_p(A, u);  // 𝐴^𝑢𝑖 mod 𝑝
+    ElementModQ c = Hash.hash_elems(hash_header, A, B, a, b, m);  // sha256(𝑄', A, B, a𝑖, b𝑖, 𝑀𝑖)
+    ElementModQ v = a_plus_bc_q(u, c, s);  // (𝑢𝑖 + 𝑐𝑖.𝑠𝑖) mod 𝑞
 
     return new ChaumPedersenProof(a, b, c, v);
   }

@@ -140,26 +140,36 @@ public class ContestVoteLimitsVerifier {
 
       // 5.E calculate c = H(Q-bar, (A,B), (a,b))
       ChaumPedersen.ConstantChaumPedersenProof proof = contest.proof.orElseThrow(IllegalStateException::new);
-      ElementModP a = proof.pad;
-      ElementModP b = proof.data;
-      ElementModQ challenge_computed =
-              Hash.hash_elems(electionRecord.extendedHash(),
-                      selection_alpha_product,
-                      selection_beta_product, a, b);
-      if (!challenge_computed.equals(this.contest_challenge)) {
-        System.out.printf(" 5.E Challenge fails verification for contest %s.%n", contest.contestId);
-        limit_error = true;
+      boolean proofOk = true;
+      if (proof.name.endsWith("2")) {
+        // ElGamal.Ciphertext message, ElementModP k, ElementModQ qbar
+        proofOk = proof.is_valid(
+                contest.ciphertextAccumulation,
+                electionRecord.context.jointPublicKey,
+                electionRecord.context.cryptoExtendedBaseHash
+        );
+      } else {
+        ElementModP a = proof.pad;
+        ElementModP b = proof.data;
+        ElementModQ challenge_computed =
+                Hash.hash_elems(electionRecord.extendedHash(),
+                        selection_alpha_product,
+                        selection_beta_product, a, b);
+        if (!challenge_computed.equals(this.contest_challenge)) {
+          System.out.printf(" 5.E Challenge fails verification for contest %s.%n", contest.contestId);
+          proofOk = false;
+        }
+
+        // check equations
+        boolean equ1_check = this.check_cp_proof_alpha(selection_alpha_product);
+        boolean equ2_check = this.check_cp_proof_beta(selection_beta_product, vote_limit);
+
+        if (!equ1_check || !equ2_check) {
+          proofOk = false;
+        }
       }
 
-      // check equations
-      boolean equ1_check = this.check_cp_proof_alpha(selection_alpha_product);
-      boolean equ2_check = this.check_cp_proof_beta(selection_beta_product, vote_limit);
-
-      if (!equ1_check || !equ2_check) {
-        limit_error = true;
-      }
-
-      return !limit_error;
+      return !limit_error && proofOk;
     }
 
     /**

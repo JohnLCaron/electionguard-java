@@ -44,7 +44,7 @@ public class SchnorrProof extends Proof {
    * This is specification 2A and 2.B of ver 1.0
    * @return true if the proof is valid, false if anything is wrong
    */
-  public boolean is_valid() {
+  public boolean isValidVer1() {
     if (this.publicKey == null || this.commitment == null) {
       return false;
     }
@@ -60,6 +60,29 @@ public class SchnorrProof extends Proof {
     boolean valid_2B = g_pow_p(u).equals(Group.mult_p(h, Group.pow_p(k, this.challenge)));
 
     boolean success = valid_public_key && in_bounds_h && in_bounds_u && valid_2A && valid_2B;
+    if (!success) {
+      logger.atWarning().log("found an invalid Schnorr proof: %s constants = %s",
+              this, Group.getPrimes().name);
+      if (throwException) {
+        throw new IllegalStateException();
+      }
+    }
+    return success;
+  }
+
+  public boolean isValidVer2(ElementModP publicKey) {
+    ElementModQ u = this.response;
+    ElementModP gPowU = Group.g_pow_p(u);
+    ElementModP h = Group.div_p(gPowU, Group.pow_p(publicKey, challenge));
+
+    boolean valid_public_key = publicKey.is_valid_residue();
+    boolean in_bounds_h = h.is_in_bounds();
+    boolean in_bounds_u = u.is_in_bounds();
+
+    // Changed validation spec 2.A. see issue #278
+    boolean valid_2A = this.challenge.equals(Hash.hash_elems(publicKey, h));
+
+    boolean success = valid_public_key && in_bounds_h && in_bounds_u && valid_2A;
     if (!success) {
       logger.atWarning().log("found an invalid Schnorr proof: %s constants = %s",
               this, Group.getPrimes().name);

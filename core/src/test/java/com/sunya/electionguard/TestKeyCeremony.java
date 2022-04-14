@@ -29,7 +29,7 @@ public class TestKeyCeremony {
     assertThat(election_key_pair.key_pair().secret_key()).isNotNull();
     assertThat(election_key_pair.polynomial()).isNotNull();
     for (SchnorrProof proof : election_key_pair.polynomial().coefficient_proofs) {
-      assertThat(proof.is_valid()).isTrue();
+      assertThat(proof.isValidVer1()).isTrue();
     }
   }
 
@@ -107,7 +107,7 @@ public class TestKeyCeremony {
     assertThat(challenge.coefficient_commitments().size()).isEqualTo(QUORUM);
     assertThat(challenge.coefficient_proofs().size()).isEqualTo(QUORUM);
     for (SchnorrProof proof : challenge.coefficient_proofs()) {
-      assertThat(proof.is_valid()).isTrue();
+      assertThat(proof.isValidVer1()).isTrue();
     }
   }
 

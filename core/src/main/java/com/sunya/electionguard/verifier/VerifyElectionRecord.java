@@ -156,7 +156,8 @@ public class VerifyElectionRecord {
     }
 
     System.out.println("------------ [box 11] Correct Decryption of Tallies ------------");
-    TallyDecryptionVerifier tdv = new TallyDecryptionVerifier(electionRecord.manifest, electionRecord.decryptedTally);
+    TallyDecryptionVerifier tdv = new TallyDecryptionVerifier(electionRecord,
+            electionRecord.manifest, electionRecord.decryptedTally);
     boolean tdvOk = tdv.verify_tally_decryption();
 
     System.out.println("------------ [box 12] Correct Decryption of Spoiled Ballots ------------");

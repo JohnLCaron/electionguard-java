@@ -21,6 +21,7 @@ import javax.annotation.concurrent.Immutable;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 /** The published election record for a collection of ballots, eg from a single encryption device. */
 @Immutable
@@ -133,12 +134,16 @@ public class ElectionRecord {
   }
 
   /** Make a map of guardian_id, guardian's public_key. */
-  public ImmutableMap<String, Group.ElementModP> public_keys_of_all_guardians() {
+  public ImmutableMap<String, Group.ElementModP> publicKeysOfAllGuardians() {
     ImmutableMap.Builder<String, Group.ElementModP> result = ImmutableMap.builder();
     for (GuardianRecord guardianRecord : this.guardianRecords) {
       result.put(guardianRecord.guardianId(), guardianRecord.guardianPublicKey());
     }
     return result.build();
+  }
+
+  public Optional<GuardianRecord> findGuardian(String id) {
+    return this.guardianRecords.stream().filter(g -> g.guardianId().equals(id)).findFirst();
   }
 
   /** Make a map of guardian_id, guardian's public_key. */

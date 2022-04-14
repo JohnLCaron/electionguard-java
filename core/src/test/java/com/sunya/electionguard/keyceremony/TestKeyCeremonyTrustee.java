@@ -35,7 +35,7 @@ public class TestKeyCeremonyTrustee {
     assertThat(polynomial.coefficient_commitments.size()).isEqualTo(QUORUM);
     assertThat(polynomial.coefficient_proofs.size()).isEqualTo(QUORUM);
     for (SchnorrProof proof : polynomial.coefficient_proofs) {
-      assertThat(proof.is_valid()).isTrue();
+      assertThat(proof.isValidVer1()).isTrue();
     }
 
     KeyCeremony2.PublicKeySet public_keys = trustee.sharePublicKeys();

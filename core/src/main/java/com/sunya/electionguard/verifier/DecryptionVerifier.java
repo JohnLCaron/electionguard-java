@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.flogger.FluentLogger;
 import com.sunya.electionguard.ChaumPedersen;
+import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.Hash;
 import com.sunya.electionguard.PlaintextTally;
@@ -22,6 +23,7 @@ import static com.sunya.electionguard.Group.ElementModP;
 /**
  * This verifies specification sections "8 Correctness of Partial Decryptions",
  * "9 Correctness of Substitute Data for Missing Data", and "12 Correct Decryption of Spoiled Ballots".
+ *
  * @see <a href="https://www.electionguard.vote/spec/0.95.0/9_Verifier_construction/#correctness-of-partial-decryptions">Decryption validation</a>
  * @see <a href="https://www.electionguard.vote/spec/0.95.0/9_Verifier_construction/#validation-of-correct-decryption-of-tallies">Tally decryption validation</a>
  */
@@ -45,7 +47,7 @@ public class DecryptionVerifier {
   boolean verify_spoiled_tallies(CloseableIterable<PlaintextTally> talliesIterable) {
     AtomicBoolean valid = new AtomicBoolean(true);
     try (Stream<PlaintextTally> tallies = talliesIterable.iterator().stream()) {
-      tallies.forEach(spoiled_tally ->  {
+      tallies.forEach(spoiled_tally -> {
         if (show) System.out.printf(" Spoiled tally %s %n", spoiled_tally.tallyId);
         boolean ok = this.make_all_contest_verification(spoiled_tally.tallyId, spoiled_tally.contests);
         valid.compareAndSet(true, ok); // AND
@@ -60,7 +62,9 @@ public class DecryptionVerifier {
   }
 
 
-  /** Verify 8,9 for the election tally. */
+  /**
+   * Verify 8,9 for the election tally.
+   */
   boolean verify_election_tally() {
     boolean error = !this.make_all_contest_verification(this.decryptedTally.tallyId, this.decryptedTally.contests);
     if (error) {
@@ -108,24 +112,26 @@ public class DecryptionVerifier {
     final String id;
     final PlaintextTally.Selection selection;
     final String selection_id;
-    final ElementModP pad;
-    final ElementModP data;
+    //final ElementModP pad;
+    //final ElementModP data;
 
     DecryptionSelectionVerifier(String id, PlaintextTally.Selection selection) {
       this.id = id; // contest/selection
       this.selection = selection;
       this.selection_id = selection.selectionId();
-      this.pad = selection.message().pad();
-      this.data = selection.message().data();
+      //this.pad = selection.message().pad();
+      //this.data = selection.message().data();
     }
 
-    /** Verify a selection at a time. Combine all the checks separated by guardian shares. */
+    /**
+     * Verify a selection at a time. Combine all the checks separated by guardian shares.
+     */
     boolean verify_a_selection() {
       List<CiphertextDecryptionSelection> shares = this.selection.shares();
-      ShareVerifier sv = new ShareVerifier(this.id, shares, this.pad, this.data);
+      ShareVerifier sv = new ShareVerifier(this.id, shares, selection.message());
       boolean res = sv.verify_all_shares();
       if (!res) {
-        System.out.printf(" %s tally verification error.%n", this.selection_id );
+        System.out.printf(" %s tally verification error.%n", this.selection_id);
       }
       return res;
     }
@@ -135,22 +141,22 @@ public class DecryptionVerifier {
   private class ShareVerifier {
     final String id; // contest/selection
     final List<CiphertextDecryptionSelection> shares;
-    final ElementModP selection_pad;
-    final ElementModP selection_data;
+    final ElGamal.Ciphertext message;
     final ImmutableMap<String, ElementModP> public_keys;
 
-    ShareVerifier(String id, List<CiphertextDecryptionSelection> shares, ElementModP selection_pad, ElementModP selection_data) {
+    ShareVerifier(String id, List<CiphertextDecryptionSelection> shares, ElGamal.Ciphertext message) {
       this.id = id;
       this.shares = shares;
-      this.selection_pad = selection_pad;
-      this.selection_data = selection_data;
-      this.public_keys = electionRecord.public_keys_of_all_guardians();
+      this.message = message;
+      this.public_keys = electionRecord.publicKeysOfAllGuardians();
     }
 
-    /** Verify all shares of a tally decryption */
+    /**
+     * Verify all shares of a tally decryption
+     */
     boolean verify_all_shares() {
       boolean error = false;
-      for (CiphertextDecryptionSelection share : this.shares){
+      for (CiphertextDecryptionSelection share : this.shares) {
         ElementModP curr_public_key = this.public_keys.get(share.guardianId());
         if (share.proof().isPresent()) {
           if (!this.verify_share_guardian_present(share, curr_public_key)) {
@@ -211,7 +217,7 @@ public class DecryptionVerifier {
 
         // 9.C Check if the given challenge ci = H(Q-bar, (A,B), (ai, bi), M_i,l)
         ElementModQ challenge_computed = Hash.hash_elems(electionRecord.extendedHash(),
-                this.selection_pad, this.selection_data, pad, data, partial_decryption);
+                this.message.pad(), this.message.data(), pad, data, partial_decryption);
         if (!challenge_computed.equals(challenge)) {
           System.out.printf("  9.C ci != H(Q-bar, (A,B), (ai, bi), M_i,l) for missing_guardian %s for %s%n", missing_guardian_id, this.id);
           error = true;
@@ -247,48 +253,58 @@ public class DecryptionVerifier {
       // get values
       Preconditions.checkArgument(share.proof().isPresent());
       ChaumPedersen.ChaumPedersenProof proof = share.proof().get();
-      ElementModP pad = proof.pad;
-      ElementModP data = proof.data;
-      ElementModQ response = proof.response;
-      ElementModQ challenge = proof.challenge;
-      ElementModP partial_decryption = share.share(); // M_i in the spec
+      if (proof.name.endsWith("2")) {
+        // ElGamal.Ciphertext message, ElementModP k, ElementModP m, ElementModQ q
+        error = !proof.is_valid(
+                this.message,
+                public_key,
+                share.share(),
+                electionRecord.context.cryptoExtendedBaseHash
+        );
+      } else {
+        ElementModP pad = proof.pad;
+        ElementModP data = proof.data;
+        ElementModQ response = proof.response;
+        ElementModQ challenge = proof.challenge;
+        ElementModP partial_decryption = share.share(); // M_i in the spec
 
-      // 8.A check if the response vi is in the set Zq
-      if (!response.is_in_bounds()) {
-        System.out.printf("  8.A response not in Zq for guardian %s for %s%n", guardian_id, this.id);
-        error = true;
-      }
+        // 8.A check if the response vi is in the set Zq
+        if (!response.is_in_bounds()) {
+          System.out.printf("  8.A response not in Zq for guardian %s for %s%n", guardian_id, this.id);
+          error = true;
+        }
 
-      // 8.B check if the given ai, bi are both in set Zr_p
-      if (!pad.is_valid_residue()) {
-        System.out.printf("  8.B ai not in Zr_p for guardian %s for %s%n", guardian_id, this.id);
-        error = true;
-      }
-      if (!data.is_valid_residue()) {
-        System.out.printf("  8.B bi not in Zr_p for guardian %s for %s%n", guardian_id, this.id);
-        error = true;
-      }
+        // 8.B check if the given ai, bi are both in set Zr_p
+        if (!pad.is_valid_residue()) {
+          System.out.printf("  8.B ai not in Zr_p for guardian %s for %s%n", guardian_id, this.id);
+          error = true;
+        }
+        if (!data.is_valid_residue()) {
+          System.out.printf("  8.B bi not in Zr_p for guardian %s for %s%n", guardian_id, this.id);
+          error = true;
+        }
 
-      // 8.C Check if the given challenge ci = H(Q-bar, (A,B), (ai, bi), Mi)
-      ElementModQ challenge_computed = Hash.hash_elems(electionRecord.extendedHash(),
-              this.selection_pad, this.selection_data, pad, data, partial_decryption);
-      if (!challenge_computed.equals(challenge)) {
-        System.out.printf("  8.C ci != H(Q-bar, (A,B), (ai, bi), Mi) for guardian %s for %s%n", guardian_id, this.id);
-        error = true;
-      } else if (show) {
-        System.out.printf("  8.C ok for guardian %s for %s%n", guardian_id, this.id);
-      }
+        // 8.C Check if the given challenge ci = H(Q-bar, (A,B), (ai, bi), Mi)
+        ElementModQ challenge_computed = Hash.hash_elems(electionRecord.extendedHash(),
+                this.message.pad(), this.message.data(), pad, data, partial_decryption);
+        if (!challenge_computed.equals(challenge)) {
+          System.out.printf("  8.C ci != H(Q-bar, (A,B), (ai, bi), Mi) for guardian %s for %s%n", guardian_id, this.id);
+          error = true;
+        } else if (show) {
+          System.out.printf("  8.C ok for guardian %s for %s%n", guardian_id, this.id);
+        }
 
-      // 8.D g^vi mod p = ai * Ki^ci mod p
-      if (!this.check_equation1(response, pad, challenge, public_key)) {
-        System.out.printf("  8.D g^vi mod p != ai * Ki^ci mod p for guardian %s for %s%n", guardian_id, this.id);
-        error = true;
-      }
+        // 8.D g^vi mod p = ai * Ki^ci mod p
+        if (!this.check_equation1(response, pad, challenge, public_key)) {
+          System.out.printf("  8.D g^vi mod p != ai * Ki^ci mod p for guardian %s for %s%n", guardian_id, this.id);
+          error = true;
+        }
 
-      // 8.E A^vi mod p = bi * Mi ^ ci mod p
-      if (!this.check_equation2(response, data, challenge, partial_decryption)) {
-        System.out.printf("  8.E A^vi mod p = bi * Mi ^ ci mod p for guardian %s for %s%n", guardian_id, this.id);
-        error = true;
+        // 8.E A^vi mod p = bi * Mi ^ ci mod p
+        if (!this.check_equation2(response, data, challenge, partial_decryption)) {
+          System.out.printf("  8.E A^vi mod p = bi * Mi ^ ci mod p for guardian %s for %s%n", guardian_id, this.id);
+          error = true;
+        }
       }
 
       return !error;
@@ -297,10 +313,11 @@ public class DecryptionVerifier {
     /**
      * 8.D Check if equation g ^ vi mod p = ai * (Ki ^ ci) mod p is satisfied.
      * <p>
-     * @param response: response of a share, vi
-     * @param pad: pad of a share, ai
+     *
+     * @param response:   response of a share, vi
+     * @param pad:        pad of a share, ai
      * @param public_key: public key of a guardian, Ki
-     * @param challenge: challenge of a share, ci
+     * @param challenge:  challenge of a share, ci
      */
     private boolean check_equation1(ElementModQ response, ElementModP pad, ElementModQ challenge, ElementModP public_key) {
       // g ^ vi = ai * (Ki ^ ci) mod p
@@ -312,14 +329,15 @@ public class DecryptionVerifier {
     /**
      * 8.E Check if equation A ^ vi = bi * (Mi^ ci) mod p is satisfied.
      * <p>
-     * @param response: response of a share, vi
-     * @param data: data of a share, bi
-     * @param challenge: challenge of a share, ci
+     *
+     * @param response:        response of a share, vi
+     * @param data:            data of a share, bi
+     * @param challenge:       challenge of a share, ci
      * @param partial_decrypt: partial decryption of a guardian, M_i,l
      */
     boolean check_equation2(ElementModQ response, ElementModP data, ElementModQ challenge, ElementModP partial_decrypt) {
       // A ^ vi = (bi * (M_i,l)^ ci) mod p
-      ElementModP left = Group.pow_p(this.selection_pad, response);
+      ElementModP left = Group.pow_p(this.message.pad(), response);
       ElementModP right = Group.mult_p(data, Group.pow_p(partial_decrypt, challenge));
       return left.equals(right);
     }

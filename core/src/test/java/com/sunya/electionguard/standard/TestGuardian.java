@@ -224,7 +224,7 @@ public class TestGuardian {
     assertThat(challenge.coefficient_commitments().size()).isEqualTo(QUORUM);
     assertThat(challenge.coefficient_proofs().size()).isEqualTo(QUORUM);
     for (SchnorrProof proof : challenge.coefficient_proofs()) {
-      assertThat(proof.is_valid()).isTrue();
+      assertThat(proof.isValidVer1()).isTrue();
     }
   }
 
