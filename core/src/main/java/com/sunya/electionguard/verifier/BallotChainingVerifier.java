@@ -30,11 +30,8 @@ public class BallotChainingVerifier {
     for (SubmittedBallot ballot : electionRecord.acceptedBallots) {
       nballots++;
         // 6.B For each ballot Bi , Hi = H(Hi−1, D, T, Bi) is satisfied. // LOOK what is D? is B_i == crypto_hash?
-        ElementModQ crypto_hash = ballot.crypto_hash;
-        ElementModQ prev_hash = ballot.code_seed;
-        ElementModQ curr_hash = ballot.code;
-        ElementModQ curr_hash_computed = Hash.hash_elems(prev_hash, ballot.timestamp, crypto_hash);
-        if (!curr_hash.equals(curr_hash_computed)) {
+        ElementModQ hashChain = Hash.hash_elems(ballot.code_seed, ballot.timestamp, ballot.crypto_hash);
+        if (!ballot.code.equals(hashChain)) {
           error = true;
           countFail++;
         }
