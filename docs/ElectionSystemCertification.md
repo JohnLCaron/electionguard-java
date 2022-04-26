@@ -85,3 +85,9 @@ How to verify election system is running verified software?
 
 Governance for the broker. How to prevent it from being hijacked or sclerotic?
 
+## Why?
+
+````
+    Emerson visited Thoreau in jail and asked “Henry, why are you here?” 
+    Thoreau purportedly responded: “Waldo, why are you not here?”
+````

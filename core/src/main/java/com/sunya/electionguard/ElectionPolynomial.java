@@ -64,17 +64,17 @@ public class ElectionPolynomial {
   /**
    * Generates a polynomial for sharing election keys.
    *
-   * @param number_of_coefficients Number of coefficients of polynomial = the quorum, k.
+   * @param quorum Number of coefficients of polynomial = the quorum, k.
    * @param nonce an optional nonce parameter that may be provided (only for testing), otherwise
    *               a random one is chosen.
    * @return ElectionPolynomial used to share election keys
    */
-  public static ElectionPolynomial generate_polynomial(int number_of_coefficients, @Nullable Group.ElementModQ nonce) {
+  public static ElectionPolynomial generate_polynomial(int quorum, @Nullable Group.ElementModQ nonce) {
     ArrayList<Group.ElementModQ> coefficients = new ArrayList<>();
     ArrayList<Group.ElementModP> commitments = new ArrayList<>();
     ArrayList<SchnorrProof> proofs = new ArrayList<>();
 
-    for (int i = 0; i < number_of_coefficients; i++) {
+    for (int i = 0; i < quorum; i++) {
       // Note the nonce value is not safe. it is designed for testing only.
       // this method should be called without the nonce in production.
       ElementModQ coeff_value = Group.int_to_q_unchecked(BigInteger.valueOf(i));
