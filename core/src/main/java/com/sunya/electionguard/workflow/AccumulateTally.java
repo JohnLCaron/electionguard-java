@@ -129,7 +129,7 @@ public class AccumulateTally {
   }
 
   boolean publish(String inputDir, String publishDir) throws IOException {
-    Publisher publisher = new Publisher(publishDir, Publisher.Mode.createIfMissing, false);
+    Publisher publisher = new Publisher(publishDir, Publisher.Mode.createIfMissing);
     publisher.writeEncryptedTallyProto(this.electionRecord, this.encryptedTally);
     publisher.copyAcceptedBallots(inputDir);
     return true;

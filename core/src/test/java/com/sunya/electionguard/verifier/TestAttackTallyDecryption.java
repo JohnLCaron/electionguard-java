@@ -194,7 +194,7 @@ public class TestAttackTallyDecryption {
   }
 
   boolean publish(String inputDir, String publishDir, ElectionRecord electionRecord, PlaintextTally decryptedTally) throws IOException {
-    Publisher publisher = new Publisher(publishDir, Publisher.Mode.createNew, false);
+    Publisher publisher = new Publisher(publishDir, Publisher.Mode.createNew);
     publisher.writeDecryptedTallyProto(electionRecord, decryptedTally);
     publisher.copyAcceptedBallots(inputDir);
     return true;

@@ -10,6 +10,7 @@ import com.sunya.electionguard.DecryptionShare;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.GuardianRecord;
 import com.sunya.electionguard.SubmittedBallot;
+import com.sunya.electionguard.decrypting.DecryptingTrustee;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -22,6 +23,7 @@ import java.util.Optional;
 import static com.sunya.electionguard.Group.ElementModP;
 import static com.sunya.electionguard.Group.ElementModQ;
 import static com.sunya.electionguard.Group.rand_q;
+import static java.util.Collections.emptyMap;
 
 /**
  * Builder of Guardians for an election.
@@ -174,6 +176,21 @@ class Guardian {
             guardian_election_partial_key_backups,
             guardian_election_partial_key_verifications
             );
+  }
+
+  public DecryptingTrustee toDecryptingTrustee() {
+    //   String id,
+    //  int xCoordinate,
+    //  ElGamal.KeyPair election_keypair,
+    //  Map<String, KeyCeremony2.PartialKeyBackup> otherGuardianPartialKeyBackups,
+    //  Map<String, ImmutableList<Group.ElementModP>> guardianCommittments)
+    return new DecryptingTrustee(
+            this.object_id,
+            this.sequence_order,
+            new ElGamal.KeyPair(election_keys.key_pair().secret_key(), election_keys.key_pair().public_key()),
+            emptyMap(),
+            emptyMap()
+    );
   }
 
   /** Share election public key with another guardian. */

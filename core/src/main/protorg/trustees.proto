@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-import "com/sunya/electionguard/protogen/common.proto";
+import "common.proto";
 
-option java_package = "com.sunya.electionguard.protogen";
+option java_package = "electionguard.protogen";
 option java_outer_classname = "TrusteeProto";
 
 message DecryptingTrustees {
@@ -19,6 +19,11 @@ message DecryptingTrustee {
   // The commitments {"public keys K_ij") generated from the election polynomial coefficients.
   // Duplicated here and in ElectionRecordProto.GuardianRecord, to keep the trustees independent
   repeated CommitmentSet guardian_commitments = 6;
+}
+
+message ElGamalKeyPair {
+  ElementModQ secret_key = 1;
+  ElementModP public_key = 2;
 }
 
 message CommitmentSet {

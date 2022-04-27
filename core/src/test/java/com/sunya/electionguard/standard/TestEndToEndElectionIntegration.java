@@ -21,7 +21,8 @@ import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.PlaintextBallot;
 import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.SubmittedBallot;
-import com.sunya.electionguard.publish.Consumer;
+import com.sunya.electionguard.json.JsonConsumer;
+import com.sunya.electionguard.json.JsonPublisher;
 import com.sunya.electionguard.publish.Publisher;
 import com.sunya.electionguard.verifier.ElectionRecord;
 import net.jqwik.api.Example;
@@ -387,7 +388,7 @@ public class TestEndToEndElectionIntegration {
     // Publish and verify steps of the election
   void step_5_publish_and_verify() throws IOException {
     System.out.printf("%n5. publish to %s%n", outputDir);
-    Publisher publisher = new Publisher(outputDir, Publisher.Mode.createNew, true);
+    JsonPublisher publisher = new JsonPublisher(outputDir, Publisher.Mode.createNew);
 
     publisher.writeElectionRecordJson(
             this.election,
@@ -406,8 +407,8 @@ public class TestEndToEndElectionIntegration {
   }
 
   // Verify results of election
-  void verify_results(Publisher publisher) throws IOException {
-    Consumer consumer = new Consumer(publisher);
+  void verify_results(JsonPublisher publisher) throws IOException {
+    JsonConsumer consumer = new JsonConsumer(publisher);
     ElectionRecord roundtrip = consumer.readElectionRecordJson();
 
     assertThat(roundtrip.manifest).isEqualTo(this.election);

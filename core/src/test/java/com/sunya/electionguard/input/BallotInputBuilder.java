@@ -64,7 +64,7 @@ public class BallotInputBuilder {
       }
 
       PlaintextBallot.Selection build() {
-        return new PlaintextBallot.Selection(id, seq++, vote, false, null);
+        return new PlaintextBallot.Selection(id, seq++, vote, null);
       }
     }
   }

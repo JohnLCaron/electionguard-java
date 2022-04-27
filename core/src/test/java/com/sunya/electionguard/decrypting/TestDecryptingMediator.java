@@ -5,7 +5,7 @@ import com.sunya.electionguard.PlaintextBallot;
 import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.SubmittedBallot;
 import com.sunya.electionguard.TestProperties;
-import com.sunya.electionguard.proto.TrusteeFromProto;
+import com.sunya.electionguard.protoconvert.TrusteeFromProto;
 import com.sunya.electionguard.publish.CloseableIterable;
 import com.sunya.electionguard.publish.Consumer;
 import com.sunya.electionguard.publish.PrivateData;

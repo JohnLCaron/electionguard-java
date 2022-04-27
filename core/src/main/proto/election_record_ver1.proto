@@ -1,0 +1,66 @@
+syntax = "proto3";
+
+import "ciphertext_tally.proto";
+import "common.proto";
+import "election_record.proto";
+import "manifest.proto";
+import "plaintext_tally.proto";
+
+option java_package = "electionguard.protogen";
+option java_outer_classname = "ElectionRecordProto";
+
+// The published Election record, for some collection of ballots.
+message ElectionRecord {
+  string proto_version = 1; // protobuf serialization version
+  ElectionConstants constants = 2;
+  Manifest manifest = 3;
+  ElectionContext context = 4;
+  repeated GuardianRecord guardian_records = 5;
+  repeated EncryptionDevice devices = 6;
+
+  CiphertextTally ciphertext_tally = 7;
+  PlaintextTally decrypted_tally = 8;
+
+  // The guardians present for decryption
+  repeated AvailableGuardian available_guardians = 9;
+}
+
+// ElectionGuard representation of a specific election.
+message ElectionContext {
+  uint32 number_of_guardians = 1; // The number of guardians necessary to generate the public key
+  uint32 quorum = 2; // The quorum of guardians necessary to decrypt an election.  Must be <= number_of_guardians.
+
+  // The `joint public key (K)` in the [ElectionGuard Spec]
+  ElementModP joint_public_key = 3;
+
+  // Matches Manifest.crypto_hash
+  UInt256 manifest_hash = 4;
+
+  // the `base hash code (𝑄)` in the [ElectionGuard Spec]
+  UInt256 crypto_base_hash = 5;
+
+  // the `extended base hash code (𝑄')` in the [ElectionGuard Spec]
+  UInt256 crypto_extended_base_hash = 6;
+
+  // Hash of all the public commitments for all the guardians = H(K 1,0 , K 1,1 , K 1,2 , ..., K n,k−1 ).
+  UInt256 commitment_hash = 7;
+
+  map<string, string> extended_data = 8;
+}
+
+// The device that does the encryption.
+message EncryptionDevice {
+  int64 device_id = 1;
+  int64 session_id = 2;
+  int64 launch_code = 3;
+  string location = 4;
+}
+
+// Public info for Guardian.
+message GuardianRecord {
+  string guardian_id = 1; // guardian id
+  uint32 x_coordinate = 2;    // x coordinate in the secret polynomial
+  ElementModP guardian_public_key = 3;
+  repeated ElementModP coefficient_commitments = 4;  // Kij, j=0...quorum-1
+  repeated SchnorrProof coefficient_proofs = 5;
+}

@@ -2,7 +2,7 @@ package com.sunya.electionguard;
 
 import com.google.common.collect.ImmutableList;
 import com.sunya.electionguard.core.UInt256;
-import com.sunya.electionguard.publish.ConvertFromJson;
+import com.sunya.electionguard.json.ConvertFromJson;
 import com.sunya.electionguard.publish.Publisher;
 import net.jqwik.api.Example;
 import net.jqwik.api.lifecycle.AfterContainer;
@@ -72,7 +72,7 @@ public class TestHashAgainstPython {
     }
 
     if (writeOut) {
-      Publisher publisher = new Publisher(output, createIfMissing, false);
+      Publisher publisher = new Publisher(output, createIfMissing);
       publisher.writeStartingProto(subject, constants);
     }
   }

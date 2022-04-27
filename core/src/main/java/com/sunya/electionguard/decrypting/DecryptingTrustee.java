@@ -1,7 +1,6 @@
 package com.sunya.electionguard.decrypting;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
 import com.google.common.flogger.FluentLogger;
 import com.sunya.electionguard.BallotBox;
 import com.sunya.electionguard.ChaumPedersen;
@@ -34,7 +33,7 @@ public record DecryptingTrustee(
   int xCoordinate,
   ElGamal.KeyPair election_keypair,
   Map<String, KeyCeremony2.PartialKeyBackup> otherGuardianPartialKeyBackups,
-  Map<String, ImmutableList<Group.ElementModP>> guardianCommittments)  implements DecryptingTrusteeIF {
+  Map<String, List<Group.ElementModP>> guardianCommittments)  implements DecryptingTrusteeIF {
 
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 

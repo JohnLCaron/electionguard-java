@@ -1,8 +1,8 @@
 package com.sunya.electionguard.standard;
 
 import com.sunya.electionguard.GuardianRecord;
-import com.sunya.electionguard.publish.ConvertFromJson;
-import com.sunya.electionguard.publish.ConvertToJson;
+import com.sunya.electionguard.json.ConvertFromJson;
+import com.sunya.electionguard.json.ConvertToJson;
 import net.jqwik.api.Example;
 
 import java.io.File;

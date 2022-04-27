@@ -180,7 +180,7 @@ public class KeyCeremonyRemote {
     this.nguardians = nguardians;
     this.quorum = quorum;
 
-    this.publisher = new Publisher(outputDir, Publisher.Mode.createNew, false);
+    this.publisher = new Publisher(outputDir, Publisher.Mode.createNew);
     Formatter errors = new Formatter();
     if (!publisher.validateOutputDir(errors)) {
       System.out.printf("*** Publisher validateOutputDir FAILED on %s%n%s", outputDir, errors);

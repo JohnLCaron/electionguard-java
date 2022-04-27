@@ -9,7 +9,7 @@ import com.sunya.electionguard.keyceremony.KeyCeremonyTrustee;
 import com.sunya.electionguard.keyceremony.KeyCeremonyTrusteeIF;
 import com.sunya.electionguard.keyceremony.KeyCeremonyRemoteMediator;
 import electionguard.protogen.TrusteeProto;
-import com.sunya.electionguard.proto.TrusteeToProto;
+import com.sunya.electionguard.protoconvert.KeyCeremonyTrusteeToProto;
 import com.sunya.electionguard.publish.Consumer;
 import com.sunya.electionguard.publish.PrivateData;
 import com.sunya.electionguard.publish.Publisher;
@@ -91,7 +91,7 @@ public class KeyCeremonySimulator {
         System.exit(1);
       }
 
-      Publisher publisher = new Publisher(cmdLine.outputDir, Publisher.Mode.createNew, false);
+      Publisher publisher = new Publisher(cmdLine.outputDir, Publisher.Mode.createNew);
       KeyCeremonySimulator keyCeremony = new KeyCeremonySimulator(election, cmdLine.nguardians, cmdLine.quorum, publisher);
 
       keyCeremony.runKeyCeremony();
@@ -138,7 +138,7 @@ public class KeyCeremonySimulator {
     List<KeyCeremonyTrustee> trustees = trusteeProxies.stream()
             .map(t -> t.delegate)
             .toList();
-    TrusteeProto.DecryptingTrustees trusteesProto = TrusteeToProto.convertTrustees(trustees);
+    TrusteeProto.DecryptingTrustees trusteesProto = KeyCeremonyTrusteeToProto.convertTrustees(trustees);
     boolean okt;
     try {
       PrivateData pdata = publisher.makePrivateData(false, false);

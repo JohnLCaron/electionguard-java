@@ -1,8 +1,6 @@
 package com.sunya.electionguard.viz;
 
-import com.google.common.collect.ImmutableList;
 import com.sunya.electionguard.decrypting.DecryptingTrustee;
-import com.sunya.electionguard.proto.TrusteeFromProto;
 import com.sunya.electionguard.publish.PrivateData;
 import ucar.ui.prefs.ComboBox;
 import ucar.ui.widget.BAMutil;
@@ -15,9 +13,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Formatter;
 
 class TrusteesPanel extends JPanel {

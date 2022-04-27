@@ -551,7 +551,6 @@ public class CiphertextBallot implements Hash.CryptoHashCheckable {
               contestHash,
               ballot_selections,
               crypto_hash,
-              contest_total,
               nonce,  // Optional
               proof); // Optional
     }
@@ -566,8 +565,6 @@ public class CiphertextBallot implements Hash.CryptoHashCheckable {
     public final ImmutableList<Selection> selections;
     /** This element's crypto_hash. */
     public final Group.ElementModQ crypto_hash; // see ciphertext_ballot_context_crypto_hash()
-    /** The contest's encrypted total votes. (A, B) in the spec. */
-    public final ElGamal.Ciphertext ciphertextAccumulation;
     /** The nonce used to generate the encrypted_total. Sensitive and should be treated as a secret. */
     public final Optional<Group.ElementModQ> nonce;
 
@@ -580,7 +577,6 @@ public class CiphertextBallot implements Hash.CryptoHashCheckable {
                    Group.ElementModQ contestHash,
                    List<Selection> selections,
                    Group.ElementModQ crypto_hash,
-                   ElGamal.Ciphertext ciphertextAccumulation,
                    Optional<Group.ElementModQ> nonce,
                    Optional<ChaumPedersen.ConstantChaumPedersenProof> proof) {
       Preconditions.checkArgument(!Strings.isNullOrEmpty(contestId));
@@ -589,7 +585,6 @@ public class CiphertextBallot implements Hash.CryptoHashCheckable {
       this.contestHash = Preconditions.checkNotNull(contestHash);
       this.selections = ImmutableList.copyOf(Preconditions.checkNotNull(selections));
       this.crypto_hash = Preconditions.checkNotNull(crypto_hash);
-      this.ciphertextAccumulation = Preconditions.checkNotNull(ciphertextAccumulation);
       this.nonce = Preconditions.checkNotNull(nonce);
       this.proof = Preconditions.checkNotNull(proof);
     }
@@ -600,7 +595,7 @@ public class CiphertextBallot implements Hash.CryptoHashCheckable {
               this.selections.stream().map(s -> s.removeNonce()).toList();
 
       return new Contest(this.contestId, this.sequenceOrder, this.contestHash, new_selections, this.crypto_hash,
-              this.ciphertextAccumulation, Optional.empty(), this.proof);
+              Optional.empty(), this.proof);
     }
 
     /**
@@ -657,19 +652,12 @@ public class CiphertextBallot implements Hash.CryptoHashCheckable {
         return false;
       }
 
-      ElGamal.Ciphertext elgamal_accumulation = this.elgamal_accumulate();
-
-      // Verify that the contest ciphertext matches the elgamal accumulation of all selections
-      if (!this.ciphertextAccumulation.equals(elgamal_accumulation)) {
-        logger.atInfo().log("ciphertext does not equal elgamal accumulation for: %s", this.contestId);
-        return false;
-      }
-
       // Verify the sum of the selections matches the proof
+      ElGamal.Ciphertext elgamal_accumulation = this.elgamal_accumulate();
       try {
         Hash.setDebug(false);
         // System.out.printf("is_valid_encryption '%s'%n", where);
-        return this.proof.get().is_valid(this.ciphertextAccumulation, elgamal_public_key, crypto_extended_base_hash);
+        return this.proof.get().is_valid(elgamal_accumulation, elgamal_public_key, crypto_extended_base_hash);
       } finally {
         Hash.setDebug(false);
       }
@@ -680,12 +668,17 @@ public class CiphertextBallot implements Hash.CryptoHashCheckable {
       if (this == o) return true;
       if (o == null || getClass() != o.getClass()) return false;
       Contest contest = (Contest) o;
-      return sequenceOrder == contest.sequenceOrder && contestId.equals(contest.contestId) && contestHash.equals(contest.contestHash) && selections.equals(contest.selections) && crypto_hash.equals(contest.crypto_hash) && ciphertextAccumulation.equals(contest.ciphertextAccumulation) && nonce.equals(contest.nonce) && proof.equals(contest.proof);
+      return sequenceOrder == contest.sequenceOrder &&
+              contestId.equals(contest.contestId) &&
+              contestHash.equals(contest.contestHash) &&
+              selections.equals(contest.selections) &&
+              crypto_hash.equals(contest.crypto_hash)
+              && nonce.equals(contest.nonce) && proof.equals(contest.proof);
     }
 
     @Override
     public int hashCode() {
-      return Objects.hash(contestId, sequenceOrder, contestHash, selections, crypto_hash, ciphertextAccumulation, nonce, proof);
+      return Objects.hash(contestId, sequenceOrder, contestHash, selections, crypto_hash, nonce, proof);
     }
 
     @Override
@@ -695,7 +688,6 @@ public class CiphertextBallot implements Hash.CryptoHashCheckable {
               "\n  sequenceOrder   =" + sequenceOrder +
               "\n  contestHash     =" + contestHash +
               "\n  crypto_hash     =" + crypto_hash +
-              "\n  ciphertextAccumulation=" + ciphertextAccumulation +
               "\n  nonce           =" + nonce +
               "\n  proof           =" + proof +
               '}';

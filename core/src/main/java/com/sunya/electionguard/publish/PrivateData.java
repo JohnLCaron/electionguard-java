@@ -1,13 +1,13 @@
 package com.sunya.electionguard.publish;
 
 import com.sunya.electionguard.decrypting.DecryptingTrustee;
-import com.sunya.electionguard.proto.PlaintextBallotFromProto;
-import com.sunya.electionguard.proto.PlaintextBallotToProto;
-import com.sunya.electionguard.proto.SubmittedBallotFromProto;
-import com.sunya.electionguard.proto.TrusteeFromProto;
+import com.sunya.electionguard.protoconvert.ElectionInitializedConvert;
+import com.sunya.electionguard.protoconvert.PlaintextBallotFromProto;
+import com.sunya.electionguard.protoconvert.PlaintextBallotToProto;
+import com.sunya.electionguard.protoconvert.TrusteeFromProto;
 import com.sunya.electionguard.standard.GuardianPrivateRecord;
 import com.sunya.electionguard.PlaintextBallot;
-import electionguard.protogen.CiphertextBallotProto;
+import electionguard.protogen.ElectionRecordProto2;
 import electionguard.protogen.PlaintextBallotProto;
 import electionguard.protogen.TrusteeProto;
 
@@ -22,6 +22,9 @@ import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.List;
 
+import static com.sunya.electionguard.protoconvert.DecryptingTrusteeToProto.publishDecryptingTrustee;
+import static com.sunya.electionguard.protoconvert.TrusteeFromProto.importDecryptingTrustee;
+
 /** Publishes the Manifest Record to Json or protobuf files. */
 public class PrivateData {
   static final String PRIVATE_DATA_DIR = "election_private_data";
@@ -29,8 +32,6 @@ public class PrivateData {
   //// json
   static final String PRIVATE_GUARDIANS_DIR = "private_guardians";
   static final String PRIVATE_BALLOT_DIR = "plaintext_ballots";
-  static final String PLAINTEXT_BALLOT_PREFIX = "plaintext_ballot_";
-  static final String PRIVATE_GUARDIAN_PREFIX = "private_guardian_";
 
   //// proto
   static final String TRUSTEES_FILE = "trustees" + Publisher.PROTO_SUFFIX;
@@ -112,11 +113,6 @@ public class PrivateData {
     return privateBallotsPath().resolve(PROTO_BALLOTS_FILE);
   }
 
-  public Path guardiansPrivatePath(String id) {
-    String fileName = id + Publisher.JSON_SUFFIX;
-    return privateDirectory.resolve(fileName);
-  }
-
   public File[] guardianRecordPrivateFiles() {
     Path where = privateGuardiansPath();
     if (!Files.exists(privateGuardiansPath()) || !Files.isDirectory(privateGuardiansPath())) {
@@ -171,6 +167,17 @@ public class PrivateData {
     return result;
   }
 
+  public void writeTrustee(DecryptingTrustee trustee) {
+    TrusteeProto.DecryptingTrustee proto = publishDecryptingTrustee(trustee);
+    Path fileout = Publisher.decryptingTrusteePath(this.privateDirectory, trustee.id());
+    try (FileOutputStream out = new FileOutputStream(fileout.toFile())) {
+      proto.writeTo(out);
+    } catch (IOException ioe) {
+      throw new RuntimeException(ioe);
+    }
+  }
+
+
   public void writePrivateDataProto(
           @Nullable Iterable<PlaintextBallot> original_ballots,
           @Nullable Iterable<GuardianPrivateRecord> guardians) throws IOException {
@@ -178,7 +185,7 @@ public class PrivateData {
     Files.createDirectories(privateDirectory);
 
     if (guardians != null) {
-      throw new UnsupportedOperationException();
+      return;
     }
 
     if (original_ballots != null) {
@@ -194,83 +201,8 @@ public class PrivateData {
     // TODO CIPHERTEXT_BALLOT_PREFIX?
   }
 
-  ////////////////////////////////////////////////////////////////////////////////
-  // JSON, probably not needed
-
-  public void writeGuardiansJson(Iterable<GuardianPrivateRecord> guardianRecords) throws IOException {
-    Files.createDirectories(privateDirectory);
-    for (GuardianPrivateRecord guardianRecord : guardianRecords) {
-      ConvertToJson.writeGuardianRecordPrivate(guardianRecord, this.guardiansPrivatePath(guardianRecord.guardian_id()));
-    }
-  }
-
-  /**
-   * Publish the private data for an election.
-   * Useful for generating sample data sets.
-   * Do not use this in a production application.
-   */
-  public void publish_private_data(
-          @Nullable Iterable<PlaintextBallot> original_ballots,
-          @Nullable Iterable<GuardianPrivateRecord> guardians) throws IOException {
-
-    Files.createDirectories(privateDirectory);
-
-    if (guardians != null) {
-      Files.createDirectories(privateGuardiansPath());
-      for (GuardianPrivateRecord guardian : guardians) {
-        String guardian_name = PRIVATE_GUARDIAN_PREFIX + guardian.guardian_id() + Publisher.JSON_SUFFIX;
-        ConvertToJson.writeGuardianRecordPrivate(guardian, privateGuardiansPath().resolve(guardian_name));
-      }
-    }
-
-    if (original_ballots != null) {
-      Files.createDirectories(privateBallotsPath());
-      for (PlaintextBallot plaintext_ballot : original_ballots) {
-        String ballot_name = PLAINTEXT_BALLOT_PREFIX + plaintext_ballot.object_id() + Publisher.JSON_SUFFIX;
-        ConvertToJson.writePlaintextBallot(plaintext_ballot, privateBallotsPath().resolve(ballot_name));
-      }
-    }
-
-    // TODO CIPHERTEXT_BALLOT_PREFIX?
-  }
-
-  // These are input ballots that did not validate (not spoiled ballots). put them somewhere to be examined later.
-  public void publish_invalid_ballots(String directory, Iterable<PlaintextBallot> invalid_ballots) throws IOException {
-    Path invalidBallotsPath = privateDirectory.resolve(directory);
-    Files.createDirectories(invalidBallotsPath);
-
-    for (PlaintextBallot plaintext_ballot : invalid_ballots) {
-      String ballot_name = PLAINTEXT_BALLOT_PREFIX + plaintext_ballot.object_id() + Publisher.JSON_SUFFIX;
-      ConvertToJson.writePlaintextBallot(plaintext_ballot, invalidBallotsPath.resolve(ballot_name));
-    }
-
-  }
-
-  public List<GuardianPrivateRecord> readGuardianPrivateJson() throws IOException {
-    List<GuardianPrivateRecord> result = new ArrayList<>();
-    for (File file : guardianRecordPrivateFiles()) {
-      GuardianPrivateRecord fromPython = ConvertFromJson.readGuardianRecordPrivate(file.getAbsolutePath());
-      result.add(fromPython);
-    }
-    return result;
-  }
-
-  // Input ballot files for debugging. Not part of the election record.
   public List<PlaintextBallot> inputBallots() throws IOException {
-    if (!Files.exists(privateBallotsPath())) {
-      return new ArrayList<>();
-    }
-    File dir = privateBallotsPath().toFile();
-    if (dir.listFiles() != null) {
-      List<PlaintextBallot> result = new ArrayList<>();
-      for (File file : dir.listFiles()) {
-        PlaintextBallot fromJson = ConvertFromJson.readPlaintextBallot(file.getAbsolutePath());
-        result.add(fromJson);
-      }
-      return result;
-    } else {
-      return new ArrayList<>();
-    }
+    return inputBallots(privateBallotsProtoPath());
   }
 
   public static List<PlaintextBallot> inputBallots(Path fileOrDirPath) throws IOException {
@@ -280,14 +212,7 @@ public class PrivateData {
     List<PlaintextBallot> result = new ArrayList<>();
 
     File dir = fileOrDirPath.toFile();
-    if (dir.isDirectory()) {
-      for (File file : dir.listFiles((parent, name) -> name.endsWith(Publisher.JSON_SUFFIX))) {
-        result.add(ConvertFromJson.readPlaintextBallot(file.getAbsolutePath()));
-      }
-    } else if (dir.getAbsolutePath().endsWith("json")) {
-      result.add(ConvertFromJson.readPlaintextBallot(dir.getAbsolutePath()));
-
-    } else if (dir.getAbsolutePath().endsWith("protobuf")) {
+    if (dir.getAbsolutePath().endsWith("protobuf")) {
       // multiple input ballots in a protobuf
       try (FileInputStream input = new FileInputStream(dir.getAbsolutePath())) {
       while (true) {

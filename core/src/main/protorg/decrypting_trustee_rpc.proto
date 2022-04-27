@@ -1,10 +1,9 @@
 syntax = "proto3";
 
-import "com/sunya/electionguard/protogen/common.proto";
-import "com/sunya/electionguard/protogen/plaintext_tally.proto";
-import "google/protobuf/empty.proto";
+import "common.proto";
+import "common_rpc.proto";
 
-option java_package = "com.sunya.electionguard.protogen";
+option java_package = "electionguard.protogen";
 option java_outer_classname = "DecryptingTrusteeProto";
 
 service DecryptingTrusteeService {
@@ -25,7 +24,7 @@ message PartialDecryptionResponse {
 
 message PartialDecryptionResult {
   ElementModP decryption = 1;
-  ChaumPedersenProof proof = 2;
+  GenericChaumPedersenProof proof = 2;
 }
 
 message CompensatedDecryptionRequest {
@@ -41,7 +40,7 @@ message CompensatedDecryptionResponse {
 
 message CompensatedDecryptionResult {
   ElementModP decryption = 1;
-  ChaumPedersenProof proof = 2;
+  GenericChaumPedersenProof proof = 2;
   ElementModP recoveryPublicKey = 3;
 }
 

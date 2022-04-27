@@ -40,8 +40,8 @@ message AnnotatedString {
 
 message BallotStyle {
   string ballot_style_id = 1;
-  repeated string geopolitical_unit_ids = 2;
-  repeated string party_ids = 3;
+  repeated string geopolitical_unit_ids = 2; // match GeopoliticalUnit.geopolitical_unit_id
+  repeated string party_ids = 3; // match Party.party_id
   string image_url = 4;
 }
 
@@ -135,8 +135,8 @@ message ContestDescription {
   }
 
   string contest_id = 1;
-  uint32 sequence_order = 2;
-  string geopolitical_unit_id = 3;
+  uint32 sequence_order = 2; // unique within manifest
+  string geopolitical_unit_id = 3; // match GeopoliticalUnit.geopolitical_unit_id
   VoteVariationType vote_variation = 4;
   uint32 number_elected = 5;
   uint32 votes_allowed = 6;
@@ -150,7 +150,7 @@ message ContestDescription {
 
 message SelectionDescription {
   string selection_id = 1;
-  uint32 sequence_order = 2;
+  uint32 sequence_order = 2; // unique within contest
   string candidate_id = 3;   // matches Candidate.candidate_id
   UInt256 crypto_hash = 4;
 }

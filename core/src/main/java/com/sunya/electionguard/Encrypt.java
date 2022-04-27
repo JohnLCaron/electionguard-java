@@ -141,7 +141,7 @@ public class Encrypt {
    */
   // selection_from( description: SelectionDescription, is_placeholder: bool = False, is_affirmative: bool = False,
   static PlaintextBallot.Selection selection_from(Manifest.SelectionDescription mselection, boolean is_placeholder, boolean is_affirmative) {
-    return new PlaintextBallot.Selection(mselection.selectionId(), mselection.sequenceOrder(), is_affirmative ? 1 : 0, is_placeholder, null);
+    return new PlaintextBallot.Selection(mselection.selectionId(), mselection.sequenceOrder(), is_affirmative ? 1 : 0, null);
   }
 
   /**

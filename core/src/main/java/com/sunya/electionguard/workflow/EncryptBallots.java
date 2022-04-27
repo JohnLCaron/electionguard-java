@@ -242,7 +242,7 @@ public class EncryptBallots {
     System.out.printf("%nPublish cast = %d spoiled = %d failed = %d total = %d%n%n",
             ncast, nspoiled, failed, originalBallotsCount);
 
-    Publisher publisher = new Publisher(publishDir, Publisher.Mode.createIfMissing, false);
+    Publisher publisher = new Publisher(publishDir, Publisher.Mode.createIfMissing);
     publisher.writeEncryptionResultsProto(
             electionRecord,
             ImmutableList.of(this.device), // add the device
@@ -252,17 +252,17 @@ public class EncryptBallots {
   }
 
   void saveOriginalBallots(Publisher publisher, List<PlaintextBallot> ballots) throws IOException {
-    PrivateData pdata = publisher.makePrivateData(true, true);
+    /*PrivateData pdata = publisher.makePrivateData(true, true);
     // LOOK JSON !!
     pdata.publish_private_data(ballots, null);
     // LOOK Proto
     pdata.writePrivateDataProto(ballots, null);
-    System.out.printf("Save %d original ballots in %s%n", ballots.size(), pdata.privateDirectory());
+    System.out.printf("Save %d original ballots in %s%n", ballots.size(), pdata.privateDirectory()); */
 
   }
 
   void saveInvalidBallots(Publisher publisher, List<PlaintextBallot> ballots) throws IOException {
-    publisher.publish_invalid_ballots("invalid_ballots", ballots);
-    System.out.printf("Save %d invalid ballot in %s/invalid_ballots%n", ballots.size(), publisher.publishPath());
+    /* publisher.publish_invalid_ballots("invalid_ballots", ballots);
+    System.out.printf("Save %d invalid ballot in %s/invalid_ballots%n", ballots.size(), publisher.publishPath()); */
   }
 }

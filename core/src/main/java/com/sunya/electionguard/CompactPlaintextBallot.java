@@ -100,7 +100,6 @@ public class CompactPlaintextBallot {
                         selection.selectionId(),
                         selection.sequenceOrder(),
                         compact_ballot.selections.get(index) ? YES_VOTE : NO_VOTE,
-                        placeholder,
                         compact_ballot.extended_data.get(index)));
         index += 1;
       }

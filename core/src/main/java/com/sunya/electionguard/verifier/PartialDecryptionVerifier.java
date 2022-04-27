@@ -34,8 +34,8 @@ public class PartialDecryptionVerifier {
   PartialDecryptionVerifier(ElectionRecord electionRecord, PlaintextTally decryptedTally) {
     this.electionRecord = electionRecord;
     this.tally = Preconditions.checkNotNull(decryptedTally);
-    this.lagrange_coefficients = electionRecord.availableGuardians.stream().collect(Collectors.toMap(
-            g -> g.guardianId(), g -> g.lagrangeCoordinate()));
+    this.lagrange_coefficients = electionRecord.availableGuardians.stream().collect(
+            Collectors.toMap(g -> g.guardianId(), g -> g.lagrangeCoefficient()));
   }
 
   /** Verify 10.A for available guardians, if there are missing guardians. */
@@ -70,7 +70,7 @@ public class PartialDecryptionVerifier {
           seq_others.add(other.xCoordinate());
         }
       }
-      error |= !this.verify_lagrange_coefficient(guardian.xCoordinate(), seq_others, guardian.lagrangeCoordinate());
+      error |= !this.verify_lagrange_coefficient(guardian.xCoordinate(), seq_others, guardian.lagrangeCoefficient());
     }
 
     if (error) {

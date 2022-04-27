@@ -1,5 +1,6 @@
 package com.sunya.electionguard.verifier;
 
+import com.sunya.electionguard.json.JsonConsumer;
 import com.sunya.electionguard.publish.Consumer;
 import net.jqwik.api.Example;
 import java.io.IOException;
@@ -24,7 +25,7 @@ public class TestPartialDecryptionVerifier {
   public void testSelectionEncryptionValidationJson() throws IOException {
     String topdir = TestParameterVerifier.topdirJson;
     System.out.printf("testSelectionEncryptionValidationJson %s%n", topdir);
-    Consumer consumer = new Consumer(topdir);
+    JsonConsumer consumer = new JsonConsumer(topdir);
     ElectionRecord electionrecord = consumer.readElectionRecordJson();
     PartialDecryptionVerifier validator = new PartialDecryptionVerifier(electionrecord, electionrecord.decryptedTally);
 

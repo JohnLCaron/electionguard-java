@@ -128,6 +128,15 @@ public class ElectionPolynomial {
     return Group.div_q(numerator, denominator);
   }
 
+  public static Integer computeLagrangeCoefficient(Integer coordinate, List<Integer> degrees) {
+    int product = degrees.stream().reduce(1, (a, b)  -> a * b);
+    // denominator = mult_q(*[(degree - coordinate) for degree in degrees])
+    List<Integer> diff = degrees.stream().map(degree -> degree - coordinate).toList();
+    int productDiff = diff.stream().reduce(1, (a, b)  -> a * b);
+    ElementModQ denominator = Group.int_to_q_unchecked(BigInteger.valueOf(productDiff).mod(Group.getPrimes().smallPrime));
+    return product / productDiff;
+  }
+
   /**
    * Verify a polynomial coordinate value is in fact on the polynomial's curve.
    *

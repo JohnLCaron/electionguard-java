@@ -2,6 +2,7 @@ package com.sunya.electionguard.verifier;
 
 import com.google.common.base.Preconditions;
 import com.sunya.electionguard.*;
+import com.sunya.electionguard.json.JsonConsumer;
 import com.sunya.electionguard.publish.Consumer;
 import net.jqwik.api.Example;
 import java.io.IOException;
@@ -23,7 +24,7 @@ public class TestSelectionEncryptionVerifier {
 
   @Example
   public void testSelectionEncryptionValidationJson() throws IOException {
-    Consumer consumer = new Consumer(TestParameterVerifier.topdirJson);
+    JsonConsumer consumer = new JsonConsumer(TestParameterVerifier.topdirJson);
     testSelectionEncryptionValidation(consumer.readElectionRecordJson());
   }
 

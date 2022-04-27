@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-import "com/sunya/electionguard/protogen/common.proto";
+import "common.proto";
 
-option java_package = "com.sunya.electionguard.protogen";
+option java_package = "electionguard.protogen";
 option java_outer_classname = "ManifestProto";
 
 // The structure of the election. See: https://developers.google.com/elections-data/reference/election
@@ -30,6 +30,7 @@ message Manifest {
   repeated BallotStyle ballot_styles = 10;
   InternationalizedText name = 11;
   ContactInformation contact_information = 12;
+  UInt256 crypto_hash = 13;
 }
 
 message AnnotatedString {
@@ -38,14 +39,14 @@ message AnnotatedString {
 }
 
 message BallotStyle {
-  string object_id = 1;
+  string ballot_style_id = 1;
   repeated string geopolitical_unit_ids = 2;
   repeated string party_ids = 3;
   string image_url = 4;
 }
 
 message Candidate {
-  string object_id = 1;
+  string candidate_id = 1;
   InternationalizedText name = 2;
   string party_id = 3;
   string image_url = 4;
@@ -93,7 +94,7 @@ message GeopoliticalUnit {
     other = 28;
   }
 
-  string object_id = 1;
+  string geopolitical_unit_id = 1;
   string name = 2;
   ReportingUnitType type = 3;
   ContactInformation contact_information = 4;
@@ -109,7 +110,7 @@ message Language {
 }
 
 message Party {
-  string object_id = 1;
+  string party_id = 1;
   InternationalizedText name = 2;
   string abbreviation = 3;
   string color = 4;
@@ -133,21 +134,23 @@ message ContestDescription {
     other = 12;
   }
 
-  string object_id = 1;
-  string electoral_district_id = 2;
-  uint32 sequence_order = 3;
+  string contest_id = 1;
+  uint32 sequence_order = 2;
+  string geopolitical_unit_id = 3;
   VoteVariationType vote_variation = 4;
   uint32 number_elected = 5;
   uint32 votes_allowed = 6;
   string name = 7;
-  repeated SelectionDescription ballot_selections = 8;
+  repeated SelectionDescription selections = 8;
   InternationalizedText ballot_title = 9;
   InternationalizedText ballot_subtitle = 10;
   repeated string primary_party_ids = 11;
+  UInt256 crypto_hash = 12;
 }
 
 message SelectionDescription {
-  string object_id = 1;
-  string candidate_id = 2;
-  uint32 sequence_order = 3;
+  string selection_id = 1;
+  uint32 sequence_order = 2;
+  string candidate_id = 3;   // matches Candidate.candidate_id
+  UInt256 crypto_hash = 4;
 }

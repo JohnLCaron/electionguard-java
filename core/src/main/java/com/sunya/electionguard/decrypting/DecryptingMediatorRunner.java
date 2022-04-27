@@ -17,7 +17,7 @@ import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.Scheduler;
 import com.sunya.electionguard.input.CiphertextTallyInputValidation;
 import com.sunya.electionguard.input.ManifestInputValidation;
-import com.sunya.electionguard.proto.CommonConvert;
+import com.sunya.electionguard.protoconvert.CommonConvert;
 import electionguard.protogen.DecryptingProto;
 import electionguard.protogen.DecryptingServiceGrpc;
 import com.sunya.electionguard.publish.Consumer;
@@ -119,7 +119,7 @@ public class DecryptingMediatorRunner {
       }
 
       // check that outputDir exists and can be written to
-      Publisher publisher = new Publisher(cmdLine.outputDir, Publisher.Mode.createNew, false);
+      Publisher publisher = new Publisher(cmdLine.outputDir, Publisher.Mode.createNew);
       if (!publisher.validateOutputDir(errors)) {
         System.out.printf("*** Publisher validateOutputDir FAILED on %s%n%s", cmdLine.outputDir, errors);
         System.exit(1);
@@ -363,7 +363,7 @@ public class DecryptingMediatorRunner {
     builder.setTrusteeId(request.getGuardianId());
     builder.setUrl(request.getRemoteUrl());
     builder.setXCoordinate(request.getGuardianXCoordinate());
-    builder.setElectionPublicKey(CommonConvert.convertElementModP(request.getPublicKey()));
+    builder.setElectionPublicKey(CommonConvert.importElementModP(request.getPublicKey()));
     DecryptingRemoteTrusteeProxy trustee = builder.build();
     trusteeProxies.add(trustee);
     return trustee;

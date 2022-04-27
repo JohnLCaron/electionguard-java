@@ -1,34 +1,27 @@
 syntax = "proto3";
 
-import "com/sunya/electionguard/protogen/common.proto";
+import "common.proto";
 
-option java_package = "com.sunya.electionguard.protogen";
+option java_package = "electionguard.protogen";
 option java_outer_classname = "CiphertextTallyProto";
 
 // Encrypted Tally of some collection of ballots.
 message CiphertextTally {
-  string object_id = 1;
-
-  // Map(CONTEST_ID, CiphertextTallyContest)
-  map<string, CiphertextTallyContest> contests = 2;
+  string tally_id = 1;
+  repeated CiphertextTallyContest contests = 2;
 }
 
 message CiphertextTallyContest {
-  string object_id = 1;
-  int32 sequence_order = 2;
-
-  // The ContestDescription hash.
-  ElementModQ description_hash = 3;
-
-  // Map(SELECTION_ID, CiphertextTallySelection)
-  map<string, CiphertextTallySelection> tally_selections = 4;
+  string contest_id = 1; // matches ContestDescription.contest_id
+  uint32 sequence_order = 2; // matches ContestDescription.sequence_order
+  UInt256 contest_description_hash = 3; // matches ContestDescription.crypto_hash
+  repeated CiphertextTallySelection selections = 4;
 }
 
 // A homomorphic accumulation of CiphertextBallotSelections.
 message CiphertextTallySelection {
-  string object_id = 1;
-  int32 sequence_order = 2;
-  ElementModQ description_hash = 3;
-  // accumulation over all the cast ballots
-  ElGamalCiphertext ciphertext = 4;
+  string selection_id = 1; // matches SelectionDescription.selection_id
+  uint32 sequence_order = 2; // matches SelectionDescription.sequence_order
+  UInt256 selection_description_hash = 3; // matches SelectionDescription.crypto_hash
+  ElGamalCiphertext ciphertext = 4;  // accumulation over all the cast ballots for this selection
 }

@@ -13,7 +13,8 @@ import com.sunya.electionguard.InternalManifest;
 import com.sunya.electionguard.CiphertextTally;
 import com.sunya.electionguard.PlaintextBallot;
 import com.sunya.electionguard.PlaintextTally;
-import com.sunya.electionguard.publish.PrivateData;
+import com.sunya.electionguard.json.JsonPrivateData;
+import com.sunya.electionguard.json.JsonPublisher;
 import com.sunya.electionguard.publish.Publisher;
 import net.jqwik.api.Example;
 import net.jqwik.api.lifecycle.BeforeProperty;
@@ -58,7 +59,7 @@ public class TestPublishJson {
     CiphertextTally ciphertext_tally =
             new CiphertextTallyBuilder("CiphertextTallyId", metadata, context).build();
 
-    Publisher publisher = new Publisher(outputDir, Publisher.Mode.createNew, true);
+    JsonPublisher publisher = new JsonPublisher(outputDir, Publisher.Mode.createNew);
     publisher.writeElectionRecordJson(
             election,
             context,
@@ -81,7 +82,7 @@ public class TestPublishJson {
 
     Guardian g = Guardian.createForTesting("GuardianId", 1, 1, 1, null);
     List<GuardianPrivateRecord> guardians = ImmutableList.of(g.export_private_data());
-    PrivateData publishPrivate = new PrivateData(outputDir, false, false);
+    JsonPrivateData publishPrivate = new JsonPrivateData(outputDir, false, false);
     publishPrivate.publish_private_data(
             original_ballots,
             guardians);

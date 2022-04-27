@@ -1,7 +1,7 @@
 package com.sunya.electionguard;
 
 import com.google.common.collect.ImmutableList;
-import com.sunya.electionguard.publish.ConvertFromJson;
+import com.sunya.electionguard.json.ConvertFromJson;
 
 import javax.annotation.Nullable;
 import java.io.*;

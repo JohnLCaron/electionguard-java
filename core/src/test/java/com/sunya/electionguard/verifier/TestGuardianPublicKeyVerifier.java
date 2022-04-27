@@ -1,6 +1,7 @@
 package com.sunya.electionguard.verifier;
 
 import com.sunya.electionguard.*;
+import com.sunya.electionguard.json.JsonConsumer;
 import com.sunya.electionguard.publish.Consumer;
 import net.jqwik.api.Example;
 
@@ -20,7 +21,7 @@ public class TestGuardianPublicKeyVerifier {
     assertThat(kgv.verify_all_guardians()).isTrue();
 
     for (GuardianRecord coeff : electionRecord.guardianRecords) {
-      boolean kgvOk = kgv.verifyGuardianVer1(coeff);
+      boolean kgvOk = kgv.verifyGuardian(coeff);
       assertThat(kgvOk).isTrue();
     }
 
@@ -33,13 +34,13 @@ public class TestGuardianPublicKeyVerifier {
   @Example
   public void testGuardianPublicKeyValidationJson() throws IOException {
     String topdir = TestParameterVerifier.topdirJson;
-    Consumer consumer = new Consumer(topdir);
+    JsonConsumer consumer = new JsonConsumer(topdir);
     ElectionRecord electionRecord = consumer.readElectionRecordJson();
     GuardianPublicKeyVerifier kgv = new GuardianPublicKeyVerifier(electionRecord);
     assertThat(kgv.verify_all_guardians()).isTrue();
 
     for (GuardianRecord coeff : electionRecord.guardianRecords) {
-      boolean kgvOk = kgv.verifyGuardianVer1(coeff);
+      boolean kgvOk = kgv.verifyGuardian(coeff);
       assertThat(kgvOk).isTrue();
     }
 

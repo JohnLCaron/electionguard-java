@@ -1,5 +1,6 @@
 package com.sunya.electionguard.verifier;
 
+import com.sunya.electionguard.json.JsonConsumer;
 import com.sunya.electionguard.publish.Consumer;
 import net.jqwik.api.Example;
 import java.io.IOException;
@@ -21,7 +22,7 @@ public class TestElectionPublicKeyVerifier {
   @Example
   public void testVerifyPublicKeysJson() throws IOException {
     String topdir = TestParameterVerifier.topdirJson;
-    Consumer consumer = new Consumer(topdir);
+    JsonConsumer consumer = new JsonConsumer(topdir);
     ElectionPublicKeyVerifier validator = new ElectionPublicKeyVerifier(consumer.readElectionRecordJson());
 
     boolean sevOk = validator.verify_public_keys();

@@ -5,7 +5,7 @@ import com.sunya.electionguard.BallotBox;
 import com.sunya.electionguard.CiphertextTally;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.Group;
-import com.sunya.electionguard.proto.TrusteeFromProto;
+import com.sunya.electionguard.protoconvert.TrusteeFromProto;
 import com.sunya.electionguard.publish.Consumer;
 import com.sunya.electionguard.verifier.ElectionRecord;
 

@@ -369,7 +369,7 @@ public class DecryptingMediator {
               .toList();
       Group.ElementModQ coeff = ElectionPolynomial.compute_lagrange_coefficient(guardian.xCoordinate(), seq_orders);
       this.lagrange_coefficients.put(guardian.id(), coeff);
-      this.guardianStates.add(new AvailableGuardian(guardian.id(), guardian.xCoordinate(), coeff, 0));
+      this.guardianStates.add(new AvailableGuardian(guardian.id(), guardian.xCoordinate(), coeff));
     }
   }
 

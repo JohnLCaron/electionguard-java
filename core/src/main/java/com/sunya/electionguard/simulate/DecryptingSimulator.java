@@ -14,7 +14,7 @@ import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.Scheduler;
 import com.sunya.electionguard.decrypting.DecryptingTrustee;
 import com.sunya.electionguard.input.ManifestInputValidation;
-import com.sunya.electionguard.proto.TrusteeFromProto;
+import com.sunya.electionguard.protoconvert.TrusteeFromProto;
 import com.sunya.electionguard.publish.Consumer;
 import com.sunya.electionguard.publish.Publisher;
 import com.sunya.electionguard.verifier.ElectionRecord;
@@ -214,7 +214,7 @@ public class DecryptingSimulator {
   }
 
   boolean publish(String inputDir, String publishDir) throws IOException {
-    Publisher publisher = new Publisher(publishDir, Publisher.Mode.createIfMissing, false);
+    Publisher publisher = new Publisher(publishDir, Publisher.Mode.createIfMissing);
     publisher.writeDecryptionResultsProto(
             this.electionRecord,
             this.encryptedTally,

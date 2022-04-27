@@ -1,6 +1,8 @@
 package com.sunya.electionguard.verifier;
 
+import com.google.common.collect.Iterables;
 import com.sunya.electionguard.CiphertextBallot;
+import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.Hash;
 import com.sunya.electionguard.SubmittedBallot;
@@ -71,7 +73,7 @@ public class TestAttackSubmittedBallot {
       }
 
       if (write) {
-        Publisher publisher = new Publisher(output, createIfMissing, false);
+        Publisher publisher = new Publisher(output, createIfMissing);
         publisher.writeEncryptionResultsProto(electionRecord, electionRecord.devices, ballots);
       }
     }
@@ -113,7 +115,6 @@ public class TestAttackSubmittedBallot {
             contest.contestHash,
             selections2,
             change_crypto,
-            contest.ciphertextAccumulation,
             contest.nonce,
             contest.proof
     );

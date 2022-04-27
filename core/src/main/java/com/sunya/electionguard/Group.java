@@ -252,13 +252,18 @@ public class Group {
   }
 
   /**
-    Given a Python integer, returns an ElementModQ. Allows
+    Given a BigInteger, returns an ElementModQ. Allows
     for the input to be out-of-bounds, and thus creating an invalid
     element (i.e., outside of [0,Q)). Useful for tests of it
     you're absolutely, positively, certain the input is in-bounds.
    */
   public static ElementModQ int_to_q_unchecked(BigInteger biggy) {
     return new ElementModQ(biggy);
+  }
+
+  // given an int, returns an ElementModQ
+  public static ElementModQ int_to_q_unchecked(int bitsy) {
+    return new ElementModQ(BigInteger.valueOf(bitsy));
   }
 
   // https://www.electionguard.vote/spec/0.95.0/9_Verifier_construction/#modular-addition

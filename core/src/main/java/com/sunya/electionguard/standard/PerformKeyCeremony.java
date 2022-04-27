@@ -8,16 +8,22 @@ import com.sunya.electionguard.GuardianRecord;
 import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.Hash;
+import com.sunya.electionguard.core.UInt256;
+import com.sunya.electionguard.decrypting.DecryptingTrustee;
 import com.sunya.electionguard.input.ManifestInputValidation;
 import com.sunya.electionguard.publish.Consumer;
 import com.sunya.electionguard.publish.PrivateData;
 import com.sunya.electionguard.publish.Publisher;
+import electionguard.ballot.ElectionConfig;
+import electionguard.ballot.ElectionInitialized;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.List;
 import java.util.Optional;
+
+import static java.util.Collections.emptyMap;
 
 /**
  * A command line program that performs the key ceremony to create the Guardians, using standard library and local Guardians.
@@ -272,19 +278,33 @@ public class PerformKeyCeremony {
   }
 
   boolean publish(String publishDir) throws IOException {
-    Publisher publisher = new Publisher(publishDir, Publisher.Mode.createNew, true);
-    publisher.writeKeyCeremonyJson(
+    ElectionConfig config = new ElectionConfig(
+            "yoFace",
+            new electionguard.ballot.ElectionConstants(Group.getPrimes()),
             this.election,
-            this.context,
-            Group.getPrimes(),
-            this.guardian_records);
+            this.numberOfGuardians,
+            this.quorum,
+            emptyMap()
+    );
+
+    ElectionInitialized electionInitialized = new ElectionInitialized(
+            config,
+            this.jointKey.joint_public_key(),
+            UInt256.fromModQ(this.election.cryptoHash()),
+            UInt256.fromModQ(this.context.cryptoExtendedBaseHash),
+            this.guardian_records.stream().map( it -> new electionguard.ballot.Guardian(it)).toList(),
+            emptyMap()
+    );
+
+    Publisher publisher = new Publisher(publishDir, Publisher.Mode.createNew);
+    publisher.writeElectionInitialized(electionInitialized);
 
     // save private data for decrypting
-    List<GuardianPrivateRecord> gprivate = this.guardians.stream()
-            .map(g -> g.export_private_data())
+    List<DecryptingTrustee> trustees = this.guardians.stream()
+            .map(g -> g.toDecryptingTrustee())
             .toList();
-    PrivateData pdata = publisher.makePrivateData(false, false);
-    pdata.writeGuardiansJson(gprivate);
+    PrivateData privateData = publisher.makePrivateData(false, false);
+    trustees.forEach(it -> privateData.writeTrustee(it));
     return true;
   }
 }

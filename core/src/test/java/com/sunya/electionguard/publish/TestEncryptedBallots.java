@@ -11,7 +11,7 @@ import java.io.IOException;
 import static com.google.common.truth.Truth.assertThat;
 
 public class TestEncryptedBallots {
-  private static final String kotlinPublish = "/home/snake/dev/github/electionguard-kotlin-multiplatform/src/commonTest/data/workflow/runBatchEncryption";
+  private static final String kotlinPublish = "/home/snake/dev/github/electionguard-kotlin-multiplatform/src/commonTest/data/runWorkflow";
 
   @Example
   public void testReadElectionRecordFromKotlin() throws IOException {

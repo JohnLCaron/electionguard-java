@@ -1,5 +1,6 @@
 package com.sunya.electionguard.verifier;
 
+import com.sunya.electionguard.json.JsonConsumer;
 import com.sunya.electionguard.publish.Consumer;
 import net.jqwik.api.Example;
 
@@ -27,7 +28,7 @@ public class TestDecryptionVerifier {
   @Example
   public void testDecryptionValidationJson() throws IOException {
     String topdir = TestParameterVerifier.topdirJson;
-    Consumer consumer = new Consumer(topdir);
+    JsonConsumer consumer = new JsonConsumer(topdir);
     ElectionRecord electionrecord = consumer.readElectionRecordJson();
     DecryptionVerifier validator = new DecryptionVerifier(electionrecord, electionrecord.decryptedTally);
 

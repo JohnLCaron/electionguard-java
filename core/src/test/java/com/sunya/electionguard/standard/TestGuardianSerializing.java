@@ -6,8 +6,9 @@ import com.sunya.electionguard.Group;
 import com.sunya.electionguard.GuardianRecord;
 import com.sunya.electionguard.Hash;
 import com.sunya.electionguard.Manifest;
-import com.sunya.electionguard.publish.Consumer;
-import com.sunya.electionguard.publish.PrivateData;
+import com.sunya.electionguard.json.JsonConsumer;
+import com.sunya.electionguard.json.JsonPrivateData;
+import com.sunya.electionguard.json.JsonPublisher;
 import com.sunya.electionguard.publish.Publisher;
 import net.jqwik.api.Example;
 
@@ -54,8 +55,8 @@ public class TestGuardianSerializing {
   final int quorum = 4;
   final Manifest election;
   final String outputDir;
-  final Publisher publisher;
-  final PrivateData pdata;
+  final JsonPublisher publisher;
+  final JsonPrivateData pdata;
 
   KeyCeremony.ElectionJointKey jointKey;
   List<Guardian> guardians;
@@ -69,8 +70,8 @@ public class TestGuardianSerializing {
     Path tmp = Files.createTempDirectory(null);
     tmp.toFile().deleteOnExit();
     this.outputDir = "/home/snake/tmp/publishTmp"; // tmp.toAbsolutePath().toString();
-    this.publisher = new Publisher(outputDir, Publisher.Mode.createNew, true);
-    this.pdata = new PrivateData(outputDir, true, true);
+    this.publisher = new JsonPublisher(outputDir, Publisher.Mode.createNew);
+    this.pdata = new JsonPrivateData(outputDir, true, true);
 
     this.guardians = new ArrayList<>();
     this.guardianRecords = new ArrayList<>();
@@ -121,7 +122,7 @@ public class TestGuardianSerializing {
 
   @Example
   public void checkGuardianRecord() throws IOException {
-    Consumer consumer = new Consumer(this.publisher);
+    JsonConsumer consumer = new JsonConsumer(this.publisher);
     List<GuardianRecord> guardianRecords = consumer.guardianRecords();
     assertThat(guardianRecords).hasSize(this.guardians.size());
 

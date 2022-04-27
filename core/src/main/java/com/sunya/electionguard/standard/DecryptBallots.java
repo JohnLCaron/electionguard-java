@@ -15,6 +15,7 @@ import com.sunya.electionguard.input.ManifestInputValidation;
 import com.sunya.electionguard.publish.Consumer;
 import com.sunya.electionguard.publish.Publisher;
 import com.sunya.electionguard.verifier.ElectionRecord;
+import electionguard.ballot.DecryptionResult;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
@@ -23,6 +24,8 @@ import java.util.Formatter;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import static java.util.Collections.emptyMap;
 
 /**
  * A command line program to decrypt a collection of ballots, using standard library and local Guardians.
@@ -221,14 +224,15 @@ public class DecryptBallots {
   }
 
   boolean publish(String inputDir, String publishDir) throws IOException {
-    Publisher publisher = new Publisher(publishDir, Publisher.Mode.createIfMissing, false);
-    publisher.writeDecryptionResultsJson(
-            this.electionRecord,
-            this.encryptedTally,
-            this.decryptedTally,
-            this.spoiledDecryptedBallots,
-            this.availableGuardians);
 
+    DecryptionResult result = new DecryptionResult(
+            null, // this.tallyResult,
+            this.decryptedTally,
+            this.availableGuardians,
+            emptyMap());
+
+    Publisher publisher = new Publisher(publishDir, Publisher.Mode.createIfMissing);
+    publisher.writeDecryptionResults(result);
     publisher.copyAcceptedBallots(inputDir);
     return true;
   }

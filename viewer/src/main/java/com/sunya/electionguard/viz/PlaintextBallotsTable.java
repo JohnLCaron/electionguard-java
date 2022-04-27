@@ -183,10 +183,6 @@ public class PlaintextBallotsTable extends JPanel {
       return selection.sequenceOrder;
     }
 
-    public boolean isPlaceHolder() {
-      return selection.isPlaceholderSelection;
-    }
-
     public int getVote() {
       return selection.vote;
     }

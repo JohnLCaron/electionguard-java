@@ -1,5 +1,6 @@
 package com.sunya.electionguard.publish;
 
+import com.sunya.electionguard.json.JsonConsumer;
 import com.sunya.electionguard.verifier.ElectionRecord;
 import com.sunya.electionguard.verifier.TestParameterVerifier;
 import net.jqwik.api.Example;
@@ -12,7 +13,7 @@ public class TestConsumer {
 
   @Example
   public void testConsumerJson() throws IOException {
-    Consumer consumer = new Consumer(TestParameterVerifier.topdirJson);
+    JsonConsumer consumer = new JsonConsumer(TestParameterVerifier.topdirJson);
     ElectionRecord record = consumer.readElectionRecord();
     assertThat(record.manifest).isNotNull();
     assertThat(record.context).isNotNull();
@@ -29,7 +30,7 @@ public class TestConsumer {
 
   @Example
   public void testConsumerJsonPython() throws IOException {
-    Consumer consumer = new Consumer(TestParameterVerifier.topdirJsonPython);
+    JsonConsumer consumer = new JsonConsumer(TestParameterVerifier.topdirJsonPython);
     ElectionRecord record = consumer.readElectionRecord();
     assertThat(record.manifest).isNotNull();
     assertThat(record.context).isNotNull();

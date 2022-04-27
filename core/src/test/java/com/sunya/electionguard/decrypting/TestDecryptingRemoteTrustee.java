@@ -3,7 +3,7 @@ package com.sunya.electionguard.decrypting;
 import com.sunya.electionguard.CiphertextTally;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.Group;
-import com.sunya.electionguard.proto.CommonConvert;
+import com.sunya.electionguard.protoconvert.CommonConvert;
 import electionguard.protogen.CommonProto;
 import electionguard.protogen.CommonRpcProto;
 import electionguard.protogen.DecryptingTrusteeProto;
@@ -63,12 +63,12 @@ public class TestDecryptingRemoteTrustee {
 
     List<CommonProto.ElGamalCiphertext> texts = this.tally.contests.values().stream()
             .flatMap(c -> c.selections.values().stream())
-            .map(s -> CommonConvert.convertCiphertext(s.ciphertext()))
+            .map(s -> CommonConvert.publishCiphertext(s.ciphertext()))
             .toList();
 
     DecryptingTrusteeProto.PartialDecryptionRequest request = DecryptingTrusteeProto.PartialDecryptionRequest.newBuilder()
             .addAllText(texts)
-            .setExtendedBaseHash(CommonConvert.convertElementModQ(this.extendedHash))
+            .setExtendedBaseHash(CommonConvert.publishElementModQ(this.extendedHash))
             .build();
 
     remote1.partialDecrypt(request, observePartialDecryption);
@@ -88,8 +88,8 @@ public class TestDecryptingRemoteTrustee {
 
     ElGamal.Ciphertext fakeText = new ElGamal.Ciphertext(Group.TWO_MOD_P, Group.TWO_MOD_P);
     DecryptingTrusteeProto.PartialDecryptionRequest request = DecryptingTrusteeProto.PartialDecryptionRequest.newBuilder()
-            .addText(CommonConvert.convertCiphertext(fakeText))
-            .setExtendedBaseHash(CommonConvert.convertElementModQ(this.extendedHash))
+            .addText(CommonConvert.publishCiphertext(fakeText))
+            .setExtendedBaseHash(CommonConvert.publishElementModQ(this.extendedHash))
             .build();
 
     remote1.partialDecrypt(request, observePartialDecryption);
@@ -108,13 +108,13 @@ public class TestDecryptingRemoteTrustee {
 
     List<CommonProto.ElGamalCiphertext> texts = this.tally.contests.values().stream()
             .flatMap(c -> c.selections.values().stream())
-            .map(s -> CommonConvert.convertCiphertext(s.ciphertext()))
+            .map(s -> CommonConvert.publishCiphertext(s.ciphertext()))
             .toList();
 
     DecryptingTrusteeProto.CompensatedDecryptionRequest request = DecryptingTrusteeProto.CompensatedDecryptionRequest.newBuilder()
             .setMissingGuardianId("remoteTrustee2")
             .addAllText(texts)
-            .setExtendedBaseHash(CommonConvert.convertElementModQ(this.extendedHash))
+            .setExtendedBaseHash(CommonConvert.publishElementModQ(this.extendedHash))
             .build();
 
     remote1.compensatedDecrypt(request, observeCompensatedDecryption);
@@ -135,8 +135,8 @@ public class TestDecryptingRemoteTrustee {
     ElGamal.Ciphertext fakeText = new ElGamal.Ciphertext(Group.TWO_MOD_P, Group.TWO_MOD_P);
     DecryptingTrusteeProto.CompensatedDecryptionRequest request = DecryptingTrusteeProto.CompensatedDecryptionRequest.newBuilder()
             .setMissingGuardianId("remoteTrustee2")
-            .addText(CommonConvert.convertCiphertext(fakeText))
-            .setExtendedBaseHash(CommonConvert.convertElementModQ(this.extendedHash))
+            .addText(CommonConvert.publishCiphertext(fakeText))
+            .setExtendedBaseHash(CommonConvert.publishElementModQ(this.extendedHash))
             .build();
 
     remote1.compensatedDecrypt(request, observeCompensatedDecryption);
@@ -156,8 +156,8 @@ public class TestDecryptingRemoteTrustee {
     ElGamal.Ciphertext fakeText = new ElGamal.Ciphertext(Group.TWO_MOD_P, Group.TWO_MOD_P);
     DecryptingTrusteeProto.CompensatedDecryptionRequest request = DecryptingTrusteeProto.CompensatedDecryptionRequest.newBuilder()
             .setMissingGuardianId("who?")
-            .addText(CommonConvert.convertCiphertext(fakeText))
-            .setExtendedBaseHash(CommonConvert.convertElementModQ(this.extendedHash))
+            .addText(CommonConvert.publishCiphertext(fakeText))
+            .setExtendedBaseHash(CommonConvert.publishElementModQ(this.extendedHash))
             .build();
 
     remote1.compensatedDecrypt(request, observeCompensatedDecryption);

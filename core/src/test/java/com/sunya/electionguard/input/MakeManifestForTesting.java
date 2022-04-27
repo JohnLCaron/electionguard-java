@@ -35,7 +35,7 @@ public class MakeManifestForTesting {
 
     ElectionConstants constants = ElectionConstants.get(ElectionConstants.PrimeOption.Standard);
 
-    Publisher publisher = new Publisher(output, createIfMissing, false);
+    Publisher publisher = new Publisher(output, createIfMissing);
     publisher.writeStartingProto(manifest, constants);
   }
 }

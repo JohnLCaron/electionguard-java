@@ -1,11 +1,14 @@
 package com.sunya.electionguard.verifier;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Iterables;
 import com.sunya.electionguard.ChaumPedersen;
+import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.Hash;
 
 import java.math.BigInteger;
+import java.util.List;
 
 import com.sunya.electionguard.SubmittedBallot;
 import static com.sunya.electionguard.CiphertextBallot.Contest;
@@ -63,15 +66,20 @@ public class ContestVoteLimitsVerifier {
     final ElementModQ contest_response;
     final ElementModQ contest_challenge;
     final String contest_id;
+    final ElGamal.Ciphertext ciphertextAccumulation;
 
     ContestVerifier(Contest contest) {
       this.contest = contest;
       this.proof = contest.proof.orElseThrow();
-      this.contest_alpha = contest.ciphertextAccumulation.pad();
-      this.contest_beta = contest.ciphertextAccumulation.data();
       this.contest_response = proof.response;
       this.contest_challenge = proof.challenge;
       this.contest_id = contest.contestId;
+
+      // recalculate ciphertextAccumulation
+      List<ElGamal.Ciphertext> texts = contest.selections.stream().map(it -> it.ciphertext()).toList();
+      this.ciphertextAccumulation = ElGamal.elgamal_add(Iterables.toArray(texts, ElGamal.Ciphertext.class));
+      this.contest_alpha = ciphertextAccumulation.pad();
+      this.contest_beta = ciphertextAccumulation.data();
     }
 
     boolean verifyContest() {
@@ -144,7 +152,7 @@ public class ContestVoteLimitsVerifier {
       if (proof.name.endsWith("2")) {
         // ElGamal.Ciphertext message, ElementModP k, ElementModQ qbar
         proofOk = proof.is_valid(
-                contest.ciphertextAccumulation,
+                ciphertextAccumulation,
                 electionRecord.context.jointPublicKey,
                 electionRecord.context.cryptoExtendedBaseHash
         );

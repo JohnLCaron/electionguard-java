@@ -1,6 +1,6 @@
 package com.sunya.electionguard.decrypting;
 
-import com.sunya.electionguard.proto.TrusteeFromProto;
+import com.sunya.electionguard.protoconvert.TrusteeFromProto;
 import net.jqwik.api.Example;
 
 import java.io.IOException;

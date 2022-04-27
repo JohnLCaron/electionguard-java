@@ -1,5 +1,6 @@
 package com.sunya.electionguard.verifier;
 
+import com.sunya.electionguard.json.JsonConsumer;
 import com.sunya.electionguard.publish.Consumer;
 import net.jqwik.api.Example;
 import java.io.IOException;
@@ -18,7 +19,7 @@ public class TestBallotAggregationVerifier {
 
   @Example
   public void testVerifyBallotAggregationJson() throws IOException {
-    Consumer consumer = new Consumer(TestParameterVerifier.topdirJson);
+    JsonConsumer consumer = new JsonConsumer(TestParameterVerifier.topdirJson);
     ElectionRecord electionRecord = consumer.readElectionRecordJson();
     BallotAggregationVerifier validator = new BallotAggregationVerifier(electionRecord.acceptedBallots, electionRecord.decryptedTally);
 

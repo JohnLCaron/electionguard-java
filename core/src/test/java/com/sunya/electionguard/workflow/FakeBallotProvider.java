@@ -26,6 +26,6 @@ public class FakeBallotProvider {
   public static PlaintextBallot.Selection makeSelection(Manifest.SelectionDescription selection) {
     return new PlaintextBallot.Selection(
             selection.selectionId(), selection.sequenceOrder(),
-            1, false, null);
+            1, null);
   }
 }

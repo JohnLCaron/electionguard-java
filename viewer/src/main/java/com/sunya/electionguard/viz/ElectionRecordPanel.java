@@ -205,7 +205,7 @@ class ElectionRecordPanel extends JPanel {
 
       f.format("%n  Available Guardians%n");
       for (AvailableGuardian guardian : record.availableGuardians) {
-        f.format("    %20s %d %s%n", guardian.guardianId(), guardian.xCoordinate(), guardian.lagrangeCoordinate());
+        f.format("    %20s %d %s%n", guardian.guardianId(), guardian.xCoordinate(), guardian.lagrangeCoefficient());
       }
 
       f.format("%nAcceptedBallots %d%n", Iterables.size(record.acceptedBallots));

@@ -217,7 +217,6 @@ public class TestEncryptProperties extends TestProperties {
     CiphertextBallot.Contest malformed_proof = new CiphertextBallot.Contest(
             result.object_id(), result.sequence_order(), result.contestHash,
             result.selections, result.crypto_hash,
-            new ElGamal.Ciphertext(TWO_MOD_P, TWO_MOD_P),
             result.nonce,
             Optional.of(malformed_disjunctive));
     assertThat(malformed_proof.is_valid_encryption("test", description.contest.cryptoHash(), keypair.public_key(), ONE_MOD_Q)).isFalse();
@@ -226,7 +225,6 @@ public class TestEncryptProperties extends TestProperties {
     CiphertextBallot.Contest missing_proof = new CiphertextBallot.Contest(
             result.object_id(), result.sequence_order(), result.contestHash,
             result.selections, result.crypto_hash,
-            new ElGamal.Ciphertext(TWO_MOD_P, TWO_MOD_P),
             result.nonce, Optional.empty());
     assertThat(missing_proof.is_valid_encryption("test", description.contest.cryptoHash(), keypair.public_key(), ONE_MOD_Q)).isFalse();
   }

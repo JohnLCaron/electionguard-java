@@ -3,7 +3,7 @@ package com.sunya.electionguard.keyceremony;
 import com.google.common.flogger.FluentLogger;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.SchnorrProof;
-import com.sunya.electionguard.proto.CommonConvert;
+import com.sunya.electionguard.protoconvert.CommonConvert;
 import electionguard.protogen.CommonRpcProto;
 import electionguard.protogen.RemoteKeyCeremonyTrusteeProto;
 import electionguard.protogen.RemoteKeyCeremonyTrusteeServiceGrpc;
@@ -43,7 +43,7 @@ class KeyCeremonyRemoteTrusteeProxy implements KeyCeremonyTrusteeIF {
         return Optional.empty();
       }
       List<SchnorrProof> proofs = response.getCoefficientProofsList().stream()
-              .map(CommonConvert::convertSchnorrProof)
+              .map(CommonConvert::importSchnorrProof)
               .toList();
       return Optional.of(new KeyCeremony2.PublicKeySet(
               response.getOwnerId(),
@@ -63,7 +63,7 @@ class KeyCeremonyRemoteTrusteeProxy implements KeyCeremonyTrusteeIF {
       RemoteKeyCeremonyTrusteeProto.PublicKeySet.Builder request = RemoteKeyCeremonyTrusteeProto.PublicKeySet.newBuilder();
       request.setOwnerId(keyset.ownerId())
               .setGuardianXCoordinate(keyset.guardianXCoordinate());
-      keyset.coefficientProofs().forEach(p -> request.addCoefficientProofs(CommonConvert.convertSchnorrProof(p)));
+      keyset.coefficientProofs().forEach(p -> request.addCoefficientProofs(CommonConvert.publishSchnorrProof(p)));
 
       CommonRpcProto.ErrorResponse response = blockingStub.receivePublicKeys(request.build());
       if (!response.getError().isEmpty()) {
@@ -86,7 +86,7 @@ class KeyCeremonyRemoteTrusteeProxy implements KeyCeremonyTrusteeIF {
               response.getGeneratingGuardianId(),
               response.getDesignatedGuardianId(),
               response.getDesignatedGuardianXCoordinate(),
-              CommonConvert.convertElementModQ(response.getCoordinate()),
+              CommonConvert.importElementModQ(response.getCoordinate()),
               response.getError()));
 
     } catch (StatusRuntimeException e) {
@@ -102,7 +102,7 @@ class KeyCeremonyRemoteTrusteeProxy implements KeyCeremonyTrusteeIF {
       request.setGeneratingGuardianId(backup.generatingGuardianId())
               .setDesignatedGuardianId(backup.designatedGuardianId())
               .setDesignatedGuardianXCoordinate(backup.designatedGuardianXCoordinate())
-              .setCoordinate(CommonConvert.convertElementModQ(backup.coordinate()));
+              .setCoordinate(CommonConvert.publishElementModQ(backup.coordinate()));
 
       RemoteKeyCeremonyTrusteeProto.PartialKeyVerification response = blockingStub.verifyPartialKeyBackup(request.build());
       return Optional.of(new KeyCeremony2.PartialKeyVerification(
@@ -125,7 +125,7 @@ class KeyCeremonyRemoteTrusteeProxy implements KeyCeremonyTrusteeIF {
               response.getGeneratingGuardianId(),
               response.getDesignatedGuardianId(),
               response.getDesignatedGuardianXCoordinate(),
-              CommonConvert.convertElementModQ(response.getCoordinate()),
+              CommonConvert.importElementModQ(response.getCoordinate()),
               response.getError()));
 
 
@@ -144,7 +144,7 @@ class KeyCeremonyRemoteTrusteeProxy implements KeyCeremonyTrusteeIF {
         logger.atSevere().log("sendJointPublicKey failed: %s", response.getError());
         return Optional.empty();
       }
-      return Optional.ofNullable(CommonConvert.convertElementModP(response.getJointPublicKey()));
+      return Optional.ofNullable(CommonConvert.importElementModP(response.getJointPublicKey()));
 
     } catch (StatusRuntimeException e) {
       logger.atSevere().withCause(e).log("sendJointPublicKey failed: ");

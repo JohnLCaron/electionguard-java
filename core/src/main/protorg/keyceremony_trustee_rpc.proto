@@ -1,9 +1,10 @@
 syntax = "proto3";
 
-import "com/sunya/electionguard/protogen/common.proto";
+import "common.proto";
+import "common_rpc.proto";
 import "google/protobuf/empty.proto";
 
-option java_package = "com.sunya.electionguard.protogen";
+option java_package = "electionguard.protogen";
 option java_outer_classname = "RemoteKeyCeremonyTrusteeProto";
 
 service RemoteKeyCeremonyTrusteeService {

@@ -195,8 +195,9 @@ class DecryptionMediator {
             new ArrayList<>(available_guardians.values()));
 
     List<AvailableGuardian> result = new ArrayList<>();
-    available_guardians.values().forEach(g -> result.add( new AvailableGuardian(
-            g.owner_id(), g.sequence_order(), lagrange_coefficients.get(g.owner_id()), 0)));
+    available_guardians.values().forEach(g -> result.add(
+            new AvailableGuardian(g.owner_id(), g.sequence_order(), lagrange_coefficients.get(g.owner_id()))
+    ));
     return result;
   }
 

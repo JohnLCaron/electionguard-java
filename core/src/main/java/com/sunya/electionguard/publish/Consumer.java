@@ -2,28 +2,21 @@ package com.sunya.electionguard.publish;
 
 import com.google.common.collect.AbstractIterator;
 import com.sunya.electionguard.*;
-import com.sunya.electionguard.proto.SubmittedBallotFromProto;
-import com.sunya.electionguard.proto.ElectionRecordFromProto;
-import com.sunya.electionguard.proto.PlaintextBallotFromProto;
-import com.sunya.electionguard.proto.PlaintextTallyFromProto;
+import com.sunya.electionguard.protoconvert.SubmittedBallotFromProto;
+import com.sunya.electionguard.protoconvert.ElectionRecordFromProto;
+import com.sunya.electionguard.protoconvert.PlaintextBallotFromProto;
+import com.sunya.electionguard.protoconvert.PlaintextTallyFromProto;
 import com.sunya.electionguard.verifier.ElectionRecord;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Formatter;
-import java.util.List;
-import java.util.Map;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import electionguard.protogen.*;
-
-import javax.annotation.Nullable;
 
 
 /** Helper class for consumers of published election records in Json or protobuf. */
@@ -35,13 +28,12 @@ public class Consumer {
   }
 
   public Consumer(String topDir) throws IOException {
-    publisher = new Publisher(topDir, Publisher.Mode.readonly, false);
+    publisher = new Publisher(topDir, Publisher.Mode.readonly);
   }
 
-  public static Consumer fromElectionRecord(String electionRecordDir, boolean isJson) throws IOException {
-    return new Consumer(new Publisher(Path.of(electionRecordDir), Publisher.Mode.readonly, isJson));
+  public static Consumer fromElectionRecord(String electionRecordDir) throws IOException {
+    return new Consumer(new Publisher(Path.of(electionRecordDir), Publisher.Mode.readonly));
   }
-
 
   public String location() {
     return publisher.publishPath().toAbsolutePath().toString();
@@ -52,10 +44,6 @@ public class Consumer {
       error.format("%s does not exist", publisher.publishPath());
       return false;
     }
-    if (!Files.exists(publisher.electionRecordProtoPath()) && !Files.exists(publisher.constantsPath())) {
-      error.format("%s does not contain proto or json files", publisher.publishPath());
-      return false;
-    }
     return true;
   }
 
@@ -63,17 +51,9 @@ public class Consumer {
     ElectionRecord result;
     if (Files.exists(publisher.electionRecordProtoPath())) {
       result = readElectionRecordProto();
-    } else if (Files.exists(publisher.constantsPath()))  {
-      result = readElectionRecordJson();
     } else {
       throw new FileNotFoundException(String.format("No election record found in %s", publisher.publishPath()));
     }
-
-    /* check constants
-    if (!result.constants.equals(Group.getPrimes())) {
-      System.out.printf("** Non-standard constants in %s%n", publisher.publishPath());
-      Group.setPrimes(result.constants);
-    } */
     return result;
   }
 
@@ -81,119 +61,9 @@ public class Consumer {
     if (Files.exists(publisher.electionRecordProtoPath())) {
       return readElectionRecordProto().manifest;
     } else {
-      return manifest();
+      return null;
     }
   }
-
-  //////////////////// Json
-
-  public ElectionRecord readElectionRecordJson() throws IOException {
-    return new ElectionRecord(
-            ElectionRecord.currentVersion, // logic is that it would fail on an earlier version TODO add to Json
-            this.manifest(), // required
-            this.constants(), // required
-            this.context(),
-            this.guardianRecords(),
-            this.devices(),
-            this.ciphertextTally(),
-            this.decryptedTally(),
-            CloseableIterableAdapter.wrap(this.acceptedBallots()),
-            CloseableIterableAdapter.wrap(this.spoiledBallots()),
-            this.availableGuardians());
-  }
-
-  public Manifest manifest() throws IOException {
-    return ConvertFromJson.readManifest(publisher.manifestPath().toString());
-  }
-
-  public ElectionConstants constants() throws IOException {
-    return ConvertFromJson.readConstants(publisher.constantsPath().toString());
-  }
-
-  @Nullable
-  public ElectionContext context() throws IOException {
-    if (Files.exists(publisher.contextPath())) {
-      return ConvertFromJson.readContext(publisher.contextPath().toString());
-    }
-    return null;
-  }
-
-  @Nullable
-  public PlaintextTally decryptedTally() throws IOException {
-    if (Files.exists(publisher.tallyPath())) {
-      return ConvertFromJson.readPlaintextTally(publisher.tallyPath().toString());
-    }
-    return null;
-  }
-
-  @Nullable
-  public CiphertextTally ciphertextTally() throws IOException {
-    if (Files.exists(publisher.encryptedTallyPath())) {
-      return ConvertFromJson.readCiphertextTally(publisher.encryptedTallyPath().toString());
-    }
-    return null;
-  }
-
-  public List<Encrypt.EncryptionDevice> devices() throws IOException {
-    List<Encrypt.EncryptionDevice> result = new ArrayList<>();
-    for (File file : publisher.deviceFiles()) {
-      Encrypt.EncryptionDevice fromPython = ConvertFromJson.readDevice(file.getAbsolutePath());
-      result.add(fromPython);
-    }
-    return result;
-  }
-
-  public List<SubmittedBallot> acceptedBallots() throws IOException {
-    List<SubmittedBallot> result = new ArrayList<>();
-    for (File file : publisher.ballotFiles()) {
-      SubmittedBallot fromPython = ConvertFromJson.readSubmittedBallot(file.getAbsolutePath());
-      result.add(fromPython);
-    }
-    return result;
-  }
-
-  public List<AvailableGuardian> availableGuardians() throws IOException {
-    // early versions didnt have this
-    if (!publisher.coefficientsPath().toFile().exists()) {
-      return new ArrayList<>();
-    }
-    Map<String, GuardianRecord> grMap = guardianRecords().stream().collect(Collectors.toMap(
-            GuardianRecord::guardianId, gr -> gr));
-    LagrangeCoefficientsPojo coeffPojo = ConvertFromJson.readCoefficients(publisher.coefficientsPath().toString());
-    // Preconditions.checkArgument(grs.size() == pojo.coefficients.size());
-    List<AvailableGuardian> result = new ArrayList<>();
-    for (Map.Entry<String, Group.ElementModQ> entry : coeffPojo.coefficients.entrySet()) {
-      GuardianRecord gr = grMap.get(entry.getKey());
-      AvailableGuardian avail = new AvailableGuardian(entry.getKey(), gr.xCoordinate(), entry.getValue(), null);
-      result.add(avail);
-    }
-    return result;
-  }
-
-  // Decrypted, spoiled ballots
-  public List<PlaintextTally> spoiledBallots() {
-    List<PlaintextTally> result = new ArrayList<>();
-    for (File file : publisher.spoiledBallotFiles()) {
-      try {
-        PlaintextTally fromPython = ConvertFromJson.readPlaintextTally(file.getAbsolutePath());
-        result.add(fromPython);
-      } catch (Exception e) {
-        // System.out.printf("Exception %s on %s%n", e.getMessage(), file.getAbsolutePath());
-      }
-    }
-    return result;
-  }
-
-  public List<GuardianRecord> guardianRecords() throws IOException {
-    List<GuardianRecord> result = new ArrayList<>();
-    for (File file : publisher.guardianRecordsFiles()) {
-      GuardianRecord fromPython = ConvertFromJson.readGuardianRecord(file.getAbsolutePath());
-      result.add(fromPython);
-    }
-    return result;
-  }
-
-  ///////////////////////////////////////////// Proto
 
   // reads everything
   public ElectionRecord readElectionRecordProto() throws IOException {
@@ -336,7 +206,7 @@ public class Consumer {
           input.close();
           return endOfData();
         }
-        return PlaintextTallyFromProto.translateFromProto(tallyProto);
+        return PlaintextTallyFromProto.importPlaintextTally(tallyProto);
       } catch (IOException e) {
         throw new RuntimeException(e);
       }
