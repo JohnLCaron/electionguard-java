@@ -4,7 +4,7 @@ import com.google.common.collect.Sets;
 import com.sunya.electionguard.BallotBox;
 import com.sunya.electionguard.BallotFactory;
 import com.sunya.electionguard.CiphertextBallot;
-import com.sunya.electionguard.ElectionContext;
+import com.sunya.electionguard.ElectionCryptoContext;
 import com.sunya.electionguard.CiphertextTally;
 import com.sunya.electionguard.CiphertextTallyBuilder;
 import com.sunya.electionguard.DecryptionShare;
@@ -49,7 +49,7 @@ public class TestDecryptionMediator extends TestProperties {
   List<Guardian> guardians = new ArrayList<>();
   KeyCeremony.ElectionJointKey joint_public_key;
   Manifest election;
-  ElectionContext context;
+  ElectionCryptoContext context;
   InternalManifest metadata;
   Map<String, Integer> expected_plaintext_tally;
 
@@ -168,7 +168,7 @@ public class TestDecryptionMediator extends TestProperties {
 
   @Example
   public void test_announce() {
-    DecryptionMediator mediator = new DecryptionMediator("mediator-id", this.context);
+    DecryptionMediator mediator = new DecryptionMediator(this.context);
     Guardian guardian = this.guardians.get(0);
     KeyCeremony.ElectionPublicKey guardian_key = guardian.share_key();
 
@@ -191,7 +191,7 @@ public class TestDecryptionMediator extends TestProperties {
 
   @Example
   public void test_get_plaintext_with_all_guardians_present() {
-    DecryptionMediator mediator = new DecryptionMediator("mediator-id", this.context);
+    DecryptionMediator mediator = new DecryptionMediator(this.context);
 
     DecryptionHelper.perform_decryption_setup(
             this.guardians,
@@ -214,7 +214,7 @@ public class TestDecryptionMediator extends TestProperties {
 
   @Example
   public void test_get_plaintext_with_a_missing_guardian() {
-    DecryptionMediator mediator = new DecryptionMediator("mediator-id", this.context);
+    DecryptionMediator mediator = new DecryptionMediator(this.context);
 
     List<Guardian> available_guardians = this.guardians.subList(0, 2);
     List<KeyCeremony.ElectionPublicKey> all_guardian_keys = this.guardians.stream().map(Guardian::share_key).toList();
@@ -268,7 +268,7 @@ public class TestDecryptionMediator extends TestProperties {
 
     CiphertextTally encrypted_tally = this.generate_encrypted_tally(desc.internalManifest, desc.context, plaintext_ballots);
 
-    DecryptionMediator mediator = new DecryptionMediator("test_get_plaintext_tally_with_all_guardians_present", desc.context);
+    DecryptionMediator mediator = new DecryptionMediator(desc.context);
     DecryptionHelper.perform_decryption_setup(this.guardians, mediator, desc.context, encrypted_tally, new ArrayList<>());
 
     PlaintextTally plaintext_tally = mediator.get_plaintext_tally(encrypted_tally).orElseThrow();
@@ -278,7 +278,7 @@ public class TestDecryptionMediator extends TestProperties {
 
   private CiphertextTally generate_encrypted_tally(
           InternalManifest imanifest,
-          ElectionContext context,
+          ElectionCryptoContext context,
           List<PlaintextBallot> ballots) {
 
     // encrypt each ballot

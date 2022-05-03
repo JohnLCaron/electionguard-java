@@ -317,6 +317,7 @@ public class ChaumPedersenKt {
                         " validHash " + validHash +
                         " valid0 " + valid0 +
                         " valid1 " + valid1);
+        throw new IllegalStateException();
       }
 
       return valid0 && valid1 && consistentC && validHash;

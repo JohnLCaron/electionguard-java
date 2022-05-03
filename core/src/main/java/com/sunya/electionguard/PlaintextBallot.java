@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 /**
  * The plaintext representation of a voter's ballot selections for all the contests in an election.
@@ -196,14 +195,15 @@ public class PlaintextBallot {
     /** The vote count. */
     public final int vote;
     /** Optional write-in candidate. */
-    public final Optional<ExtendedData> extendedData; // default None
+    @Nullable
+    public final String extendedData; // default None
 
-    public Selection(String selectionId, int sequenceOrder, int vote, @Nullable ExtendedData extendedData) {
+    public Selection(String selectionId, int sequenceOrder, int vote, @Nullable String extendedData) {
       Preconditions.checkArgument(!Strings.isNullOrEmpty(selectionId));
       this.selectionId = selectionId;
       this.sequenceOrder = sequenceOrder;
       this.vote = vote;
-      this.extendedData = Optional.ofNullable(extendedData);
+      this.extendedData = extendedData;
     }
 
     public boolean is_valid(String expected_selection_id) {
@@ -224,17 +224,13 @@ public class PlaintextBallot {
       if (this == o) return true;
       if (o == null || getClass() != o.getClass()) return false;
       Selection selection = (Selection) o;
-      return // sequence_order == selection.sequence_order &&
-              vote == selection.vote &&
-              selectionId.equals(selection.selectionId) &&
-              extendedData.equals(selection.extendedData);
+      return sequenceOrder == selection.sequenceOrder && vote == selection.vote && selectionId.equals(selection.selectionId) && Objects.equals(extendedData, selection.extendedData);
     }
 
     @Override
     public int hashCode() {
       return Objects.hash(selectionId, sequenceOrder, vote, extendedData);
     }
-
 
     @Override
     public String toString() {
@@ -243,40 +239,6 @@ public class PlaintextBallot {
               ", sequence_order=" + sequenceOrder +
               ", vote=" + vote +
               ", extended_data=" + extendedData +
-              '}';
-    }
-  }
-
-  /** Used to indicate a write-in candidate. */
-  @Immutable
-  public static class ExtendedData {
-    public final String value;
-    public final int length;
-
-    public ExtendedData(String value, int length) {
-      this.value = value;
-      this.length = length;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) return true;
-      if (o == null || getClass() != o.getClass()) return false;
-      ExtendedData that = (ExtendedData) o;
-      return length == that.length &&
-              value.equals(that.value);
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(value, length);
-    }
-
-    @Override
-    public String toString() {
-      return "ExtendedData{" +
-              "value='" + value + '\'' +
-              ", length=" + length +
               '}';
     }
   }

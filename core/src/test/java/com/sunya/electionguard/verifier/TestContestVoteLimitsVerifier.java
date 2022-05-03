@@ -13,7 +13,7 @@ public class TestContestVoteLimitsVerifier {
     String topdir = TestParameterVerifier.topdirProto;
     System.out.printf("testContestVoteLimitsValidatorProto %s%n", topdir);
     Consumer consumer = new Consumer(topdir);
-    ContestVoteLimitsVerifier validator = new ContestVoteLimitsVerifier(consumer.readElectionRecordProto());
+    ContestVoteLimitsVerifier validator = new ContestVoteLimitsVerifier(consumer.readElectionRecord());
 
     boolean sevOk = validator.verify_all_accepted_ballots();
     assertThat(sevOk).isTrue();

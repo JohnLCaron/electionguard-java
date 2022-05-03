@@ -3,12 +3,10 @@ package com.sunya.electionguard.workflow;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.publish.Consumer;
-import com.sunya.electionguard.verifier.ElectionRecord;
+import com.sunya.electionguard.publish.ElectionRecord;
 import net.jqwik.api.Example;
 
-import javax.annotation.Nullable;
 import java.io.IOException;
-import java.time.OffsetDateTime;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -20,7 +18,7 @@ public class TestManifestHash {
   public void testManifestHash() throws IOException {
     Consumer consumer = new Consumer(input);
     ElectionRecord electionRecord = consumer.readElectionRecord();
-    Manifest manifest = electionRecord.manifest;
+    Manifest manifest = electionRecord.manifest();
 
     System.out.printf("***manifest%n");
     manifest.recalcCryptoHash(

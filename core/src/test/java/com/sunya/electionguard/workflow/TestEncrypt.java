@@ -2,13 +2,13 @@ package com.sunya.electionguard.workflow;
 
 import com.sunya.electionguard.CiphertextBallot;
 import com.sunya.electionguard.ElGamal;
-import com.sunya.electionguard.ElectionContext;
+import com.sunya.electionguard.ElectionCryptoContext;
 import com.sunya.electionguard.Encrypt;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.InternalManifest;
 import com.sunya.electionguard.PlaintextBallot;
 import com.sunya.electionguard.publish.Consumer;
-import com.sunya.electionguard.verifier.ElectionRecord;
+import com.sunya.electionguard.publish.ElectionRecord;
 import net.jqwik.api.Example;
 
 import java.io.IOException;
@@ -24,18 +24,14 @@ public class TestEncrypt {
   public void testEncryption() throws IOException {
     Consumer consumer = new Consumer(input);
     ElectionRecord electionRecord = consumer.readElectionRecord();
-    PlaintextBallot ballot = FakeBallotProvider.makeBallot(electionRecord.manifest, "congress-district-7-arlington", 3, 0);
+    PlaintextBallot ballot = FakeBallotProvider.makeBallot(electionRecord.manifest(), "congress-district-7-arlington", 3, 0);
 
-    InternalManifest metadata = new InternalManifest(electionRecord.manifest);
+    InternalManifest metadata = new InternalManifest(electionRecord.manifest());
     ElGamal.KeyPair keypair = elgamal_keypair_from_secret(Group.TWO_MOD_Q).orElseThrow();
 
-    // int numberOfGuardians, int quorum, Group.ElementModP jointPublicKey,
-    //                         Group.ElementModQ manifestHash, Group.ElementModQ cryptoBaseHash,
-    //                         Group.ElementModQ cryptoExtendedBaseHash, Group.ElementModQ commitmentHash,
-    //                         @Nullable Map<String, String> extended_data
-    ElectionContext context = new ElectionContext(1,1, keypair.public_key(), electionRecord.manifest.cryptoHash(),
+    ElectionCryptoContext context = new ElectionCryptoContext(1,1, keypair.public_key(), electionRecord.manifest().cryptoHash(),
             Group.TWO_MOD_Q, Group.TWO_MOD_Q, Group.TWO_MOD_Q, null);
-    System.out.printf("electionRecord.manifest.cryptoHash() %s%n", electionRecord.manifest.cryptoHash());
+    System.out.printf("electionRecord.manifest.cryptoHash() %s%n", electionRecord.manifest().cryptoHash());
 
     //   public static Optional<CiphertextBallot> encrypt_ballot(
     //          PlaintextBallot ballot,

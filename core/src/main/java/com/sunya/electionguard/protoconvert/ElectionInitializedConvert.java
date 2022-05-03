@@ -5,7 +5,7 @@ import com.sunya.electionguard.SchnorrProof;
 import electionguard.ballot.ElectionConfig;
 import electionguard.ballot.ElectionInitialized;
 import electionguard.ballot.Guardian;
-import electionguard.protogen.ElectionRecordProto2;
+import electionguard.protogen.ElectionRecordProto;
 
 import javax.annotation.concurrent.Immutable;
 import java.io.FileInputStream;
@@ -22,14 +22,14 @@ import static com.sunya.electionguard.protoconvert.ManifestToProto.publishManife
 public class ElectionInitializedConvert {
 
   public static ElectionInitialized read(String filename) throws IOException {
-    ElectionRecordProto2.ElectionInitialized proto;
+    ElectionRecordProto.ElectionInitialized proto;
     try (FileInputStream inp = new FileInputStream(filename)) {
-      proto = ElectionRecordProto2.ElectionInitialized.parseFrom(inp);
+      proto = ElectionRecordProto.ElectionInitialized.parseFrom(inp);
     }
     return importElectionInitialized(proto);
   }
 
-  public static ElectionInitialized importElectionInitialized(ElectionRecordProto2.ElectionInitialized proto) {
+  public static ElectionInitialized importElectionInitialized(ElectionRecordProto.ElectionInitialized proto) {
     ElectionConfig config = importElectionConfig(proto.getConfig());
 
     List<Guardian> guardians =
@@ -46,7 +46,7 @@ public class ElectionInitializedConvert {
             proto.getMetadataMap());
   }
 
-  static Guardian importGuardian(ElectionRecordProto2.Guardian guardianRecord) {
+  static Guardian importGuardian(ElectionRecordProto.Guardian guardianRecord) {
    List<Group.ElementModP> coefficient_commitments = guardianRecord.getCoefficientCommitmentsList().stream()
             .map(CommonConvert::importElementModP)
            .toList();
@@ -63,8 +63,8 @@ public class ElectionInitializedConvert {
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-  public static ElectionRecordProto2.ElectionInitialized publishElectionInitialized(ElectionInitialized init) {
-    ElectionRecordProto2.ElectionInitialized.Builder builder = ElectionRecordProto2.ElectionInitialized.newBuilder();
+  public static ElectionRecordProto.ElectionInitialized publishElectionInitialized(ElectionInitialized init) {
+    ElectionRecordProto.ElectionInitialized.Builder builder = ElectionRecordProto.ElectionInitialized.newBuilder();
     builder.setConfig(publishElectionConfig(init.getConfig()));
     builder.setJointPublicKey(publishElementModP(init.getJointPublicKey()));
     builder.setManifestHash(CommonConvert.publishUInt256(init.getManifestHash()));
@@ -75,8 +75,8 @@ public class ElectionInitializedConvert {
     return builder.build();
   }
 
-  static ElectionRecordProto2.Guardian publishGuardian(Guardian guardian) {
-    ElectionRecordProto2.Guardian.Builder builder = ElectionRecordProto2.Guardian.newBuilder();
+  static ElectionRecordProto.Guardian publishGuardian(Guardian guardian) {
+    ElectionRecordProto.Guardian.Builder builder = ElectionRecordProto.Guardian.newBuilder();
     builder.setGuardianId(guardian.getGuardianId());
     builder.setXCoordinate(guardian.getXCoordinate());
     builder.addAllCoefficientCommitments(guardian.getCoefficientCommitments().stream().map(it -> publishElementModP(it)).toList());

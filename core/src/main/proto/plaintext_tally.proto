@@ -21,7 +21,7 @@ message PlaintextTallySelection {
   uint32 tally = 2;
   ElementModP value = 3; // // g^tally or M in the spec.
   ElGamalCiphertext message = 4;
-  repeated PartialDecryption partialDecryptions = 5; // one for each Available Guardian
+  repeated PartialDecryption partial_decryptions = 5; // one for each Available Guardian
 }
 
 // A Guardian's Partial Decryption of a selection
@@ -39,10 +39,10 @@ message PartialDecryption {
 
 // artifact because oneof cant have repeated fields
 message RecoveredParts {
-  repeated RecoveredPartialDecryption fragments = 1;
+  repeated MissingPartialDecryption fragments = 1;
 }
 
-message RecoveredPartialDecryption {
+message MissingPartialDecryption {
   string selection_id = 1; // matches SelectionDescription.selection_id
   string guardian_id = 2;  // The Available Guardian that this share belongs to
   string missing_guardian_id = 3; //  // The Missing Guardian for whom this share is calculated on behalf of.

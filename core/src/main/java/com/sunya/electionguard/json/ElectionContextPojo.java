@@ -3,7 +3,7 @@ package com.sunya.electionguard.json;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
-import com.sunya.electionguard.ElectionContext;
+import com.sunya.electionguard.ElectionCryptoContext;
 import com.sunya.electionguard.Group;
 
 import javax.annotation.Nullable;
@@ -25,10 +25,10 @@ public class ElectionContextPojo {
   ////////////////////////////////////////////////////////////////////////////
   // deserialize
 
-  public static ElectionContext deserialize(JsonElement jsonElem) {
+  public static ElectionCryptoContext deserialize(JsonElement jsonElem) {
     Gson gson = GsonTypeAdapters.enhancedGson();
     ElectionContextPojo pojo = gson.fromJson(jsonElem, ElectionContextPojo.class);
-    return new ElectionContext(
+    return new ElectionCryptoContext(
             pojo.number_of_guardians,
             pojo.quorum,
             pojo.elgamal_public_key,
@@ -43,7 +43,7 @@ public class ElectionContextPojo {
   ////////////////////////////////////////////////////////////////////////////
   // serialize
 
-  public static JsonElement serialize(ElectionContext org) {
+  public static JsonElement serialize(ElectionCryptoContext org) {
     ElectionContextPojo pojo = new ElectionContextPojo();
     pojo.number_of_guardians = org.numberOfGuardians;
     pojo.quorum = org.quorum;

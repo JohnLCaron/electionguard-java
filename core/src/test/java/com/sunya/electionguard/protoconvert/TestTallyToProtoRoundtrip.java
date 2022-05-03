@@ -3,7 +3,7 @@ package com.sunya.electionguard.protoconvert;
 import com.sunya.electionguard.CiphertextTally;
 import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.json.ConvertFromJson;
-import com.sunya.electionguard.publish.Publisher;
+import com.sunya.electionguard.publish.PublisherOld;
 import electionguard.protogen.CiphertextTallyProto;
 import electionguard.protogen.PlaintextTallyProto;
 import com.sunya.electionguard.json.JsonPublisher;
@@ -20,7 +20,7 @@ public class TestTallyToProtoRoundtrip {
 
   @BeforeContainer
   public static void setup() throws IOException {
-    publisher = new JsonPublisher(TestParameterVerifier.topdirJson, Publisher.Mode.readonly);
+    publisher = new JsonPublisher(TestParameterVerifier.topdirJson, PublisherOld.Mode.readonly);
   }
 
   @Example

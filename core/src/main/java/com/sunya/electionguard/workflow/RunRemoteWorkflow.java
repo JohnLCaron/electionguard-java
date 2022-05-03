@@ -36,7 +36,7 @@ import java.util.stream.Stream;
 public class RunRemoteWorkflow {
   public static final String classpath = "core/build/libs/core-0.9.5-SNAPSHOT-all.jar";
   private static final String REMOTE_TRUSTEE = "remoteTrustee";
-  private static final String CMD_OUTPUT = "/home/snake/tmp/RunRemoteWorkflow/";
+  private static final String CMD_OUTPUT = "/home/snake/tmp/electionguard/RunRemoteWorkflow/";
 
   private static class CommandLine {
     @Parameter(names = {"-in"}, order = 0,
@@ -258,7 +258,7 @@ public class RunRemoteWorkflow {
 
       PrivateData privatePublisher = null;
       try {
-        privatePublisher = new PrivateData(cmdLine.trusteeDir, false, false);
+        privatePublisher = new PrivateData(cmdLine.trusteeDir, false, true);
       } catch (IOException e) {
         e.printStackTrace();
       }
@@ -267,7 +267,7 @@ public class RunRemoteWorkflow {
                 "java",
                 "-classpath", classpath,
                 "com.sunya.electionguard.decrypting.DecryptingRemoteTrustee",
-                "-trusteeFile", privatePublisher.trusteePath(REMOTE_TRUSTEE + i).toString());
+                "-trusteeFile", privatePublisher.trusteePath("decryptingTrustee-" + REMOTE_TRUSTEE + i).toString());
         running.add(command);
       }
 

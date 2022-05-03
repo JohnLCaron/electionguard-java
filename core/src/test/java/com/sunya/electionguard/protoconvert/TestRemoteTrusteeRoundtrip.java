@@ -64,10 +64,10 @@ public class TestRemoteTrusteeRoundtrip {
     assertThat(org.verifyPartialKeyBackup(trustee2.sendPartialKeyBackup(ID))).isNotNull();
     assertThat(org.otherGuardianPartialKeyBackups).hasSize(2);
 
-    TrusteeProto.DecryptingTrustee trusteeProto = KeyCeremonyTrusteeToProto.convertTrustee(org);
-    publisher.overwriteTrusteeProto(trusteeProto);
+    // TrusteeProto.DecryptingTrustee trusteeProto = KeyCeremonyTrusteeToProto.convertTrustee(org);
+    publisher.writeTrustee(org);
 
-    DecryptingTrustee roundtrip = publisher.readDecryptingTrustee(trusteeProto.getGuardianId());
+    DecryptingTrustee roundtrip = publisher.readDecryptingTrustee(org.id);
     assertThat(roundtrip.id()).isEqualTo(org.id);
     assertThat(roundtrip.xCoordinate()).isEqualTo(org.xCoordinate);
     assertThat(roundtrip.election_keypair()).isEqualTo(org.secrets().election_key_pair);

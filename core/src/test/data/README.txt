@@ -4,7 +4,7 @@
 2. publishEndToEnd is the output of TestEndToEndElectionIntegration.java from 2/15/2022. This
      uses the standard library classes, serializing to json.
 
-3. workflow is the output of RunRemoteWorkflow from 2/14/2022.
+3. workflow is the output of RunRemoteWorkflow from 4/30/2022, using start
       This uses the remote library code, serializing to proto.
 
 Note: election constants changed python PR #387, 8/4/21.

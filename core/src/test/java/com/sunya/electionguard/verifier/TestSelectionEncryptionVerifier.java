@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.sunya.electionguard.*;
 import com.sunya.electionguard.json.JsonConsumer;
 import com.sunya.electionguard.publish.Consumer;
+import com.sunya.electionguard.publish.ElectionRecord;
 import net.jqwik.api.Example;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -19,7 +20,7 @@ public class TestSelectionEncryptionVerifier {
   @Example
   public void testSelectionEncryptionValidationProto() throws IOException {
     Consumer consumer = new Consumer(TestParameterVerifier.topdirProto);
-    testSelectionEncryptionValidation(consumer.readElectionRecordProto());
+    testSelectionEncryptionValidation(consumer.readElectionRecord());
   }
 
   @Example
@@ -36,21 +37,21 @@ public class TestSelectionEncryptionVerifier {
 
     // not sure how different this is from SelectionEncryptionVerifier ??
     Tester tester = new Tester(electionRecord);
-    for (SubmittedBallot ballot : electionRecord.acceptedBallots) {
+    for (SubmittedBallot ballot : electionRecord.submittedBallots()) {
       for (CiphertextBallot.Contest contest : ballot.contests) {
         tester.verify_a_contest(contest);
       }
     }
 
     // not currently part of SelectionEncryptionVerifier
-    for (SubmittedBallot ballot : electionRecord.acceptedBallots) {
-      assertThat(ballot.is_valid_encryption(electionRecord.manifest.cryptoHash(),
-              electionRecord.context.jointPublicKey,
-              electionRecord.context.cryptoExtendedBaseHash));
+    for (SubmittedBallot ballot : electionRecord.submittedBallots()) {
+      assertThat(ballot.is_valid_encryption(electionRecord.manifest().cryptoHash(),
+              electionRecord.electionPublicKey(),
+              electionRecord.extendedHash()));
     }
 
     // ballot chaining (box 6)
-    for (SubmittedBallot ballot : electionRecord.acceptedBallots) {
+    for (SubmittedBallot ballot : electionRecord.submittedBallots()) {
       ElementModQ crypto_hash = ballot.crypto_hash;
       ElementModQ prev_hash = ballot.code_seed;
       ElementModQ curr_hash = ballot.code;
@@ -67,7 +68,7 @@ public class TestSelectionEncryptionVerifier {
     }
 
     void verify_a_contest(CiphertextBallot.Contest contest) {
-      Integer vote_limit = electionRecord.getVoteLimitForContest(contest.contestId);
+      Integer vote_limit = electionRecord.manifest().findVoteLimit(contest.contestId);
       Preconditions.checkNotNull(vote_limit);
 
       int placeholder_count = 0;
@@ -265,8 +266,8 @@ public class TestSelectionEncryptionVerifier {
       return a_res && b_res;
     }
 
-    private boolean match_vote_limit_by_contest(String contest_name, int num_of_placeholders) {
-      int vote_limit = electionRecord.getVoteLimitForContest(contest_name);
+    private boolean match_vote_limit_by_contest(String contestName, int num_of_placeholders) {
+      Integer vote_limit = electionRecord.manifest().findVoteLimit(contestName);
       boolean res = vote_limit == num_of_placeholders;
       if (!res) {
         System.out.printf("Contest placeholder number error.%n");

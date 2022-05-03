@@ -30,7 +30,7 @@ public class CommonConvert {
     if (modQ == null || modQ.getValue().isEmpty()) {
       return null;
     }
-    return new UInt256(modQ.toByteArray());
+    return new UInt256(modQ.getValue().toByteArray());
   }
 
   @Nullable

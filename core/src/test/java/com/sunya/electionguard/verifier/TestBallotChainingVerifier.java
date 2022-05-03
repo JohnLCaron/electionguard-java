@@ -14,7 +14,7 @@ public class TestBallotChainingVerifier {
   public void testContestVoteLimitsValidatorProto() throws IOException {
     String topdir = TestParameterVerifier.topdirProto;
     Consumer consumer = new Consumer(topdir);
-    BallotChainingVerifier validator = new BallotChainingVerifier(consumer.readElectionRecordProto());
+    BallotChainingVerifier validator = new BallotChainingVerifier(consumer.readElectionRecord());
     boolean sevOk = validator.verify_all_ballots();
     assertThat(sevOk).isTrue();
   }

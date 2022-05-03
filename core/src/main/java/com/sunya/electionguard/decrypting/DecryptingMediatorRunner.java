@@ -18,11 +18,13 @@ import com.sunya.electionguard.Scheduler;
 import com.sunya.electionguard.input.CiphertextTallyInputValidation;
 import com.sunya.electionguard.input.ManifestInputValidation;
 import com.sunya.electionguard.protoconvert.CommonConvert;
+import electionguard.ballot.DecryptionResult;
+import electionguard.ballot.TallyResult;
 import electionguard.protogen.DecryptingProto;
 import electionguard.protogen.DecryptingServiceGrpc;
 import com.sunya.electionguard.publish.Consumer;
 import com.sunya.electionguard.publish.Publisher;
-import com.sunya.electionguard.verifier.ElectionRecord;
+import com.sunya.electionguard.publish.ElectionRecord;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.stub.StreamObserver;
@@ -36,6 +38,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
+import static java.util.Collections.emptyMap;
 
 /**
  * A command line program to decrypt a tally and optionally a collection of ballots with remote Guardians.
@@ -106,16 +110,13 @@ public class DecryptingMediatorRunner {
     DecryptingMediatorRunner decryptor = null;
     try {
       Consumer consumer = new Consumer(cmdLine.encryptDir);
+      TallyResult tallyResult = consumer.readTallyResult();
       ElectionRecord electionRecord = consumer.readElectionRecord();
-      ManifestInputValidation validator = new ManifestInputValidation(electionRecord.manifest);
+      ManifestInputValidation validator = new ManifestInputValidation(electionRecord.manifest());
       Formatter errors = new Formatter();
       if (!validator.validateElection(errors)) {
         System.out.printf("*** ElectionInputValidation FAILED on %s%n%s", cmdLine.encryptDir, errors);
         System.exit(1);
-      }
-
-      if (electionRecord.constants != null) {
-        Group.setPrimes(electionRecord.constants);
       }
 
       // check that outputDir exists and can be written to
@@ -125,8 +126,8 @@ public class DecryptingMediatorRunner {
         System.exit(1);
       }
 
-      decryptor = new DecryptingMediatorRunner(consumer, electionRecord, cmdLine.encryptDir, cmdLine.outputDir,
-              cmdLine.navailable, cmdLine.decryptSpoiled, publisher);
+      decryptor = new DecryptingMediatorRunner(consumer, electionRecord, tallyResult,
+              cmdLine.encryptDir, cmdLine.outputDir, cmdLine.navailable, cmdLine.decryptSpoiled, publisher);
       decryptor.start(cmdLine.port);
 
       System.out.print("Waiting for guardians to register: elapsed seconds = ");
@@ -208,6 +209,7 @@ public class DecryptingMediatorRunner {
   final List<DecryptingRemoteTrusteeProxy> trusteeProxies = Collections.synchronizedList(new ArrayList<>());
   boolean startedDecryption = false;
   boolean decryptSpoiled;
+  TallyResult tallyResult;
 
   CiphertextTally encryptedTally;
   PlaintextTally decryptedTally;
@@ -215,7 +217,8 @@ public class DecryptingMediatorRunner {
   List<AvailableGuardian> availableGuardians;
   final Publisher publisher;
 
-  DecryptingMediatorRunner(Consumer consumer, ElectionRecord electionRecord, String encryptDir, String outputDir,
+  DecryptingMediatorRunner(Consumer consumer, ElectionRecord electionRecord, TallyResult tallyResult,
+                           String encryptDir, String outputDir,
                            int navailable, boolean decryptSpoiled, Publisher publisher) {
     this.consumer = consumer;
     this.electionRecord = electionRecord;
@@ -224,9 +227,10 @@ public class DecryptingMediatorRunner {
     this.navailable = navailable;
     this.publisher = publisher;
     this.decryptSpoiled = decryptSpoiled;
+    this.nguardians = electionRecord.numberOfGuardians();
+    this.quorum = electionRecord.quorum();
+    this.tallyResult = tallyResult;
 
-    this.nguardians = electionRecord.context.numberOfGuardians;
-    this.quorum = electionRecord.context.quorum;
     Preconditions.checkArgument(this.navailable >= this.quorum,
             String.format("Available guardians (%d) must be >= quorum (%d)", this.navailable, this.quorum));
     Preconditions.checkArgument(this.navailable <= this.nguardians,
@@ -243,12 +247,12 @@ public class DecryptingMediatorRunner {
 
   private boolean runDecryption() {
     // Do the accumulation if the encryptedTally doesnt exist
-    if (this.electionRecord.ciphertextTally == null) {
+    if (this.electionRecord.ciphertextTally() == null) {
       System.out.printf("   DecryptingMediatorRunner accumulateTally%n");
       accumulateTally();
     } else {
-      this.encryptedTally = this.electionRecord.ciphertextTally;
-      CiphertextTallyInputValidation validator = new CiphertextTallyInputValidation(electionRecord.manifest);
+      this.encryptedTally = this.electionRecord.ciphertextTally();
+      CiphertextTallyInputValidation validator = new CiphertextTallyInputValidation(electionRecord.manifest());
       Formatter errors = new Formatter();
       if (!validator.validateTally(this.encryptedTally, errors)) {
         System.out.printf("*** CiphertextTallyInputValidation FAILED on electionRecord%n%s", errors);
@@ -260,7 +264,7 @@ public class DecryptingMediatorRunner {
 
     boolean ok;
     try {
-      publish(encryptDir);
+      publish(encryptDir, tallyResult);
       ok = true;
     } catch (IOException e) {
       e.printStackTrace();
@@ -273,9 +277,9 @@ public class DecryptingMediatorRunner {
 
   void accumulateTally() {
     System.out.printf("%nAccumulate tally%n");
-    InternalManifest metadata = new InternalManifest(this.electionRecord.manifest);
-    CiphertextTallyBuilder ciphertextTally = new CiphertextTallyBuilder("DecryptingMediatorRunner", metadata, electionRecord.context);
-    int nballots = ciphertextTally.batch_append(electionRecord.acceptedBallots);
+    InternalManifest metadata = new InternalManifest(this.electionRecord.manifest());
+    CiphertextTallyBuilder ciphertextTally = new CiphertextTallyBuilder("DecryptingMediatorRunner", metadata, electionRecord);
+    int nballots = ciphertextTally.batch_append(electionRecord.submittedBallots());
     this.encryptedTally = ciphertextTally.build();
     System.out.printf(" done accumulating %d ballots in the tally%n", nballots);
   }
@@ -285,12 +289,13 @@ public class DecryptingMediatorRunner {
     this.startedDecryption = true;
 
     // The guardians' election public key is in the electionRecord.guardianRecords.
-    Map<String, Group.ElementModP> guardianPublicKeys = electionRecord.guardianRecords.stream().collect(
-            Collectors.toMap(coeff -> coeff.guardianId(), coeff -> coeff.guardianPublicKey()));
+    Map<String, Group.ElementModP> guardianPublicKeys = electionRecord.guardians().stream().collect(
+            Collectors.toMap(guardian -> guardian.getGuardianId(), guardian -> guardian.publicKey()));
 
-    DecryptingMediator mediator = new DecryptingMediator(electionRecord.context,
+    DecryptingMediator mediator = new DecryptingMediator(
+            this.electionRecord,
             this.encryptedTally,
-            this.decryptSpoiled ? consumer.submittedSpoiledBallotsProto() : ImmutableList.of(),
+            this.decryptSpoiled ? consumer.iterateSpoiledBallots() : ImmutableList.of(),
             guardianPublicKeys);
 
     int count = 0;
@@ -340,14 +345,15 @@ public class DecryptingMediatorRunner {
     System.out.printf(" Proxy channel shutdown was success = %s%n", shutdownOk);
   }
 
-  void publish(String inputDir) throws IOException {
-    publisher.writeDecryptionResultsProto(
-            this.electionRecord,
-            this.encryptedTally,
+  void publish(String inputDir, TallyResult tallyResult) throws IOException {
+    DecryptionResult results = new DecryptionResult(
+            tallyResult,
             this.decryptedTally,
-            this.spoiledDecryptedTallies,
-            this.availableGuardians);
+            this.availableGuardians,
+            emptyMap()
+    );
 
+    publisher.writeDecryptionResults(results);
     publisher.copyAcceptedBallots(inputDir);
   }
 

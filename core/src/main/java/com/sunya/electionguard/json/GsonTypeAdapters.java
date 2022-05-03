@@ -12,7 +12,7 @@ import com.google.gson.JsonSerializer;
 import com.sunya.electionguard.AvailableGuardian;
 import com.sunya.electionguard.BallotBox;
 import com.sunya.electionguard.ElectionConstants;
-import com.sunya.electionguard.ElectionContext;
+import com.sunya.electionguard.ElectionCryptoContext;
 import com.sunya.electionguard.Encrypt;
 import com.sunya.electionguard.GuardianRecord;
 import com.sunya.electionguard.Manifest;
@@ -52,8 +52,8 @@ class GsonTypeAdapters {
             .registerTypeAdapter(CiphertextTally.class, new CiphertextTallyDeserializer())
             .registerTypeAdapter(ElectionConstants.class, new ElectionConstantsSerializer())
             .registerTypeAdapter(ElectionConstants.class, new ElectionConstantsDeserializer())
-            .registerTypeAdapter(ElectionContext.class, new ElectionContextSerializer())
-            .registerTypeAdapter(ElectionContext.class, new ElectionContextDeserializer())
+            .registerTypeAdapter(ElectionCryptoContext.class, new ElectionContextSerializer())
+            .registerTypeAdapter(ElectionCryptoContext.class, new ElectionContextDeserializer())
             .registerTypeAdapter(Encrypt.EncryptionDevice.class, new EncryptionDeviceSerializer())
             .registerTypeAdapter(Encrypt.EncryptionDevice.class, new EncryptionDeviceDeserializer())
             .registerTypeAdapter(Group.ElementModQ.class, new ModQDeserializer())
@@ -262,16 +262,16 @@ class GsonTypeAdapters {
   }
 
 
-  private static class ElectionContextSerializer implements JsonSerializer<ElectionContext> {
+  private static class ElectionContextSerializer implements JsonSerializer<ElectionCryptoContext> {
     @Override
-    public JsonElement serialize(ElectionContext src, Type typeOfSrc, JsonSerializationContext context) {
+    public JsonElement serialize(ElectionCryptoContext src, Type typeOfSrc, JsonSerializationContext context) {
       return ElectionContextPojo.serialize(src);
     }
   }
 
-  private static class ElectionContextDeserializer implements JsonDeserializer<ElectionContext> {
+  private static class ElectionContextDeserializer implements JsonDeserializer<ElectionCryptoContext> {
     @Override
-    public ElectionContext deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+    public ElectionCryptoContext deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
             throws JsonParseException {
       return ElectionContextPojo.deserialize(json);
     }

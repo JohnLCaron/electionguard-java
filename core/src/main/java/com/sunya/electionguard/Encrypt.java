@@ -2,6 +2,8 @@ package com.sunya.electionguard;
 
 import com.google.common.base.Preconditions;
 import com.google.common.flogger.FluentLogger;
+import com.sunya.electionguard.publish.ElectionContext;
+import com.sunya.electionguard.publish.ElectionRecord;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -467,7 +469,7 @@ public class Encrypt {
     }
 
     // Verify the proofs
-    if (encrypted_ballot.is_valid_encryption(internal_manifest.manifest.cryptoHash(), context.jointPublicKey, context.cryptoExtendedBaseHash)) {
+    if (encrypted_ballot.is_valid_encryption(internal_manifest.manifest.cryptoHash(), context.electionPublicKey(), context.extendedHash())) {
       return Optional.of(encrypted_ballot);
     } else {
       return Optional.empty(); // log error will have happened earlier
@@ -501,8 +503,8 @@ public class Encrypt {
               ballot.object_id(),
               use_contest,
               contestp,
-              context.jointPublicKey,
-              context.cryptoExtendedBaseHash,
+              context.electionPublicKey(),
+              context.extendedHash(),
               nonce_seed, true);
 
       if (encrypted_contest.isEmpty()) {

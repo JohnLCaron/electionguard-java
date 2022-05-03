@@ -1,6 +1,6 @@
 package com.sunya.electionguard.standard;
 
-import com.sunya.electionguard.ElectionContext;
+import com.sunya.electionguard.ElectionCryptoContext;
 import com.sunya.electionguard.ElectionFactory;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.GuardianRecord;
@@ -9,7 +9,7 @@ import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.json.JsonConsumer;
 import com.sunya.electionguard.json.JsonPrivateData;
 import com.sunya.electionguard.json.JsonPublisher;
-import com.sunya.electionguard.publish.Publisher;
+import com.sunya.electionguard.publish.PublisherOld;
 import net.jqwik.api.Example;
 
 import java.io.IOException;
@@ -70,7 +70,7 @@ public class TestGuardianSerializing {
     Path tmp = Files.createTempDirectory(null);
     tmp.toFile().deleteOnExit();
     this.outputDir = "/home/snake/tmp/publishTmp"; // tmp.toAbsolutePath().toString();
-    this.publisher = new JsonPublisher(outputDir, Publisher.Mode.createNew);
+    this.publisher = new JsonPublisher(outputDir, PublisherOld.Mode.createNew);
     this.pdata = new JsonPrivateData(outputDir, true, true);
 
     this.guardians = new ArrayList<>();
@@ -88,7 +88,7 @@ public class TestGuardianSerializing {
     System.out.printf("%nKey Ceremony%n");
     this.jointKey = keyCeremony(guardians);
 
-    ElectionContext context = ElectionContext.create(
+    ElectionCryptoContext context = ElectionCryptoContext.create(
             this.numberOfGuardians,
             this.quorum,
             this.jointKey.joint_public_key(),
@@ -109,7 +109,7 @@ public class TestGuardianSerializing {
     return keyCeremony.publish_joint_key().orElseThrow();
   }
 
-  void publish(ElectionContext context) throws IOException {
+  void publish(ElectionCryptoContext context) throws IOException {
     publisher.writeKeyCeremonyJson(
             this.election,
             context,

@@ -73,10 +73,10 @@ public class ConvertFromJson {
     }
   }
 
-  public static ElectionContext readContext(String pathname) throws IOException {
+  public static ElectionCryptoContext readContext(String pathname) throws IOException {
     try (InputStream is = new FileInputStream(pathname)) {
       Reader reader = new InputStreamReader(is);
-      return enhancedGson.fromJson(reader, ElectionContext.class);
+      return enhancedGson.fromJson(reader, ElectionCryptoContext.class);
     } catch (Exception ioe) {
       logger.atSevere().log("Failed readContext file '%s'", pathname);
       ioe.printStackTrace();

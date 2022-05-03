@@ -6,7 +6,7 @@ import com.sunya.electionguard.PlaintextTally;
 import electionguard.ballot.DecryptionResult;
 import electionguard.ballot.ElectionInitialized;
 import electionguard.ballot.TallyResult;
-import electionguard.protogen.ElectionRecordProto2;
+import electionguard.protogen.ElectionRecordProto;
 
 import javax.annotation.concurrent.Immutable;
 
@@ -23,7 +23,7 @@ import static com.sunya.electionguard.protoconvert.PlaintextTallyToProto.publish
 @Immutable
 public class ElectionResultsConvert {
 
-  public static TallyResult importTallyResult(ElectionRecordProto2.TallyResult proto) {
+  public static TallyResult importTallyResult(ElectionRecordProto.TallyResult proto) {
     ElectionInitialized init = importElectionInitialized(proto.getElectionInit());
     CiphertextTally encrypted = importCiphertextTally(proto.getCiphertextTally());
 
@@ -34,7 +34,7 @@ public class ElectionResultsConvert {
             proto.getTallyIdsList());
   }
 
-  public static DecryptionResult importDecryptionResult(ElectionRecordProto2.DecryptionResult proto) {
+  public static DecryptionResult importDecryptionResult(ElectionRecordProto.DecryptionResult proto) {
     TallyResult tallyResult = importTallyResult(proto.getTallyResult());
     PlaintextTally decryptedTally = importPlaintextTally(proto.getDecryptedTally());
 
@@ -50,7 +50,7 @@ public class ElectionResultsConvert {
             proto.getMetadataMap());
   }
 
-  static AvailableGuardian importAvailableGuardian(ElectionRecordProto2.AvailableGuardian proto) {
+  static AvailableGuardian importAvailableGuardian(ElectionRecordProto.AvailableGuardian proto) {
     return new AvailableGuardian(
             proto.getGuardianId(),
             proto.getXCoordinate(),
@@ -60,8 +60,8 @@ public class ElectionResultsConvert {
 
   ////////////////////////////////////////////////////////////////////////////////////////////////
 
-  public static ElectionRecordProto2.TallyResult publishTallyResult(TallyResult result) {
-    ElectionRecordProto2.TallyResult.Builder builder = ElectionRecordProto2.TallyResult.newBuilder();
+  public static ElectionRecordProto.TallyResult publishTallyResult(TallyResult result) {
+    ElectionRecordProto.TallyResult.Builder builder = ElectionRecordProto.TallyResult.newBuilder();
     builder.setElectionInit(publishElectionInitialized(result.getElectionIntialized()));
     builder.setCiphertextTally(publishCiphertextTally(result.getCiphertextTally()));
     builder.addAllBallotIds(result.getBallotIds());
@@ -70,8 +70,8 @@ public class ElectionResultsConvert {
     return builder.build();
   }
 
-  public static ElectionRecordProto2.DecryptionResult publishDecryptionResult(DecryptionResult result) {
-    ElectionRecordProto2.DecryptionResult.Builder builder = ElectionRecordProto2.DecryptionResult.newBuilder();
+  public static ElectionRecordProto.DecryptionResult publishDecryptionResult(DecryptionResult result) {
+    ElectionRecordProto.DecryptionResult.Builder builder = ElectionRecordProto.DecryptionResult.newBuilder();
     builder.setTallyResult(publishTallyResult(result.getTallyResult()));
     builder.setDecryptedTally(publishPlaintextTally(result.getDecryptedTally()));
     builder.addAllDecryptingGuardians(
@@ -80,8 +80,8 @@ public class ElectionResultsConvert {
     return builder.build();
   }
 
-  static ElectionRecordProto2.AvailableGuardian publishAvailableGuardian(AvailableGuardian guardian) {
-    ElectionRecordProto2.AvailableGuardian.Builder builder = ElectionRecordProto2.AvailableGuardian.newBuilder();
+  static ElectionRecordProto.AvailableGuardian publishAvailableGuardian(AvailableGuardian guardian) {
+    ElectionRecordProto.AvailableGuardian.Builder builder = ElectionRecordProto.AvailableGuardian.newBuilder();
     builder.setGuardianId(guardian.guardianId());
     builder.setXCoordinate(guardian.xCoordinate());
     builder.setLagrangeCoefficient(publishElementModQ(guardian.lagrangeCoefficient()));

@@ -3,15 +3,15 @@ package com.sunya.electionguard.json;
 import com.sunya.electionguard.AvailableGuardian;
 import com.sunya.electionguard.CiphertextTally;
 import com.sunya.electionguard.ElectionConstants;
-import com.sunya.electionguard.ElectionContext;
+import com.sunya.electionguard.ElectionCryptoContext;
 import com.sunya.electionguard.Encrypt;
 import com.sunya.electionguard.GuardianRecord;
 import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.PlaintextBallot;
 import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.SubmittedBallot;
-import com.sunya.electionguard.publish.Publisher;
-import com.sunya.electionguard.verifier.ElectionRecord;
+import com.sunya.electionguard.publish.PublisherOld;
+import com.sunya.electionguard.publish.ElectionRecord;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -49,14 +49,14 @@ public class JsonPublisher {
   static final String AVAILABLE_GUARDIAN_PREFIX = "available_guardian_";
 
   private final String topdir;
-  private final Publisher.Mode createMode;
+  private final PublisherOld.Mode createMode;
   private final Path electionRecordDir;
   private final Path devicesDirPath;
   private final Path ballotsDirPath;
   private final Path spoiledBallotDirPath;
   private final Path guardianDirPath;
 
-  public JsonPublisher(String where, Publisher.Mode createMode) throws IOException {
+  public JsonPublisher(String where, PublisherOld.Mode createMode) throws IOException {
     this.topdir = where;
     this.createMode = createMode;
 
@@ -67,14 +67,14 @@ public class JsonPublisher {
     this.spoiledBallotDirPath = electionRecordDir.resolve(SPOILED_BALLOTS_DIR);
     // this.availableGuardianDirPath = publishDirectory.resolve(AVAILABLE_GUARDIANS_DIR);
 
-    if (createMode == Publisher.Mode.createNew) {
+    if (createMode == PublisherOld.Mode.createNew) {
       if (!Files.exists(electionRecordDir)) {
         Files.createDirectories(electionRecordDir);
       } else {
         removeAllFiles();
       }
         createDirs();
-    } else if (createMode == Publisher.Mode.createIfMissing) {
+    } else if (createMode == PublisherOld.Mode.createIfMissing) {
       if (!Files.exists(electionRecordDir)) {
         Files.createDirectories(electionRecordDir);
       }
@@ -86,7 +86,7 @@ public class JsonPublisher {
     }
   }
 
-  public JsonPublisher(Path electionRecordDir, Publisher.Mode createMode) throws IOException {
+  public JsonPublisher(Path electionRecordDir, PublisherOld.Mode createMode) throws IOException {
     this.createMode = createMode;
     this.topdir = electionRecordDir.toAbsolutePath().toString();
 
@@ -97,14 +97,14 @@ public class JsonPublisher {
     this.spoiledBallotDirPath = electionRecordDir.resolve(SPOILED_BALLOTS_DIR);
     // this.availableGuardianDirPath = publishDirectory.resolve(AVAILABLE_GUARDIANS_DIR);
 
-    if (createMode == Publisher.Mode.createNew) {
+    if (createMode == PublisherOld.Mode.createNew) {
       if (!Files.exists(electionRecordDir)) {
         Files.createDirectories(electionRecordDir);
       } else {
         removeAllFiles();
       }
         createDirs();
-    } else if (createMode == Publisher.Mode.createIfMissing) {
+    } else if (createMode == PublisherOld.Mode.createIfMissing) {
       if (!Files.exists(electionRecordDir)) {
         Files.createDirectories(electionRecordDir);
       }
@@ -246,11 +246,11 @@ public class JsonPublisher {
 
   public void writeKeyCeremonyJson(
           Manifest manifest,
-          ElectionContext context,
+          ElectionCryptoContext context,
           ElectionConstants constants,
           Iterable<GuardianRecord> guardianRecords) throws IOException {
 
-    if (createMode == Publisher.Mode.readonly) {
+    if (createMode == PublisherOld.Mode.readonly) {
       throw new UnsupportedOperationException("Trying to write to readonly election record");
     }
 
@@ -270,13 +270,13 @@ public class JsonPublisher {
           Iterable<PlaintextTally> spoiledBallots,
           Iterable<AvailableGuardian> availableGuardians) throws IOException {
 
-    if (createMode == Publisher.Mode.readonly) {
+    if (createMode == PublisherOld.Mode.readonly) {
       throw new UnsupportedOperationException("Trying to write to readonly election record");
     }
 
-    ConvertToJson.writeElection(election.manifest, this.manifestPath());
-    ConvertToJson.writeContext(election.context, this.contextPath());
-    ConvertToJson.writeConstants(election.constants, this.constantsPath());
+    ConvertToJson.writeElection(election.manifest(), this.manifestPath());
+    // ConvertToJson.writeContext(election.context, this.contextPath());
+    // ConvertToJson.writeConstants(election.constants, this.constantsPath());
     // TODO election.devices
 
     ConvertToJson.writeCiphertextTally(encryptedTally, encryptedTallyPath());
@@ -296,7 +296,7 @@ public class JsonPublisher {
   /** Publishes the election record as json. */
   public void writeElectionRecordJson(
           Manifest manifest,
-          ElectionContext context,
+          ElectionCryptoContext context,
           ElectionConstants constants,
           Iterable<Encrypt.EncryptionDevice> devices,
           Iterable<SubmittedBallot> ciphertext_ballots,
@@ -306,7 +306,7 @@ public class JsonPublisher {
           @Nullable Iterable<PlaintextTally> spoiledBallots,
           @Nullable Iterable<AvailableGuardian> availableGuardians) throws IOException {
 
-    if (createMode == Publisher.Mode.readonly) {
+    if (createMode == PublisherOld.Mode.readonly) {
       throw new UnsupportedOperationException("Trying to write to readonly election record");
     }
 
@@ -344,7 +344,7 @@ public class JsonPublisher {
 
   // These are input ballots that did not validate (not spoiled ballots). put them somewhere to be examined later.
   public void publish_invalid_ballots(String directory, Iterable<PlaintextBallot> invalid_ballots) throws IOException {
-    if (createMode == Publisher.Mode.readonly) {
+    if (createMode == PublisherOld.Mode.readonly) {
       throw new UnsupportedOperationException("Trying to write to readonly election record");
     }
 

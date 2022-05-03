@@ -65,10 +65,10 @@ public class PlaintextTallyToProto {
     return builder.build();
   }
 
-  private static PlaintextTallyProto.RecoveredPartialDecryption convertCompensatedShare(
+  private static PlaintextTallyProto.MissingPartialDecryption convertCompensatedShare(
           DecryptionShare.CiphertextCompensatedDecryptionSelection org) {
 
-    PlaintextTallyProto.RecoveredPartialDecryption.Builder builder = PlaintextTallyProto.RecoveredPartialDecryption.newBuilder();
+    PlaintextTallyProto.MissingPartialDecryption.Builder builder = PlaintextTallyProto.MissingPartialDecryption.newBuilder();
     builder.setSelectionId(org.selectionId());
     builder.setGuardianId(org.guardianId());
     builder.setMissingGuardianId(org.missing_guardian_id());

@@ -13,7 +13,7 @@ public class TestElectionPublicKeyVerifier {
   public void testVerifyPublicKeysProto() throws IOException {
     String topdir = TestParameterVerifier.topdirProto;
     Consumer consumer = new Consumer(topdir);
-    ElectionPublicKeyVerifier validator = new ElectionPublicKeyVerifier(consumer.readElectionRecordProto());
+    ElectionPublicKeyVerifier validator = new ElectionPublicKeyVerifier(consumer.readElectionRecord());
 
     boolean sevOk = validator.verify_public_keys();
     assertThat(sevOk).isTrue();

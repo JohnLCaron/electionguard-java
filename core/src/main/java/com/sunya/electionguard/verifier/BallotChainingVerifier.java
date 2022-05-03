@@ -6,6 +6,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.sunya.electionguard.SubmittedBallot;
+import com.sunya.electionguard.publish.ElectionRecord;
+
 import static com.sunya.electionguard.Group.ElementModQ;
 
 /**
@@ -27,7 +29,7 @@ public class BallotChainingVerifier {
 
     // LOOK this assumes that the ballots are in the correct order. Why would they be?
     int nballots = 0;
-    for (SubmittedBallot ballot : electionRecord.acceptedBallots) {
+    for (SubmittedBallot ballot : electionRecord.submittedBallots()) {
       nballots++;
         // 6.B For each ballot Bi , Hi = H(Hi−1, D, T, Bi) is satisfied. // LOOK what is D? is B_i == crypto_hash?
         ElementModQ hashChain = Hash.hash_elems(ballot.code_seed, ballot.timestamp, ballot.crypto_hash);

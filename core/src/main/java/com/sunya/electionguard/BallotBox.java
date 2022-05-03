@@ -5,6 +5,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.flogger.FluentLogger;
 import com.sunya.electionguard.publish.CloseableIterable;
 import com.sunya.electionguard.publish.CloseableIterableAdapter;
+import com.sunya.electionguard.publish.ElectionContext;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;

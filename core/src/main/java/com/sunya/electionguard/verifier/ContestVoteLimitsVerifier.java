@@ -10,7 +10,10 @@ import com.sunya.electionguard.Hash;
 import java.math.BigInteger;
 import java.util.List;
 
+import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.SubmittedBallot;
+import com.sunya.electionguard.publish.ElectionRecord;
+
 import static com.sunya.electionguard.CiphertextBallot.Contest;
 import static com.sunya.electionguard.CiphertextBallot.Selection;
 import static com.sunya.electionguard.Group.ElementModP;
@@ -35,7 +38,7 @@ public class ContestVoteLimitsVerifier {
     int nballots  = 0;
     int ncontests  = 0;
     int nselections  = 0;
-    for (SubmittedBallot ballot : electionRecord.acceptedBallots) {
+    for (SubmittedBallot ballot : electionRecord.submittedBallots()) {
       nballots++;
       if (show) System.out.printf("Ballot %s.%n", ballot.object_id());
       for (Contest contest : ballot.contests) {
@@ -127,7 +130,9 @@ public class ContestVoteLimitsVerifier {
       }
 
       // 5.A verify the placeholder numbers match the maximum votes allowed
-      Integer vote_limit = electionRecord.getVoteLimitForContest(this.contest.contestId);
+      Manifest.ContestDescription mcontest = electionRecord.manifest().contests().stream()
+              .filter(c -> c.contestId().equals(this.contest.contestId)).findFirst().orElseThrow();
+      Integer vote_limit = mcontest.votesAllowed();
       Preconditions.checkNotNull(vote_limit);
       if (vote_limit != placeholder_count) {
         System.out.printf(" 5.A Contest placeholder %d != %d vote limit for contest %s.%n", placeholder_count,
@@ -153,8 +158,8 @@ public class ContestVoteLimitsVerifier {
         // ElGamal.Ciphertext message, ElementModP k, ElementModQ qbar
         proofOk = proof.is_valid(
                 ciphertextAccumulation,
-                electionRecord.context.jointPublicKey,
-                electionRecord.context.cryptoExtendedBaseHash
+                electionRecord.electionPublicKey(),
+                electionRecord.extendedHash()
         );
       } else {
         ElementModP a = proof.pad;

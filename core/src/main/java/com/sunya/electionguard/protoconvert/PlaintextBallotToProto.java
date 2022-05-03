@@ -6,7 +6,7 @@ import electionguard.protogen.PlaintextBallotProto;
 
 public class PlaintextBallotToProto {
 
-  public static PlaintextBallotProto.PlaintextBallot translateToProto(PlaintextBallot ballot) {
+  public static PlaintextBallotProto.PlaintextBallot publishPlaintextBallot(PlaintextBallot ballot) {
     PlaintextBallotProto.PlaintextBallot.Builder builder = PlaintextBallotProto.PlaintextBallot.newBuilder();
     builder.setBallotId(ballot.object_id());
     builder.setBallotStyleId(ballot.ballotStyleId);
@@ -29,15 +29,7 @@ public class PlaintextBallotToProto {
     builder.setSelectionId(selection.selectionId);
     builder.setSequenceOrder(selection.sequenceOrder);
     builder.setVote(selection.vote);
-    selection.extendedData.ifPresent(value -> builder.setExtendedData(convertExtendedData(value)));
+    builder.setExtendedData(selection.extendedData);
     return builder.build();
-  }
-
-  static PlaintextBallotProto.ExtendedData convertExtendedData(PlaintextBallot.ExtendedData data) {
-    PlaintextBallotProto.ExtendedData.Builder builder = PlaintextBallotProto.ExtendedData.newBuilder();
-    builder.setValue(data.value);
-    builder.setLength(data.length);
-    return builder.build();
-
   }
 }

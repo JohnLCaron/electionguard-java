@@ -21,10 +21,10 @@ public class CompactPlaintextBallot {
   final String object_id;
   final String style_id;
   final ImmutableList<Boolean> selections;
-  final ImmutableMap<Integer, PlaintextBallot.ExtendedData> extended_data;
+  final ImmutableMap<Integer, String> extended_data;
 
   public CompactPlaintextBallot(String object_id, String style_id, List<Boolean> selections,
-                                Map<Integer, PlaintextBallot.ExtendedData> extended_data) {
+                                Map<Integer, String> extended_data) {
     this.object_id = Preconditions.checkNotNull(object_id);
     this.style_id = Preconditions.checkNotNull(style_id);
     this.selections = ImmutableList.copyOf(selections);
@@ -34,7 +34,7 @@ public class CompactPlaintextBallot {
   /** Compress a plaintext ballot into a compact plaintext ballot. */
   static CompactPlaintextBallot compress_plaintext_ballot(PlaintextBallot ballot) {
     List<Boolean> selections = get_compact_selections(ballot);
-    Map<Integer, PlaintextBallot.ExtendedData> extended_data = get_compact_extended_data(ballot);
+    Map<Integer, String> extended_data = get_compact_extended_data(ballot);
     return new CompactPlaintextBallot(ballot.object_id(), ballot.ballotStyleId, selections, extended_data);
   }
 
@@ -48,16 +48,14 @@ public class CompactPlaintextBallot {
     return selections;
   }
 
-  private static Map<Integer, PlaintextBallot.ExtendedData> get_compact_extended_data(PlaintextBallot ballot) {
-    Map<Integer, PlaintextBallot.ExtendedData> extended_data = new HashMap<>(); // why a map?
+  private static Map<Integer, String> get_compact_extended_data(PlaintextBallot ballot) {
+    Map<Integer, String> extended_data = new HashMap<>(); // why a map?
 
     int index = 0;
     for (PlaintextBallot.Contest contest : ballot.contests) { // LOOK How do we guarantee order?
       for (PlaintextBallot.Selection selection : contest.selections) {
         index += 1; // starts at 1 ?
-        if (selection.extendedData.isPresent()) {
-          extended_data.put(index, selection.extendedData.get());
-        }
+          extended_data.put(index, selection.extendedData);
       }
     }
     return extended_data;

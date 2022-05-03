@@ -7,7 +7,7 @@ import "manifest.proto";
 import "plaintext_tally.proto";
 
 option java_package = "electionguard.protogen";
-option java_outer_classname = "ElectionRecordProto";
+option java_outer_classname = "ElectionRecordProto1";
 
 // The published Election record, for some collection of ballots.
 message ElectionRecord {

@@ -188,11 +188,7 @@ public class PlaintextBallotsTable extends JPanel {
     }
 
     public String getExtendedData() {
-      if (selection.extendedData.isPresent()) {
-        return selection.extendedData.get().value;
-      } else {
-        return "";
-      }
+        return selection.extendedData;
     }
 
   }

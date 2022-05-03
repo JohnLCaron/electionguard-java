@@ -2,9 +2,6 @@ package com.sunya.electionguard.json;
 
 import com.google.common.collect.ImmutableList;
 import com.sunya.electionguard.*;
-import com.sunya.electionguard.json.LagrangeCoefficientsPojo;
-import com.sunya.electionguard.json.ConvertFromJson;
-import com.sunya.electionguard.json.ConvertToJson;
 import net.jqwik.api.Example;
 
 import java.io.File;
@@ -180,7 +177,7 @@ public class TestJsonRoundtrip {
             "testSelectiontRoundtrip",
             43,
             1,
-            new PlaintextBallot.ExtendedData("stuff", 42));
+            "stuff");
 
     PlaintextBallot.Contest contest = new PlaintextBallot.Contest(
             "testContestRoundtrip",

@@ -2,6 +2,7 @@ package com.sunya.electionguard.verifier;
 
 import com.sunya.electionguard.json.JsonConsumer;
 import com.sunya.electionguard.publish.Consumer;
+import com.sunya.electionguard.publish.ElectionRecord;
 import net.jqwik.api.Example;
 
 import java.io.IOException;
@@ -14,9 +15,9 @@ public class TestTallyDecryptionVerifier {
   public void testVerifyTallyDecryptionProto() throws IOException {
     String topdir = TestParameterVerifier.topdirProto;
     Consumer consumer = new Consumer(topdir);
-    ElectionRecord electionRecord = consumer.readElectionRecordProto();
+    ElectionRecord electionRecord = consumer.readElectionRecord();
 
-    TallyDecryptionVerifier tdv = new TallyDecryptionVerifier(electionRecord, electionRecord.manifest, electionRecord.decryptedTally);
+    TallyDecryptionVerifier tdv = new TallyDecryptionVerifier(electionRecord, electionRecord.manifest(), electionRecord.decryptedTally());
     boolean tdvOk = tdv.verify_tally_decryption();
     assertThat(tdvOk).isTrue();
   }
@@ -27,7 +28,7 @@ public class TestTallyDecryptionVerifier {
     JsonConsumer consumer = new JsonConsumer(topdir);
     ElectionRecord electionRecord = consumer.readElectionRecordJson();
 
-    TallyDecryptionVerifier tdv = new TallyDecryptionVerifier(electionRecord, electionRecord.manifest, electionRecord.decryptedTally);
+    TallyDecryptionVerifier tdv = new TallyDecryptionVerifier(electionRecord, electionRecord.manifest(), electionRecord.decryptedTally());
     boolean tdvOk = tdv.verify_tally_decryption();
     assertThat(tdvOk).isTrue();
   }

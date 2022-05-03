@@ -2,7 +2,7 @@ package com.sunya.electionguard.protoconvert;
 
 import com.google.protobuf.ByteString;
 import com.sunya.electionguard.AvailableGuardian;
-import com.sunya.electionguard.ElectionContext;
+import com.sunya.electionguard.ElectionCryptoContext;
 import com.sunya.electionguard.ElectionConstants;
 import com.sunya.electionguard.GuardianRecord;
 import com.sunya.electionguard.Manifest;
@@ -18,23 +18,23 @@ import static com.sunya.electionguard.protoconvert.CommonConvert.publishElementM
 import static com.sunya.electionguard.protoconvert.CommonConvert.publishElementModQ;
 
 import electionguard.protogen.ElectionRecordProto;
-import electionguard.protogen.ElectionRecordProto2;
+import electionguard.protogen.ElectionRecordProto1;
 
 
 public class ElectionRecordToProto {
   public static final String PROTO_VERSION = "1.0.0";
 
-  public static ElectionRecordProto.ElectionRecord buildElectionRecord(
+  public static ElectionRecordProto1.ElectionRecord buildElectionRecord(
           Manifest description,
           ElectionConstants constants,
-          @Nullable ElectionContext context,
+          @Nullable ElectionCryptoContext context,
           @Nullable Iterable<GuardianRecord> guardianRecords,
           @Nullable Iterable<Encrypt.EncryptionDevice> devices,
           @Nullable CiphertextTally ciphertext_tally,
           @Nullable PlaintextTally decryptedTally,
           @Nullable Iterable<AvailableGuardian> availableGuardians) {
 
-    ElectionRecordProto.ElectionRecord.Builder builder = ElectionRecordProto.ElectionRecord.newBuilder();
+    ElectionRecordProto1.ElectionRecord.Builder builder = ElectionRecordProto1.ElectionRecord.newBuilder();
     builder.setProtoVersion(PROTO_VERSION);
     builder.setConstants( convertConstants(constants));
     builder.setManifest( ManifestToProto.publishManifest(description));
@@ -67,16 +67,16 @@ public class ElectionRecordToProto {
     return builder.build();
   }
 
-  static ElectionRecordProto2.AvailableGuardian convertAvailableGuardian(AvailableGuardian guardian) {
-    ElectionRecordProto2.AvailableGuardian.Builder builder = ElectionRecordProto2.AvailableGuardian.newBuilder();
+  static ElectionRecordProto.AvailableGuardian convertAvailableGuardian(AvailableGuardian guardian) {
+    ElectionRecordProto.AvailableGuardian.Builder builder = ElectionRecordProto.AvailableGuardian.newBuilder();
     builder.setGuardianId(guardian.guardianId());
     builder.setXCoordinate(guardian.xCoordinate());
     builder.setLagrangeCoefficient(publishElementModQ(guardian.lagrangeCoefficient()));
     return builder.build();
   }
 
-  static ElectionRecordProto2.ElectionConstants convertConstants(ElectionConstants constants) {
-    ElectionRecordProto2.ElectionConstants.Builder builder = ElectionRecordProto2.ElectionConstants.newBuilder();
+  static ElectionRecordProto.ElectionConstants convertConstants(ElectionConstants constants) {
+    ElectionRecordProto.ElectionConstants.Builder builder = ElectionRecordProto.ElectionConstants.newBuilder();
     if (constants.name != null) {
       builder.setName(constants.name);
     }
@@ -87,8 +87,8 @@ public class ElectionRecordToProto {
     return builder.build();
   }
 
-  static ElectionRecordProto.ElectionContext convertContext(ElectionContext context) {
-    ElectionRecordProto.ElectionContext.Builder builder = ElectionRecordProto.ElectionContext.newBuilder();
+  static ElectionRecordProto1.ElectionContext convertContext(ElectionCryptoContext context) {
+    ElectionRecordProto1.ElectionContext.Builder builder = ElectionRecordProto1.ElectionContext.newBuilder();
     builder.setNumberOfGuardians(context.numberOfGuardians);
     builder.setQuorum(context.quorum);
     builder.setJointPublicKey(publishElementModP(context.jointPublicKey));
@@ -102,8 +102,8 @@ public class ElectionRecordToProto {
     return builder.build();
   }
 
-  static ElectionRecordProto.EncryptionDevice convertDevice(Encrypt.EncryptionDevice device) {
-    ElectionRecordProto.EncryptionDevice.Builder builder = ElectionRecordProto.EncryptionDevice.newBuilder();
+  static ElectionRecordProto1.EncryptionDevice convertDevice(Encrypt.EncryptionDevice device) {
+    ElectionRecordProto1.EncryptionDevice.Builder builder = ElectionRecordProto1.EncryptionDevice.newBuilder();
     builder.setDeviceId(device.deviceId());
     builder.setSessionId(device.sessionId());
     builder.setLaunchCode(device.launchCode());
@@ -111,8 +111,8 @@ public class ElectionRecordToProto {
     return builder.build();
   }
 
-  static ElectionRecordProto.GuardianRecord convertGuardianRecord(GuardianRecord guardianRecord) {
-    ElectionRecordProto.GuardianRecord.Builder builder = ElectionRecordProto.GuardianRecord.newBuilder();
+  static ElectionRecordProto1.GuardianRecord convertGuardianRecord(GuardianRecord guardianRecord) {
+    ElectionRecordProto1.GuardianRecord.Builder builder = ElectionRecordProto1.GuardianRecord.newBuilder();
     builder.setGuardianId(guardianRecord.guardianId());
     builder.setXCoordinate(guardianRecord.xCoordinate());
     builder.setGuardianPublicKey(publishElementModP(guardianRecord.guardianPublicKey()));

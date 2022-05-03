@@ -8,7 +8,7 @@ import com.sunya.electionguard.BallotBox;
 import com.sunya.electionguard.ChaumPedersen;
 import com.sunya.electionguard.CiphertextBallot;
 import com.sunya.electionguard.CiphertextContest;
-import com.sunya.electionguard.ElectionContext;
+import com.sunya.electionguard.ElectionCryptoContext;
 import com.sunya.electionguard.CiphertextSelection;
 import com.sunya.electionguard.CiphertextTally;
 import com.sunya.electionguard.DecryptionShare;
@@ -17,6 +17,7 @@ import com.sunya.electionguard.ElectionPolynomial;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.Scheduler;
 import com.sunya.electionguard.SubmittedBallot;
+import com.sunya.electionguard.publish.ElectionContext;
 
 import javax.annotation.Nullable;
 import java.math.BigInteger;
@@ -182,10 +183,10 @@ public class Decryptions {
 
     try {
       BallotBox.DecryptionProofTuple tuple =
-              partially_decrypt(guardian_keys, selection.ciphertext(), context.cryptoExtendedBaseHash, null);
+              partially_decrypt(guardian_keys, selection.ciphertext(), context.extendedHash(), null);
 
       if (tuple.proof.is_valid(selection.ciphertext(), guardian_keys.key_pair().public_key(),
-              tuple.decryption, context.cryptoExtendedBaseHash)) {
+              tuple.decryption, context.extendedHash())) {
         return Optional.of(DecryptionShare.create_ciphertext_decryption_selection(
                 selection.object_id(),
                 guardian_keys.owner_id(),
@@ -221,7 +222,7 @@ public class Decryptions {
           KeyCeremony.ElectionPublicKey missing_guardian_key,
           KeyCeremony.ElectionPartialKeyBackup missing_guardian_backup,
           CiphertextTally tally,
-          ElectionContext context) {
+          ElectionCryptoContext context) {
 
     Map<String, CiphertextCompensatedDecryptionContest> contests = new HashMap<>();
 
@@ -255,7 +256,7 @@ public class Decryptions {
           KeyCeremony.ElectionPublicKey missing_guardian_key,
           KeyCeremony.ElectionPartialKeyBackup missing_guardian_backup,
           CiphertextContest contest,
-          ElectionContext context) {
+          ElectionCryptoContext context) {
 
       Map<String, CiphertextCompensatedDecryptionSelection> selections = new HashMap<>();
 
@@ -296,7 +297,7 @@ public class Decryptions {
           KeyCeremony.ElectionPublicKey missing_guardian_key,
           KeyCeremony.ElectionPartialKeyBackup missing_guardian_backup,
           Iterable<SubmittedBallot> ballots,
-          ElectionContext context) {
+          ElectionCryptoContext context) {
 
     Map<String, CompensatedDecryptionShare> decrypted_ballots = new HashMap<>();
 
@@ -324,7 +325,7 @@ public class Decryptions {
           KeyCeremony.ElectionPublicKey missing_guardian_key,
           KeyCeremony.ElectionPartialKeyBackup missing_guardian_backup,
           SubmittedBallot ballot,
-          ElectionContext context) {
+          ElectionCryptoContext context) {
 
     Map<String, CiphertextCompensatedDecryptionContest> contests = new HashMap<>();
 
@@ -358,14 +359,14 @@ public class Decryptions {
     final KeyCeremony.ElectionPublicKey missing_guardian_key;
     final KeyCeremony.ElectionPartialKeyBackup missing_guardian_backup;
     final CiphertextSelection selection;
-    final ElectionContext context;
+    final ElectionCryptoContext context;
 
     RunComputeCompensatedDecryptionShareForSelection(
             KeyCeremony.ElectionPublicKey guardian_key,
             KeyCeremony.ElectionPublicKey missing_guardian_key,
             KeyCeremony.ElectionPartialKeyBackup missing_guardian_backup,
             CiphertextSelection selection,
-            ElectionContext context) {
+            ElectionCryptoContext context) {
       this.guardian_key = guardian_key;
       this.missing_guardian_key = missing_guardian_key;
       this.missing_guardian_backup = missing_guardian_backup;
@@ -397,7 +398,7 @@ public class Decryptions {
           KeyCeremony.ElectionPublicKey missing_guardian_key,
           KeyCeremony.ElectionPartialKeyBackup missing_guardian_backup,
           CiphertextSelection selection,
-          ElectionContext context) {
+          ElectionCryptoContext context) {
 
     Optional<BallotBox.DecryptionProofTuple> compensated = compensate_decrypt(
             missing_guardian_backup,

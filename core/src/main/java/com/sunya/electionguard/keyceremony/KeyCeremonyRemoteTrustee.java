@@ -188,7 +188,7 @@ class KeyCeremonyRemoteTrustee extends RemoteKeyCeremonyTrusteeServiceGrpc.Remot
     this.outputDir = outputDir;
 
     // fail fast on bad output directory
-    publisher = new PrivateData(outputDir, false, false);
+    publisher = new PrivateData(outputDir, false, true);
     Formatter errors = new Formatter();
     if (!publisher.validateOutputDir(errors)) {
       System.out.printf("*** Publisher validateOutputDir FAILED on %s%n%s", outputDir, errors);
@@ -352,8 +352,7 @@ class KeyCeremonyRemoteTrustee extends RemoteKeyCeremonyTrusteeServiceGrpc.Remot
                         StreamObserver<CommonRpcProto.ErrorResponse> responseObserver) {
     CommonRpcProto.ErrorResponse.Builder response = CommonRpcProto.ErrorResponse.newBuilder();
     try {
-      TrusteeProto.DecryptingTrustee trusteeProto = KeyCeremonyTrusteeToProto.convertTrustee(this.delegate);
-      publisher.overwriteTrusteeProto(trusteeProto);
+      publisher.writeTrustee(this.delegate);
       logger.atInfo().log("KeyCeremonyRemoteTrustee saveState %s", delegate.id);
 
     } catch (Throwable t) {

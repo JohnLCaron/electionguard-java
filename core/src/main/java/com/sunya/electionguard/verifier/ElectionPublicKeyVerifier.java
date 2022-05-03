@@ -2,8 +2,9 @@ package com.sunya.electionguard.verifier;
 
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.Group;
-import com.sunya.electionguard.GuardianRecord;
 import com.sunya.electionguard.Hash;
+import com.sunya.electionguard.publish.ElectionRecord;
+import electionguard.ballot.Guardian;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -35,11 +36,11 @@ public class ElectionPublicKeyVerifier {
 
     // Equation 3.A
     // The hashing is order dependent, use the sequence_order to sort.
-    List<GuardianRecord> sorted = this.electionRecord.guardianRecords.stream()
-            .sorted(Comparator.comparing(GuardianRecord::xCoordinate)).toList();
+    List<Guardian> sorted = this.electionRecord.guardians().stream()
+            .sorted(Comparator.comparing(Guardian::getXCoordinate)).toList();
     List<Group.ElementModP> commitments = new ArrayList<>();
-    for (GuardianRecord coeff : sorted) {
-      commitments.addAll(coeff.coefficientCommitments());
+    for (Guardian coeff : sorted) {
+      commitments.addAll(coeff.getCoefficientCommitments());
     }
     ElementModQ commitment_hash = Hash.hash_elems(commitments);
     ElementModQ expectedExtendedHash = Hash.hash_elems(this.electionRecord.baseHash(), commitment_hash);
@@ -48,14 +49,14 @@ public class ElectionPublicKeyVerifier {
       System.out.printf(" ***3.A. extended hash does not match expected.%n");
       return false;
     }
-    System.out.printf(" Manifest public key validation for %d guardians success.%n", this.electionRecord.guardianRecords.size());
+    System.out.printf(" Manifest public key validation for %d guardians success.%n", this.electionRecord.guardians().size());
     return true;
   }
 
   ElementModP computePublicKey() {
     List<ElementModP> Ki = new ArrayList<>();
-    for (GuardianRecord coeff : this.electionRecord.guardianRecords) {
-      Ki.add(coeff.guardianPublicKey());
+    for (Guardian coeff : this.electionRecord.guardians()) {
+      Ki.add(coeff.publicKey());
     }
     return ElGamal.elgamal_combine_public_keys(Ki);
   }

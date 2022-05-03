@@ -1,6 +1,7 @@
 package electionguard.ballot
 
 import com.sunya.electionguard.*
+import com.sunya.electionguard.core.UInt256
 import java.util.Collections.emptyMap
 
 data class TallyResult(
@@ -9,6 +10,9 @@ data class TallyResult(
     val ballotIds: List<String>,
     val tallyIds: List<String>,
 ) {
+    fun manifestHash(): UInt256 {
+        return electionIntialized.manifestHash;
+    }
     fun jointPublicKey(): Group.ElementModP {
         return electionIntialized.jointPublicKey
     }

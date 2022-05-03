@@ -29,12 +29,7 @@ public class PlaintextBallotFromProto {
             selection.getSelectionId(),
             selection.getSequenceOrder(),
             selection.getVote(),
-            selection.hasExtendedData() ? convertExtendedData(selection.getExtendedData()) : null);
+            selection.getExtendedData());
   }
 
-  static PlaintextBallot.ExtendedData convertExtendedData(PlaintextBallotProto.ExtendedData data) {
-    return new PlaintextBallot.ExtendedData(
-            data.getValue(),
-            data.getLength());
-  }
 }

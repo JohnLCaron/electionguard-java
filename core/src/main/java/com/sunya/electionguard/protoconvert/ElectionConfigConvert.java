@@ -3,7 +3,7 @@ package com.sunya.electionguard.protoconvert;
 import com.google.protobuf.ByteString;
 import electionguard.ballot.ElectionConstants;
 import electionguard.ballot.ElectionConfig;
-import electionguard.protogen.ElectionRecordProto2;
+import electionguard.protogen.ElectionRecordProto;
 
 import javax.annotation.concurrent.Immutable;
 import java.io.FileInputStream;
@@ -16,14 +16,14 @@ import static com.sunya.electionguard.protoconvert.ManifestToProto.publishManife
 public class ElectionConfigConvert {
 
   public static ElectionConfig read(String filename) throws IOException {
-    ElectionRecordProto2.ElectionConfig proto;
+    ElectionRecordProto.ElectionConfig proto;
     try (FileInputStream inp = new FileInputStream(filename)) {
-      proto = ElectionRecordProto2.ElectionConfig.parseFrom(inp);
+      proto = ElectionRecordProto.ElectionConfig.parseFrom(inp);
     }
     return importElectionConfig(proto);
   }
 
-  static ElectionConfig importElectionConfig(ElectionRecordProto2.ElectionConfig config) {
+  static ElectionConfig importElectionConfig(ElectionRecordProto.ElectionConfig config) {
     if (config == null) {
       return null;
     }
@@ -36,7 +36,7 @@ public class ElectionConfigConvert {
             config.getMetadataMap());
   }
 
-  static ElectionConstants importElectionConstants(ElectionRecordProto2.ElectionConstants constants) {
+  static ElectionConstants importElectionConstants(ElectionRecordProto.ElectionConstants constants) {
     return new ElectionConstants(
             constants.getName(),
             constants.getLargePrime().toByteArray(),
@@ -47,8 +47,8 @@ public class ElectionConfigConvert {
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-  static ElectionRecordProto2.ElectionConfig publishElectionConfig(ElectionConfig config) {
-    ElectionRecordProto2.ElectionConfig.Builder builder = ElectionRecordProto2.ElectionConfig.newBuilder();
+  public static ElectionRecordProto.ElectionConfig publishElectionConfig(ElectionConfig config) {
+    ElectionRecordProto.ElectionConfig.Builder builder = ElectionRecordProto.ElectionConfig.newBuilder();
     builder.setProtoVersion(config.getProtoVersion());
     builder.setConstants(publishElectionConstants(config.getConstants()));
     builder.setManifest(publishManifest(config.getManifest()));
@@ -59,8 +59,8 @@ public class ElectionConfigConvert {
     return builder.build();
   }
 
-  static ElectionRecordProto2.ElectionConstants publishElectionConstants(ElectionConstants constants) {
-    ElectionRecordProto2.ElectionConstants.Builder builder = ElectionRecordProto2.ElectionConstants.newBuilder();
+  static ElectionRecordProto.ElectionConstants publishElectionConstants(ElectionConstants constants) {
+    ElectionRecordProto.ElectionConstants.Builder builder = ElectionRecordProto.ElectionConstants.newBuilder();
     builder.setName(constants.getName());
     builder.setLargePrime(ByteString.copyFrom(constants.getLargePrime()));
     builder.setSmallPrime(ByteString.copyFrom(constants.getSmallPrime()));

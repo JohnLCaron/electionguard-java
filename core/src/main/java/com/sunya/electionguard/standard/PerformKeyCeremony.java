@@ -3,7 +3,7 @@ package com.sunya.electionguard.standard;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
-import com.sunya.electionguard.ElectionContext;
+import com.sunya.electionguard.ElectionCryptoContext;
 import com.sunya.electionguard.GuardianRecord;
 import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.Group;
@@ -13,7 +13,7 @@ import com.sunya.electionguard.decrypting.DecryptingTrustee;
 import com.sunya.electionguard.input.ManifestInputValidation;
 import com.sunya.electionguard.publish.Consumer;
 import com.sunya.electionguard.publish.PrivateData;
-import com.sunya.electionguard.publish.Publisher;
+import com.sunya.electionguard.publish.PublisherOld;
 import electionguard.ballot.ElectionConfig;
 import electionguard.ballot.ElectionInitialized;
 
@@ -90,7 +90,7 @@ public class PerformKeyCeremony {
     try {
       // all we need from election record is the ElectionDescription.
       Consumer consumer = new Consumer(cmdLine.inputDir);
-      Manifest election = consumer.readManifest();
+      Manifest election = consumer.readElectionRecord().manifest();
       ManifestInputValidation validator = new ManifestInputValidation(election);
       Formatter errors = new Formatter();
       if (!validator.validateElection(errors)) {
@@ -122,7 +122,7 @@ public class PerformKeyCeremony {
 
   KeyCeremony.ElectionJointKey jointKey;
   Group.ElementModQ commitmentsHash;
-  ElectionContext context;
+  ElectionCryptoContext context;
 
   List<Guardian> guardians;
   List<GuardianRecord> guardian_records = new ArrayList<>();
@@ -144,7 +144,7 @@ public class PerformKeyCeremony {
       throw new RuntimeException("*** Key Ceremony failed");
     }
 
-    this.context = ElectionContext.create(this.numberOfGuardians, this.quorum,
+    this.context = ElectionCryptoContext.create(this.numberOfGuardians, this.quorum,
             this.jointKey.joint_public_key(), this.election, this.commitmentsHash, null);
   }
 
@@ -296,7 +296,7 @@ public class PerformKeyCeremony {
             emptyMap()
     );
 
-    Publisher publisher = new Publisher(publishDir, Publisher.Mode.createNew);
+    PublisherOld publisher = new PublisherOld(publishDir, PublisherOld.Mode.createNew);
     publisher.writeElectionInitialized(electionInitialized);
 
     // save private data for decrypting

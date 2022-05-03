@@ -67,13 +67,13 @@ class KeyCeremonyRemoteTrusteeProxy implements KeyCeremonyTrusteeIF {
 
       CommonRpcProto.ErrorResponse response = blockingStub.receivePublicKeys(request.build());
       if (!response.getError().isEmpty()) {
-        logger.atSevere().log("receivePublicKeys failed: %s", response.getError());
+        logger.atSevere().log("receivePublicKeys failed: '%s'", response.getError());
       }
       return response.getError();
 
     } catch (StatusRuntimeException e) {
-      logger.atSevere().withCause(e).log("receivePublicKeys failed: ");
-      return "receivePublicKeys failed: " + e.getMessage();
+      logger.atSevere().withCause(e).log("receivePublicKeys StatusRuntimeException: ");
+      return "receivePublicKeys StatusRuntimeException: " + e.getMessage();
     }
   }
 

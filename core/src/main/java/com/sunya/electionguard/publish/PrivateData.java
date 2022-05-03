@@ -1,13 +1,13 @@
 package com.sunya.electionguard.publish;
 
 import com.sunya.electionguard.decrypting.DecryptingTrustee;
-import com.sunya.electionguard.protoconvert.ElectionInitializedConvert;
+import com.sunya.electionguard.keyceremony.KeyCeremonyTrustee;
+import com.sunya.electionguard.protoconvert.KeyCeremonyTrusteeToProto;
 import com.sunya.electionguard.protoconvert.PlaintextBallotFromProto;
 import com.sunya.electionguard.protoconvert.PlaintextBallotToProto;
 import com.sunya.electionguard.protoconvert.TrusteeFromProto;
 import com.sunya.electionguard.standard.GuardianPrivateRecord;
 import com.sunya.electionguard.PlaintextBallot;
-import electionguard.protogen.ElectionRecordProto2;
 import electionguard.protogen.PlaintextBallotProto;
 import electionguard.protogen.TrusteeProto;
 
@@ -23,7 +23,6 @@ import java.util.Formatter;
 import java.util.List;
 
 import static com.sunya.electionguard.protoconvert.DecryptingTrusteeToProto.publishDecryptingTrustee;
-import static com.sunya.electionguard.protoconvert.TrusteeFromProto.importDecryptingTrustee;
 
 /** Publishes the Manifest Record to Json or protobuf files. */
 public class PrivateData {
@@ -34,8 +33,7 @@ public class PrivateData {
   static final String PRIVATE_BALLOT_DIR = "plaintext_ballots";
 
   //// proto
-  static final String TRUSTEES_FILE = "trustees" + Publisher.PROTO_SUFFIX;
-  static final String PROTO_BALLOTS_FILE = "plaintextBallots" + Publisher.PROTO_SUFFIX;
+  static final String PROTO_BALLOTS_FILE = "plaintextBallots" + PublisherOld.PROTO_SUFFIX;
 
   private final Path privateDirectory;
 
@@ -92,12 +90,8 @@ public class PrivateData {
     return privateDirectory.toAbsolutePath();
   }
 
-  public Path trusteesPath() {
-    return privateDirectory.resolve(TRUSTEES_FILE);
-  }
-
   public Path trusteePath(String id) {
-    String filename = id + Publisher.PROTO_SUFFIX;
+    String filename = id + PublisherOld.PROTO_SUFFIX;
     return privateDirectory.resolve(filename);
   }
 
@@ -123,15 +117,6 @@ public class PrivateData {
 
   //////////////////////////////////////////////////////////////////
   // Proto
-
-  public void writeTrusteesProto(TrusteeProto.DecryptingTrustees trusteesProto) throws IOException {
-    Files.createDirectories(privateDirectory);
-
-    try (FileOutputStream out = new FileOutputStream(trusteesPath().toFile())) {
-      trusteesProto.writeDelimitedTo(out);
-    }
-  }
-
   public void overwriteTrusteeProto(TrusteeProto.DecryptingTrustee trusteeProto) throws IOException {
     Path outputPath = trusteePath(trusteeProto.getGuardianId());
     if (Files.exists(outputPath)) {
@@ -142,9 +127,21 @@ public class PrivateData {
     }
   }
 
+  public void writeTrustee(KeyCeremonyTrustee trustee) {
+    TrusteeProto.DecryptingTrustee trusteeProto = KeyCeremonyTrusteeToProto.convertTrustee(trustee);
+    Path fileout = PublisherOld.decryptingTrusteePath(this.privateDirectory, trustee.id);
+    System.out.printf("writeTrustee %s%n", fileout);
+    try (FileOutputStream out = new FileOutputStream(fileout.toFile())) {
+      trusteeProto.writeTo(out);
+    } catch (IOException ioe) {
+      throw new RuntimeException(ioe);
+    }
+  }
+
   public DecryptingTrustee readDecryptingTrustee(String id) throws IOException {
-    Path outputPath = trusteePath(id);
-    return TrusteeFromProto.readTrustee(outputPath.toString());
+    Path fileout = PublisherOld.decryptingTrusteePath(this.privateDirectory, id);
+    System.out.printf("readDecryptingTrustee %s%n", fileout);
+    return TrusteeFromProto.readTrustee(fileout.toString());
   }
 
   public static List<DecryptingTrustee> readDecryptingTrustees(String fileOrDir) throws IOException {
@@ -152,16 +149,8 @@ public class PrivateData {
     List<DecryptingTrustee> result = new ArrayList<>();
     File dir = new File(fileOrDir);
     if (dir.isDirectory()) {
-      for (File file : dir.listFiles((parent, name) -> name.endsWith(Publisher.PROTO_SUFFIX))) {
+      for (File file : dir.listFiles((parent, name) -> name.endsWith(PublisherOld.PROTO_SUFFIX))) {
         result.add(TrusteeFromProto.readTrustee(file.toString()));
-      }
-    } else {
-      try {
-        // multiple trustees
-        result.addAll(TrusteeFromProto.readTrustees(fileOrDir));
-      } catch (Exception e) {
-        // one trustee
-        result.add(TrusteeFromProto.readTrustee(fileOrDir));
       }
     }
     return result;
@@ -169,7 +158,7 @@ public class PrivateData {
 
   public void writeTrustee(DecryptingTrustee trustee) {
     TrusteeProto.DecryptingTrustee proto = publishDecryptingTrustee(trustee);
-    Path fileout = Publisher.decryptingTrusteePath(this.privateDirectory, trustee.id());
+    Path fileout = PublisherOld.decryptingTrusteePath(this.privateDirectory, trustee.id());
     try (FileOutputStream out = new FileOutputStream(fileout.toFile())) {
       proto.writeTo(out);
     } catch (IOException ioe) {
@@ -192,7 +181,7 @@ public class PrivateData {
       Files.createDirectories(privateBallotsPath());
       try (FileOutputStream out = new FileOutputStream(privateBallotsProtoPath().toFile())) {
         for (PlaintextBallot ballot : original_ballots) {
-          PlaintextBallotProto.PlaintextBallot ballotProto = PlaintextBallotToProto.translateToProto(ballot);
+          PlaintextBallotProto.PlaintextBallot ballotProto = PlaintextBallotToProto.publishPlaintextBallot(ballot);
           ballotProto.writeDelimitedTo(out);
         }
       }

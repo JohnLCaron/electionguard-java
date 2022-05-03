@@ -1,13 +1,12 @@
 package com.sunya.electionguard.verifier;
 
-import com.google.common.collect.Iterables;
 import com.sunya.electionguard.CiphertextBallot;
-import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.Hash;
 import com.sunya.electionguard.SubmittedBallot;
 import com.sunya.electionguard.publish.Consumer;
-import com.sunya.electionguard.publish.Publisher;
+import com.sunya.electionguard.publish.ElectionRecord;
+import com.sunya.electionguard.publish.PublisherOld;
 import net.jqwik.api.Example;
 
 import java.io.IOException;
@@ -15,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.sunya.electionguard.publish.Publisher.Mode.createIfMissing;
+import static com.sunya.electionguard.publish.PublisherOld.Mode.createIfMissing;
 
 // try to modify a SubmittedBallot and see if it still validates
 public class TestAttackSubmittedBallot {
@@ -27,7 +26,7 @@ public class TestAttackSubmittedBallot {
     String topdir = TestParameterVerifier.topdirProto;
 
     Consumer consumer = new Consumer(topdir);
-    ElectionRecord electionRecord = consumer.readElectionRecordProto();
+    ElectionRecord electionRecord = consumer.readElectionRecord();
     SelectionEncryptionVerifier sev = new SelectionEncryptionVerifier(electionRecord);
 
     boolean sevOk = sev.verify_all_selections();
@@ -35,7 +34,7 @@ public class TestAttackSubmittedBallot {
 
     List<SubmittedBallot> ballots = new ArrayList<>();
     TestSelectionEncryptionVerifier.Tester tester = new TestSelectionEncryptionVerifier.Tester(electionRecord);
-    for (SubmittedBallot ballot : electionRecord.acceptedBallots) {
+    for (SubmittedBallot ballot : electionRecord.submittedBallots()) {
       if (ballot.ballotId.equals(ballotId)) { // random ballot to change
         CiphertextBallot.Contest contestChanged = null;
         int idx = 0;
@@ -73,8 +72,8 @@ public class TestAttackSubmittedBallot {
       }
 
       if (write) {
-        Publisher publisher = new Publisher(output, createIfMissing);
-        publisher.writeEncryptionResultsProto(electionRecord, electionRecord.devices, ballots);
+        PublisherOld publisher = new PublisherOld(output, createIfMissing);
+        publisher.writeEncryptionResultsProto(electionRecord, ballots);
       }
     }
   }
@@ -134,7 +133,7 @@ public class TestAttackSubmittedBallot {
   @Example
   public void testSelectionEncryptionVerifier() throws IOException {
     Consumer consumer = new Consumer(output);
-    TestSelectionEncryptionVerifier.testSelectionEncryptionValidation(consumer.readElectionRecordProto());
+    TestSelectionEncryptionVerifier.testSelectionEncryptionValidation(consumer.readElectionRecord());
   }
 
 }

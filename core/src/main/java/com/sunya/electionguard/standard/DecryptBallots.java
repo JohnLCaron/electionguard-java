@@ -13,8 +13,8 @@ import com.sunya.electionguard.CiphertextTally;
 import com.sunya.electionguard.Scheduler;
 import com.sunya.electionguard.input.ManifestInputValidation;
 import com.sunya.electionguard.publish.Consumer;
-import com.sunya.electionguard.publish.Publisher;
-import com.sunya.electionguard.verifier.ElectionRecord;
+import com.sunya.electionguard.publish.PublisherOld;
+import com.sunya.electionguard.publish.ElectionRecord;
 import electionguard.ballot.DecryptionResult;
 
 import java.io.IOException;
@@ -114,7 +114,7 @@ public class DecryptBallots {
     try {
       Consumer consumer = new Consumer(cmdLine.encryptDir);
       ElectionRecord electionRecord = consumer.readElectionRecord();
-      ManifestInputValidation validator = new ManifestInputValidation(electionRecord.manifest);
+      ManifestInputValidation validator = new ManifestInputValidation(electionRecord.manifest());
       Formatter errors = new Formatter();
       if (!validator.validateElection(errors)) {
         System.out.printf("*** ElectionInputValidation FAILED on %s%n%s", cmdLine.encryptDir, errors);
@@ -123,7 +123,7 @@ public class DecryptBallots {
 
       System.out.printf(" BallotDecryptor read from %s%n Write to %s%n", cmdLine.encryptDir, cmdLine.outputDir);
       decryptor = new DecryptBallots(consumer, electionRecord, guardiansProvider);
-      if (electionRecord.ciphertextTally == null) {
+      if (electionRecord.ciphertextTally() == null) {
         decryptor.accumulateTally();
       }
       decryptor.decryptTally();
@@ -167,11 +167,11 @@ public class DecryptBallots {
   public DecryptBallots(Consumer consumer, ElectionRecord electionRecord, GuardiansProvider provider) {
     this.consumer = consumer;
     this.electionRecord = electionRecord;
-    this.election = electionRecord.manifest;
-    this.quorum = electionRecord.context.quorum;
-    this.numberOfGuardians = electionRecord.context.numberOfGuardians;
+    this.election = electionRecord.manifest();
+    this.quorum = electionRecord.quorum();
+    this.numberOfGuardians = electionRecord.numberOfGuardians();
     // LOOK We could do the accumulation if the encryptedTally doesnt exist
-    this.encryptedTally = electionRecord.ciphertextTally;
+    this.encryptedTally = electionRecord.ciphertextTally();
 
     this.guardians = provider.guardians();
     for (Guardian guardian : provider.guardians()) {
@@ -183,23 +183,23 @@ public class DecryptBallots {
   void accumulateTally() {
     System.out.printf("%nAccumulate tally%n");
     InternalManifest metadata = new InternalManifest(this.election);
-    CiphertextTallyBuilder ciphertextTally = new CiphertextTallyBuilder("DecryptBallots", metadata, electionRecord.context);
-    int nballots = ciphertextTally.batch_append(electionRecord.acceptedBallots);
+    CiphertextTallyBuilder ciphertextTally = new CiphertextTallyBuilder("DecryptBallots", metadata, electionRecord);
+    int nballots = ciphertextTally.batch_append(electionRecord.submittedBallots());
     this.encryptedTally = ciphertextTally.build();
     System.out.printf(" done accumulating %d ballots in the tally%n", nballots);
   }
 
   void decryptTally() {
     System.out.printf("%nDecrypt tally%n");
-    DecryptionMediator mediator = new DecryptionMediator("DecryptBallots", electionRecord.context);
+    DecryptionMediator mediator = new DecryptionMediator(electionRecord);
 
     // Announce each guardian as present
     int count = 0;
     for (Guardian guardian : this.guardians) {
       System.out.printf("Guardian Present: %s%n", guardian.object_id);
       KeyCeremony.ElectionPublicKey guardian_key = guardian.share_key();
-      DecryptionShare tally_share = guardian.compute_tally_share(this.encryptedTally, electionRecord.context).orElseThrow();
-      Map<String, Optional<DecryptionShare>> ballot_shares = guardian.compute_ballot_shares(electionRecord.acceptedBallots, electionRecord.context);
+      DecryptionShare tally_share = guardian.compute_tally_share(this.encryptedTally, electionRecord).orElseThrow();
+      Map<String, Optional<DecryptionShare>> ballot_shares = guardian.compute_ballot_shares(electionRecord.submittedBallots(), electionRecord);
       mediator.announce(guardian_key, tally_share, ballot_shares);
 
       count++;
@@ -214,7 +214,7 @@ public class DecryptBallots {
     System.out.printf("Tally Decrypted%n");
 
     // Get the plaintext Spoiled Ballots
-    this.spoiledDecryptedTallies = mediator.get_plaintext_ballots(electionRecord.spoiledBallots()).orElseThrow();
+    this.spoiledDecryptedTallies = mediator.get_plaintext_ballots(electionRecord.submittedBallots()).orElseThrow();
     System.out.printf("Spoiled Ballot Tallies Decrypted%n");
 
     this.spoiledDecryptedBallots = this.spoiledDecryptedTallies.values();
@@ -231,7 +231,7 @@ public class DecryptBallots {
             this.availableGuardians,
             emptyMap());
 
-    Publisher publisher = new Publisher(publishDir, Publisher.Mode.createIfMissing);
+    PublisherOld publisher = new PublisherOld(publishDir, PublisherOld.Mode.createIfMissing);
     publisher.writeDecryptionResults(result);
     publisher.copyAcceptedBallots(inputDir);
     return true;

@@ -2,11 +2,10 @@ package com.sunya.electionguard.json;
 
 import com.sunya.electionguard.CiphertextBallot;
 import com.sunya.electionguard.SubmittedBallot;
-import com.sunya.electionguard.json.ConvertFromJson;
 import com.sunya.electionguard.protoconvert.SubmittedBallotFromProto;
 import com.sunya.electionguard.protoconvert.SubmittedBallotToProto;
 import electionguard.protogen.CiphertextBallotProto;
-import com.sunya.electionguard.publish.Publisher;
+import com.sunya.electionguard.publish.PublisherOld;
 import com.sunya.electionguard.verifier.TestParameterVerifier;
 import net.jqwik.api.Example;
 import net.jqwik.api.lifecycle.BeforeContainer;
@@ -21,7 +20,7 @@ public class TestSubmittedBallotToProtoRoundtrip {
 
   @BeforeContainer
   public static void setup() throws IOException {
-    publisher = new JsonPublisher(TestParameterVerifier.topdirJson, Publisher.Mode.readonly);
+    publisher = new JsonPublisher(TestParameterVerifier.topdirJson, PublisherOld.Mode.readonly);
   }
 
   @Example

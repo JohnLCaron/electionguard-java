@@ -9,7 +9,8 @@ import com.sunya.electionguard.protoconvert.TrusteeFromProto;
 import com.sunya.electionguard.publish.CloseableIterable;
 import com.sunya.electionguard.publish.Consumer;
 import com.sunya.electionguard.publish.PrivateData;
-import com.sunya.electionguard.verifier.ElectionRecord;
+import com.sunya.electionguard.publish.ElectionRecord;
+import electionguard.ballot.ElectionInitialized;
 import net.jqwik.api.Example;
 
 import java.io.IOException;
@@ -43,11 +44,11 @@ public class TestDecryptingMediator extends TestProperties {
     trustees.add(TrusteeFromProto.readTrustee(TRUSTEE_DATA_DIR + "/remoteTrustee3.protobuf"));
 
     this.consumer = new Consumer(DECRYPTING_DATA_DIR);
-    this.electionRecord = consumer.readElectionRecord();
+    ElectionInitialized electionRecord = consumer.readElectionInitialized();
 
     // The guardians' election public key is in the electionRecord.guardianCoefficients.
-    this.guardianPublicKeys = electionRecord.guardianRecords.stream().collect(
-            Collectors.toMap(coeff -> coeff.guardianId(), coeff -> coeff.guardianPublicKey()));
+    this.guardianPublicKeys = electionRecord.getGuardians().stream().collect(
+            Collectors.toMap(guardian -> guardian.getGuardianId(), guardian -> guardian.publicKey()));
 
     // hand tally the results
     expectedTally = new HashMap<>();
@@ -58,12 +59,12 @@ public class TestDecryptingMediator extends TestProperties {
     expectedTally.put("justice-supreme-court:john-hancock-selection", 3);
     expectedTally.put("justice-supreme-court:write-in-selection", 1);
 
-    this.spoiledBallots =  consumer.submittedSpoiledBallotsProto();
+    this.spoiledBallots =  consumer.iterateSpoiledBallots();
   }
 
   DecryptingMediator makeDecryptingMediator() {
-    return new DecryptingMediator(this.electionRecord.context,
-            this.electionRecord.ciphertextTally,
+    return new DecryptingMediator(this.electionRecord,
+            this.electionRecord.ciphertextTally(),
             this.spoiledBallots,
             this.guardianPublicKeys);
   }
@@ -144,7 +145,7 @@ public class TestDecryptingMediator extends TestProperties {
   }
 
   private void checkDecrypted(List<PlaintextTally> decrypteds) throws IOException {
-    PrivateData pdata = new PrivateData(DECRYPTING_DATA_DIR, false, false);
+    PrivateData pdata = new PrivateData(DECRYPTING_DATA_DIR, false, true);
     List<PlaintextBallot> inputBallots = pdata.inputBallots();
     Map<String, PlaintextBallot> inputBallotsMap = inputBallots.stream().collect(Collectors.toMap(e -> e.object_id(), e -> e));
     for (PlaintextTally decrypted : decrypteds) {

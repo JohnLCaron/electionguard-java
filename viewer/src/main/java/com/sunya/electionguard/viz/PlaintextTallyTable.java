@@ -81,12 +81,10 @@ public class PlaintextTallyTable extends JPanel {
     add(split2, BorderLayout.CENTER);
   }
 
-  void setPlaintextTallies(Manifest manifest, CloseableIterable<PlaintextTally> tallies) {
+  void setPlaintextTallies(Manifest manifest, Iterable<PlaintextTally> tallies) {
     this.manifest = new InternalManifest(manifest);
-    try (CloseableIterator<PlaintextTally> iter = tallies.iterator())  {
-      java.util.List<PlaintextTallyBean> beanList = new ArrayList<>();
-      while (iter.hasNext()) {
-        PlaintextTally tally = iter.next();
+    java.util.List<PlaintextTallyBean> beanList = new ArrayList<>();
+    for (PlaintextTally tally: tallies) {
         beanList.add(new PlaintextTallyBean(tally));
       }
       tallyTable.setBeans(beanList);
@@ -96,7 +94,6 @@ public class PlaintextTallyTable extends JPanel {
         contestTable.setBeans(new ArrayList<>());
         selectionTable.setBeans(new ArrayList<>());
       }
-    }
   }
 
   void setTally(PlaintextTallyBean plaintextTallyBean) {

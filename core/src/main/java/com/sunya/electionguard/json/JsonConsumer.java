@@ -3,7 +3,7 @@ package com.sunya.electionguard.json;
 import com.sunya.electionguard.AvailableGuardian;
 import com.sunya.electionguard.CiphertextTally;
 import com.sunya.electionguard.ElectionConstants;
-import com.sunya.electionguard.ElectionContext;
+import com.sunya.electionguard.ElectionCryptoContext;
 import com.sunya.electionguard.Encrypt;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.GuardianRecord;
@@ -11,8 +11,8 @@ import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.SubmittedBallot;
 import com.sunya.electionguard.publish.CloseableIterableAdapter;
-import com.sunya.electionguard.publish.Publisher;
-import com.sunya.electionguard.verifier.ElectionRecord;
+import com.sunya.electionguard.publish.PublisherOld;
+import com.sunya.electionguard.publish.ElectionRecord;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -35,11 +35,11 @@ public class JsonConsumer {
   }
 
   public JsonConsumer(String topDir) throws IOException {
-    publisher = new JsonPublisher(topDir, Publisher.Mode.readonly);
+    publisher = new JsonPublisher(topDir, PublisherOld.Mode.readonly);
   }
 
   public static JsonConsumer fromElectionRecord(String electionRecordDir) throws IOException {
-    return new JsonConsumer(new JsonPublisher(Path.of(electionRecordDir), Publisher.Mode.readonly));
+    return new JsonConsumer(new JsonPublisher(Path.of(electionRecordDir), PublisherOld.Mode.readonly));
   }
 
   public String location() {
@@ -72,9 +72,9 @@ public class JsonConsumer {
 
   //////////////////// Json
 
-  public ElectionRecord readElectionRecordJson() throws IOException {
-    return new ElectionRecord(
-            ElectionRecord.currentVersion, // logic is that it would fail on an earlier version TODO add to Json
+  public ElectionRecordJson readElectionRecordJson() throws IOException {
+    return new ElectionRecordJson(
+            ElectionRecordJson.currentVersion, // logic is that it would fail on an earlier version TODO add to Json
             this.manifest(), // required
             this.constants(), // required
             this.context(),
@@ -96,7 +96,7 @@ public class JsonConsumer {
   }
 
   @Nullable
-  public ElectionContext context() throws IOException {
+  public ElectionCryptoContext context() throws IOException {
     if (Files.exists(publisher.contextPath())) {
       return ConvertFromJson.readContext(publisher.contextPath().toString());
     }

@@ -3,6 +3,8 @@ package com.sunya.electionguard.verifier;
 import com.sunya.electionguard.*;
 import com.sunya.electionguard.json.JsonConsumer;
 import com.sunya.electionguard.publish.Consumer;
+import com.sunya.electionguard.publish.ElectionRecord;
+import electionguard.ballot.Guardian;
 import net.jqwik.api.Example;
 
 import java.io.IOException;
@@ -16,16 +18,16 @@ public class TestGuardianPublicKeyVerifier {
   public void testGuardianPublicKeyValidationProto() throws IOException {
     String topdir = TestParameterVerifier.topdirProto;
     Consumer consumer = new Consumer(topdir);
-    ElectionRecord electionRecord = consumer.readElectionRecordProto();
+    ElectionRecord electionRecord = consumer.readElectionRecord();
     GuardianPublicKeyVerifier kgv = new GuardianPublicKeyVerifier(electionRecord);
     assertThat(kgv.verify_all_guardians()).isTrue();
 
-    for (GuardianRecord coeff : electionRecord.guardianRecords) {
+    for (Guardian coeff : electionRecord.guardians()) {
       boolean kgvOk = kgv.verifyGuardian(coeff);
       assertThat(kgvOk).isTrue();
     }
 
-    for (GuardianRecord coeff : electionRecord.guardianRecords) {
+    for (Guardian coeff : electionRecord.guardians()) {
       verify_equations(electionRecord.generatorP(), coeff);
       verify_challenges(coeff);
     }
@@ -39,19 +41,19 @@ public class TestGuardianPublicKeyVerifier {
     GuardianPublicKeyVerifier kgv = new GuardianPublicKeyVerifier(electionRecord);
     assertThat(kgv.verify_all_guardians()).isTrue();
 
-    for (GuardianRecord coeff : electionRecord.guardianRecords) {
+    for (Guardian coeff : electionRecord.guardians()) {
       boolean kgvOk = kgv.verifyGuardian(coeff);
       assertThat(kgvOk).isTrue();
     }
 
-    for (GuardianRecord coeff : electionRecord.guardianRecords) {
+    for (Guardian coeff : electionRecord.guardians()) {
       verify_equations(electionRecord.generatorP(), coeff);
       verify_challenges(coeff);
     }
   }
 
-  private void verify_equations(Group.ElementModP genP, GuardianRecord coeff) {
-    for (SchnorrProof proof : coeff.coefficientProofs()) {
+  private void verify_equations(Group.ElementModP genP, Guardian coeff) {
+    for (SchnorrProof proof : coeff.getCoefficientProofs()) {
       Group.ElementModP commitment = proof.commitment; // h
       Group.ElementModP public_key = proof.publicKey; // k
       Group.ElementModQ challenge = proof.challenge;   // c
@@ -62,8 +64,8 @@ public class TestGuardianPublicKeyVerifier {
     }
   }
 
-  private void verify_challenges(GuardianRecord coeff) {
-    for (SchnorrProof proof : coeff.coefficientProofs()) {
+  private void verify_challenges(Guardian coeff) {
+    for (SchnorrProof proof : coeff.getCoefficientProofs()) {
       Group.ElementModP commitment = proof.commitment; // h
       Group.ElementModP public_key = proof.publicKey; // k
       Group.ElementModQ challenge = proof.challenge;   // c

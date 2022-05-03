@@ -2,11 +2,14 @@ package com.sunya.electionguard.keyceremony;
 
 import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.input.ManifestInputBuilder;
+import electionguard.ballot.ElectionConfig;
+import com.sunya.electionguard.ElectionConstants;
 import net.jqwik.api.Example;
 
 import java.io.IOException;
 
 import static com.google.common.truth.Truth.assertThat;
+import static java.util.Collections.emptyMap;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 
@@ -32,8 +35,8 @@ public class TestKeyCeremonyRemote {
   }
 
   private KeyCeremonyRemote makeRemote() throws IOException {
-    // Manifest manifest, int nguardians, int quorum, Publisher publisher
-    return new KeyCeremonyRemote(this.manifest, NGUARDIANS, QUORUM, "/home/snake/tmp/electionguard/publishKeyCeremonyRemote");
+    ElectionConfig config = new ElectionConfig(this.manifest, NGUARDIANS, QUORUM);
+    return new KeyCeremonyRemote(config, "/home/snake/tmp/electionguard/publishKeyCeremonyRemote");
   }
 
   @Example

@@ -2,7 +2,7 @@ package com.sunya.electionguard.input;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import com.sunya.electionguard.ElectionContext;
+import com.sunya.electionguard.ElectionCryptoContext;
 import com.sunya.electionguard.Manifest;
 
 import java.time.OffsetDateTime;
@@ -89,7 +89,7 @@ public class ManifestInputBuilder {
 
     List<Manifest.Party> parties = ImmutableList.of(new Manifest.Party("dog"), new Manifest.Party("cat"));
 
-    return new Manifest(manifest_name, ElectionContext.SPEC_VERSION, Manifest.ElectionType.general,
+    return new Manifest(manifest_name, ElectionCryptoContext.SPEC_VERSION, Manifest.ElectionType.general,
             OffsetDateTime.now().toString(), OffsetDateTime.now().toString(),
             districts, parties, candidates.values().stream().toList(),
             contests.stream().map(ContestBuilder::build).toList(),

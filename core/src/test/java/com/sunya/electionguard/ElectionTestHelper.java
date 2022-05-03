@@ -446,7 +446,7 @@ public class ElectionTestHelper {
 
     return new Manifest(
             randomString("election_scope_id"),
-            ElectionContext.SPEC_VERSION,
+            ElectionCryptoContext.SPEC_VERSION,
             Manifest.ElectionType.general,  // good enough for now
             start_date.toString(),
             end_date.toString(),
@@ -508,9 +508,9 @@ public class ElectionTestHelper {
 
   static class CIPHERTEXT_ELECTIONS_TUPLE_TYPE {
     ElementModQ secret_key;
-    ElectionContext context;
+    ElectionCryptoContext context;
 
-    public CIPHERTEXT_ELECTIONS_TUPLE_TYPE(ElementModQ secret_key, ElectionContext context) {
+    public CIPHERTEXT_ELECTIONS_TUPLE_TYPE(ElementModQ secret_key, ElectionCryptoContext context) {
       this.secret_key = secret_key;
       this.context = context;
     }
@@ -525,7 +525,7 @@ public class ElectionTestHelper {
     ElGamal.KeyPair keypair = elgamal_keypairs();
     return new CIPHERTEXT_ELECTIONS_TUPLE_TYPE(
             keypair.secret_key(),
-            ElectionContext.create(
+            ElectionCryptoContext.create(
                     1,
                     1,
                     keypair.public_key(),
@@ -538,14 +538,14 @@ public class ElectionTestHelper {
     public final InternalManifest metadata;
     public final List<PlaintextBallot> ballots;
     public final ElementModQ secret_key;
-    public final ElectionContext context;
+    public final ElectionCryptoContext context;
 
     public EverythingTuple(
                  Manifest election_description,
                  InternalManifest metadata,
                  List<PlaintextBallot> ballots,
                  ElementModQ secret_key,
-                 ElectionContext context) {
+                 ElectionCryptoContext context) {
       this.election_description = election_description;
       this.metadata = metadata;
       this.ballots = ballots;

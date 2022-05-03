@@ -6,7 +6,7 @@ import "manifest.proto";
 import "plaintext_tally.proto";
 
 option java_package = "electionguard.protogen";
-option java_outer_classname = "ElectionRecordProto2";
+option java_outer_classname = "ElectionRecordProto";
 
 // Election Configuration, before the KeyCeremony
 message ElectionConfig {

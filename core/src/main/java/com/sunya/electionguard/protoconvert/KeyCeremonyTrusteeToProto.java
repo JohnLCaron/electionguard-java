@@ -5,44 +5,36 @@ import com.sunya.electionguard.SchnorrProof;
 import com.sunya.electionguard.keyceremony.KeyCeremony2;
 import com.sunya.electionguard.keyceremony.KeyCeremonyTrustee;
 
-import java.util.List;
-
 import static com.sunya.electionguard.protoconvert.CommonConvert.publishElementModP;
 
 import electionguard.protogen.TrusteeProto;
 
 public class KeyCeremonyTrusteeToProto {
 
-  public static TrusteeProto.DecryptingTrustees convertTrustees(List<KeyCeremonyTrustee> trustees) {
-    TrusteeProto.DecryptingTrustees.Builder builder = TrusteeProto.DecryptingTrustees.newBuilder();
-    trustees.forEach(t -> builder.addTrustees(convertTrustee(t)));
-    return builder.build();
-  }
-
   public static TrusteeProto.DecryptingTrustee convertTrustee(KeyCeremonyTrustee trustee) {
     TrusteeProto.DecryptingTrustee.Builder builder = TrusteeProto.DecryptingTrustee.newBuilder();
     builder.setGuardianId(trustee.id);
     builder.setGuardianXCoordinate(trustee.xCoordinate);
-    builder.setElectionKeyPair(convertElgamalKeypair(trustee.secrets().election_key_pair));
-    trustee.otherGuardianPartialKeyBackups.values().forEach(k -> builder.addOtherGuardianBackups(convertElectionPartialKeyBackup(k)));
-    trustee.allGuardianPublicKeys.values().forEach(k -> builder.addGuardianCommitments(convertCoefficients(k)));
+    builder.setElectionKeypair(convertElgamalKeypair(trustee.secrets().election_key_pair));
+    trustee.otherGuardianPartialKeyBackups.values().forEach(k -> builder.addSecretKeyShares(convertElectionPartialKeyBackup(k)));
+    trustee.allGuardianPublicKeys.values().forEach(k -> builder.addCoefficientCommitments(convertCoefficients(k)));
     return builder.build();
   }
 
-  private static TrusteeProto.ElectionPartialKeyBackup2 convertElectionPartialKeyBackup(KeyCeremony2.PartialKeyBackup org) {
-    TrusteeProto.ElectionPartialKeyBackup2.Builder builder = TrusteeProto.ElectionPartialKeyBackup2.newBuilder();
+  private static TrusteeProto.SecretKeyShare convertElectionPartialKeyBackup(KeyCeremony2.PartialKeyBackup org) {
+    TrusteeProto.SecretKeyShare.Builder builder = TrusteeProto.SecretKeyShare.newBuilder();
     builder.setGeneratingGuardianId(org.generatingGuardianId());
     builder.setDesignatedGuardianId(org.designatedGuardianId());
     builder.setDesignatedGuardianXCoordinate(org.designatedGuardianXCoordinate());
     if (org.coordinate() != null) {
-      builder.setCoordinate(CommonConvert.publishElementModQ(org.coordinate()));
+      builder.setGeneratingGuardianValue(CommonConvert.publishElementModQ(org.coordinate()));
     }
     builder.setError(org.error());
     return builder.build();
   }
 
-  private static TrusteeProto.ElGamalKeyPair convertElgamalKeypair(ElGamal.KeyPair keypair) {
-    TrusteeProto.ElGamalKeyPair.Builder builder = TrusteeProto.ElGamalKeyPair.newBuilder();
+  private static TrusteeProto.ElGamalKeypair convertElgamalKeypair(ElGamal.KeyPair keypair) {
+    TrusteeProto.ElGamalKeypair.Builder builder = TrusteeProto.ElGamalKeypair.newBuilder();
     builder.setSecretKey(CommonConvert.publishElementModQ(keypair.secret_key()));
     builder.setPublicKey(CommonConvert.publishElementModP(keypair.public_key()));
     return builder.build();

@@ -49,7 +49,7 @@ public class PlaintextTallyFromProto {
   private static DecryptionShare.CiphertextDecryptionSelection convertShare(PlaintextTallyProto.PartialDecryption proto) {
     Map<String, DecryptionShare.CiphertextCompensatedDecryptionSelection> recovered = new HashMap<>();
     if (proto.hasRecoveredParts()) {
-      for (PlaintextTallyProto.RecoveredPartialDecryption part : proto.getRecoveredParts().getFragmentsList()) {
+      for (PlaintextTallyProto.MissingPartialDecryption part : proto.getRecoveredParts().getFragmentsList()) {
         recovered.put(part.getGuardianId(), convertCompensatedShare(part));
       }
     }
@@ -63,7 +63,7 @@ public class PlaintextTallyFromProto {
   }
 
   private static DecryptionShare.CiphertextCompensatedDecryptionSelection convertCompensatedShare(
-          PlaintextTallyProto.RecoveredPartialDecryption proto) {
+          PlaintextTallyProto.MissingPartialDecryption proto) {
 
     return new DecryptionShare.CiphertextCompensatedDecryptionSelection(
             proto.getSelectionId(),

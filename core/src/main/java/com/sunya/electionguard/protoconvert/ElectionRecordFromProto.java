@@ -2,13 +2,13 @@ package com.sunya.electionguard.protoconvert;
 
 import com.google.protobuf.ByteString;
 import com.sunya.electionguard.AvailableGuardian;
-import com.sunya.electionguard.ElectionContext;
+import com.sunya.electionguard.ElectionCryptoContext;
 import com.sunya.electionguard.ElectionConstants;
 import com.sunya.electionguard.CiphertextTally;
 import com.sunya.electionguard.GuardianRecord;
 import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.PlaintextTally;
-import com.sunya.electionguard.verifier.ElectionRecord;
+import com.sunya.electionguard.publish.ElectionRecord;
 import com.sunya.electionguard.Encrypt;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.SchnorrProof;
@@ -20,24 +20,24 @@ import java.math.BigInteger;
 import java.util.List;
 
 import electionguard.protogen.ElectionRecordProto;
-import electionguard.protogen.ElectionRecordProto2;
+import electionguard.protogen.ElectionRecordProto1;
 
 @Immutable
 public class ElectionRecordFromProto {
 
   public static ElectionRecord read(String filename) throws IOException {
-    ElectionRecordProto.ElectionRecord proto;
+    ElectionRecordProto1.ElectionRecord proto;
     try (FileInputStream inp = new FileInputStream(filename)) {
-      proto = ElectionRecordProto.ElectionRecord.parseFrom(inp);
+      proto = ElectionRecordProto1.ElectionRecord.parseFrom(inp);
     }
     return translateFromProto(proto);
   }
 
-  public static ElectionRecord translateFromProto(ElectionRecordProto.ElectionRecord proto) {
+  public static ElectionRecord translateFromProto(ElectionRecordProto1.ElectionRecord proto) {
     String version = proto.getProtoVersion();
     Manifest manifest = ManifestFromProto.translateFromProto(proto.getManifest());
     ElectionConstants constants = convertConstants(proto.getConstants());
-    ElectionContext context = proto.hasContext() ? convertContext(proto.getContext()) : null;
+    ElectionCryptoContext context = proto.hasContext() ? convertContext(proto.getContext()) : null;
 
     List<GuardianRecord> guardianRecords =
             proto.getGuardianRecordsList().stream()
@@ -57,11 +57,11 @@ public class ElectionRecordFromProto {
                     .map(ElectionRecordFromProto::convertAvailableGuardian)
                     .toList();
 
-    return new ElectionRecord(version, manifest, constants, context, guardianRecords,
-            devices, ciphertextTally, decryptedTally, null, null, guardians);
+    return null; // new ElectionRecordFromProto1(version, manifest, constants, context, guardianRecords,
+            // devices, ciphertextTally, decryptedTally, null, null, guardians);
   }
 
-  static AvailableGuardian convertAvailableGuardian(ElectionRecordProto2.AvailableGuardian proto) {
+  static AvailableGuardian convertAvailableGuardian(ElectionRecordProto.AvailableGuardian proto) {
     return new AvailableGuardian(
             proto.getGuardianId(),
             proto.getXCoordinate(),
@@ -69,7 +69,7 @@ public class ElectionRecordFromProto {
     );
   }
 
-  static ElectionConstants convertConstants(ElectionRecordProto2.ElectionConstants constants) {
+  static ElectionConstants convertConstants(ElectionRecordProto.ElectionConstants constants) {
     return new ElectionConstants(
             constants.getName(),
             convertBigInteger(constants.getLargePrime()),
@@ -82,11 +82,11 @@ public class ElectionRecordFromProto {
     return new BigInteger(1, bs.toByteArray());
   }
 
-  static ElectionContext convertContext(ElectionRecordProto.ElectionContext context) {
+  static ElectionCryptoContext convertContext(ElectionRecordProto1.ElectionContext context) {
     if (context == null) {
       return null;
     }
-    return new ElectionContext(
+    return new ElectionCryptoContext(
             context.getNumberOfGuardians(),
             context.getQuorum(),
             CommonConvert.importElementModP(context.getJointPublicKey()),
@@ -97,11 +97,11 @@ public class ElectionRecordFromProto {
             context.getExtendedDataMap());
   }
 
-  static Encrypt.EncryptionDevice convertDevice(ElectionRecordProto.EncryptionDevice device) {
+  static Encrypt.EncryptionDevice convertDevice(ElectionRecordProto1.EncryptionDevice device) {
     return new Encrypt.EncryptionDevice(device.getDeviceId(), device.getSessionId(), device.getLaunchCode(), device.getLocation());
   }
 
-  static GuardianRecord convertGuardianRecord(ElectionRecordProto.GuardianRecord guardianRecord) {
+  static GuardianRecord convertGuardianRecord(ElectionRecordProto1.GuardianRecord guardianRecord) {
    List<Group.ElementModP> coefficient_commitments = guardianRecord.getCoefficientCommitmentsList().stream()
             .map(CommonConvert::importElementModP)
            .toList();

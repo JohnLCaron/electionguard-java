@@ -1,9 +1,7 @@
 package com.sunya.electionguard.json;
 
 import com.sunya.electionguard.*;
-import com.sunya.electionguard.json.LagrangeCoefficientsPojo;
-import com.sunya.electionguard.json.ConvertFromJson;
-import com.sunya.electionguard.publish.Publisher;
+import com.sunya.electionguard.publish.PublisherOld;
 import com.sunya.electionguard.verifier.TestParameterVerifier;
 import net.jqwik.api.Example;
 import net.jqwik.api.lifecycle.BeforeContainer;
@@ -19,7 +17,7 @@ public class TestReadPythonJson {
 
   @BeforeContainer
   public static void setup() throws IOException {
-    publisher = new JsonPublisher(pythonPublish, Publisher.Mode.readonly);
+    publisher = new JsonPublisher(pythonPublish, PublisherOld.Mode.readonly);
     System.out.printf("TestReadPythonJson from %s%n", publisher.publishPath());
   }
 
@@ -40,7 +38,7 @@ public class TestReadPythonJson {
 
   @Example
   public void testContextPythonJson() throws IOException {
-    ElectionContext fromPython = ConvertFromJson.readContext(publisher.contextPath().toString());
+    ElectionCryptoContext fromPython = ConvertFromJson.readContext(publisher.contextPath().toString());
     assertThat(fromPython).isNotNull();
     System.out.printf("%n%s%n%n", fromPython);
   }

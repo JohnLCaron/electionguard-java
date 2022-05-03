@@ -41,8 +41,8 @@ public class ConvertToJson {
     }
   }
 
-  static void writeContext(ElectionContext object, Path where) throws IOException {
-    Type type = new TypeToken<ElectionContext>(){}.getType();
+  static void writeContext(ElectionCryptoContext object, Path where) throws IOException {
+    Type type = new TypeToken<ElectionCryptoContext>(){}.getType();
     try (FileWriter writer = new FileWriter(where.toFile())) {
       enhancedGson.toJson(object, type, writer);
     }

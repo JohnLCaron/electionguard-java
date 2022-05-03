@@ -2,12 +2,12 @@ package com.sunya.electionguard.input;
 
 import com.sunya.electionguard.ElectionConstants;
 import com.sunya.electionguard.Manifest;
-import com.sunya.electionguard.publish.Publisher;
+import com.sunya.electionguard.publish.PublisherOld;
 
 import java.io.IOException;
 import java.util.Formatter;
 
-import static com.sunya.electionguard.publish.Publisher.Mode.createIfMissing;
+import static com.sunya.electionguard.publish.PublisherOld.Mode.createIfMissing;
 
 public class MakeManifestForTesting {
   private static final String output = "/home/snake/tmp/electionguard/kickstart/start";
@@ -35,7 +35,7 @@ public class MakeManifestForTesting {
 
     ElectionConstants constants = ElectionConstants.get(ElectionConstants.PrimeOption.Standard);
 
-    Publisher publisher = new Publisher(output, createIfMissing);
+    PublisherOld publisher = new PublisherOld(output, createIfMissing);
     publisher.writeStartingProto(manifest, constants);
   }
 }

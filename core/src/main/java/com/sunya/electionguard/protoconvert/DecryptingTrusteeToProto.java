@@ -2,7 +2,6 @@ package com.sunya.electionguard.protoconvert;
 
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.Group;
-import com.sunya.electionguard.SchnorrProof;
 import com.sunya.electionguard.decrypting.DecryptingTrustee;
 import com.sunya.electionguard.keyceremony.KeyCeremony2;
 import electionguard.protogen.TrusteeProto;
@@ -18,26 +17,26 @@ public class DecryptingTrusteeToProto {
     TrusteeProto.DecryptingTrustee.Builder builder = TrusteeProto.DecryptingTrustee.newBuilder();
     builder.setGuardianId(trustee.id());
     builder.setGuardianXCoordinate(trustee.xCoordinate());
-    builder.setElectionKeyPair(publishElgamalKeypair(trustee.election_keypair()));
-    trustee.otherGuardianPartialKeyBackups().values().forEach(k -> builder.addOtherGuardianBackups(publishElectionPartialKeyBackup(k)));
-    trustee.guardianCommittments().entrySet().forEach(entry -> builder.addGuardianCommitments(publishCommitmentSet(entry)));
+    builder.setElectionKeypair(publishElgamalKeypair(trustee.election_keypair()));
+    trustee.otherGuardianPartialKeyBackups().values().forEach(k -> builder.addSecretKeyShares(publishElectionPartialKeyBackup(k)));
+    trustee.guardianCommittments().entrySet().forEach(entry -> builder.addCoefficientCommitments(publishCommitmentSet(entry)));
     return builder.build();
   }
 
-  private static TrusteeProto.ElectionPartialKeyBackup2 publishElectionPartialKeyBackup(KeyCeremony2.PartialKeyBackup org) {
-    TrusteeProto.ElectionPartialKeyBackup2.Builder builder = TrusteeProto.ElectionPartialKeyBackup2.newBuilder();
+  private static TrusteeProto.SecretKeyShare publishElectionPartialKeyBackup(KeyCeremony2.PartialKeyBackup org) {
+    TrusteeProto.SecretKeyShare.Builder builder = TrusteeProto.SecretKeyShare.newBuilder();
     builder.setGeneratingGuardianId(org.generatingGuardianId());
     builder.setDesignatedGuardianId(org.designatedGuardianId());
     builder.setDesignatedGuardianXCoordinate(org.designatedGuardianXCoordinate());
     if (org.coordinate() != null) {
-      builder.setCoordinate(CommonConvert.publishElementModQ(org.coordinate()));
+      builder.setGeneratingGuardianValue(CommonConvert.publishElementModQ(org.coordinate()));
     }
     builder.setError(org.error());
     return builder.build();
   }
 
-  private static TrusteeProto.ElGamalKeyPair publishElgamalKeypair(ElGamal.KeyPair keypair) {
-    TrusteeProto.ElGamalKeyPair.Builder builder = TrusteeProto.ElGamalKeyPair.newBuilder();
+  private static TrusteeProto.ElGamalKeypair publishElgamalKeypair(ElGamal.KeyPair keypair) {
+    TrusteeProto.ElGamalKeypair.Builder builder = TrusteeProto.ElGamalKeypair.newBuilder();
     builder.setSecretKey(CommonConvert.publishElementModQ(keypair.secret_key()));
     builder.setPublicKey(CommonConvert.publishElementModP(keypair.public_key()));
     return builder.build();

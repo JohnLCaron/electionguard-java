@@ -4,6 +4,7 @@ import com.sunya.electionguard.ElectionConstants;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.json.JsonConsumer;
 import com.sunya.electionguard.publish.Consumer;
+import com.sunya.electionguard.publish.ElectionRecord;
 import net.jqwik.api.Example;
 
 import java.io.IOException;
@@ -11,8 +12,8 @@ import java.io.IOException;
 import static com.google.common.truth.Truth.assertThat;
 
 public class TestParameterVerifier {
-  // public static final String topdirProto = "src/test/data/workflow/decryptor/";
-  public static final String topdirProto = "/home/snake/tmp/electionguard/remoteWorkflow/encryptor/";
+  public static final String topdirProto = "src/test/data/workflow/decryptor/";
+  // public static final String topdirProto = "/home/snake/tmp/electionguard/remoteWorkflow/encryptor/";
   // public static final String topdirProto = "/home/snake/tmp/electionguard/kickstart/decryptor/";
   // public static final String topdirSimProto = "/home/snake/tmp/electionguard/remoteWorkflowSimulated/decryptor/";
   public static final String topdirJson = "src/test/data/publishEndToEnd/";
@@ -31,7 +32,7 @@ public class TestParameterVerifier {
   @Example
   public void testElectionRecordProto() throws IOException {
     Consumer consumer = new Consumer(topdirProto);
-    ParameterVerifier blv = new ParameterVerifier(consumer.readElectionRecordProto());
+    ParameterVerifier blv = new ParameterVerifier(consumer.readElectionRecord());
     boolean blvOk = blv.verify_all_params();
     assertThat(blvOk).isTrue();
   }
@@ -41,8 +42,8 @@ public class TestParameterVerifier {
     try {
       JsonConsumer consumer = new JsonConsumer(topdirJsonPython);
       ElectionRecord electionRecord = consumer.readElectionRecordJson();
-      assertThat(electionRecord.constants.getPrimeOptionType()).isEqualTo(ElectionConstants.PrimeOption.LargeTest);
-      Group.setPrimes(electionRecord.constants);
+      // assertThat(electionRecord.constants.getPrimeOptionType()).isEqualTo(ElectionConstants.PrimeOption.LargeTest);
+      // Group.setPrimes(electionRecord.constants);
       ParameterVerifier blv = new ParameterVerifier(electionRecord);
       boolean blvOk = blv.verify_all_params();
       assertThat(blvOk).isTrue();

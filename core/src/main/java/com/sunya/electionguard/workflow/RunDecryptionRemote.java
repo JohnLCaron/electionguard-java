@@ -114,7 +114,7 @@ public class RunDecryptionRemote {
 
     PrivateData privatePublisher = null;
     try {
-      privatePublisher = new PrivateData(cmdLine.trusteeDir, false, false);
+      privatePublisher = new PrivateData(cmdLine.trusteeDir, false, true);
     } catch (IOException e) {
       e.printStackTrace();
     }

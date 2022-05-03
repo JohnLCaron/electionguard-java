@@ -1,91 +1,53 @@
 package com.sunya.electionguard.publish;
 
-import com.google.common.collect.Iterables;
-import com.sunya.electionguard.*;
+import com.sunya.electionguard.PlaintextBallot;
+import com.sunya.electionguard.SubmittedBallot;
+import com.sunya.electionguard.protoconvert.ElectionConfigConvert;
 import com.sunya.electionguard.protoconvert.ElectionInitializedConvert;
 import com.sunya.electionguard.protoconvert.ElectionResultsConvert;
+import com.sunya.electionguard.protoconvert.PlaintextBallotToProto;
 import com.sunya.electionguard.protoconvert.SubmittedBallotToProto;
-import com.sunya.electionguard.protoconvert.ElectionRecordToProto;
-import com.sunya.electionguard.protoconvert.PlaintextTallyToProto;
-import electionguard.ballot.DecryptionResult;
-import electionguard.ballot.ElectionInitialized;
-import electionguard.protogen.ElectionRecordProto2;
-import electionguard.protogen.PlaintextTallyProto;
-import com.sunya.electionguard.verifier.ElectionRecord;
+import electionguard.ballot.*;
+import electionguard.protogen.CiphertextBallotProto;
+import electionguard.protogen.ElectionRecordProto;
+import electionguard.protogen.PlaintextBallotProto;
 
-import javax.annotation.Nullable;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Formatter;
+import java.util.List;
 
-import electionguard.protogen.CiphertextBallotProto;
-import electionguard.protogen.ElectionRecordProto;
-
-/** Publishes the Manifest Record to protobuf files. */
+/**
+ * Publishes the Manifest Record to Json or protobuf files.
+ */
 public class Publisher {
-  public enum Mode {readonly,
-                    writeonly, // write new files, but do not create directories
-                    createIfMissing, // create directories if not already exist
-                    createNew // create clean directories
+
+  public enum Mode {
+    readonly,
+    writeonly, // write new files, but do not create directories
+    createIfMissing, // create directories if not already exist
+    createNew // create clean directories
   }
 
-  static final String PROTO_VERSION = "2.0.0";
+  private Mode createPublisherMode;
+  private ElectionRecordPath path;
+  private Path electionRecordDir;
 
-  static final String PROTO_SUFFIX = ".protobuf";
-  static final String DECRYPTING_TRUSTEE_PREFIX = "decryptingTrustee";
-  static final String ELECTION_CONFIG_FILE_NAME = "electionConfig" + PROTO_SUFFIX;
-  static final String ELECTION_INITIALIZED_FILE_NAME = "electionInitialized" + PROTO_SUFFIX;
-  static final String TALLY_RESULT_NAME = "tallyResult" + PROTO_SUFFIX;
-  static final String DECRYPTION_RESULT_NAME = "decryptionResult" + PROTO_SUFFIX;
-  static final String PLAINTEXT_BALLOT_PROTO = "plaintextBallots" + PROTO_SUFFIX;
-  static final String SUBMITTED_BALLOT_PROTO = "encryptedBallots" + PROTO_SUFFIX;
-  static final String SPOILED_BALLOT_FILE = "spoiledBallotsTally" + PROTO_SUFFIX;
+  public Publisher(String topDir, Mode publisherMode) throws IOException {
+    this.createPublisherMode = publisherMode;
+    this.path = new ElectionRecordPath(topDir);
+    this.electionRecordDir = Path.of(topDir);
 
-  static final String TRUSTEES_FILE = "trustees" + PROTO_SUFFIX;
-
-  private final String topdir;
-  private final Mode createMode;
-  private final Path electionRecordDir;
-
-  public Publisher(String where, Mode createMode) throws IOException {
-    this.topdir = where;
-    this.createMode = createMode;
-
-    this.electionRecordDir = Path.of(where);
-
-    if (createMode == Mode.createNew) {
+    if (createPublisherMode == Mode.createNew) {
       if (!Files.exists(electionRecordDir)) {
         Files.createDirectories(electionRecordDir);
       } else {
-        removeAllFiles();
+        removeAllFiles(electionRecordDir);
       }
-    } else if (createMode == Mode.createIfMissing) {
-      if (!Files.exists(electionRecordDir)) {
-        Files.createDirectories(electionRecordDir);
-      }
-    } else {
-      if (!Files.exists(electionRecordDir)) {
-        throw new IllegalStateException("Non existing election directory " + electionRecordDir);
-      }
-    }
-  }
-
-  public Publisher(Path electionRecordDir, Mode createMode) throws IOException {
-    this.createMode = createMode;
-    this.topdir = electionRecordDir.toAbsolutePath().toString();
-
-    this.electionRecordDir = electionRecordDir;
-
-    if (createMode == Mode.createNew) {
-      if (!Files.exists(electionRecordDir)) {
-        Files.createDirectories(electionRecordDir);
-      } else {
-        removeAllFiles();
-      }
-    } else if (createMode == Mode.createIfMissing) {
+    } else if (createPublisherMode == Mode.createIfMissing) {
       if (!Files.exists(electionRecordDir)) {
         Files.createDirectories(electionRecordDir);
       }
@@ -97,14 +59,14 @@ public class Publisher {
   }
 
   /** Delete everything in the output directory, but leave that directory. */
-  private void removeAllFiles() throws IOException {
-    if (!electionRecordDir.toFile().exists()) {
+  private void removeAllFiles(Path where) throws IOException {
+    if (!where.toFile().exists()) {
       return;
     }
 
-    String filename = electionRecordDir.getFileName().toString();
-    Files.walk(electionRecordDir)
-            .filter(p -> !p.equals(electionRecordDir))
+    String filename = where.getFileName().toString();
+    Files.walk(where)
+            .filter(p -> !p.equals(where))
             .map(Path::toFile)
             .sorted((o1, o2) -> -o1.compareTo(o2))
             .forEach( f-> f.delete());
@@ -131,260 +93,73 @@ public class Publisher {
     return true;
   }
 
-  ////////////////////
-
-  public Path publishPath() {
-    return electionRecordDir.toAbsolutePath();
+  public String publishPath() {
+    return electionRecordDir.toString();
   }
 
-  public Path electionRecordProtoPath() {
-    return electionRecordDir.toAbsolutePath();
-  }
-
-  public Path decryptionResultPath() {
-    return electionRecordDir.resolve(DECRYPTION_RESULT_NAME).toAbsolutePath();
-  }
-
-  public Path submittedBallotProtoPath() {
-    return electionRecordDir.resolve(SUBMITTED_BALLOT_PROTO).toAbsolutePath();
-  }
-
-  public Path spoiledBallotProtoPath() {
-    return electionRecordDir.resolve(SPOILED_BALLOT_FILE).toAbsolutePath();
-  }
-
-  public static Path decryptingTrusteePath(Path trusteePath, String guardianId) {
-    String filename = String.format("decryptingTrustee-%s.protobuf", guardianId);
-    return trusteePath.resolve(filename).toAbsolutePath();
-  }
-  //////////////////////////////////////////////////////////////////
-  // Proto
-
-  /** Publishes the starting election record as proto. */
-  public void writeStartingProto(
-          Manifest description,
-          ElectionConstants constants) throws IOException {
-
-    if (createMode == Mode.readonly) {
-      throw new UnsupportedOperationException("Trying to write to readonly election record");
-    }
-
-    ElectionRecordProto.ElectionRecord electionRecordProto = ElectionRecordToProto.buildElectionRecord(
-            description, constants, null, null,
-            null, null, null, null);
-    try (FileOutputStream out = new FileOutputStream(electionRecordProtoPath().toFile())) {
-      electionRecordProto.writeTo(out);
+  public void writeElectionConfig(ElectionConfig config) throws IOException {
+    ElectionRecordProto.ElectionConfig proto = ElectionConfigConvert.publishElectionConfig(config);
+    try (FileOutputStream out = new FileOutputStream(path.electionConfigPath())) {
+      proto.writeTo(out);
     }
   }
+
 
   public void writeElectionInitialized(ElectionInitialized init) throws IOException {
-    ElectionRecordProto2.ElectionInitialized proto = ElectionInitializedConvert.publishElectionInitialized(init);
-    try (FileOutputStream out = new FileOutputStream(electionRecordProtoPath().toFile())) {
+    ElectionRecordProto.ElectionInitialized proto = ElectionInitializedConvert.publishElectionInitialized(init);
+    try (FileOutputStream out = new FileOutputStream(path.electionInitializedPath())) {
+      proto.writeTo(out);
+    }
+  }
+
+  public void writeEncryptions(ElectionInitialized init, Iterable<SubmittedBallot> ballots) throws IOException {
+    writeElectionInitialized(init);
+
+      try (FileOutputStream out = new FileOutputStream(path.submittedBallotPath())) {
+        for (SubmittedBallot ballot : ballots) {
+          CiphertextBallotProto.SubmittedBallot ballotProto = SubmittedBallotToProto.translateToProto(ballot);
+          ballotProto.writeDelimitedTo(out);
+        }
+      }
+  }
+
+  public void writeTallyResult(TallyResult tally) throws IOException {
+    ElectionRecordProto.TallyResult proto = ElectionResultsConvert.publishTallyResult(tally);
+    try (FileOutputStream out = new FileOutputStream(path.tallyResultPath())) {
       proto.writeTo(out);
     }
   }
 
   public void writeDecryptionResults(DecryptionResult dresult) throws IOException {
-    ElectionRecordProto2.DecryptionResult proto = ElectionResultsConvert.publishDecryptionResult(dresult);
-    try (FileOutputStream out = new FileOutputStream(decryptionResultPath().toFile())) {
+    ElectionRecordProto.DecryptionResult proto = ElectionResultsConvert.publishDecryptionResult(dresult);
+    try (FileOutputStream out = new FileOutputStream(path.decryptionResultPath())) {
       proto.writeTo(out);
     }
   }
 
-  /** Publishes the KeyCeremony part of the election record as proto. */
-  public void writeKeyCeremonyProto(
-          Manifest description,
-          ElectionContext context,
-          ElectionConstants constants,
-          Iterable<GuardianRecord> guardianRecords) throws IOException {
-
-    if (createMode == Mode.readonly) {
-      throw new UnsupportedOperationException("Trying to write to readonly election record");
-    }
-
-    if (context.numberOfGuardians != Iterables.size(guardianRecords)) {
-      throw new IllegalStateException(String.format("Number of guardians (%d) does not match number of coefficients (%d)",
-              context.numberOfGuardians, Iterables.size(guardianRecords)));
-    }
-
-    ElectionRecordProto.ElectionRecord electionRecordProto = ElectionRecordToProto.buildElectionRecord(
-            description, constants, context, guardianRecords,
-            null, null, null, null);
-    try (FileOutputStream out = new FileOutputStream(electionRecordProtoPath().toFile())) {
-      electionRecordProto.writeTo(out);
-    }
-  }
-
-  /** Publishes the ballot Encryptions part of election record as proto. */
-  public void writeEncryptionResultsProto(
-          ElectionRecord electionRecord,
-          Iterable<Encrypt.EncryptionDevice> devices,
-          Iterable<SubmittedBallot> submittedBallots) throws IOException {
-
-    if (createMode == Mode.readonly) {
-      throw new UnsupportedOperationException("Trying to write to readonly election record");
-    }
-
-    // the accepted ballots are written into their own file
-    int count = 0;
-    try (FileOutputStream out = new FileOutputStream(submittedBallotProtoPath().toFile())) {
-      for (SubmittedBallot ballot : submittedBallots) {
-        CiphertextBallotProto.SubmittedBallot ballotProto = SubmittedBallotToProto.translateToProto(ballot);
-        ballotProto.writeDelimitedTo(out);
-        count++;
-      }
-    }
-    System.out.printf("Save %d accepted ballots in %s%n", count, submittedBallotProtoPath());
-
-    ElectionRecordProto.ElectionRecord electionRecordProto = ElectionRecordToProto.buildElectionRecord(
-            electionRecord.manifest,
-            electionRecord.constants,
-            electionRecord.context,
-            electionRecord.guardianRecords,
-            devices, null, null, null);
-
-    try (FileOutputStream out = new FileOutputStream(electionRecordProtoPath().toFile())) {
-      electionRecordProto.writeTo(out);
-    }
-  }
-
-  /** Adds the encryptedTally to the election record. */
-  public void writeEncryptedTallyProto(ElectionRecord electionRecord,
-                                       CiphertextTally encryptedTally) throws IOException {
-
-    if (createMode == Mode.readonly) {
-      throw new UnsupportedOperationException("Trying to write to readonly election record");
-    }
-
-    ElectionRecordProto.ElectionRecord electionRecordProto = ElectionRecordToProto.buildElectionRecord(
-            electionRecord.manifest, electionRecord.constants, electionRecord.context,
-            electionRecord.guardianRecords,
-            electionRecord.devices,
-            encryptedTally,
-            null, null);
-
-    try (FileOutputStream out = new FileOutputStream(electionRecordProtoPath().toFile())) {
-      electionRecordProto.writeTo(out);
-    }
-  }
-
-  public void writeDecryptedTallyProto(ElectionRecord electionRecord,
-                                       PlaintextTally decryptedTally) throws IOException {
-
-    if (createMode == Mode.readonly) {
-      throw new UnsupportedOperationException("Trying to write to readonly election record");
-    }
-
-    ElectionRecordProto.ElectionRecord ElectionRecordProto = ElectionRecordToProto.buildElectionRecord(
-            electionRecord.manifest, electionRecord.constants, electionRecord.context,
-            electionRecord.guardianRecords, electionRecord.devices,
-            electionRecord.ciphertextTally,
-            decryptedTally,
-            null);
-
-    try (FileOutputStream out = new FileOutputStream(electionRecordProtoPath().toFile())) {
-      ElectionRecordProto.writeTo(out);
-    }
-  }
-
-  /** Publishes the ballot and tally Decryptions election record as proto. */
-  public void writeDecryptionResultsProto(
-          ElectionRecord electionRecord,
-          CiphertextTally encryptedTally,
-          PlaintextTally decryptedTally,
-          Iterable<PlaintextTally> spoiledBallots,
-          Iterable<AvailableGuardian> availableGuardians) throws IOException {
-
-    if (createMode == Mode.readonly) {
-      throw new UnsupportedOperationException("Trying to write to readonly election record");
-    }
-
-    if (spoiledBallots != null) {
-      // the spoiledBallots are written into their own file
-      try (FileOutputStream out = new FileOutputStream(spoiledBallotProtoPath().toFile())) {
-        for (PlaintextTally ballot : spoiledBallots) {
-          PlaintextTallyProto.PlaintextTally ballotProto = PlaintextTallyToProto.publishPlaintextTally(ballot);
+  public void writePlaintextBallot(String outputDir, List<PlaintextBallot> plaintextBallots) throws IOException {
+    if (!plaintextBallots.isEmpty()) {
+      String fileout = path.plaintextBallotPath(outputDir);
+      try (FileOutputStream out = new FileOutputStream(fileout)) {
+        for (PlaintextBallot ballot : plaintextBallots) {
+          PlaintextBallotProto.PlaintextBallot ballotProto = PlaintextBallotToProto.publishPlaintextBallot(ballot);
           ballotProto.writeDelimitedTo(out);
         }
       }
     }
-
-    ElectionRecordProto.ElectionRecord electionRecordProto = ElectionRecordToProto.buildElectionRecord(
-            electionRecord.manifest, electionRecord.constants, electionRecord.context,
-            electionRecord.guardianRecords, electionRecord.devices,
-            encryptedTally,
-            decryptedTally,
-            availableGuardians);
-
-    try (FileOutputStream out = new FileOutputStream(electionRecordProtoPath().toFile())) {
-      electionRecordProto.writeTo(out);
-    }
   }
 
-  /** Publishes the entire election record as proto. */
-  public void writeElectionRecordProto(
-          Manifest description,
-          ElectionContext context,
-          ElectionConstants constants,
-          Iterable<GuardianRecord> guardianRecords,
-          Iterable<Encrypt.EncryptionDevice> devices,
-          Iterable<SubmittedBallot> accepted_ballots,
-          CiphertextTally ciphertext_tally,
-          PlaintextTally decryptedTally,
-          @Nullable Iterable<PlaintextTally> spoiledBallots,
-          Iterable<AvailableGuardian> availableGuardians) throws IOException {
-
-    if (createMode == Mode.readonly) {
-      throw new UnsupportedOperationException("Trying to write to readonly election record");
-    }
-
-    // the accepted ballots are written into their own file
-    try (FileOutputStream out = new FileOutputStream(submittedBallotProtoPath().toFile())) {
-      for (SubmittedBallot ballot : accepted_ballots) {
-        CiphertextBallotProto.SubmittedBallot ballotProto = SubmittedBallotToProto.translateToProto(ballot);
-        ballotProto.writeDelimitedTo(out);
-      }
-    }
-
-    if (spoiledBallots != null) {
-      // the spoiledBallots are written into their own file
-      try (FileOutputStream out = new FileOutputStream(spoiledBallotProtoPath().toFile())) {
-        for (PlaintextTally ballot : spoiledBallots) {
-          PlaintextTallyProto.PlaintextTally ballotProto = PlaintextTallyToProto.publishPlaintextTally(ballot);
-          ballotProto.writeDelimitedTo(out);
-        }
-      }
-    }
-
-    ElectionRecordProto.ElectionRecord electionRecordProto = ElectionRecordToProto.buildElectionRecord(
-            description, constants, context, guardianRecords,
-            devices,
-            ciphertext_tally,
-            decryptedTally,
-            availableGuardians);
-
-    try (FileOutputStream out = new FileOutputStream(electionRecordProtoPath().toFile())) {
-      electionRecordProto.writeTo(out);
-    }
-  }
-
-  /** Copy accepted ballots file from the inputDir to this election record. */
   public void copyAcceptedBallots(String inputDir) throws IOException {
-    if (createMode == Mode.readonly) {
+    if (this.createPublisherMode == Publisher.Mode.readonly) {
       throw new UnsupportedOperationException("Trying to write to readonly election record");
     }
-    Path source = new Publisher(inputDir, Mode.writeonly).submittedBallotProtoPath();
-    Path dest = submittedBallotProtoPath();
+    String source = new ElectionRecordPath(inputDir).submittedBallotPath();
+    String dest = path.submittedBallotPath();
     if (source.equals(dest)) {
       return;
     }
 
     System.out.printf("Copy AcceptedBallots from %s to %s%n", source, dest);
-    Files.copy(source, dest, StandardCopyOption.COPY_ATTRIBUTES);
+    Files.copy(Path.of(source), Path.of(dest), StandardCopyOption.COPY_ATTRIBUTES);
   }
-
-  public PrivateData makePrivateData(boolean removeAllFiles, boolean createDirs) throws IOException {
-    return new PrivateData(this.topdir, removeAllFiles, createDirs);
-  }
-
 }

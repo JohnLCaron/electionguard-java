@@ -8,7 +8,7 @@ import electionguard.protogen.CommonProto;
 import electionguard.protogen.CommonRpcProto;
 import electionguard.protogen.DecryptingTrusteeProto;
 import com.sunya.electionguard.publish.Consumer;
-import com.sunya.electionguard.verifier.ElectionRecord;
+import com.sunya.electionguard.publish.ElectionRecord;
 
 import io.grpc.stub.StreamObserver;
 import net.jqwik.api.Example;
@@ -49,7 +49,7 @@ public class TestDecryptingRemoteTrustee {
 
     Consumer consumer = new Consumer(TestDecryptingMediator.DECRYPTING_DATA_DIR);
     ElectionRecord electionRecord = consumer.readElectionRecord();
-    this.tally = electionRecord.ciphertextTally;
+    this.tally = electionRecord.ciphertextTally();
     this.extendedHash =  electionRecord.extendedHash();
   }
 

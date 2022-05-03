@@ -3,7 +3,6 @@ package com.sunya.electionguard.simulate;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.flogger.FluentLogger;
 import com.sunya.electionguard.AvailableGuardian;
-import com.sunya.electionguard.ElectionContext;
 import com.sunya.electionguard.CiphertextTally;
 import com.sunya.electionguard.DecryptWithShares;
 import com.sunya.electionguard.DecryptionShare;
@@ -12,6 +11,7 @@ import com.sunya.electionguard.Group;
 import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.SubmittedBallot;
 import com.sunya.electionguard.decrypting.DecryptingTrusteeIF;
+import com.sunya.electionguard.publish.ElectionRecord;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,7 +28,7 @@ import java.util.Set;
 public class DecryptingTrusteeMediator {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
-  private final ElectionContext context;
+  private final ElectionRecord electionRecord;
   private final CiphertextTally ciphertext_tally;
   private final Iterable<SubmittedBallot> ciphertext_ballots; // spoiled ballots
 
@@ -52,11 +52,11 @@ public class DecryptingTrusteeMediator {
   private Map<String, Group.ElementModQ> lagrange_coefficients;
   private List<AvailableGuardian> guardianStates;
 
-  public DecryptingTrusteeMediator(ElectionContext context,
+  public DecryptingTrusteeMediator(ElectionRecord context,
                                    CiphertextTally encryptedTally,
                                    Iterable<SubmittedBallot> spoiled_ballots,
                                    Map<String, Group.ElementModP> guardianPublicKeys) {
-    this.context = context;
+    this.electionRecord = context;
     this.ciphertext_tally = encryptedTally;
     this.ciphertext_ballots = spoiled_ballots;
     this.guardianPublicKeys = guardianPublicKeys;
@@ -80,7 +80,7 @@ public class DecryptingTrusteeMediator {
 
     // LOOK Compute the Decryption Share for the guardian, right now. Should be a seperate step??
     Optional<DecryptionShare> tally_share =
-            TrusteeDecryptions.compute_decryption_share(guardian, this.ciphertext_tally, this.context);
+            TrusteeDecryptions.compute_decryption_share(guardian, this.ciphertext_tally, this.electionRecord);
     if (tally_share.isEmpty()) {
       logger.atWarning().log("announce could not generate decryption share for %s", guardian.id());
       return false;
@@ -89,7 +89,7 @@ public class DecryptingTrusteeMediator {
 
     // LOOK Compute the spoiled ballot decryption shares. Should be a seperate step??
     Optional<Map<String, DecryptionShare>> ballot_shares =
-            TrusteeDecryptions.compute_decryption_share_for_ballots(guardian, this.ciphertext_ballots, context);
+            TrusteeDecryptions.compute_decryption_share_for_ballots(guardian, this.ciphertext_ballots, electionRecord);
     if (ballot_shares.isEmpty()) {
       logger.atWarning().log("announce could not generate spoiled ballot decryption share for %s", guardian.id());
       return false;
@@ -138,23 +138,23 @@ public class DecryptingTrusteeMediator {
   // decrypted representation of each selection into a decrypted representation
   public Optional<PlaintextTally> get_plaintext_tally() {
     // Make sure a Quorum of Guardians have announced
-    if (this.available_guardians.size() < this.context.quorum) {
+    if (this.available_guardians.size() < this.electionRecord.quorum()) {
       logger.atWarning().log("cannot get plaintext tally with less than quorum available guardians");
       return Optional.empty();
     }
     compute_lagrange_coefficients();
 
     // If all Guardians are present decrypt the tally
-    if (this.available_guardians.size() == this.context.numberOfGuardians) {
+    if (this.available_guardians.size() == this.electionRecord.numberOfGuardians()) {
       return DecryptWithShares.decrypt_tally(
               this.ciphertext_tally,
               this.tally_shares,
-              this.context);
+              this.electionRecord);
     }
 
     // If guardians are missing, compensate
     this.compute_missing_shares_for_tally();
-    if (this.tally_shares.size() != this.context.numberOfGuardians) {
+    if (this.tally_shares.size() != this.electionRecord.numberOfGuardians()) {
       logger.atWarning().log("get plaintext tally failed with share length mismatch");
       return Optional.empty();
     }
@@ -163,7 +163,7 @@ public class DecryptingTrusteeMediator {
     return DecryptWithShares.decrypt_tally(
             this.ciphertext_tally,
             this.tally_shares,
-            this.context);
+            this.electionRecord);
   }
 
   private void compute_missing_shares_for_tally() {
@@ -222,7 +222,7 @@ public class DecryptingTrusteeMediator {
               available_guardian,
               missing_guardian_id,
               this.ciphertext_tally,
-              this.context);
+              this.electionRecord);
       if (tally_share.isEmpty()) {
         logger.atWarning().log("TrusteeDecryptions.compute_compensated_decryption_share failed for missing: %s", missing_guardian_id);
         break;
@@ -247,7 +247,7 @@ public class DecryptingTrusteeMediator {
     }
 
     // LOOK must augment this.ballot_shares with missing guardians
-    return Optional.of(DecryptWithShares.decrypt_spoiled_ballots(this.ciphertext_ballots, this.ballot_shares, this.context));
+    return Optional.of(DecryptWithShares.decrypt_spoiled_ballots(this.ciphertext_ballots, this.ballot_shares, this.electionRecord));
   }
 
   /**
@@ -264,23 +264,23 @@ public class DecryptingTrusteeMediator {
     return DecryptWithShares.decrypt_ballots(
             this.ciphertext_ballots, // LOOK running through ballots twice
             this.ballot_shares, // MAP(AVAILABLE_GUARDIAN_ID, Map(BALLOT_ID, DecryptionShare))
-            this.context);
+            this.electionRecord);
   }
 
   private boolean compute_ballot_shares() {
     // Make sure a Quorum of Guardians have announced
-    if (this.available_guardians.size() < this.context.quorum) {
+    if (this.available_guardians.size() < this.electionRecord.quorum()) {
       logger.atWarning().log("cannot decrypt with less than quorum available guardians");
       return false;
     }
 
     // If guardians are missing, for each ballot compute compensated ballot_shares, add to this.ballot_shares
-    if (this.available_guardians.size() < this.context.numberOfGuardians) {
+    if (this.available_guardians.size() < this.electionRecord.numberOfGuardians()) {
       for (SubmittedBallot ballot : this.ciphertext_ballots) { // LOOK running through ballots
-        if (this.count_ballot_shares(ballot.object_id()) < this.context.numberOfGuardians) {
+        if (this.count_ballot_shares(ballot.object_id()) < this.electionRecord.numberOfGuardians()) {
           this.compute_missing_shares_for_ballot(ballot);
         }
-        if (this.count_ballot_shares(ballot.object_id()) != this.context.numberOfGuardians) {
+        if (this.count_ballot_shares(ballot.object_id()) != this.electionRecord.numberOfGuardians()) {
           logger.atWarning().log("decrypt_spoiled_ballots failed with share length mismatch");
           return false;
         }
@@ -340,7 +340,7 @@ public class DecryptingTrusteeMediator {
               available_guardian,
               missing_guardian_id,
               ballot,
-              this.context);
+              this.electionRecord);
       if (ballot_share.isEmpty()) {
         logger.atWarning().log("compensation failed for missing: %s", missing_guardian_id);
         break;
