@@ -1,6 +1,7 @@
 package com.sunya.electionguard;
 
 import com.google.common.flogger.FluentLogger;
+import com.sunya.electionguard.publish.ElectionContext;
 
 import java.util.List;
 import java.util.Map;
@@ -22,13 +23,13 @@ class BallotValidations {
       return false;
     }
 
-    if (!ballot.is_valid_encryption(
+    /* if (!ballot.is_valid_encryption(
             manifest.manifest.cryptoHash(),
-            context.jointPublicKey,
-            context.cryptoExtendedBaseHash)) {
+            context.electionPublicKey(),
+            context.extendedHash())) {
       logger.atInfo().log("ballot_is_valid_for_election: mismatching ballot encryption %s", ballot.object_id());
       return false;
-    }
+    } */
     return true;
   }
 

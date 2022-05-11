@@ -1,11 +1,11 @@
 package com.sunya.electionguard.verifier;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.flogger.FluentLogger;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.AvailableGuardian;
 import com.sunya.electionguard.PlaintextTally;
+import com.sunya.electionguard.publish.ElectionRecord;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -34,8 +34,8 @@ public class PartialDecryptionVerifier {
   PartialDecryptionVerifier(ElectionRecord electionRecord, PlaintextTally decryptedTally) {
     this.electionRecord = electionRecord;
     this.tally = Preconditions.checkNotNull(decryptedTally);
-    this.lagrange_coefficients = electionRecord.availableGuardians.stream().collect(Collectors.toMap(
-            g -> g.guardianId(), g -> g.lagrangeCoordinate()));
+    this.lagrange_coefficients = electionRecord.availableGuardians().stream().collect(
+            Collectors.toMap(g -> g.guardianId(), g -> g.lagrangeCoefficient()));
   }
 
   /** Verify 10.A for available guardians, if there are missing guardians. */
@@ -61,7 +61,7 @@ public class PartialDecryptionVerifier {
   /** Verify 10.A for available guardians lagrange coefficients, if there are missing guardians. */
   boolean verify_lagrange_coefficients() {
     boolean error = false;
-    List<AvailableGuardian> guardians = electionRecord.availableGuardians;
+    List<AvailableGuardian> guardians = electionRecord.availableGuardians();
 
     for (AvailableGuardian guardian : guardians) {
       List<Integer> seq_others = new ArrayList<>();
@@ -70,7 +70,7 @@ public class PartialDecryptionVerifier {
           seq_others.add(other.xCoordinate());
         }
       }
-      error |= !this.verify_lagrange_coefficient(guardian.xCoordinate(), seq_others, guardian.lagrangeCoordinate());
+      error |= !this.verify_lagrange_coefficient(guardian.xCoordinate(), seq_others, guardian.lagrangeCoefficient());
     }
 
     if (error) {
@@ -155,14 +155,12 @@ public class PartialDecryptionVerifier {
     final List<CiphertextDecryptionSelection> shares;
     final ElementModP selection_pad;
     final ElementModP selection_data;
-    final ImmutableMap<String, ElementModP> public_keys;
 
     ShareVerifier(String id, List<CiphertextDecryptionSelection> shares, ElementModP selection_pad, ElementModP selection_data) {
       this.id = id;
       this.shares = shares;
       this.selection_pad = selection_pad;
       this.selection_data = selection_data;
-      this.public_keys = electionRecord.publicKeysOfAllGuardians();
     }
 
     /** Verify all shares of a tally decryption, when there are missing guardians */

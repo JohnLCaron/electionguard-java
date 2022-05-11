@@ -2,228 +2,123 @@ package com.sunya.electionguard.publish;
 
 import com.google.common.collect.AbstractIterator;
 import com.sunya.electionguard.*;
-import com.sunya.electionguard.proto.SubmittedBallotFromProto;
-import com.sunya.electionguard.proto.ElectionRecordFromProto;
-import com.sunya.electionguard.proto.PlaintextBallotFromProto;
-import com.sunya.electionguard.proto.PlaintextTallyFromProto;
-import com.sunya.electionguard.verifier.ElectionRecord;
+import com.sunya.electionguard.json.JsonConsumer;
+import com.sunya.electionguard.protoconvert.ElectionConfigConvert;
+import com.sunya.electionguard.protoconvert.ElectionInitializedConvert;
+import com.sunya.electionguard.protoconvert.ElectionResultsConvert;
+import com.sunya.electionguard.protoconvert.SubmittedBallotFromProto;
+import com.sunya.electionguard.protoconvert.PlaintextBallotFromProto;
+import com.sunya.electionguard.protoconvert.PlaintextTallyFromProto;
 
-import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Formatter;
-import java.util.List;
-import java.util.Map;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import electionguard.protogen.*;
-
-import javax.annotation.Nullable;
 
 
 /** Helper class for consumers of published election records in Json or protobuf. */
 public class Consumer {
-  private final Publisher publisher;
-
-  public Consumer(Publisher publisher) {
-    this.publisher = publisher;
-  }
+  public final ElectionRecordPath path;
 
   public Consumer(String topDir) throws IOException {
-    publisher = new Publisher(topDir, Publisher.Mode.readonly, false);
-  }
-
-  public static Consumer fromElectionRecord(String electionRecordDir, boolean isJson) throws IOException {
-    return new Consumer(new Publisher(Path.of(electionRecordDir), Publisher.Mode.readonly, isJson));
-  }
-
-
-  public String location() {
-    return publisher.publishPath().toAbsolutePath().toString();
+    path = new ElectionRecordPath(topDir);
   }
 
   public boolean isValidElectionRecord(Formatter error) {
-    if (!Files.exists(publisher.publishPath())) {
-      error.format("%s does not exist", publisher.publishPath());
-      return false;
-    }
-    if (!Files.exists(publisher.electionRecordProtoPath()) && !Files.exists(publisher.constantsPath())) {
-      error.format("%s does not contain proto or json files", publisher.publishPath());
+    if (!Files.exists(Path.of(path.getTopDir()))) {
+      error.format("%s does not exist", path.getTopDir());
       return false;
     }
     return true;
   }
 
   public ElectionRecord readElectionRecord() throws IOException {
-    ElectionRecord result;
-    if (Files.exists(publisher.electionRecordProtoPath())) {
-      result = readElectionRecordProto();
-    } else if (Files.exists(publisher.constantsPath()))  {
-      result = readElectionRecordJson();
-    } else {
-      throw new FileNotFoundException(String.format("No election record found in %s", publisher.publishPath()));
+    if (Files.exists(Path.of(path.decryptionResultPath()))) {
+      return new ElectionRecordFromProto(readDecryptionResult(), this);
+    }
+    if (Files.exists(Path.of(path.tallyResultPath()))) {
+      return new ElectionRecordFromProto(readTallyResult(), this);
+    }
+    if (Files.exists(Path.of(path.electionInitializedPath()))) {
+      return new ElectionRecordFromProto(readElectionInitialized(), this);
+    }
+    if (Files.exists(Path.of(path.electionConfigPath()))) {
+      return new ElectionRecordFromProto(readElectionConfig());
     }
 
-    /* check constants
-    if (!result.constants.equals(Group.getPrimes())) {
-      System.out.printf("** Non-standard constants in %s%n", publisher.publishPath());
-      Group.setPrimes(result.constants);
-    } */
-    return result;
+    JsonConsumer jsonConsumer = new JsonConsumer(path.getTopDir());
+    return jsonConsumer.readElectionRecord();
   }
 
-  public Manifest readManifest() throws IOException {
-    if (Files.exists(publisher.electionRecordProtoPath())) {
-      return readElectionRecordProto().manifest;
-    } else {
-      return manifest();
+  public electionguard.ballot.ElectionConfig readElectionConfig() throws IOException {
+    return ElectionConfigConvert.read(path.electionConfigPath());
+  }
+
+  public electionguard.ballot.ElectionInitialized readElectionInitialized() throws IOException {
+    return ElectionInitializedConvert.read(path.electionInitializedPath());
+  }
+
+  public electionguard.ballot.TallyResult readTallyResult() throws IOException {
+    ElectionRecordProto.TallyResult proto;
+    try (FileInputStream inp = new FileInputStream(path.tallyResultPath())) {
+      proto = ElectionRecordProto.TallyResult.parseFrom(inp);
     }
+    return ElectionResultsConvert.importTallyResult(proto);
   }
 
-  //////////////////// Json
-
-  public ElectionRecord readElectionRecordJson() throws IOException {
-    return new ElectionRecord(
-            ElectionRecord.currentVersion, // logic is that it would fail on an earlier version TODO add to Json
-            this.manifest(), // required
-            this.constants(), // required
-            this.context(),
-            this.guardianRecords(),
-            this.devices(),
-            this.ciphertextTally(),
-            this.decryptedTally(),
-            CloseableIterableAdapter.wrap(this.acceptedBallots()),
-            CloseableIterableAdapter.wrap(this.spoiledBallots()),
-            this.availableGuardians());
-  }
-
-  public Manifest manifest() throws IOException {
-    return ConvertFromJson.readManifest(publisher.manifestPath().toString());
-  }
-
-  public ElectionConstants constants() throws IOException {
-    return ConvertFromJson.readConstants(publisher.constantsPath().toString());
-  }
-
-  @Nullable
-  public ElectionContext context() throws IOException {
-    if (Files.exists(publisher.contextPath())) {
-      return ConvertFromJson.readContext(publisher.contextPath().toString());
+  public electionguard.ballot.DecryptionResult readDecryptionResult() throws IOException {
+    ElectionRecordProto.DecryptionResult proto;
+    try (FileInputStream inp = new FileInputStream(path.decryptionResultPath())) {
+      proto = ElectionRecordProto.DecryptionResult.parseFrom(inp);
     }
-    return null;
-  }
-
-  @Nullable
-  public PlaintextTally decryptedTally() throws IOException {
-    if (Files.exists(publisher.tallyPath())) {
-      return ConvertFromJson.readPlaintextTally(publisher.tallyPath().toString());
-    }
-    return null;
-  }
-
-  @Nullable
-  public CiphertextTally ciphertextTally() throws IOException {
-    if (Files.exists(publisher.encryptedTallyPath())) {
-      return ConvertFromJson.readCiphertextTally(publisher.encryptedTallyPath().toString());
-    }
-    return null;
-  }
-
-  public List<Encrypt.EncryptionDevice> devices() throws IOException {
-    List<Encrypt.EncryptionDevice> result = new ArrayList<>();
-    for (File file : publisher.deviceFiles()) {
-      Encrypt.EncryptionDevice fromPython = ConvertFromJson.readDevice(file.getAbsolutePath());
-      result.add(fromPython);
-    }
-    return result;
-  }
-
-  public List<SubmittedBallot> acceptedBallots() throws IOException {
-    List<SubmittedBallot> result = new ArrayList<>();
-    for (File file : publisher.ballotFiles()) {
-      SubmittedBallot fromPython = ConvertFromJson.readSubmittedBallot(file.getAbsolutePath());
-      result.add(fromPython);
-    }
-    return result;
-  }
-
-  public List<AvailableGuardian> availableGuardians() throws IOException {
-    // early versions didnt have this
-    if (!publisher.coefficientsPath().toFile().exists()) {
-      return new ArrayList<>();
-    }
-    Map<String, GuardianRecord> grMap = guardianRecords().stream().collect(Collectors.toMap(
-            GuardianRecord::guardianId, gr -> gr));
-    LagrangeCoefficientsPojo coeffPojo = ConvertFromJson.readCoefficients(publisher.coefficientsPath().toString());
-    // Preconditions.checkArgument(grs.size() == pojo.coefficients.size());
-    List<AvailableGuardian> result = new ArrayList<>();
-    for (Map.Entry<String, Group.ElementModQ> entry : coeffPojo.coefficients.entrySet()) {
-      GuardianRecord gr = grMap.get(entry.getKey());
-      AvailableGuardian avail = new AvailableGuardian(entry.getKey(), gr.xCoordinate(), entry.getValue(), null);
-      result.add(avail);
-    }
-    return result;
-  }
-
-  // Decrypted, spoiled ballots
-  public List<PlaintextTally> spoiledBallots() {
-    List<PlaintextTally> result = new ArrayList<>();
-    for (File file : publisher.spoiledBallotFiles()) {
-      try {
-        PlaintextTally fromPython = ConvertFromJson.readPlaintextTally(file.getAbsolutePath());
-        result.add(fromPython);
-      } catch (Exception e) {
-        // System.out.printf("Exception %s on %s%n", e.getMessage(), file.getAbsolutePath());
-      }
-    }
-    return result;
-  }
-
-  public List<GuardianRecord> guardianRecords() throws IOException {
-    List<GuardianRecord> result = new ArrayList<>();
-    for (File file : publisher.guardianRecordsFiles()) {
-      GuardianRecord fromPython = ConvertFromJson.readGuardianRecord(file.getAbsolutePath());
-      result.add(fromPython);
-    }
-    return result;
-  }
-
-  ///////////////////////////////////////////// Proto
-
-  // reads everything
-  public ElectionRecord readElectionRecordProto() throws IOException {
-    ElectionRecord fromProto = ElectionRecordFromProto.read(publisher.electionRecordProtoPath().toString());
-    return fromProto.setBallots(submittedAllBallotsProto(), decryptedSpoiledBallotsProto());
+    return ElectionResultsConvert.importDecryptionResult(proto);
   }
 
   // all submitted ballots cast or spoiled
-  public CloseableIterable<SubmittedBallot> submittedAllBallotsProto() {
-    if (Files.exists(publisher.submittedBallotProtoPath())) {
-      return () -> new SubmittedBallotIterator(publisher.submittedBallotProtoPath().toString(),
+  public CloseableIterable<SubmittedBallot> iterateSubmittedBallots() {
+    if (Files.exists(Path.of(path.submittedBallotPath()))) {
+      return () -> new SubmittedBallotIterator(path.submittedBallotPath(),
               b -> true);
     } else {
       return CloseableIterableAdapter.empty();
     }
   }
 
+  // all submitted ballots cast only
+  public CloseableIterable<SubmittedBallot> iterateCastBallots() {
+    if (Files.exists(Path.of(path.submittedBallotPath()))) {
+      return () -> new SubmittedBallotIterator(path.submittedBallotPath(),
+              b -> b.getState() == CiphertextBallotProto.SubmittedBallot.BallotState.CAST);
+    } else {
+      return CloseableIterableAdapter.empty();
+    }
+  }
+
   // all submitted ballots spoiled only
-  public CloseableIterable<SubmittedBallot> submittedSpoiledBallotsProto() {
-    if (Files.exists(publisher.submittedBallotProtoPath())) {
-      return () -> new SubmittedBallotIterator(publisher.submittedBallotProtoPath().toString(),
+  public CloseableIterable<SubmittedBallot> iterateSpoiledBallots() {
+    if (Files.exists(Path.of(path.submittedBallotPath()))) {
+      return () -> new SubmittedBallotIterator(path.submittedBallotPath(),
               b -> b.getState() == CiphertextBallotProto.SubmittedBallot.BallotState.SPOILED);
     } else {
       return CloseableIterableAdapter.empty();
     }
   }
 
-  public CloseableIterable<PlaintextTally> decryptedSpoiledBallotsProto() {
-    if (Files.exists(publisher.spoiledBallotProtoPath())) {
-      return () -> new PlaintextTallyIterator(publisher.spoiledBallotProtoPath().toString());
+  public CloseableIterable<PlaintextTally> iterateSpoiledBallotTallies() {
+    if (Files.exists(Path.of(path.spoiledBallotPath()))) {
+      return () -> new PlaintextTallyIterator(path.spoiledBallotPath());
+    } else {
+      return CloseableIterableAdapter.empty();
+    }
+  }
+
+  public CloseableIterable<PlaintextBallot> iteratePlaintextBallots(String ballotDir, Predicate<PlaintextBallot> filter) {
+    if (Files.exists(Path.of(path.plaintextBallotPath(ballotDir)))) {
+      return () -> new PlaintextBallotIterator(path.plaintextBallotPath(ballotDir), filter);
     } else {
       return CloseableIterableAdapter.empty();
     }
@@ -280,10 +175,12 @@ public class Consumer {
   private static class PlaintextBallotIterator extends AbstractIterator<PlaintextBallot>
           implements CloseableIterator<PlaintextBallot> {
     private final String filename;
+    private final Predicate<PlaintextBallot> filter;
     private FileInputStream input;
 
-    PlaintextBallotIterator(String filename) {
+    PlaintextBallotIterator(String filename, Predicate<PlaintextBallot> filter) {
       this.filename = filename;
+      this.filter = filter;
     }
 
     @Override
@@ -292,12 +189,18 @@ public class Consumer {
         if (input == null) {
           this.input = new FileInputStream(filename);
         }
-        PlaintextBallotProto.PlaintextBallot ballotProto = PlaintextBallotProto.PlaintextBallot.parseDelimitedFrom(input);
-        if (ballotProto == null) {
-          input.close();
-          return endOfData();
+        while (true) {
+          PlaintextBallotProto.PlaintextBallot ballotProto = PlaintextBallotProto.PlaintextBallot.parseDelimitedFrom(input);
+          if (ballotProto == null) {
+            input.close();
+            return endOfData();
+          }
+          PlaintextBallot ballot = PlaintextBallotFromProto.translateFromProto(ballotProto);
+          if (!filter.test(ballot)) {
+            continue; // skip it
+          }
+          return ballot;
         }
-        return PlaintextBallotFromProto.translateFromProto(ballotProto);
       } catch (IOException e) {
         throw new RuntimeException(e);
       }
@@ -336,7 +239,7 @@ public class Consumer {
           input.close();
           return endOfData();
         }
-        return PlaintextTallyFromProto.translateFromProto(tallyProto);
+        return PlaintextTallyFromProto.importPlaintextTally(tallyProto);
       } catch (IOException e) {
         throw new RuntimeException(e);
       }

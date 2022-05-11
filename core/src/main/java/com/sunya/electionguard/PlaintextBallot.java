@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 /**
  * The plaintext representation of a voter's ballot selections for all the contests in an election.
@@ -195,19 +194,16 @@ public class PlaintextBallot {
     public final int sequenceOrder;
     /** The vote count. */
     public final int vote;
-    /** Is this a placeholder? */
-    public final boolean isPlaceholderSelection; // default false
     /** Optional write-in candidate. */
-    public final Optional<ExtendedData> extendedData; // default None
+    @Nullable
+    public final String extendedData;
 
-    public Selection(String selectionId, int sequenceOrder, int vote, boolean isPlaceholderSelection,
-                     @Nullable ExtendedData extendedData) {
+    public Selection(String selectionId, int sequenceOrder, int vote, @Nullable String extendedData) {
       Preconditions.checkArgument(!Strings.isNullOrEmpty(selectionId));
       this.selectionId = selectionId;
       this.sequenceOrder = sequenceOrder;
       this.vote = vote;
-      this.isPlaceholderSelection = isPlaceholderSelection;
-      this.extendedData = Optional.ofNullable(extendedData);
+      this.extendedData = extendedData;
     }
 
     public boolean is_valid(String expected_selection_id) {
@@ -228,18 +224,13 @@ public class PlaintextBallot {
       if (this == o) return true;
       if (o == null || getClass() != o.getClass()) return false;
       Selection selection = (Selection) o;
-      return // sequence_order == selection.sequence_order &&
-              vote == selection.vote &&
-              isPlaceholderSelection == selection.isPlaceholderSelection &&
-              selectionId.equals(selection.selectionId) &&
-              extendedData.equals(selection.extendedData);
+      return sequenceOrder == selection.sequenceOrder && vote == selection.vote && selectionId.equals(selection.selectionId) && Objects.equals(extendedData, selection.extendedData);
     }
 
     @Override
     public int hashCode() {
-      return Objects.hash(selectionId, sequenceOrder, vote, isPlaceholderSelection, extendedData);
+      return Objects.hash(selectionId, sequenceOrder, vote, extendedData);
     }
-
 
     @Override
     public String toString() {
@@ -247,42 +238,7 @@ public class PlaintextBallot {
               "selection_id='" + selectionId + '\'' +
               ", sequence_order=" + sequenceOrder +
               ", vote=" + vote +
-              ", is_placeholder_selection=" + isPlaceholderSelection +
               ", extended_data=" + extendedData +
-              '}';
-    }
-  }
-
-  /** Used to indicate a write-in candidate. */
-  @Immutable
-  public static class ExtendedData {
-    public final String value;
-    public final int length;
-
-    public ExtendedData(String value, int length) {
-      this.value = value;
-      this.length = length;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) return true;
-      if (o == null || getClass() != o.getClass()) return false;
-      ExtendedData that = (ExtendedData) o;
-      return length == that.length &&
-              value.equals(that.value);
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(value, length);
-    }
-
-    @Override
-    public String toString() {
-      return "ExtendedData{" +
-              "value='" + value + '\'' +
-              ", length=" + length +
               '}';
     }
   }
@@ -301,7 +257,7 @@ public class PlaintextBallot {
       for (CiphertextBallot.Selection cselection : ccontest.selections) {
         if (!cselection.is_placeholder_selection) {
           PlaintextTally.Selection tselection = tcontest.selections().get(cselection.object_id());
-          selections.add(new Selection(cselection.object_id(), -1, tselection.tally(), false, null));
+          selections.add(new Selection(cselection.object_id(), -1, tselection.tally(), null));
         }
       }
       contests.add(new Contest(ccontest.object_id(), ccontest.sequence_order(), selections));

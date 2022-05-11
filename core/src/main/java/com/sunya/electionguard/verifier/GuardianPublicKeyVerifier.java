@@ -1,8 +1,9 @@
 package com.sunya.electionguard.verifier;
 
 import com.sunya.electionguard.Group;
-import com.sunya.electionguard.GuardianRecord;
 import com.sunya.electionguard.SchnorrProof;
+import com.sunya.electionguard.publish.ElectionRecord;
+import electionguard.ballot.Guardian;
 
 import static com.sunya.electionguard.Group.ElementModQ;
 import static com.sunya.electionguard.Group.ElementModP;
@@ -23,7 +24,7 @@ public class GuardianPublicKeyVerifier {
     boolean error = false;
 
     int count = 0;
-    for (GuardianRecord gr : this.electionRecord.guardianRecords) {
+    for (Guardian gr : this.electionRecord.guardians()) {
       boolean res = this.verifyGuardian(gr);
       if (!res) {
         error = true;
@@ -34,26 +35,26 @@ public class GuardianPublicKeyVerifier {
 
     if (!error) {
       System.out.printf(" Guardians (%d) key generation verification success. %n",
-              this.electionRecord.guardianRecords.size());
+              this.electionRecord.guardians().size());
     }
     return !error;
   }
 
-  boolean verifyGuardian(GuardianRecord guardian) {
+  boolean verifyGuardian(Guardian guardian) {
     boolean error = false;
 
     int count = 0;
-    for (SchnorrProof proof : guardian.coefficientProofs()) {
+    for (SchnorrProof proof : guardian.getCoefficientProofs()) {
       boolean proofOk;
       if (proof.publicKey == null) {
-        ElementModP publicKey = guardian.coefficientCommitments().get(count);
+        ElementModP publicKey = guardian.getCoefficientCommitments().get(count);
         proofOk = proof.isValidVer2(publicKey);
       } else {
         proofOk = proof.isValidVer1();
       }
       if (!proofOk) {
         error = true;
-        System.out.printf("Guardian %s coefficient_proof %d: validation failed.%n", guardian.guardianId(), count);
+        System.out.printf("Guardian %s coefficient_proof %d: validation failed.%n", guardian.getGuardianId(), count);
       }
       count++;
     }

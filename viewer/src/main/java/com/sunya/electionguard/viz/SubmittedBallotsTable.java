@@ -5,13 +5,13 @@
 
 package com.sunya.electionguard.viz;
 
-import com.sunya.electionguard.ElectionContext;
 import com.sunya.electionguard.InternalManifest;
 import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.SubmittedBallot;
 import com.sunya.electionguard.CiphertextBallot;
 import com.sunya.electionguard.publish.CloseableIterable;
 import com.sunya.electionguard.publish.CloseableIterator;
+import com.sunya.electionguard.publish.ElectionContext;
 import ucar.ui.prefs.BeanTable;
 import ucar.ui.widget.BAMutil;
 import ucar.ui.widget.IndependentWindow;
@@ -25,6 +25,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Formatter;
+import java.util.Iterator;
 import java.util.Optional;
 
 public class SubmittedBallotsTable extends JPanel {
@@ -86,15 +87,13 @@ public class SubmittedBallotsTable extends JPanel {
     add(split2, BorderLayout.CENTER);
   }
 
-  void setAcceptedBallots(Manifest manifest, ElectionContext context, CloseableIterable<SubmittedBallot> acceptedBallots) {
+  void setAcceptedBallots(Manifest manifest, ElectionContext context, Iterable<SubmittedBallot> acceptedBallots) {
     this.manifest = new InternalManifest(manifest);
     this.context = context;
-    try (CloseableIterator<SubmittedBallot> iter = acceptedBallots.iterator())  {
-      java.util.List<SubmittedBallotBean> beanList = new ArrayList<>();
-      while (iter.hasNext()) {
-        SubmittedBallot ballot = iter.next();
-        beanList.add(new SubmittedBallotBean(ballot));
-      }
+    java.util.List<SubmittedBallotBean> beanList = new ArrayList<>();
+    for (SubmittedBallot ballot : acceptedBallots) {
+      beanList.add(new SubmittedBallotBean(ballot));
+    }
       ballotTable.setBeans(beanList);
       if (beanList.size() > 0) {
         setBallot(beanList.get(0));
@@ -102,7 +101,6 @@ public class SubmittedBallotsTable extends JPanel {
         contestTable.setBeans(new ArrayList<>());
         selectionTable.setBeans(new ArrayList<>());
       }
-    }
   }
 
   void setBallot(SubmittedBallotBean ballotBean) {
@@ -326,7 +324,7 @@ public class SubmittedBallotsTable extends JPanel {
 
     // String where, Group.ElementModQ selectionHash, Group.ElementModP publicKey, Group.ElementModQ cryptoExtendedBaseHash
     public boolean isValid() {
-      return selection.is_valid_encryption("test", selection.selectionHash, context.jointPublicKey, context.cryptoExtendedBaseHash);
+      return selection.is_valid_encryption("test", selection.selectionHash, context.electionPublicKey(), context.extendedHash());
     }
 
     @Override

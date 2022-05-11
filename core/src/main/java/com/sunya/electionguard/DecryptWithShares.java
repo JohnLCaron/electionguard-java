@@ -3,6 +3,7 @@ package com.sunya.electionguard;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.flogger.FluentLogger;
+import com.sunya.electionguard.publish.ElectionContext;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,7 +36,7 @@ public class DecryptWithShares {
       }
 
       Optional<PlaintextTally> decrypted_tally =
-              decrypt_ballot(ballot, ballot_shares, context.cryptoExtendedBaseHash);
+              decrypt_ballot(ballot, ballot_shares, context.extendedHash());
       if (decrypted_tally.isEmpty()) {
         logger.atWarning().log("Failed to decrypt ciphertext spoiled ballots %s", ballot.object_id());
       } else {
@@ -63,7 +64,7 @@ public class DecryptWithShares {
     Map<String, PlaintextTally.Contest> contests = new HashMap<>();
     for (CiphertextTally.Contest tallyContest : tally.contests.values()) {
       Optional<PlaintextTally.Contest> pc = decrypt_contest_with_decryption_shares(
-              CiphertextContest.createFrom(tallyContest), shares, context.cryptoExtendedBaseHash);
+              CiphertextContest.createFrom(tallyContest), shares, context.extendedHash());
       if (pc.isEmpty()) {
         logger.atWarning().log("contest: %s failed to decrypt with shares", tallyContest.object_id());
         return Optional.empty();
@@ -97,7 +98,7 @@ public class DecryptWithShares {
       }
 
       Optional<PlaintextTally> decrypted_tally =
-              decrypt_ballot(ballot, ballot_shares, context.cryptoExtendedBaseHash);
+              decrypt_ballot(ballot, ballot_shares, context.extendedHash());
       if (decrypted_tally.isEmpty()) {
          return Optional.empty();
       }

@@ -1,7 +1,7 @@
 package com.sunya.electionguard.standard;
 
 import com.sunya.electionguard.CiphertextBallot;
-import com.sunya.electionguard.ElectionContext;
+import com.sunya.electionguard.ElectionCryptoContext;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.ElectionTestHelper;
 import com.sunya.electionguard.Encrypt;
@@ -49,7 +49,7 @@ public class TestEncryptHypothesisProperties extends TestProperties {
 
     List<PlaintextBallot> ballots = everything.ballots;
     Group.ElementModQ secret_key = everything.secret_key;
-    ElectionContext context = everything.context;
+    ElectionCryptoContext context = everything.context;
 
     // Tally the plaintext ballots for comparison later
     Map<String, Integer> plaintext_tallies = TallyTestHelper.accumulate_plaintext_ballots(ballots);

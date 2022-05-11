@@ -2,8 +2,8 @@ package com.sunya.electionguard;
 
 import com.google.common.collect.ImmutableList;
 import com.sunya.electionguard.core.UInt256;
-import com.sunya.electionguard.publish.ConvertFromJson;
-import com.sunya.electionguard.publish.Publisher;
+import com.sunya.electionguard.json.ConvertFromJson;
+import com.sunya.electionguard.publish.PublisherOld;
 import net.jqwik.api.Example;
 import net.jqwik.api.lifecycle.AfterContainer;
 
@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.sunya.electionguard.publish.Publisher.Mode.createIfMissing;
+import static com.sunya.electionguard.publish.PublisherOld.Mode.createIfMissing;
 
 public class TestHashAgainstPython {
   public static final String topdirJsonPythonData = "src/test/data/python_data/";
@@ -72,7 +72,7 @@ public class TestHashAgainstPython {
     }
 
     if (writeOut) {
-      Publisher publisher = new Publisher(output, createIfMissing, false);
+      PublisherOld publisher = new PublisherOld(output, createIfMissing);
       publisher.writeStartingProto(subject, constants);
     }
   }
@@ -189,8 +189,8 @@ public class TestHashAgainstPython {
     String ps0 = "000" + ps;
     assertThat(ps0.length()).isEqualTo(ps.length() + 3);
 
-    Group.ElementModQ s1p = Group.hex_to_q_unchecked(ps);
-    Group.ElementModQ s2p = Group.hex_to_q_unchecked(ps0);
+    Group.ElementModP s1p = Group.hex_to_p_unchecked(ps);
+    Group.ElementModP s2p = Group.hex_to_p_unchecked(ps0);
 
     assertThat(s1p).isEqualTo(p);
     assertThat(s1p).isEqualTo(s2p);

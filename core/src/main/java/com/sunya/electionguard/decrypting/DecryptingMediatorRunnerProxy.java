@@ -2,8 +2,7 @@ package com.sunya.electionguard.decrypting;
 
 import com.google.common.flogger.FluentLogger;
 import com.sunya.electionguard.Group;
-import com.sunya.electionguard.proto.CommonConvert;
-import electionguard.protogen.CommonRpcProto;
+import com.sunya.electionguard.protoconvert.CommonConvert;
 import electionguard.protogen.DecryptingProto;
 import electionguard.protogen.DecryptingServiceGrpc;
 import io.grpc.ManagedChannel;
@@ -47,7 +46,7 @@ class DecryptingMediatorRunnerProxy {
               .setGuardianId(guardianId)
               .setRemoteUrl(remoteUrl)
               .setGuardianXCoordinate(coordinate)
-              .setPublicKey(CommonConvert.convertElementModP(publicKey))
+              .setPublicKey(CommonConvert.publishElementModP(publicKey))
               .build();
 
       DecryptingProto.RegisterDecryptingTrusteeResponse response = blockingStub.registerTrustee(request);

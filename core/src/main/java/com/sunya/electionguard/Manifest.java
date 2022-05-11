@@ -8,6 +8,7 @@ import com.google.common.flogger.FluentLogger;
 import javax.annotation.Nullable;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * The Manifest: defines the candidates, contests, and associated information for a specific election.
@@ -38,7 +39,7 @@ public record Manifest(
     Preconditions.checkNotNull(startDate);
     Preconditions.checkNotNull(endDate);
     if (Strings.isNullOrEmpty(specVersion)) {
-      specVersion = ElectionContext.SPEC_VERSION;
+      specVersion = ElectionCryptoContext.SPEC_VERSION;
     }
     geopoliticalUnits = toImmutableListEmpty(geopoliticalUnits);
     parties = toImmutableListEmpty(parties);
@@ -199,6 +200,13 @@ public record Manifest(
               "candidate_contests_have_valid_party_ids", candidate_contests_have_valid_party_ids);
     }
     return success;
+  }
+
+  public Optional<ContestDescription> findContest(String contestId) {
+    return contests.stream().filter(c -> c.contestId.equals(contestId)).findFirst();
+  }
+  public Integer findVoteLimit(String contestId) {
+    return findContest(contestId).map(c -> c.votesAllowed).orElse(null);
   }
 
   /**

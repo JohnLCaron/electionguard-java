@@ -53,7 +53,6 @@ class DecryptWithSecrets {
             selection.object_id(),
             selection.sequence_order(),
             plaintext_vote,
-            selection.is_placeholder_selection,
             null));
   }
 
@@ -114,7 +113,6 @@ class DecryptWithSecrets {
             selection.object_id(),
             selection.sequence_order(),
             plaintext_vote,
-            selection.is_placeholder_selection,
             null));
   }
 
@@ -158,7 +156,7 @@ class DecryptWithSecrets {
               crypto_extended_base_hash,
               suppress_validity_check);
       if (plaintext_selection.isPresent()) {
-        if (!remove_placeholders || !plaintext_selection.get().isPlaceholderSelection) {
+        if (!remove_placeholders || !selection.isPlaceholderSelection) {
           plaintext_selections.add(plaintext_selection.get());
         }
       } else {
@@ -243,7 +241,7 @@ class DecryptWithSecrets {
               suppress_validity_check);
 
       if (plaintext_selection.isPresent()) {
-        if (!remove_placeholders || !plaintext_selection.get().isPlaceholderSelection) {
+        if (!remove_placeholders || !selection.isPlaceholderSelection) {
           plaintext_selections.add(plaintext_selection.get());
         }
       } else {

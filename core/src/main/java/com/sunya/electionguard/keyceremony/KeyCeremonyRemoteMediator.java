@@ -1,12 +1,16 @@
 package com.sunya.electionguard.keyceremony;
 
 import com.google.common.flogger.FluentLogger;
-import com.sunya.electionguard.ElectionContext;
+import com.sunya.electionguard.ElectionCryptoContext;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.GuardianRecord;
 import com.sunya.electionguard.Hash;
 import com.sunya.electionguard.Manifest;
+import com.sunya.electionguard.core.UInt256;
 import com.sunya.electionguard.publish.Publisher;
+import electionguard.ballot.ElectionConfig;
+import electionguard.ballot.ElectionInitialized;
+import electionguard.ballot.Guardian;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -19,6 +23,8 @@ import java.util.Optional;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import static java.util.Collections.emptyMap;
+
 /** Mediate the key ceremony using remote Guardians. */
 public class KeyCeremonyRemoteMediator {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
@@ -28,11 +34,11 @@ public class KeyCeremonyRemoteMediator {
   final List<KeyCeremonyTrusteeIF> trusteeProxies;
 
   final Map<String, KeyCeremony2.PublicKeySet> publicKeysMap = new HashMap<>();
-  final List<GuardianRecord> guardianRecords = new ArrayList<>();
+  final List<Guardian> guardianRecords = new ArrayList<>();
 
   Group.ElementModP jointKey;
   Group.ElementModQ commitmentsHash;
-  ElectionContext context;
+  ElectionCryptoContext context;
 
   public KeyCeremonyRemoteMediator(Manifest election, int quorum,
                                    List<KeyCeremonyTrusteeIF> trusteeProxies) {
@@ -85,7 +91,7 @@ public class KeyCeremonyRemoteMediator {
       throw new RuntimeException("*** makeCoefficientValidationSets failed");
     }
 
-    this.context = ElectionContext.create(this.trusteeProxies.size(), this.quorum,
+    this.context = ElectionCryptoContext.create(this.trusteeProxies.size(), this.quorum,
             this.jointKey, this.election, this.commitmentsHash, null);
 
     System.out.printf("  Key Ceremony complete%n");
@@ -114,7 +120,7 @@ public class KeyCeremonyRemoteMediator {
           if (!trustee.id().equals(recipient.id())) {
             String error = recipient.receivePublicKeys(publicKeys);
             if (!error.isEmpty()) {
-              System.out.printf("PublicKey Commitments: '%s' failed to validate '%s' = %s", recipient.id(), trustee.id(), error);
+              System.out.printf("PublicKey Commitments: '%s' failed to validate '%s', error = '%s'%n", recipient.id(), trustee.id(), error);
               fail = true;
             }
           }
@@ -258,22 +264,32 @@ public class KeyCeremonyRemoteMediator {
               keys.coefficientCommitments().get(0),
               keys.coefficientCommitments(),
               keys.coefficientProofs());
-      this.guardianRecords.add(guardianRecord);
+      this.guardianRecords.add(new Guardian(guardianRecord));
       commitments.addAll(keys.coefficientCommitments());
     }
     this.commitmentsHash = Hash.hash_elems(commitments);
     return true;
   }
 
-  public boolean publishElectionRecord(Publisher publisher) {
+  public boolean publishElectionRecord(Publisher publisher, ElectionConfig config) {
     System.out.printf("Publish ElectionRecord to %s%n", publisher.publishPath());
     // the election record
     try {
-      publisher.writeKeyCeremonyProto(
-              this.election,
-              this.context,
-              Group.getPrimes(),
-              this.guardianRecords);
+      publisher.writeElectionInitialized(
+              //     val config: ElectionConfig,
+              //    /** The joint public key (K) in the ElectionGuard Spec. */
+              //    val jointPublicKey: Group.ElementModP,
+              //    val manifestHash: UInt256, // matches Manifest.cryptoHash
+              //    val cryptoExtendedBaseHash: UInt256, // aka qbar
+              //    val guardians: List<Guardian>,
+              //    val metadata: Map<String, String> = emptyMap(),
+              new ElectionInitialized(
+                      config,
+                      this.jointKey,
+                      UInt256.fromModQ(config.getManifest().cryptoHash()),
+                      UInt256.fromModQ(this.context.cryptoExtendedBaseHash),
+                      this.guardianRecords,
+                      emptyMap()));
       return true;
     } catch (IOException e) {
       e.printStackTrace();

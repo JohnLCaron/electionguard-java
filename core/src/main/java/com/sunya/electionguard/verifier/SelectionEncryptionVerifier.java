@@ -1,6 +1,7 @@
 package com.sunya.electionguard.verifier;
 
 import com.sunya.electionguard.*;
+import com.sunya.electionguard.publish.ElectionRecord;
 
 import static com.sunya.electionguard.Group.ElementModQ;
 import static com.sunya.electionguard.Group.ElementModP;
@@ -22,7 +23,7 @@ public class SelectionEncryptionVerifier {
     int nballots  = 0;
     int ncontests  = 0;
     int nselections  = 0;
-    for (SubmittedBallot ballot : electionRecord.acceptedBallots) {
+    for (SubmittedBallot ballot : electionRecord.submittedBallots()) {
       nballots++;
       for (CiphertextBallot.Contest contest : ballot.contests) {
         ncontests++;
@@ -176,8 +177,8 @@ public class SelectionEncryptionVerifier {
       // ElGamal.Ciphertext message, ElementModP k, ElementModQ qbar
       return proof.is_valid(
               selection.ciphertext(),
-              electionRecord.context.jointPublicKey,
-              electionRecord.context.cryptoExtendedBaseHash);
+              electionRecord.electionPublicKey(),
+              electionRecord.extendedHash());
     }
   }
 

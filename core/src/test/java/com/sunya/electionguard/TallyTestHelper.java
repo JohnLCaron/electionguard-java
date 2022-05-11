@@ -4,8 +4,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.google.common.truth.Truth.assertWithMessage;
-
 public class TallyTestHelper {
 
   /**
@@ -24,8 +22,6 @@ public class TallyTestHelper {
     for (PlaintextBallot ballot : ballots) {
       for (PlaintextBallot.Contest contest : ballot.contests) {
         for (PlaintextBallot.Selection selection : contest.selections) {
-          assertWithMessage("Placeholder selections should not exist in the plaintext ballots")
-                  .that(selection.isPlaceholderSelection).isFalse();
           // returns 1 or 0 for n-of-m ballot selections
           result.merge(selection.selectionId, selection.vote, Integer::sum);
         }

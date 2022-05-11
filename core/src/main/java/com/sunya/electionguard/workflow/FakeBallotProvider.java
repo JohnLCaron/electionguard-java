@@ -67,7 +67,7 @@ public class FakeBallotProvider implements BallotProvider {
     static PlaintextBallot.Selection get_random_selection_from(Manifest.SelectionDescription description) {
       boolean choice = random.nextBoolean();
       return new PlaintextBallot.Selection(description.selectionId(), description.sequenceOrder(),
-              choice ? 1 : 0, false, null);
+              choice ? 1 : 0, null);
     }
 
   }

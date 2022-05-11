@@ -7,7 +7,8 @@ import com.sunya.electionguard.ElectionFactory;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.publish.Consumer;
-import com.sunya.electionguard.publish.Publisher;
+import com.sunya.electionguard.publish.ElectionRecord;
+import com.sunya.electionguard.publish.PublisherOld;
 import net.jqwik.api.Example;
 
 import java.io.IOException;
@@ -29,10 +30,10 @@ public class TestAttackTallyDecryption {
   public void attackTallyDecryptionWrongManifest() throws IOException {
     String topdir = TestParameterVerifier.topdirProto;
     Consumer consumer = new Consumer(topdir);
-    ElectionRecord electionRecord = consumer.readElectionRecordProto();
+    ElectionRecord electionRecord = consumer.readElectionRecord();
     Manifest fakeElection = ElectionFactory.get_fake_manifest();
 
-    TallyDecryptionVerifier tdv = new TallyDecryptionVerifier(electionRecord, fakeElection, electionRecord.decryptedTally);
+    TallyDecryptionVerifier tdv = new TallyDecryptionVerifier(electionRecord, fakeElection, electionRecord.decryptedTally());
     boolean tdvOk = tdv.verify_tally_decryption();
     assertThat(tdvOk).isFalse();
   }
@@ -42,14 +43,14 @@ public class TestAttackTallyDecryption {
   public void attackTallyDecryptionWrongTally() throws IOException {
     String topdir = TestParameterVerifier.topdirProto;
     Consumer consumer = new Consumer(topdir);
-    ElectionRecord electionRecord = consumer.readElectionRecordProto();
-    PlaintextTally tally = electionRecord.decryptedTally;
+    ElectionRecord electionRecord = consumer.readElectionRecord();
+    PlaintextTally tally = electionRecord.decryptedTally();
     assertThat(tally).isNotNull();
 
     PlaintextTally attack = new PlaintextTally( tally.tallyId,
             messContests(tally.contests, this::messTally));
 
-    TallyDecryptionVerifier tdv = new TallyDecryptionVerifier(electionRecord, electionRecord.manifest, attack);
+    TallyDecryptionVerifier tdv = new TallyDecryptionVerifier(electionRecord, electionRecord.manifest(), attack);
     boolean tdvOk = tdv.verify_tally_decryption();
     assertThat(tdvOk).isFalse();
   }
@@ -59,14 +60,14 @@ public class TestAttackTallyDecryption {
   public void attackTallyDecryptionWrongTallyAndValue() throws IOException {
     String topdir = TestParameterVerifier.topdirProto;
     Consumer consumer = new Consumer(topdir);
-    ElectionRecord electionRecord = consumer.readElectionRecordProto();
-    PlaintextTally tally = electionRecord.decryptedTally;
+    ElectionRecord electionRecord = consumer.readElectionRecord();
+    PlaintextTally tally = electionRecord.decryptedTally();
     assertThat(tally).isNotNull();
 
     PlaintextTally attack = new PlaintextTally( tally.tallyId,
             messContests(tally.contests, this::messTallyAndValue));
 
-    TallyDecryptionVerifier tdv = new TallyDecryptionVerifier(electionRecord, electionRecord.manifest, attack);
+    TallyDecryptionVerifier tdv = new TallyDecryptionVerifier(electionRecord, electionRecord.manifest(), attack);
     boolean tdvOk = tdv.verify_tally_decryption();
     assertThat(tdvOk).isFalse();
   }
@@ -76,8 +77,8 @@ public class TestAttackTallyDecryption {
   public void attackTallyDecryption() throws IOException {
     String topdir = TestParameterVerifier.topdirProto;
     Consumer consumer = new Consumer(topdir);
-    ElectionRecord electionRecord = consumer.readElectionRecordProto();
-    PlaintextTally tally = electionRecord.decryptedTally;
+    ElectionRecord electionRecord = consumer.readElectionRecord();
+    PlaintextTally tally = electionRecord.decryptedTally();
     assertThat(tally).isNotNull();
 
     PlaintextTally attack = new PlaintextTally( tally.tallyId,
@@ -85,7 +86,7 @@ public class TestAttackTallyDecryption {
 
     // Attack fools this verification
     System.out.println("------------ [box 11] Correctness of Decryption of Tallies ------------");
-    TallyDecryptionVerifier tdv = new TallyDecryptionVerifier(electionRecord, electionRecord.manifest, attack);
+    TallyDecryptionVerifier tdv = new TallyDecryptionVerifier(electionRecord, electionRecord.manifest(), attack);
     boolean tdvOk = tdv.verify_tally_decryption();
     assertThat(tdvOk).isTrue();
 
@@ -194,7 +195,7 @@ public class TestAttackTallyDecryption {
   }
 
   boolean publish(String inputDir, String publishDir, ElectionRecord electionRecord, PlaintextTally decryptedTally) throws IOException {
-    Publisher publisher = new Publisher(publishDir, Publisher.Mode.createNew, false);
+    PublisherOld publisher = new PublisherOld(publishDir, PublisherOld.Mode.createNew);
     publisher.writeDecryptedTallyProto(electionRecord, decryptedTally);
     publisher.copyAcceptedBallots(inputDir);
     return true;

@@ -2,10 +2,8 @@ package com.sunya.electionguard.workflow;
 
 import com.beust.jcommander.*;
 import com.google.common.base.Stopwatch;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.sunya.electionguard.BallotBox;
-import com.sunya.electionguard.Group;
 import com.sunya.electionguard.InternalManifest;
 import com.sunya.electionguard.SubmittedBallot;
 import com.sunya.electionguard.input.BallotInputValidation;
@@ -15,9 +13,9 @@ import com.sunya.electionguard.Encrypt;
 import com.sunya.electionguard.PlaintextBallot;
 import com.sunya.electionguard.input.ManifestInputValidation;
 import com.sunya.electionguard.publish.Consumer;
-import com.sunya.electionguard.publish.PrivateData;
 import com.sunya.electionguard.publish.Publisher;
-import com.sunya.electionguard.verifier.ElectionRecord;
+import com.sunya.electionguard.publish.ElectionRecord;
+import electionguard.ballot.ElectionInitialized;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
@@ -101,27 +99,28 @@ public class EncryptBallots {
 
     Consumer consumer = new Consumer(cmdLine.inputDir);
     ElectionRecord electionRecord = consumer.readElectionRecord();
-    ManifestInputValidation validator = new ManifestInputValidation(electionRecord.manifest);
+    ElectionInitialized electionInit = consumer.readElectionInitialized();
+    ManifestInputValidation validator = new ManifestInputValidation(electionRecord.manifest());
     Formatter errors = new Formatter();
     if (!validator.validateElection(errors)) {
       System.out.printf("*** ElectionInputValidation FAILED on %s%n%s", cmdLine.inputDir, errors);
       System.exit(1);
     }
 
-    if (electionRecord.constants != null) {
-      Group.setPrimes(electionRecord.constants);
-    }
+    // if (electionRecord.constants != null) {
+    //  Group.setPrimes(electionRecord.constants);
+    // }
 
     BallotProvider ballotProvider = null;
     if (cmdLine.ballotProviderClass != null) {
       try {
-        ballotProvider = makeBallotProvider(cmdLine.ballotProviderClass, electionRecord.manifest, cmdLine.nballots);
+        ballotProvider = makeBallotProvider(cmdLine.ballotProviderClass, electionRecord.manifest(), cmdLine.nballots);
       } catch (Throwable t) {
         t.printStackTrace();
         System.exit(3);
       }
     } else {
-      ballotProvider = new FakeBallotProvider(electionRecord.manifest, cmdLine.nballots);
+      ballotProvider = new FakeBallotProvider(electionRecord.manifest(), cmdLine.nballots);
     }
 
     System.out.printf(" EncryptBallots: read context from %s%n", cmdLine.inputDir);
@@ -134,7 +133,7 @@ public class EncryptBallots {
     EncryptBallots encryptor = new EncryptBallots(electionRecord, cmdLine.deviceName);
     Stopwatch stopwatch = Stopwatch.createStarted();
 
-    BallotInputValidation ballotValidator = new BallotInputValidation(electionRecord.manifest);
+    BallotInputValidation ballotValidator = new BallotInputValidation(electionRecord.manifest());
     List<PlaintextBallot> originalBallots = new ArrayList<>();
     List<PlaintextBallot> invalidBallots = new ArrayList<>();
     try {
@@ -168,7 +167,7 @@ public class EncryptBallots {
 
     try {
       // publish
-      Publisher publish = encryptor.publish(cmdLine.encryptDir);
+      Publisher publish = encryptor.publish(cmdLine.encryptDir, electionInit);
       encryptor.saveInvalidBallots(publish, invalidBallots);
       if (cmdLine.save) {
         encryptor.saveOriginalBallots(publish, originalBallots);
@@ -209,15 +208,15 @@ public class EncryptBallots {
 
   public EncryptBallots(ElectionRecord electionRecord, String deviceName) {
     this.electionRecord = electionRecord;
-    this.quorum = electionRecord.context.quorum;
-    this.numberOfGuardians = electionRecord.context.numberOfGuardians;
+    this.quorum = electionRecord.quorum();
+    this.numberOfGuardians = electionRecord.numberOfGuardians();
 
     // Configure the Encryption Device
-    InternalManifest metadata = new InternalManifest(electionRecord.manifest);
+    InternalManifest metadata = new InternalManifest(electionRecord.manifest());
     this.device = Encrypt.createDeviceForTest(deviceName);
-    this.encryptor = new Encrypt.EncryptionMediator(metadata, electionRecord.context, this.device);
+    this.encryptor = new Encrypt.EncryptionMediator(metadata, electionRecord, this.device);
 
-    this.ballotBox = new BallotBox(electionRecord.manifest, electionRecord.context);
+    this.ballotBox = new BallotBox(electionRecord.manifest(), electionRecord);
     System.out.printf("%nReady to encrypt with device: '%s'%n", this.device.location());
   }
 
@@ -235,34 +234,32 @@ public class EncryptBallots {
     }
   }
 
-  Publisher publish(String publishDir) throws IOException {
+  Publisher publish(String publishDir, ElectionInitialized electionInit) throws IOException {
     int ncast = Iterables.size(this.ballotBox.getCastBallots());
     int nspoiled = Iterables.size(this.ballotBox.getSpoiledBallots());
     int failed = originalBallotsCount - ncast - nspoiled;
     System.out.printf("%nPublish cast = %d spoiled = %d failed = %d total = %d%n%n",
             ncast, nspoiled, failed, originalBallotsCount);
 
-    Publisher publisher = new Publisher(publishDir, Publisher.Mode.createIfMissing, false);
-    publisher.writeEncryptionResultsProto(
-            electionRecord,
-            ImmutableList.of(this.device), // add the device
+    Publisher publisher = new Publisher(publishDir, Publisher.Mode.createIfMissing);
+    publisher.writeEncryptions(
+            electionInit,
             this.ballotBox.getAllBallots() // add the encrypted ballots
     );
     return publisher;
   }
 
   void saveOriginalBallots(Publisher publisher, List<PlaintextBallot> ballots) throws IOException {
-    PrivateData pdata = publisher.makePrivateData(true, true);
+    /*PrivateData pdata = publisher.makePrivateData(true, true);
     // LOOK JSON !!
     pdata.publish_private_data(ballots, null);
     // LOOK Proto
     pdata.writePrivateDataProto(ballots, null);
-    System.out.printf("Save %d original ballots in %s%n", ballots.size(), pdata.privateDirectory());
-
+    System.out.printf("Save %d original ballots in %s%n", ballots.size(), pdata.privateDirectory()); */
   }
 
   void saveInvalidBallots(Publisher publisher, List<PlaintextBallot> ballots) throws IOException {
-    publisher.publish_invalid_ballots("invalid_ballots", ballots);
-    System.out.printf("Save %d invalid ballot in %s/invalid_ballots%n", ballots.size(), publisher.publishPath());
+    /* publisher.publish_invalid_ballots("invalid_ballots", ballots);
+    System.out.printf("Save %d invalid ballot in %s/invalid_ballots%n", ballots.size(), publisher.publishPath()); */
   }
 }

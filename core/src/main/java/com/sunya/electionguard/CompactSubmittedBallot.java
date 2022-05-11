@@ -1,6 +1,7 @@
 package com.sunya.electionguard;
 
 import com.google.common.base.Preconditions;
+import com.sunya.electionguard.publish.ElectionContext;
 
 import javax.annotation.concurrent.Immutable;
 import java.util.List;

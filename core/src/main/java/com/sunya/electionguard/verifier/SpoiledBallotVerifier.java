@@ -3,13 +3,13 @@ package com.sunya.electionguard.verifier;
 import com.google.common.flogger.FluentLogger;
 import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.PlaintextTally;
+import com.sunya.electionguard.publish.ElectionRecord;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Stream;
 
 /**
  * This verifies specification "12B Correct Decryption of Spoiled Ballots".
@@ -26,7 +26,7 @@ public class SpoiledBallotVerifier {
 
   SpoiledBallotVerifier(ElectionRecord electionRecord) {
     this.electionRecord = electionRecord;
-    for (Manifest.ContestDescription contest : electionRecord.manifest.contests()) {
+    for (Manifest.ContestDescription contest : electionRecord.manifest().contests()) {
       HashSet<String> selectionNames = new HashSet<>();
       for (Manifest.SelectionDescription selection : contest.selections()) {
         selectionNames.add(selection.selectionId());
@@ -38,8 +38,7 @@ public class SpoiledBallotVerifier {
   boolean verify_plaintext_ballot() {
     AtomicBoolean valid = new AtomicBoolean(true);
 
-    try (Stream<PlaintextTally> ballots = electionRecord.spoiledBallots.iterator().stream()) {
-      ballots.forEach(ballot -> {
+    for (PlaintextTally ballot : electionRecord.spoiledBallotTallies()) {
         for (PlaintextTally.Contest contest : ballot.contests.values()) {
           Set<String> selectionNames = names.get(contest.contestId());
           if (selectionNames == null) {
@@ -54,7 +53,6 @@ public class SpoiledBallotVerifier {
             }
           }
         }
-      });
     }
 
     if (!valid.get()) {

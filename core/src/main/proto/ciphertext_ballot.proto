@@ -30,7 +30,7 @@ message CiphertextBallotContest {
   uint32 sequence_order = 2; // matches the ContestDescription.sequence_order
   UInt256 contest_hash = 3; // matches ContestDescription.crypto_hash
   repeated CiphertextBallotSelection selections = 4;
-  ElGamalCiphertext ciphertext_accumulation = 5;  // The contest total (A, B)
+  reserved 5;
   UInt256 crypto_hash = 6;
   ConstantChaumPedersenProof proof = 7;  // The proof the sum of the selections does not exceed the maximum
 }

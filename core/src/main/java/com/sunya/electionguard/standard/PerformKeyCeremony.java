@@ -3,21 +3,27 @@ package com.sunya.electionguard.standard;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
-import com.sunya.electionguard.ElectionContext;
+import com.sunya.electionguard.ElectionCryptoContext;
 import com.sunya.electionguard.GuardianRecord;
 import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.Hash;
+import com.sunya.electionguard.core.UInt256;
+import com.sunya.electionguard.decrypting.DecryptingTrustee;
 import com.sunya.electionguard.input.ManifestInputValidation;
 import com.sunya.electionguard.publish.Consumer;
 import com.sunya.electionguard.publish.PrivateData;
-import com.sunya.electionguard.publish.Publisher;
+import com.sunya.electionguard.publish.PublisherOld;
+import electionguard.ballot.ElectionConfig;
+import electionguard.ballot.ElectionInitialized;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.List;
 import java.util.Optional;
+
+import static java.util.Collections.emptyMap;
 
 /**
  * A command line program that performs the key ceremony to create the Guardians, using standard library and local Guardians.
@@ -84,7 +90,7 @@ public class PerformKeyCeremony {
     try {
       // all we need from election record is the ElectionDescription.
       Consumer consumer = new Consumer(cmdLine.inputDir);
-      Manifest election = consumer.readManifest();
+      Manifest election = consumer.readElectionRecord().manifest();
       ManifestInputValidation validator = new ManifestInputValidation(election);
       Formatter errors = new Formatter();
       if (!validator.validateElection(errors)) {
@@ -116,7 +122,7 @@ public class PerformKeyCeremony {
 
   KeyCeremony.ElectionJointKey jointKey;
   Group.ElementModQ commitmentsHash;
-  ElectionContext context;
+  ElectionCryptoContext context;
 
   List<Guardian> guardians;
   List<GuardianRecord> guardian_records = new ArrayList<>();
@@ -138,7 +144,7 @@ public class PerformKeyCeremony {
       throw new RuntimeException("*** Key Ceremony failed");
     }
 
-    this.context = ElectionContext.create(this.numberOfGuardians, this.quorum,
+    this.context = ElectionCryptoContext.create(this.numberOfGuardians, this.quorum,
             this.jointKey.joint_public_key(), this.election, this.commitmentsHash, null);
   }
 
@@ -272,19 +278,33 @@ public class PerformKeyCeremony {
   }
 
   boolean publish(String publishDir) throws IOException {
-    Publisher publisher = new Publisher(publishDir, Publisher.Mode.createNew, true);
-    publisher.writeKeyCeremonyJson(
+    ElectionConfig config = new ElectionConfig(
+            "yoFace",
+            new electionguard.ballot.ElectionConstants(Group.getPrimes()),
             this.election,
-            this.context,
-            Group.getPrimes(),
-            this.guardian_records);
+            this.numberOfGuardians,
+            this.quorum,
+            emptyMap()
+    );
+
+    ElectionInitialized electionInitialized = new ElectionInitialized(
+            config,
+            this.jointKey.joint_public_key(),
+            UInt256.fromModQ(this.election.cryptoHash()),
+            UInt256.fromModQ(this.context.cryptoExtendedBaseHash),
+            this.guardian_records.stream().map( it -> new electionguard.ballot.Guardian(it)).toList(),
+            emptyMap()
+    );
+
+    PublisherOld publisher = new PublisherOld(publishDir, PublisherOld.Mode.createNew);
+    publisher.writeElectionInitialized(electionInitialized);
 
     // save private data for decrypting
-    List<GuardianPrivateRecord> gprivate = this.guardians.stream()
-            .map(g -> g.export_private_data())
+    List<DecryptingTrustee> trustees = this.guardians.stream()
+            .map(g -> g.toDecryptingTrustee())
             .toList();
-    PrivateData pdata = publisher.makePrivateData(false, false);
-    pdata.writeGuardiansJson(gprivate);
+    PrivateData privateData = publisher.makePrivateData(false, false);
+    trustees.forEach(it -> privateData.writeTrustee(it));
     return true;
   }
 }

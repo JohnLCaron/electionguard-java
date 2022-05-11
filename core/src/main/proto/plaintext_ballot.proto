@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+import "common.proto";
+
 option java_package = "electionguard.protogen";
 option java_outer_classname = "PlaintextBallotProto";
 
@@ -21,12 +23,6 @@ message PlaintextBallotSelection {
   string selection_id = 1; // matches the SelectionDescription.selection_id
   uint32 sequence_order = 2;
   uint32 vote = 3;  // 0 or 1
-  bool is_placeholder_selection = 4;
-  ExtendedData extended_data = 5; // TODO not used
-}
-
-// used for write-in candidate value
-message ExtendedData {
-  string value = 1;
-  uint32 length = 2; // TODO why length ?
+  reserved 4;
+  string extended_data = 5; // used for write-in candidate value
 }

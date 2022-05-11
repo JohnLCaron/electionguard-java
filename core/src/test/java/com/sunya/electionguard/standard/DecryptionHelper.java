@@ -1,6 +1,6 @@
 package com.sunya.electionguard.standard;
 
-import com.sunya.electionguard.ElectionContext;
+import com.sunya.electionguard.ElectionCryptoContext;
 import com.sunya.electionguard.CiphertextTally;
 import com.sunya.electionguard.DecryptionShare;
 import com.sunya.electionguard.SubmittedBallot;
@@ -21,7 +21,7 @@ public class DecryptionHelper {
   public static void perform_decryption_setup(
           List<Guardian> available_guardians,
           DecryptionMediator mediator,
-          ElectionContext context,
+          ElectionCryptoContext context,
           CiphertextTally ciphertext_tally,
           List<SubmittedBallot> spoiled_ballots) {
 
@@ -39,7 +39,7 @@ public class DecryptionHelper {
           List<Guardian> all_guardians,
           int quorum,
           DecryptionMediator mediator,
-          ElectionContext context,
+          ElectionCryptoContext context,
           CiphertextTally ciphertext_tally,
           List<SubmittedBallot> spoiled_ballots) {
 
@@ -60,7 +60,7 @@ public class DecryptionHelper {
           List<Guardian> available_guardians,
           List<KeyCeremony.ElectionPublicKey> all_guardians_keys,
           DecryptionMediator mediator,
-          ElectionContext context,
+          ElectionCryptoContext context,
           CiphertextTally ciphertext_tally,
           List<SubmittedBallot> spoiled_ballots) {
 
@@ -81,7 +81,7 @@ public class DecryptionHelper {
           List<Guardian> available_guardians,
           List<KeyCeremony.ElectionPublicKey> all_guardians_keys,
           DecryptionMediator mediator,
-          ElectionContext context,
+          ElectionCryptoContext context,
           CiphertextTally ciphertext_tally,
           List<SubmittedBallot> spoiled_ballots) {
 
@@ -115,7 +115,7 @@ public class DecryptionHelper {
  static void exchange_compensated_decryption_shares(
           List<Guardian> available_guardians,
           DecryptionMediator mediator,
-          ElectionContext context,
+          ElectionCryptoContext context,
           CiphertextTally ciphertext_tally,
           @Nullable List<SubmittedBallot> spoiled_ballots) {
 

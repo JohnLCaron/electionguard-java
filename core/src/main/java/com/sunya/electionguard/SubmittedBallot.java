@@ -101,26 +101,34 @@ public class SubmittedBallot extends CiphertextBallot {
     if (o == null || getClass() != o.getClass()) return false;
     if (!super.equals(o)) return false;
     SubmittedBallot that = (SubmittedBallot) o;
-    return state == that.state;
+    return timestamp == that.timestamp &&
+            ballotId.equals(that.ballotId) &&
+            ballotStyleId.equals(that.ballotStyleId) &&
+            manifestHash.equals(that.manifestHash) &&
+            code_seed.equals(that.code_seed) &&
+            contests.equals(that.contests) &&
+            code.equals(that.code) &&
+            crypto_hash.equals(that.crypto_hash) &&
+            state.equals(that.state);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(super.hashCode(), state);
+    return Objects.hash(ballotId, ballotStyleId, manifestHash, code_seed, contests, code, timestamp, crypto_hash, state);
   }
 
   @Override
   public String toString() {
     return "SubmittedBallot{" +
-            "\n object_id    ='" + object_id() + '\'' +
-            "\n state        =" + state +
-            "\n style_id     ='" + ballotStyleId + '\'' +
-            "\n manifest_hash=" + manifestHash +
-            "\n code         =" + code +
-            "\n code_seed    =" + code_seed +
-            "\n tracking_hash=" + code +
-            "\n timestamp    =" + timestamp +
-            "\n crypto_hash  =" + crypto_hash +
+            "state=" + state +
+            ", ballotId='" + ballotId + '\'' +
+            ", ballotStyleId='" + ballotStyleId + '\'' +
+            ", manifestHash=" + manifestHash +
+            ", code_seed=" + code_seed +
+            ", contests=" + contests +
+            ", code=" + code +
+            ", timestamp=" + timestamp +
+            ", crypto_hash=" + crypto_hash +
             '}';
   }
 }

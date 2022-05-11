@@ -1,14 +1,15 @@
 package com.sunya.electionguard.standard;
 
-import com.sunya.electionguard.ElectionContext;
+import com.sunya.electionguard.ElectionCryptoContext;
 import com.sunya.electionguard.ElectionFactory;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.GuardianRecord;
 import com.sunya.electionguard.Hash;
 import com.sunya.electionguard.Manifest;
-import com.sunya.electionguard.publish.Consumer;
-import com.sunya.electionguard.publish.PrivateData;
-import com.sunya.electionguard.publish.Publisher;
+import com.sunya.electionguard.json.JsonConsumer;
+import com.sunya.electionguard.json.JsonPrivateData;
+import com.sunya.electionguard.json.JsonPublisher;
+import com.sunya.electionguard.publish.PublisherOld;
 import net.jqwik.api.Example;
 
 import java.io.IOException;
@@ -18,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.sunya.electionguard.CompareHelper.compareGuardianRecord;
 
 /** KeyCeremony to create the Guardians. */
 public class TestGuardianSerializing {
@@ -54,8 +56,8 @@ public class TestGuardianSerializing {
   final int quorum = 4;
   final Manifest election;
   final String outputDir;
-  final Publisher publisher;
-  final PrivateData pdata;
+  final JsonPublisher publisher;
+  final JsonPrivateData pdata;
 
   KeyCeremony.ElectionJointKey jointKey;
   List<Guardian> guardians;
@@ -69,8 +71,8 @@ public class TestGuardianSerializing {
     Path tmp = Files.createTempDirectory(null);
     tmp.toFile().deleteOnExit();
     this.outputDir = "/home/snake/tmp/publishTmp"; // tmp.toAbsolutePath().toString();
-    this.publisher = new Publisher(outputDir, Publisher.Mode.createNew, true);
-    this.pdata = new PrivateData(outputDir, true, true);
+    this.publisher = new JsonPublisher(outputDir, PublisherOld.Mode.createNew);
+    this.pdata = new JsonPrivateData(outputDir, true, true);
 
     this.guardians = new ArrayList<>();
     this.guardianRecords = new ArrayList<>();
@@ -87,7 +89,7 @@ public class TestGuardianSerializing {
     System.out.printf("%nKey Ceremony%n");
     this.jointKey = keyCeremony(guardians);
 
-    ElectionContext context = ElectionContext.create(
+    ElectionCryptoContext context = ElectionCryptoContext.create(
             this.numberOfGuardians,
             this.quorum,
             this.jointKey.joint_public_key(),
@@ -108,7 +110,7 @@ public class TestGuardianSerializing {
     return keyCeremony.publish_joint_key().orElseThrow();
   }
 
-  void publish(ElectionContext context) throws IOException {
+  void publish(ElectionCryptoContext context) throws IOException {
     publisher.writeKeyCeremonyJson(
             this.election,
             context,
@@ -121,7 +123,7 @@ public class TestGuardianSerializing {
 
   @Example
   public void checkGuardianRecord() throws IOException {
-    Consumer consumer = new Consumer(this.publisher);
+    JsonConsumer consumer = new JsonConsumer(this.publisher);
     List<GuardianRecord> guardianRecords = consumer.guardianRecords();
     assertThat(guardianRecords).hasSize(this.guardians.size());
 
@@ -129,8 +131,9 @@ public class TestGuardianSerializing {
       System.out.printf("Test Guardian %s%n", guardian.object_id);
       GuardianRecord guardianRecord = guardian.publish();
       GuardianRecord guardianPrivateRoundtrip = guardianRecords.stream().filter(g -> g.guardianId().equals(guardian.object_id)).findFirst().orElseThrow();
-      assertThat(guardianPrivateRoundtrip.equals(guardianRecord)).isTrue();
+      compareGuardianRecord(guardianPrivateRoundtrip, guardianRecord);
       assertThat(guardianPrivateRoundtrip).isEqualTo(guardianRecord);
+      assertThat(guardianPrivateRoundtrip.equals(guardianRecord)).isTrue();
     }
   }
 
@@ -143,7 +146,7 @@ public class TestGuardianSerializing {
       System.out.printf("Test Guardian %s%n", guardian.object_id);
       GuardianPrivateRecord guardianPrivate = guardian.export_private_data();
       GuardianPrivateRecord guardianPrivateRoundtrip = roundtrip.stream().filter(g -> g.guardian_id().equals(guardian.object_id)).findFirst().orElseThrow();
-      assertThat(guardianPrivateRoundtrip.equals(guardianPrivate)).isTrue();
+      //assertThat(guardianPrivateRoundtrip.equals(guardianPrivate)).isTrue();
       assertThat(guardianPrivateRoundtrip).isEqualTo(guardianPrivate);
     }
   }

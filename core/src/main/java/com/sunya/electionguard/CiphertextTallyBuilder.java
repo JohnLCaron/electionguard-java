@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.flogger.FluentLogger;
-import com.sunya.electionguard.publish.CloseableIterable;
+import com.sunya.electionguard.publish.ElectionContext;
 
 import javax.annotation.concurrent.Immutable;
 import java.util.HashMap;
@@ -17,7 +17,6 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.sunya.electionguard.BallotBox.State;
 
@@ -79,16 +78,15 @@ public class CiphertextTallyBuilder {
   /**
    * Append a collection of Ballots to the tally, parallelized over these ballots, for each selection.
    */
-  public int batch_append(CloseableIterable<SubmittedBallot> ballotsIterable) {
+  public int batch_append(Iterable<SubmittedBallot> ballotsIterable) {
     // Map(SELECTION_ID, Map(BALLOT_ID, Ciphertext)
     Map<String, Map<String, ElGamal.Ciphertext>> cast_ballot_selections = new HashMap<>();
 
     // Find all the ballots for each selection.
     AtomicInteger count = new AtomicInteger();
-    try (Stream<SubmittedBallot> ballots = ballotsIterable.iterator().stream()) {
-      ballots.filter(b -> b.state == State.CAST && !cast_ballot_ids.contains(b.object_id()) &&
-                      BallotValidations.ballot_is_valid_for_election(b, this.manifest, this.context))
-              .forEach(ballot -> {
+    for (SubmittedBallot ballot : ballotsIterable) {
+      if (ballot.state == State.CAST && !cast_ballot_ids.contains(ballot.object_id()) &&
+                      BallotValidations.ballot_is_valid_for_election(ballot, this.manifest, this.context)) {
         // collect the selections so they can be accumulated in parallel
         for (CiphertextBallot.Contest contest : ballot.contests) {
           for (CiphertextBallot.Selection selection : contest.selections) {
@@ -98,7 +96,7 @@ public class CiphertextTallyBuilder {
         }
         this.cast_ballot_ids.add(ballot.object_id());
         count.incrementAndGet();
-      });
+      }
     }
 
     // heres where the tallies are actually accumulated, in parellel over the selections

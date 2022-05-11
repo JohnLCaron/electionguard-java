@@ -13,6 +13,8 @@ plugins {
     `java-library`
     alias(libs.plugins.protobufPlugin)
     alias(libs.plugins.execforkPlugin)
+
+    kotlin("jvm") version "1.6.21"
 }
 
 version = "0.9.5-SNAPSHOT"

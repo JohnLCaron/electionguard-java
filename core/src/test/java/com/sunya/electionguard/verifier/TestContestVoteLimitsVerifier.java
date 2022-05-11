@@ -1,5 +1,6 @@
 package com.sunya.electionguard.verifier;
 
+import com.sunya.electionguard.json.JsonConsumer;
 import com.sunya.electionguard.publish.Consumer;
 import net.jqwik.api.Example;
 import java.io.IOException;
@@ -12,7 +13,7 @@ public class TestContestVoteLimitsVerifier {
     String topdir = TestParameterVerifier.topdirProto;
     System.out.printf("testContestVoteLimitsValidatorProto %s%n", topdir);
     Consumer consumer = new Consumer(topdir);
-    ContestVoteLimitsVerifier validator = new ContestVoteLimitsVerifier(consumer.readElectionRecordProto());
+    ContestVoteLimitsVerifier validator = new ContestVoteLimitsVerifier(consumer.readElectionRecord());
 
     boolean sevOk = validator.verify_all_accepted_ballots();
     assertThat(sevOk).isTrue();
@@ -20,10 +21,10 @@ public class TestContestVoteLimitsVerifier {
 
   @Example
   public void testContestVoteLimitsValidatorJson() throws IOException {
-    String topdir = TestParameterVerifier.topdirJson;
+    String topdir = TestParameterVerifier.topdirJsonExample;
     System.out.printf("testContestVoteLimitsValidatorJson %s%n", topdir);
 
-    Consumer consumer = new Consumer(topdir);
+    JsonConsumer consumer = new JsonConsumer(topdir);
     ContestVoteLimitsVerifier validator = new ContestVoteLimitsVerifier(consumer.readElectionRecordJson());
 
     boolean sevOk = validator.verify_all_accepted_ballots();

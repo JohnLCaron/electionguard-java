@@ -9,11 +9,11 @@ import com.sunya.electionguard.ElectionConstants;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.input.ManifestInputValidation;
-import com.sunya.electionguard.verifier.ElectionRecord;
+import com.sunya.electionguard.publish.Publisher;
+import electionguard.ballot.ElectionConfig;
 import electionguard.protogen.RemoteKeyCeremonyProto;
 import electionguard.protogen.RemoteKeyCeremonyServiceGrpc;
 import com.sunya.electionguard.publish.Consumer;
-import com.sunya.electionguard.publish.Publisher;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.stub.StreamObserver;
@@ -96,19 +96,16 @@ public class KeyCeremonyRemote {
     KeyCeremonyRemote keyCeremony = null;
     try {
       Consumer consumer = new Consumer(cmdLine.inputDir);
-      ElectionRecord election = consumer.readElectionRecord();
-      ManifestInputValidation validator = new ManifestInputValidation(election.manifest);
+      ElectionConfig election = consumer.readElectionConfig(); // LOOK manifest?
+      ManifestInputValidation validator = new ManifestInputValidation(election.getManifest());
       Formatter errors = new Formatter();
       if (!validator.validateElection(errors)) {
         System.out.printf("*** ManifestInputValidation FAILED on %s%n%s", cmdLine.inputDir, errors);
         System.exit(1);
       }
 
-      if (election.constants != null) {
-        Group.setPrimes(election.constants);
-      }
-
-      keyCeremony = new KeyCeremonyRemote(election.manifest, cmdLine.nguardians, cmdLine.quorum, cmdLine.outputDir);
+      ElectionConfig config = new ElectionConfig(election.getManifest(), cmdLine.nguardians, cmdLine.quorum);
+      keyCeremony = new KeyCeremonyRemote(config, cmdLine.outputDir);
       keyCeremony.start(cmdLine.port);
 
       System.out.print("Waiting for guardians to register: elapsed seconds = ");
@@ -168,6 +165,7 @@ public class KeyCeremonyRemote {
   }
 
   ///////////////////////////////////////////////////////////////////////////
+  final ElectionConfig config;
   final Manifest manifest;
   final int nguardians;
   final int quorum;
@@ -175,12 +173,13 @@ public class KeyCeremonyRemote {
   final List<KeyCeremonyRemoteTrusteeProxy> trusteeProxies = Collections.synchronizedList(new ArrayList<>());
   boolean startedKeyCeremony = false;
 
-  KeyCeremonyRemote(Manifest manifest, int nguardians, int quorum, String outputDir) throws IOException {
-    this.manifest = manifest;
-    this.nguardians = nguardians;
-    this.quorum = quorum;
+  KeyCeremonyRemote(ElectionConfig config, String outputDir) throws IOException {
+    this.config = config;
+    this.manifest = config.getManifest();
+    this.nguardians = config.getNumberOfGuardians();
+    this.quorum = config.getQuorum();
 
-    this.publisher = new Publisher(outputDir, Publisher.Mode.createNew, false);
+    this.publisher = new Publisher(outputDir, Publisher.Mode.createNew);
     Formatter errors = new Formatter();
     if (!publisher.validateOutputDir(errors)) {
       System.out.printf("*** Publisher validateOutputDir FAILED on %s%n%s", outputDir, errors);
@@ -211,7 +210,7 @@ public class KeyCeremonyRemote {
     System.out.printf("%nKey Ceremony Trustees save state was success = %s%n", allOk);
 
     if (allOk) {
-      allOk = mediator.publishElectionRecord(publisher);
+      allOk = mediator.publishElectionRecord(publisher, config);
     }
 
     return allOk;

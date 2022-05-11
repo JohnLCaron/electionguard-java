@@ -8,11 +8,11 @@ import com.sunya.electionguard.input.ManifestInputValidation;
 import com.sunya.electionguard.keyceremony.KeyCeremonyTrustee;
 import com.sunya.electionguard.keyceremony.KeyCeremonyTrusteeIF;
 import com.sunya.electionguard.keyceremony.KeyCeremonyRemoteMediator;
-import electionguard.protogen.TrusteeProto;
-import com.sunya.electionguard.proto.TrusteeToProto;
 import com.sunya.electionguard.publish.Consumer;
 import com.sunya.electionguard.publish.PrivateData;
 import com.sunya.electionguard.publish.Publisher;
+import com.sunya.electionguard.publish.PublisherOld;
+import electionguard.ballot.ElectionConfig;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -83,15 +83,15 @@ public class KeyCeremonySimulator {
     try {
       // all we need from election record is the ElectionDescription.
       Consumer consumer = new Consumer(cmdLine.inputDir);
-      Manifest election = consumer.readManifest();
-      ManifestInputValidation validator = new ManifestInputValidation(election);
+      ElectionConfig election = consumer.readElectionConfig();
+      ManifestInputValidation validator = new ManifestInputValidation(election.getManifest());
       Formatter errors = new Formatter();
       if (!validator.validateElection(errors)) {
         System.out.printf("*** ElectionInputValidation FAILED on %s%n%s", cmdLine.inputDir, errors);
         System.exit(1);
       }
 
-      Publisher publisher = new Publisher(cmdLine.outputDir, Publisher.Mode.createNew, false);
+      Publisher publisher = new Publisher(cmdLine.outputDir, Publisher.Mode.createNew);
       KeyCeremonySimulator keyCeremony = new KeyCeremonySimulator(election, cmdLine.nguardians, cmdLine.quorum, publisher);
 
       keyCeremony.runKeyCeremony();
@@ -105,6 +105,7 @@ public class KeyCeremonySimulator {
   }
 
   ///////////////////////////////////////////////////////////////////////////
+  final ElectionConfig config;
   final Manifest manifest;
   final int numberOfGuardians;
   final int quorum;
@@ -112,8 +113,9 @@ public class KeyCeremonySimulator {
 
   List<KeyCeremonyTrusteeSimulator> trusteeProxies;
 
-  public KeyCeremonySimulator(Manifest manifest, int nguardians, int quorum, Publisher publisher) {
-    this.manifest = manifest;
+  public KeyCeremonySimulator(ElectionConfig config, int nguardians, int quorum, Publisher publisher) {
+    this.config = config;
+    this.manifest = config.getManifest();
     this.numberOfGuardians = nguardians;
     this.quorum = quorum;
     this.publisher = publisher;
@@ -132,17 +134,16 @@ public class KeyCeremonySimulator {
     KeyCeremonyRemoteMediator mediator = new KeyCeremonyRemoteMediator(manifest, quorum, trusteeIfs);
     mediator.runKeyCeremony();
 
-    boolean ok = mediator.publishElectionRecord(this.publisher);
+    boolean ok = mediator.publishElectionRecord(this.publisher, this.config);
     System.out.printf("%nKey Ceremony publishElectionRecord = %s%n", ok);
 
     List<KeyCeremonyTrustee> trustees = trusteeProxies.stream()
             .map(t -> t.delegate)
             .toList();
-    TrusteeProto.DecryptingTrustees trusteesProto = TrusteeToProto.convertTrustees(trustees);
     boolean okt;
     try {
-      PrivateData pdata = publisher.makePrivateData(false, false);
-      pdata.writeTrusteesProto(trusteesProto);
+      PrivateData pdata = new PrivateData(publisher.publishPath() + "/private_data", false, false);
+      trustees.forEach (t -> pdata.writeTrustee(t));
       okt = true;
     } catch (IOException e) {
       e.printStackTrace();

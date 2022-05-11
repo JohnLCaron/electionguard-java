@@ -5,11 +5,12 @@ import com.sunya.electionguard.PlaintextBallot;
 import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.SubmittedBallot;
 import com.sunya.electionguard.TestProperties;
-import com.sunya.electionguard.proto.TrusteeFromProto;
+import com.sunya.electionguard.protoconvert.TrusteeFromProto;
 import com.sunya.electionguard.publish.CloseableIterable;
 import com.sunya.electionguard.publish.Consumer;
+import com.sunya.electionguard.publish.ElectionRecordPath;
 import com.sunya.electionguard.publish.PrivateData;
-import com.sunya.electionguard.verifier.ElectionRecord;
+import com.sunya.electionguard.publish.ElectionRecord;
 import net.jqwik.api.Example;
 
 import java.io.IOException;
@@ -25,9 +26,10 @@ import static com.google.common.truth.Truth8.assertThat;
 
 public class TestDecryptingMediator extends TestProperties {
   public static final String DECRYPTING_DATA_DIR = "src/test/data/workflow/encryptor/";
-  public static final String TRUSTEE_DATA_DIR = "src/test/data/workflow/keyCeremony/election_private_data/";
+  public static final String TRUSTEE_DATA_DIR =    "src/test/data/workflow/keyCeremony/election_private_data/";
   // public static final String DECRYPTING_DATA_DIR = "/home/snake/tmp/electionguard/remoteWorkflow/encryptor/";
   // public static final String TRUSTEE_DATA_DIR = "/home/snake/tmp/electionguard/remoteWorkflow/keyCeremony/election_private_data/";
+  private static final ElectionRecordPath path = new ElectionRecordPath(DECRYPTING_DATA_DIR);
 
   List<DecryptingTrusteeIF> trustees = new ArrayList<>();
   Consumer consumer;
@@ -38,16 +40,17 @@ public class TestDecryptingMediator extends TestProperties {
   CloseableIterable<SubmittedBallot> spoiledBallots;
 
   public TestDecryptingMediator() throws IOException {
-    trustees.add(TrusteeFromProto.readTrustee(TRUSTEE_DATA_DIR + "/remoteTrustee1.protobuf"));
-    trustees.add(TrusteeFromProto.readTrustee(TRUSTEE_DATA_DIR + "/remoteTrustee2.protobuf"));
-    trustees.add(TrusteeFromProto.readTrustee(TRUSTEE_DATA_DIR + "/remoteTrustee3.protobuf"));
+    trustees.add(TrusteeFromProto.readTrustee(path.decryptingTrusteePath(TRUSTEE_DATA_DIR, "remoteTrustee1")));
+    trustees.add(TrusteeFromProto.readTrustee(path.decryptingTrusteePath(TRUSTEE_DATA_DIR, "remoteTrustee2")));
+    trustees.add(TrusteeFromProto.readTrustee(path.decryptingTrusteePath(TRUSTEE_DATA_DIR, "remoteTrustee3")));
+    trustees.add(TrusteeFromProto.readTrustee(path.decryptingTrusteePath(TRUSTEE_DATA_DIR, "remoteTrustee4")));
 
     this.consumer = new Consumer(DECRYPTING_DATA_DIR);
     this.electionRecord = consumer.readElectionRecord();
 
     // The guardians' election public key is in the electionRecord.guardianCoefficients.
-    this.guardianPublicKeys = electionRecord.guardianRecords.stream().collect(
-            Collectors.toMap(coeff -> coeff.guardianId(), coeff -> coeff.guardianPublicKey()));
+    this.guardianPublicKeys = electionRecord.guardians().stream().collect(
+            Collectors.toMap(guardian -> guardian.getGuardianId(), guardian -> guardian.publicKey()));
 
     // hand tally the results
     expectedTally = new HashMap<>();
@@ -58,12 +61,12 @@ public class TestDecryptingMediator extends TestProperties {
     expectedTally.put("justice-supreme-court:john-hancock-selection", 3);
     expectedTally.put("justice-supreme-court:write-in-selection", 1);
 
-    this.spoiledBallots =  consumer.submittedSpoiledBallotsProto();
+    this.spoiledBallots =  consumer.iterateSpoiledBallots();
   }
 
   DecryptingMediator makeDecryptingMediator() {
-    return new DecryptingMediator(this.electionRecord.context,
-            this.electionRecord.ciphertextTally,
+    return new DecryptingMediator(this.electionRecord,
+            this.electionRecord.ciphertextTally(),
             this.spoiledBallots,
             this.guardianPublicKeys);
   }
@@ -144,7 +147,7 @@ public class TestDecryptingMediator extends TestProperties {
   }
 
   private void checkDecrypted(List<PlaintextTally> decrypteds) throws IOException {
-    PrivateData pdata = new PrivateData(DECRYPTING_DATA_DIR, false, false);
+    PrivateData pdata = new PrivateData(DECRYPTING_DATA_DIR, false, true);
     List<PlaintextBallot> inputBallots = pdata.inputBallots();
     Map<String, PlaintextBallot> inputBallotsMap = inputBallots.stream().collect(Collectors.toMap(e -> e.object_id(), e -> e));
     for (PlaintextTally decrypted : decrypteds) {

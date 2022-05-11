@@ -6,7 +6,7 @@ import com.google.common.flogger.FluentLogger;
 import com.sunya.electionguard.BallotBox;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.Group;
-import com.sunya.electionguard.proto.CommonConvert;
+import com.sunya.electionguard.protoconvert.CommonConvert;
 import electionguard.protogen.CommonProto;
 import electionguard.protogen.CommonRpcProto;
 import electionguard.protogen.DecryptingTrusteeProto;
@@ -47,13 +47,13 @@ class DecryptingRemoteTrusteeProxy implements DecryptingTrusteeIF  {
 
     try {
       List<CommonProto.ElGamalCiphertext> texts = text.stream()
-              .map(CommonConvert::convertCiphertext)
+              .map(CommonConvert::publishCiphertext)
               .toList();
 
       DecryptingTrusteeProto.CompensatedDecryptionRequest.Builder request = DecryptingTrusteeProto.CompensatedDecryptionRequest.newBuilder()
               .setMissingGuardianId(missing_guardian_id)
               .addAllText(texts)
-              .setExtendedBaseHash(CommonConvert.convertElementModQ(extended_base_hash));
+              .setExtendedBaseHash(CommonConvert.publishElementModQ(extended_base_hash));
 
       DecryptingTrusteeProto.CompensatedDecryptionResponse response = blockingStub.compensatedDecrypt(request.build());
       if (!response.getError().isEmpty()) {
@@ -72,9 +72,9 @@ class DecryptingRemoteTrusteeProxy implements DecryptingTrusteeIF  {
 
   private DecryptionProofRecovery convertDecryptionProofRecovery(DecryptingTrusteeProto.CompensatedDecryptionResult proto) {
     return new DecryptionProofRecovery(
-            CommonConvert.convertElementModP(proto.getDecryption()),
-            CommonConvert.convertChaumPedersenProof(proto.getProof()),
-            CommonConvert.convertElementModP(proto.getRecoveryPublicKey()));
+            CommonConvert.importElementModP(proto.getDecryption()),
+            CommonConvert.importChaumPedersenProof(proto.getProof()),
+            CommonConvert.importElementModP(proto.getRecoveryPublicKey()));
   }
 
   @Override
@@ -84,12 +84,12 @@ class DecryptingRemoteTrusteeProxy implements DecryptingTrusteeIF  {
           @Nullable Group.ElementModQ nonce_seed) { // LOOK currently ignoring
     try {
       List<CommonProto.ElGamalCiphertext> texts = text.stream()
-              .map(CommonConvert::convertCiphertext)
+              .map(CommonConvert::publishCiphertext)
               .toList();
 
       DecryptingTrusteeProto.PartialDecryptionRequest.Builder request = DecryptingTrusteeProto.PartialDecryptionRequest.newBuilder()
               .addAllText(texts)
-              .setExtendedBaseHash(CommonConvert.convertElementModQ(extended_base_hash));
+              .setExtendedBaseHash(CommonConvert.publishElementModQ(extended_base_hash));
 
       DecryptingTrusteeProto.PartialDecryptionResponse response = blockingStub.partialDecrypt(request.build());
       if (!response.getError().isEmpty()) {
@@ -108,8 +108,8 @@ class DecryptingRemoteTrusteeProxy implements DecryptingTrusteeIF  {
 
   private BallotBox.DecryptionProofTuple convertDecryptionProofTuple(DecryptingTrusteeProto.PartialDecryptionResult proto) {
     return new BallotBox.DecryptionProofTuple(
-            CommonConvert.convertElementModP(proto.getDecryption()),
-            CommonConvert.convertChaumPedersenProof(proto.getProof()));
+            CommonConvert.importElementModP(proto.getDecryption()),
+            CommonConvert.importChaumPedersenProof(proto.getProof()));
   }
 
   boolean finish(boolean allOk) {

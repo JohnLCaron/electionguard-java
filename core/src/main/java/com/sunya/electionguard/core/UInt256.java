@@ -5,6 +5,7 @@ import com.sunya.electionguard.Group;
 import com.sunya.electionguard.Hash;
 import at.favre.lib.bytes.Bytes;
 
+import java.math.BigInteger;
 import java.util.Arrays;
 
 public record UInt256(byte[] val) implements Hash.CryptoHashableString {
@@ -16,6 +17,10 @@ public record UInt256(byte[] val) implements Hash.CryptoHashableString {
   public static UInt256 fromModQ(Group.ElementModQ elem) {
     Bytes b = elem.normalize(32);
     return new UInt256(b.array());
+  }
+
+  public Group.ElementModQ toModQ() {
+    return Group.int_to_q_unchecked( new BigInteger(val));
   }
 
   public String toString() {

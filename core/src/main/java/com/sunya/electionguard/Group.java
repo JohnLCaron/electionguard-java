@@ -1,6 +1,7 @@
 package com.sunya.electionguard;
 
 import at.favre.lib.bytes.Bytes;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
 import com.sunya.electionguard.core.UInt256;
 
@@ -44,8 +45,26 @@ public class Group {
     primes = ElectionConstants.STANDARD_CONSTANTS;
   }
 
+  private static Bytes normalize(BigInteger input, int size) {
+    Bytes b = Bytes.wrap(input.toByteArray());
+    if (b.length() > size) {
+      // BigInteger sometimes has leading zeroes, so remove them
+      int leading = b.length() - size;
+      for (int idx = 0; idx < leading; idx++) {
+        if (b.byteAt(idx) != 0) {
+          throw new IllegalArgumentException(String.format("Input has %d bytes; cannot normalize to %d", b.length(), size));
+        }
+      }
+      b =  b.copy(leading, size);
+    } else if (b.length() < size) {
+      Bytes prepend = Bytes.allocate(size - b.length());
+      b = Bytes.from(prepend, b);
+    }
+    return b;
+  }
+
   @Immutable
-  static class ElementMod {
+  static abstract class ElementMod {
     final BigInteger elem;
 
     ElementMod(BigInteger elem) {
@@ -60,13 +79,7 @@ public class Group {
      * Converts from the element to the hex String of the BigInteger bytes.
      * This is preferable to directly accessing `elem`, whose representation might change.
      */
-    public String to_hex() {
-      String h = elem.toString(16);
-      if (h.length() % 2 == 1) {
-        h = "0" + h;
-      }
-      return h.toUpperCase();
-    }
+    public abstract String to_hex();
 
     /**
      * Converts from the element to the representation of bytes by first going through hex.
@@ -81,29 +94,7 @@ public class Group {
     }
 
     public Bytes normalize(int size) {
-      Bytes b = bytes();
-      if (b.length() > size) {
-        // BigInteger sometimes has leading zeroes, so remove them
-        int leading = b.length() - size;
-        for (int idx = 0; idx < leading; idx++) {
-          if (b.byteAt(idx) != 0) {
-            throw new IllegalArgumentException(String.format("Input has %d bytes; cannot normalize to %d", b.length(), size));
-          }
-        }
-        b =  b.copy(leading, size);
-      } else if (b.length() < size) {
-        Bytes prepend = Bytes.allocate(size - b.length());
-        b = Bytes.from(prepend, b);
-      }
-      return b;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) return true;
-      if (!(o instanceof ElementMod)) return false;
-      ElementMod that = (ElementMod) o;
-      return elem.equals(that.elem);
+      return Group.normalize(this.elem, size);
     }
 
     @Override
@@ -131,12 +122,22 @@ public class Group {
 
     @Override
     public String toString() {
-      // return "ElementModQ{elem=" + elem + '}';
       return UInt256.fromModQ(this).toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (!(o instanceof ElementMod that)) return false;
+      return this.normalize(32).equals(that.normalize(32));
     }
 
     public String to_hex() {
       return this.normalize(32).encodeHex(true);
+    }
+
+    public boolean isNormal() {
+      return bytes().array().length == 32;
     }
   }
 
@@ -176,14 +177,25 @@ public class Group {
       return toString();
     }
 
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (!(o instanceof ElementMod that)) return false;
+      return this.normalize(512).equals(that.normalize(512));
+    }
+
     public String to_hex() {
       return this.normalize(512).encodeHex(true);
+    }
+
+    public boolean isNormal() {
+      return bytes().array().length == 512;
     }
   }
 
   /**
    * Given a hex string representing bytes, returns an ElementModQ.
-   * Returns `None` if the number is out of the allowed [0,Q) range.
+   * Returns empty if the number is out of the allowed [0,Q) range.
    */
   public static Optional<ElementModQ> hex_to_q(String input) {
     BigInteger b = new BigInteger(input, 16);
@@ -251,14 +263,35 @@ public class Group {
     return new ElementModP(biggy);
   }
 
+  public static ElementModP int_to_p_normalized(BigInteger biggy) {
+    Bytes b = Group.normalize(biggy, 512);
+    BigInteger normal = new BigInteger(1, b.array());
+    ElementModP result = new ElementModP(normal);
+    Preconditions.checkArgument(result.is_in_bounds());
+    return result;
+  }
+
   /**
-    Given a Python integer, returns an ElementModQ. Allows
+    Given a BigInteger, returns an ElementModQ. Allows
     for the input to be out-of-bounds, and thus creating an invalid
     element (i.e., outside of [0,Q)). Useful for tests of it
     you're absolutely, positively, certain the input is in-bounds.
    */
   public static ElementModQ int_to_q_unchecked(BigInteger biggy) {
     return new ElementModQ(biggy);
+  }
+
+  public static ElementModQ int_to_q_normalized(BigInteger biggy) {
+    Bytes b = Group.normalize(biggy, 32);
+    BigInteger normal = new BigInteger(1, b.array());
+    ElementModQ result = new ElementModQ(normal);
+    Preconditions.checkArgument(result.is_in_bounds());
+    return result;
+  }
+
+  // given an int, returns an ElementModQ
+  public static ElementModQ int_to_q_unchecked(int bitsy) {
+    return new ElementModQ(BigInteger.valueOf(bitsy));
   }
 
   // https://www.electionguard.vote/spec/0.95.0/9_Verifier_construction/#modular-addition
@@ -383,13 +416,13 @@ public class Group {
   /** Generate random number between 0 and Q. */
   public static ElementModQ rand_q() {
     BigInteger random = Utils.randbelow(primes.smallPrime);
-    return int_to_q_unchecked(random);
+    return int_to_q_normalized(random);
   }
 
   /** Generate random number between start and Q. */
   public static ElementModQ rand_range_q(ElementMod start) {
     BigInteger random = Utils.randbetween(start.getBigInt(), primes.smallPrime);
-    return int_to_q_unchecked(random);
+    return int_to_q_normalized(random);
   }
 
   // is lower <= x < upper, ie is x in [lower, upper) ?

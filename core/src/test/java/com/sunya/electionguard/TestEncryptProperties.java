@@ -217,7 +217,6 @@ public class TestEncryptProperties extends TestProperties {
     CiphertextBallot.Contest malformed_proof = new CiphertextBallot.Contest(
             result.object_id(), result.sequence_order(), result.contestHash,
             result.selections, result.crypto_hash,
-            new ElGamal.Ciphertext(TWO_MOD_P, TWO_MOD_P),
             result.nonce,
             Optional.of(malformed_disjunctive));
     assertThat(malformed_proof.is_valid_encryption("test", description.contest.cryptoHash(), keypair.public_key(), ONE_MOD_Q)).isFalse();
@@ -226,7 +225,6 @@ public class TestEncryptProperties extends TestProperties {
     CiphertextBallot.Contest missing_proof = new CiphertextBallot.Contest(
             result.object_id(), result.sequence_order(), result.contestHash,
             result.selections, result.crypto_hash,
-            new ElGamal.Ciphertext(TWO_MOD_P, TWO_MOD_P),
             result.nonce, Optional.empty());
     assertThat(missing_proof.is_valid_encryption("test", description.contest.cryptoHash(), keypair.public_key(), ONE_MOD_Q)).isFalse();
   }
@@ -351,7 +349,7 @@ public class TestEncryptProperties extends TestProperties {
     KeyPair keypair = elgamal_keypair_from_secret(int_to_q_unchecked(BigInteger.TWO)).orElseThrow();
     Manifest election = ElectionFactory.get_fake_manifest();
     ElectionBuilder.DescriptionAndContext tuple = ElectionFactory.get_fake_ciphertext_election(election, keypair.public_key()).orElseThrow();
-    ElectionContext context = tuple.context;
+    ElectionCryptoContext context = tuple.context;
 
     PlaintextBallot subject = ElectionFactory.get_fake_ballot(election, null);
     assertThat(subject.is_valid(election.ballotStyles().get(0).ballotStyleId())).isTrue();
@@ -382,7 +380,7 @@ public class TestEncryptProperties extends TestProperties {
     KeyPair keypair = elgamal_keypair_from_secret(int_to_q_unchecked(BigInteger.TWO)).orElseThrow();
     Manifest election = ElectionFactory.get_fake_manifest();
     ElectionBuilder.DescriptionAndContext tuple = ElectionFactory.get_fake_ciphertext_election(election, keypair.public_key()).orElseThrow();
-    ElectionContext context = tuple.context;
+    ElectionCryptoContext context = tuple.context;
 
     PlaintextBallot data = ElectionFactory.get_fake_ballot(election, null);
     assertThat(data.is_valid(election.ballotStyles().get(0).ballotStyleId())).isTrue();
@@ -400,7 +398,7 @@ public class TestEncryptProperties extends TestProperties {
     KeyPair keypair = elgamal_keypair_from_secret(int_to_q_unchecked(BigInteger.TWO)).orElseThrow();
     Manifest election = ElectionFactory.get_simple_election_from_file();
     ElectionBuilder.DescriptionAndContext tuple = ElectionFactory.get_fake_ciphertext_election(election, keypair.public_key()).orElseThrow();
-    ElectionContext context = tuple.context;
+    ElectionCryptoContext context = tuple.context;
 
     PlaintextBallot data = ballot_factory.get_simple_ballot_from_file();
     assertThat(data.is_valid(election.ballotStyles().get(0).ballotStyleId())).isTrue();
@@ -423,7 +421,7 @@ public class TestEncryptProperties extends TestProperties {
 
      Manifest election = ElectionFactory.get_simple_election_from_file();
      ElectionBuilder.DescriptionAndContext tuple = ElectionFactory.get_fake_ciphertext_election(election, keypair.public_key()).orElseThrow();
-     ElectionContext context = tuple.context;
+     ElectionCryptoContext context = tuple.context;
 
      PlaintextBallot data = ballot_factory.get_simple_ballot_from_file();
      assertThat(data.is_valid(election.ballotStyles().get(0).ballotStyleId())).isTrue();

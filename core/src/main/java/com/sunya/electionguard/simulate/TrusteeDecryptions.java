@@ -7,7 +7,6 @@ import com.google.common.flogger.FluentLogger;
 import com.sunya.electionguard.BallotBox;
 import com.sunya.electionguard.CiphertextBallot;
 import com.sunya.electionguard.CiphertextContest;
-import com.sunya.electionguard.ElectionContext;
 import com.sunya.electionguard.CiphertextSelection;
 import com.sunya.electionguard.CiphertextTally;
 import com.sunya.electionguard.DecryptionShare;
@@ -15,6 +14,7 @@ import com.sunya.electionguard.Group;
 import com.sunya.electionguard.SubmittedBallot;
 import com.sunya.electionguard.decrypting.DecryptingTrusteeIF;
 import com.sunya.electionguard.decrypting.DecryptionProofRecovery;
+import com.sunya.electionguard.publish.ElectionContext;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -157,7 +157,8 @@ public class TrusteeDecryptions {
           ElectionContext context) {
 
     try {
-      List<BallotBox.DecryptionProofTuple> results = guardian.partialDecrypt(ImmutableList.of(selection.ciphertext()), context.cryptoExtendedBaseHash, null);
+      List<BallotBox.DecryptionProofTuple> results = guardian.partialDecrypt(ImmutableList.of(selection.ciphertext()),
+              context.extendedHash(), null);
       if (results.isEmpty()) {
         logger.atWarning().log("compute_decryption_share_for_selection guardian.partialDecrypt failed",
                 guardian.id(), selection.object_id());
@@ -165,7 +166,7 @@ public class TrusteeDecryptions {
       }
       BallotBox.DecryptionProofTuple tuple = results.get(0);
       if (tuple.proof.is_valid(selection.ciphertext(), guardian.electionPublicKey(),
-              tuple.decryption, context.cryptoExtendedBaseHash)) {
+              tuple.decryption, context.extendedHash())) {
         return Optional.of(DecryptionShare.create_ciphertext_decryption_selection(
                 selection.object_id(),
                 guardian.id(),
@@ -307,7 +308,7 @@ public class TrusteeDecryptions {
     List<DecryptionProofRecovery> compensated = guardian.compensatedDecrypt(
             missing_guardian_id,
             ImmutableList.of(selection.ciphertext()),
-            context.cryptoExtendedBaseHash,
+            context.extendedHash(),
             null);
 
     if (compensated.isEmpty()) {
@@ -321,7 +322,7 @@ public class TrusteeDecryptions {
             selection.ciphertext(),
             tuple.recoveryPublicKey(),
             tuple.decryption(),
-            context.cryptoExtendedBaseHash)) {
+            context.extendedHash())) {
 
       CiphertextCompensatedDecryptionSelection share = new CiphertextCompensatedDecryptionSelection(
               selection.object_id(),

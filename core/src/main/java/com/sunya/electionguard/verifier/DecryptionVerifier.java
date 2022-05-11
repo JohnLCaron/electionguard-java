@@ -1,19 +1,19 @@
 package com.sunya.electionguard.verifier;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.flogger.FluentLogger;
 import com.sunya.electionguard.ChaumPedersen;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.Hash;
 import com.sunya.electionguard.PlaintextTally;
-import com.sunya.electionguard.publish.CloseableIterable;
+import com.sunya.electionguard.publish.ElectionRecord;
+import electionguard.ballot.Guardian;
 
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Stream;
+import java.util.stream.Collectors;
 
 import static com.sunya.electionguard.DecryptionShare.CiphertextDecryptionSelection;
 import static com.sunya.electionguard.DecryptionShare.CiphertextCompensatedDecryptionSelection;
@@ -44,14 +44,12 @@ public class DecryptionVerifier {
    * 12. An election verifier should confirm the correct decryption of each spoiled ballot using the same
    * process that was used to confirm the election tallies.
    */
-  boolean verify_spoiled_tallies(CloseableIterable<PlaintextTally> talliesIterable) {
+  boolean verify_spoiled_tallies(Iterable<PlaintextTally> talliesIterable) {
     AtomicBoolean valid = new AtomicBoolean(true);
-    try (Stream<PlaintextTally> tallies = talliesIterable.iterator().stream()) {
-      tallies.forEach(spoiled_tally -> {
-        if (show) System.out.printf(" Spoiled tally %s %n", spoiled_tally.tallyId);
-        boolean ok = this.make_all_contest_verification(spoiled_tally.tallyId, spoiled_tally.contests);
+    for (PlaintextTally tally : talliesIterable) {
+        if (show) System.out.printf(" Spoiled tally %s %n", tally.tallyId);
+        boolean ok = this.make_all_contest_verification(tally.tallyId, tally.contests);
         valid.compareAndSet(true, ok); // AND
-      });
     }
     if (!valid.get()) {
       System.out.printf(" *** 12.A Spoiled ballot decryption failure. %n");
@@ -142,13 +140,14 @@ public class DecryptionVerifier {
     final String id; // contest/selection
     final List<CiphertextDecryptionSelection> shares;
     final ElGamal.Ciphertext message;
-    final ImmutableMap<String, ElementModP> public_keys;
+    final Map<String, ElementModP> public_keys;
 
     ShareVerifier(String id, List<CiphertextDecryptionSelection> shares, ElGamal.Ciphertext message) {
       this.id = id;
       this.shares = shares;
       this.message = message;
-      this.public_keys = electionRecord.publicKeysOfAllGuardians();
+      this.public_keys = electionRecord.guardians().stream()
+              .collect( Collectors.toMap(Guardian::getGuardianId, Guardian::publicKey));
     }
 
     /**
@@ -259,7 +258,7 @@ public class DecryptionVerifier {
                 this.message,
                 public_key,
                 share.share(),
-                electionRecord.context.cryptoExtendedBaseHash
+                electionRecord.extendedHash()
         );
       } else {
         ElementModP pad = proof.pad;

@@ -3,11 +3,11 @@ package com.sunya.electionguard.verifier;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
-import com.sunya.electionguard.ElectionConstants;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.input.ManifestInputValidation;
 import com.sunya.electionguard.input.PlaintextTallyInputValidation;
 import com.sunya.electionguard.publish.Consumer;
+import com.sunya.electionguard.publish.ElectionRecord;
 
 import java.util.Formatter;
 import java.util.Objects;
@@ -75,19 +75,19 @@ public class VerifyElectionRecord {
     try {
       Consumer consumer = new Consumer(cmdLine.inputDir);
       ElectionRecord electionRecord = consumer.readElectionRecord();
-      ManifestInputValidation validator = new ManifestInputValidation(electionRecord.manifest);
+      ManifestInputValidation validator = new ManifestInputValidation(electionRecord.manifest());
       Formatter errors = new Formatter();
       if (!validator.validateElection(errors)) {
         System.out.printf("*** ElectionInputValidation FAILED on %s%n%s", cmdLine.inputDir, errors);
         System.exit(1);
       }
       System.out.printf(" VerifyElectionRecord read from %s%n", cmdLine.inputDir);
-      if (cmdLine.usePrimes) {
-        Group.setPrimes(electionRecord.constants);
-        if (electionRecord.constants.getPrimeOptionType() != ElectionConstants.PrimeOption.Standard) {
-          System.out.printf(" Use primes from electionRecord = %s%n", electionRecord.constants);
-        }
-      }
+      //if (cmdLine.usePrimes) {
+      //  Group.setPrimes(electionRecord.constants);
+      //  if (electionRecord.constants.getPrimeOptionType() != ElectionConstants.PrimeOption.Standard) {
+      //    System.out.printf(" Use primes from electionRecord = %s%n", electionRecord.constants);
+      //  }
+      //}
       boolean ok = verifyElectionRecord(electionRecord, cmdLine.skip10);
       System.exit(ok ? 0 : 1);
     } catch (Throwable t) {
@@ -126,42 +126,42 @@ public class VerifyElectionRecord {
 
     System.out.println("\n============ Decryption Verification =========================");
     System.out.println("------------ [box 7] Ballot Aggregation Validation ------------");
-    BallotAggregationVerifier bav = new BallotAggregationVerifier(electionRecord.acceptedBallots, electionRecord.decryptedTally);
+    BallotAggregationVerifier bav = new BallotAggregationVerifier(electionRecord.submittedBallots(), electionRecord.decryptedTally());
     boolean bavOk = bav.verify_ballot_aggregation();
 
     System.out.println("------------ [box 8, 9] Correctness of Decryptions ------------");
-    DecryptionVerifier dv = new DecryptionVerifier(electionRecord, electionRecord.decryptedTally);
+    DecryptionVerifier dv = new DecryptionVerifier(electionRecord, electionRecord.decryptedTally());
     boolean dvOk = dv.verify_election_tally();
 
     System.out.println("------------ [box 10] Correctness of Replacement Partial Decryptions ------------");
     boolean pdvOk = true;
-    if (Objects.equals(electionRecord.context.numberOfGuardians, electionRecord.context.quorum)) {
+    if (Objects.equals(electionRecord.numberOfGuardians(), electionRecord.quorum())) {
       System.out.println("  not needed since there are no missing guardians");
     } else {
-      PartialDecryptionVerifier pdv = new PartialDecryptionVerifier(electionRecord, electionRecord.decryptedTally);
+      PartialDecryptionVerifier pdv = new PartialDecryptionVerifier(electionRecord, electionRecord.decryptedTally());
       pdvOk = pdv.verify_replacement_partial_decryptions();
     }
 
     System.out.println("------------ PlaintextTallyInputValidation ------------");
     PlaintextTallyInputValidation validator = new PlaintextTallyInputValidation(
-            electionRecord.manifest,
-            electionRecord.ciphertextTally,
-            electionRecord.context.numberOfGuardians,
-            electionRecord.availableGuardians.size());
+            electionRecord.manifest(),
+            electionRecord.ciphertextTally(),
+            electionRecord.numberOfGuardians(),
+            electionRecord.availableGuardians().size());
     Formatter errors = new Formatter();
     boolean ptiValid = true;
-    if (!validator.validateTally(electionRecord.decryptedTally, errors)) {
+    if (!validator.validateTally(electionRecord.decryptedTally(), errors)) {
       System.out.printf("*** PlaintextTallyInputValidation FAILED on electionRecord%n%s", errors);
       ptiValid = false;
     }
 
     System.out.println("------------ [box 11] Correct Decryption of Tallies ------------");
     TallyDecryptionVerifier tdv = new TallyDecryptionVerifier(electionRecord,
-            electionRecord.manifest, electionRecord.decryptedTally);
+            electionRecord.manifest(), electionRecord.decryptedTally());
     boolean tdvOk = tdv.verify_tally_decryption();
 
     System.out.println("------------ [box 12] Correct Decryption of Spoiled Ballots ------------");
-    boolean dvsOk = dv.verify_spoiled_tallies(electionRecord.spoiledBallots);
+    boolean dvsOk = dv.verify_spoiled_tallies(electionRecord.spoiledBallotTallies());
 
     // 12B
     SpoiledBallotVerifier pbv = new SpoiledBallotVerifier(electionRecord);

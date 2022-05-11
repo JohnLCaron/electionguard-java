@@ -7,12 +7,12 @@ import com.google.common.flogger.FluentLogger;
 import com.sunya.electionguard.BallotBox;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.Group;
-import com.sunya.electionguard.proto.CommonConvert;
+import com.sunya.electionguard.protoconvert.CommonConvert;
 import electionguard.protogen.CommonRpcProto;
 import electionguard.protogen.DecryptingProto;
 import electionguard.protogen.DecryptingTrusteeProto;
 import electionguard.protogen.DecryptingTrusteeServiceGrpc;
-import com.sunya.electionguard.proto.TrusteeFromProto;
+import com.sunya.electionguard.protoconvert.TrusteeFromProto;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.stub.StreamObserver;
@@ -181,13 +181,13 @@ public class DecryptingRemoteTrustee extends DecryptingTrusteeServiceGrpc.Decryp
     DecryptingTrusteeProto.CompensatedDecryptionResponse.Builder response = DecryptingTrusteeProto.CompensatedDecryptionResponse.newBuilder();
     try {
       List<ElGamal.Ciphertext > texts = request.getTextList().stream()
-              .map(CommonConvert::convertCiphertext)
+              .map(CommonConvert::importCiphertext)
               .toList();
 
       List<DecryptionProofRecovery> tuples = delegate.compensatedDecrypt(
               request.getMissingGuardianId(),
               texts,
-              CommonConvert.convertElementModQ(request.getExtendedBaseHash()),
+              CommonConvert.importElementModQ(request.getExtendedBaseHash()),
               null);
 
       List<DecryptingTrusteeProto.CompensatedDecryptionResult> protos = tuples.stream()
@@ -207,9 +207,9 @@ public class DecryptingRemoteTrustee extends DecryptingTrusteeServiceGrpc.Decryp
 
   private DecryptingTrusteeProto.CompensatedDecryptionResult convertDecryptionProofRecovery(DecryptionProofRecovery tuple) {
     return DecryptingTrusteeProto.CompensatedDecryptionResult.newBuilder()
-            .setDecryption(CommonConvert.convertElementModP(tuple.decryption()))
-            .setProof(CommonConvert.convertChaumPedersenProof(tuple.proof()))
-            .setRecoveryPublicKey(CommonConvert.convertElementModP(tuple.recoveryPublicKey()))
+            .setDecryption(CommonConvert.publishElementModP(tuple.decryption()))
+            .setProof(CommonConvert.publishChaumPedersenProof(tuple.proof()))
+            .setRecoveryPublicKey(CommonConvert.publishElementModP(tuple.recoveryPublicKey()))
             .build();
   }
 
@@ -220,11 +220,11 @@ public class DecryptingRemoteTrustee extends DecryptingTrusteeServiceGrpc.Decryp
     DecryptingTrusteeProto.PartialDecryptionResponse.Builder response = DecryptingTrusteeProto.PartialDecryptionResponse.newBuilder();
     try {
       List<ElGamal.Ciphertext > texts = request.getTextList().stream()
-              .map(CommonConvert::convertCiphertext)
+              .map(CommonConvert::importCiphertext)
               .toList();
       List<BallotBox.DecryptionProofTuple> tuples = delegate.partialDecrypt(
               texts,
-              CommonConvert.convertElementModQ(request.getExtendedBaseHash()),
+              CommonConvert.importElementModQ(request.getExtendedBaseHash()),
               null);
 
       List<DecryptingTrusteeProto.PartialDecryptionResult> protos = tuples.stream()
@@ -244,8 +244,8 @@ public class DecryptingRemoteTrustee extends DecryptingTrusteeServiceGrpc.Decryp
 
   private DecryptingTrusteeProto.PartialDecryptionResult convertDecryptionProofTuple(BallotBox.DecryptionProofTuple tuple) {
     return DecryptingTrusteeProto.PartialDecryptionResult.newBuilder()
-            .setDecryption(CommonConvert.convertElementModP(tuple.decryption))
-            .setProof(CommonConvert.convertChaumPedersenProof(tuple.proof))
+            .setDecryption(CommonConvert.publishElementModP(tuple.decryption))
+            .setProof(CommonConvert.publishChaumPedersenProof(tuple.proof))
           .build();
   }
 

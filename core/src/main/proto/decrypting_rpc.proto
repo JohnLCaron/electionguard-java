@@ -1,7 +1,6 @@
 syntax = "proto3";
 
 import "common.proto";
-import "common_rpc.proto";
 
 option java_package = "electionguard.protogen";
 option java_outer_classname = "DecryptingProto";

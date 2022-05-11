@@ -14,16 +14,21 @@ import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.Scheduler;
 import com.sunya.electionguard.decrypting.DecryptingTrustee;
 import com.sunya.electionguard.input.ManifestInputValidation;
-import com.sunya.electionguard.proto.TrusteeFromProto;
 import com.sunya.electionguard.publish.Consumer;
+import com.sunya.electionguard.publish.PrivateData;
 import com.sunya.electionguard.publish.Publisher;
-import com.sunya.electionguard.verifier.ElectionRecord;
+import com.sunya.electionguard.publish.PublisherOld;
+import com.sunya.electionguard.publish.ElectionRecord;
+import electionguard.ballot.DecryptionResult;
+import electionguard.ballot.TallyResult;
 
 import java.io.IOException;
 import java.util.Formatter;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static java.util.Collections.emptyMap;
 
 /**
  * A command line program to decrypt a collection of ballots.
@@ -44,9 +49,9 @@ public class DecryptingSimulator {
             description = "Directory containing input election record and encrypted ballots and tally", required = true)
     String encryptDir;
 
-    @Parameter(names = {"-guardiansLocation"}, order = 1,
+    @Parameter(names = {"-trusteeDir"}, order = 1,
             description = "location of serialized guardian files")
-    String guardiansProviderLocation;
+    String trusteeDir;
 
     @Parameter(names = {"-out"}, order = 3,
             description = "Directory where augmented election record is published", required = true)
@@ -85,13 +90,14 @@ public class DecryptingSimulator {
       System.exit(1);
     }
 
-    RemoteGuardiansProvider guardiansProvider = new RemoteGuardiansProvider(cmdLine.guardiansProviderLocation);
+    RemoteGuardiansProvider guardiansProvider = new RemoteGuardiansProvider(cmdLine.trusteeDir);
 
     try {
       Consumer consumer = new Consumer(cmdLine.encryptDir);
       ElectionRecord electionRecord = consumer.readElectionRecord();
+      TallyResult tallyResult = consumer.readTallyResult();
       // LOOK how to validate guardians??
-      ManifestInputValidation validator = new ManifestInputValidation(electionRecord.manifest);
+      ManifestInputValidation validator = new ManifestInputValidation(electionRecord.manifest());
       Formatter errors = new Formatter();
       if (!validator.validateElection(errors)) {
         System.out.printf("*** ElectionInputValidation FAILED on %s%n%s", cmdLine.encryptDir, errors);
@@ -102,12 +108,12 @@ public class DecryptingSimulator {
       decryptor = new DecryptingSimulator(consumer, electionRecord, guardiansProvider);
 
       // Do the accumulation if the encryptedTally doesnt exist
-      if (electionRecord.ciphertextTally == null) {
+      if (electionRecord.ciphertextTally() == null) {
         decryptor.accumulateTally();
       }
 
       decryptor.decryptTally();
-      boolean ok = decryptor.publish(cmdLine.encryptDir, cmdLine.outputDir);
+      boolean ok = decryptor.publish(cmdLine.encryptDir, cmdLine.outputDir, tallyResult);
       System.out.printf("*** DecryptingSimulator %s%n", ok ? "SUCCESS" : "FAILURE");
       System.exit(ok ? 0 : 1);
 
@@ -138,7 +144,8 @@ public class DecryptingSimulator {
 
     List<DecryptingTrustee> read(String location) {
       try {
-        return TrusteeFromProto.readTrustees(location);
+        PrivateData pdata = new PrivateData(location, false, false);
+        return pdata.readDecryptingTrustees(location);
       } catch (IOException e) {
         throw new RuntimeException(e);
       }
@@ -161,10 +168,10 @@ public class DecryptingSimulator {
   public DecryptingSimulator(Consumer consumer, ElectionRecord electionRecord, RemoteGuardiansProvider provider) {
     this.consumer = consumer;
     this.electionRecord = electionRecord;
-    this.election = electionRecord.manifest;
-    this.quorum = electionRecord.context.quorum;
-    this.numberOfGuardians = electionRecord.context.numberOfGuardians;
-    this.encryptedTally = electionRecord.ciphertextTally;
+    this.election = electionRecord.manifest();
+    this.quorum = electionRecord.quorum();
+    this.numberOfGuardians = electionRecord.numberOfGuardians();
+    this.encryptedTally = electionRecord.ciphertextTally();
 
     this.guardians = provider.guardians();
     for (DecryptingTrustee guardian : provider.guardians()) {
@@ -176,8 +183,8 @@ public class DecryptingSimulator {
   void accumulateTally() {
     System.out.printf("%nAccumulate tally%n");
     InternalManifest metadata = new InternalManifest(this.election);
-    CiphertextTallyBuilder ciphertextTally = new CiphertextTallyBuilder("DecryptingSimulator", metadata, electionRecord.context);
-    int nballots = ciphertextTally.batch_append(electionRecord.acceptedBallots);
+    CiphertextTallyBuilder ciphertextTally = new CiphertextTallyBuilder("DecryptingSimulator", metadata, electionRecord);
+    int nballots = ciphertextTally.batch_append(electionRecord.submittedBallots());
     this.encryptedTally = ciphertextTally.build();
     System.out.printf(" done accumulating %d ballots in the tally%n", nballots);
   }
@@ -186,12 +193,12 @@ public class DecryptingSimulator {
     System.out.printf("%nDecrypt tally%n");
 
     // The guardians' election public key is in the electionRecord.guardianRecords.
-    Map<String, Group.ElementModP> guardianPublicKeys = electionRecord.guardianRecords.stream().collect(
-            Collectors.toMap(coeff -> coeff.guardianId(), coeff -> coeff.guardianPublicKey()));
+    Map<String, Group.ElementModP> guardianPublicKeys = electionRecord.guardians().stream().collect(
+            Collectors.toMap(guardian -> guardian.getGuardianId(), guardian -> guardian.publicKey()));
 
-    DecryptingTrusteeMediator mediator = new DecryptingTrusteeMediator(electionRecord.context,
+    DecryptingTrusteeMediator mediator = new DecryptingTrusteeMediator(electionRecord,
             this.encryptedTally,
-            consumer.submittedSpoiledBallotsProto(),
+            consumer.iterateSubmittedBallots(),
             guardianPublicKeys);
 
     int count = 0;
@@ -213,8 +220,22 @@ public class DecryptingSimulator {
     System.out.printf("Done decrypting tally%n%n%s%n", this.decryptedTally);
   }
 
-  boolean publish(String inputDir, String publishDir) throws IOException {
-    Publisher publisher = new Publisher(publishDir, Publisher.Mode.createIfMissing, false);
+  boolean publish(String inputDir, String publishDir, TallyResult tallyResult) throws IOException {
+    DecryptionResult results = new DecryptionResult(
+            tallyResult,
+            this.decryptedTally,
+            this.availableGuardians,
+            emptyMap()
+    );
+
+    Publisher publisher = new Publisher(publishDir, Publisher.Mode.createIfMissing);
+    publisher.writeDecryptionResults(results);
+    publisher.copyAcceptedBallots(inputDir);
+    return true;
+  }
+
+  boolean publishOld(String inputDir, String publishDir) throws IOException {
+    PublisherOld publisher = new PublisherOld(publishDir, PublisherOld.Mode.createIfMissing);
     publisher.writeDecryptionResultsProto(
             this.electionRecord,
             this.encryptedTally,

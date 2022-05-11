@@ -1,7 +1,7 @@
 package com.sunya.electionguard;
 
 import com.google.common.base.Preconditions;
-import com.sunya.electionguard.publish.PlaintextBallotPojo;
+import com.sunya.electionguard.json.PlaintextBallotPojo;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -77,21 +77,17 @@ public class BallotFactory {
   ///////////////////////////////////////////////////
 
   static PlaintextBallot.Selection get_selection_well_formed() {
-    PlaintextBallot.ExtendedData extra_data = new PlaintextBallot.ExtendedData("random", 33);
     return new PlaintextBallot.Selection("selection-{draw(uuids)}",
                 42,
                 TestUtils.randomBool() ? 1 : 0,
-                false,
-                TestUtils.randomBool() ? extra_data : null);
+                TestUtils.randomBool() ? "random" : null);
   }
 
   static PlaintextBallot.Selection get_selection_poorly_formed() {
-    PlaintextBallot.ExtendedData extra_data = new PlaintextBallot.ExtendedData("random", 33);
     return new PlaintextBallot.Selection("selection-{draw(uuids)}",
             43,
             TestUtils.randomBool() ? 2 : 3,
-            TestUtils.randomBool(),
-            TestUtils.randomBool() ? extra_data : null);
+            TestUtils.randomBool() ? "random" : null);
   }
 
   //////////////////////////////////////////////////////////////////////////////////////

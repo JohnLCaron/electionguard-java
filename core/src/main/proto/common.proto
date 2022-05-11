@@ -35,7 +35,7 @@ message HashedElGamalCiphertext {
 }
 
 message SchnorrProof {
-  ElementModP public_key = 1; // k in the spec
+  ElementModP public_key = 1; // k in the spec // 1.0 only
   ElementModP commitment = 2; // h in the spec // 1.0 only
   ElementModQ challenge = 3; // c in the spec
   ElementModQ response = 4; // u in the spec

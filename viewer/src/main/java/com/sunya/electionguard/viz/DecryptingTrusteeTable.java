@@ -92,7 +92,7 @@ public class DecryptingTrusteeTable extends JPanel {
     backupTable.setBeans(beanList);
 
     java.util.List<GuardianCommittmentsBean> bean2List = new ArrayList<>();
-    for (Map.Entry<String, ImmutableList<Group.ElementModP>> e : trusteeBean.object.guardianCommittments().entrySet()) {
+    for (Map.Entry<String, java.util.List<Group.ElementModP>> e : trusteeBean.object.guardianCommittments().entrySet()) {
       bean2List.add(new GuardianCommittmentsBean(e.getKey(), e.getValue()));
     }
     commitmentTable.setBeans(bean2List);
@@ -164,11 +164,11 @@ public class DecryptingTrusteeTable extends JPanel {
 
   public class GuardianCommittmentsBean {
     String key;
-    ImmutableList<Group.ElementModP> object;
+    java.util.List<Group.ElementModP> object;
 
     public GuardianCommittmentsBean(){}
 
-    GuardianCommittmentsBean(String key, ImmutableList<Group.ElementModP> object) {
+    GuardianCommittmentsBean(String key, java.util.List<Group.ElementModP> object) {
       this.key = key;
       this.object = object;
     }

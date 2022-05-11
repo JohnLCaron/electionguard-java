@@ -2,7 +2,7 @@ package com.sunya.electionguard.keyceremony;
 
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.TestUtils;
-import com.sunya.electionguard.proto.CommonConvert;
+import com.sunya.electionguard.protoconvert.CommonConvert;
 import electionguard.protogen.CommonProto;
 import electionguard.protogen.CommonRpcProto;
 import electionguard.protogen.RemoteKeyCeremonyTrusteeProto;
@@ -178,7 +178,7 @@ public class TestKeyCeremonyRemoteTrustee {
             .setChallenge(org.getChallenge())
             .setCommitment(org.getCommitment())
             .setPublicKey(org.getPublicKey())
-            .setResponse(CommonConvert.convertElementModQ(TestUtils.elements_mod_q()))
+            .setResponse(CommonConvert.publishElementModQ(TestUtils.elements_mod_q()))
             .build();
 
     result.set(index, munged);
@@ -369,10 +369,10 @@ public class TestKeyCeremonyRemoteTrustee {
     verify(observePublicKeySet, times(2)).onNext(capturePublicKeySet.capture());
     RemoteKeyCeremonyTrusteeProto.PublicKeySet keySet1 = capturePublicKeySet.getValue();
 
-    Group.ElementModP key1 = CommonConvert.convertElementModP(keySet1.getCoefficientProofs(0).getPublicKey());
-    Group.ElementModP key2 = CommonConvert.convertElementModP(keySet2.getCoefficientProofs(0).getPublicKey());
+    Group.ElementModP key1 = CommonConvert.importElementModP(keySet1.getCoefficientProofs(0).getPublicKey());
+    Group.ElementModP key2 = CommonConvert.importElementModP(keySet2.getCoefficientProofs(0).getPublicKey());
     Group.ElementModP expected = Group.mult_p(key1, key2);
-    Group.ElementModP actual = CommonConvert.convertElementModP(response.getJointPublicKey());
+    Group.ElementModP actual = CommonConvert.importElementModP(response.getJointPublicKey());
     assertThat(actual).isEqualTo(expected);
   }
 

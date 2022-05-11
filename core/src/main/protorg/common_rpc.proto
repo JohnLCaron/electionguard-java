@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+option java_package = "electionguard.protogen";
+option java_outer_classname = "CommonRpcProto";
+
+message FinishRequest {
+  bool all_ok = 1;
+}
+
+message ErrorResponse {
+  string error = 1; // non empty on error
+}

@@ -2,6 +2,7 @@ package com.sunya.electionguard.verifier;
 
 import com.sunya.electionguard.ElectionConstants;
 import com.sunya.electionguard.Group;
+import com.sunya.electionguard.publish.ElectionRecord;
 
 import java.math.BigInteger;
 

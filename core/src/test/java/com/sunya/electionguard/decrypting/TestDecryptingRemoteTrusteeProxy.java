@@ -5,9 +5,9 @@ import com.sunya.electionguard.BallotBox;
 import com.sunya.electionguard.CiphertextTally;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.Group;
-import com.sunya.electionguard.proto.TrusteeFromProto;
+import com.sunya.electionguard.protoconvert.TrusteeFromProto;
 import com.sunya.electionguard.publish.Consumer;
-import com.sunya.electionguard.verifier.ElectionRecord;
+import com.sunya.electionguard.publish.ElectionRecord;
 
 import java.io.IOException;
 import java.util.List;
@@ -37,7 +37,7 @@ public class TestDecryptingRemoteTrusteeProxy {
 
     Consumer consumer = new Consumer(electionRecordDir);
     ElectionRecord record = consumer.readElectionRecord();
-    this.tally = record.ciphertextTally;
+    this.tally = record.ciphertextTally();
     this.extendedHash =  record.extendedHash();
   }
 

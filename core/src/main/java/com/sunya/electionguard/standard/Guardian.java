@@ -4,12 +4,14 @@ import com.google.common.base.Preconditions;
 import com.google.common.flogger.FluentLogger;
 import com.sunya.electionguard.BallotBox;
 import com.sunya.electionguard.ChaumPedersen;
-import com.sunya.electionguard.ElectionContext;
+import com.sunya.electionguard.ElectionCryptoContext;
 import com.sunya.electionguard.CiphertextTally;
 import com.sunya.electionguard.DecryptionShare;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.GuardianRecord;
 import com.sunya.electionguard.SubmittedBallot;
+import com.sunya.electionguard.decrypting.DecryptingTrustee;
+import com.sunya.electionguard.publish.ElectionContext;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -22,6 +24,7 @@ import java.util.Optional;
 import static com.sunya.electionguard.Group.ElementModP;
 import static com.sunya.electionguard.Group.ElementModQ;
 import static com.sunya.electionguard.Group.rand_q;
+import static java.util.Collections.emptyMap;
 
 /**
  * Builder of Guardians for an election.
@@ -174,6 +177,21 @@ class Guardian {
             guardian_election_partial_key_backups,
             guardian_election_partial_key_verifications
             );
+  }
+
+  public DecryptingTrustee toDecryptingTrustee() {
+    //   String id,
+    //  int xCoordinate,
+    //  ElGamal.KeyPair election_keypair,
+    //  Map<String, KeyCeremony2.PartialKeyBackup> otherGuardianPartialKeyBackups,
+    //  Map<String, ImmutableList<Group.ElementModP>> guardianCommittments)
+    return new DecryptingTrustee(
+            this.object_id,
+            this.sequence_order,
+            new ElGamal.KeyPair(election_keys.key_pair().secret_key(), election_keys.key_pair().public_key()),
+            emptyMap(),
+            emptyMap()
+    );
   }
 
   /** Share election public key with another guardian. */
@@ -359,7 +377,7 @@ class Guardian {
   public Optional<DecryptionShare.CompensatedDecryptionShare> compute_compensated_tally_share(
           String missing_guardian_id,
           CiphertextTally tally,
-          ElectionContext context) {
+          ElectionCryptoContext context) {
 
     // Ensure missing guardian information available
     KeyCeremony.ElectionPublicKey missing_guardian_key = this.guardian_election_public_keys.get(missing_guardian_id);
@@ -380,7 +398,7 @@ class Guardian {
   public Map<String, Optional<DecryptionShare.CompensatedDecryptionShare>> compute_compensated_ballot_shares(
           String missing_guardian_id,
           List<SubmittedBallot> ballots,
-          ElectionContext context) {
+          ElectionCryptoContext context) {
 
     Map<String, Optional<DecryptionShare.CompensatedDecryptionShare>> shares = new HashMap<>();
 

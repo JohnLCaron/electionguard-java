@@ -2,13 +2,14 @@ package com.sunya.electionguard.standard;
 
 import com.google.common.flogger.FluentLogger;
 import com.sunya.electionguard.AvailableGuardian;
-import com.sunya.electionguard.ElectionContext;
+import com.sunya.electionguard.BallotBox;
 import com.sunya.electionguard.CiphertextTally;
 import com.sunya.electionguard.DecryptWithShares;
 import com.sunya.electionguard.DecryptionShare;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.SubmittedBallot;
+import com.sunya.electionguard.publish.ElectionContext;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,7 +29,6 @@ import static com.sunya.electionguard.standard.KeyCeremonyMediator.GuardianPair;
 class DecryptionMediator {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
-  private final String id;
   private final ElectionContext context;
 
   // Map(GUARDIAN_ID, Guardian)
@@ -47,8 +47,7 @@ class DecryptionMediator {
   // Map<BALLOT_ID, Map<GuardianPair, DecryptionShare>>
   private final Map<String, Map<GuardianPair, CompensatedDecryptionShare>> compensated_ballot_shares = new HashMap<>();
 
-  public DecryptionMediator(String id, ElectionContext context) {
-    this.id = id;
+  public DecryptionMediator(ElectionContext context) {
     this.context = context;
   }
 
@@ -138,12 +137,12 @@ class DecryptionMediator {
   /** Determine if the announcement phase is complete */
    boolean announcement_complete() {
      // If a quorum not announced, not ready
-     if (this.available_guardians.size() < this.context.quorum) {
+     if (this.available_guardians.size() < this.context.quorum()) {
        logger.atWarning().log("cannot decrypt with less than quorum available guardians");
        return false;
      }
      // If guardians missing or available not accounted for, not ready
-     if (this.available_guardians.size() + this.missing_guardians.size() != this.context.numberOfGuardians) {
+     if (this.available_guardians.size() + this.missing_guardians.size() != this.context.numberOfGuardians()) {
        logger.atWarning().log("cannot decrypt without accounting for all guardians missing or present");
        return false;
      }
@@ -153,7 +152,7 @@ class DecryptionMediator {
   boolean ready_to_decrypt(Map<String, DecryptionShare> shares) {
     // If all guardian shares are represented including if necessary
     // the missing guardians reconstructed shares, the decryption can be made
-    return shares.size() == this.context.numberOfGuardians;
+    return shares.size() == this.context.numberOfGuardians();
   }
 
    /**  Get all available guardian keys. */
@@ -195,8 +194,9 @@ class DecryptionMediator {
             new ArrayList<>(available_guardians.values()));
 
     List<AvailableGuardian> result = new ArrayList<>();
-    available_guardians.values().forEach(g -> result.add( new AvailableGuardian(
-            g.owner_id(), g.sequence_order(), lagrange_coefficients.get(g.owner_id()), 0)));
+    available_guardians.values().forEach(g -> result.add(
+            new AvailableGuardian(g.owner_id(), g.sequence_order(), lagrange_coefficients.get(g.owner_id()))
+    ));
     return result;
   }
 
@@ -296,6 +296,9 @@ class DecryptionMediator {
 
     Map<String, PlaintextTally> ballots = new HashMap<>();
     for (SubmittedBallot ciphertext_ballot : ciphertext_ballots) {
+      if (ciphertext_ballot.state != BallotBox.State.SPOILED) {
+        continue;
+      }
       Map<String, DecryptionShare> ballot_shares = this.ballot_shares.get(ciphertext_ballot.object_id());
       if (ballot_shares == null || !this.ready_to_decrypt(ballot_shares)) {
         // Skip ballot if not ready to decrypt LOOK silent failure
@@ -305,7 +308,7 @@ class DecryptionMediator {
       Optional<PlaintextTally> tallyO = DecryptWithShares.decrypt_ballot(
               ciphertext_ballot,
               ballot_shares,
-              this.context.cryptoExtendedBaseHash);
+              this.context.extendedHash());
 
       // LOOK silent failure
       tallyO.ifPresent(t -> ballots.put(t.tallyId, t));

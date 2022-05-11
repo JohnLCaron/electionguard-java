@@ -5,13 +5,13 @@ import com.google.common.flogger.FluentLogger;
 import com.sunya.electionguard.BallotBox;
 import com.sunya.electionguard.CiphertextBallot;
 import com.sunya.electionguard.CiphertextContest;
-import com.sunya.electionguard.ElectionContext;
 import com.sunya.electionguard.CiphertextSelection;
 import com.sunya.electionguard.CiphertextTally;
 import com.sunya.electionguard.DecryptionShare;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.SubmittedBallot;
+import com.sunya.electionguard.publish.ElectionContext;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -52,7 +52,7 @@ public class RemoteDecryptions {
         texts.add(selection.ciphertext());
       }
     }
-    List<BallotBox.DecryptionProofTuple> results = guardian.partialDecrypt(texts, context.cryptoExtendedBaseHash, null);
+    List<BallotBox.DecryptionProofTuple> results = guardian.partialDecrypt(texts, context.extendedHash(), null);
 
     // Create the guardian's DecryptionShare for the tally
     int count = 0;
@@ -63,7 +63,7 @@ public class RemoteDecryptions {
       for (CiphertextSelection tallySelection : tallyContest.selections.values()) {
         BallotBox.DecryptionProofTuple tuple = results.get(count);
         if (tuple.proof.is_valid(tallySelection.ciphertext(), guardian.electionPublicKey(),
-                tuple.decryption, context.cryptoExtendedBaseHash)) {
+                tuple.decryption, context.extendedHash())) {
 
           CiphertextDecryptionSelection share = DecryptionShare.create_ciphertext_decryption_selection(
                   tallySelection.object_id(),
@@ -126,7 +126,7 @@ public class RemoteDecryptions {
         texts.add(ballotSelection.ciphertext());
       }
     }
-    List<BallotBox.DecryptionProofTuple> results = guardian.partialDecrypt(texts, context.cryptoExtendedBaseHash, null);
+    List<BallotBox.DecryptionProofTuple> results = guardian.partialDecrypt(texts, context.extendedHash(), null);
 
     // Create the guardian's DecryptionShare for the ballot
     int count = 0;
@@ -137,7 +137,7 @@ public class RemoteDecryptions {
       for (CiphertextBallot.Selection ballotSelection : ballotContest.selections) {
         BallotBox.DecryptionProofTuple tuple = results.get(count);
         if (tuple.proof.is_valid(ballotSelection.ciphertext(), guardian.electionPublicKey(),
-                tuple.decryption, context.cryptoExtendedBaseHash)) {
+                tuple.decryption, context.extendedHash())) {
 
           CiphertextDecryptionSelection share = DecryptionShare.create_ciphertext_decryption_selection(
                   ballotSelection.object_id(),
@@ -192,7 +192,7 @@ public class RemoteDecryptions {
     List<DecryptionProofRecovery> results = guardian.compensatedDecrypt(
             missing_guardian_id,
             texts,
-            context.cryptoExtendedBaseHash,
+            context.extendedHash(),
             null);
 
     // Create the guardian's DecryptionShare for the tally
@@ -208,7 +208,7 @@ public class RemoteDecryptions {
                 tallySelection.ciphertext(),
                 tuple.recoveryPublicKey(),
                 tuple.decryption(),
-                context.cryptoExtendedBaseHash)) {
+                context.extendedHash())) {
 
           CiphertextCompensatedDecryptionSelection share = new CiphertextCompensatedDecryptionSelection(
                   tallySelection.object_id(),
@@ -266,7 +266,7 @@ public class RemoteDecryptions {
     List<DecryptionProofRecovery> results = guardian.compensatedDecrypt(
             missing_guardian_id,
             texts,
-            context.cryptoExtendedBaseHash,
+            context.extendedHash(),
             null);
 
     // Create the guardian's DecryptionShare for the tally
@@ -282,7 +282,7 @@ public class RemoteDecryptions {
                 selection.ciphertext(),
                 tuple.recoveryPublicKey(),
                 tuple.decryption(),
-                context.cryptoExtendedBaseHash)) {
+                context.extendedHash())) {
 
           CiphertextCompensatedDecryptionSelection share = new CiphertextCompensatedDecryptionSelection(
                   selection.object_id(),

@@ -4,13 +4,16 @@ import com.google.common.base.Preconditions;
 import com.google.common.flogger.FluentLogger;
 import com.sunya.electionguard.DecryptionShare;
 import com.sunya.electionguard.ElGamal;
-import com.sunya.electionguard.GuardianRecord;
 import com.sunya.electionguard.InternalManifest;
 import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.PlaintextTally;
+import com.sunya.electionguard.publish.ElectionRecord;
+import electionguard.ballot.Guardian;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.sunya.electionguard.Group.ElementModP;
 
@@ -48,6 +51,9 @@ public class TallyDecryptionVerifier {
     boolean error = false;
     Preconditions.checkNotNull(decryptedTally);
 
+    Map<String, Guardian> guardianMap = electionRecord.guardians().stream()
+            .collect( Collectors.toMap(Guardian::getGuardianId, g -> g));
+
     for (PlaintextTally.Contest contest : decryptedTally.contests.values()) {
       InternalManifest.ContestWithPlaceholders manifestContest = manifest.getContestById(contest.contestId()).orElse(null);
       if (manifestContest == null) {
@@ -63,11 +69,11 @@ public class TallyDecryptionVerifier {
          ElGamal.Ciphertext message = selection.message();
 
         for (DecryptionShare.CiphertextDecryptionSelection share : selection.shares()) {
-          GuardianRecord guardian = electionRecord.findGuardian(share.guardianId()).orElseThrow();
+          Guardian guardian = guardianMap.get(share.guardianId());
           share.proof().ifPresent(proof -> {
             if (!proof.is_valid(
                     selection.message(),
-                    guardian.guardianPublicKey(),
+                    guardian.publicKey(),
                     share.share(),
                     qbar)) {
               System.out.printf(" 11.A Tally Decryption proof failed for %s.%n", proof);

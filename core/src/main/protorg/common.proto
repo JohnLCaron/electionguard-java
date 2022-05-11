@@ -1,13 +1,15 @@
 syntax = "proto3";
 
-option java_package = "com.sunya.electionguard.protogen";
+option java_package = "electionguard.protogen";
 option java_outer_classname = "CommonProto";
 
+// A 4096 bit unsigned int, big-endian.
 // A member of the group Z mod P
 message ElementModP {
   bytes value = 1;
 }
 
+// A 256 bit unsigned int, big-endian.
 // A member of the group Z mod Q
 message ElementModQ {
   bytes value = 1;
@@ -18,39 +20,29 @@ message ElGamalCiphertext {
   ElementModP data = 2;
 }
 
-message ElGamalKeyPair {
-  ElementModQ secret_key = 1;
-  ElementModP public_key = 2;
-}
-
-message RSAPublicKey {
-  bytes modulus = 1;
-  bytes public_exponent = 2;
-}
-
-message RSAPrivateKey {
-  bytes modulus = 1;
-  bytes private_exponent = 2;
-}
-
-message ChaumPedersenProof {
-  ElementModP pad = 1; // a in the spec
-  ElementModP data = 2; // b in the spec
+message GenericChaumPedersenProof {
+  ElementModP pad = 1; // a in the spec  // 1.0 only
+  ElementModP data = 2; // b in the spec  // 1.0 only
   ElementModQ challenge = 3; // c in the spec
   ElementModQ response = 4; // v in the spec
 }
 
+message HashedElGamalCiphertext {
+  ElementModP c0 = 1;
+  bytes c1 = 2;
+  UInt256 c2 = 3;
+  uint32 numBytes = 4;
+}
+
 message SchnorrProof {
   ElementModP public_key = 1; // k in the spec
-  ElementModP commitment = 2; // h in the spec
+  ElementModP commitment = 2; // h in the spec // 1.0 only
   ElementModQ challenge = 3; // c in the spec
   ElementModQ response = 4; // u in the spec
 }
 
-message FinishRequest {
-  bool all_ok = 1;
-}
-
-message ErrorResponse {
-  string error = 1; // non empty on error
+// A 256 bit unsigned int, big-endian. Always exactly 32 bytes.
+// Used as a hash, when Group operations are no longer needed on it.
+message UInt256 {
+  bytes value = 1;
 }

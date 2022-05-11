@@ -21,10 +21,10 @@ public class CompactPlaintextBallot {
   final String object_id;
   final String style_id;
   final ImmutableList<Boolean> selections;
-  final ImmutableMap<Integer, PlaintextBallot.ExtendedData> extended_data;
+  final ImmutableMap<Integer, String> extended_data;
 
   public CompactPlaintextBallot(String object_id, String style_id, List<Boolean> selections,
-                                Map<Integer, PlaintextBallot.ExtendedData> extended_data) {
+                                Map<Integer, String> extended_data) {
     this.object_id = Preconditions.checkNotNull(object_id);
     this.style_id = Preconditions.checkNotNull(style_id);
     this.selections = ImmutableList.copyOf(selections);
@@ -34,29 +34,29 @@ public class CompactPlaintextBallot {
   /** Compress a plaintext ballot into a compact plaintext ballot. */
   static CompactPlaintextBallot compress_plaintext_ballot(PlaintextBallot ballot) {
     List<Boolean> selections = get_compact_selections(ballot);
-    Map<Integer, PlaintextBallot.ExtendedData> extended_data = get_compact_extended_data(ballot);
+    Map<Integer, String> extended_data = get_compact_extended_data(ballot);
     return new CompactPlaintextBallot(ballot.object_id(), ballot.ballotStyleId, selections, extended_data);
   }
 
   private static List<Boolean> get_compact_selections(PlaintextBallot ballot) {
     ArrayList<Boolean> selections = new ArrayList<>();
     for (PlaintextBallot.Contest contest : ballot.contests) { // LOOK How do we guarantee order?
-      for (PlaintextBallot.Selection selection: contest.selections) {
+      for (PlaintextBallot.Selection selection : contest.selections) {
         selections.add(selection.vote == YES_VOTE);
       }
     }
     return selections;
   }
 
-  private static Map<Integer, PlaintextBallot.ExtendedData> get_compact_extended_data(PlaintextBallot ballot) {
-    Map<Integer, PlaintextBallot.ExtendedData> extended_data = new HashMap<>(); // why a map?
+  private static Map<Integer, String> get_compact_extended_data(PlaintextBallot ballot) {
+    Map<Integer, String> extended_data = new HashMap<>(); // why a map?
 
     int index = 0;
     for (PlaintextBallot.Contest contest : ballot.contests) { // LOOK How do we guarantee order?
       for (PlaintextBallot.Selection selection : contest.selections) {
-        index += 1; // starts at 1 ?
-        if (selection.extendedData.isPresent()) {
-          extended_data.put(index, selection.extendedData.get());
+        if (selection.extendedData != null) {
+          index += 1; // starts at 1 ?
+          extended_data.put(index, selection.extendedData);
         }
       }
     }
@@ -94,13 +94,12 @@ public class CompactPlaintextBallot {
 
       // Iterate through selections. If contest not in style, mark as placeholder
       List<PlaintextBallot.Selection> selections = new ArrayList<>();
-      for (Manifest.SelectionDescription selection: sortedSelections) {
+      for (Manifest.SelectionDescription selection : sortedSelections) {
         selections.add(
                 new PlaintextBallot.Selection(
                         selection.selectionId(),
                         selection.sequenceOrder(),
                         compact_ballot.selections.get(index) ? YES_VOTE : NO_VOTE,
-                        placeholder,
                         compact_ballot.extended_data.get(index)));
         index += 1;
       }
