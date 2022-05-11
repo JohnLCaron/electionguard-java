@@ -2,10 +2,12 @@ package com.sunya.electionguard.json;
 
 import com.google.common.collect.ImmutableList;
 import com.sunya.electionguard.*;
+import electionguard.ballot.ElectionConfig;
 import net.jqwik.api.Example;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,6 +15,8 @@ import java.util.Map;
 import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.sunya.electionguard.Group.g_pow_p;
+import static com.sunya.electionguard.SchnorrProof.make_schnorr_proof;
 
 public class TestJsonRoundtrip {
 
@@ -24,14 +28,14 @@ public class TestJsonRoundtrip {
 
     int n = 17;
     Map<String, Group.ElementModQ> coeffs = new HashMap<>();
-    for (int i=0; i<n; i++) {
-      coeffs.put("test"+i+1, Group.rand_q());
+    for (int i = 0; i < n; i++) {
+      coeffs.put("test" + i + 1, Group.rand_q());
     }
 
     List<AvailableGuardian> ags = new ArrayList<>();
-    for (int i=0; i<n; i++) {
-      String key = "test"+i+1;
-      ags.add(new AvailableGuardian(key, i+1, coeffs.get(key)));
+    for (int i = 0; i < n; i++) {
+      String key = "test" + i + 1;
+      ags.add(new AvailableGuardian(key, i + 1, coeffs.get(key)));
     }
 
     // original
@@ -40,7 +44,47 @@ public class TestJsonRoundtrip {
     ConvertToJson.writeCoefficients(ags, file.toPath());
     // read it back
     LagrangeCoefficientsPojo fromFile = ConvertFromJson.readCoefficients(outputFile);
+    compareCoeff(fromFile, org);
     assertThat(fromFile).isEqualTo(org);
+  }
+
+  void compareCoeff(LagrangeCoefficientsPojo round, LagrangeCoefficientsPojo expected) {
+    for (Map.Entry<String, Group.ElementModQ> roundE : round.coefficients.entrySet()) {
+      Group.ElementModQ expectedV = expected.coefficients.get(roundE.getKey());
+      assertThat(expectedV).isNotNull();
+      assertThat(roundE.getValue()).isEqualTo(expectedV);
+    }
+  }
+
+  @Example
+  public void testNormalized() throws IOException {
+    BigInteger nonormal = new BigInteger("FF89940FEA8014812318EA706F2E6CC89088969A79E8477439849C729BD5EB03", 16);
+    BigInteger expected =   new BigInteger("0089940FEA8014812318EA706F2E6CC89088969A79E8477439849C729BD5EB03", 16);
+
+    Group.ElementModQ nonormalQ = Group.int_to_q(nonormal).orElseThrow();
+    Group.ElementModQ expectedQ = Group.int_to_q(expected).orElseThrow();
+
+    Map<String, Group.ElementModQ> coeffs = new HashMap<>();
+    coeffs.put("test", nonormalQ);
+
+    List<AvailableGuardian> ags = new ArrayList<>();
+    ags.add(new AvailableGuardian("test", 1, nonormalQ));
+
+    // expected after normalization
+    Map<String, Group.ElementModQ> coeffsN= new HashMap<>();
+    coeffsN.put("test", expectedQ);
+    LagrangeCoefficientsPojo expectedPojo = new LagrangeCoefficientsPojo(coeffsN);
+
+    // write json
+    File file = File.createTempFile("temp", null);
+    file.deleteOnExit();
+    String outputFile = file.getAbsolutePath();
+    ConvertToJson.writeCoefficients(ags, file.toPath());
+
+    // read it back
+    LagrangeCoefficientsPojo fromFile = ConvertFromJson.readCoefficients(outputFile);
+    compareCoeff(fromFile, expectedPojo);
+    assertThat(fromFile).isEqualTo(expectedPojo);
   }
 
   @Example
@@ -56,6 +100,33 @@ public class TestJsonRoundtrip {
     // read it back
     Manifest roundtrip = ConvertFromJson.readManifest(outputFile);
     assertThat(roundtrip).isEqualTo(description);
+  }
+
+
+  @Example
+  public void testGuardianRecordRoundtrip() throws IOException {
+    File file = File.createTempFile("temp", null);
+    file.deleteOnExit();
+    String outputFile = file.getAbsolutePath();
+
+    Group.ElementModQ a = Group.rand_q();
+    ElGamal.KeyPair keypair = new ElGamal.KeyPair(a, g_pow_p(a));
+    SchnorrProof proof = make_schnorr_proof(keypair, Group.rand_q());
+
+    // String guardianId, // Unique identifier of the guardian.
+    //        int xCoordinate, // Actually the x coordinate, must be > 0
+    //        Group.ElementModP guardianPublicKey, // Guardian's election public key for encrypting election objects.
+    //        List<Group.ElementModP> coefficientCommitments,
+    //        // Commitment for each coefficient of the guardians secret polynomial. First commitment is the election_public_key.
+    //        List<SchnorrProof> coefficientProofs
+    GuardianRecord org = new GuardianRecord("test", 42, Group.TWO_MOD_P,
+            List.of(Group.TWO_MOD_P), List.of(proof));
+
+    // write json
+    ConvertToJson.writeGuardianRecord(org, file.toPath());
+    // read it back
+    GuardianRecord fromFile = ConvertFromJson.readGuardianRecord(outputFile);
+    assertThat(fromFile).isEqualTo(org);
   }
 
   @Example
@@ -196,39 +267,5 @@ public class TestJsonRoundtrip {
     PlaintextBallot fromFile = ConvertFromJson.readPlaintextBallot(outputFile);
     assertThat(fromFile).isEqualTo(org);
   }
-
-  /* https://github.com/hsiafan/gson-java8-datatype
-  @Example
-  public void testOptional() {
-    Gson gson = GsonTypeAdapters.enhancedGson();
-
-    assertThat(gson.toJson(OptionalInt.of(10))).isEqualTo("10");
-    assertThat(gson.fromJson("10", OptionalInt.class)).isEqualTo(OptionalInt.of(10));
-    assertThat(gson.toJson(OptionalInt.empty())).isEqualTo("null"); // null
-    assertThat(gson.fromJson("null", OptionalInt.class)).isEqualTo(OptionalInt.empty());
-
-    assertThat(gson.toJson(Optional.of("test"))).isEqualTo("\"test\"");
-    assertThat(gson.toJson(Optional.of(Optional.of("test")))).isEqualTo("\"test\"");
-
-    assertThat(gson.toJson(Optional.empty())).isEqualTo("null"); // null
-    assertThat(gson.toJson(Optional.of(Optional.empty()))).isEqualTo("null"); // null
-    assertThat(gson.fromJson("null", Optional.class)).isEqualTo(Optional.empty());
-
-    Optional<String> r1 = gson.fromJson("\"test\"", new TypeToken<Optional<String>>() {
-    }.getType());
-    assertThat(r1).isEqualTo(Optional.of("test"));
-
-    Optional<Optional<String>> r2 = gson.fromJson("\"test\"", new TypeToken<Optional<Optional<String>>>() {
-    }.getType());
-    assertThat(r2).isEqualTo(Optional.of(Optional.of("test")));
-
-    Optional<String> r3 = gson.fromJson("null", new TypeToken<Optional<String>>() {
-    }.getType());
-    assertThat(r3).isEqualTo(Optional.empty());
-
-    Optional<Optional<String>> r4 = gson.fromJson("null", new TypeToken<Optional<Optional<String>>>() {
-    }.getType());
-    assertThat(r4).isEqualTo(Optional.empty());
-  } */
 
 }

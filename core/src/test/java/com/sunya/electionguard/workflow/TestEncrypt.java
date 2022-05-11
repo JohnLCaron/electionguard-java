@@ -7,7 +7,7 @@ import com.sunya.electionguard.Encrypt;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.InternalManifest;
 import com.sunya.electionguard.PlaintextBallot;
-import com.sunya.electionguard.publish.Consumer;
+import com.sunya.electionguard.json.JsonConsumer;
 import com.sunya.electionguard.publish.ElectionRecord;
 import net.jqwik.api.Example;
 
@@ -22,7 +22,7 @@ public class TestEncrypt {
 
   @Example
   public void testEncryption() throws IOException {
-    Consumer consumer = new Consumer(input);
+    JsonConsumer consumer = new JsonConsumer(input);
     ElectionRecord electionRecord = consumer.readElectionRecord();
     PlaintextBallot ballot = FakeBallotProvider.makeBallot(electionRecord.manifest(), "congress-district-7-arlington", 3, 0);
 

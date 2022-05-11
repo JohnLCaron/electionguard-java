@@ -21,7 +21,7 @@ public class TestBallotAggregationVerifier {
 
   @Example
   public void testVerifyBallotAggregationJson() throws IOException {
-    JsonConsumer consumer = new JsonConsumer(TestParameterVerifier.topdirJson);
+    JsonConsumer consumer = new JsonConsumer(TestParameterVerifier.topdirJsonExample);
     ElectionRecord electionRecord = consumer.readElectionRecordJson();
     var validator = new BallotAggregationVerifier(electionRecord.submittedBallots(),
             electionRecord.decryptedTally());

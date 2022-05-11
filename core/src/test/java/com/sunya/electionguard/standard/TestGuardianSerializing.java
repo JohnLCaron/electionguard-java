@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.sunya.electionguard.CompareHelper.compareGuardianRecord;
 
 /** KeyCeremony to create the Guardians. */
 public class TestGuardianSerializing {
@@ -130,8 +131,9 @@ public class TestGuardianSerializing {
       System.out.printf("Test Guardian %s%n", guardian.object_id);
       GuardianRecord guardianRecord = guardian.publish();
       GuardianRecord guardianPrivateRoundtrip = guardianRecords.stream().filter(g -> g.guardianId().equals(guardian.object_id)).findFirst().orElseThrow();
-      assertThat(guardianPrivateRoundtrip.equals(guardianRecord)).isTrue();
+      compareGuardianRecord(guardianPrivateRoundtrip, guardianRecord);
       assertThat(guardianPrivateRoundtrip).isEqualTo(guardianRecord);
+      assertThat(guardianPrivateRoundtrip.equals(guardianRecord)).isTrue();
     }
   }
 
@@ -144,7 +146,7 @@ public class TestGuardianSerializing {
       System.out.printf("Test Guardian %s%n", guardian.object_id);
       GuardianPrivateRecord guardianPrivate = guardian.export_private_data();
       GuardianPrivateRecord guardianPrivateRoundtrip = roundtrip.stream().filter(g -> g.guardian_id().equals(guardian.object_id)).findFirst().orElseThrow();
-      assertThat(guardianPrivateRoundtrip.equals(guardianPrivate)).isTrue();
+      //assertThat(guardianPrivateRoundtrip.equals(guardianPrivate)).isTrue();
       assertThat(guardianPrivateRoundtrip).isEqualTo(guardianPrivate);
     }
   }

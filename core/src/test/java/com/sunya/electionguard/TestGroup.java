@@ -6,7 +6,7 @@ import java.math.BigInteger;
 
 import static com.google.common.truth.Truth.assertThat;
 
-class GroupTest {
+class TestGroup {
   @Example
   public void basicsLg() {
     //basics(ElectionConstants.LARGE_TEST_CONSTANTS);

@@ -24,7 +24,7 @@ public class TestPartialDecryptionVerifier {
 
   @Example
   public void testSelectionEncryptionValidationJson() throws IOException {
-    String topdir = TestParameterVerifier.topdirJson;
+    String topdir = TestParameterVerifier.topdirJsonExample;
     System.out.printf("testSelectionEncryptionValidationJson %s%n", topdir);
     JsonConsumer consumer = new JsonConsumer(topdir);
     ElectionRecord electionrecord = consumer.readElectionRecordJson();

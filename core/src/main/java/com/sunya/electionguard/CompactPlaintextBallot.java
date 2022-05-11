@@ -41,7 +41,7 @@ public class CompactPlaintextBallot {
   private static List<Boolean> get_compact_selections(PlaintextBallot ballot) {
     ArrayList<Boolean> selections = new ArrayList<>();
     for (PlaintextBallot.Contest contest : ballot.contests) { // LOOK How do we guarantee order?
-      for (PlaintextBallot.Selection selection: contest.selections) {
+      for (PlaintextBallot.Selection selection : contest.selections) {
         selections.add(selection.vote == YES_VOTE);
       }
     }
@@ -54,8 +54,10 @@ public class CompactPlaintextBallot {
     int index = 0;
     for (PlaintextBallot.Contest contest : ballot.contests) { // LOOK How do we guarantee order?
       for (PlaintextBallot.Selection selection : contest.selections) {
-        index += 1; // starts at 1 ?
+        if (selection.extendedData != null) {
+          index += 1; // starts at 1 ?
           extended_data.put(index, selection.extendedData);
+        }
       }
     }
     return extended_data;
@@ -92,7 +94,7 @@ public class CompactPlaintextBallot {
 
       // Iterate through selections. If contest not in style, mark as placeholder
       List<PlaintextBallot.Selection> selections = new ArrayList<>();
-      for (Manifest.SelectionDescription selection: sortedSelections) {
+      for (Manifest.SelectionDescription selection : sortedSelections) {
         selections.add(
                 new PlaintextBallot.Selection(
                         selection.selectionId(),

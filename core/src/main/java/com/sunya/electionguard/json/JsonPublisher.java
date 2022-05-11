@@ -22,8 +22,6 @@ import java.util.Formatter;
 
 /** Publishes the Manifest Record to JSON */
 public class JsonPublisher {
-  static final String ELECTION_RECORD_DIR = "election_record";
-
   //// json
   static final String JSON_SUFFIX = ".json";
 
@@ -60,7 +58,7 @@ public class JsonPublisher {
     this.topdir = where;
     this.createMode = createMode;
 
-    this.electionRecordDir = Path.of(where).resolve(ELECTION_RECORD_DIR);
+    this.electionRecordDir = Path.of(where);
     this.devicesDirPath = electionRecordDir.resolve(DEVICES_DIR);
     this.ballotsDirPath = electionRecordDir.resolve(SUBMITTED_BALLOTS_DIR);
     this.guardianDirPath = electionRecordDir.resolve(GUARDIANS_DIR);
@@ -71,14 +69,14 @@ public class JsonPublisher {
       if (!Files.exists(electionRecordDir)) {
         Files.createDirectories(electionRecordDir);
       } else {
-        removeAllFiles();
+        // too dangerous removeAllFiles();
       }
-        createDirs();
+      createDirs();
     } else if (createMode == PublisherOld.Mode.createIfMissing) {
       if (!Files.exists(electionRecordDir)) {
         Files.createDirectories(electionRecordDir);
       }
-        createDirs();
+      createDirs();
     } else {
       if (!Files.exists(electionRecordDir)) {
         throw new IllegalStateException("Non existing election directory " + electionRecordDir);
@@ -103,12 +101,12 @@ public class JsonPublisher {
       } else {
         removeAllFiles();
       }
-        createDirs();
+      createDirs();
     } else if (createMode == PublisherOld.Mode.createIfMissing) {
       if (!Files.exists(electionRecordDir)) {
         Files.createDirectories(electionRecordDir);
       }
-        createDirs();
+      createDirs();
     } else {
       if (!Files.exists(electionRecordDir)) {
         throw new IllegalStateException("Non existing election directory " + electionRecordDir);
@@ -130,14 +128,11 @@ public class JsonPublisher {
     }
 
     String filename = electionRecordDir.getFileName().toString();
-    if (!filename.startsWith("election_record")) {
-      throw new RuntimeException(String.format("Publish directory '%s' should start with 'election_record'", filename));
-    }
     Files.walk(electionRecordDir)
             .filter(p -> !p.equals(electionRecordDir))
             .map(Path::toFile)
             .sorted((o1, o2) -> -o1.compareTo(o2))
-            .forEach( f-> f.delete());
+            .forEach(f -> f.delete());
   }
 
   /** Make sure output dir exists and is writeable. */

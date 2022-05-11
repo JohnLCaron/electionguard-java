@@ -189,8 +189,8 @@ public class TestHashAgainstPython {
     String ps0 = "000" + ps;
     assertThat(ps0.length()).isEqualTo(ps.length() + 3);
 
-    Group.ElementModQ s1p = Group.hex_to_q_unchecked(ps);
-    Group.ElementModQ s2p = Group.hex_to_q_unchecked(ps0);
+    Group.ElementModP s1p = Group.hex_to_p_unchecked(ps);
+    Group.ElementModP s2p = Group.hex_to_p_unchecked(ps0);
 
     assertThat(s1p).isEqualTo(p);
     assertThat(s1p).isEqualTo(s2p);

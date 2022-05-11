@@ -244,7 +244,8 @@ public class CiphertextBallot implements Hash.CryptoHashCheckable {
           Group.ElementModP elgamal_public_key,
           Group.ElementModQ crypto_extended_base_hash) {
 
-    if (!seed_hash.equals(this.manifestHash)) {
+    if (!seed_hash.equals(this.manifestHash)) { // manifestHash is unnormalized
+      seed_hash.equals(this.manifestHash);
       logger.atInfo().log("mismatching ballot hash: %s expected(%s) actual(%s)", this.ballotId, seed_hash, this.manifestHash);
       return false;
     }

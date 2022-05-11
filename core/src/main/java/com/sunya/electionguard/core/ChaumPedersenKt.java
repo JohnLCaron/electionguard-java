@@ -70,7 +70,7 @@ public class ChaumPedersenKt {
                     publicKey,
                     nonce,
                     seed,
-                    List.of(qbar, message.pad(), message.data()),
+                    List.of(qbar, publicKey, message.pad(), message.data()),
                     List.of()
             ),
             plaintext
@@ -317,7 +317,7 @@ public class ChaumPedersenKt {
                         " validHash " + validHash +
                         " valid0 " + valid0 +
                         " valid1 " + valid1);
-        throw new IllegalStateException();
+        // LOOK throw new IllegalStateException();
       }
 
       return valid0 && valid1 && consistentC && validHash;

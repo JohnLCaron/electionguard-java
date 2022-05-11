@@ -100,14 +100,14 @@ class GsonTypeAdapters {
     public BigInteger deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
             throws JsonParseException {
       String content = json.getAsJsonPrimitive().getAsString();
-      return new BigInteger(content, 10);
+      return new BigInteger(content, 16);
     }
   }
 
   private static class BigIntegerSerializer implements JsonSerializer<BigInteger> {
     @Override
     public JsonElement serialize(BigInteger src, Type typeOfSrc, JsonSerializationContext context) {
-      return new JsonPrimitive(src.toString(10));
+      return new JsonPrimitive(src.toString(16));
     }
   }
 

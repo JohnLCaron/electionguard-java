@@ -6,6 +6,7 @@ import com.google.common.collect.Lists;
 import com.sunya.electionguard.BallotBox;
 import com.sunya.electionguard.BallotFactory;
 import com.sunya.electionguard.CiphertextBallot;
+import com.sunya.electionguard.CompareHelper;
 import com.sunya.electionguard.ElectionCryptoContext;
 import com.sunya.electionguard.CiphertextTally;
 import com.sunya.electionguard.CiphertextTallyBuilder;
@@ -36,6 +37,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static com.google.common.truth.Truth.assertWithMessage;
+import static com.sunya.electionguard.CompareHelper.compareCiphertextBallot;
 import static com.sunya.electionguard.InternalManifest.ContestWithPlaceholders;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -415,7 +417,8 @@ public class TestEndToEndElectionIntegration {
     //assertThat(roundtrip.constants).isEqualTo(this.constants);
     //assertThat(roundtrip.devices.size()).isEqualTo(1);
     //assertThat(roundtrip.devices.get(0)).isEqualTo(this.device);
-    assertThat(roundtrip.ciphertextTally()).isEqualTo(this.publishedTally);
+    CompareHelper.compareCiphertextTally(roundtrip.ciphertextTally(), this.publishedTally);
+    CompareHelper.comparePlaintextTally(roundtrip.decryptedTally(), this.decryptedTally);
     assertThat(roundtrip.decryptedTally()).isEqualTo(this.decryptedTally);
 
     Map<String, GuardianRecord> coeffMap = this.guardian_records.stream()
@@ -424,6 +427,7 @@ public class TestEndToEndElectionIntegration {
       GuardianRecord expectedRecord = coeffMap.get(guardian.getGuardianId());
       assertThat(expectedRecord).isNotNull();
       electionguard.ballot.Guardian expected = new electionguard.ballot.Guardian(expectedRecord);
+      CompareHelper.compareGuardian(guardian, expected);
       assertWithMessage(guardian.getGuardianId()).that(guardian).isEqualTo(expected);
     }
 
@@ -442,6 +446,7 @@ public class TestEndToEndElectionIntegration {
 
     for (SubmittedBallot ballot : roundtrip.submittedBallots()) {
       SubmittedBallot expected = this.ballot_box.get(ballot.object_id()).orElseThrow();
+      compareCiphertextBallot(ballot, expected);
       assertWithMessage(ballot.object_id()).that(ballot).isEqualTo(expected);
     }
 

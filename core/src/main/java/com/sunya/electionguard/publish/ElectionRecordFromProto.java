@@ -149,7 +149,7 @@ public class ElectionRecordFromProto implements ElectionRecord {
 
   @Override
   public List<AvailableGuardian> availableGuardians() {
-    return this.decryption == null ? null : this.decryption.getAvailableGuardians();
+    return this.decryption == null ? emptyList() : this.decryption.getAvailableGuardians();
   }
 
   @Override

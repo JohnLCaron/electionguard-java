@@ -21,7 +21,7 @@ public class TestElectionPublicKeyVerifier {
 
   @Example
   public void testVerifyPublicKeysJson() throws IOException {
-    String topdir = TestParameterVerifier.topdirJson;
+    String topdir = TestParameterVerifier.topdirJsonExample;
     JsonConsumer consumer = new JsonConsumer(topdir);
     ElectionPublicKeyVerifier validator = new ElectionPublicKeyVerifier(consumer.readElectionRecordJson());
 

@@ -197,7 +197,7 @@ public class ChaumPedersen {
       if (o == null || getClass() != o.getClass()) return false;
       if (!super.equals(o)) return false;
       ChaumPedersenProof that = (ChaumPedersenProof) o;
-      return Objects.equals(pad, that.pad) && Objects.equals(data, that.data) && challenge.equals(that.challenge) && response.equals(that.response);
+      return challenge.equals(that.challenge) && response.equals(that.response);
     }
 
     @Override

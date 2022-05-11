@@ -25,7 +25,7 @@ public class TestSelectionEncryptionVerifier {
 
   @Example
   public void testSelectionEncryptionValidationJson() throws IOException {
-    JsonConsumer consumer = new JsonConsumer(TestParameterVerifier.topdirJson);
+    JsonConsumer consumer = new JsonConsumer(TestParameterVerifier.topdirJsonExample);
     testSelectionEncryptionValidation(consumer.readElectionRecordJson());
   }
 

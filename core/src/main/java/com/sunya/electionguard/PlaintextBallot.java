@@ -196,7 +196,7 @@ public class PlaintextBallot {
     public final int vote;
     /** Optional write-in candidate. */
     @Nullable
-    public final String extendedData; // default None
+    public final String extendedData;
 
     public Selection(String selectionId, int sequenceOrder, int vote, @Nullable String extendedData) {
       Preconditions.checkArgument(!Strings.isNullOrEmpty(selectionId));

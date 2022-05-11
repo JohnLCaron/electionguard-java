@@ -28,7 +28,7 @@ public class TestDecryptionVerifier {
 
   @Example
   public void testDecryptionValidationJson() throws IOException {
-    String topdir = TestParameterVerifier.topdirJson;
+    String topdir = TestParameterVerifier.topdirJsonExample;
     JsonConsumer consumer = new JsonConsumer(topdir);
     ElectionRecord electionrecord = consumer.readElectionRecordJson();
     DecryptionVerifier validator = new DecryptionVerifier(electionrecord, electionrecord.decryptedTally());

@@ -24,7 +24,7 @@ public class TestTallyDecryptionVerifier {
 
   @Example
   public void testVerifyTallyDecryptionJson() throws IOException {
-    String topdir = TestParameterVerifier.topdirJson;
+    String topdir = TestParameterVerifier.topdirJsonExample;
     JsonConsumer consumer = new JsonConsumer(topdir);
     ElectionRecord electionRecord = consumer.readElectionRecordJson();
 

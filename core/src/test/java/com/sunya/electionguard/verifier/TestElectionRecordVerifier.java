@@ -21,7 +21,7 @@ public class TestElectionRecordVerifier {
 
   @Example
   public void testElectionRecordVerifierJson() throws IOException {
-    String topdir = TestParameterVerifier.topdirJson;
+    String topdir = TestParameterVerifier.topdirJsonExample;
     JsonConsumer consumer = new JsonConsumer(topdir);
     System.out.printf(" VerifyElectionRecord read from %s%n", topdir);
     boolean ok = VerifyElectionRecord.verifyElectionRecord(consumer.readElectionRecord(), false);

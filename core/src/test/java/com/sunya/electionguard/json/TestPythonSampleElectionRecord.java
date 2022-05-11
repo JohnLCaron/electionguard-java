@@ -1,6 +1,8 @@
 package com.sunya.electionguard.json;
 
 import com.sunya.electionguard.CiphertextTally;
+import com.sunya.electionguard.CompareHelper;
+import com.sunya.electionguard.DecryptionShare;
 import com.sunya.electionguard.GuardianRecord;
 import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.core.UInt256;
@@ -32,12 +34,15 @@ import static com.google.common.truth.Truth.assertThat;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 
-public class TestJsonRecordToProto {
+// Test Json reading from python library sample_election_record.
+// Then using that to roundtrip to proto and back.
+
+public class TestPythonSampleElectionRecord {
   private static JsonConsumer consumer;
 
   @BeforeContainer
   public static void setUp() throws IOException {
-    consumer = new JsonConsumer(TestParameterVerifier.topdirJson);
+    consumer = new JsonConsumer(TestParameterVerifier.topdirJsonExample);
   }
 
   @Example
@@ -48,13 +53,14 @@ public class TestJsonRecordToProto {
     assertThat(consumer.ciphertextTally()).isNotNull();
     assertThat(consumer.decryptedTally()).isNotNull();
     assertThat(consumer.devices()).hasSize(1);
-    assertThat(consumer.guardianRecords()).hasSize(7);
-    assertThat(consumer.availableGuardians()).hasSize(5);
+    assertThat(consumer.guardianRecords()).hasSize(2);
+    assertThat(consumer.availableGuardians()).hasSize(2);
 
     assertThat(consumer.acceptedBallots()).isNotNull();
     assertThat(consumer.acceptedBallots()).isNotEmpty();
   }
 
+  @Example
   public void testElectionRecordProto1() throws IOException {
     ElectionRecordProto1.ElectionRecord protoFromJson = ElectionRecordToProto.buildElectionRecord(
             consumer.manifest(),
@@ -72,67 +78,17 @@ public class TestJsonRecordToProto {
     CiphertextTally expected = consumer.ciphertextTally();
     assertThat(roundtrip.ciphertextTally()).isEqualTo(expected);
     PlaintextTally expectedDecryptedTally = consumer.decryptedTally();
-    comparePlaintextTally(roundtrip.decryptedTally(), expectedDecryptedTally);
+    CompareHelper.comparePlaintextTally(roundtrip.decryptedTally(), expectedDecryptedTally);
     assertThat(roundtrip.decryptedTally()).isEqualTo(expectedDecryptedTally);
     List<GuardianRecord> records = consumer.guardianRecords();
-    roundtrip.guardians().stream().forEach(g -> compareGuardian(g, records));
+    roundtrip.guardians().stream().forEach(g -> CompareHelper.compareGuardian(g, records));
     assertThat(roundtrip.availableGuardians()).isEqualTo(consumer.availableGuardians());
   }
 
-  void comparePlaintextTally(PlaintextTally decryptedTally, PlaintextTally expected) {
-    for (Map.Entry<String, PlaintextTally.Contest> entry : expected.contests.entrySet()) {
-      PlaintextTally.Contest expectedContest = entry.getValue();
-      PlaintextTally.Contest contest = decryptedTally.contests.get(entry.getKey());
-      assertThat(contest).isNotNull();
-      for (Map.Entry<String, PlaintextTally.Selection> entry2 : expectedContest.selections().entrySet()) {
-        PlaintextTally.Selection expectedSelection = entry2.getValue();
-        PlaintextTally.Selection selection = contest.selections().get(entry2.getKey());
-        assertThat(selection).isEqualTo(expectedSelection);
-      }
-    }
-  }
-
-  void compareGuardian(Guardian guardian, List<GuardianRecord> records) {
-    GuardianRecord expected = records.stream()
-            .filter(g -> g.guardianId().equals(guardian.getGuardianId()))
-            .findFirst().orElseThrow();
-
-    assertThat(guardian.getXCoordinate()).isEqualTo(expected.xCoordinate());
-    assertThat(guardian.getCoefficientCommitments()).isEqualTo(expected.coefficientCommitments());
-    assertThat(guardian.getCoefficientProofs()).isEqualTo(expected.coefficientProofs());
-  }
-
-  public DecryptionResult makeDecryptionResult() throws IOException {
-    ElectionConfig config = new ElectionConfig(
-            consumer.manifest(),
-            consumer.context().numberOfGuardians,
-            consumer.context().quorum
-    );
-
-    ElectionInitialized init = new ElectionInitialized(
-            config,
-            consumer.context().jointPublicKey,
-            UInt256.fromModQ(consumer.context().manifestHash),
-            UInt256.fromModQ(consumer.context().cryptoExtendedBaseHash),
-            consumer.guardianRecords().stream().map(g -> new Guardian(g)).toList(),
-            emptyMap()
-    );
-
-    TallyResult tresult = new TallyResult(
-            init,
-            consumer.ciphertextTally(),
-            emptyList(), emptyList());
-
-    DecryptionResult dresult = new DecryptionResult(tresult,
-            consumer.decryptedTally(),
-            consumer.availableGuardians(),
-            emptyMap());
-
-    return dresult;
-  }
+  // DecryptionResult
 
   @Example
-  public void testJsonToProto() throws IOException {
+  public void testDecryptionResultJsonRoundtrip() throws IOException {
     DecryptionResult dresult = makeDecryptionResult();
     ElectionRecordProto.DecryptionResult proto = ElectionResultsConvert.publishDecryptionResult(dresult);
     DecryptionResult roundtrip = ElectionResultsConvert.importDecryptionResult(proto);
@@ -177,7 +133,7 @@ public class TestJsonRecordToProto {
   }
 
   @Example
-  public void testJsonPublishProtoRoundtrip() throws IOException {
+  public void testPublishDecryptionResultJsonRoundtrip() throws IOException {
     DecryptionResult dresult = makeDecryptionResult();
 
     Path tmp = Files.createTempDirectory("publish");
@@ -190,5 +146,35 @@ public class TestJsonRecordToProto {
     DecryptionResult roundtrip = consumer.readDecryptionResult();
 
     compareDecryptionResult(roundtrip, dresult);
+  }
+
+
+  private DecryptionResult makeDecryptionResult() throws IOException {
+    ElectionConfig config = new ElectionConfig(
+            consumer.manifest(),
+            consumer.context().numberOfGuardians,
+            consumer.context().quorum
+    );
+
+    ElectionInitialized init = new ElectionInitialized(
+            config,
+            consumer.context().jointPublicKey,
+            UInt256.fromModQ(consumer.context().manifestHash),
+            UInt256.fromModQ(consumer.context().cryptoExtendedBaseHash),
+            consumer.guardianRecords().stream().map(g -> new Guardian(g)).toList(),
+            emptyMap()
+    );
+
+    TallyResult tresult = new TallyResult(
+            init,
+            consumer.ciphertextTally(),
+            emptyList(), emptyList());
+
+    DecryptionResult dresult = new DecryptionResult(tresult,
+            consumer.decryptedTally(),
+            consumer.availableGuardians(),
+            emptyMap());
+
+    return dresult;
   }
 }

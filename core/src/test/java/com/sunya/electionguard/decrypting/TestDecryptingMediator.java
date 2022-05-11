@@ -8,9 +8,9 @@ import com.sunya.electionguard.TestProperties;
 import com.sunya.electionguard.protoconvert.TrusteeFromProto;
 import com.sunya.electionguard.publish.CloseableIterable;
 import com.sunya.electionguard.publish.Consumer;
+import com.sunya.electionguard.publish.ElectionRecordPath;
 import com.sunya.electionguard.publish.PrivateData;
 import com.sunya.electionguard.publish.ElectionRecord;
-import electionguard.ballot.ElectionInitialized;
 import net.jqwik.api.Example;
 
 import java.io.IOException;
@@ -26,9 +26,10 @@ import static com.google.common.truth.Truth8.assertThat;
 
 public class TestDecryptingMediator extends TestProperties {
   public static final String DECRYPTING_DATA_DIR = "src/test/data/workflow/encryptor/";
-  public static final String TRUSTEE_DATA_DIR = "src/test/data/workflow/keyCeremony/election_private_data/";
+  public static final String TRUSTEE_DATA_DIR =    "src/test/data/workflow/keyCeremony/election_private_data/";
   // public static final String DECRYPTING_DATA_DIR = "/home/snake/tmp/electionguard/remoteWorkflow/encryptor/";
   // public static final String TRUSTEE_DATA_DIR = "/home/snake/tmp/electionguard/remoteWorkflow/keyCeremony/election_private_data/";
+  private static final ElectionRecordPath path = new ElectionRecordPath(DECRYPTING_DATA_DIR);
 
   List<DecryptingTrusteeIF> trustees = new ArrayList<>();
   Consumer consumer;
@@ -39,15 +40,16 @@ public class TestDecryptingMediator extends TestProperties {
   CloseableIterable<SubmittedBallot> spoiledBallots;
 
   public TestDecryptingMediator() throws IOException {
-    trustees.add(TrusteeFromProto.readTrustee(TRUSTEE_DATA_DIR + "/remoteTrustee1.protobuf"));
-    trustees.add(TrusteeFromProto.readTrustee(TRUSTEE_DATA_DIR + "/remoteTrustee2.protobuf"));
-    trustees.add(TrusteeFromProto.readTrustee(TRUSTEE_DATA_DIR + "/remoteTrustee3.protobuf"));
+    trustees.add(TrusteeFromProto.readTrustee(path.decryptingTrusteePath(TRUSTEE_DATA_DIR, "remoteTrustee1")));
+    trustees.add(TrusteeFromProto.readTrustee(path.decryptingTrusteePath(TRUSTEE_DATA_DIR, "remoteTrustee2")));
+    trustees.add(TrusteeFromProto.readTrustee(path.decryptingTrusteePath(TRUSTEE_DATA_DIR, "remoteTrustee3")));
+    trustees.add(TrusteeFromProto.readTrustee(path.decryptingTrusteePath(TRUSTEE_DATA_DIR, "remoteTrustee4")));
 
     this.consumer = new Consumer(DECRYPTING_DATA_DIR);
-    ElectionInitialized electionRecord = consumer.readElectionInitialized();
+    this.electionRecord = consumer.readElectionRecord();
 
     // The guardians' election public key is in the electionRecord.guardianCoefficients.
-    this.guardianPublicKeys = electionRecord.getGuardians().stream().collect(
+    this.guardianPublicKeys = electionRecord.guardians().stream().collect(
             Collectors.toMap(guardian -> guardian.getGuardianId(), guardian -> guardian.publicKey()));
 
     // hand tally the results

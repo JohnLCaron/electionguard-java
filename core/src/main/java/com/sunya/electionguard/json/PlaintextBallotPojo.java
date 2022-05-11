@@ -31,12 +31,17 @@ public class PlaintextBallotPojo {
     public Integer sequence_order;
     public Integer vote;
     public Boolean is_placeholder_selection = Boolean.FALSE;
-    public String extended_data;
+    public ExtendedData extended_data;
   }
 
   public static class ExtendedData {
     public String value;
     public Integer length;
+
+    public ExtendedData(String value, Integer length) {
+      this.value = value;
+      this.length = length;
+    }
   }
 
   /////////////////////////////////////
@@ -85,11 +90,12 @@ public class PlaintextBallotPojo {
   }
 
   private static PlaintextBallot.Selection convertPlaintextBallotSelection(PlaintextBallotPojo.PlaintextBallotSelection pojo) {
+    String extendedData = pojo.extended_data != null ? pojo.extended_data.value : null;
     return new PlaintextBallot.Selection(
             pojo.object_id,
             pojo.sequence_order,
             pojo.vote,
-            pojo.extended_data);
+            extendedData);
   }
 
   ////////////////////////////////////////////////////////////////////////////////////////
@@ -122,7 +128,9 @@ public class PlaintextBallotPojo {
     pojo.object_id = src.selectionId;
     pojo.sequence_order = src.sequenceOrder;
     pojo.vote = src.vote;
-    pojo.extended_data = src.extendedData;
+    if (src.extendedData != null) {
+      pojo.extended_data = new ExtendedData(src.extendedData, src.extendedData.length());
+    }
     return pojo;
   }
 

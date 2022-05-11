@@ -12,7 +12,7 @@ import java.io.IOException;
 import static com.google.common.truth.Truth.assertThat;
 
 public class TestReadPythonJson {
-  private static final String pythonPublish = TestParameterVerifier.topdirJsonPython;
+  private static final String pythonPublish = TestParameterVerifier.topdirJsonExample;
   private static JsonPublisher publisher;
 
   @BeforeContainer
@@ -32,7 +32,7 @@ public class TestReadPythonJson {
   public void testConstantsPythonJson() throws IOException {
     ElectionConstants fromPython = ConvertFromJson.readConstants(publisher.constantsPath().toString());
     assertThat(fromPython).isNotNull();
-    assertThat(fromPython).isEqualTo(ElectionConstants.LARGE_TEST_CONSTANTS);
+    assertThat(fromPython).isEqualTo(ElectionConstants.STANDARD_CONSTANTS);
     System.out.printf("%n%s%n%n", fromPython);
   }
 

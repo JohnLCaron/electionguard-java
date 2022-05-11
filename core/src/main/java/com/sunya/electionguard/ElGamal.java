@@ -37,10 +37,9 @@ public class ElGamal {
 
     public Ciphertext {
       Preconditions.checkNotNull(pad);
+      Preconditions.checkArgument(pad.is_in_bounds());
       Preconditions.checkNotNull(data);
-      /* if (!data.is_valid_residue()) {
-        throw new IllegalStateException();
-      } */
+      Preconditions.checkArgument(data.is_in_bounds());
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.sunya.electionguard.publish;
 
 import com.google.common.collect.AbstractIterator;
 import com.sunya.electionguard.*;
+import com.sunya.electionguard.json.JsonConsumer;
 import com.sunya.electionguard.protoconvert.ElectionConfigConvert;
 import com.sunya.electionguard.protoconvert.ElectionInitializedConvert;
 import com.sunya.electionguard.protoconvert.ElectionResultsConvert;
@@ -28,7 +29,7 @@ public class Consumer {
   }
 
   public boolean isValidElectionRecord(Formatter error) {
-    if (Files.exists(Path.of(path.getTopDir()))) {
+    if (!Files.exists(Path.of(path.getTopDir()))) {
       error.format("%s does not exist", path.getTopDir());
       return false;
     }
@@ -45,7 +46,12 @@ public class Consumer {
     if (Files.exists(Path.of(path.electionInitializedPath()))) {
       return new ElectionRecordFromProto(readElectionInitialized(), this);
     }
-    return new ElectionRecordFromProto(readElectionConfig());
+    if (Files.exists(Path.of(path.electionConfigPath()))) {
+      return new ElectionRecordFromProto(readElectionConfig());
+    }
+
+    JsonConsumer jsonConsumer = new JsonConsumer(path.getTopDir());
+    return jsonConsumer.readElectionRecord();
   }
 
   public electionguard.ballot.ElectionConfig readElectionConfig() throws IOException {

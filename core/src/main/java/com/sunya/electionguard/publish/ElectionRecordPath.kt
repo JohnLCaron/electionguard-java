@@ -7,7 +7,7 @@ data class ElectionRecordPath(val topDir : String) {
         const val PROTO_VERSION = "2.0.0"
 
         const val PROTO_SUFFIX = ".protobuf"
-        const val DECRYPTING_TRUSTEE_PREFIX = "decryptingTrustee"
+        const val DECRYPTING_TRUSTEE_PREFIX = "decryptingTrustee-"
         const val ELECTION_CONFIG_FILE_NAME = "electionConfig" + PROTO_SUFFIX
         const val ELECTION_INITIALIZED_FILE_NAME = "electionInitialized" + PROTO_SUFFIX
         const val TALLY_RESULT_NAME = "tallyResult" + PROTO_SUFFIX
@@ -46,6 +46,6 @@ data class ElectionRecordPath(val topDir : String) {
     }
 
     fun decryptingTrusteePath(trusteeDir: String, guardianId: String): String {
-        return "$trusteeDir/$DECRYPTING_TRUSTEE_PREFIX-$guardianId$PROTO_SUFFIX"
+        return "$trusteeDir/$DECRYPTING_TRUSTEE_PREFIX$guardianId$PROTO_SUFFIX"
     }
 }

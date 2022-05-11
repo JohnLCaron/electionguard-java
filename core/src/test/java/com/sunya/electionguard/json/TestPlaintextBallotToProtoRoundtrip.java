@@ -4,7 +4,6 @@ import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.protoconvert.PlaintextTallyFromProto;
 import com.sunya.electionguard.protoconvert.PlaintextTallyToProto;
 import electionguard.protogen.PlaintextTallyProto;
-import com.sunya.electionguard.publish.Consumer;
 import com.sunya.electionguard.verifier.TestParameterVerifier;
 import net.jqwik.api.Example;
 import net.jqwik.api.lifecycle.BeforeContainer;
@@ -18,7 +17,7 @@ public class TestPlaintextBallotToProtoRoundtrip {
 
   @BeforeContainer
   public static void setup() throws IOException {
-    consumer = new JsonConsumer(TestParameterVerifier.topdirJson);
+    consumer = new JsonConsumer(TestParameterVerifier.topdirJsonExample);
   }
 
   @Example

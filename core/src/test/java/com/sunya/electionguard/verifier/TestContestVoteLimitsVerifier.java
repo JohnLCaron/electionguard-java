@@ -21,7 +21,7 @@ public class TestContestVoteLimitsVerifier {
 
   @Example
   public void testContestVoteLimitsValidatorJson() throws IOException {
-    String topdir = TestParameterVerifier.topdirJson;
+    String topdir = TestParameterVerifier.topdirJsonExample;
     System.out.printf("testContestVoteLimitsValidatorJson %s%n", topdir);
 
     JsonConsumer consumer = new JsonConsumer(topdir);

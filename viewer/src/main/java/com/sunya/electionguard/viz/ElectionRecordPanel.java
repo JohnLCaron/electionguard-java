@@ -141,7 +141,9 @@ class ElectionRecordPanel extends JPanel {
       if (record.ciphertextTally() != null) {
         ciphertextTallyTable.setCiphertextTally(record.ciphertextTally());
       }
-      plaintextTallyTable.setPlaintextTallies(record.manifest(), ImmutableList.of(record.decryptedTally()));
+      if (record.decryptedTally() != null) {
+        plaintextTallyTable.setPlaintextTallies(record.manifest(), ImmutableList.of(record.decryptedTally()));
+      }
       spoiledBallotsTable.setPlaintextTallies(record.manifest(), record.spoiledBallotTallies());
     } catch (Exception e) {
       e.printStackTrace();
@@ -162,12 +164,12 @@ class ElectionRecordPanel extends JPanel {
       f.format("  name = %s%n", manifest.name());
       f.format("  start_date = %s%n", manifest.startDate());
       f.format("  end_date = %s%n", manifest.endDate());
-      f.format("  manifest crypto hash = %s%n", manifest.cryptoHash());
+      f.format("  manifest crypto hash = %s (%s) %n", manifest.cryptoHash(), manifest.cryptoHash().getBigInt());
 
       ElectionConstants constants = record.constants();
       f.format("%nConstants%n");
       f.format("  name = %s%n", constants.name);
-      f.format("  large_prime = %s%n", Group.int_to_p_unchecked(constants.cofactor).toShortString());
+      f.format("  large_prime = %s%n", Group.int_to_p_unchecked(constants.largePrime).toShortString());
       f.format("  small_prime = %s%n", Group.int_to_q_unchecked(constants.smallPrime));
       f.format("  cofactor    = %s%n", Group.int_to_p_unchecked(constants.cofactor).toShortString());
       f.format("  generator   = %s%n", Group.int_to_p_unchecked(constants.generator).toShortString());
@@ -175,7 +177,9 @@ class ElectionRecordPanel extends JPanel {
       f.format("%nContext%n");
       f.format("  number_of_guardians = %s%n", record.numberOfGuardians());
       f.format("  quorum = %s%n", record.quorum());
-      f.format("  election public key = %s%n", record.electionPublicKey().toShortString());
+      if (record.electionPublicKey() != null) {
+        f.format("  election public key = %s%n", record.electionPublicKey().toShortString());
+      }
       f.format("  extended base hash = %s%n", record.extendedHash());
 
       /*

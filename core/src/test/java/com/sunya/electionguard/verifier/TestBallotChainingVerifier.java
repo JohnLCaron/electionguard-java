@@ -21,7 +21,7 @@ public class TestBallotChainingVerifier {
 
   @Example
   public void testContestVoteLimitsValidatorJson() throws IOException {
-    String topdir = TestParameterVerifier.topdirJson;
+    String topdir = TestParameterVerifier.topdirJsonExample;
     JsonConsumer consumer = new JsonConsumer(topdir);
     BallotChainingVerifier validator = new BallotChainingVerifier(consumer.readElectionRecordJson());
     boolean sevOk = validator.verify_all_ballots();

@@ -35,7 +35,7 @@ public class TestGuardianPublicKeyVerifier {
 
   @Example
   public void testGuardianPublicKeyValidationJson() throws IOException {
-    String topdir = TestParameterVerifier.topdirJson;
+    String topdir = TestParameterVerifier.topdirJsonExample;
     JsonConsumer consumer = new JsonConsumer(topdir);
     ElectionRecord electionRecord = consumer.readElectionRecordJson();
     GuardianPublicKeyVerifier kgv = new GuardianPublicKeyVerifier(electionRecord);
