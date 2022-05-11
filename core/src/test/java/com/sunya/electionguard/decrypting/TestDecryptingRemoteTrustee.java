@@ -54,7 +54,8 @@ public class TestDecryptingRemoteTrustee {
   }
 
   DecryptingRemoteTrustee makeDecryptingRemoteTrustee() throws IOException {
-    return new DecryptingRemoteTrustee(TestDecryptingMediator.TRUSTEE_DATA_DIR + "/remoteTrustee1.protobuf");
+    return new DecryptingRemoteTrustee(TestDecryptingMediator.TRUSTEE_DATA_DIR +
+            "/decryptingTrustee-remoteTrustee1.protobuf");
   }
 
   @Example

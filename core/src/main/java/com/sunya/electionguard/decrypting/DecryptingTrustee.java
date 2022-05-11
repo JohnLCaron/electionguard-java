@@ -134,9 +134,6 @@ public record DecryptingTrustee(
     }
 
     Group.ElementModP recovered = recoverPublicKey(missing_guardian_id);
-    Group.ElementModP recovered2 = recoverPublicKey2(missing_guardian_id);
-    System.out.printf("recovered.equals(recovered2) = %s%n", recovered.equals(recovered2));
-
     List<DecryptionProofRecovery> results = new ArrayList<>();
     for (ElGamal.Ciphertext text : texts) {
       // 𝑀_{𝑖,l} = 𝐴^P𝑖_{l}
@@ -170,28 +167,6 @@ public record DecryptingTrustee(
 
   /** Compute the recovery public key for a given guardian. */
   public Group.ElementModP recoverPublicKey(String missing_guardian_id) {
-
-    List<Group.ElementModP> otherCommitments = this.guardianCommittments.get(missing_guardian_id);
-    if (otherCommitments == null) {
-      String mess = String.format("recovery_public_key_for guardian %s missing commitments for %s", this.id, missing_guardian_id);
-      logger.atSevere().log(mess);
-      throw new IllegalStateException(mess);
-    }
-
-    // compute the recovery public key, corresponding to the secret share Pi(l)
-    // K_ij^(l^j) for j in 0..k-1.  K_ij is coefficients[j].public_key
-    Group.ElementModP public_key = ONE_MOD_P;
-    int count = 0;
-    for (Group.ElementModP commitment : otherCommitments) {
-      Group.ElementModQ exponent = Group.pow_q(BigInteger.valueOf(this.xCoordinate), BigInteger.valueOf(count));
-      public_key = mult_p(public_key, pow_p(commitment, exponent));
-      count++;
-    }
-
-    return public_key;
-  }
-
-  public Group.ElementModP recoverPublicKey2(String missing_guardian_id) {
 
     List<Group.ElementModP> otherCommitments = this.guardianCommittments.get(missing_guardian_id);
     if (otherCommitments == null) {

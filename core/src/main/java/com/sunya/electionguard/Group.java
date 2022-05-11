@@ -1,14 +1,11 @@
 package com.sunya.electionguard;
 
 import at.favre.lib.bytes.Bytes;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
-import com.sunya.electionguard.core.UInt256;
 
 import javax.annotation.concurrent.Immutable;
 import java.math.BigInteger;
 import java.util.Collection;
-import java.util.Objects;
 import java.util.Optional;
 
 /** Wraps all computations on BigInteger. */
@@ -75,37 +72,29 @@ public class Group {
       return elem;
     }
 
-    /**
-     * Converts from the element to the hex String of the BigInteger bytes.
-     * This is preferable to directly accessing `elem`, whose representation might change.
-     */
-    public abstract String to_hex();
-
-    /**
-     * Converts from the element to the representation of bytes by first going through hex.
-     * This is preferable to directly accessing `elem`, whose representation might change.
-     */
-    byte[] to_bytes() {
-      return Utils.b16decode(this.to_hex());
+    public String base16() {
+      return bytes().encodeHex(true);
     }
 
-    public Bytes bytes() {
-      return Bytes.wrap(elem.toByteArray());
-    }
+    public abstract Bytes bytes();
 
-    public Bytes normalize(int size) {
-      return Group.normalize(this.elem, size);
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (!(o instanceof ElementMod that)) return false;
+      return bytes().equals(that.bytes());
     }
 
     @Override
     public int hashCode() {
-      return Objects.hash(elem);
+      return bytes().hashCode();
     }
 
     @Override
     public String toString() {
-      return "ElementMod{elem=" + elem + '}';
+      return base16();
     }
+
   }
 
   /** Elements in the Group Z_q: integers mod q. */
@@ -120,24 +109,8 @@ public class Group {
       return between(BigInteger.ZERO, elem, primes.smallPrime);
     }
 
-    @Override
-    public String toString() {
-      return UInt256.fromModQ(this).toString();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) return true;
-      if (!(o instanceof ElementMod that)) return false;
-      return this.normalize(32).equals(that.normalize(32));
-    }
-
-    public String to_hex() {
-      return this.normalize(32).encodeHex(true);
-    }
-
-    public boolean isNormal() {
-      return bytes().array().length == 32;
+    public Bytes bytes() {
+      return Group.normalize(this.elem, 32);
     }
   }
 
@@ -153,6 +126,10 @@ public class Group {
       return between(BigInteger.ZERO, elem, primes.largePrime);
     }
 
+    public Bytes bytes() {
+      return Group.normalize(this.elem, 512);
+    }
+
     /**
      * Validates that this element is in Z^r_p.
      * y ∈ Z^r_p if and only if y^q mod p = 1
@@ -160,11 +137,6 @@ public class Group {
     public boolean is_valid_residue() {
       boolean residue = elem.modPow(primes.smallPrime, primes.largePrime).equals(BigInteger.ONE);
       return between(BigInteger.ONE, elem, primes.largePrime) && residue;
-    }
-
-    @Override
-    public String toString() {
-      return "ElementModP{" + elem.toString(16) + '}';
     }
 
     public String toShortString() {
@@ -175,21 +147,6 @@ public class Group {
         return longString.substring(0, 13 + ndigitsShort) + "..." + longString.substring(len - ndigitsShort - 1, len);
       }
       return toString();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) return true;
-      if (!(o instanceof ElementMod that)) return false;
-      return this.normalize(512).equals(that.normalize(512));
-    }
-
-    public String to_hex() {
-      return this.normalize(512).encodeHex(true);
-    }
-
-    public boolean isNormal() {
-      return bytes().array().length == 512;
     }
   }
 
@@ -263,14 +220,6 @@ public class Group {
     return new ElementModP(biggy);
   }
 
-  public static ElementModP int_to_p_normalized(BigInteger biggy) {
-    Bytes b = Group.normalize(biggy, 512);
-    BigInteger normal = new BigInteger(1, b.array());
-    ElementModP result = new ElementModP(normal);
-    Preconditions.checkArgument(result.is_in_bounds());
-    return result;
-  }
-
   /**
     Given a BigInteger, returns an ElementModQ. Allows
     for the input to be out-of-bounds, and thus creating an invalid
@@ -279,14 +228,6 @@ public class Group {
    */
   public static ElementModQ int_to_q_unchecked(BigInteger biggy) {
     return new ElementModQ(biggy);
-  }
-
-  public static ElementModQ int_to_q_normalized(BigInteger biggy) {
-    Bytes b = Group.normalize(biggy, 32);
-    BigInteger normal = new BigInteger(1, b.array());
-    ElementModQ result = new ElementModQ(normal);
-    Preconditions.checkArgument(result.is_in_bounds());
-    return result;
   }
 
   // given an int, returns an ElementModQ
@@ -416,13 +357,13 @@ public class Group {
   /** Generate random number between 0 and Q. */
   public static ElementModQ rand_q() {
     BigInteger random = Utils.randbelow(primes.smallPrime);
-    return int_to_q_normalized(random);
+    return int_to_q(random).orElseThrow();
   }
 
   /** Generate random number between start and Q. */
   public static ElementModQ rand_range_q(ElementMod start) {
     BigInteger random = Utils.randbetween(start.getBigInt(), primes.smallPrime);
-    return int_to_q_normalized(random);
+    return int_to_q(random).orElseThrow();
   }
 
   // is lower <= x < upper, ie is x in [lower, upper) ?

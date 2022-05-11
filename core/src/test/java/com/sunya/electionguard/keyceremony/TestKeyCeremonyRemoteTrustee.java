@@ -71,14 +71,6 @@ public class TestKeyCeremonyRemoteTrustee {
   }
 
   @Example
-  public void makeRemoteNoDirectory() {
-    int xCoordinate = 1;
-    assertThrows(FileNotFoundException.class, () ->
-      new KeyCeremonyRemoteTrustee("KeyCeremonyRemoteTrustee" + xCoordinate, xCoordinate, QUORUM,
-              "/home/snake/tmp/electionguard/testKeyCeremonyRemoteTrusteeUnownDirectory"));
-  }
-
-  @Example
   public void testConstructor() throws IOException {
     KeyCeremonyRemoteTrustee remote = makeRemote(1);
     assertThat(remote.delegate.xCoordinate).isEqualTo(1);

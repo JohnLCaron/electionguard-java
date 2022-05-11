@@ -22,7 +22,7 @@ public class TestBigIntegerCoding {
     s = modp.toString();
     System.out.printf("ElementModP.toString() = (%d) %s%n", s.length(), s);
 
-    s = modp.to_hex();
+    s = modp.base16();
     System.out.printf("ElementModP.to_hex() = (%d) %s%n", s.length(), s);
   }
 
@@ -38,7 +38,7 @@ public class TestBigIntegerCoding {
     assertThat(rtrip).isEqualTo(bi);
 
     Group.ElementModP modp = Group.int_to_p_unchecked(Group.getPrimes().largePrime);
-    s = modp.to_hex();
+    s = modp.base16();
     rtrip = new BigInteger(s, 16);
     assertThat(rtrip).isEqualTo(bi);
   }

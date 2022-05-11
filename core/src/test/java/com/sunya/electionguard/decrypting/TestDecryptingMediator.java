@@ -19,16 +19,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 
 public class TestDecryptingMediator extends TestProperties {
-  public static final String DECRYPTING_DATA_DIR = "src/test/data/workflow/encryptor/";
-  public static final String TRUSTEE_DATA_DIR =    "src/test/data/workflow/keyCeremony/election_private_data/";
-  // public static final String DECRYPTING_DATA_DIR = "/home/snake/tmp/electionguard/remoteWorkflow/encryptor/";
-  // public static final String TRUSTEE_DATA_DIR = "/home/snake/tmp/electionguard/remoteWorkflow/keyCeremony/election_private_data/";
+  //public static final String DECRYPTING_DATA_DIR = "src/test/data/workflow/encryptor/";
+  //public static final String TRUSTEE_DATA_DIR =    "src/test/data/workflow/keyCeremony/election_private_data/";
+  public static final String DECRYPTING_DATA_DIR = "/home/snake/tmp/electionguard/kickstart/encryptor/";
+  public static final String TRUSTEE_DATA_DIR = "/home/snake/tmp/electionguard/kickstart/keyCeremony/election_private_data/";
   private static final ElectionRecordPath path = new ElectionRecordPath(DECRYPTING_DATA_DIR);
 
   List<DecryptingTrusteeIF> trustees = new ArrayList<>();
@@ -53,14 +54,7 @@ public class TestDecryptingMediator extends TestProperties {
             Collectors.toMap(guardian -> guardian.getGuardianId(), guardian -> guardian.publicKey()));
 
     // hand tally the results
-    expectedTally = new HashMap<>();
-    expectedTally.put("referendum-pineapple:referendum-pineapple-affirmative-selection", 0);
-    expectedTally.put("referendum-pineapple:referendum-pineapple-negative-selection", 0);
-    expectedTally.put("justice-supreme-court:benjamin-franklin-selection", 3);
-    expectedTally.put("justice-supreme-court:john-adams-selection", 0);
-    expectedTally.put("justice-supreme-court:john-hancock-selection", 3);
-    expectedTally.put("justice-supreme-court:write-in-selection", 1);
-
+    this.expectedTally = getExpectedTally();
     this.spoiledBallots =  consumer.iterateSpoiledBallots();
   }
 
@@ -133,6 +127,7 @@ public class TestDecryptingMediator extends TestProperties {
     DecryptingMediator mediator = makeDecryptingMediator();
     assertThat(mediator.announce(this.trustees.get(0))).isTrue();
     assertThat(mediator.announce(this.trustees.get(1))).isTrue();
+    assertThat(mediator.announce(this.trustees.get(3))).isTrue();
 
     Optional<PlaintextTally> decrypted_tallies = mediator.get_plaintext_tally();
     assertThat(decrypted_tallies).isPresent();
@@ -170,12 +165,13 @@ public class TestDecryptingMediator extends TestProperties {
   }
 
   private Map<String, Integer> convertToCounts(PlaintextTally tally) {
-    Map<String, Integer> counts = new HashMap<>();
+    Map<String, Integer> counts = new TreeMap<>();
     for (PlaintextTally.Contest contest : tally.contests.values()) {
       for (Map.Entry<String, PlaintextTally.Selection> entry : contest.selections().entrySet()) {
         counts.put(contest.contestId() + ":" + entry.getKey(), entry.getValue().tally());
       }
     }
+    counts.entrySet().forEach(entry -> System.out.printf("    expectedTally.put(\"%s\",%d);%n", entry.getKey(), entry.getValue()));
     return counts;
   }
 
@@ -187,6 +183,111 @@ public class TestDecryptingMediator extends TestProperties {
       }
     }
     return counts;
+  }
+
+  private Map<String, Integer> getExpectedTally() {
+    Map<String, Integer> expectedTally = new HashMap<>();
+    expectedTally.put("contest0:selection0",2);
+    expectedTally.put("contest0:selection1",0);
+    expectedTally.put("contest0:selection2",0);
+    expectedTally.put("contest0:selection3",0);
+    expectedTally.put("contest10:selection40",1);
+    expectedTally.put("contest10:selection41",0);
+    expectedTally.put("contest10:selection42",1);
+    expectedTally.put("contest10:selection43",0);
+    expectedTally.put("contest11:selection44",1);
+    expectedTally.put("contest11:selection45",1);
+    expectedTally.put("contest11:selection46",0);
+    expectedTally.put("contest11:selection47",0);
+    expectedTally.put("contest12:selection48",2);
+    expectedTally.put("contest12:selection49",0);
+    expectedTally.put("contest12:selection50",0);
+    expectedTally.put("contest12:selection51",0);
+    expectedTally.put("contest13:selection52",0);
+    expectedTally.put("contest13:selection53",1);
+    expectedTally.put("contest13:selection54",1);
+    expectedTally.put("contest13:selection55",0);
+    expectedTally.put("contest14:selection56",1);
+    expectedTally.put("contest14:selection57",1);
+    expectedTally.put("contest14:selection58",0);
+    expectedTally.put("contest14:selection59",0);
+    expectedTally.put("contest15:selection60",2);
+    expectedTally.put("contest15:selection61",0);
+    expectedTally.put("contest15:selection62",0);
+    expectedTally.put("contest15:selection63",0);
+    expectedTally.put("contest16:selection64",2);
+    expectedTally.put("contest16:selection65",0);
+    expectedTally.put("contest16:selection66",0);
+    expectedTally.put("contest16:selection67",0);
+    expectedTally.put("contest17:selection68",1);
+    expectedTally.put("contest17:selection69",0);
+    expectedTally.put("contest17:selection70",0);
+    expectedTally.put("contest17:selection71",0);
+    expectedTally.put("contest18:selection72",1);
+    expectedTally.put("contest18:selection73",1);
+    expectedTally.put("contest18:selection74",0);
+    expectedTally.put("contest18:selection75",0);
+    expectedTally.put("contest19:selection76",1);
+    expectedTally.put("contest19:selection77",0);
+    expectedTally.put("contest19:selection78",0);
+    expectedTally.put("contest19:selection79",1);
+    expectedTally.put("contest1:selection4",1);
+    expectedTally.put("contest1:selection5",0);
+    expectedTally.put("contest1:selection6",0);
+    expectedTally.put("contest1:selection7",0);
+    expectedTally.put("contest20:selection80",0);
+    expectedTally.put("contest20:selection81",1);
+    expectedTally.put("contest20:selection82",0);
+    expectedTally.put("contest20:selection83",1);
+    expectedTally.put("contest21:selection84",2);
+    expectedTally.put("contest21:selection85",0);
+    expectedTally.put("contest21:selection86",0);
+    expectedTally.put("contest21:selection87",0);
+    expectedTally.put("contest22:selection88",1);
+    expectedTally.put("contest22:selection89",0);
+    expectedTally.put("contest22:selection90",1);
+    expectedTally.put("contest22:selection91",0);
+    expectedTally.put("contest23:selection92",2);
+    expectedTally.put("contest23:selection93",0);
+    expectedTally.put("contest23:selection94",0);
+    expectedTally.put("contest23:selection95",0);
+    expectedTally.put("contest24:selection96",1);
+    expectedTally.put("contest24:selection97",1);
+    expectedTally.put("contest24:selection98",0);
+    expectedTally.put("contest24:selection99",0);
+    expectedTally.put("contest2:selection10",0);
+    expectedTally.put("contest2:selection11",0);
+    expectedTally.put("contest2:selection8",1);
+    expectedTally.put("contest2:selection9",1);
+    expectedTally.put("contest3:selection12",0);
+    expectedTally.put("contest3:selection13",2);
+    expectedTally.put("contest3:selection14",0);
+    expectedTally.put("contest3:selection15",0);
+    expectedTally.put("contest4:selection16",2);
+    expectedTally.put("contest4:selection17",0);
+    expectedTally.put("contest4:selection18",0);
+    expectedTally.put("contest4:selection19",0);
+    expectedTally.put("contest5:selection20",1);
+    expectedTally.put("contest5:selection21",0);
+    expectedTally.put("contest5:selection22",1);
+    expectedTally.put("contest5:selection23",0);
+    expectedTally.put("contest6:selection24",1);
+    expectedTally.put("contest6:selection25",0);
+    expectedTally.put("contest6:selection26",1);
+    expectedTally.put("contest6:selection27",0);
+    expectedTally.put("contest7:selection28",1);
+    expectedTally.put("contest7:selection29",0);
+    expectedTally.put("contest7:selection30",0);
+    expectedTally.put("contest7:selection31",0);
+    expectedTally.put("contest8:selection32",1);
+    expectedTally.put("contest8:selection33",0);
+    expectedTally.put("contest8:selection34",0);
+    expectedTally.put("contest8:selection35",1);
+    expectedTally.put("contest9:selection36",1);
+    expectedTally.put("contest9:selection37",0);
+    expectedTally.put("contest9:selection38",0);
+    expectedTally.put("contest9:selection39",1);
+    return expectedTally;
   }
 
 }

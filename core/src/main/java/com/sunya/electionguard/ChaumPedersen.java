@@ -325,12 +325,12 @@ public class ChaumPedersen {
                 String.format("%n pad %s%n", a.toShortString()) +
                 String.format(" data %s%n", b.toShortString()) +
                 String.format(" challenge %s%n", this.challenge) +
-                String.format(" response %s%n", this.response) +
-                String.format(" g_pow_p(v) %s%n", g_pow_p(v).toShortString()) +
-                String.format(" pow_p(k, c) %s%n", pow_p(k, c).toShortString()) +
-                String.format(" mult_p(a, pow_p(k, c)) %s%n", mult_p(a, pow_p(k, c)).toShortString());
-        // throw new IllegalStateException(err);
+                String.format(" response %s%n", this.response);
+                //String.format(" g_pow_p(v) %s%n", g_pow_p(v).toShortString()) +
+                //String.format(" pow_p(k, c) %s%n", pow_p(k, c).toShortString()) +
+                //String.format(" mult_p(a, pow_p(k, c)) %s%n", mult_p(a, pow_p(k, c)).toShortString());
         logger.atWarning().log(err);
+        throw new IllegalStateException(err);
       }
       return success;
     }

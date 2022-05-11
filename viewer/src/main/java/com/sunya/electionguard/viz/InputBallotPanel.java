@@ -97,7 +97,7 @@ class InputBallotPanel extends JPanel {
     inputBallotsTable.clearBeans();
     File file = new File(fileOrDir);
     try {
-      List<PlaintextBallot> inputs = PrivateData.inputBallots(file.toPath());
+      List<PlaintextBallot> inputs = PrivateData.readPlaintextBallots(file.toPath());
       if (inputs.isEmpty()) {
         System.out.printf("No ballots in %s%n", file.toPath());
         return false;

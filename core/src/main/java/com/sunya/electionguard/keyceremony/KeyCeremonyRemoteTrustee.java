@@ -11,8 +11,6 @@ import electionguard.protogen.CommonRpcProto;
 import electionguard.protogen.RemoteKeyCeremonyProto;
 import electionguard.protogen.RemoteKeyCeremonyTrusteeProto;
 import electionguard.protogen.RemoteKeyCeremonyTrusteeServiceGrpc;
-import electionguard.protogen.TrusteeProto;
-import com.sunya.electionguard.protoconvert.KeyCeremonyTrusteeToProto;
 import com.sunya.electionguard.publish.PrivateData;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;

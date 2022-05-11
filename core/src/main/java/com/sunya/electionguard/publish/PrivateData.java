@@ -6,12 +6,10 @@ import com.sunya.electionguard.protoconvert.KeyCeremonyTrusteeToProto;
 import com.sunya.electionguard.protoconvert.PlaintextBallotFromProto;
 import com.sunya.electionguard.protoconvert.PlaintextBallotToProto;
 import com.sunya.electionguard.protoconvert.TrusteeFromProto;
-import com.sunya.electionguard.standard.GuardianPrivateRecord;
 import com.sunya.electionguard.PlaintextBallot;
 import electionguard.protogen.PlaintextBallotProto;
 import electionguard.protogen.TrusteeProto;
 
-import javax.annotation.Nullable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -27,13 +25,8 @@ import static com.sunya.electionguard.protoconvert.DecryptingTrusteeToProto.publ
 /** Publishes the Manifest Record to Json or protobuf files. */
 public class PrivateData {
   static final String PRIVATE_DATA_DIR = "election_private_data";
-
-  //// json
-  static final String PRIVATE_GUARDIANS_DIR = "private_guardians";
-  static final String PRIVATE_BALLOT_DIR = "plaintext_ballots";
-
-  //// proto
-  static final String PROTO_BALLOTS_FILE = "plaintextBallots" + PublisherOld.PROTO_SUFFIX;
+  static final String INPUT_BALLOTS_FILE = "inputBallots" + ElectionRecordPath.PROTO_SUFFIX;
+  static final String INVALID_BALLOTS_FILE = "invalidBallots" + ElectionRecordPath.PROTO_SUFFIX;
 
   private final Path privateDirectory;
 
@@ -95,24 +88,12 @@ public class PrivateData {
     return privateDirectory.resolve(filename);
   }
 
-  public Path privateGuardiansPath() {
-    return privateDirectory.resolve(PRIVATE_GUARDIANS_DIR);
+  public Path inputBallotsFilePath() {
+    return privateDirectory.resolve(INPUT_BALLOTS_FILE);
   }
 
-  public Path privateBallotsPath() {
-    return privateDirectory.resolve(PRIVATE_BALLOT_DIR);
-  }
-
-  public Path privateBallotsProtoPath() {
-    return privateBallotsPath().resolve(PROTO_BALLOTS_FILE);
-  }
-
-  public File[] guardianRecordPrivateFiles() {
-    Path where = privateGuardiansPath();
-    if (!Files.exists(privateGuardiansPath()) || !Files.isDirectory(privateGuardiansPath())) {
-      return new File[0];
-    }
-    return privateGuardiansPath().toFile().listFiles();
+  public Path invalidBallotsFilePath() {
+    return privateDirectory.resolve(INVALID_BALLOTS_FILE);
   }
 
   //////////////////////////////////////////////////////////////////
@@ -166,35 +147,23 @@ public class PrivateData {
     }
   }
 
+  // PlaintextBallots
 
-  public void writePrivateDataProto(
-          @Nullable Iterable<PlaintextBallot> original_ballots,
-          @Nullable Iterable<GuardianPrivateRecord> guardians) throws IOException {
-
+  public void writeInputBallots(Iterable<PlaintextBallot> original_ballots) throws IOException {
     Files.createDirectories(privateDirectory);
-
-    if (guardians != null) {
-      return;
-    }
-
-    if (original_ballots != null) {
-      Files.createDirectories(privateBallotsPath());
-      try (FileOutputStream out = new FileOutputStream(privateBallotsProtoPath().toFile())) {
-        for (PlaintextBallot ballot : original_ballots) {
-          PlaintextBallotProto.PlaintextBallot ballotProto = PlaintextBallotToProto.publishPlaintextBallot(ballot);
-          ballotProto.writeDelimitedTo(out);
-        }
+    try (FileOutputStream out = new FileOutputStream(inputBallotsFilePath().toFile())) {
+      for (PlaintextBallot ballot : original_ballots) {
+        PlaintextBallotProto.PlaintextBallot ballotProto = PlaintextBallotToProto.publishPlaintextBallot(ballot);
+        ballotProto.writeDelimitedTo(out);
       }
     }
-
-    // TODO CIPHERTEXT_BALLOT_PREFIX?
   }
 
   public List<PlaintextBallot> inputBallots() throws IOException {
-    return inputBallots(privateBallotsProtoPath());
+    return readPlaintextBallots(inputBallotsFilePath());
   }
 
-  public static List<PlaintextBallot> inputBallots(Path fileOrDirPath) throws IOException {
+  public static List<PlaintextBallot> readPlaintextBallots(Path fileOrDirPath) throws IOException {
     if (!Files.exists(fileOrDirPath)) {
       return new ArrayList<>();
     }
@@ -214,8 +183,21 @@ public class PrivateData {
         }
       }
     }
-
     return result;
+  }
+
+  public void writeInvalidBallots(Iterable<PlaintextBallot> invalid_ballots) throws IOException {
+    Files.createDirectories(privateDirectory);
+    try (FileOutputStream out = new FileOutputStream(invalidBallotsFilePath().toFile())) {
+      for (PlaintextBallot ballot : invalid_ballots) {
+        PlaintextBallotProto.PlaintextBallot ballotProto = PlaintextBallotToProto.publishPlaintextBallot(ballot);
+        ballotProto.writeDelimitedTo(out);
+      }
+    }
+  }
+
+  public List<PlaintextBallot> invalidBallots() throws IOException {
+    return readPlaintextBallots(invalidBallotsFilePath());
   }
 
 }

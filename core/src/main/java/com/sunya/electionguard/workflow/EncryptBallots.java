@@ -13,6 +13,7 @@ import com.sunya.electionguard.Encrypt;
 import com.sunya.electionguard.PlaintextBallot;
 import com.sunya.electionguard.input.ManifestInputValidation;
 import com.sunya.electionguard.publish.Consumer;
+import com.sunya.electionguard.publish.PrivateData;
 import com.sunya.electionguard.publish.Publisher;
 import com.sunya.electionguard.publish.ElectionRecord;
 import electionguard.ballot.ElectionInitialized;
@@ -168,9 +169,9 @@ public class EncryptBallots {
     try {
       // publish
       Publisher publish = encryptor.publish(cmdLine.encryptDir, electionInit);
-      encryptor.saveInvalidBallots(publish, invalidBallots);
+      encryptor.saveInvalidBallots(cmdLine.encryptDir, invalidBallots);
       if (cmdLine.save) {
-        encryptor.saveOriginalBallots(publish, originalBallots);
+        encryptor.saveOriginalBallots(cmdLine.encryptDir, originalBallots);
       }
       boolean ok = true;
 
@@ -249,17 +250,15 @@ public class EncryptBallots {
     return publisher;
   }
 
-  void saveOriginalBallots(Publisher publisher, List<PlaintextBallot> ballots) throws IOException {
-    /*PrivateData pdata = publisher.makePrivateData(true, true);
-    // LOOK JSON !!
-    pdata.publish_private_data(ballots, null);
-    // LOOK Proto
-    pdata.writePrivateDataProto(ballots, null);
-    System.out.printf("Save %d original ballots in %s%n", ballots.size(), pdata.privateDirectory()); */
+  void saveOriginalBallots(String outputDir, List<PlaintextBallot> ballots) throws IOException {
+    PrivateData publisher = new PrivateData(outputDir, false, true);
+    publisher.writeInputBallots(ballots);
+    System.out.printf("Save %d original ballots in %s%n", ballots.size(), publisher.inputBallotsFilePath());
   }
 
-  void saveInvalidBallots(Publisher publisher, List<PlaintextBallot> ballots) throws IOException {
-    /* publisher.publish_invalid_ballots("invalid_ballots", ballots);
-    System.out.printf("Save %d invalid ballot in %s/invalid_ballots%n", ballots.size(), publisher.publishPath()); */
+  void saveInvalidBallots(String outputDir, List<PlaintextBallot> ballots) throws IOException {
+    PrivateData publisher = new PrivateData(outputDir, false, true);
+    publisher.writeInvalidBallots(ballots);
+    System.out.printf("Save %d invalid ballots in %s%n", ballots.size(), publisher.invalidBallotsFilePath());
   }
 }

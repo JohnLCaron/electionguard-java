@@ -73,7 +73,8 @@ public class TestSubmittedBallotToProtoRoundtrip {
   public void testPublishEndToEndProblem() throws IOException {
     JsonPublisher publisher = new JsonPublisher(TestParameterVerifier.topdirPublishEndToEnd, PublisherOld.Mode.readonly);
     assertThat(publisher.ballotFiles()).isNotEmpty();
-    String filename = "submitted_ballot_5a150c74-a2cb-47f6-b575-165ba8a4ce53.json";
+    String filename = TestParameterVerifier.topdirPublishEndToEnd +
+            "/submitted_ballots/submitted_ballot_5a150c74-a2cb-47f6-b575-165ba8a4ce53.json";
     SubmittedBallot fromJson = ConvertFromJson.readSubmittedBallot(filename);
     assertThat(fromJson).isNotNull();
     for (CiphertextBallot.Contest contest : fromJson.contests) {

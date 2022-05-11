@@ -208,14 +208,14 @@ public class CompareHelper {
 
   public static void compareElementModP(Group.ElementModP actual, Group.ElementModP expected) {
     if (!actual.equals(expected)) {
-      System.out.printf("HEY %s != %s%n", actual.to_hex(), expected.to_hex());
+      System.out.printf("HEY %s != %s%n", actual.base16(), expected.base16());
     }
     assertThat(actual).isEqualTo(expected);
   }
 
   public static void compareElementModQ(Group.ElementModQ actual, Group.ElementModQ expected) {
     if (!actual.equals(expected)) {
-      System.out.printf("HEY %s != %s%n", actual.to_hex(), expected.to_hex());
+      System.out.printf("HEY %s != %s%n", actual.base16(), expected.base16());
     }
     assertThat(actual).isEqualTo(expected);
   }

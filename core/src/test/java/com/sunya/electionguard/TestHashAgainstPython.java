@@ -34,19 +34,19 @@ public class TestHashAgainstPython {
     assertThat(subject).isNotNull();
     assertThat(subject.is_valid()).isTrue();
 
-    System.out.printf("Manifest crypto_hash: %s%n", subject.cryptoHash().to_hex());
+    System.out.printf("Manifest crypto_hash: %s%n", subject.cryptoHash().base16());
     System.out.printf("     start_date: %s%n", subject.startDate()); // .format(Utils.dtf));
     System.out.printf("     end_date: %s%n", subject.endDate()); // .format(Utils.dtf));
 
     for (Manifest.ContestDescription contest : subject.contests()) {
       System.out.printf("  Contest %s crypto_hash: %s%n",
-              contest.contestId(), contest.cryptoHash().to_hex());
+              contest.contestId(), contest.cryptoHash().base16());
       for (Manifest.SelectionDescription selection : contest.selections()) {
         System.out.printf("    Selection %s crypto_hash: %s%n",
-                selection.selectionId(), selection.cryptoHash().to_hex());
+                selection.selectionId(), selection.cryptoHash().base16());
       }
     }
-    assertThat(subject.cryptoHash().to_hex()).isEqualTo("C02919B0A6BC022C5E56D6C51985078AF9A94359C12DEF441574189457B9D52B");
+    assertThat(subject.cryptoHash().base16()).isEqualTo("C02919B0A6BC022C5E56D6C51985078AF9A94359C12DEF441574189457B9D52B");
   }
 
   @Example
@@ -58,16 +58,16 @@ public class TestHashAgainstPython {
     assertThat(subject).isNotNull();
     assertThat(subject.is_valid()).isTrue();
 
-    System.out.printf("Manifest crypto_hash: %s%n", subject.cryptoHash().to_hex());
+    System.out.printf("Manifest crypto_hash: %s%n", subject.cryptoHash().base16());
     System.out.printf("     start_date: %s%n", subject.startDate()); // .format(Utils.dtf));
     System.out.printf("     end_date: %s%n", subject.endDate()); // .format(Utils.dtf));
 
     for (Manifest.ContestDescription contest : subject.contests()) {
       System.out.printf("  Contest %s crypto_hash: %s%n",
-              contest.contestId(), contest.cryptoHash().to_hex());
+              contest.contestId(), contest.cryptoHash().base16());
       for (Manifest.SelectionDescription selection : contest.selections()) {
         System.out.printf("    Selection %s crypto_hash: %s%n",
-                selection.selectionId(), selection.cryptoHash().to_hex());
+                selection.selectionId(), selection.cryptoHash().base16());
       }
     }
 
@@ -106,8 +106,8 @@ public class TestHashAgainstPython {
             null
             );
 
-    System.out.printf("BallotStyle crypto_hash: %s%n", bs.cryptoHash().to_hex());
-    assertThat(bs.cryptoHash().to_hex()).isEqualTo("5DF2F070E007D049992ED4A7ABA224606D43EA8244D74509E250C4747E8F84A1");
+    System.out.printf("BallotStyle crypto_hash: %s%n", bs.cryptoHash().base16());
+    assertThat(bs.cryptoHash().base16()).isEqualTo("5DF2F070E007D049992ED4A7ABA224606D43EA8244D74509E250C4747E8F84A1");
   }
 
   @Example
@@ -151,7 +151,7 @@ public class TestHashAgainstPython {
   public void show(String s1) {
     Group.ElementModQ s1q = Group.hex_to_q_unchecked(s1);
     UInt256 s1u = UInt256.fromModQ(s1q);
-    System.out.printf(" len = %d s1u = %s s1q = %s%n", s1.length(), s1u, s1q.to_hex());
+    System.out.printf(" len = %d s1u = %s s1q = %s%n", s1.length(), s1u, s1q.base16());
   }
 
   @Example
@@ -167,25 +167,25 @@ public class TestHashAgainstPython {
     Group.ElementModQ s2q = Group.hex_to_q_unchecked("000C49A1E8053FBA95F6B7CD3F3B30B101CDD595C435A46AECF2872F47F1C601206");
 
     assertThat(s1q).isEqualTo(s2q);
-    assertThat(s1q.to_hex()).isEqualTo(s2q.to_hex());
+    assertThat(s1q.base16()).isEqualTo(s2q.base16());
     assertThat(Hash.hash_elems(s1q)).isEqualTo(Hash.hash_elems(s2q));
 
-    System.out.printf(" len = %d hex = %s%n", s1q.to_hex().length(), s1q.to_hex());
+    System.out.printf(" len = %d hex = %s%n", s1q.base16().length(), s1q.base16());
   }
 
   @Example
   public void testElementModQToHex() {
     Group.ElementModQ subject = Group.TWO_MOD_Q;
-    System.out.printf(" len = %d hex = '%s'%n", subject.to_hex().length(), subject.to_hex());
+    System.out.printf(" len = %d hex = '%s'%n", subject.base16().length(), subject.base16());
 
-    assertThat(subject.to_hex().length()).isEqualTo(64);
+    assertThat(subject.base16().length()).isEqualTo(64);
   }
 
   @Example
   public void testElementModP() {
     Group.ElementModQ q = Group.rand_q();
     Group.ElementModP p = Group.g_pow_p(q);
-    String ps = p.to_hex();
+    String ps = p.base16();
     String ps0 = "000" + ps;
     assertThat(ps0.length()).isEqualTo(ps.length() + 3);
 
@@ -196,8 +196,8 @@ public class TestHashAgainstPython {
     assertThat(s1p).isEqualTo(s2p);
     assertThat(Hash.hash_elems(s1p)).isEqualTo(Hash.hash_elems(s2p));
 
-    assertThat(s1p.to_hex()).isEqualTo(s2p.to_hex());
-    System.out.printf("ps0.len = %d, s2p.to_hex() len = %d%n", ps0.length(), s2p.to_hex().length());
+    assertThat(s1p.base16()).isEqualTo(s2p.base16());
+    System.out.printf("ps0.len = %d, s2p.to_hex() len = %d%n", ps0.length(), s2p.base16().length());
   }
 
   @Example

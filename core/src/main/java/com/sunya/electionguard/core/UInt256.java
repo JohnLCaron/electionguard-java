@@ -15,8 +15,7 @@ public record UInt256(byte[] val) implements Hash.CryptoHashableString {
   }
 
   public static UInt256 fromModQ(Group.ElementModQ elem) {
-    Bytes b = elem.normalize(32);
-    return new UInt256(b.array());
+    return new UInt256(elem.bytes().array());
   }
 
   public Group.ElementModQ toModQ() {

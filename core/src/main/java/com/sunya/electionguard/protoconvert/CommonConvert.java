@@ -47,7 +47,7 @@ public class CommonConvert {
       return null;
     }
     BigInteger elem = new BigInteger(1, modQ.getValue().toByteArray());
-    return Group.int_to_q_normalized(elem);
+    return Group.int_to_q(elem).orElseThrow();
   }
   
   @Nullable
@@ -56,7 +56,7 @@ public class CommonConvert {
       return null;
     }
     BigInteger elem = new BigInteger(1, modQ.getValue().toByteArray());
-    return Group.int_to_q_normalized(elem);
+    return Group.int_to_q(elem).orElseThrow();
   }
 
   @Nullable
@@ -65,7 +65,7 @@ public class CommonConvert {
       return null;
     }
     BigInteger elem = new BigInteger(1, modP.getValue().toByteArray());
-    return Group.int_to_p_normalized(elem);
+    return Group.int_to_p(elem).orElseThrow();
   }
 
   @Nullable
