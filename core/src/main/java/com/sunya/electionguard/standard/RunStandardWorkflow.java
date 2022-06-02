@@ -107,7 +107,7 @@ public class RunStandardWorkflow {
     out = new Formatter();
     command1.run(out, "java",
             "-classpath", classpath,
-            "com.sunya.electionguard.workflow.EncryptBallots",
+            "com.sunya.electionguard.workflow.RunEncryptBallots",
             "-in", cmdLine.encryptDir,
             "-nballots", Integer.toString(cmdLine.nballots),
             "-out", cmdLine.encryptDir,

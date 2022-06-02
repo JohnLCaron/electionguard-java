@@ -89,7 +89,6 @@ public class VerifyElectionRecord {
       //  }
       //}
       boolean ok = verifyElectionRecord(electionRecord, cmdLine.skip10);
-      System.exit(ok ? 0 : 1);
     } catch (Throwable t) {
       t.printStackTrace();
       System.exit(2);
@@ -126,7 +125,7 @@ public class VerifyElectionRecord {
 
     System.out.println("\n============ Decryption Verification =========================");
     System.out.println("------------ [box 7] Ballot Aggregation Validation ------------");
-    BallotAggregationVerifier bav = new BallotAggregationVerifier(electionRecord.submittedBallots(), electionRecord.decryptedTally());
+    BallotAggregationVerifier bav = new BallotAggregationVerifier(electionRecord.submittedBallots(), electionRecord.ciphertextTally());
     boolean bavOk = bav.verify_ballot_aggregation();
 
     System.out.println("------------ [box 8, 9] Correctness of Decryptions ------------");
@@ -165,7 +164,7 @@ public class VerifyElectionRecord {
 
     // 12B
     SpoiledBallotVerifier pbv = new SpoiledBallotVerifier(electionRecord);
-    boolean pbvOk = pbv.verify_plaintext_ballot();
+    boolean pbvOk = pbv.verifySpoiledBallot();
 
     boolean allOk = (blvOk && gpkvOk && epkvOk && sevOk && cvlvOk && bcvOk && bavOk && dvOk && ptiValid &&
             (pdvOk || skip10) &&

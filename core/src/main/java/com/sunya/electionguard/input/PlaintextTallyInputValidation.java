@@ -31,6 +31,11 @@ public class PlaintextTallyInputValidation {
 
   /** Determine if a tally is valid and well-formed for the given election manifest. */
   public boolean validateTally(PlaintextTally tally, Formatter problems) {
+    if (tally == null) {
+      System.out.printf("  Decrypted Tally does not exist%n");
+      return false;
+    }
+
     ValidationMessenger messes = new ValidationMessenger("PlaintextTally", tally.tallyId);
 
     for (Map.Entry<String, PlaintextTally.Contest> entry : tally.contests.entrySet()) {

@@ -1,7 +1,6 @@
 package com.sunya.electionguard.json;
 
 import com.sunya.electionguard.*;
-import com.sunya.electionguard.publish.PublisherOld;
 import com.sunya.electionguard.verifier.TestParameterVerifier;
 import net.jqwik.api.Example;
 import net.jqwik.api.lifecycle.BeforeContainer;

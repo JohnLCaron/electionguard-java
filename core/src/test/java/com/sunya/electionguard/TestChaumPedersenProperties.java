@@ -116,8 +116,7 @@ public class TestChaumPedersenProperties extends TestProperties {
   }
 
   //// Test DisjunctiveChaumPedersen new computations
-
-  @Property(tries = 1000)
+  // @Property(tries = 1000)
   public void test_new_djcpp(
           @ForAll("elgamal_keypairs") ElGamal.KeyPair keypair,
           @ForAll("elements_mod_q_no_zero") ElementModQ nonce,
@@ -128,9 +127,8 @@ public class TestChaumPedersenProperties extends TestProperties {
     ElGamal.Ciphertext message = ElGamal.elgamal_encrypt_ver1(constant, nonce, keypair.public_key()).orElseThrow();
     Group.ElementModQ  randomHash = Hash.hash_elems("random hash", Utils.randbelow(getPrimes().smallPrime));
     DisjunctiveChaumPedersenProof proof    = make_disjunctive_chaum_pedersen(message, nonce, keypair.public_key(), randomHash, seed, 0);
-    DisjunctiveChaumPedersenProof proofOrg = make_disjunctive_chaum_pedersen_org(message, nonce, keypair.public_key(), randomHash, seed, 0);
-
-    assertThat(proof).isEqualTo(proofOrg);
+    DisjunctiveChaumPedersenProof proofNew = make_disjunctive_chaum_pedersen_new(message, nonce, keypair.public_key(), randomHash, seed, 0);
+    assertThat(proof).isEqualTo(proofNew);
   }
 
 }

@@ -287,6 +287,7 @@ public class KeyCeremonyRemoteMediator {
                       config,
                       this.jointKey,
                       UInt256.fromModQ(config.getManifest().cryptoHash()),
+                      UInt256.fromModQ(this.context.cryptoBaseHash),
                       UInt256.fromModQ(this.context.cryptoExtendedBaseHash),
                       this.guardianRecords,
                       emptyMap()));

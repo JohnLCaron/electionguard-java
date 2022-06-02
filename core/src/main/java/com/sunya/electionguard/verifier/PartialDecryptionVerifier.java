@@ -26,20 +26,25 @@ public class PartialDecryptionVerifier {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   final ElectionRecord electionRecord;
-  final PlaintextTally tally;
+  final PlaintextTally decryptedTally;
 
   // Map(AVAILABLE_GUARDIAN_ID, ElementModQ)
   final Map<String, Group.ElementModQ> lagrange_coefficients;
 
   PartialDecryptionVerifier(ElectionRecord electionRecord, PlaintextTally decryptedTally) {
     this.electionRecord = electionRecord;
-    this.tally = Preconditions.checkNotNull(decryptedTally);
+    this.decryptedTally = decryptedTally;
     this.lagrange_coefficients = electionRecord.availableGuardians().stream().collect(
             Collectors.toMap(g -> g.guardianId(), g -> g.lagrangeCoefficient()));
   }
 
   /** Verify 10.A for available guardians, if there are missing guardians. */
   boolean verify_replacement_partial_decryptions() {
+    if (decryptedTally == null) {
+      System.out.printf("  Decrypted Tally does not exist%n");
+      return false;
+    }
+
     if (this.lagrange_coefficients.size() == 0) {
       System.out.printf(" ***Replacement Partial Decryptions failure : lagrange_coefficients not found in election record. %n");
       return false;
@@ -48,7 +53,7 @@ public class PartialDecryptionVerifier {
     boolean error = !this.verify_lagrange_coefficients();
 
     // Verify 10.B for available guardians, if there are missing guardians.
-    error |= !this.make_all_contest_verification(this.tally.contests);
+    error |= !this.make_all_contest_verification(this.decryptedTally.contests);
 
     if (error) {
       System.out.printf(" ***Replacement Partial Decryptions failure. %n");

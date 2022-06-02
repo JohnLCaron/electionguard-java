@@ -1,5 +1,6 @@
 package com.sunya.electionguard.publish;
 
+import com.google.common.base.Stopwatch;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.SubmittedBallot;
 import com.sunya.electionguard.core.UInt256;
@@ -29,9 +30,13 @@ public class TestEncryptedBallots {
     Group.ElementModP jointPublicKey = tallyResult.jointPublicKey();
     Group.ElementModQ cryptoExtendedBaseHash = tallyResult.cryptoExtendedBaseHash();
 
+    Stopwatch stopwatch = Stopwatch.createStarted();
+    int count = 0;
     for (SubmittedBallot ballot : consumer.iterateSubmittedBallots()) {
       assertThat(ballot.is_valid_encryption(manifestHash.toModQ(), jointPublicKey, cryptoExtendedBaseHash)).isTrue();
+      count++;
     }
+    System.out.printf("That took %s for %d ballots%n", stopwatch, count);
   }
 
   @Example
@@ -48,9 +53,13 @@ public class TestEncryptedBallots {
     Group.ElementModP jointPublicKey = tallyResult.jointPublicKey();
     Group.ElementModQ cryptoExtendedBaseHash = tallyResult.cryptoExtendedBaseHash();
 
+    Stopwatch stopwatch = Stopwatch.createStarted();
+    int count = 0;
     for (SubmittedBallot ballot : consumer.iterateSubmittedBallots()) {
       assertThat(ballot.is_valid_encryption(manifestHash.toModQ(), jointPublicKey, cryptoExtendedBaseHash)).isTrue();
+      count++;
     }
+    System.out.printf("That took %s for %d ballots%n", stopwatch, count);
   }
 
 }

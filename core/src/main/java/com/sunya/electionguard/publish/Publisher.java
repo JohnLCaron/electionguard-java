@@ -1,16 +1,16 @@
 package com.sunya.electionguard.publish;
 
-import com.sunya.electionguard.PlaintextBallot;
+import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.SubmittedBallot;
 import com.sunya.electionguard.protoconvert.ElectionConfigConvert;
 import com.sunya.electionguard.protoconvert.ElectionInitializedConvert;
 import com.sunya.electionguard.protoconvert.ElectionResultsConvert;
-import com.sunya.electionguard.protoconvert.PlaintextBallotToProto;
+import com.sunya.electionguard.protoconvert.PlaintextTallyToProto;
 import com.sunya.electionguard.protoconvert.SubmittedBallotToProto;
 import electionguard.ballot.*;
 import electionguard.protogen.CiphertextBallotProto;
 import electionguard.protogen.ElectionRecordProto;
-import electionguard.protogen.PlaintextBallotProto;
+import electionguard.protogen.PlaintextTallyProto;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -18,7 +18,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Formatter;
-import java.util.List;
 
 /**
  * Publishes the Manifest Record to Json or protobuf files.
@@ -64,7 +63,6 @@ public class Publisher {
       return;
     }
 
-    String filename = where.getFileName().toString();
     Files.walk(where)
             .filter(p -> !p.equals(where))
             .map(Path::toFile)
@@ -99,52 +97,46 @@ public class Publisher {
 
   public void writeElectionConfig(ElectionConfig config) throws IOException {
     ElectionRecordProto.ElectionConfig proto = ElectionConfigConvert.publishElectionConfig(config);
-    try (FileOutputStream out = new FileOutputStream(path.electionConfigPath())) {
+    try (FileOutputStream out = new FileOutputStream(path.electionConfigPath().toFile())) {
       proto.writeTo(out);
     }
   }
-
 
   public void writeElectionInitialized(ElectionInitialized init) throws IOException {
     ElectionRecordProto.ElectionInitialized proto = ElectionInitializedConvert.publishElectionInitialized(init);
-    try (FileOutputStream out = new FileOutputStream(path.electionInitializedPath())) {
+    try (FileOutputStream out = new FileOutputStream(path.electionInitializedPath().toFile())) {
       proto.writeTo(out);
     }
   }
 
-  public void writeEncryptions(ElectionInitialized init, Iterable<SubmittedBallot> ballots) throws IOException {
-    writeElectionInitialized(init);
-
-      try (FileOutputStream out = new FileOutputStream(path.submittedBallotPath())) {
-        for (SubmittedBallot ballot : ballots) {
-          CiphertextBallotProto.SubmittedBallot ballotProto = SubmittedBallotToProto.translateToProto(ballot);
-          ballotProto.writeDelimitedTo(out);
-        }
+  public void writeSubmittedBallots(Iterable<SubmittedBallot> ballots) throws IOException {
+    try (FileOutputStream out = new FileOutputStream(path.submittedBallotPath().toFile())) {
+      for (SubmittedBallot ballot : ballots) {
+        CiphertextBallotProto.SubmittedBallot ballotProto = SubmittedBallotToProto.translateToProto(ballot);
+        ballotProto.writeDelimitedTo(out);
       }
+    }
   }
 
   public void writeTallyResult(TallyResult tally) throws IOException {
     ElectionRecordProto.TallyResult proto = ElectionResultsConvert.publishTallyResult(tally);
-    try (FileOutputStream out = new FileOutputStream(path.tallyResultPath())) {
+    try (FileOutputStream out = new FileOutputStream(path.tallyResultPath().toFile())) {
       proto.writeTo(out);
     }
   }
 
   public void writeDecryptionResults(DecryptionResult dresult) throws IOException {
     ElectionRecordProto.DecryptionResult proto = ElectionResultsConvert.publishDecryptionResult(dresult);
-    try (FileOutputStream out = new FileOutputStream(path.decryptionResultPath())) {
+    try (FileOutputStream out = new FileOutputStream(path.decryptionResultPath().toFile())) {
       proto.writeTo(out);
     }
   }
 
-  public void writePlaintextBallot(String outputDir, List<PlaintextBallot> plaintextBallots) throws IOException {
-    if (!plaintextBallots.isEmpty()) {
-      String fileout = path.plaintextBallotPath(outputDir);
-      try (FileOutputStream out = new FileOutputStream(fileout)) {
-        for (PlaintextBallot ballot : plaintextBallots) {
-          PlaintextBallotProto.PlaintextBallot ballotProto = PlaintextBallotToProto.publishPlaintextBallot(ballot);
-          ballotProto.writeDelimitedTo(out);
-        }
+  public void writeSpoiledBallots(Iterable<PlaintextTally> ballots) throws IOException {
+    try (FileOutputStream out = new FileOutputStream(path.spoiledBallotPath().toFile())) {
+      for (PlaintextTally ballot : ballots) {
+        PlaintextTallyProto.PlaintextTally ballotProto = PlaintextTallyToProto.publishPlaintextTally(ballot);
+        ballotProto.writeDelimitedTo(out);
       }
     }
   }
@@ -153,13 +145,12 @@ public class Publisher {
     if (this.createPublisherMode == Publisher.Mode.readonly) {
       throw new UnsupportedOperationException("Trying to write to readonly election record");
     }
-    String source = new ElectionRecordPath(inputDir).submittedBallotPath();
-    String dest = path.submittedBallotPath();
+    Path source = new ElectionRecordPath(inputDir).submittedBallotPath();
+    Path dest = path.submittedBallotPath();
     if (source.equals(dest)) {
       return;
     }
-
     System.out.printf("Copy AcceptedBallots from %s to %s%n", source, dest);
-    Files.copy(Path.of(source), Path.of(dest), StandardCopyOption.COPY_ATTRIBUTES);
+    Files.copy(source, dest, StandardCopyOption.COPY_ATTRIBUTES);
   }
 }

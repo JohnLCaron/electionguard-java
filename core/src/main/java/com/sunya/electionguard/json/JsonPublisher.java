@@ -10,7 +10,6 @@ import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.PlaintextBallot;
 import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.SubmittedBallot;
-import com.sunya.electionguard.publish.PublisherOld;
 import com.sunya.electionguard.publish.ElectionRecord;
 
 import javax.annotation.Nullable;

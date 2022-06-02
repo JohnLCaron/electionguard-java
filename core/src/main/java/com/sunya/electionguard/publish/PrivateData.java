@@ -25,17 +25,15 @@ import static com.sunya.electionguard.protoconvert.DecryptingTrusteeToProto.publ
 /** Publishes the Manifest Record to Json or protobuf files. */
 public class PrivateData {
   static final String PRIVATE_DATA_DIR = "election_private_data";
-  static final String INPUT_BALLOTS_FILE = "inputBallots" + ElectionRecordPath.PROTO_SUFFIX;
-  static final String INVALID_BALLOTS_FILE = "invalidBallots" + ElectionRecordPath.PROTO_SUFFIX;
 
-  private final Path privateDirectory;
+  private final ElectionRecordPath recordPath;
 
   public PrivateData(String where, boolean removeAllFiles, boolean createDirs) throws IOException {
-    this.privateDirectory = Path.of(where).resolve(PRIVATE_DATA_DIR);
+    this.recordPath = new ElectionRecordPath(Path.of(where).resolve(PRIVATE_DATA_DIR).toAbsolutePath().toString());
 
-    if (removeAllFiles) {
-      removeAllFiles();
-    }
+    //if (removeAllFiles) {
+   //   removeAllFiles();
+   // }
     if (createDirs) {
       createDirs();
     }
@@ -43,74 +41,65 @@ public class PrivateData {
 
   /** Make sure output dir exists and is writeable. */
   public boolean validateOutputDir(Formatter error) {
-    if (!Files.exists(privateDirectory)) {
-      error.format(" Output directory '%s' does not exist%n", privateDirectory);
+
+    if (!Files.exists(recordPath.topDirPath())) {
+      error.format(" Output directory '%s' does not exist%n", recordPath.topDirPath());
       return false;
     }
-    if (!Files.isDirectory(privateDirectory)) {
-      error.format(" Output directory '%s' is not a directory%n", privateDirectory);
+    if (!Files.isDirectory(recordPath.topDirPath())) {
+      error.format(" Output directory '%s' is not a directory%n", recordPath.topDirPath());
       return false;
     }
-    if (!Files.isWritable(privateDirectory)) {
-      error.format(" Output directory '%s' is not writeable%n", privateDirectory);
+    if (!Files.isWritable(recordPath.topDirPath())) {
+      error.format(" Output directory '%s' is not writeable%n", recordPath.topDirPath());
       return false;
     }
-    if (!Files.isExecutable(privateDirectory)) {
-      error.format(" Output directory '%s' is not executable%n", privateDirectory);
+    if (!Files.isExecutable(recordPath.topDirPath())) {
+      error.format(" Output directory '%s' is not executable%n", recordPath.topDirPath());
       return false;
     }
     return true;
   }
 
   private void createDirs() throws IOException {
-    Files.createDirectories(privateDirectory);
-    System.out.printf("Make private directory %s%n", privateDirectory);
+    Files.createDirectories(recordPath.topDirPath());
+    System.out.printf("Make private directory %s%n", recordPath.topDirPath());
   }
 
-  /** Delete everything in the output directory, but leave that directory. */
+  /** Delete everything in the output directory, but leave that directory.
   private void removeAllFiles() throws IOException {
-    if (!this.privateDirectory.toFile().exists()) {
+    if (!Files.exists(recordPath.topDirPath())) {
       return;
     }
-    Files.walk(this.privateDirectory)
-            .filter(p -> !p.equals(privateDirectory))
+    Files.walk(this.recordPath.topDirPath())
+            .filter(p -> !p.equals(recordPath.topDirPath()))
             .map(Path::toFile)
             .sorted((o1, o2) -> -o1.compareTo(o2))
             .forEach(f -> f.delete());
-  }
+  } */
 
-  public Path privateDirectory() {
-    return privateDirectory.toAbsolutePath();
+  public String getTopDir() {
+    return this.recordPath.getTopDir();
   }
 
   public Path trusteePath(String id) {
-    String filename = id + PublisherOld.PROTO_SUFFIX;
-    return privateDirectory.resolve(filename);
+    return this.recordPath.topDirPath().resolve(this.recordPath.decryptingTrusteeName(id));
   }
 
   public Path inputBallotsFilePath() {
-    return privateDirectory.resolve(INPUT_BALLOTS_FILE);
+    return this.recordPath.topDirPath().resolve(ElectionRecordPath.INPUT_BALLOTS_FILE);
   }
 
   public Path invalidBallotsFilePath() {
-    return privateDirectory.resolve(INVALID_BALLOTS_FILE);
+    return this.recordPath.topDirPath().resolve(ElectionRecordPath.INVALID_BALLOTS_FILE);
   }
 
   //////////////////////////////////////////////////////////////////
   // Proto
-  public void overwriteTrusteeProto(TrusteeProto.DecryptingTrustee trusteeProto) throws IOException {
-    Path outputPath = trusteePath(trusteeProto.getGuardianId());
-    if (Files.exists(outputPath)) {
-      Files.delete(outputPath);
-    }
-    try (FileOutputStream out = new FileOutputStream(outputPath.toFile())) {
-      trusteeProto.writeDelimitedTo(out);
-    }
-  }
 
   public void writeTrustee(KeyCeremonyTrustee trustee) {
     TrusteeProto.DecryptingTrustee trusteeProto = KeyCeremonyTrusteeToProto.convertTrustee(trustee);
-    Path fileout = PublisherOld.decryptingTrusteePath(this.privateDirectory, trustee.id);
+    Path fileout = this.trusteePath(trustee.id);
     System.out.printf("writeTrustee %s%n", fileout);
     try (FileOutputStream out = new FileOutputStream(fileout.toFile())) {
       trusteeProto.writeTo(out);
@@ -120,17 +109,16 @@ public class PrivateData {
   }
 
   public DecryptingTrustee readDecryptingTrustee(String id) throws IOException {
-    Path fileout = PublisherOld.decryptingTrusteePath(this.privateDirectory, id);
+    Path fileout = this.trusteePath(id);
     System.out.printf("readDecryptingTrustee %s%n", fileout);
     return TrusteeFromProto.readTrustee(fileout.toString());
   }
 
   public static List<DecryptingTrustee> readDecryptingTrustees(String fileOrDir) throws IOException {
-
     List<DecryptingTrustee> result = new ArrayList<>();
     File dir = new File(fileOrDir);
     if (dir.isDirectory()) {
-      for (File file : dir.listFiles((parent, name) -> name.endsWith(PublisherOld.PROTO_SUFFIX))) {
+      for (File file : dir.listFiles((parent, name) -> name.endsWith(ElectionRecordPath.PROTO_SUFFIX))) {
         result.add(TrusteeFromProto.readTrustee(file.toString()));
       }
     }
@@ -139,7 +127,7 @@ public class PrivateData {
 
   public void writeTrustee(DecryptingTrustee trustee) {
     TrusteeProto.DecryptingTrustee proto = publishDecryptingTrustee(trustee);
-    Path fileout = PublisherOld.decryptingTrusteePath(this.privateDirectory, trustee.id());
+    Path fileout = this.trusteePath(trustee.id());
     try (FileOutputStream out = new FileOutputStream(fileout.toFile())) {
       proto.writeTo(out);
     } catch (IOException ioe) {
@@ -150,7 +138,7 @@ public class PrivateData {
   // PlaintextBallots
 
   public void writeInputBallots(Iterable<PlaintextBallot> original_ballots) throws IOException {
-    Files.createDirectories(privateDirectory);
+    Files.createDirectories(recordPath.topDirPath());
     try (FileOutputStream out = new FileOutputStream(inputBallotsFilePath().toFile())) {
       for (PlaintextBallot ballot : original_ballots) {
         PlaintextBallotProto.PlaintextBallot ballotProto = PlaintextBallotToProto.publishPlaintextBallot(ballot);
@@ -159,7 +147,7 @@ public class PrivateData {
     }
   }
 
-  public List<PlaintextBallot> inputBallots() throws IOException {
+  public List<PlaintextBallot> readInputBallots() throws IOException {
     return readPlaintextBallots(inputBallotsFilePath());
   }
 
@@ -187,7 +175,7 @@ public class PrivateData {
   }
 
   public void writeInvalidBallots(Iterable<PlaintextBallot> invalid_ballots) throws IOException {
-    Files.createDirectories(privateDirectory);
+    Files.createDirectories(recordPath.topDirPath());
     try (FileOutputStream out = new FileOutputStream(invalidBallotsFilePath().toFile())) {
       for (PlaintextBallot ballot : invalid_ballots) {
         PlaintextBallotProto.PlaintextBallot ballotProto = PlaintextBallotToProto.publishPlaintextBallot(ballot);
@@ -196,7 +184,7 @@ public class PrivateData {
     }
   }
 
-  public List<PlaintextBallot> invalidBallots() throws IOException {
+  public List<PlaintextBallot> readInvalidBallots() throws IOException {
     return readPlaintextBallots(invalidBallotsFilePath());
   }
 

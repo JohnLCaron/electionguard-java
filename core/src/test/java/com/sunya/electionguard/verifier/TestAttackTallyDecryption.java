@@ -8,7 +8,7 @@ import com.sunya.electionguard.Group;
 import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.publish.Consumer;
 import com.sunya.electionguard.publish.ElectionRecord;
-import com.sunya.electionguard.publish.PublisherOld;
+import com.sunya.electionguard.json.PublisherOld;
 import net.jqwik.api.Example;
 
 import java.io.IOException;

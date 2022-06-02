@@ -406,7 +406,12 @@ public class RemoteDecryptions {
       for (Map.Entry<String, CiphertextCompensatedDecryptionContest> entry4 : contest_shares.entrySet()) {
         String available_guardian_id = entry4.getKey();
         CiphertextCompensatedDecryptionContest compensated_contest = entry4.getValue();
-        Preconditions.checkArgument(compensated_contest.selections().containsKey(selection.object_id()));
+        if (!compensated_contest.selections().containsKey(selection.object_id())) {
+          logger.atWarning().log("contest %s selection %s not found", contest.object_id, selection.object_id());
+          System.out.printf("contest %s selection %s not found%n", contest.object_id, selection.object_id());
+          compensated_contest.selections().entrySet().forEach( e -> System.out.printf(" %s%n",  e));
+          continue;
+        }
         compensated_selection_shares.put(available_guardian_id, compensated_contest.selections().get(selection.object_id()));
       }
 

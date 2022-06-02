@@ -41,6 +41,7 @@ public class ElectionInitializedConvert {
             config,
             CommonConvert.importElementModP(proto.getJointPublicKey()),
             CommonConvert.importUInt256(proto.getManifestHash()),
+            CommonConvert.importUInt256(proto.getCryptoBaseHash()),
             CommonConvert.importUInt256(proto.getCryptoExtendedBaseHash()),
             guardians,
             proto.getMetadataMap());
@@ -69,6 +70,7 @@ public class ElectionInitializedConvert {
     builder.setJointPublicKey(publishElementModP(init.getJointPublicKey()));
     builder.setManifestHash(CommonConvert.publishUInt256(init.getManifestHash()));
     builder.setCryptoExtendedBaseHash(CommonConvert.publishUInt256(init.getCryptoExtendedBaseHash()));
+    builder.setCryptoBaseHash(CommonConvert.publishUInt256(init.getCryptoBaseHash()));
     builder.addAllGuardians(init.getGuardians().stream().map(it -> publishGuardian(it)).toList());
     builder.putAllMetadata(init.getMetadata());
 

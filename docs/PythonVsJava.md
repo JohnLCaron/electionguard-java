@@ -55,14 +55,14 @@ The non-remote workflow can also be run for testing purposes.
 
 ### Workflow
 
-| Python | standard Java | remote Java |
-| --- | --- | --- |
-| TestEndToEndElection | RunElectionWorkflow | RunRemoteWorkflow |
-| KeyCeremonyMediator | PerformKeyCeremony | KeyCeremonyRemote |
-| EncryptionMediator | EncryptBallots | same |
-| - | AccumulateTally | AccumulateTally |
-| DecryptionMediator | DecryptBallots | DecryptingMediatorRunner |
-| - | VerifyElectionRecord | same |
+| Python | standard Java | remote Java           |
+| --- | --- |-----------------------|
+| TestEndToEndElection | RunElectionWorkflow | RunRemoteWorkflow     |
+| KeyCeremonyMediator | PerformKeyCeremony | KeyCeremonyRemote     |
+| EncryptionMediator | EncryptBallots | same                  |
+| - | AccumulateTally | AccumulateTally       |
+| DecryptionMediator | DecryptBallots | RunDecryptingMediator |
+| - | VerifyElectionRecord | same                  |
 
 ## Serialization from Java
 

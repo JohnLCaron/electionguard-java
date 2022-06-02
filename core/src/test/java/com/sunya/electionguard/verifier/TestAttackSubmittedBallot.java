@@ -6,7 +6,7 @@ import com.sunya.electionguard.Hash;
 import com.sunya.electionguard.SubmittedBallot;
 import com.sunya.electionguard.publish.Consumer;
 import com.sunya.electionguard.publish.ElectionRecord;
-import com.sunya.electionguard.publish.PublisherOld;
+import com.sunya.electionguard.json.PublisherOld;
 import net.jqwik.api.Example;
 
 import java.io.IOException;
@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.sunya.electionguard.publish.PublisherOld.Mode.createIfMissing;
+import static com.sunya.electionguard.json.PublisherOld.Mode.createIfMissing;
 
 // try to modify a SubmittedBallot and see if it still validates
 public class TestAttackSubmittedBallot {

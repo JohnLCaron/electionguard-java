@@ -241,6 +241,26 @@ public class KeyCeremonyTrustee {
       java.security.KeyPair rsa_keypair = Rsa.rsa_keypair();
       return new GuardianSecrets(key_pair, proof, polynomial, rsa_keypair);
     }
+
+    @Override
+    public String toString() {
+      return "GuardianSecrets{" +
+              "polynomial=" + polynomial +
+              ", election_key_pair=" + election_key_pair +
+              ", proof=" + proof +
+              '}';
+    }
   }
 
+  @Override
+  public String toString() {
+    return "KeyCeremonyTrustee{" +
+            "id='" + id + '\'' +
+            ", xCoordinate=" + xCoordinate +
+            ", allGuardianPublicKeys=" + allGuardianPublicKeys +
+            ", myPartialKeyBackups=" + myPartialKeyBackups +
+            ", otherGuardianPartialKeyBackups=" + otherGuardianPartialKeyBackups +
+            ", guardianSecrets=" + guardianSecrets +
+            '}';
+  }
 }

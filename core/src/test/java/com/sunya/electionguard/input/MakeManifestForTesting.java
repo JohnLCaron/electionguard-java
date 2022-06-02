@@ -2,12 +2,12 @@ package com.sunya.electionguard.input;
 
 import com.sunya.electionguard.ElectionConstants;
 import com.sunya.electionguard.Manifest;
-import com.sunya.electionguard.publish.PublisherOld;
+import com.sunya.electionguard.json.PublisherOld;
 
 import java.io.IOException;
 import java.util.Formatter;
 
-import static com.sunya.electionguard.publish.PublisherOld.Mode.createIfMissing;
+import static com.sunya.electionguard.json.PublisherOld.Mode.createIfMissing;
 
 public class MakeManifestForTesting {
   private static final String output = "/home/snake/tmp/electionguard/kickstart/start";

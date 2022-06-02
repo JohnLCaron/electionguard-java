@@ -97,7 +97,7 @@ public record DecryptingTrustee(
                         String.format("   partial_decryption = %s %n ", partial_decryption.toShortString()) +
                         String.format("   extended_base_hash = %s %n ", extended_base_hash)
         );
-        throw new IllegalArgumentException(String.format("PartialDecrypt invalid proof for %s", this.id));
+        // throw new IllegalArgumentException(String.format("PartialDecrypt invalid proof for %s", this.id));
       }
       results.add(new BallotBox.DecryptionProofTuple(partial_decryption, proof));
     }

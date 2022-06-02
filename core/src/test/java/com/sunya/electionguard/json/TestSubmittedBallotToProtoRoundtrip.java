@@ -5,10 +5,8 @@ import com.sunya.electionguard.SubmittedBallot;
 import com.sunya.electionguard.protoconvert.SubmittedBallotFromProto;
 import com.sunya.electionguard.protoconvert.SubmittedBallotToProto;
 import electionguard.protogen.CiphertextBallotProto;
-import com.sunya.electionguard.publish.PublisherOld;
 import com.sunya.electionguard.verifier.TestParameterVerifier;
 import net.jqwik.api.Example;
-import net.jqwik.api.lifecycle.BeforeContainer;
 
 import java.io.File;
 import java.io.IOException;

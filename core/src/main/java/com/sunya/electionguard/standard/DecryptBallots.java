@@ -13,7 +13,7 @@ import com.sunya.electionguard.CiphertextTally;
 import com.sunya.electionguard.Scheduler;
 import com.sunya.electionguard.input.ManifestInputValidation;
 import com.sunya.electionguard.publish.Consumer;
-import com.sunya.electionguard.publish.PublisherOld;
+import com.sunya.electionguard.json.PublisherOld;
 import com.sunya.electionguard.publish.ElectionRecord;
 import electionguard.ballot.DecryptionResult;
 

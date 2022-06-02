@@ -23,7 +23,6 @@ public class ElectionConstantsPojo {
     Gson gson = GsonTypeAdapters.enhancedGson();
     ElectionConstantsPojo pojo = gson.fromJson(jsonElem, ElectionConstantsPojo.class);
     return new ElectionConstants(
-            pojo.name,
             pojo.large_prime,
             pojo.small_prime,
             pojo.cofactor,

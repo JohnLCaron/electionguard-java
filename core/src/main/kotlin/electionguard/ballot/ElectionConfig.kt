@@ -1,7 +1,7 @@
 package electionguard.ballot
 
+import com.google.common.base.Preconditions
 import com.sunya.electionguard.Manifest
-import java.math.BigInteger
 import java.util.Collections.emptyMap
 
 /** Configuration for KeyCeremony. */
@@ -16,6 +16,13 @@ data class ElectionConfig(
     /** arbitrary key/value metadata. */
     val metadata: Map<String, String> = emptyMap(),
 ) {
+
+    init {
+        Preconditions.checkArgument(numberOfGuardians > 0);
+        Preconditions.checkArgument(quorum > 0);
+        Preconditions.checkArgument(quorum <= numberOfGuardians);
+    }
+
     constructor(manifest: Manifest, numberOfGuardians: Int, quorum: Int) :
             this("2.0.0", ElectionConstants(com.sunya.electionguard.ElectionConstants.STANDARD_CONSTANTS),
                  manifest, numberOfGuardians, quorum)

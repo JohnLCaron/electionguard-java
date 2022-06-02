@@ -29,14 +29,14 @@ import java.util.stream.Stream;
  * For command line help:
  * <strong>
  * <pre>
- *  java -classpath electionguard-java-all.jar com.sunya.electionguard.workflow.RunDecryption --help
+ *  java -classpath electionguard-java-all.jar com.sunya.electionguard.workflow.RunDecryptionRemote --help
  * </pre>
  * </strong>
  */
 public class RunDecryptionRemote {
   public static final String classpath = RunRemoteWorkflow.classpath;
   private static final String REMOTE_TRUSTEE = "remoteTrustee";
-  private static final String CMD_OUTPUT = "/home/snake/tmp/RunDecryptionRemote/";
+  private static final String CMD_OUTPUT = "/home/snake/tmp/electionguard/RunDecryptionRemote/";
 
   private static class CommandLine {
     @Parameter(names = {"-trusteeDir"}, order = 4,
@@ -98,7 +98,7 @@ public class RunDecryptionRemote {
     RunCommand decryptBallots = new RunCommand("DecryptingRemote", service,
             "java",
             "-classpath", classpath,
-            "com.sunya.electionguard.decrypting.DecryptingMediatorRunner",
+            "com.sunya.electionguard.decrypting.RunDecryptingMediator",
             "-in", cmdLine.encryptDir,
             "-out", cmdLine.outputDir,
             "-navailable", Integer.toString(navailable)
@@ -137,30 +137,6 @@ public class RunDecryptionRemote {
 
     System.out.printf("*** decryptBallots elapsed = %d sec%n", stopwatch.elapsed(TimeUnit.SECONDS));
     stopwatch.reset().start();
-    System.out.printf("%n5=============================================================%n");
-
-    // VerifyElectionRecord
-    RunCommand verifyElectionRecord = new RunCommand("VerifyElectionRecord", service,
-            "java",
-            "-classpath", classpath,
-            "com.sunya.electionguard.verifier.VerifyElectionRecord",
-            "-in", cmdLine.outputDir);
-    running.add(verifyElectionRecord);
-    try {
-      Thread.sleep(1000);
-    } catch (Throwable e) {
-      e.printStackTrace();
-      System.exit(1);
-    }
-
-    try {
-      if (!verifyElectionRecord.waitFor(10)) {
-        System.out.format("Kill verifyElectionRecord =%d%n", verifyElectionRecord.kill());
-      }
-    } catch (Throwable e) {
-      e.printStackTrace();
-    }
-    System.out.printf("*** verifyElectionRecord elapsed = %d sec%n", stopwatch.elapsed(TimeUnit.SECONDS));
 
     System.out.printf("%n*** All took = %d sec%n", stopwatchAll.elapsed(TimeUnit.SECONDS));
 

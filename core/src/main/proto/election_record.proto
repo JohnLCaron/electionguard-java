@@ -35,6 +35,8 @@ message ElectionInitialized {
   ElementModP joint_public_key = 2;
   // Matches Manifest.crypto_hash
   UInt256 manifest_hash = 3;
+  // the `base hash code (𝑄)` in the [ElectionGuard Spec]
+  UInt256 crypto_base_hash = 7;
   // the `extended base hash code (𝑄')` in the [ElectionGuard Spec]
   UInt256 crypto_extended_base_hash = 4;
   // the public information about the Guardians / Trustees

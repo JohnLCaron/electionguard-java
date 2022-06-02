@@ -1,5 +1,6 @@
 package com.sunya.electionguard.decrypting;
 
+import com.google.common.base.Stopwatch;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.PlaintextBallot;
 import com.sunya.electionguard.PlaintextTally;
@@ -26,10 +27,10 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 
 public class TestDecryptingMediator extends TestProperties {
-  //public static final String DECRYPTING_DATA_DIR = "src/test/data/workflow/encryptor/";
-  //public static final String TRUSTEE_DATA_DIR =    "src/test/data/workflow/keyCeremony/election_private_data/";
-  public static final String DECRYPTING_DATA_DIR = "/home/snake/tmp/electionguard/kickstart/encryptor/";
-  public static final String TRUSTEE_DATA_DIR = "/home/snake/tmp/electionguard/kickstart/keyCeremony/election_private_data/";
+  public static final String DECRYPTING_DATA_DIR = "src/test/data/workflow/encryptor/";
+  public static final String TRUSTEE_DATA_DIR =    "src/test/data/workflow/keyCeremony/election_private_data/";
+  //public static final String DECRYPTING_DATA_DIR = "/home/snake/tmp/electionguard/kickstart/encryptor/";
+  //public static final String TRUSTEE_DATA_DIR = "/home/snake/tmp/electionguard/kickstart/keyCeremony/election_private_data/";
   private static final ElectionRecordPath path = new ElectionRecordPath(DECRYPTING_DATA_DIR);
 
   List<DecryptingTrusteeIF> trustees = new ArrayList<>();
@@ -81,8 +82,10 @@ public class TestDecryptingMediator extends TestProperties {
       assertThat(subject.announce(trustee)).isTrue();
     }
 
+    Stopwatch stopwatch = Stopwatch.createStarted();
     assertThat(subject.get_plaintext_tally()).isPresent();
-    assertThat(subject.get_plaintext_ballots()).isPresent();
+    System.out.printf("That took %s%n", stopwatch);
+    // assertThat(subject.get_plaintext_ballots()).isPresent();
   }
 
   @Example
@@ -95,7 +98,7 @@ public class TestDecryptingMediator extends TestProperties {
 
     // Cannot get plaintext tally without a quorum
     assertThat(subject.get_plaintext_tally()).isEmpty();
-    assertThat(subject.get_plaintext_ballots()).isEmpty();
+    // assertThat(subject.get_plaintext_ballots()).isEmpty();
   }
 
   @Example
@@ -129,21 +132,24 @@ public class TestDecryptingMediator extends TestProperties {
     assertThat(mediator.announce(this.trustees.get(1))).isTrue();
     assertThat(mediator.announce(this.trustees.get(3))).isTrue();
 
+    Stopwatch stopwatch = Stopwatch.createStarted();
     Optional<PlaintextTally> decrypted_tallies = mediator.get_plaintext_tally();
+    System.out.printf("TestCompensateMissingGuardian: get_plaintext_tally took %s%n", stopwatch);
     assertThat(decrypted_tallies).isPresent();
     Map<String, Integer> result = this.convertToCounts(decrypted_tallies.get());
     assertThat(result).isNotEmpty();
     assertThat(result).isEqualTo(this.expectedTally);
 
     // Verify that the decrypted ballots equal the original ballots
+    stopwatch.reset();
     List<PlaintextTally> spoiledBallots = mediator.decrypt_spoiled_ballots().orElseThrow();
-    System.out.printf("spoiledBallots = %d%n", spoiledBallots.size());
     checkDecrypted(spoiledBallots);
+    System.out.printf("  decrypt_spoiled_ballots took %s for %d spoiled ballots%n", stopwatch, spoiledBallots.size());
   }
 
   private void checkDecrypted(List<PlaintextTally> decrypteds) throws IOException {
     PrivateData pdata = new PrivateData(DECRYPTING_DATA_DIR, false, true);
-    List<PlaintextBallot> inputBallots = pdata.inputBallots();
+    List<PlaintextBallot> inputBallots = pdata.readInputBallots();
     Map<String, PlaintextBallot> inputBallotsMap = inputBallots.stream().collect(Collectors.toMap(e -> e.object_id(), e -> e));
     for (PlaintextTally decrypted : decrypteds) {
       PlaintextBallot input_ballot = inputBallotsMap.get(decrypted.tallyId);
@@ -171,7 +177,7 @@ public class TestDecryptingMediator extends TestProperties {
         counts.put(contest.contestId() + ":" + entry.getKey(), entry.getValue().tally());
       }
     }
-    counts.entrySet().forEach(entry -> System.out.printf("    expectedTally.put(\"%s\",%d);%n", entry.getKey(), entry.getValue()));
+    // counts.entrySet().forEach(entry -> System.out.printf("    expectedTally.put(\"%s\",%d);%n", entry.getKey(), entry.getValue()));
     return counts;
   }
 

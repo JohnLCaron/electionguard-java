@@ -166,7 +166,7 @@ public class Encrypt {
    *
    * @param selection:                 the selection in the valid input form
    * @param selection_description:     the `SelectionDescription` from the `ContestDescription` which defines this selection's structure
-   * @param elgamal_public_key:        the public key (K) used to encrypt the ballot
+   * @param jointPublicKey:        the public key (K) used to encrypt the ballot
    * @param crypto_extended_base_hash: the extended base hash of the election
    * @param nonce_seed:                an `ElementModQ` used as a header to seed the `Nonce` generated for this selection.
    *                                   this value can be (or derived from) the BallotContest nonce, but no relationship is required
@@ -177,7 +177,7 @@ public class Encrypt {
           String where,
           PlaintextBallot.Selection selection,
           Manifest.SelectionDescription selection_description,
-          ElementModP elgamal_public_key,
+          ElementModP jointPublicKey,
           ElementModQ crypto_extended_base_hash,
           ElementModQ nonce_seed,
           boolean is_placeholder, // default false
@@ -199,7 +199,7 @@ public class Encrypt {
 
     // Generate the encryption
     Optional<ElGamal.Ciphertext> elgamal_encryption =
-            ElGamal.elgamal_encrypt_ver1(selection.vote, selection_nonce, elgamal_public_key);
+            ElGamal.elgamal_encrypt_ver1(selection.vote, selection_nonce, jointPublicKey);
 
     if (elgamal_encryption.isEmpty()){
       // will have logged about the failure earlier, so no need to log anything here
@@ -213,7 +213,7 @@ public class Encrypt {
             selection.sequenceOrder,
             selection_description_hash,
             elgamal_encryption.get(),
-            elgamal_public_key,
+            jointPublicKey,
             crypto_extended_base_hash,
             disjunctive_chaum_pedersen_nonce,
             selection.vote,
@@ -233,13 +233,18 @@ public class Encrypt {
     }
 
     // verify the selection.
-    if (encrypted_selection.is_valid_encryption(where, selection_description_hash, elgamal_public_key, crypto_extended_base_hash)) {
+    if (encrypted_selection.is_valid_encryption(where, selection_description_hash, jointPublicKey, crypto_extended_base_hash)) {
+      if (first) {
+        System.out.printf("first encryption %s = %s%n", where, encrypted_selection);
+        first = false;
+      }
       return Optional.of(encrypted_selection);
     } else {
       logger.atWarning().log("Failed selection proof for selection: %s", encrypted_selection.object_id());
       return Optional.empty();
     }
   }
+  static boolean first = true;
 
   /**
    * Encrypt a PlaintextBallotContest into CiphertextBallot.Contest.
@@ -251,7 +256,7 @@ public class Encrypt {
    *
    * @param contest:                   the contest in the valid input form
    * @param contestp:                   the `ContestWithPlaceholders` which defines this contest's structure
-   * @param elgamal_public_key:        the public key (k) used to encrypt the ballot
+   * @param jointPublicKey:        the public key (k) used to encrypt the ballot
    * @param crypto_extended_base_hash: the extended base hash of the election
    * @param nonce_seed:                an `ElementModQ` used as a header to seed the `Nonce` generated for this contest.
    *                                   this value can be (or derived from) the Ballot nonce, but no relationship is required
@@ -261,7 +266,7 @@ public class Encrypt {
           String where,
           PlaintextBallot.Contest contest,
           ContestWithPlaceholders contestp,
-          ElementModP elgamal_public_key,
+          ElementModP jointPublicKey,
           ElementModQ crypto_extended_base_hash,
           ElementModQ nonce_seed,
           boolean should_verify_proofs /* default true */) {
@@ -310,7 +315,7 @@ public class Encrypt {
                   where + " " + contest.contestId,
                   plaintext_selection,
                   description,
-                  elgamal_public_key,
+                  jointPublicKey,
                   crypto_extended_base_hash,
                   contest_nonce,
                   false,
@@ -321,7 +326,7 @@ public class Encrypt {
                   where + " " + contest.contestId,
                   selection_from(description, false, false),
                   description,
-                  elgamal_public_key,
+                  jointPublicKey,
                   crypto_extended_base_hash,
                   contest_nonce,
                   false,
@@ -353,7 +358,7 @@ public class Encrypt {
 
               selection_from(placeholder, true, select_placeholder),
          placeholder,
-         elgamal_public_key,
+         jointPublicKey,
          crypto_extended_base_hash,
          contest_nonce, true, true);
       if (encrypted_selection.isEmpty()) {
@@ -372,7 +377,7 @@ public class Encrypt {
         contest.sequenceOrder,
         contest_description_hash,
         encrypted_selections,
-        elgamal_public_key,
+        jointPublicKey,
         crypto_extended_base_hash,
         chaum_pedersen_nonce,
         contest_description.numberElected(),
@@ -387,10 +392,10 @@ public class Encrypt {
     }
 
     // Verify the proof
-    if (encrypted_contest.is_valid_encryption(where, contest_description_hash, elgamal_public_key, crypto_extended_base_hash)) {
+    if (encrypted_contest.is_valid_encryption(where, contest_description_hash, jointPublicKey, crypto_extended_base_hash)) {
       return Optional.of(encrypted_contest);
     } else {
-      encrypted_contest.is_valid_encryption(where, contest_description_hash, elgamal_public_key, crypto_extended_base_hash);
+      encrypted_contest.is_valid_encryption(where, contest_description_hash, jointPublicKey, crypto_extended_base_hash);
       logger.atWarning().log("mismatching contest proof for contest %s", encrypted_contest.contestId);
       return Optional.empty();
     }

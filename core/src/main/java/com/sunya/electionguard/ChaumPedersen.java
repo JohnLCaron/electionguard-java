@@ -23,6 +23,7 @@ import static com.sunya.electionguard.core.ElGamalKt.ciphertextOf;
  */
 public class ChaumPedersen {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
+  private static final boolean warn = true;
 
   /**
    * A disjunctive Chaum-Pederson proof.
@@ -84,8 +85,71 @@ public class ChaumPedersen {
       if (this.name.endsWith("2")) {
         return is_valid2(message, k, qbar);
       } else {
-        return is_valid1(message, k, qbar);
+        return is_valid_org(message, k, qbar);
       }
+    }
+
+    boolean is_valid_org(ElGamal.Ciphertext message, ElementModP k, ElementModQ qbar) {
+      ElementModP alpha = message.pad();
+      ElementModP beta = message.data();
+
+      ElementModP a0 = this.proof0.pad;
+      ElementModP b0 = this.proof0.data;
+      ElementModP a1 = this.proof1.pad;
+      ElementModP b1 = this.proof1.data;
+      ElementModQ c0 = this.proof0.challenge;
+      ElementModQ c1 = this.proof1.challenge;
+      ElementModQ c = this.challenge;
+      ElementModQ v0 = this.proof0.response;
+      ElementModQ v1 = this.proof1.response;
+
+      boolean in_bounds_alpha = alpha.is_valid_residue();
+      boolean in_bounds_beta = beta.is_valid_residue();
+      boolean in_bounds_a0 = a0.is_valid_residue();
+      boolean in_bounds_b0 = b0.is_valid_residue();
+      boolean in_bounds_a1 = a1.is_valid_residue();
+      boolean in_bounds_b1 = b1.is_valid_residue();
+      boolean in_bounds_c0 = c0.is_in_bounds();
+      boolean in_bounds_c1 = c1.is_in_bounds();
+      boolean in_bounds_v0 = v0.is_in_bounds();
+      boolean in_bounds_v1 = v1.is_in_bounds();
+
+      boolean consistent_c = add_q(c0, c1).equals(c) && c.equals(Hash.hash_elems(qbar, alpha, beta, a0, b0, a1, b1));
+      boolean consistent_gv0 = g_pow_p(v0).equals(mult_p(a0, pow_p(alpha, c0)));
+      boolean consistent_gv1 = g_pow_p(v1).equals(mult_p(a1, pow_p(alpha, c1)));
+      boolean consistent_kv0 = pow_p(k, v0).equals(mult_p(b0, pow_p(beta, c0)));
+
+      // consistent_gc1kv1 = mult_p(g_pow_p(c1), pow_p(k, v1)) == mult_p(b1, pow_p(beta, c1))
+      boolean consistent_gc1kv1 = mult_p(g_pow_p(c1), pow_p(k, v1)).equals(mult_p(b1, pow_p(beta, c1)));
+
+      boolean success = (in_bounds_alpha && in_bounds_beta && in_bounds_a0 && in_bounds_b0 && in_bounds_a1 &&
+              in_bounds_b1 && in_bounds_c0 && in_bounds_c1 && in_bounds_v0 && in_bounds_v1 && consistent_c &&
+              consistent_gv0 && consistent_gv1 && consistent_kv0 && consistent_gc1kv1);
+
+      if (!success) {
+        Formatter f = new Formatter();
+        f.format("found an invalid disjunctive Chaum-Pedersen (zero or one) proof:%n");
+        f.format(" in_bounds_alpha %s%n", in_bounds_alpha);
+        f.format(" in_bounds_beta %s%n", in_bounds_beta);
+        f.format(" in_bounds_a0 %s%n", in_bounds_a0);
+        f.format(" in_bounds_b0 %s%n", in_bounds_b0);
+        f.format(" in_bounds_a1  %s%n", in_bounds_a1);
+        f.format(" in_bounds_b1 %s%n", in_bounds_b1);
+        f.format(" in_bounds_c0 %s%n", in_bounds_c0);
+        f.format(" in_bounds_c1 %s%n", in_bounds_c1);
+        f.format(" in_bounds_v0 %s%n", in_bounds_v0);
+        f.format(" in_bounds_v1 %s%n", in_bounds_v1);
+        f.format(" consistent_c %s%n", consistent_c);
+        f.format(" consistent_gv0 %s%n", consistent_gv0);
+        f.format(" consistent_gv1 %s%n", consistent_gv1);
+        f.format(" consistent_kv0 %s%n", consistent_kv0);
+        f.format(" consistent_gc1kv1 %s%n", consistent_gc1kv1);
+        f.format("  k %s%n", k.toShortString());
+        f.format("  message %s%n", message);
+        f.format("  qbar %s%n", qbar);
+        throw new IllegalStateException(f.toString());
+      }
+      return success;
     }
 
     // version 1
@@ -253,11 +317,11 @@ public class ChaumPedersen {
       if (name.endsWith("2")) {
         return isValidVer2(message, k, m, extBaseHash);
       } else {
-        return isValidVer1(message, k, m, extBaseHash);
+        return is_valid1(message, k, m, extBaseHash);
       }
     }
 
-    boolean isValidVer2(ElGamal.Ciphertext ciphertext, ElementModP publicKey, ElementModP m, ElementModQ qbar) {
+    public boolean isValidVer2(ElGamal.Ciphertext ciphertext, ElementModP publicKey, ElementModP m, ElementModQ qbar) {
       ChaumPedersenKt.GenericChaumPedersenProof kt =
                       new ChaumPedersenKt.GenericChaumPedersenProof(this.challenge, this.response);
       // ElementModP g,
@@ -277,7 +341,7 @@ public class ChaumPedersen {
               true);
     }
 
-    boolean isValidVer1(ElGamal.Ciphertext message, ElementModP k, ElementModP m, ElementModQ extBaseHash) {
+    public boolean isValidVer1(ElGamal.Ciphertext message, ElementModP k, ElementModP m, ElementModQ extBaseHash) {
       ChaumPedersenProof expanded = this.expand(message, k);
       ElementModP A = message.pad();
       ElementModP B = message.data();
@@ -308,7 +372,7 @@ public class ChaumPedersen {
       boolean success = in_bounds_alpha && in_bounds_beta && in_bounds_k && in_bounds_m && in_bounds_a && in_bounds_b
               && in_bounds_c && in_bounds_v && in_bounds_q && same_c && consistent_gv && consistent_av;
 
-      if (!success) {
+      if (!success && warn) {
         String err = "found an invalid Chaum-Pedersen proof " +
                 String.format("%n in_bounds_alpha %s%n", in_bounds_alpha) +
                 String.format(" in_bounds_beta %s%n", in_bounds_beta) +
@@ -331,6 +395,62 @@ public class ChaumPedersen {
                 //String.format(" mult_p(a, pow_p(k, c)) %s%n", mult_p(a, pow_p(k, c)).toShortString());
         logger.atWarning().log(err);
         throw new IllegalStateException(err);
+      }
+      return success;
+    }
+
+    public boolean is_valid1(ElGamal.Ciphertext message, ElementModP k, ElementModP m, ElementModQ q) {
+      ElementModP alpha = message.pad();
+      ElementModP beta = message.data();
+      ElementModP a = this.pad;
+      ElementModP b = this.data;
+      ElementModQ c = this.challenge;
+      ElementModQ v = this.response;
+      boolean in_bounds_alpha = alpha.is_valid_residue();
+      boolean in_bounds_beta = beta.is_valid_residue();
+      boolean in_bounds_k = k.is_valid_residue();
+      boolean in_bounds_m = m.is_valid_residue();
+      boolean in_bounds_a = a.is_valid_residue();
+      boolean in_bounds_b = b.is_valid_residue();
+      boolean in_bounds_c = c.is_in_bounds();
+      boolean in_bounds_v = v.is_in_bounds();
+      boolean in_bounds_q = q.is_in_bounds();
+
+      boolean same_c = c.equals(Hash.hash_elems(q, alpha, beta, a, b, m));
+      boolean consistent_gv = (in_bounds_v && in_bounds_a && in_bounds_c &&
+              // The equation 𝑔^𝑣𝑖 = 𝑎𝑖𝐾^𝑐𝑖
+              g_pow_p(v).equals(mult_p(a, pow_p(k, c))));
+
+      // The equation 𝐴^𝑣𝑖 = 𝑏𝑖𝑀𝑖^𝑐𝑖 mod 𝑝
+      boolean temp = pow_p(alpha, v).equals(mult_p(b, pow_p(m, c)));
+      boolean consistent_av = (in_bounds_alpha && in_bounds_b && in_bounds_c && in_bounds_v && temp);
+
+      boolean success = in_bounds_alpha && in_bounds_beta && in_bounds_k && in_bounds_m && in_bounds_a && in_bounds_b
+              && in_bounds_c && in_bounds_v && in_bounds_q && same_c && consistent_gv && consistent_av;
+
+      if (!success && warn) {
+        String err = "found an invalid Chaum-Pedersen proof " +
+                String.format("%n in_bounds_alpha %s%n", in_bounds_alpha) +
+                String.format(" in_bounds_beta %s%n", in_bounds_beta) +
+                String.format(" in_bounds_k %s%n", in_bounds_k) +
+                String.format(" in_bounds_m %s%n", in_bounds_m) +
+                String.format(" in_bounds_a %s%n", in_bounds_a) +
+                String.format(" in_bounds_b %s%n", in_bounds_b) +
+                String.format(" in_bounds_c %s%n", in_bounds_c) +
+                String.format(" in_bounds_v %s%n", in_bounds_v) +
+                String.format(" in_bounds_q %s%n", in_bounds_q) +
+                String.format(" same_c %s%n", same_c) +
+                String.format(" consistent_gv %s%n", consistent_gv) +
+                String.format(" consistent_av %s%n", consistent_av) +
+                String.format("%n pad %s%n", this.pad.toShortString()) +
+                String.format(" data %s%n", this.data.toShortString()) +
+                String.format(" challenge %s%n", this.challenge) +
+                String.format(" response %s%n", this.response) +
+                String.format(" g_pow_p(v) %s%n", g_pow_p(v).toShortString()) +
+                String.format(" pow_p(k, c) %s%n", pow_p(k, c).toShortString()) +
+                String.format(" mult_p(a, pow_p(k, c)) %s%n", mult_p(a, pow_p(k, c)).toShortString());
+        // throw new IllegalStateException(err);
+        logger.atWarning().log(err);
       }
       return success;
     }
@@ -424,11 +544,10 @@ public class ChaumPedersen {
       //     ElementModQ c = Hash.hash_elems(crypto_extended_base_hash, alpha, beta, a, b); // sha256(𝑄', A, B, a, b)
       boolean same_c = c.equals(Hash.hash_elems(extendedHash, alpha, beta, a, b));
       boolean consistent_gv = in_bounds_v && in_bounds_a && in_bounds_alpha && in_bounds_c &&
-              // The equation 𝑔^𝑉 = 𝑎𝐴^𝐶 mod 𝑝
+              // 5.F The equation 𝑔^𝑉 = 𝑎𝐴^𝐶 mod 𝑝
               g_pow_p(v).equals(mult_p(a, pow_p(alpha, c)));
 
-      // LOOK
-      // The equation 𝑔^𝐿𝐾^𝑣 = 𝑏𝐵^𝐶 mod 𝑝
+      // 5.G The equation 𝑔^𝐿𝐾^𝑣 = 𝑏𝐵^𝐶 mod 𝑝
       boolean consistent_kv = in_bounds_constant &&
               mult_p(g_pow_p(mult_p(c, constant_q)), pow_p(publicKey, v)).equals(mult_p(b, pow_p(beta, c)));
 
@@ -489,7 +608,7 @@ public class ChaumPedersen {
    * @param seed:      Used to generate other random values here
    * @param plaintext: Zero or one
    */
-  static DisjunctiveChaumPedersenProof make_disjunctive_chaum_pedersen(
+  static DisjunctiveChaumPedersenProof make_disjunctive_chaum_pedersen_new(
           ElGamal.Ciphertext message,
           ElementModQ r,
           ElementModP k,
@@ -497,9 +616,9 @@ public class ChaumPedersen {
           ElementModQ seed,
           int plaintext) {
 
-    Preconditions.checkArgument(0 <= plaintext && plaintext <= 1, "make_disjunctive_chaum_pedersen only supports integers of 0 or 1");
-    return (plaintext == 0) ? make_disjunctive_chaum_pedersen_zero(message, r, k, q, seed) :
-            make_disjunctive_chaum_pedersen_one(message, r, k, q, seed);
+    Preconditions.checkArgument(0 <= plaintext && plaintext <= 1, "make_disjunctive_chaum_pedersen_new only supports integers of 0 or 1");
+    return (plaintext == 0) ? make_disjunctive_chaum_pedersen_zero_new(message, r, k, q, seed) :
+            make_disjunctive_chaum_pedersen_one_new(message, r, k, q, seed);
   }
 
 
@@ -513,7 +632,7 @@ public class ChaumPedersen {
    * @param qbar:    A value used when generating the challenge, usually the election extended base hash (𝑄')
    * @param seed:    Used to generate other random values here
    */
-  static DisjunctiveChaumPedersenProof make_disjunctive_chaum_pedersen_zero(
+  static DisjunctiveChaumPedersenProof make_disjunctive_chaum_pedersen_zero_new(
           ElGamal.Ciphertext message,
           ElementModQ r,
           ElementModP k,
@@ -554,7 +673,7 @@ public class ChaumPedersen {
    * @param qbar:    A value used when generating the challenge, usually the election extended base hash (𝑄')
    * @param seed:    Used to generate other random values here
    */
-  static DisjunctiveChaumPedersenProof make_disjunctive_chaum_pedersen_one(
+  static DisjunctiveChaumPedersenProof make_disjunctive_chaum_pedersen_one_new(
           ElGamal.Ciphertext message,
           ElementModQ r,
           ElementModP k,
@@ -605,7 +724,7 @@ public class ChaumPedersen {
     ElementModP A = message.pad();
     ElementModP B = message.data();
 
-    // Pick one random number in Q.
+    // Pick a random number in Q as the nonce.
     ElementModQ u = new Nonces(seed, "constant-chaum-pedersen-proof").get(0);
     ElementModP a = g_pow_p(u);  // 𝑔^𝑢𝑖 mod 𝑝
     ElementModP b = pow_p(A, u);  // 𝐴^𝑢𝑖 mod 𝑝
@@ -658,7 +777,7 @@ public class ChaumPedersen {
 
   /////////////////////////////////////////////////////////////////////
 
-  static DisjunctiveChaumPedersenProof make_disjunctive_chaum_pedersen_org(
+  static DisjunctiveChaumPedersenProof make_disjunctive_chaum_pedersen(
           ElGamal.Ciphertext message,
           ElementModQ r,
           ElementModP k,
@@ -667,8 +786,8 @@ public class ChaumPedersen {
           int plaintext) {
 
     Preconditions.checkArgument(0 <= plaintext && plaintext <= 1, "make_disjunctive_chaum_pedersen only supports integers of 0 or 1");
-    return (plaintext == 0) ? make_disjunctive_chaum_pedersen_zero_org(message, r, k, q, seed) :
-            make_disjunctive_chaum_pedersen_one_org(message, r, k, q, seed);
+    return (plaintext == 0) ? make_disjunctive_chaum_pedersen_zero(message, r, k, q, seed) :
+            make_disjunctive_chaum_pedersen_one(message, r, k, q, seed);
   }
 
 
@@ -682,7 +801,7 @@ public class ChaumPedersen {
    * @param qbar:    A value used when generating the challenge, usually the election extended base hash (𝑄')
    * @param seed:    Used to generate other random values here
    */
-  static DisjunctiveChaumPedersenProof make_disjunctive_chaum_pedersen_zero_org(
+  static DisjunctiveChaumPedersenProof make_disjunctive_chaum_pedersen_zero(
           ElGamal.Ciphertext message,
           ElementModQ r,
           ElementModP k,
@@ -722,7 +841,7 @@ public class ChaumPedersen {
    * @param qbar:    A value used when generating the challenge, usually the election extended base hash (𝑄')
    * @param seed:    Used to generate other random values here
    */
-  static DisjunctiveChaumPedersenProof make_disjunctive_chaum_pedersen_one_org(
+  static DisjunctiveChaumPedersenProof make_disjunctive_chaum_pedersen_one(
           ElGamal.Ciphertext message,
           ElementModQ r,
           ElementModP k,

@@ -15,7 +15,7 @@ import com.sunya.electionguard.PlaintextBallot;
 import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.json.JsonPrivateData;
 import com.sunya.electionguard.json.JsonPublisher;
-import com.sunya.electionguard.publish.PublisherOld;
+import com.sunya.electionguard.json.PublisherOld;
 import net.jqwik.api.Example;
 import net.jqwik.api.lifecycle.BeforeProperty;
 

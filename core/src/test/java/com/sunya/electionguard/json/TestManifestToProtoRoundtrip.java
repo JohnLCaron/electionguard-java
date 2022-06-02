@@ -4,7 +4,6 @@ import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.protoconvert.ManifestFromProto;
 import com.sunya.electionguard.protoconvert.ManifestToProto;
 import electionguard.protogen.ManifestProto;
-import com.sunya.electionguard.publish.PublisherOld;
 import com.sunya.electionguard.verifier.TestParameterVerifier;
 import net.jqwik.api.Example;
 import net.jqwik.api.lifecycle.BeforeContainer;

@@ -18,7 +18,7 @@ import static com.sunya.electionguard.Proof.Usage.SecretValue;
 @Immutable
 public class SchnorrProof extends Proof {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
-  private static final boolean throwException = false;
+  private static final boolean throwException = true;
 
   /** The commitment K_ij. */
   @Nullable

@@ -35,13 +35,12 @@ public class DecryptWithShares {
         ballot_shares.put(entry.getKey(), map2.get(ballot.object_id()));
       }
 
-      Optional<PlaintextTally> decrypted_tally =
+      Optional<PlaintextTally> decrypted_ballot =
               decrypt_ballot(ballot, ballot_shares, context.extendedHash());
-      if (decrypted_tally.isEmpty()) {
+      if (decrypted_ballot.isEmpty()) {
         logger.atWarning().log("Failed to decrypt ciphertext spoiled ballots %s", ballot.object_id());
       } else {
-        PlaintextTally dtally = decrypted_tally.get();
-        result.add(decrypted_tally.get());
+        result.add(decrypted_ballot.get());
       }
     }
 

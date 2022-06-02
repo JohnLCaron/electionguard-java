@@ -11,7 +11,6 @@ import com.sunya.electionguard.keyceremony.KeyCeremonyRemoteMediator;
 import com.sunya.electionguard.publish.Consumer;
 import com.sunya.electionguard.publish.PrivateData;
 import com.sunya.electionguard.publish.Publisher;
-import com.sunya.electionguard.publish.PublisherOld;
 import electionguard.ballot.ElectionConfig;
 
 import java.io.IOException;
@@ -93,10 +92,7 @@ public class KeyCeremonySimulator {
 
       Publisher publisher = new Publisher(cmdLine.outputDir, Publisher.Mode.createNew);
       KeyCeremonySimulator keyCeremony = new KeyCeremonySimulator(election, cmdLine.nguardians, cmdLine.quorum, publisher);
-
       keyCeremony.runKeyCeremony();
-      System.exit(0);
-
     } catch (Throwable t) {
       System.out.printf("*** KeyCeremony FAILURE%n");
       t.printStackTrace();
@@ -142,16 +138,14 @@ public class KeyCeremonySimulator {
             .toList();
     boolean okt;
     try {
-      PrivateData pdata = new PrivateData(publisher.publishPath() + "/private_data", false, false);
+      PrivateData pdata = new PrivateData(publisher.publishPath(), false, true);
       trustees.forEach (t -> pdata.writeTrustee(t));
       okt = true;
+      System.out.printf("%nKey Ceremony publish %d Trustees to %s%n", trustees.size(), pdata.getTopDir());
     } catch (IOException e) {
       e.printStackTrace();
       okt = false;
     }
-    System.out.printf("%nKey Ceremony publish Trustee = %s%n", okt);
-
-    System.exit(ok && okt ? 0 : 1);
   }
 
 }

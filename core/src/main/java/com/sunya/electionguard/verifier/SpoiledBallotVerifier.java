@@ -35,7 +35,7 @@ public class SpoiledBallotVerifier {
     }
   }
 
-  boolean verify_plaintext_ballot() {
+  boolean verifySpoiledBallot() {
     AtomicBoolean valid = new AtomicBoolean(true);
 
     for (PlaintextTally ballot : electionRecord.spoiledBallotTallies()) {
@@ -47,6 +47,9 @@ public class SpoiledBallotVerifier {
             continue;
           }
           for (PlaintextTally.Selection selection : contest.selections().values()) {
+            if (selection.selectionId().endsWith("placeholder")) {
+              continue;
+            }
             if (!selectionNames.contains(selection.selectionId())) {
               System.out.printf(" ***Ballot Selection id (%s) not contained in contest (%s).%n", selection.selectionId(), contest.contestId());
               valid.set(false);

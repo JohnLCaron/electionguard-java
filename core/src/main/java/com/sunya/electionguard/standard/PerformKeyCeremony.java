@@ -13,7 +13,7 @@ import com.sunya.electionguard.decrypting.DecryptingTrustee;
 import com.sunya.electionguard.input.ManifestInputValidation;
 import com.sunya.electionguard.publish.Consumer;
 import com.sunya.electionguard.publish.PrivateData;
-import com.sunya.electionguard.publish.PublisherOld;
+import com.sunya.electionguard.json.PublisherOld;
 import electionguard.ballot.ElectionConfig;
 import electionguard.ballot.ElectionInitialized;
 
@@ -291,6 +291,7 @@ public class PerformKeyCeremony {
             config,
             this.jointKey.joint_public_key(),
             UInt256.fromModQ(this.election.cryptoHash()),
+            UInt256.fromModQ(this.context.cryptoBaseHash),
             UInt256.fromModQ(this.context.cryptoExtendedBaseHash),
             this.guardian_records.stream().map( it -> new electionguard.ballot.Guardian(it)).toList(),
             emptyMap()
