@@ -183,7 +183,7 @@ public class ManifestPojo {
             pojo.electoral_district_id,
             Manifest.VoteVariationType.valueOf(pojo.vote_variation),
             pojo.number_elected,
-            pojo.votes_allowed,
+            pojo.votes_allowed == null ? pojo.number_elected : pojo.votes_allowed,
             pojo.name,
             ConvertPojos.convertList(pojo.ballot_selections, ManifestPojo::convertSelectionDescription),
             convertInternationalizedText(pojo.ballot_title),

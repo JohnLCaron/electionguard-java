@@ -41,12 +41,11 @@ public class TestElectionRecordVerifier {
   }
 
   @Example
-  public void testElectionRecordJsonPreview1() throws IOException {
-    // latest example record 3/5 guardians, test constants
+  public void testElectionRecordJsonMay25() throws IOException {
+    // latest example record 5/25/22, all guardians present
     try {
-      Group.setPrimes(ElectionConstants.get(ElectionConstants.PrimeOption.LargeTest));
-      String electionRecordDir = "/home/snake/dev/github/electionguard/data/1.0.0-preview-1/sample/hamilton-general/election_record/";
-      testElectionRecord(JsonConsumer.fromElectionRecord(electionRecordDir));
+      String topdir = TestParameterVerifier.topdirJsonPython;
+      testElectionRecord(JsonConsumer.fromElectionRecord(topdir));
     } finally {
       Group.reset();
     }

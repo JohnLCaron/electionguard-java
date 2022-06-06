@@ -13,7 +13,7 @@ public class TestConsumer {
 
   @Example
   public void testConsumerJson() throws IOException {
-    JsonConsumer consumer = new JsonConsumer(TestParameterVerifier.topdirJsonExample);
+    JsonConsumer consumer = new JsonConsumer(TestParameterVerifier.topdirJsonPython);
     ElectionRecordJson record = consumer.readElectionRecordJson();
     assertThat(record.manifest).isNotNull();
     assertThat(record.context).isNotNull();
@@ -25,11 +25,10 @@ public class TestConsumer {
     assertThat(record.availableGuardians).isNotEmpty();
 
     assertThat(record.acceptedBallots).isNotEmpty();
-    assertThat(record.spoiledBallotTallies).isNotEmpty();
+    assertThat(record.spoiledBallotTallies).isNotNull();
   }
 
-  // Not working - must regenerate
-  // @Example
+  @Example
   public void testConsumerJsonPython() throws IOException {
     JsonConsumer consumer = new JsonConsumer(TestParameterVerifier.topdirJsonPython);
     ElectionRecordJson record = consumer.readElectionRecordJson();
@@ -39,10 +38,10 @@ public class TestConsumer {
     assertThat(record.ciphertextTally).isNotNull();
     assertThat(record.decryptedTally).isNotNull();
     assertThat(record.devices).hasSize(1);
-    assertThat(record.guardianRecords).hasSize(5);
+    assertThat(record.guardianRecords).hasSize(2);
 
-    assertThat(record.acceptedBallots).hasSize(6);
-    assertThat(record.spoiledBallotTallies).hasSize(3);
+    assertThat(record.acceptedBallots).hasSize(4);
+    assertThat(record.spoiledBallotTallies).isEmpty();
   }
 
   @Example

@@ -17,12 +17,20 @@ public class ElementModPojo {
   public static Group.ElementModQ deserializeQ(JsonElement jsonElem) {
     Gson gson = GsonTypeAdapters.enhancedGson();
     BigInteger biggy = gson.fromJson(jsonElem, BigInteger.class);
+    int size = biggy.toByteArray().length;
+    if (32 != size) {
+      System.out.printf("HEY");
+    }
     return Group.int_to_q(biggy).orElseThrow();
   }
 
   public static Group.ElementModP deserializeP(JsonElement jsonElem) {
     Gson gson = GsonTypeAdapters.enhancedGson();
     BigInteger biggy = gson.fromJson(jsonElem, BigInteger.class);
+    int size = biggy.toByteArray().length;
+    if (512 != size) {
+      System.out.printf("HEY");
+    }
     return Group.int_to_p(biggy).orElseThrow();
   }
 

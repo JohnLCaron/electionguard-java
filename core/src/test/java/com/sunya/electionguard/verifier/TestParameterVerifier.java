@@ -16,7 +16,7 @@ public class TestParameterVerifier {
   public static final String topdirEncryptor = "/home/snake/tmp/electionguard/remoteWorkflow/encryptor";
   public static final String topdirPublishEndToEnd = "src/test/data/publishEndToEnd";
   public static final String topdirJsonExample = "src/test/data/python/sample_election_record/";
-  public static final String topdirJsonPython = "src/test/data/python/1.4.0/";
+  public static final String topdirJsonPython = "/home/snake/tmp/electionguard/electionRecord25May2022";
 
   @Example
   public void testElectionRecordJson() throws IOException {
