@@ -19,7 +19,8 @@ import java.util.function.Predicate;
 import electionguard.protogen.*;
 
 
-/** Helper class for consumers of published election records in Json or protobuf. */
+/** Helper class for consumers of published election records in protobuf.
+ * Use JsonConsumer for Json files. */
 public class Consumer {
   public final ElectionRecordPath path;
 

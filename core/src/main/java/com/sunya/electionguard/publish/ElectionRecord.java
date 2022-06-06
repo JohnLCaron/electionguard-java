@@ -54,5 +54,4 @@ public interface ElectionRecord extends ElectionContext {
   BigInteger cofactor();
 
   ElectionConstants constants();
-
 }

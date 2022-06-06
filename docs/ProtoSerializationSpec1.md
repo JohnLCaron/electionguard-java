@@ -51,6 +51,14 @@ Notes
 | c2       | UInt256     |       |
 | numBytes | uint32      |       |
 
+### message DataCiphertext (instead of HashedElGamalCiphertext?)
+
+| Name     | Type        | Notes |
+|----------|-------------|-------|
+| pad      | ElementModP |       |
+| data     | bytes       |       |
+| mac      | bytes       |       |
+
 ### message SchnorrProof
 
 | Name       | JSON Name | Type            | Notes   |
@@ -105,7 +113,7 @@ There is no python SDK version of this message.
 |---------------------------|--------------------|-----------------------|----------|
 | number_of_guardians       |                    | uint32                |          |
 | quorum                    |                    | uint32                |          |
-| joint_public_key          | elgamal public key | ElementModP           |          |
+| joint_public_key          | elgamal_public_key | ElementModP           |          |
 | manifest_hash             |                    | UInt256               |          |
 | crypto_base_hash          |                    | UInt256               |          |
 | crypto_extended_base_hash |                    | UInt256               |          |
@@ -233,20 +241,20 @@ When the optional crypto_hash are passed, they are verified. If not passed in, t
 
 ### message ContestDescription
 
-| Name                 | JSON Name             | Type                         | Notes                                         |
-|----------------------|-----------------------|------------------------------|-----------------------------------------------|
-| contest_id           | object_id             | string                       |                                               |
-| sequence_order       |                       | uint32                       | deterministic sorting                         |
-| geopolitical_unit_id | electoral_district_id | string                       | GeoPoliticalUnit.geopolitical_unit_id |
-| vote_variation       |                       | enum VoteVariationType       |                                               |
-| number_elected       |                       | uint32                       |                                               |
-| votes_allowed        |                       | uint32                       |                                               |
-| name                 |                       | string                       |                                               |
-| selections           | ballot_selections     | List\<SelectionDescription\> |                                               |
-| ballot_title         |                       | InternationalizedText        | optional                                      |
-| ballot_subtitle      |                       | InternationalizedText        | optional                                      |
-| primary_party_ids    |                       | List\<string\>               | optional, match Party.party_id                |
-| crypto_hash          | not present           | UInt256                      | optional                                      |
+| Name                 | JSON Name             | Type                         | Notes                                   |
+|----------------------|-----------------------|------------------------------|-----------------------------------------|
+| contest_id           | object_id             | string                       |                                         |
+| sequence_order       |                       | uint32                       | deterministic sorting                   |
+| geopolitical_unit_id | electoral_district_id | string                       | GeoPoliticalUnit.geopolitical_unit_id   |
+| vote_variation       |                       | enum VoteVariationType       |                                         |
+| number_elected       |                       | uint32                       |                                         |
+| votes_allowed        |                       | uint32                       |                                         |
+| name                 |                       | string                       |                                         |
+| selections           | ballot_selections     | List\<SelectionDescription\> |                                         |
+| ballot_title         |                       | InternationalizedText        | optional                                |
+| ballot_subtitle      |                       | InternationalizedText        | optional                                |
+| primary_party_ids    |                       | List\<string\>               | optional, match Party.party_id          |
+| crypto_hash          | not present           | UInt256                      | optional                                |
 
 ### message SelectionDescription
 
@@ -304,16 +312,17 @@ When the optional crypto_hash are passed, they are verified. If not passed in, t
 
 ### message CiphertextBallotContest
 
-| Name           | JSON Name               | Type                              | Notes                                     |
-|----------------|-------------------------|-----------------------------------|-------------------------------------------|
-| contest_id     | object_id               | string                            | matches ContestDescription.contest_id     |
-| sequence_order |                         | uint32                            | matches ContestDescription.sequence_order |
-| contest_hash   | description_hash        | UInt256                           | matches ContestDescription.crypto_hash    |                                                                     |
-| selections     | ballot_selections       | List\<CiphertextBallotSelection\> |                                           |
-|                | ciphertext_accumulation | ElGamalCiphertext                 | removed                                   |
-| crypto_hash    |                         | UInt256                           |                                           |
-|                | nonce                   | ElementModQ                       | removed                                   |
-| proof          |                         | ConstantChaumPedersenProof        |                                           |
+| Name           | JSON Name                | Type                              | Notes                                     |
+|----------------|--------------------------|-----------------------------------|-------------------------------------------|
+| contest_id     | object_id                | string                            | matches ContestDescription.contest_id     |
+| sequence_order |                          | uint32                            | matches ContestDescription.sequence_order |
+| contest_hash   | description_hash         | UInt256                           | matches ContestDescription.crypto_hash    |                                                                     |
+| selections     | ballot_selections        | List\<CiphertextBallotSelection\> |                                           |
+|                | ciphertext_accumulation  | ElGamalCiphertext                 | removed                                   |
+| crypto_hash    |                          | UInt256                           |                                           |
+|                | nonce                    | ElementModQ                       | removed                                   |
+| proof          |                          | ConstantChaumPedersenProof        |                                           |
+| extended_data  | ciphertext_extended_data | data_ciphertext                   | LOOK what?                                |
 
 ### message CiphertextBallotSelection
 
@@ -328,6 +337,7 @@ When the optional crypto_hash are passed, they are verified. If not passed in, t
 |                          | nonce            | ElementModQ                   | removed                                     |
 | proof                    |                  | DisjunctiveChaumPedersenProof |                                             |
 | extended_data            |                  | HashedElGamalCiphertext       | optional                                    |
+| extended_data            | extended_data    | string                        | LOOK what?                                  |
 
 ### message ConstantChaumPedersenProof
 

@@ -189,14 +189,15 @@ class ElectionRecordPanel extends JPanel {
         f.format("    %d session=%d launch=%d location=%s%n", device.deviceId(), device.sessionId(), device.launchCode(), device.location());
       } */
 
-      f.format("%n  Guardian Records id, sequence%n");
+      f.format("%n  Guardian Records: id, sequence #commitments #proofs%n");
       for (Guardian gr : record.guardians()) {
-        f.format("    %s %d%n", gr.getGuardianId(), gr.getXCoordinate());
+        f.format("    %10s %10d %10d %10d%n", gr.getGuardianId(), gr.getXCoordinate(),
+                gr.getCoefficientCommitments().size(), gr.getCoefficientProofs().size());
       }
 
-      f.format("%n  Available Guardians%n");
+      f.format("%n  Available Guardians    lagrange%n");
       for (AvailableGuardian guardian : record.availableGuardians()) {
-        f.format("    %20s %d %s%n", guardian.guardianId(), guardian.xCoordinate(), guardian.lagrangeCoefficient());
+        f.format("    %10s %10d %10s%n", guardian.guardianId(), guardian.xCoordinate(), guardian.lagrangeCoefficient());
       }
 
       f.format("%nAcceptedBallots %d%n", Iterables.size(record.submittedBallots()));

@@ -275,6 +275,10 @@ public class SubmittedBallotsTable extends JPanel {
       return descOpt.map( desc -> desc.contest.voteVariation().toString()).orElse( "N/A");
     }
 
+    public Integer getVotesAllowed() {
+      return descOpt.map( desc -> desc.contest.votesAllowed()).orElse( -1);
+    }
+
     @Override
     public String toString() {
       return String.format("CiphertextBallot.Contest%n %s%n%nManifest.ContestDescription%n%s%n",

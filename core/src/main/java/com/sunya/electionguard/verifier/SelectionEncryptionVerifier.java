@@ -93,9 +93,9 @@ public class SelectionEncryptionVerifier {
       }
 
       // 4.B: conduct hash computation, c = H(Q-bar, (alpha, beta), (a0, b0), (a1, b1))
-      ElementModQ expected_challenge = Hash.hash_elems(electionRecord.extendedHash(),
+      ElementModQ computedChallenge = Hash.hash_elems(electionRecord.extendedHash(),
               this.alpha, this.beta, a0, b0, a1, b1);
-      if (!challenge.equals(expected_challenge)) {
+      if (!challenge.equals(computedChallenge)) {
         System.out.printf("4.B selection challenge failed for %s.%n", selection.object_id());
         error = true;
       }
@@ -140,6 +140,10 @@ public class SelectionEncryptionVerifier {
         System.out.printf("4.H check chaum-pedersen one proof failed for %s.%n", selection.object_id());
         error = true;
       }
+
+      // just for fun we want to know about is_valid()
+      // ElGamal.Ciphertext message, ElementModP k, ElementModP m, ElementModQ extBaseHash
+      boolean isValid = proof.is_valid(selection.ciphertext(), K, electionRecord.extendedHash());
 
       if (error) {
         System.out.printf("%s validity verification failure.%n", selection_id);
