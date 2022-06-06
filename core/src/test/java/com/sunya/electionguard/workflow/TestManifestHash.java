@@ -2,8 +2,10 @@ package com.sunya.electionguard.workflow;
 
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.Manifest;
+import com.sunya.electionguard.json.JsonConsumer;
 import com.sunya.electionguard.publish.Consumer;
 import com.sunya.electionguard.publish.ElectionRecord;
+import com.sunya.electionguard.verifier.TestParameterVerifier;
 import net.jqwik.api.Example;
 
 import java.io.IOException;
@@ -12,11 +14,11 @@ import static com.google.common.truth.Truth.assertThat;
 
 
 public class TestManifestHash {
-  String input = "/home/snake/dev/github/electionguard-kotlin-multiplatform/src/commonTest/data/testPython";
+  String input = TestParameterVerifier.topdirJsonExample;
 
   @Example
   public void testManifestHash() throws IOException {
-    Consumer consumer = new Consumer(input);
+    JsonConsumer consumer = new JsonConsumer(input);
     ElectionRecord electionRecord = consumer.readElectionRecord();
     Manifest manifest = electionRecord.manifest();
 

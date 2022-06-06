@@ -60,7 +60,7 @@ public class TestPythonSampleElectionRecord {
     assertThat(consumer.acceptedBallots()).isNotEmpty();
   }
 
-  @Example
+  // @Example
   public void testElectionRecordProto1() throws IOException {
     ElectionRecordProto1.ElectionRecord protoFromJson = ElectionRecordToProto.buildElectionRecord(
             consumer.manifest(),
@@ -160,6 +160,7 @@ public class TestPythonSampleElectionRecord {
             config,
             consumer.context().jointPublicKey,
             UInt256.fromModQ(consumer.context().manifestHash),
+            UInt256.fromModQ(consumer.context().cryptoBaseHash),
             UInt256.fromModQ(consumer.context().cryptoExtendedBaseHash),
             consumer.guardianRecords().stream().map(g -> new Guardian(g)).toList(),
             emptyMap()

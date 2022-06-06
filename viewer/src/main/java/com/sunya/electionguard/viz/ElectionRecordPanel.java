@@ -180,6 +180,7 @@ class ElectionRecordPanel extends JPanel {
       if (record.electionPublicKey() != null) {
         f.format("  election public key = %s%n", record.electionPublicKey().toShortString());
       }
+      f.format("  base hash = %s%n", record.baseHash());
       f.format("  extended base hash = %s%n", record.extendedHash());
 
       /*

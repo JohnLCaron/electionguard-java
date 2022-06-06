@@ -159,16 +159,6 @@ public class CompareHelper {
     assertThat(actual).isEqualTo(expected);
   }
 
-  //     return sequenceOrder == that.sequenceOrder &&
-  //            isPlaceholderSelection == that.isPlaceholderSelection &&
-  //            selectionId.equals(that.selectionId) &&
-  //            selectionHash.equals(that.selectionHash) &&
-  //            ciphertext.equals(that.ciphertext);
-  //       return is_placeholder_selection == selection.is_placeholder_selection &&
-  //              crypto_hash.equals(selection.crypto_hash) &&
-  //              nonce.equals(selection.nonce) &&
-  //              proof.equals(selection.proof) &&
-  //              extended_data.equals(selection.extended_data);
   public static void compareCiphertextBallotSelection(CiphertextBallot.Selection actual, CiphertextBallot.Selection expected) {
     assertThat(actual.selectionId).isEqualTo(expected.selectionId);
     assertThat(actual.sequenceOrder).isEqualTo(expected.sequenceOrder);
@@ -208,14 +198,14 @@ public class CompareHelper {
 
   public static void compareElementModP(Group.ElementModP actual, Group.ElementModP expected) {
     if (!actual.equals(expected)) {
-      System.out.printf("HEY %s != %s%n", actual.to_hex(), expected.to_hex());
+      System.out.printf("HEY %s != %s%n", actual.base16(), expected.base16());
     }
     assertThat(actual).isEqualTo(expected);
   }
 
   public static void compareElementModQ(Group.ElementModQ actual, Group.ElementModQ expected) {
     if (!actual.equals(expected)) {
-      System.out.printf("HEY %s != %s%n", actual.to_hex(), expected.to_hex());
+      System.out.printf("HEY %s != %s%n", actual.base16(), expected.base16());
     }
     assertThat(actual).isEqualTo(expected);
   }

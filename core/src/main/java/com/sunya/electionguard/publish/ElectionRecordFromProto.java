@@ -87,11 +87,10 @@ public class ElectionRecordFromProto implements ElectionRecord {
   public ElectionConstants constants() {
     electionguard.ballot.ElectionConstants c = this.config.getConstants();
     return new ElectionConstants(
-            c.getName(),
-            new BigInteger(c.getLargePrime()),
-            new BigInteger(c.getSmallPrime()),
-            new BigInteger(c.getCofactor()),
-            new BigInteger(c.getGenerator()));
+            new BigInteger(1, c.getLargePrime()),
+            new BigInteger(1, c.getSmallPrime()),
+            new BigInteger(1, c.getCofactor()),
+            new BigInteger(1, c.getGenerator()));
   }
 
   @Override
@@ -125,8 +124,8 @@ public class ElectionRecordFromProto implements ElectionRecord {
   }
 
   @Override
-  public Group.ElementModQ baseHash() { // LOOK wrong
-    return this.init == null ? null : this.init.getCryptoExtendedBaseHash().toModQ();
+  public Group.ElementModQ baseHash() {
+    return this.init == null ? null : this.init.getCryptoBaseHash().toModQ();
   }
 
   /** Joint election public key, K in the spec. */

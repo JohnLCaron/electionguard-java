@@ -13,13 +13,11 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.*;
 import static com.google.common.truth.Truth.assertThat;
 
@@ -68,14 +66,6 @@ public class TestKeyCeremonyRemoteTrustee {
 
   private String makeId(int xCoordinate) {
     return "KeyCeremonyRemoteTrustee" + xCoordinate;
-  }
-
-  @Example
-  public void makeRemoteNoDirectory() {
-    int xCoordinate = 1;
-    assertThrows(FileNotFoundException.class, () ->
-      new KeyCeremonyRemoteTrustee("KeyCeremonyRemoteTrustee" + xCoordinate, xCoordinate, QUORUM,
-              "/home/snake/tmp/electionguard/testKeyCeremonyRemoteTrusteeUnownDirectory"));
   }
 
   @Example

@@ -61,9 +61,9 @@ public class Hash {
       if (x == null) {
         hash_me = "null";
       } else if (x instanceof Group.ElementMod) {
-        hash_me = ((Group.ElementMod)x).to_hex();
+        hash_me = ((Group.ElementMod)x).base16();
       } else if (x instanceof CryptoHashable) {
-        hash_me = ((CryptoHashable)x).cryptoHash().to_hex();
+        hash_me = ((CryptoHashable)x).cryptoHash().base16();
       } else if (x instanceof CryptoHashableString) {
         hash_me = ((CryptoHashableString)x).cryptoHashString();
       } else if (x instanceof String) {
@@ -72,7 +72,7 @@ public class Hash {
       } else if (x instanceof Iterable) {
           // The simplest way to deal with lists, tuples, and such are to crunch them recursively.
         Object[] asArray = Iterables.toArray((Iterable) x, Object.class);
-        hash_me = (asArray.length == 0) ? "null" : hash_elems(asArray).to_hex();
+        hash_me = (asArray.length == 0) ? "null" : hash_elems(asArray).base16();
       } else {
         hash_me = x.toString();
       }

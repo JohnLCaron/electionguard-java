@@ -28,13 +28,13 @@ public class ElectionPublicKeyVerifier {
     ElementModP public_key = this.electionRecord.electionPublicKey();
     ElementModP expected_public_key = computePublicKey();
 
-    // Equation 3.B
+    // Equation 3.A
     if (!public_key.equals(expected_public_key)) {
-      System.out.printf(" ***3.B Public key does not match expected.%n");
+      System.out.printf(" ***3.A Public key does not match expected.%n");
       return false;
     }
 
-    // Equation 3.A
+    // Equation 3.B
     // The hashing is order dependent, use the sequence_order to sort.
     List<Guardian> sorted = this.electionRecord.guardians().stream()
             .sorted(Comparator.comparing(Guardian::getXCoordinate)).toList();
@@ -46,7 +46,7 @@ public class ElectionPublicKeyVerifier {
     ElementModQ expectedExtendedHash = Hash.hash_elems(this.electionRecord.baseHash(), commitment_hash);
 
     if (!this.electionRecord.extendedHash().equals(expectedExtendedHash)) {
-      System.out.printf(" ***3.A. extended hash does not match expected.%n");
+      System.out.printf(" ***3.B. extended hash does not match expected.%n");
       return false;
     }
     System.out.printf(" Manifest public key validation for %d guardians success.%n", this.electionRecord.guardians().size());

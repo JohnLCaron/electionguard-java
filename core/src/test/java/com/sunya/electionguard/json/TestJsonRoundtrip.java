@@ -57,11 +57,11 @@ public class TestJsonRoundtrip {
   }
 
   @Example
-  public void testNormalized() throws IOException {
-    BigInteger nonormal = new BigInteger("FF89940FEA8014812318EA706F2E6CC89088969A79E8477439849C729BD5EB03", 16);
-    BigInteger expected =   new BigInteger("0089940FEA8014812318EA706F2E6CC89088969A79E8477439849C729BD5EB03", 16);
+  public void testConvertToNormal() throws IOException {
+    BigInteger notnormal = new BigInteger("89940FEA8014812318EA706F2E6CC89088969A79E8477439849C729BD5EB03", 16);
+    BigInteger expected = new BigInteger("0089940FEA8014812318EA706F2E6CC89088969A79E8477439849C729BD5EB03", 16);
 
-    Group.ElementModQ nonormalQ = Group.int_to_q(nonormal).orElseThrow();
+    Group.ElementModQ nonormalQ = Group.int_to_q(notnormal).orElseThrow();
     Group.ElementModQ expectedQ = Group.int_to_q(expected).orElseThrow();
 
     Map<String, Group.ElementModQ> coeffs = new HashMap<>();

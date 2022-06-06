@@ -5,10 +5,8 @@ import com.sunya.electionguard.SubmittedBallot;
 import com.sunya.electionguard.protoconvert.SubmittedBallotFromProto;
 import com.sunya.electionguard.protoconvert.SubmittedBallotToProto;
 import electionguard.protogen.CiphertextBallotProto;
-import com.sunya.electionguard.publish.PublisherOld;
 import com.sunya.electionguard.verifier.TestParameterVerifier;
 import net.jqwik.api.Example;
-import net.jqwik.api.lifecycle.BeforeContainer;
 
 import java.io.File;
 import java.io.IOException;
@@ -73,7 +71,8 @@ public class TestSubmittedBallotToProtoRoundtrip {
   public void testPublishEndToEndProblem() throws IOException {
     JsonPublisher publisher = new JsonPublisher(TestParameterVerifier.topdirPublishEndToEnd, PublisherOld.Mode.readonly);
     assertThat(publisher.ballotFiles()).isNotEmpty();
-    String filename = "submitted_ballot_5a150c74-a2cb-47f6-b575-165ba8a4ce53.json";
+    String filename = TestParameterVerifier.topdirPublishEndToEnd +
+            "/submitted_ballots/submitted_ballot_5a150c74-a2cb-47f6-b575-165ba8a4ce53.json";
     SubmittedBallot fromJson = ConvertFromJson.readSubmittedBallot(filename);
     assertThat(fromJson).isNotNull();
     for (CiphertextBallot.Contest contest : fromJson.contests) {

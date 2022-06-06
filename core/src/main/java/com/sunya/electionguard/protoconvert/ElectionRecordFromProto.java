@@ -71,7 +71,6 @@ public class ElectionRecordFromProto {
 
   static ElectionConstants convertConstants(ElectionRecordProto.ElectionConstants constants) {
     return new ElectionConstants(
-            constants.getName(),
             convertBigInteger(constants.getLargePrime()),
             convertBigInteger(constants.getSmallPrime()),
             convertBigInteger(constants.getCofactor()),

@@ -45,9 +45,14 @@ public class DecryptionVerifier {
    * process that was used to confirm the election tallies.
    */
   boolean verify_spoiled_tallies(Iterable<PlaintextTally> talliesIterable) {
+    if (decryptedTally == null) {
+      System.out.printf("  Decrypted Tally dpes not exist%n");
+      return false;
+    }
+
     AtomicBoolean valid = new AtomicBoolean(true);
     for (PlaintextTally tally : talliesIterable) {
-        if (show) System.out.printf(" Spoiled tally %s %n", tally.tallyId);
+        System.out.printf("Spoiled tally %s %n", tally.tallyId);
         boolean ok = this.make_all_contest_verification(tally.tallyId, tally.contests);
         valid.compareAndSet(true, ok); // AND
     }
@@ -95,7 +100,7 @@ public class DecryptionVerifier {
     boolean verify_a_contest() {
       boolean error = false;
       for (PlaintextTally.Selection selection : this.contest.selections().values()) {
-        String id = contest.contestId() + "-" + selection.selectionId();
+        String id = contest.contestId() + "/" + selection.selectionId();
         DecryptionSelectionVerifier tsv = new DecryptionSelectionVerifier(id, selection);
         if (!tsv.verify_a_selection()) {
           System.out.printf("  Selection %s decryption failure.%n", id);
@@ -127,11 +132,7 @@ public class DecryptionVerifier {
     boolean verify_a_selection() {
       List<CiphertextDecryptionSelection> shares = this.selection.shares();
       ShareVerifier sv = new ShareVerifier(this.id, shares, selection.message());
-      boolean res = sv.verify_all_shares();
-      if (!res) {
-        System.out.printf(" %s tally verification error.%n", this.selection_id);
-      }
-      return res;
+      return sv.verify_all_shares();
     }
   }
 
@@ -252,6 +253,19 @@ public class DecryptionVerifier {
       // get values
       Preconditions.checkArgument(share.proof().isPresent());
       ChaumPedersen.ChaumPedersenProof proof = share.proof().get();
+      error = !proof.is_valid(
+              this.message,
+              public_key,
+              share.share(),
+              electionRecord.extendedHash()
+      );
+      if (error) {
+        System.out.printf(" **8.C guardian %s %s: FAIL%n", guardian_id, this.id);
+      } else {
+        System.out.printf("   8.C guardian %s %s: OK%n", guardian_id, this.id);
+      }
+
+      /*
       if (proof.name.endsWith("2")) {
         // ElGamal.Ciphertext message, ElementModP k, ElementModP m, ElementModQ q
         error = !proof.is_valid(
@@ -283,14 +297,28 @@ public class DecryptionVerifier {
           error = true;
         }
 
+        // Ramsdale: In Step 8C, c_{i} = H(\bar Q,(A,B),(a_{i},b_{i}), M_{i}) should be
+        //                       c_{i} = H(\bar Q,A,B,a_{i},b_{i}, M_{i}).  maybe red herring
         // 8.C Check if the given challenge ci = H(Q-bar, (A,B), (ai, bi), Mi)
-        ElementModQ challenge_computed = Hash.hash_elems(electionRecord.extendedHash(),
-                this.message.pad(), this.message.data(), pad, data, partial_decryption);
+        ElementModQ challenge_computed = Hash.hash_elems(
+                electionRecord.extendedHash(), // Qbar
+                this.message.pad(),
+                this.message.data(),
+                pad,
+                data,
+                partial_decryption);
         if (!challenge_computed.equals(challenge)) {
-          System.out.printf("  8.C ci != H(Q-bar, (A,B), (ai, bi), Mi) for guardian %s for %s%n", guardian_id, this.id);
+          System.out.printf("**8.C guardian %s %s: FAIL%n", guardian_id, this.id);
+          if (show) {
+            System.out.printf("**8.C guardian %s %s: challenge_computed %s != challenge %s%n", guardian_id, this.id, challenge_computed, challenge);
+            System.out.printf("      message.pad(%s), message.data(%s), pad(%s), data(%s), partial_decryption(%s)%n",
+                    this.message.pad(), this.message.data(), pad, data, partial_decryption);
+          }
           error = true;
         } else if (show) {
-          System.out.printf("  8.C ok for guardian %s for %s%n", guardian_id, this.id);
+          System.out.printf("  8.C guardian %s %s: challenge_computed %s == challenge %s%n", guardian_id, this.id , challenge_computed, challenge);
+          System.out.printf("      message.pad(%s), message.data(%s), pad(%s), data(%s), partial_decryption(%s)%n",
+                  this.message.pad(), this.message.data(), pad, data, partial_decryption);
         }
 
         // 8.D g^vi mod p = ai * Ki^ci mod p
@@ -304,7 +332,7 @@ public class DecryptionVerifier {
           System.out.printf("  8.E A^vi mod p = bi * Mi ^ ci mod p for guardian %s for %s%n", guardian_id, this.id);
           error = true;
         }
-      }
+      } */
 
       return !error;
     }

@@ -49,15 +49,15 @@ public class TestHashedElGamal {
     );
     Group.ElementModQ nonce = Group.int_to_q(noncei).orElseThrow();
 
-    System.out.printf("secretKey='%s'%n", secretKey.to_hex());
-    System.out.printf("publicKey='%s'%n", publicKey.to_hex());
+    System.out.printf("secretKey='%s'%n", secretKey.base16());
+    System.out.printf("publicKey='%s'%n", publicKey.base16());
 
     HashedElGamal subject = HashedElGamal.create(
             Bytes.from("message"),
             publicKey,
             nonce);
 
-    System.out.printf("HashedElGamal.pad='%s'%n", subject.c0().to_hex());
+    System.out.printf("HashedElGamal.pad='%s'%n", subject.c0().base16());
     System.out.printf("HashedElGamal.data='%s'%n", subject.c1());
 
     Bytes result = subject.decrypt(secretKey);

@@ -9,7 +9,7 @@ import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.json.JsonConsumer;
 import com.sunya.electionguard.json.JsonPrivateData;
 import com.sunya.electionguard.json.JsonPublisher;
-import com.sunya.electionguard.publish.PublisherOld;
+import com.sunya.electionguard.json.PublisherOld;
 import net.jqwik.api.Example;
 
 import java.io.IOException;

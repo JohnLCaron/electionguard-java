@@ -1,5 +1,6 @@
 package com.sunya.electionguard.json;
 
+import com.google.common.base.Preconditions;
 import com.sunya.electionguard.AvailableGuardian;
 import com.sunya.electionguard.CiphertextTally;
 import com.sunya.electionguard.ElectionConstants;
@@ -11,7 +12,6 @@ import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.SubmittedBallot;
 import com.sunya.electionguard.publish.CloseableIterableAdapter;
-import com.sunya.electionguard.publish.PublisherOld;
 import com.sunya.electionguard.publish.ElectionRecord;
 
 import javax.annotation.Nullable;
@@ -92,7 +92,10 @@ public class JsonConsumer {
   }
 
   public ElectionConstants constants() throws IOException {
-    return ConvertFromJson.readConstants(publisher.constantsPath().toString());
+    ElectionConstants result = ConvertFromJson.readConstants(publisher.constantsPath().toString());
+    ElectionConstants current = Group.getPrimes();
+    Preconditions.checkArgument(current.equals(result));
+    return result;
   }
 
   @Nullable

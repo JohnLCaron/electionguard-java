@@ -97,7 +97,7 @@ public class ElGamalKt {
 
     @Override
     public String cryptoHashString() {
-      return Hash.hash_elems(pad, data).to_hex();
+      return Hash.hash_elems(pad, data).base16();
     }
   }
 

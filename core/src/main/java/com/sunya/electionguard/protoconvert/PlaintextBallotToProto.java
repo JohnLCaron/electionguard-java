@@ -29,7 +29,9 @@ public class PlaintextBallotToProto {
     builder.setSelectionId(selection.selectionId);
     builder.setSequenceOrder(selection.sequenceOrder);
     builder.setVote(selection.vote);
-    builder.setExtendedData(selection.extendedData);
+    if (selection.extendedData != null) {
+      builder.setExtendedData(selection.extendedData);
+    }
     return builder.build();
   }
 }

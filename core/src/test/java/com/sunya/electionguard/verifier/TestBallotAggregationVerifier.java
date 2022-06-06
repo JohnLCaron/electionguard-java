@@ -14,7 +14,7 @@ public class TestBallotAggregationVerifier {
     Consumer consumer = new Consumer(TestParameterVerifier.topdirProto);
     ElectionRecord electionRecord = consumer.readElectionRecord();
     var validator = new BallotAggregationVerifier(electionRecord.submittedBallots(),
-            electionRecord.decryptedTally());
+            electionRecord.ciphertextTally());
     boolean sevOk1 = validator.verify_ballot_aggregation();
     assertThat(sevOk1).isTrue();
   }
@@ -24,7 +24,7 @@ public class TestBallotAggregationVerifier {
     JsonConsumer consumer = new JsonConsumer(TestParameterVerifier.topdirJsonExample);
     ElectionRecord electionRecord = consumer.readElectionRecordJson();
     var validator = new BallotAggregationVerifier(electionRecord.submittedBallots(),
-            electionRecord.decryptedTally());
+            electionRecord.ciphertextTally());
 
     boolean sevOk1 = validator.verify_ballot_aggregation();
     assertThat(sevOk1).isTrue();

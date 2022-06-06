@@ -168,6 +168,7 @@ public class DecryptingRemoteTrustee extends DecryptingTrusteeServiceGrpc.Decryp
 
   DecryptingRemoteTrustee(String trusteeFile) throws IOException {
     this.delegate = TrusteeFromProto.readTrustee(trusteeFile);
+    System.out.printf("DecryptingTrustee= %s%n", this.delegate);
   }
 
   String id() {

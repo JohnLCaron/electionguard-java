@@ -61,6 +61,15 @@ public class ElectionPolynomial {
     return Objects.hash(coefficients, coefficient_commitments, coefficient_proofs);
   }
 
+  @Override
+  public String toString() {
+    return "ElectionPolynomial{" +
+            "coefficients=" + coefficients +
+            ", coefficient_commitments=" + coefficient_commitments +
+            ", coefficient_proofs=" + coefficient_proofs +
+            '}';
+  }
+
   /**
    * Generates a polynomial for sharing election keys.
    *

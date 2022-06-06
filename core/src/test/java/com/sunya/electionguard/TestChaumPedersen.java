@@ -52,16 +52,17 @@ public class TestChaumPedersen {
 
   @Example
   public void test_cp_proofs_simple() {
-    ElGamal.KeyPair  keypair = ElGamal.elgamal_keypair_from_secret(TWO_MOD_Q).orElseThrow();
-    ElementModQ seed = TWO_MOD_Q;
-    ElGamal.Ciphertext message = ElGamal.elgamal_encrypt_ver1(0, ONE_MOD_Q, keypair.public_key()).orElseThrow();
-    ElementModP decryption = message.partial_decrypt(keypair.secret_key());
+    ElGamal.KeyPair keypair = ElGamal.elgamal_keypair_from_secret(Group.rand_q()).orElseThrow();
+    ElementModQ extended_base_hash = Group.rand_q();
+    ElementModQ seed = Group.rand_q();
+    ElGamal.Ciphertext text = ElGamal.elgamal_encrypt_ver1(42, Group.rand_q(), keypair.public_key()).orElseThrow();
+    ElementModP partial_decryption = text.partial_decrypt(keypair.secret_key());
 
-    ChaumPedersenProof proof = make_chaum_pedersen(message, keypair.secret_key(), decryption, seed, ONE_MOD_Q);
-    ChaumPedersenProof bad_proof = make_chaum_pedersen(message, keypair.secret_key(), TWO_MOD_P, seed, ONE_MOD_Q);
+    ChaumPedersenProof proof = make_chaum_pedersen(text, keypair.secret_key(), partial_decryption, seed, extended_base_hash);
+    ChaumPedersenProof bad_proof = make_chaum_pedersen(text, keypair.secret_key(), TWO_MOD_P, seed, extended_base_hash);
 
-    assertThat(proof.is_valid(message, keypair.public_key(), decryption, ONE_MOD_Q)).isTrue();
-    assertThat(bad_proof.is_valid(message, keypair.public_key(), decryption, ONE_MOD_Q)).isFalse();
+    assertThat(proof.is_valid1(text, keypair.public_key(), partial_decryption, extended_base_hash)).isTrue();
+    assertThat(bad_proof.is_valid1(text, keypair.public_key(), partial_decryption, extended_base_hash)).isFalse();
   }
 
   // TestConstantChaumPedersen

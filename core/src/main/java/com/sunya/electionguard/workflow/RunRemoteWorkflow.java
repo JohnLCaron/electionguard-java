@@ -112,6 +112,7 @@ public class RunRemoteWorkflow {
     int exitStatus = 0;
 
     try {
+      PrivateData privatePublisher = new PrivateData(cmdLine.trusteeDir, false, true);
 
       System.out.printf("%n1=============================================================%n");
       // PerformKeyCeremony
@@ -165,7 +166,7 @@ public class RunRemoteWorkflow {
       RunCommand encryptBallotsCmd = new RunCommand("EncryptBallots", service,
               "java",
               "-classpath", classpath,
-              "com.sunya.electionguard.workflow.EncryptBallots",
+              "com.sunya.electionguard.workflow.RunEncryptBallots",
               "-in", cmdLine.keyDir,
               "-nballots", Integer.toString(cmdLine.nballots),
               "-out", cmdLine.encryptDir,
@@ -202,12 +203,11 @@ public class RunRemoteWorkflow {
       System.out.printf("%n3=============================================================%n");
       stopwatch.reset().start();
 
-      // -in /home/snake/tmp/electionguard/remoteWorkflow/encryptor -out /home/snake/tmp/electionguard/remoteWorkflow/accumTally
       // Accumulate the Tally
       RunCommand accumTallyCmd = new RunCommand("AccumTally", service,
               "java",
               "-classpath", classpath,
-              "com.sunya.electionguard.workflow.AccumulateTally",
+              "com.sunya.electionguard.workflow.RunAccumulateTally",
               "-in", cmdLine.encryptDir,
               "-out", cmdLine.encryptDir
       );
@@ -242,7 +242,7 @@ public class RunRemoteWorkflow {
       RunCommand decryptBallotsCmd = new RunCommand("DecryptingRemote", service,
               "java",
               "-classpath", classpath,
-              "com.sunya.electionguard.decrypting.DecryptingMediatorRunner",
+              "com.sunya.electionguard.decrypting.RunDecryptingMediator",
               "-in", cmdLine.encryptDir,
               "-out", cmdLine.outputDir,
               "-navailable", Integer.toString(navailable)
@@ -256,18 +256,12 @@ public class RunRemoteWorkflow {
         return;
       }
 
-      PrivateData privatePublisher = null;
-      try {
-        privatePublisher = new PrivateData(cmdLine.trusteeDir, false, true);
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
       for (int i = 1; i <= cmdLine.quorum; i++) {
         RunCommand command = new RunCommand("DecryptingRemoteTrustee" + i, service,
                 "java",
                 "-classpath", classpath,
                 "com.sunya.electionguard.decrypting.DecryptingRemoteTrustee",
-                "-trusteeFile", privatePublisher.trusteePath("decryptingTrustee-" + REMOTE_TRUSTEE + i).toString());
+                "-trusteeFile", privatePublisher.trusteePath(REMOTE_TRUSTEE + i).toString());
         running.add(command);
       }
 

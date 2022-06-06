@@ -11,9 +11,11 @@ public class TestUInt256 {
 
   @Example
   public void testUInt256() {
-    BigInteger bi = new BigInteger("89378920920032937196531702992192972263302712977973574040976517358784464109329");
+    String val10 = "89378920920032937196531702992192972263302712977973574040976517358784464109329";
+    assertThat(val10.length()).isEqualTo(77);
+    BigInteger bi = new BigInteger(val10);
     Group.ElementModQ biq = Group.int_to_q_unchecked(bi);
-    assertThat(biq.bytes().length()).isEqualTo(33);
+    assertThat(biq.bytes().length()).isEqualTo(32);
     UInt256 biu = UInt256.fromModQ(biq);
     assertThat(biu.toString()).isEqualTo("UInt256(0xC59AAD302F149A018F925AEC7B819C6F890441F0954C36C198FD0066C5A93F11)");
 
@@ -25,7 +27,7 @@ public class TestUInt256 {
 
     assertThat(biu2).isEqualTo(biu);
     assertThat(biq2.toString()).isEqualTo(biq.toString());
-    assertThat(biq2.to_hex()).isEqualTo(biq.to_hex());
+    assertThat(biq2.base16()).isEqualTo(biq.base16());
 
     assertThat(biq2).isEqualTo(biq);
     assertThat(bi2).isNotEqualTo(bi);
