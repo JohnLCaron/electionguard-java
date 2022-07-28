@@ -3,6 +3,9 @@ package com.sunya.electionguard.json;
 import com.google.common.flogger.FluentLogger;
 import com.google.gson.*;
 import com.sunya.electionguard.*;
+import com.sunya.electionguard.ballot.DecryptingGuardian;
+import com.sunya.electionguard.ballot.EncryptedBallot;
+import com.sunya.electionguard.ballot.EncryptedTally;
 import com.sunya.electionguard.standard.GuardianPrivateRecord;
 
 import java.io.*;
@@ -12,10 +15,10 @@ public class ConvertFromJson {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
   private static final Gson enhancedGson = GsonTypeAdapters.enhancedGson();
 
-  public static AvailableGuardian readAvailableGuardian(String pathname) throws IOException {
+  public static DecryptingGuardian readAvailableGuardian(String pathname) throws IOException {
     try (InputStream is = new FileInputStream(pathname)) {
       Reader reader = new InputStreamReader(is);
-      return enhancedGson.fromJson(reader, AvailableGuardian.class);
+      return enhancedGson.fromJson(reader, DecryptingGuardian.class);
     } catch (Exception ioe) {
       logger.atSevere().log("Failed readAvailableGuardian file '%s'", pathname);
       throw ioe;
@@ -32,10 +35,10 @@ public class ConvertFromJson {
     }
   }
 
-  public static CiphertextTally readCiphertextTally(String pathname) throws IOException {
+  public static EncryptedTally readCiphertextTally(String pathname) throws IOException {
     try (InputStream is = new FileInputStream(pathname)) {
       Reader reader = new InputStreamReader(is);
-      return enhancedGson.fromJson(reader, CiphertextTally.class);
+      return enhancedGson.fromJson(reader, EncryptedTally.class);
     } catch (Exception ioe) {
       logger.atSevere().log("Failed readCiphertextTally file '%s'", pathname);
       throw ioe;
@@ -124,10 +127,10 @@ public class ConvertFromJson {
     }
   }
 
-  public static SubmittedBallot readSubmittedBallot(String pathname) throws IOException {
+  public static EncryptedBallot readSubmittedBallot(String pathname) throws IOException {
     try (InputStream is = new FileInputStream(pathname)) {
       Reader reader = new InputStreamReader(is);
-      return enhancedGson.fromJson(reader, SubmittedBallot.class);
+      return enhancedGson.fromJson(reader, EncryptedBallot.class);
     } catch (Exception ioe) {
       logger.atSevere().log("Failed readSubmittedBallot file '%s'", pathname);
       throw ioe;

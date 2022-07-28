@@ -8,7 +8,7 @@ import com.sunya.electionguard.BallotFactory;
 import com.sunya.electionguard.CiphertextBallot;
 import com.sunya.electionguard.CompareHelper;
 import com.sunya.electionguard.ElectionCryptoContext;
-import com.sunya.electionguard.CiphertextTally;
+import com.sunya.electionguard.ballot.EncryptedTally;
 import com.sunya.electionguard.CiphertextTallyBuilder;
 import com.sunya.electionguard.ElectionBuilder;
 import com.sunya.electionguard.ElectionConstants;
@@ -21,10 +21,9 @@ import com.sunya.electionguard.InternalManifest;
 import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.PlaintextBallot;
 import com.sunya.electionguard.PlaintextTally;
-import com.sunya.electionguard.SubmittedBallot;
+import com.sunya.electionguard.ballot.EncryptedBallot;
 import com.sunya.electionguard.json.JsonConsumer;
 import com.sunya.electionguard.json.JsonPublisher;
-import com.sunya.electionguard.json.PublisherOld;
 import com.sunya.electionguard.publish.ElectionRecord;
 import net.jqwik.api.Example;
 import net.jqwik.api.lifecycle.BeforeProperty;
@@ -84,7 +83,7 @@ public class TestEndToEndElectionIntegration {
 
   // Step 4 - Decrypt Tally
   DecryptionMediator decryption_mediator;
-  CiphertextTally publishedTally;
+  EncryptedTally publishedTally;
   PlaintextTally decryptedTally;
   Collection<PlaintextTally> spoiledDecryptedTallies;
 
@@ -284,7 +283,7 @@ public class TestEndToEndElectionIntegration {
     this.ballot_box = new BallotBox(this.election, this.context);
     // Randomly cast or spoil the ballots
     for (CiphertextBallot ballot : this.ciphertext_ballots) {
-      Optional<SubmittedBallot> accepted_ballot;
+      Optional<EncryptedBallot> accepted_ballot;
       if (random.nextBoolean()) {
         accepted_ballot = this.ballot_box.cast(ballot);
       } else {
@@ -306,7 +305,7 @@ public class TestEndToEndElectionIntegration {
     CiphertextTallyBuilder ciphertext_tally = new CiphertextTallyBuilder("tally_object_id", this.metadata, this.context);
     ciphertext_tally.batch_append(this.ballot_box.getAcceptedBallotsAsCloseableIterable());
     this.publishedTally = ciphertext_tally.build();
-    List<SubmittedBallot> spoiled_ballots = Lists.newArrayList(this.ballot_box.getSpoiledBallots());
+    List<EncryptedBallot> spoiled_ballots = Lists.newArrayList(this.ballot_box.getSpoiledBallots());
 
     // Configure the Decryption
     this.decryption_mediator = new DecryptionMediator(this.context);
@@ -373,7 +372,7 @@ public class TestEndToEndElectionIntegration {
   void compare_spoiled_tallies() {
     Map<String, PlaintextTally> plaintextTalliesMap = this.spoiledDecryptedTallies.stream().collect(Collectors.toMap(t -> t.tallyId, t -> t));
 
-    for (SubmittedBallot accepted_ballot : this.ballot_box.getSpoiledBallots()) {
+    for (EncryptedBallot accepted_ballot : this.ballot_box.getSpoiledBallots()) {
       String ballot_id = accepted_ballot.object_id();
       assertThat(accepted_ballot.state).isEqualTo(BallotBox.State.SPOILED);
       for (PlaintextBallot orgBallot : this.originalPlaintextBallots) {
@@ -389,7 +388,7 @@ public class TestEndToEndElectionIntegration {
     // Publish and verify steps of the election
   void step_5_publish_and_verify() throws IOException {
     System.out.printf("%n5. publish to %s%n", outputDir);
-    JsonPublisher publisher = new JsonPublisher(outputDir, PublisherOld.Mode.createNew);
+    JsonPublisher publisher = new JsonPublisher(outputDir, JsonPublisher.Mode.createNew);
 
     publisher.writeElectionRecordJson(
             this.election,
@@ -444,8 +443,8 @@ public class TestEndToEndElectionIntegration {
     Group.ElementModQ expectedExtendedHash = Hash.hash_elems(roundtrip.baseHash(), commitment_hash);
     assertThat(roundtrip.extendedHash()).isEqualTo(expectedExtendedHash);
 
-    for (SubmittedBallot ballot : roundtrip.submittedBallots()) {
-      SubmittedBallot expected = this.ballot_box.get(ballot.object_id()).orElseThrow();
+    for (EncryptedBallot ballot : roundtrip.submittedBallots()) {
+      EncryptedBallot expected = this.ballot_box.get(ballot.object_id()).orElseThrow();
       compareCiphertextBallot(ballot, expected);
       assertWithMessage(ballot.object_id()).that(ballot).isEqualTo(expected);
     }

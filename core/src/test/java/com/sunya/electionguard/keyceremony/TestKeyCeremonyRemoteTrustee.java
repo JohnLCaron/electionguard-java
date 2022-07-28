@@ -166,8 +166,6 @@ public class TestKeyCeremonyRemoteTrustee {
     CommonProto.SchnorrProof org = proofs.get(index);
     CommonProto.SchnorrProof munged = CommonProto.SchnorrProof.newBuilder()
             .setChallenge(org.getChallenge())
-            .setCommitment(org.getCommitment())
-            .setPublicKey(org.getPublicKey())
             .setResponse(CommonConvert.publishElementModQ(TestUtils.elements_mod_q()))
             .build();
 
@@ -359,8 +357,8 @@ public class TestKeyCeremonyRemoteTrustee {
     verify(observePublicKeySet, times(2)).onNext(capturePublicKeySet.capture());
     RemoteKeyCeremonyTrusteeProto.PublicKeySet keySet1 = capturePublicKeySet.getValue();
 
-    Group.ElementModP key1 = CommonConvert.importElementModP(keySet1.getCoefficientProofs(0).getPublicKey());
-    Group.ElementModP key2 = CommonConvert.importElementModP(keySet2.getCoefficientProofs(0).getPublicKey());
+    Group.ElementModP key1 = CommonConvert.importElementModP(keySet1.getCoefficientComittments(0));
+    Group.ElementModP key2 = CommonConvert.importElementModP(keySet2.getCoefficientComittments(0));
     Group.ElementModP expected = Group.mult_p(key1, key2);
     Group.ElementModP actual = CommonConvert.importElementModP(response.getJointPublicKey());
     assertThat(actual).isEqualTo(expected);

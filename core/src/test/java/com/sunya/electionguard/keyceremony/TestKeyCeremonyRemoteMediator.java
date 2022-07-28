@@ -173,9 +173,9 @@ public class TestKeyCeremonyRemoteMediator {
 
     for (KeyCeremonyTrusteeIF trustee : mediator.trusteeProxies) {
       KeyCeremonyTrustee trusteeImpl = ((KeyCeremonyTrusteeSimulator) trustee).delegate;
-      assertThat(trusteeImpl.allGuardianPublicKeys).hasSize(3);
-      assertThat(trusteeImpl.myPartialKeyBackups).hasSize(2);
-      assertThat(trusteeImpl.otherGuardianPartialKeyBackups).hasSize(2);
+      assertThat(trusteeImpl.guardianPublicKeys).hasSize(3);
+      assertThat(trusteeImpl.mySecretKeyShares).hasSize(2);
+      assertThat(trusteeImpl.guardianSecretKeyShares).hasSize(2);
     }
   }
 }

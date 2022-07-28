@@ -1,12 +1,12 @@
 package com.sunya.electionguard.publish;
 
-import com.sunya.electionguard.AvailableGuardian;
-import com.sunya.electionguard.CiphertextTally;
+import com.sunya.electionguard.ballot.DecryptingGuardian;
+import com.sunya.electionguard.ballot.EncryptedTally;
 import com.sunya.electionguard.ElectionConstants;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.PlaintextTally;
-import com.sunya.electionguard.SubmittedBallot;
+import com.sunya.electionguard.ballot.EncryptedBallot;
 import electionguard.ballot.DecryptionResult;
 import electionguard.ballot.ElectionConfig;
 import electionguard.ballot.ElectionInitialized;
@@ -136,8 +136,8 @@ public class ElectionRecordFromProto implements ElectionRecord {
 
   @org.jetbrains.annotations.Nullable
   @Override
-  public CiphertextTally ciphertextTally() {
-    return this.tally == null ? null : this.tally.getCiphertextTally();
+  public EncryptedTally ciphertextTally() {
+    return this.tally == null ? null : this.tally.getEncryptedTally();
   }
 
   @org.jetbrains.annotations.Nullable
@@ -147,12 +147,12 @@ public class ElectionRecordFromProto implements ElectionRecord {
   }
 
   @Override
-  public List<AvailableGuardian> availableGuardians() {
-    return this.decryption == null ? emptyList() : this.decryption.getAvailableGuardians();
+  public List<DecryptingGuardian> availableGuardians() {
+    return this.decryption == null ? emptyList() : this.decryption.getDecryptingGuardians();
   }
 
   @Override
-  public Iterable<SubmittedBallot> submittedBallots() {
+  public Iterable<EncryptedBallot> submittedBallots() {
     return this.consumer == null ? emptyList() : consumer.iterateSubmittedBallots();
   }
 

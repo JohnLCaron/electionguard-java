@@ -1,5 +1,6 @@
 package com.sunya.electionguard;
 
+import com.sunya.electionguard.ballot.EncryptedBallot;
 import net.jqwik.api.Example;
 
 import java.math.BigInteger;
@@ -42,11 +43,11 @@ public class TestBallotBox {
   public void test_ballot_box_cast_ballot() {
     assertThat(BallotValidations.ballot_is_valid_for_election(data, this.metadata, context)).isTrue();
 
-    Optional<SubmittedBallot> resultO = ballotBox.cast(data);
+    Optional<EncryptedBallot> resultO = ballotBox.cast(data);
     assertThat(resultO).isPresent();
-    SubmittedBallot result = resultO.get();
+    EncryptedBallot result = resultO.get();
 
-    SubmittedBallot expected = ballotBox.get(source.object_id()).orElse(null);
+    EncryptedBallot expected = ballotBox.get(source.object_id()).orElse(null);
     assertThat(expected).isNotNull();
     assertThat(expected.state).isEqualTo(BallotBox.State.CAST);
     assertThat(result.state).isEqualTo(BallotBox.State.CAST);
@@ -59,11 +60,11 @@ public class TestBallotBox {
 
   @Example
   public void test_ballot_box_spoil_ballot() {
-    Optional<SubmittedBallot> resultO = ballotBox.spoil(data);
+    Optional<EncryptedBallot> resultO = ballotBox.spoil(data);
     assertThat(resultO).isPresent();
-    SubmittedBallot result = resultO.get();
+    EncryptedBallot result = resultO.get();
 
-    SubmittedBallot expected = ballotBox.get(source.object_id()).orElse(null);
+    EncryptedBallot expected = ballotBox.get(source.object_id()).orElse(null);
     assertThat(expected).isNotNull();
 
     assertThat(expected.state).isEqualTo(BallotBox.State.SPOILED);
@@ -77,10 +78,10 @@ public class TestBallotBox {
 
   @Example
   public void test_cast_ballot() {
-    SubmittedBallot result = ballotBox.accept_ballot(data, BallotBox.State.CAST).orElse(null);
+    EncryptedBallot result = ballotBox.accept_ballot(data, BallotBox.State.CAST).orElse(null);
     assertThat(result).isNotNull();
 
-    SubmittedBallot expected = ballotBox.get(source.object_id()).orElse(null);
+    EncryptedBallot expected = ballotBox.get(source.object_id()).orElse(null);
     assertThat(expected).isNotNull();
     assertThat(expected.state).isEqualTo(BallotBox.State.CAST);
     assertThat(result.state).isEqualTo(BallotBox.State.CAST);
@@ -93,10 +94,10 @@ public class TestBallotBox {
 
   @Example
   public void test_spoil_ballot() {
-    SubmittedBallot result = ballotBox.accept_ballot(data, BallotBox.State.SPOILED).orElse(null);
+    EncryptedBallot result = ballotBox.accept_ballot(data, BallotBox.State.SPOILED).orElse(null);
     assertThat(result).isNotNull();
 
-    SubmittedBallot expected = ballotBox.get(source.object_id()).orElse(null);
+    EncryptedBallot expected = ballotBox.get(source.object_id()).orElse(null);
     assertThat(expected).isNotNull();
     assertThat(expected.state).isEqualTo(BallotBox.State.SPOILED);
     assertThat(result.state).isEqualTo(BallotBox.State.SPOILED);

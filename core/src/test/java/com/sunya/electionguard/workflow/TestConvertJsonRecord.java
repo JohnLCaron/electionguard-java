@@ -3,7 +3,7 @@ package com.sunya.electionguard.workflow;
 import com.sunya.electionguard.CompareHelper;
 import com.sunya.electionguard.GuardianRecord;
 import com.sunya.electionguard.PlaintextTally;
-import com.sunya.electionguard.SubmittedBallot;
+import com.sunya.electionguard.ballot.EncryptedBallot;
 import com.sunya.electionguard.json.JsonConsumer;
 import com.sunya.electionguard.publish.Consumer;
 import com.sunya.electionguard.publish.ElectionRecord;
@@ -33,9 +33,9 @@ public class TestConvertJsonRecord {
     assertThat(protoRecord.ciphertextTally()).isEqualTo(jsonConsumer.ciphertextTally());
     assertThat(protoRecord.decryptedTally()).isEqualTo(jsonConsumer.decryptedTally());
 
-    Iterator<SubmittedBallot> iter = jsonConsumer.acceptedBallots().iterator();
-    for (SubmittedBallot ballot : protoRecord.submittedBallots()) {
-      SubmittedBallot expected = iter.next();
+    Iterator<EncryptedBallot> iter = jsonConsumer.acceptedBallots().iterator();
+    for (EncryptedBallot ballot : protoRecord.submittedBallots()) {
+      EncryptedBallot expected = iter.next();
       CompareHelper.compareCiphertextBallot(ballot, expected);
     }
 

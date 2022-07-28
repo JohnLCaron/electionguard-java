@@ -21,8 +21,8 @@ public class TestKeyCeremonyTrustee {
 
     assertThat(trustee.id).isEqualTo(GUARDIAN_ID);
     assertThat(trustee.xCoordinate).isEqualTo(GUARDIAN_X_COORDINATE);
-    assertThat(trustee.allGuardianPublicKeys).hasSize(1);
-    assertThat(trustee.otherGuardianPartialKeyBackups).isEmpty();
+    assertThat(trustee.guardianPublicKeys).hasSize(1);
+    assertThat(trustee.guardianSecretKeyShares).isEmpty();
 
     ElGamal.KeyPair election_key_pair = trustee.secrets().election_key_pair;
     assertThat(election_key_pair).isNotNull();
@@ -38,10 +38,10 @@ public class TestKeyCeremonyTrustee {
       assertThat(proof.isValidVer1()).isTrue();
     }
 
-    KeyCeremony2.PublicKeySet public_keys = trustee.sharePublicKeys();
-    assertThat(public_keys).isEqualTo(trustee.allGuardianPublicKeys.get(GUARDIAN_ID));
+    KeyCeremony2.PublicKeys public_keys = trustee.sharePublicKeys();
+    assertThat(public_keys).isEqualTo(trustee.guardianPublicKeys.get(GUARDIAN_ID));
 
-    assertThat(public_keys.ownerId()).isEqualTo(GUARDIAN_ID);
+    assertThat(public_keys.guardianId()).isEqualTo(GUARDIAN_ID);
     assertThat(public_keys.guardianXCoordinate()).isEqualTo(GUARDIAN_X_COORDINATE);
     int count = 0;
     for (Group.ElementModP key : public_keys.coefficientCommitments()) {
@@ -59,8 +59,8 @@ public class TestKeyCeremonyTrustee {
     KeyCeremonyTrustee trustee2 = new KeyCeremonyTrustee(GUARDIAN2_ID, GUARDIAN2_X_COORDINATE, QUORUM, null);
 
     assertThat(trustee.receivePublicKeys(trustee2.sharePublicKeys())).isEmpty();
-    assertThat(trustee.allGuardianPublicKeys).hasSize(2);
-    assertThat(trustee2.sharePublicKeys()).isEqualTo(trustee.allGuardianPublicKeys.get(GUARDIAN2_ID));
+    assertThat(trustee.guardianPublicKeys).hasSize(2);
+    assertThat(trustee2.sharePublicKeys()).isEqualTo(trustee.guardianPublicKeys.get(GUARDIAN2_ID));
   }
 
   @Example
@@ -70,7 +70,7 @@ public class TestKeyCeremonyTrustee {
     assertThat(trustee1.receivePublicKeys(trustee2.sharePublicKeys())).isEmpty();
     assertThat(trustee2.receivePublicKeys(trustee1.sharePublicKeys())).isEmpty();
 
-    KeyCeremony2.PartialKeyBackup backup = trustee1.sendPartialKeyBackup(GUARDIAN2_ID);
+    KeyCeremony2.SecretKeyShare backup = trustee1.sendPartialKeyBackup(GUARDIAN2_ID);
     assertThat(backup).isNotNull();
     assertThat(backup.error()).isEmpty();
 
@@ -87,7 +87,7 @@ public class TestKeyCeremonyTrustee {
     assertThat(trustee1.receivePublicKeys(trustee2.sharePublicKeys())).isEmpty();
     assertThat(trustee2.receivePublicKeys(trustee1.sharePublicKeys())).isEmpty();
 
-    KeyCeremony2.PartialKeyBackup backup = trustee1.sendPartialKeyBackup(GUARDIAN_ID);
+    KeyCeremony2.SecretKeyShare backup = trustee1.sendPartialKeyBackup(GUARDIAN_ID);
     assertThat(backup).isNotNull();
     assertThat(backup.error()).contains("sendPartialKeyBackup cannot ask for its own backup 'Guardian 1'");
   }
@@ -99,7 +99,7 @@ public class TestKeyCeremonyTrustee {
     assertThat(trustee1.receivePublicKeys(trustee2.sharePublicKeys())).isEmpty();
     assertThat(trustee2.receivePublicKeys(trustee1.sharePublicKeys())).isEmpty();
 
-    KeyCeremony2.PartialKeyBackup backup = trustee1.sendPartialKeyBackup("Unknown");
+    KeyCeremony2.SecretKeyShare backup = trustee1.sendPartialKeyBackup("Unknown");
     assertThat(backup).isNotNull();
     assertThat(backup.error()).contains("Trustee 'Guardian 1', does not have public key for 'Unknown'");
   }
@@ -111,7 +111,7 @@ public class TestKeyCeremonyTrustee {
     assertThat(trustee1.receivePublicKeys(trustee2.sharePublicKeys())).isEmpty();
     assertThat(trustee2.receivePublicKeys(trustee1.sharePublicKeys())).isEmpty();
 
-    KeyCeremony2.PartialKeyBackup backup = trustee1.sendPartialKeyBackup(GUARDIAN2_ID);
+    KeyCeremony2.SecretKeyShare backup = trustee1.sendPartialKeyBackup(GUARDIAN2_ID);
     assertThat(backup).isNotNull();
     assertThat(backup.error()).isEmpty();
 
@@ -128,7 +128,7 @@ public class TestKeyCeremonyTrustee {
     assertThat(trustee1.receivePublicKeys(trustee2.sharePublicKeys())).isEmpty();
     // trustee1 does not share its backup with trustee2
 
-    KeyCeremony2.PartialKeyBackup backup = trustee1.sendPartialKeyBackup(GUARDIAN2_ID);
+    KeyCeremony2.SecretKeyShare backup = trustee1.sendPartialKeyBackup(GUARDIAN2_ID);
     assertThat(backup).isNotNull();
 
     KeyCeremony2.PartialKeyVerification verify2 = trustee2.verifyPartialKeyBackup(backup);
@@ -142,10 +142,10 @@ public class TestKeyCeremonyTrustee {
     KeyCeremonyTrustee trustee1 = new KeyCeremonyTrustee(GUARDIAN_ID, GUARDIAN_X_COORDINATE, QUORUM, null);
     KeyCeremonyTrustee trustee2 = new KeyCeremonyTrustee(GUARDIAN2_ID, GUARDIAN2_X_COORDINATE, QUORUM, null);
     assertThat(trustee1.receivePublicKeys(trustee2.sharePublicKeys())).isEmpty();
-    KeyCeremony2.PublicKeySet challengedGuardianKeys = trustee1.sharePublicKeys();
+    KeyCeremony2.PublicKeys challengedGuardianKeys = trustee1.sharePublicKeys();
     assertThat(trustee2.receivePublicKeys(challengedGuardianKeys)).isEmpty();
 
-    KeyCeremony2.PartialKeyBackup backup = trustee1.sendPartialKeyBackup(GUARDIAN2_ID);
+    KeyCeremony2.SecretKeyShare backup = trustee1.sendPartialKeyBackup(GUARDIAN2_ID);
     assertThat(backup).isNotNull();
     assertThat(backup.error()).isEmpty();
 
@@ -161,7 +161,7 @@ public class TestKeyCeremonyTrustee {
     KeyCeremonyTrustee trustee1 = new KeyCeremonyTrustee(GUARDIAN_ID, GUARDIAN_X_COORDINATE, QUORUM, null);
     KeyCeremonyTrustee trustee2 = new KeyCeremonyTrustee(GUARDIAN2_ID, GUARDIAN2_X_COORDINATE, QUORUM, null);
     assertThat(trustee1.receivePublicKeys(trustee2.sharePublicKeys())).isEmpty();
-    KeyCeremony2.PublicKeySet challengedGuardianKeys = trustee1.sharePublicKeys();
+    KeyCeremony2.PublicKeys challengedGuardianKeys = trustee1.sharePublicKeys();
     assertThat(trustee2.receivePublicKeys(challengedGuardianKeys)).isEmpty();
 
     KeyCeremony2.PartialKeyChallengeResponse challengeResponse = trustee1.sendBackupChallenge("Unknown");
@@ -173,7 +173,7 @@ public class TestKeyCeremonyTrustee {
     KeyCeremonyTrustee trustee1 = new KeyCeremonyTrustee(GUARDIAN_ID, GUARDIAN_X_COORDINATE, QUORUM, null);
     KeyCeremonyTrustee trustee2 = new KeyCeremonyTrustee(GUARDIAN2_ID, GUARDIAN2_X_COORDINATE, QUORUM, null);
     assertThat(trustee1.receivePublicKeys(trustee2.sharePublicKeys())).isEmpty();
-    KeyCeremony2.PublicKeySet challengedGuardianKeys = trustee1.sharePublicKeys();
+    KeyCeremony2.PublicKeys challengedGuardianKeys = trustee1.sharePublicKeys();
     assertThat(trustee2.receivePublicKeys(challengedGuardianKeys)).isEmpty();
 
     assertThat(trustee1.publishJointKey()).isEqualTo(trustee2.publishJointKey());

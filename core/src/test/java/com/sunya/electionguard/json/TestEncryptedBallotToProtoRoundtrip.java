@@ -1,11 +1,10 @@
 package com.sunya.electionguard.json;
 
 import com.sunya.electionguard.CiphertextBallot;
-import com.sunya.electionguard.SubmittedBallot;
-import com.sunya.electionguard.protoconvert.SubmittedBallotFromProto;
-import com.sunya.electionguard.protoconvert.SubmittedBallotToProto;
-import electionguard.protogen.CiphertextBallotProto;
+import com.sunya.electionguard.ballot.EncryptedBallot;
+import com.sunya.electionguard.protoconvert.EncryptedBallotConvert;
 import com.sunya.electionguard.verifier.TestParameterVerifier;
+import electionguard.protogen.EncryptedBallotProto;
 import net.jqwik.api.Example;
 
 import java.io.File;
@@ -13,17 +12,17 @@ import java.io.IOException;
 
 import static com.google.common.truth.Truth.assertThat;
 
-public class TestSubmittedBallotToProtoRoundtrip {
+public class TestEncryptedBallotToProtoRoundtrip {
 
   @Example
   public void testCiphertextBallotsJsonExample() throws IOException {
-    JsonPublisher publisher = new JsonPublisher(TestParameterVerifier.topdirJsonExample, PublisherOld.Mode.readonly);
+    JsonPublisher publisher = new JsonPublisher(TestParameterVerifier.topdirJsonExample, JsonPublisher.Mode.readonly);
     assertThat(publisher.ballotFiles()).isNotEmpty();
     for (File file : publisher.ballotFiles()) {
-      SubmittedBallot fromPython = ConvertFromJson.readSubmittedBallot(file.getAbsolutePath());
+      EncryptedBallot fromPython = ConvertFromJson.readSubmittedBallot(file.getAbsolutePath());
       assertThat(fromPython).isNotNull();
-      CiphertextBallotProto.SubmittedBallot proto = SubmittedBallotToProto.translateToProto(fromPython);
-      SubmittedBallot roundtrip = SubmittedBallotFromProto.translateFromProto(proto);
+      EncryptedBallotProto.EncryptedBallot proto = EncryptedBallotConvert.publishEncryptedBallot(fromPython);
+      EncryptedBallot roundtrip = EncryptedBallotConvert.importEncryptedBallot(proto);
       int contestIdx = 0;
       for (CiphertextBallot.Contest contest : roundtrip.contests) {
         CiphertextBallot.Contest pcontest = fromPython.contests.get(contestIdx);
@@ -43,13 +42,13 @@ public class TestSubmittedBallotToProtoRoundtrip {
 
   @Example
   public void testCiphertextBallotPublishEndToEnd() throws IOException {
-    JsonPublisher publisher = new JsonPublisher(TestParameterVerifier.topdirPublishEndToEnd, PublisherOld.Mode.readonly);
+    JsonPublisher publisher = new JsonPublisher(TestParameterVerifier.topdirPublishEndToEnd, JsonPublisher.Mode.readonly);
     assertThat(publisher.ballotFiles()).isNotEmpty();
     for (File file : publisher.ballotFiles()) {
-      SubmittedBallot fromPython = ConvertFromJson.readSubmittedBallot(file.getAbsolutePath());
+      EncryptedBallot fromPython = ConvertFromJson.readSubmittedBallot(file.getAbsolutePath());
       assertThat(fromPython).isNotNull();
-      CiphertextBallotProto.SubmittedBallot proto = SubmittedBallotToProto.translateToProto(fromPython);
-      SubmittedBallot roundtrip = SubmittedBallotFromProto.translateFromProto(proto);
+      EncryptedBallotProto.EncryptedBallot proto = EncryptedBallotConvert.publishEncryptedBallot(fromPython);
+      EncryptedBallot roundtrip = EncryptedBallotConvert.importEncryptedBallot(proto);
       int contestIdx = 0;
       for (CiphertextBallot.Contest contest : roundtrip.contests) {
         CiphertextBallot.Contest pcontest = fromPython.contests.get(contestIdx);
@@ -69,11 +68,11 @@ public class TestSubmittedBallotToProtoRoundtrip {
 
   @Example
   public void testPublishEndToEndProblem() throws IOException {
-    JsonPublisher publisher = new JsonPublisher(TestParameterVerifier.topdirPublishEndToEnd, PublisherOld.Mode.readonly);
+    JsonPublisher publisher = new JsonPublisher(TestParameterVerifier.topdirPublishEndToEnd, JsonPublisher.Mode.readonly);
     assertThat(publisher.ballotFiles()).isNotEmpty();
     String filename = TestParameterVerifier.topdirPublishEndToEnd +
             "/submitted_ballots/submitted_ballot_5a150c74-a2cb-47f6-b575-165ba8a4ce53.json";
-    SubmittedBallot fromJson = ConvertFromJson.readSubmittedBallot(filename);
+    EncryptedBallot fromJson = ConvertFromJson.readSubmittedBallot(filename);
     assertThat(fromJson).isNotNull();
     for (CiphertextBallot.Contest contest : fromJson.contests) {
       for (CiphertextBallot.Selection selection : contest.selections) {

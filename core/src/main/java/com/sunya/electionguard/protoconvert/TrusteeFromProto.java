@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import electionguard.protogen.CommonProto;
-import electionguard.protogen.ElectionRecordProto;
 import electionguard.protogen.TrusteeProto;
 
 public class TrusteeFromProto {
@@ -31,7 +30,7 @@ public class TrusteeFromProto {
     int sequence_order = proto.getGuardianXCoordinate();
     ElGamal.KeyPair election_keypair = convertElgamalKeypair(proto.getElectionKeypair());
 
-    Map<String, KeyCeremony2.PartialKeyBackup> otherGuardianPartialKeyBackups =
+    Map<String, KeyCeremony2.SecretKeyShare> otherGuardianPartialKeyBackups =
             proto.getSecretKeySharesList().stream()
                     .collect(Collectors.toMap(p -> p.getGeneratingGuardianId(), p -> convertElectionPartialKeyBackup(p)));
 
@@ -43,12 +42,12 @@ public class TrusteeFromProto {
             otherGuardianPartialKeyBackups, commitments);
   }
 
-  private static KeyCeremony2.PartialKeyBackup convertElectionPartialKeyBackup(TrusteeProto.SecretKeyShare proto) {
-    return new KeyCeremony2.PartialKeyBackup(
+  private static KeyCeremony2.SecretKeyShare convertElectionPartialKeyBackup(TrusteeProto.SecretKeyShare proto) {
+    return new KeyCeremony2.SecretKeyShare(
             proto.getGeneratingGuardianId(),
             proto.getDesignatedGuardianId(),
             proto.getDesignatedGuardianXCoordinate(),
-            CommonConvert.importElementModQ(proto.getGeneratingGuardianValue()),
+            CommonConvert.importHashedCiphertext(proto.getEncryptedCoordinate()),
             proto.getError());
   }
 

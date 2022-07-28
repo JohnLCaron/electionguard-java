@@ -1,6 +1,6 @@
 package com.sunya.electionguard.input;
 
-import com.sunya.electionguard.CiphertextTally;
+import com.sunya.electionguard.ballot.EncryptedTally;
 import com.sunya.electionguard.DecryptionShare;
 import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.Manifest;
@@ -23,10 +23,10 @@ public class TestPlaintextTallyInputValidation {
 
   static class ElectionAndTallies {
     final Manifest election;
-    final CiphertextTally ctally;
+    final EncryptedTally ctally;
     final PlaintextTally tally;
 
-    public ElectionAndTallies(Manifest election, CiphertextTally ctally, PlaintextTally tally) {
+    public ElectionAndTallies(Manifest election, EncryptedTally ctally, PlaintextTally tally) {
       this.election = election;
       this.ctally = ctally;
       this.tally = tally;
@@ -49,12 +49,12 @@ public class TestPlaintextTallyInputValidation {
         cbuilder.addSelection(selection.selectionId(), selection.cryptoHash(), elgamal_ciphertext());
       }
     }
-    CiphertextTally ctally = builder.build();
+    EncryptedTally ctally = builder.build();
 
     PlaintextTallyInputBuilder tbuilder = new PlaintextTallyInputBuilder("ctally");
-    for (CiphertextTally.Contest contest : ctally.contests.values()) {
+    for (EncryptedTally.Contest contest : ctally.contests.values()) {
       PlaintextTallyInputBuilder.ContestBuilder cbuilder = tbuilder.addContest(contest.object_id());
-      for (CiphertextTally.Selection selection : contest.selections.values()) {
+      for (EncryptedTally.Selection selection : contest.selections.values()) {
         cbuilder.addSelection(selection.object_id(), selection.ciphertext())
                 .addShare(selection.object_id(), "guardian1", null)
                 .addShare(selection.object_id(), "guardian2", null)
@@ -76,7 +76,7 @@ public class TestPlaintextTallyInputValidation {
     return isValid;
   }
 
-  void validateTally(Manifest election, CiphertextTally ctally, PlaintextTally tally, String expectMessage) {
+  void validateTally(Manifest election, EncryptedTally ctally, PlaintextTally tally, String expectMessage) {
     PlaintextTallyInputValidation validator = new PlaintextTallyInputValidation(election, ctally, NGUARDIANS, NAVAILABLE);
     Formatter problems = new Formatter();
     boolean isValid = validator.validateTally(tally, problems);
@@ -102,9 +102,9 @@ public class TestPlaintextTallyInputValidation {
     ElectionAndTallies tallies = makeTally();
 
     PlaintextTallyInputBuilder tbuilder = new PlaintextTallyInputBuilder("ctally");
-    for (CiphertextTally.Contest contest : tallies.ctally.contests.values()) {
+    for (EncryptedTally.Contest contest : tallies.ctally.contests.values()) {
       PlaintextTallyInputBuilder.ContestBuilder cbuilder = tbuilder.addContest("bad_contest_id");
-      for (CiphertextTally.Selection selection : contest.selections.values()) {
+      for (EncryptedTally.Selection selection : contest.selections.values()) {
         cbuilder.addSelection(selection.object_id(), selection.ciphertext())
                 .addShare(selection.object_id(), "guardian1", null)
                 .addShare(selection.object_id(), "guardian2", null)
@@ -122,9 +122,9 @@ public class TestPlaintextTallyInputValidation {
     ElectionAndTallies tallies = makeTally();
 
     PlaintextTallyInputBuilder tbuilder = new PlaintextTallyInputBuilder("ctally");
-    for (CiphertextTally.Contest contest : tallies.ctally.contests.values()) {
+    for (EncryptedTally.Contest contest : tallies.ctally.contests.values()) {
       PlaintextTallyInputBuilder.ContestBuilder cbuilder = tbuilder.addContest(contest.object_id());
-      for (CiphertextTally.Selection selection : contest.selections.values()) {
+      for (EncryptedTally.Selection selection : contest.selections.values()) {
         cbuilder.addSelection(selection.object_id() + "bad", selection.ciphertext())
                 .addShare(selection.object_id(), "guardian1", null)
                 .addShare(selection.object_id(), "guardian2", null)
@@ -142,9 +142,9 @@ public class TestPlaintextTallyInputValidation {
     ElectionAndTallies tallies = makeTally();
 
     PlaintextTallyInputBuilder tbuilder = new PlaintextTallyInputBuilder("ctally");
-    for (CiphertextTally.Contest contest : tallies.ctally.contests.values()) {
+    for (EncryptedTally.Contest contest : tallies.ctally.contests.values()) {
       PlaintextTallyInputBuilder.ContestBuilder cbuilder = tbuilder.addContest(contest.object_id());
-      for (CiphertextTally.Selection selection : contest.selections.values()) {
+      for (EncryptedTally.Selection selection : contest.selections.values()) {
         cbuilder.addSelection(selection.object_id(), elgamal_ciphertext())
                 .addShare(selection.object_id(), "guardian1", null)
                 .addShare(selection.object_id(), "guardian2", null)
@@ -161,9 +161,9 @@ public class TestPlaintextTallyInputValidation {
     ElectionAndTallies tallies = makeTally();
 
     PlaintextTallyInputBuilder tbuilder = new PlaintextTallyInputBuilder("ctally");
-    for (CiphertextTally.Contest contest : tallies.ctally.contests.values()) {
+    for (EncryptedTally.Contest contest : tallies.ctally.contests.values()) {
       PlaintextTallyInputBuilder.ContestBuilder cbuilder = tbuilder.addContest(contest.object_id());
-      for (CiphertextTally.Selection selection : contest.selections.values()) {
+      for (EncryptedTally.Selection selection : contest.selections.values()) {
         cbuilder.addSelection(selection.object_id(), selection.ciphertext())
                 .addShare(selection.object_id(), "guardian1", null)
                 .addShare(selection.object_id(), "guardian2", null)
@@ -180,9 +180,9 @@ public class TestPlaintextTallyInputValidation {
     ElectionAndTallies tallies = makeTally();
 
     PlaintextTallyInputBuilder tbuilder = new PlaintextTallyInputBuilder("ctally");
-    for (CiphertextTally.Contest contest : tallies.ctally.contests.values()) {
+    for (EncryptedTally.Contest contest : tallies.ctally.contests.values()) {
       PlaintextTallyInputBuilder.ContestBuilder cbuilder = tbuilder.addContest(contest.object_id());
-      for (CiphertextTally.Selection selection : contest.selections.values()) {
+      for (EncryptedTally.Selection selection : contest.selections.values()) {
         cbuilder.addSelection(selection.object_id(), selection.ciphertext())
                 .addShare(selection.object_id(), "guardian1", null)
                 .addShare(selection.object_id(), "guardian2", null)
@@ -199,9 +199,9 @@ public class TestPlaintextTallyInputValidation {
     ElectionAndTallies tallies = makeTally();
 
     PlaintextTallyInputBuilder tbuilder = new PlaintextTallyInputBuilder("ctally");
-    for (CiphertextTally.Contest contest : tallies.ctally.contests.values()) {
+    for (EncryptedTally.Contest contest : tallies.ctally.contests.values()) {
       PlaintextTallyInputBuilder.ContestBuilder cbuilder = tbuilder.addContest(contest.object_id());
-      for (CiphertextTally.Selection selection : contest.selections.values()) {
+      for (EncryptedTally.Selection selection : contest.selections.values()) {
         cbuilder.addSelection(selection.object_id(), selection.ciphertext())
                 .addShare(selection.object_id() + "bad", "guardian1", null)
                 .addShare(selection.object_id(), "guardian2", null)
@@ -218,9 +218,9 @@ public class TestPlaintextTallyInputValidation {
     ElectionAndTallies tallies = makeTally();
 
     PlaintextTallyInputBuilder tbuilder = new PlaintextTallyInputBuilder("ctally");
-    for (CiphertextTally.Contest contest : tallies.ctally.contests.values()) {
+    for (EncryptedTally.Contest contest : tallies.ctally.contests.values()) {
       PlaintextTallyInputBuilder.ContestBuilder cbuilder = tbuilder.addContest(contest.object_id());
-      for (CiphertextTally.Selection selection : contest.selections.values()) {
+      for (EncryptedTally.Selection selection : contest.selections.values()) {
         cbuilder.addSelection(selection.object_id(), selection.ciphertext())
                 .addShare(selection.object_id(), "guardian1", null)
                 .addShare(selection.object_id(), "guardian2", null)
@@ -237,9 +237,9 @@ public class TestPlaintextTallyInputValidation {
     ElectionAndTallies tallies = makeTally();
 
     PlaintextTallyInputBuilder tbuilder = new PlaintextTallyInputBuilder("ctally");
-    for (CiphertextTally.Contest contest : tallies.ctally.contests.values()) {
+    for (EncryptedTally.Contest contest : tallies.ctally.contests.values()) {
       PlaintextTallyInputBuilder.ContestBuilder cbuilder = tbuilder.addContest(contest.object_id());
-      for (CiphertextTally.Selection selection : contest.selections.values()) {
+      for (EncryptedTally.Selection selection : contest.selections.values()) {
         cbuilder.addSelection(selection.object_id(), selection.ciphertext())
                 .addShare(selection.object_id(), "guardian1", null)
                 .addShare(selection.object_id(), "guardian2", null)
@@ -272,9 +272,9 @@ public class TestPlaintextTallyInputValidation {
     ElectionAndTallies tallies = makeTally();
 
     PlaintextTallyInputBuilder tbuilder = new PlaintextTallyInputBuilder("ctally");
-    for (CiphertextTally.Contest contest : tallies.ctally.contests.values()) {
+    for (EncryptedTally.Contest contest : tallies.ctally.contests.values()) {
       PlaintextTallyInputBuilder.ContestBuilder cbuilder = tbuilder.addContest(contest.object_id());
-      for (CiphertextTally.Selection selection : contest.selections.values()) {
+      for (EncryptedTally.Selection selection : contest.selections.values()) {
         cbuilder.addSelection(selection.object_id(), selection.ciphertext())
                 .addShare(selection.object_id(), "guardian1", null)
                 .addShare(selection.object_id(), "guardian2", null)
@@ -291,9 +291,9 @@ public class TestPlaintextTallyInputValidation {
     ElectionAndTallies tallies = makeTally();
 
     PlaintextTallyInputBuilder tbuilder = new PlaintextTallyInputBuilder("ctally");
-    for (CiphertextTally.Contest contest : tallies.ctally.contests.values()) {
+    for (EncryptedTally.Contest contest : tallies.ctally.contests.values()) {
       PlaintextTallyInputBuilder.ContestBuilder cbuilder = tbuilder.addContest(contest.object_id());
-      for (CiphertextTally.Selection selection : contest.selections.values()) {
+      for (EncryptedTally.Selection selection : contest.selections.values()) {
         cbuilder.addSelection(selection.object_id(), selection.ciphertext())
                 .addShare(selection.object_id(), "guardian1", null)
                 .addShare(selection.object_id(), "guardian2", null)
@@ -311,9 +311,9 @@ public class TestPlaintextTallyInputValidation {
     ElectionAndTallies tallies = makeTally();
 
     PlaintextTallyInputBuilder tbuilder = new PlaintextTallyInputBuilder("ctally");
-    for (CiphertextTally.Contest contest : tallies.ctally.contests.values()) {
+    for (EncryptedTally.Contest contest : tallies.ctally.contests.values()) {
       PlaintextTallyInputBuilder.ContestBuilder cbuilder = tbuilder.addContest(contest.object_id());
-      for (CiphertextTally.Selection selection : contest.selections.values()) {
+      for (EncryptedTally.Selection selection : contest.selections.values()) {
         cbuilder.addSelection(selection.object_id(), selection.ciphertext())
                 .addShare(selection.object_id(), "guardian1", null)
                 .addShare(selection.object_id(), "guardian2", null)
@@ -330,9 +330,9 @@ public class TestPlaintextTallyInputValidation {
     ElectionAndTallies tallies = makeTally();
 
     PlaintextTallyInputBuilder tbuilder = new PlaintextTallyInputBuilder("ctally");
-    for (CiphertextTally.Contest contest : tallies.ctally.contests.values()) {
+    for (EncryptedTally.Contest contest : tallies.ctally.contests.values()) {
       PlaintextTallyInputBuilder.ContestBuilder cbuilder = tbuilder.addContest(contest.object_id());
-      for (CiphertextTally.Selection selection : contest.selections.values()) {
+      for (EncryptedTally.Selection selection : contest.selections.values()) {
         cbuilder.addSelection(selection.object_id(), selection.ciphertext())
                 .addShare(selection.object_id(), "guardian1", null)
                 .addShare(selection.object_id(), "guardian2", null)
@@ -350,9 +350,9 @@ public class TestPlaintextTallyInputValidation {
     ElectionAndTallies tallies = makeTally();
 
     PlaintextTallyInputBuilder tbuilder = new PlaintextTallyInputBuilder("ctally");
-    for (CiphertextTally.Contest contest : tallies.ctally.contests.values()) {
+    for (EncryptedTally.Contest contest : tallies.ctally.contests.values()) {
       PlaintextTallyInputBuilder.ContestBuilder cbuilder = tbuilder.addContest(contest.object_id());
-      for (CiphertextTally.Selection selection : contest.selections.values()) {
+      for (EncryptedTally.Selection selection : contest.selections.values()) {
         cbuilder.addSelection(selection.object_id(), selection.ciphertext())
                 .addShare(selection.object_id(), "guardian1", null)
                 .addShare(selection.object_id(), "guardian2", null)
@@ -372,9 +372,9 @@ public class TestPlaintextTallyInputValidation {
     ElectionAndTallies tallies = makeTally();
 
     PlaintextTallyInputBuilder tbuilder = new PlaintextTallyInputBuilder("ctally");
-    for (CiphertextTally.Contest contest : tallies.ctally.contests.values()) {
+    for (EncryptedTally.Contest contest : tallies.ctally.contests.values()) {
       PlaintextTallyInputBuilder.ContestBuilder cbuilder = tbuilder.addContest(contest.object_id());
-      for (CiphertextTally.Selection selection : contest.selections.values()) {
+      for (EncryptedTally.Selection selection : contest.selections.values()) {
         cbuilder.addSelection(selection.object_id(), selection.ciphertext())
                 .addShare(selection.object_id(), "guardian1", null)
                 .addShare(selection.object_id(), "guardian2", null)

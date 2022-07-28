@@ -5,11 +5,11 @@ import com.google.common.flogger.FluentLogger;
 import com.sunya.electionguard.BallotBox;
 import com.sunya.electionguard.ChaumPedersen;
 import com.sunya.electionguard.ElectionCryptoContext;
-import com.sunya.electionguard.CiphertextTally;
+import com.sunya.electionguard.ballot.EncryptedTally;
 import com.sunya.electionguard.DecryptionShare;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.GuardianRecord;
-import com.sunya.electionguard.SubmittedBallot;
+import com.sunya.electionguard.ballot.EncryptedBallot;
 import com.sunya.electionguard.decrypting.DecryptingTrustee;
 import com.sunya.electionguard.publish.ElectionContext;
 
@@ -346,7 +346,7 @@ class Guardian {
    * @param context: Election context
    * @return Decryption share of tally or None if failure
    */
-  public Optional<DecryptionShare> compute_tally_share(CiphertextTally tally, ElectionContext context) {
+  public Optional<DecryptionShare> compute_tally_share(EncryptedTally tally, ElectionContext context) {
     return Decryptions.compute_decryption_share(
             this.election_keys,
             tally,
@@ -360,10 +360,10 @@ class Guardian {
    * @param context: Election context
    * @return Map[BALLOT_ID, DecryptionShare]
    */
-  public Map<String, Optional<DecryptionShare>> compute_ballot_shares(Iterable<SubmittedBallot> ballots, ElectionContext context) {
+  public Map<String, Optional<DecryptionShare>> compute_ballot_shares(Iterable<EncryptedBallot> ballots, ElectionContext context) {
 
     Map<String, Optional<DecryptionShare>> shares = new HashMap<>();
-    for (SubmittedBallot ballot : ballots) {
+    for (EncryptedBallot ballot : ballots) {
       Optional<DecryptionShare> share = Decryptions.compute_decryption_share_for_ballot(
               this.election_keys,
               ballot,
@@ -376,7 +376,7 @@ class Guardian {
   /** Compute the compensated decryption share of a tally for a missing guardian. */
   public Optional<DecryptionShare.CompensatedDecryptionShare> compute_compensated_tally_share(
           String missing_guardian_id,
-          CiphertextTally tally,
+          EncryptedTally tally,
           ElectionCryptoContext context) {
 
     // Ensure missing guardian information available
@@ -397,7 +397,7 @@ class Guardian {
   /** Compute the compensated decryption share of each ballots for a missing guardian. */
   public Map<String, Optional<DecryptionShare.CompensatedDecryptionShare>> compute_compensated_ballot_shares(
           String missing_guardian_id,
-          List<SubmittedBallot> ballots,
+          List<EncryptedBallot> ballots,
           ElectionCryptoContext context) {
 
     Map<String, Optional<DecryptionShare.CompensatedDecryptionShare>> shares = new HashMap<>();
@@ -409,7 +409,7 @@ class Guardian {
       return shares;
     }
 
-    for (SubmittedBallot ballot : ballots) {
+    for (EncryptedBallot ballot : ballots) {
       Optional<DecryptionShare.CompensatedDecryptionShare> share = Decryptions.compute_compensated_decryption_share_for_ballot(
               this.share_key(),
               missing_guardian_key,

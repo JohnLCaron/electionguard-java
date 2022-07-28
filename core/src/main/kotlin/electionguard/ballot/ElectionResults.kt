@@ -1,12 +1,14 @@
 package electionguard.ballot
 
 import com.sunya.electionguard.*
+import com.sunya.electionguard.ballot.DecryptingGuardian
+import com.sunya.electionguard.ballot.EncryptedTally
 import com.sunya.electionguard.core.UInt256
 import java.util.Collections.emptyMap
 
 data class TallyResult(
     val electionIntialized: ElectionInitialized,
-    val ciphertextTally: CiphertextTally,
+    val encryptedTally: EncryptedTally,
     val ballotIds: List<String>,
     val tallyIds: List<String>,
 ) {
@@ -24,6 +26,6 @@ data class TallyResult(
 data class DecryptionResult(
     val tallyResult: TallyResult,
     val decryptedTally: PlaintextTally,
-    val availableGuardians: List<AvailableGuardian>,
+    val decryptingGuardians: List<DecryptingGuardian>,
     val metadata: Map<String, String> = emptyMap(),
 )

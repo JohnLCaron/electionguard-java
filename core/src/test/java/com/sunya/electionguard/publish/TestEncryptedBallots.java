@@ -2,7 +2,7 @@ package com.sunya.electionguard.publish;
 
 import com.google.common.base.Stopwatch;
 import com.sunya.electionguard.Group;
-import com.sunya.electionguard.SubmittedBallot;
+import com.sunya.electionguard.ballot.EncryptedBallot;
 import com.sunya.electionguard.core.UInt256;
 import com.sunya.electionguard.verifier.TestParameterVerifier;
 import electionguard.ballot.DecryptionResult;
@@ -23,7 +23,7 @@ public class TestEncryptedBallots {
     DecryptionResult kotlin = consumer.readDecryptionResult();
     assertThat(kotlin.getTallyResult()).isNotNull();
     assertThat(kotlin.getDecryptedTally()).isNotNull();
-    assertThat(kotlin.getAvailableGuardians()).hasSize(3);
+    assertThat(kotlin.getDecryptingGuardians()).hasSize(3);
 
     TallyResult tallyResult = kotlin.getTallyResult();
     UInt256 manifestHash = tallyResult.manifestHash();
@@ -32,7 +32,7 @@ public class TestEncryptedBallots {
 
     Stopwatch stopwatch = Stopwatch.createStarted();
     int count = 0;
-    for (SubmittedBallot ballot : consumer.iterateSubmittedBallots()) {
+    for (EncryptedBallot ballot : consumer.iterateSubmittedBallots()) {
       assertThat(ballot.is_valid_encryption(manifestHash.toModQ(), jointPublicKey, cryptoExtendedBaseHash)).isTrue();
       count++;
     }
@@ -46,7 +46,7 @@ public class TestEncryptedBallots {
     DecryptionResult kotlin = consumer.readDecryptionResult();
     assertThat(kotlin.getTallyResult()).isNotNull();
     assertThat(kotlin.getDecryptedTally()).isNotNull();
-    assertThat(kotlin.getAvailableGuardians()).hasSize(3);
+    assertThat(kotlin.getDecryptingGuardians()).hasSize(3);
 
     TallyResult tallyResult = kotlin.getTallyResult();
     UInt256 manifestHash = tallyResult.manifestHash();
@@ -55,7 +55,7 @@ public class TestEncryptedBallots {
 
     Stopwatch stopwatch = Stopwatch.createStarted();
     int count = 0;
-    for (SubmittedBallot ballot : consumer.iterateSubmittedBallots()) {
+    for (EncryptedBallot ballot : consumer.iterateSubmittedBallots()) {
       assertThat(ballot.is_valid_encryption(manifestHash.toModQ(), jointPublicKey, cryptoExtendedBaseHash)).isTrue();
       count++;
     }

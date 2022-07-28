@@ -29,14 +29,16 @@ message CommitmentSet {
 }
 
 message SecretKeyShare {
-  // The Id of the guardian that generated this backup.
+  // The Id of the guardian that generated this (i).
   string generating_guardian_id = 1;
   // The Id of the guardian to receive this backup.
   string designated_guardian_id = 2;
-  // The x coefficient of the designated guardian.
+  // The x coefficient of the designated guardian (l).
   uint32 designated_guardian_x_coordinate = 3;
-  // The generatingGuardian's polynomial value at designatedGuardianXCoordinate
-  ElementModQ generating_guardian_value = 4;
-  // if not empty, an error has occurrred.
+  // Pi(l) = The generatingGuardian's polynomial value at designatedGuardianXCoordinate: Pi(l)
+  reserved 4;
+  // This is the encryption of that = Eℓ (Pi(ℓ)), see spec 1.03 eq 17.
+  HashedElGamalCiphertext encrypted_coordinate = 6;
+  // if not empty, an error has occurred.
   string error = 5;
 }

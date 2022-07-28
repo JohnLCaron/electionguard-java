@@ -1,5 +1,6 @@
 package com.sunya.electionguard;
 
+import com.sunya.electionguard.ballot.EncryptedBallot;
 import net.jqwik.api.ForAll;
 import net.jqwik.api.Property;
 import net.jqwik.api.ShrinkingMode;
@@ -84,7 +85,7 @@ public class TestTallyProperties extends TestProperties {
     // encrypt each ballot
     // DataStore store = new DataStore();
     Group.ElementModQ seed_hash = Encrypt.createDeviceForTest("Location").get_hash();
-    SubmittedBallot[] acceptedBallots = new SubmittedBallot[3];
+    EncryptedBallot[] acceptedBallots = new EncryptedBallot[3];
     int count = 0;
     for (PlaintextBallot ballot : everything.ballots) {
       Optional<CiphertextBallot> encrypted_ballotO = Encrypt.encrypt_ballot(
@@ -94,7 +95,7 @@ public class TestTallyProperties extends TestProperties {
       seed_hash = encrypted_ballot.code;
       // vary the state
       BallotBox.State state = (count % 3 == 0) ? BallotBox.State.UNKNOWN : (count % 3 == 1) ? BallotBox.State.CAST : BallotBox.State.SPOILED;
-      SubmittedBallot acceptedBallot = encrypted_ballot.acceptWithState(state);
+      EncryptedBallot acceptedBallot = encrypted_ballot.acceptWithState(state);
       // store.put(encrypted_ballot.object_id, acceptedBallot);
       acceptedBallots[count % 3] = acceptedBallot;
       count++;
@@ -102,21 +103,21 @@ public class TestTallyProperties extends TestProperties {
 
     CiphertextTallyBuilder tally = new CiphertextTallyBuilder("my-tally", everything.metadata, everything.context);
 
-    SubmittedBallot unknownBallot = acceptedBallots[0];
+    EncryptedBallot unknownBallot = acceptedBallots[0];
     assertThat(unknownBallot.state).isEqualTo(BallotBox.State.UNKNOWN);
 
     //  verify an UNKNOWN state ballot fails
     assertThat(tally.append(unknownBallot)).isFalse();
 
     //  cast a ballot
-    SubmittedBallot castBallot = acceptedBallots[1];
+    EncryptedBallot castBallot = acceptedBallots[1];
     assertThat(castBallot.state).isEqualTo(BallotBox.State.CAST);
     assertThat(tally.append(castBallot)).isTrue();
     //  verify a cast ballot cannot be added twice
     assertThat(tally.append(castBallot)).isFalse();
 
     //  spoil a ballot
-    SubmittedBallot spoiledBallot = acceptedBallots[2];
+    EncryptedBallot spoiledBallot = acceptedBallots[2];
     assertThat(spoiledBallot.state).isEqualTo(BallotBox.State.SPOILED);
     assertThat(tally.append(spoiledBallot)).isTrue();
     //  verify a spoiled ballot cannot be added twice
@@ -124,11 +125,11 @@ public class TestTallyProperties extends TestProperties {
 
     //// tests that use the same ballot id with different state
     // verify an already spoiled ballot cannot be cast
-    SubmittedBallot again = spoiledBallot.acceptWithState(BallotBox.State.CAST);
+    EncryptedBallot again = spoiledBallot.acceptWithState(BallotBox.State.CAST);
     assertThat(tally.append(again)).isFalse();
 
     //  verify an already cast ballot cannot be spoiled
-    SubmittedBallot again2 = castBallot.acceptWithState(BallotBox.State.SPOILED);
+    EncryptedBallot again2 = castBallot.acceptWithState(BallotBox.State.SPOILED);
     assertThat(tally.append(again2)).isFalse();
   }
 

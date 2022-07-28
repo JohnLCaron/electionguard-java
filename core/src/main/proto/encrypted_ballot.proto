@@ -3,10 +3,10 @@ syntax = "proto3";
 import "common.proto";
 
 option java_package = "electionguard.protogen";
-option java_outer_classname = "CiphertextBallotProto";
+option java_outer_classname = "EncryptedBallotProto";
 
-// An encrypted ballot that has been cast or spoiled.
-message SubmittedBallot {
+// An encrypted ballot that has been cast or spoiled
+message EncryptedBallot {
   enum BallotState {
     UNKNOWN = 0;
     CAST = 1;
@@ -18,25 +18,25 @@ message SubmittedBallot {
   UInt256 manifest_hash = 3; // Matches Manifest.crypto_hash
   UInt256 code_seed = 4; // Previous ballot tracking hash or seed hash, aka code_seed
   UInt256 code = 5; // Unique ballot tracking hash for this ballot, aka code
-  repeated CiphertextBallotContest contests = 6;
+  repeated EncryptedBallotContest contests = 6;
   int64 timestamp = 7; // Timestamp at which the ballot encryption is generated, in seconds since the epoch UTC.
   UInt256 crypto_hash = 8;
   BallotState state = 9;
 }
 
 // Encrypted selections for a specific contest.
-message CiphertextBallotContest {
+message EncryptedBallotContest {
   string contest_id = 1; // matches the ContestDescription.contest_id
   uint32 sequence_order = 2; // matches the ContestDescription.sequence_order
   UInt256 contest_hash = 3; // matches ContestDescription.crypto_hash
-  repeated CiphertextBallotSelection selections = 4;
+  repeated EncryptedBallotSelection selections = 4;
   reserved 5;
   UInt256 crypto_hash = 6;
   ConstantChaumPedersenProof proof = 7;  // The proof the sum of the selections does not exceed the maximum
 }
 
 // Encryption of a specific selection.
-message CiphertextBallotSelection {
+message EncryptedBallotSelection {
   string selection_id = 1; // matches the SelectionDescription.selection_id
   uint32 sequence_order = 2; // matches the SelectionDescription.sequence_order
   UInt256 selection_hash = 3; // matches SelectionDescription.crypto_hash
@@ -48,24 +48,24 @@ message CiphertextBallotSelection {
 }
 
 message ConstantChaumPedersenProof {
-  ElementModP pad = 1; // 1-4 are 1.0
-  ElementModP data = 2;
-  ElementModQ challenge = 3;
-  ElementModQ response = 4;
+  reserved 1;
+  reserved 2;
+  reserved 3;
+  reserved 4;
   uint32 constant = 5;
-  GenericChaumPedersenProof proof = 6; // 2.0
+  GenericChaumPedersenProof proof = 6;
 }
 
 message DisjunctiveChaumPedersenProof {
-  ElementModP proof_zero_pad = 1;  // 1-8 are 1.0
-  ElementModP proof_zero_data = 2;
-  ElementModQ proof_zero_challenge = 3;
-  ElementModQ proof_zero_response = 4;
-  ElementModP proof_one_pad = 5;
-  ElementModP proof_one_data = 6;
-  ElementModQ proof_one_challenge = 7;
-  ElementModQ proof_one_response = 8;
+  reserved 1;
+  reserved 2;
+  reserved 3;
+  reserved 4;
+  reserved 5;
+  reserved 6;
+  reserved 7;
+  reserved 8;
   ElementModQ challenge = 9;
-  GenericChaumPedersenProof proof0 = 10; // 2.0
-  GenericChaumPedersenProof proof1 = 11; // 2.0
+  GenericChaumPedersenProof proof0 = 10;
+  GenericChaumPedersenProof proof1 = 11;
 }

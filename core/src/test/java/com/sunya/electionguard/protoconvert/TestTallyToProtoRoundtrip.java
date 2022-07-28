@@ -1,10 +1,9 @@
 package com.sunya.electionguard.protoconvert;
 
-import com.sunya.electionguard.CiphertextTally;
+import com.sunya.electionguard.ballot.EncryptedTally;
 import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.json.ConvertFromJson;
-import com.sunya.electionguard.json.PublisherOld;
-import electionguard.protogen.CiphertextTallyProto;
+import electionguard.protogen.EncryptedTallyProto;
 import electionguard.protogen.PlaintextTallyProto;
 import com.sunya.electionguard.json.JsonPublisher;
 import com.sunya.electionguard.verifier.TestParameterVerifier;
@@ -20,15 +19,15 @@ public class TestTallyToProtoRoundtrip {
 
   @BeforeContainer
   public static void setup() throws IOException {
-    publisher = new JsonPublisher(TestParameterVerifier.topdirJsonExample, PublisherOld.Mode.readonly);
+    publisher = new JsonPublisher(TestParameterVerifier.topdirJsonExample, JsonPublisher.Mode.readonly);
   }
 
   @Example
   public void testCiphertextTallyRoundtrip() throws IOException {
-    CiphertextTally fromPython = ConvertFromJson.readCiphertextTally(publisher.encryptedTallyPath().toString());
+    EncryptedTally fromPython = ConvertFromJson.readCiphertextTally(publisher.encryptedTallyPath().toString());
     assertThat(fromPython).isNotNull();
-    CiphertextTallyProto.CiphertextTally proto = CiphertextTallyToProto.publishCiphertextTally(fromPython);
-    CiphertextTally roundtrip = CiphertextTallyFromProto.importCiphertextTally(proto);
+    EncryptedTallyProto.EncryptedTally proto = EncryptedTallyConvert.publishEncryptedTally(fromPython);
+    EncryptedTally roundtrip = EncryptedTallyConvert.importEncryptedTally(proto);
     assertThat(roundtrip).isEqualTo(fromPython);
   }
 
@@ -36,8 +35,8 @@ public class TestTallyToProtoRoundtrip {
   public void testPlaintextTallyRoundtrip() throws IOException {
     PlaintextTally fromPython = ConvertFromJson.readPlaintextTally(publisher.tallyPath().toString());
     assertThat(fromPython).isNotNull();
-    PlaintextTallyProto.PlaintextTally proto = PlaintextTallyToProto.publishPlaintextTally(fromPython);
-    PlaintextTally roundtrip = PlaintextTallyFromProto.importPlaintextTally(proto);
+    PlaintextTallyProto.PlaintextTally proto = PlaintextTallyConvert.publishPlaintextTally(fromPython);
+    PlaintextTally roundtrip = PlaintextTallyConvert.importPlaintextTally(proto);
     assertThat(roundtrip).isEqualTo(fromPython);
   }
 }

@@ -1,7 +1,5 @@
 syntax = "proto3";
 
-import "common.proto";
-
 option java_package = "electionguard.protogen";
 option java_outer_classname = "PlaintextBallotProto";
 

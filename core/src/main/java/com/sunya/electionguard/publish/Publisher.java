@@ -1,15 +1,15 @@
 package com.sunya.electionguard.publish;
 
 import com.sunya.electionguard.PlaintextTally;
-import com.sunya.electionguard.SubmittedBallot;
+import com.sunya.electionguard.ballot.EncryptedBallot;
 import com.sunya.electionguard.protoconvert.ElectionConfigConvert;
 import com.sunya.electionguard.protoconvert.ElectionInitializedConvert;
 import com.sunya.electionguard.protoconvert.ElectionResultsConvert;
-import com.sunya.electionguard.protoconvert.PlaintextTallyToProto;
-import com.sunya.electionguard.protoconvert.SubmittedBallotToProto;
+import com.sunya.electionguard.protoconvert.EncryptedBallotConvert;
+import com.sunya.electionguard.protoconvert.PlaintextTallyConvert;
 import electionguard.ballot.*;
-import electionguard.protogen.CiphertextBallotProto;
 import electionguard.protogen.ElectionRecordProto;
+import electionguard.protogen.EncryptedBallotProto;
 import electionguard.protogen.PlaintextTallyProto;
 
 import java.io.FileOutputStream;
@@ -109,10 +109,10 @@ public class Publisher {
     }
   }
 
-  public void writeSubmittedBallots(Iterable<SubmittedBallot> ballots) throws IOException {
+  public void writeSubmittedBallots(Iterable<EncryptedBallot> ballots) throws IOException {
     try (FileOutputStream out = new FileOutputStream(path.submittedBallotPath().toFile())) {
-      for (SubmittedBallot ballot : ballots) {
-        CiphertextBallotProto.SubmittedBallot ballotProto = SubmittedBallotToProto.translateToProto(ballot);
+      for (EncryptedBallot ballot : ballots) {
+        EncryptedBallotProto.EncryptedBallot ballotProto = EncryptedBallotConvert.publishEncryptedBallot(ballot);
         ballotProto.writeDelimitedTo(out);
       }
     }
@@ -135,7 +135,7 @@ public class Publisher {
   public void writeSpoiledBallots(Iterable<PlaintextTally> ballots) throws IOException {
     try (FileOutputStream out = new FileOutputStream(path.spoiledBallotPath().toFile())) {
       for (PlaintextTally ballot : ballots) {
-        PlaintextTallyProto.PlaintextTally ballotProto = PlaintextTallyToProto.publishPlaintextTally(ballot);
+        PlaintextTallyProto.PlaintextTally ballotProto = PlaintextTallyConvert.publishPlaintextTally(ballot);
         ballotProto.writeDelimitedTo(out);
       }
     }

@@ -1,14 +1,14 @@
 package com.sunya.electionguard.standard;
 
 import com.google.common.flogger.FluentLogger;
-import com.sunya.electionguard.AvailableGuardian;
+import com.sunya.electionguard.ballot.DecryptingGuardian;
 import com.sunya.electionguard.BallotBox;
-import com.sunya.electionguard.CiphertextTally;
+import com.sunya.electionguard.ballot.EncryptedTally;
 import com.sunya.electionguard.DecryptWithShares;
 import com.sunya.electionguard.DecryptionShare;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.PlaintextTally;
-import com.sunya.electionguard.SubmittedBallot;
+import com.sunya.electionguard.ballot.EncryptedBallot;
 import com.sunya.electionguard.publish.ElectionContext;
 
 import java.util.ArrayList;
@@ -189,18 +189,18 @@ class DecryptionMediator {
     }
   }
 
-  public List<AvailableGuardian> availableGuardians() {
+  public List<DecryptingGuardian> availableGuardians() {
     Map<String, Group.ElementModQ> lagrange_coefficients = Decryptions.compute_lagrange_coefficients_for_guardians(
             new ArrayList<>(available_guardians.values()));
 
-    List<AvailableGuardian> result = new ArrayList<>();
+    List<DecryptingGuardian> result = new ArrayList<>();
     available_guardians.values().forEach(g -> result.add(
-            new AvailableGuardian(g.owner_id(), g.sequence_order(), lagrange_coefficients.get(g.owner_id()))
+            new DecryptingGuardian(g.owner_id(), g.sequence_order(), lagrange_coefficients.get(g.owner_id()))
     ));
     return result;
   }
 
-  void reconstruct_shares_for_tally(CiphertextTally ciphertext_tally) {
+  void reconstruct_shares_for_tally(EncryptedTally ciphertext_tally) {
     Map<String, Group.ElementModQ> lagrange_coefficients = Decryptions.compute_lagrange_coefficients_for_guardians(
             new ArrayList<>(available_guardians.values()));
 
@@ -226,11 +226,11 @@ class DecryptionMediator {
     }
   }
 
-  void reconstruct_shares_for_ballots(List<SubmittedBallot> ciphertext_ballots) {
+  void reconstruct_shares_for_ballots(List<EncryptedBallot> ciphertext_ballots) {
     Map<String, Group.ElementModQ> lagrange_coefficients = Decryptions.compute_lagrange_coefficients_for_guardians(
             new ArrayList<>(available_guardians.values()));
 
-    for (SubmittedBallot ciphertext_ballot : ciphertext_ballots) {
+    for (EncryptedBallot ciphertext_ballot : ciphertext_ballots) {
       String ballot_id = ciphertext_ballot.object_id();
       Map<String, DecryptionShare> ballot_shares = this.ballot_shares.computeIfAbsent(ballot_id, m -> new HashMap<>());
 
@@ -266,7 +266,7 @@ class DecryptionMediator {
    * Get the plaintext tally for the election by composing each Guardian's
    * decrypted representation of each selection into a decrypted representation.
    */
-  public Optional<PlaintextTally> get_plaintext_tally(CiphertextTally ciphertext_tally) {
+  public Optional<PlaintextTally> get_plaintext_tally(EncryptedTally ciphertext_tally) {
     // Make sure a Quorum of Guardians have announced
     if (!this.announcement_complete() || !this.ready_to_decrypt(this.tally_shares)) {
       logger.atWarning().log("cannot get plaintext tally with less than quorum available guardians");
@@ -287,7 +287,7 @@ class DecryptionMediator {
    * @return Map(BALLOT_ID, PlaintextTally)
    */
   public Optional<Map<String, PlaintextTally>> get_plaintext_ballots(
-          Iterable<SubmittedBallot> ciphertext_ballots) {
+          Iterable<EncryptedBallot> ciphertext_ballots) {
 
     if (!this.announcement_complete()) {
       logger.atWarning().log("cannot get plaintext ballots with less than quorum available guardians");
@@ -295,7 +295,7 @@ class DecryptionMediator {
     }
 
     Map<String, PlaintextTally> ballots = new HashMap<>();
-    for (SubmittedBallot ciphertext_ballot : ciphertext_ballots) {
+    for (EncryptedBallot ciphertext_ballot : ciphertext_ballots) {
       if (ciphertext_ballot.state != BallotBox.State.SPOILED) {
         continue;
       }

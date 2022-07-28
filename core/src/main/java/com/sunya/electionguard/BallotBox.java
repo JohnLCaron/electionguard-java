@@ -3,6 +3,7 @@ package com.sunya.electionguard;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
 import com.google.common.flogger.FluentLogger;
+import com.sunya.electionguard.ballot.EncryptedBallot;
 import com.sunya.electionguard.publish.CloseableIterable;
 import com.sunya.electionguard.publish.CloseableIterableAdapter;
 import com.sunya.electionguard.publish.ElectionContext;
@@ -37,12 +38,12 @@ public class BallotBox {
   }
 
   /** Cast a specific encrypted CiphertextBallot. */
-  public Optional<SubmittedBallot> cast(CiphertextBallot ballot) {
+  public Optional<EncryptedBallot> cast(CiphertextBallot ballot) {
     return accept_ballot(ballot, State.CAST);
   }
 
   /** Spoil a specific encrypted CiphertextBallot. */
-  public Optional<SubmittedBallot> spoil(CiphertextBallot ballot) {
+  public Optional<EncryptedBallot> spoil(CiphertextBallot ballot) {
     return accept_ballot(ballot, State.SPOILED);
   }
 
@@ -51,13 +52,13 @@ public class BallotBox {
    * Verify that the ballot is valid for the election and the ballot has not already been cast or spoiled.
    * @return a `SubmittedBallot` or `None` if there was an error
    */
-  Optional<SubmittedBallot> accept_ballot(CiphertextBallot ballot, State state) {
+  Optional<EncryptedBallot> accept_ballot(CiphertextBallot ballot, State state) {
     if (!BallotValidations.ballot_is_valid_for_election(ballot, this.metadata, context)) {
       return Optional.empty();
     }
 
     if (store.containsKey(ballot.object_id())) {
-      SubmittedBallot existingBallot = store.get(ballot.object_id()).orElseThrow(IllegalStateException::new);
+      EncryptedBallot existingBallot = store.get(ballot.object_id()).orElseThrow(IllegalStateException::new);
       logger.atWarning().log("error accepting ballot, %s already exists with state: %s",
           ballot.object_id(), existingBallot.state);
       return Optional.empty();
@@ -65,7 +66,7 @@ public class BallotBox {
 
     // TODO: ISSUE #56: check if the ballot includes the nonce, and regenerate the proofs
     // TODO: ISSUE #56: check if the ballot includes the proofs, if it does not include the nonce
-    SubmittedBallot ballot_box_ballot = ballot.acceptWithState(state);
+    EncryptedBallot ballot_box_ballot = ballot.acceptWithState(state);
     store.put(ballot_box_ballot.object_id(), ballot_box_ballot);
     return Optional.of(ballot_box_ballot);
   }
@@ -82,31 +83,31 @@ public class BallotBox {
    */
 
   /** Get all the ballots, cast or spoiled. */
-  public Iterable<SubmittedBallot> getAllBallots() {
+  public Iterable<EncryptedBallot> getAllBallots() {
     return store;
   }
 
   /** Get just the cast ballots. */
-  public Iterable<SubmittedBallot> getCastBallots() {
+  public Iterable<EncryptedBallot> getCastBallots() {
     return Iterables.filter(store, b -> b.state == State.CAST);
   }
 
   /** Get just the spoiled ballots. */
-  public Iterable<SubmittedBallot> getSpoiledBallots() {
+  public Iterable<EncryptedBallot> getSpoiledBallots() {
     return Iterables.filter(store, b -> b.state == State.SPOILED);
   }
 
   /** Return the SubmittedBallot with the given key, or empty if not exist. */
-  public Optional<SubmittedBallot> get(String key) {
+  public Optional<EncryptedBallot> get(String key) {
     return store.get(key);
   }
 
   /** Get all the ballots as a CloseableIterable. */
-  public CloseableIterable<SubmittedBallot> getAcceptedBallotsAsCloseableIterable() {
+  public CloseableIterable<EncryptedBallot> getAcceptedBallotsAsCloseableIterable() {
     return CloseableIterableAdapter.wrap(store);
   }
 
-  Iterable<SubmittedBallot> getAcceptedBallots() {
+  Iterable<EncryptedBallot> getAcceptedBallots() {
     return store;
   }
 
@@ -121,8 +122,8 @@ public class BallotBox {
   }
 
   /** A mutable store for SubmittedBallot. */
-  static class DataStore implements Iterable<SubmittedBallot> {
-    private final HashMap<String, SubmittedBallot> map = new HashMap<>();
+  static class DataStore implements Iterable<EncryptedBallot> {
+    private final HashMap<String, EncryptedBallot> map = new HashMap<>();
 
     /** Does the store contain the given key? */
     boolean containsKey(String key) {
@@ -139,19 +140,19 @@ public class BallotBox {
      * (A {@code null} return can also indicate that the map previously associated {@code null} with {@code key}.)
      */
     @Nullable
-    SubmittedBallot put(String key, @Nullable SubmittedBallot value) {
+    EncryptedBallot put(String key, @Nullable EncryptedBallot value) {
       return map.put(key, value);
     }
 
     /** Return the value for the given key, or empty. */
-    Optional<SubmittedBallot> get(String key) {
-      SubmittedBallot value = map.get(key);
+    Optional<EncryptedBallot> get(String key) {
+      EncryptedBallot value = map.get(key);
       return Optional.ofNullable(value);
     }
 
     /** An iterator over the values of the DataStore. */
     @Override
-    public Iterator<SubmittedBallot> iterator() {
+    public Iterator<EncryptedBallot> iterator() {
       return map.values().iterator();
     }
 

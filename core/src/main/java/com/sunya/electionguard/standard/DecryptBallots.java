@@ -3,18 +3,18 @@ package com.sunya.electionguard.standard;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
-import com.sunya.electionguard.AvailableGuardian;
+import com.sunya.electionguard.ballot.DecryptingGuardian;
 import com.sunya.electionguard.CiphertextTallyBuilder;
 import com.sunya.electionguard.DecryptionShare;
 import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.InternalManifest;
 import com.sunya.electionguard.PlaintextTally;
-import com.sunya.electionguard.CiphertextTally;
+import com.sunya.electionguard.ballot.EncryptedTally;
 import com.sunya.electionguard.Scheduler;
 import com.sunya.electionguard.input.ManifestInputValidation;
 import com.sunya.electionguard.publish.Consumer;
-import com.sunya.electionguard.json.PublisherOld;
 import com.sunya.electionguard.publish.ElectionRecord;
+import com.sunya.electionguard.publish.Publisher;
 import electionguard.ballot.DecryptionResult;
 
 import java.io.IOException;
@@ -156,11 +156,11 @@ public class DecryptBallots {
   final Manifest election;
 
   final Iterable<Guardian> guardians;
-  CiphertextTally encryptedTally;
+  EncryptedTally encryptedTally;
   PlaintextTally decryptedTally;
   Collection<PlaintextTally> spoiledDecryptedBallots;
   Map<String, PlaintextTally> spoiledDecryptedTallies;
-  List<AvailableGuardian> availableGuardians;
+  List<DecryptingGuardian> availableGuardians;
   final int quorum;
   final int numberOfGuardians;
 
@@ -231,7 +231,7 @@ public class DecryptBallots {
             this.availableGuardians,
             emptyMap());
 
-    PublisherOld publisher = new PublisherOld(publishDir, PublisherOld.Mode.createIfMissing);
+    Publisher publisher = new Publisher(publishDir, Publisher.Mode.createIfMissing);
     publisher.writeDecryptionResults(result);
     publisher.copyAcceptedBallots(inputDir);
     return true;

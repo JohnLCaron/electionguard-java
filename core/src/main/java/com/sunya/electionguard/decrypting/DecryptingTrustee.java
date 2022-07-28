@@ -1,58 +1,107 @@
 package com.sunya.electionguard.decrypting;
 
+import at.favre.lib.bytes.Bytes;
 import com.google.common.base.Preconditions;
 import com.google.common.flogger.FluentLogger;
 import com.sunya.electionguard.BallotBox;
 import com.sunya.electionguard.ChaumPedersen;
 import com.sunya.electionguard.ElGamal;
+import com.sunya.electionguard.ElectionPolynomial;
 import com.sunya.electionguard.Group;
+import com.sunya.electionguard.core.UInt256;
 import com.sunya.electionguard.keyceremony.KeyCeremony2;
 
 import javax.annotation.Nullable;
-import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
-import static com.sunya.electionguard.Group.ONE_MOD_P;
-import static com.sunya.electionguard.Group.ONE_MOD_Q;
-import static com.sunya.electionguard.Group.mult_p;
-import static com.sunya.electionguard.Group.pow_p;
 import static com.sunya.electionguard.Group.rand_q;
 
 /**
  * A Trustee/Guardian used in Decryptions, with secrets hidden as much as possible.
  * This object must not be used with untrusted code.
- * @param id The Guardian id
- * @param xCoordinate A unique number in [1, 256) that is the polynomial x value for this guardian. aka sequence_order.
- * @param election_keypair The election (ElGamal) secret key
- * @param otherGuardianPartialKeyBackups Other guardians' partial key backups of this guardian's keys, keyed by guardian id.
- * @param guardianCommittments All guardians' public coefficient commitments, keyed by guardian id.
  */
-public record DecryptingTrustee(
-  String id,
-  int xCoordinate,
-  ElGamal.KeyPair election_keypair,
-  Map<String, KeyCeremony2.PartialKeyBackup> otherGuardianPartialKeyBackups,
-  Map<String, List<Group.ElementModP>> guardianCommittments)  implements DecryptingTrusteeIF {
-
+public class DecryptingTrustee implements DecryptingTrusteeIF {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
+  private static final boolean validate = true; // expensive, debugging only
 
-  // TODO id and sequence_order are not matching
-  public DecryptingTrustee {
-    id = Preconditions.checkNotNull(id);
+  final String id;
+  final int xCoordinate;
+  final ElGamal.KeyPair electionKeypair;
+  final Map<String, KeyCeremony2.SecretKeyShare> secretKeyShares;
+  final Map<String, List<Group.ElementModP>> coefficientCommitments;
+
+  // lazy
+  private final HashMap<String, Group.ElementModQ> generatingGuardianValues = new HashMap<>();
+  private final HashMap<String, Group.ElementModP> gPilMap = new HashMap<>();
+
+  /**
+   * @param id The Guardian id
+   * @param xCoordinate A unique number in [1, 256) that is the polynomial x value for this guardian. aka sequence_order.
+   * @param electionKeypair The election (ElGamal) secret key
+   * @param secretKeyShares Other guardians' partial key backups of this guardian's keys, keyed by guardian id.
+   * @param coefficientCommitments All guardians' public coefficient commitments, keyed by guardian id.
+   */
+  public DecryptingTrustee(
+          String id,
+          int xCoordinate,
+          ElGamal.KeyPair electionKeypair,
+          Map<String, KeyCeremony2.SecretKeyShare> secretKeyShares,
+          Map<String, List<Group.ElementModP>> coefficientCommitments) {
+    this.id = Preconditions.checkNotNull(id);
+    this.electionKeypair = Preconditions.checkNotNull(electionKeypair);
+
     Preconditions.checkArgument(xCoordinate > 0);
-    Preconditions.checkNotNull(election_keypair);
-    Preconditions.checkArgument(otherGuardianPartialKeyBackups.size() > 0);
-    Preconditions.checkArgument(guardianCommittments.size() == otherGuardianPartialKeyBackups.size() + 1);
+    Preconditions.checkArgument(secretKeyShares.size() > 0);
+    Preconditions.checkArgument(coefficientCommitments.size() == secretKeyShares.size() + 1);
 
-    otherGuardianPartialKeyBackups = Map.copyOf(otherGuardianPartialKeyBackups);
-    guardianCommittments = Map.copyOf(guardianCommittments);
+    this.xCoordinate = xCoordinate;
+    this.secretKeyShares = Map.copyOf(secretKeyShares);
+    this.coefficientCommitments = Map.copyOf(coefficientCommitments);
+  }
+
+  @Override
+  public String id() {
+    return id;
+  }
+
+  @Override
+  public int xCoordinate() {
+    return xCoordinate;
   }
 
   @Override
   public Group.ElementModP electionPublicKey() {
-    return election_keypair.public_key();
+    return electionKeypair.public_key();
+  }
+
+  public ElGamal.KeyPair electionKeypair() {
+    return electionKeypair;
+  }
+
+  public Collection<KeyCeremony2.SecretKeyShare> secretKeyShares() {
+    return secretKeyShares.values();
+  }
+
+  public Map<String, List<Group.ElementModP>> coefficientCommitments() {
+    return coefficientCommitments;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    DecryptingTrustee that = (DecryptingTrustee) o;
+    return xCoordinate == that.xCoordinate && Objects.equals(id, that.id) && Objects.equals(electionKeypair, that.electionKeypair) && Objects.equals(secretKeyShares, that.secretKeyShares) && Objects.equals(coefficientCommitments, that.coefficientCommitments) && Objects.equals(generatingGuardianValues, that.generatingGuardianValues);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(id, xCoordinate, electionKeypair, secretKeyShares, coefficientCommitments, generatingGuardianValues);
   }
 
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -79,21 +128,21 @@ public record DecryptingTrustee(
     List<BallotBox.DecryptionProofTuple> results = new ArrayList<>();
     for (ElGamal.Ciphertext text : texts) {
       // 𝑀_i = 𝐴^𝑠𝑖 mod 𝑝
-      Group.ElementModP partial_decryption = text.partial_decrypt(this.election_keypair.secret_key());
+      Group.ElementModP partial_decryption = text.partial_decrypt(this.electionKeypair.secret_key());
       // 𝑀_i = 𝐴^𝑠𝑖 mod 𝑝 and 𝐾𝑖 = 𝑔^𝑠𝑖 mod 𝑝
       ChaumPedersen.ChaumPedersenProof proof = ChaumPedersen.make_chaum_pedersen(
               text,
-              this.election_keypair.secret_key(),
+              this.electionKeypair.secret_key(),
               partial_decryption,
               nonce_seed,
               extended_base_hash);
 
-      boolean valid = proof.is_valid(text, this.election_keypair.public_key(), partial_decryption, extended_base_hash);
+      boolean valid = proof.is_valid(text, this.electionKeypair.public_key(), partial_decryption, extended_base_hash);
       if (!valid) {
         logger.atWarning().log(
                 String.format(" partialDecrypt invalid proof for %s = %s%n ", this.id, proof) +
                         String.format("   message = %s %n ", text) +
-                        String.format("   public_key = %s %n ", this.election_keypair.public_key().toShortString()) +
+                        String.format("   public_key = %s %n ", this.electionKeypair.public_key().toShortString()) +
                         String.format("   partial_decryption = %s %n ", partial_decryption.toShortString()) +
                         String.format("   extended_base_hash = %s %n ", extended_base_hash)
         );
@@ -109,7 +158,7 @@ public record DecryptingTrustee(
    * LOOK Whats with ISSUE #47?
    * <p>
    *
-   * @param missing_guardian_id: the guardian
+   * @param missingGuardianId: the guardian
    * @param texts:               the ciphertext(s) that will be decrypted
    * @param extended_base_hash:  the extended base hash of the election used to generate the ElGamal Ciphertext
    * @param nonce_seed:          an optional value used to generate the `ChaumPedersenProof`
@@ -117,7 +166,7 @@ public record DecryptingTrustee(
    * @return a DecryptionProofRecovery with the decryption and its proof and a recovery key
    */
   public List<DecryptionProofRecovery> compensatedDecrypt(
-          String missing_guardian_id,
+          String missingGuardianId,
           List<ElGamal.Ciphertext> texts,
           Group.ElementModQ extended_base_hash,
           @Nullable Group.ElementModQ nonce_seed) {
@@ -126,66 +175,70 @@ public record DecryptingTrustee(
       nonce_seed = rand_q();
     }
 
-    KeyCeremony2.PartialKeyBackup backup = this.otherGuardianPartialKeyBackups.get(missing_guardian_id);
+    KeyCeremony2.SecretKeyShare backup = this.secretKeyShares.get(missingGuardianId);
     if (backup == null) {
-      String mess = String.format("compensate_decrypt guardian %s missing backup for %s", this.id, missing_guardian_id);
+      String mess = String.format("compensate_decrypt guardian %s missing backup for %s", this.id, missingGuardianId);
       logger.atInfo().log(mess);
       throw new IllegalStateException(mess);
     }
 
-    Group.ElementModP recovered = recoverPublicKey(missing_guardian_id);
+    // lazy decryption of key share.
+    var generatingGuardianValue = this.generatingGuardianValues.get(missingGuardianId);
+    if (generatingGuardianValue == null) {
+      KeyCeremony2.SecretKeyShare sshare = this.secretKeyShares.get(missingGuardianId);
+      if (sshare == null) {
+        throw new IllegalStateException(String.format("compensate_decrypt guardian %s missing backup for %s",
+                id, missingGuardianId));
+      }
+      Bytes byteArray = sshare.encryptedCoordinate().decrypt(this.electionKeypair.secret_key());
+      if (byteArray == null) {
+        throw new IllegalStateException(String.format("%s backup for %s couldnt decrypt encryptedCoordinate", id, missingGuardianId));
+      }
+      generatingGuardianValue = new UInt256(byteArray.array()).toModQ();
+      this.generatingGuardianValues.put(missingGuardianId, generatingGuardianValue);
+    }
+
+    // lazy calculation of g^Pi(l).
+    var gPil = this.gPilMap.get(missingGuardianId);
+    if (gPil == null) {
+      List<Group.ElementModP> coefficientCommitments = this.coefficientCommitments.get(missingGuardianId);
+      if (coefficientCommitments == null) {
+        throw new IllegalStateException(String.format( "guardian %s missing coefficientCommitments for %s",
+                id, missingGuardianId));
+      }
+      gPil = ElectionPolynomial.calculateGexpPiAtL(this.xCoordinate, coefficientCommitments);
+      this.gPilMap.put(missingGuardianId, gPil);
+    }
+
     List<DecryptionProofRecovery> results = new ArrayList<>();
     for (ElGamal.Ciphertext text : texts) {
       // 𝑀_{𝑖,l} = 𝐴^P𝑖_{l}
-      Group.ElementModP partial_decryption = text.partial_decrypt(backup.coordinate());
+      Group.ElementModP partial_decryption = text.partial_decrypt(generatingGuardianValue);
 
       // 𝑀_{𝑖,l} = 𝐴^𝑠𝑖 mod 𝑝 and 𝐾𝑖 = 𝑔^𝑠𝑖 mod 𝑝
       ChaumPedersen.ChaumPedersenProof proof = ChaumPedersen.make_chaum_pedersen(
               text,
-              backup.coordinate(),
+              generatingGuardianValue,
               partial_decryption,
               nonce_seed,
               extended_base_hash);
 
-      boolean valid = proof.is_valid(text, recovered, partial_decryption, extended_base_hash);
-      if (!valid) {
-        logger.atWarning().log(
-                String.format(" compensatedDecrypt invalid proof for %s = %s%n ", this.id, proof) +
-                        String.format("   message = %s %n ", text) +
-                        String.format("   public_key = %s %n ", recovered.toShortString()) +
-                        String.format("   partial_decryption = %s %n ", partial_decryption.toShortString()) +
-                        String.format("   extended_base_hash = %s %n ", extended_base_hash)
-        );
-        throw new IllegalArgumentException(String.format("CompensatedDecrypt invalid proof for %s missing = %s",
-                this.id, missing_guardian_id));
+      if (validate) {
+        boolean valid = proof.is_valid(text, gPil, partial_decryption, extended_base_hash);
+        if (!valid) {
+          logger.atWarning().log(
+                  String.format(" compensatedDecrypt invalid proof for %s = %s%n ", this.id, proof) +
+                          String.format("   message = %s %n ", text) +
+                          String.format("   public_key = %s %n ", gPil.toShortString()) +
+                          String.format("   partial_decryption = %s %n ", partial_decryption.toShortString()) +
+                          String.format("   extended_base_hash = %s %n ", extended_base_hash)
+          );
+          throw new IllegalArgumentException(String.format("CompensatedDecrypt invalid proof for %s missing = %s",
+                  this.id, missingGuardianId));
+        }
       }
-
-      results.add(new DecryptionProofRecovery(partial_decryption, proof, recovered));
+      results.add(new DecryptionProofRecovery(partial_decryption, proof, gPil));
     }
     return results;
-  }
-
-  /** Compute the recovery public key for a given guardian. */
-  public Group.ElementModP recoverPublicKey(String missing_guardian_id) {
-
-    List<Group.ElementModP> otherCommitments = this.guardianCommittments.get(missing_guardian_id);
-    if (otherCommitments == null) {
-      String mess = String.format("recovery_public_key_for guardian %s missing commitments for %s", this.id, missing_guardian_id);
-      logger.atSevere().log(mess);
-      throw new IllegalStateException(mess);
-    }
-    Group.ElementModQ xcoordQ = Group.int_to_q_unchecked(BigInteger.valueOf(this.xCoordinate));
-
-
-    // compute the recovery public key, corresponding to the secret share Pi(l)
-    // K_ij^(l^j) for j in 0..k-1.  K_ij is coefficients[j].public_key
-    Group.ElementModP result = ONE_MOD_P;
-    Group.ElementModQ exponent = ONE_MOD_Q;
-    for (Group.ElementModP commitment : otherCommitments) {
-      result = mult_p(result, pow_p(commitment, exponent));
-      exponent = Group.mult_q(exponent, xcoordQ);
-    }
-
-    return result;
   }
 }

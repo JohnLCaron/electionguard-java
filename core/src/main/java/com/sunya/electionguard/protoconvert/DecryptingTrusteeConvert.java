@@ -11,26 +11,24 @@ import java.util.Map;
 
 import static com.sunya.electionguard.protoconvert.CommonConvert.publishElementModP;
 
-public class DecryptingTrusteeToProto {
+public class DecryptingTrusteeConvert {
 
   public static TrusteeProto.DecryptingTrustee publishDecryptingTrustee(DecryptingTrustee trustee) {
     TrusteeProto.DecryptingTrustee.Builder builder = TrusteeProto.DecryptingTrustee.newBuilder();
     builder.setGuardianId(trustee.id());
     builder.setGuardianXCoordinate(trustee.xCoordinate());
-    builder.setElectionKeypair(publishElgamalKeypair(trustee.election_keypair()));
-    trustee.otherGuardianPartialKeyBackups().values().forEach(k -> builder.addSecretKeyShares(publishElectionPartialKeyBackup(k)));
-    trustee.guardianCommittments().entrySet().forEach(entry -> builder.addCoefficientCommitments(publishCommitmentSet(entry)));
+    builder.setElectionKeypair(publishElgamalKeypair(trustee.electionKeypair()));
+    trustee.secretKeyShares().forEach(k -> builder.addSecretKeyShares(publishElectionPartialKeyBackup(k)));
+    trustee.coefficientCommitments().entrySet().forEach(entry -> builder.addCoefficientCommitments(publishCommitmentSet(entry)));
     return builder.build();
   }
 
-  private static TrusteeProto.SecretKeyShare publishElectionPartialKeyBackup(KeyCeremony2.PartialKeyBackup org) {
+  private static TrusteeProto.SecretKeyShare publishElectionPartialKeyBackup(KeyCeremony2.SecretKeyShare org) {
     TrusteeProto.SecretKeyShare.Builder builder = TrusteeProto.SecretKeyShare.newBuilder();
     builder.setGeneratingGuardianId(org.generatingGuardianId());
     builder.setDesignatedGuardianId(org.designatedGuardianId());
     builder.setDesignatedGuardianXCoordinate(org.designatedGuardianXCoordinate());
-    if (org.coordinate() != null) {
-      builder.setGeneratingGuardianValue(CommonConvert.publishElementModQ(org.coordinate()));
-    }
+    builder.setEncryptedCoordinate(CommonConvert.publishHashedCiphertext(org.encryptedCoordinate()));
     builder.setError(org.error());
     return builder.build();
   }

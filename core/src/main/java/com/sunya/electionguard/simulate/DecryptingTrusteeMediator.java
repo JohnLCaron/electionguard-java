@@ -2,14 +2,14 @@ package com.sunya.electionguard.simulate;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.flogger.FluentLogger;
-import com.sunya.electionguard.AvailableGuardian;
-import com.sunya.electionguard.CiphertextTally;
+import com.sunya.electionguard.ballot.DecryptingGuardian;
+import com.sunya.electionguard.ballot.EncryptedTally;
 import com.sunya.electionguard.DecryptWithShares;
 import com.sunya.electionguard.DecryptionShare;
 import com.sunya.electionguard.ElectionPolynomial;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.PlaintextTally;
-import com.sunya.electionguard.SubmittedBallot;
+import com.sunya.electionguard.ballot.EncryptedBallot;
 import com.sunya.electionguard.decrypting.DecryptingTrusteeIF;
 import com.sunya.electionguard.publish.ElectionRecord;
 
@@ -29,8 +29,8 @@ public class DecryptingTrusteeMediator {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   private final ElectionRecord electionRecord;
-  private final CiphertextTally ciphertext_tally;
-  private final Iterable<SubmittedBallot> ciphertext_ballots; // spoiled ballots
+  private final EncryptedTally ciphertext_tally;
+  private final Iterable<EncryptedBallot> ciphertext_ballots; // spoiled ballots
 
   // Map(MISSING_GUARDIAN_ID, Group.ElementModQ) The guardian's ElGamal.KeyPair public key.
   private final Map<String, Group.ElementModP> guardianPublicKeys;
@@ -50,11 +50,11 @@ public class DecryptingTrusteeMediator {
 
   // Map(AVAILABLE_GUARDIAN_ID, ElementModQ)
   private Map<String, Group.ElementModQ> lagrange_coefficients;
-  private List<AvailableGuardian> guardianStates;
+  private List<DecryptingGuardian> guardianStates;
 
   public DecryptingTrusteeMediator(ElectionRecord context,
-                                   CiphertextTally encryptedTally,
-                                   Iterable<SubmittedBallot> spoiled_ballots,
+                                   EncryptedTally encryptedTally,
+                                   Iterable<EncryptedBallot> spoiled_ballots,
                                    Map<String, Group.ElementModP> guardianPublicKeys) {
     this.electionRecord = context;
     this.ciphertext_tally = encryptedTally;
@@ -276,7 +276,7 @@ public class DecryptingTrusteeMediator {
 
     // If guardians are missing, for each ballot compute compensated ballot_shares, add to this.ballot_shares
     if (this.available_guardians.size() < this.electionRecord.numberOfGuardians()) {
-      for (SubmittedBallot ballot : this.ciphertext_ballots) { // LOOK running through ballots
+      for (EncryptedBallot ballot : this.ciphertext_ballots) { // LOOK running through ballots
         if (this.count_ballot_shares(ballot.object_id()) < this.electionRecord.numberOfGuardians()) {
           this.compute_missing_shares_for_ballot(ballot);
         }
@@ -299,7 +299,7 @@ public class DecryptingTrusteeMediator {
     return count;
   }
 
-  private void compute_missing_shares_for_ballot(SubmittedBallot ballot) {
+  private void compute_missing_shares_for_ballot(EncryptedBallot ballot) {
     for (String missing_guardian_id : this.missingGuardians) {
       Group.ElementModP missing_public_key = this.guardianPublicKeys.get(missing_guardian_id);
       if (missing_public_key == null) {
@@ -330,7 +330,7 @@ public class DecryptingTrusteeMediator {
   }
 
   private Optional<Map<String, DecryptionShare.CompensatedDecryptionShare>> get_compensated_shares_for_ballot(
-          SubmittedBallot ballot, String missing_guardian_id) {
+          EncryptedBallot ballot, String missing_guardian_id) {
 
     Map<String, DecryptionShare.CompensatedDecryptionShare> compensated_decryptions = new HashMap<>();
 
@@ -358,7 +358,7 @@ public class DecryptingTrusteeMediator {
     }
   }
 
-  public List<AvailableGuardian> getAvailableGuardians() {
+  public List<DecryptingGuardian> getAvailableGuardians() {
     return this.guardianStates;
   }
 
@@ -376,7 +376,7 @@ public class DecryptingTrusteeMediator {
               .toList();
       Group.ElementModQ coeff = ElectionPolynomial.compute_lagrange_coefficient(guardian.xCoordinate(), seq_orders);
       this.lagrange_coefficients.put(guardian.id(), coeff);
-      this.guardianStates.add(new AvailableGuardian(guardian.id(), guardian.xCoordinate(), coeff));
+      this.guardianStates.add(new DecryptingGuardian(guardian.id(), guardian.xCoordinate(), coeff));
     }
   }
 

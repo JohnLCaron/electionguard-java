@@ -5,6 +5,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.flogger.FluentLogger;
+import com.sunya.electionguard.ballot.EncryptedBallot;
 import com.sunya.electionguard.core.HashedElGamalCiphertext;
 
 import javax.annotation.concurrent.Immutable;
@@ -174,18 +175,19 @@ public class CiphertextBallot implements Hash.CryptoHashCheckable {
   }
 
   /**
-   * Convert into a `SubmittedBallot`, with the given state, and all nonces removed.
+   * Convert into a `EncryptedBallot`, with the given state, and all nonces removed.
    * python: from_ciphertext_ballot().
    */
-  SubmittedBallot acceptWithState(BallotBox.State state) {
-    return SubmittedBallot.create(
+  protected EncryptedBallot acceptWithState(BallotBox.State state) {
+    return new EncryptedBallot(
             this.ballotId,
             this.ballotStyleId,
             this.manifestHash,
-            Optional.of(this.code_seed),
+            this.code_seed,
             this.contests,
             this.code,
-            Optional.of(this.timestamp),
+            this.timestamp,
+            this.crypto_hash,
             state);
   }
 
@@ -591,7 +593,7 @@ public class CiphertextBallot implements Hash.CryptoHashCheckable {
     }
 
     /** Remove nonces from selections and return new contest. */
-    Contest removeNonces() {
+    public Contest removeNonces() {
       List<Selection> new_selections =
               this.selections.stream().map(s -> s.removeNonce()).toList();
 

@@ -2,7 +2,7 @@ package com.sunya.electionguard.decrypting;
 
 import com.google.common.collect.ImmutableList;
 import com.sunya.electionguard.BallotBox;
-import com.sunya.electionguard.CiphertextTally;
+import com.sunya.electionguard.ballot.EncryptedTally;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.protoconvert.TrusteeFromProto;
@@ -21,7 +21,7 @@ public class TestDecryptingRemoteTrusteeProxy {
   int port = 17771;
   DecryptingTrustee trustee;
   DecryptingRemoteTrusteeProxy proxy;
-  CiphertextTally tally;
+  EncryptedTally tally;
   Group.ElementModQ extendedHash;
 
   TestDecryptingRemoteTrusteeProxy() throws IOException {
@@ -43,8 +43,8 @@ public class TestDecryptingRemoteTrusteeProxy {
 
   // @Example
   public void testCompensatedDecrypt() {
-    for (CiphertextTally.Contest contest : tally.contests.values()) {
-      for (CiphertextTally.Selection selection : contest.selections.values()) {
+    for (EncryptedTally.Contest contest : tally.contests.values()) {
+      for (EncryptedTally.Selection selection : contest.selections.values()) {
         List<DecryptionProofRecovery> result = proxy.compensatedDecrypt(
                 "remoteTrustee-3",
                 ImmutableList.of(selection.ciphertext()),

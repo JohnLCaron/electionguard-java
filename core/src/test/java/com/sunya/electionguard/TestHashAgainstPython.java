@@ -3,7 +3,8 @@ package com.sunya.electionguard;
 import com.google.common.collect.ImmutableList;
 import com.sunya.electionguard.core.UInt256;
 import com.sunya.electionguard.json.ConvertFromJson;
-import com.sunya.electionguard.json.PublisherOld;
+import com.sunya.electionguard.publish.Publisher;
+import electionguard.ballot.ElectionConfig;
 import net.jqwik.api.Example;
 import net.jqwik.api.lifecycle.AfterContainer;
 
@@ -12,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.sunya.electionguard.json.PublisherOld.Mode.createIfMissing;
+import static com.sunya.electionguard.publish.Publisher.Mode.createIfMissing;
 
 public class TestHashAgainstPython {
   public static final String topdirJsonPythonData = "src/test/data/python_data/";
@@ -72,8 +73,9 @@ public class TestHashAgainstPython {
     }
 
     if (writeOut) {
-      PublisherOld publisher = new PublisherOld(output, createIfMissing);
-      publisher.writeStartingProto(subject, constants);
+      Publisher publisher = new Publisher(output, createIfMissing);
+      ElectionConfig config = new ElectionConfig(subject, 3, 3);
+      publisher.writeElectionConfig(config);
     }
   }
 

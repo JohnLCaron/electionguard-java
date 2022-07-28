@@ -1,6 +1,6 @@
 package com.sunya.electionguard.decrypting;
 
-import com.sunya.electionguard.CiphertextTally;
+import com.sunya.electionguard.ballot.EncryptedTally;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.protoconvert.CommonConvert;
@@ -41,7 +41,7 @@ public class TestDecryptingRemoteTrustee {
   @Captor
   ArgumentCaptor<CommonRpcProto.ErrorResponse> captureBooleanResponse;
 
-  CiphertextTally tally;
+  EncryptedTally tally;
   Group.ElementModQ extendedHash;
 
   public TestDecryptingRemoteTrustee() throws IOException {

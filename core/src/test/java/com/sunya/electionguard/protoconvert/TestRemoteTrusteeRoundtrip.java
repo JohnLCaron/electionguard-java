@@ -3,7 +3,6 @@ package com.sunya.electionguard.protoconvert;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.decrypting.DecryptingTrustee;
 import com.sunya.electionguard.keyceremony.KeyCeremonyTrustee;
-import electionguard.protogen.TrusteeProto;
 import com.sunya.electionguard.publish.PrivateData;
 import net.jqwik.api.Example;
 import net.jqwik.api.lifecycle.BeforeProperty;
@@ -52,7 +51,7 @@ public class TestRemoteTrusteeRoundtrip {
 
     assertThat(org.receivePublicKeys(trustee1.sharePublicKeys())).isEmpty();
     assertThat(org.receivePublicKeys(trustee2.sharePublicKeys())).isEmpty();
-    assertThat(org.allGuardianPublicKeys).hasSize(3);
+    assertThat(org.guardianPublicKeys).hasSize(3);
 
     assertThat(trustee1.receivePublicKeys(org.sharePublicKeys())).isEmpty();
     assertThat(trustee2.receivePublicKeys(org.sharePublicKeys())).isEmpty();
@@ -62,7 +61,7 @@ public class TestRemoteTrusteeRoundtrip {
 
     assertThat(org.verifyPartialKeyBackup(trustee1.sendPartialKeyBackup(ID))).isNotNull();
     assertThat(org.verifyPartialKeyBackup(trustee2.sendPartialKeyBackup(ID))).isNotNull();
-    assertThat(org.otherGuardianPartialKeyBackups).hasSize(2);
+    assertThat(org.guardianSecretKeyShares).hasSize(2);
 
     // TrusteeProto.DecryptingTrustee trusteeProto = KeyCeremonyTrusteeToProto.convertTrustee(org);
     publisher.writeTrustee(org);
@@ -70,12 +69,12 @@ public class TestRemoteTrusteeRoundtrip {
     DecryptingTrustee roundtrip = publisher.readDecryptingTrustee(org.id);
     assertThat(roundtrip.id()).isEqualTo(org.id);
     assertThat(roundtrip.xCoordinate()).isEqualTo(org.xCoordinate);
-    assertThat(roundtrip.election_keypair()).isEqualTo(org.secrets().election_key_pair);
-    assertThat(roundtrip.otherGuardianPartialKeyBackups()).isEqualTo(org.otherGuardianPartialKeyBackups);
+    assertThat(roundtrip.electionKeypair()).isEqualTo(org.secrets().election_key_pair);
+    assertThat(roundtrip.coefficientCommitments()).isEqualTo(org.guardianSecretKeyShares);
 
-    Map<String, List<Group.ElementModP>> expected = org.allGuardianPublicKeys.entrySet().stream()
+    Map<String, List<Group.ElementModP>> expected = org.guardianPublicKeys.entrySet().stream()
             .collect(Collectors.toMap(Map.Entry::getKey,
                     e -> e.getValue().coefficientCommitments()));
-    assertThat(roundtrip.guardianCommittments()).isEqualTo(expected);
+    assertThat(roundtrip.coefficientCommitments()).isEqualTo(expected);
   }
 }

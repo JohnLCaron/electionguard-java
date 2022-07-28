@@ -3,6 +3,9 @@ package com.sunya.electionguard.json;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.*;
 import com.sunya.electionguard.*;
+import com.sunya.electionguard.ballot.DecryptingGuardian;
+import com.sunya.electionguard.ballot.EncryptedBallot;
+import com.sunya.electionguard.ballot.EncryptedTally;
 import com.sunya.electionguard.standard.GuardianPrivateRecord;
 
 import java.io.FileWriter;
@@ -18,24 +21,24 @@ public class ConvertToJson {
   private static final Gson enhancedGson = GsonTypeAdapters.enhancedGson();
 
   // LOOK maybe replace AvailableGuardian with AvailableGuardian ??
-  static void writeAvailableGuardian(AvailableGuardian object, Path where) throws IOException {
-    Type type = new TypeToken<AvailableGuardian>(){}.getType();
+  static void writeAvailableGuardian(DecryptingGuardian object, Path where) throws IOException {
+    Type type = new TypeToken<DecryptingGuardian>(){}.getType();
     try (FileWriter writer = new FileWriter(where.toFile())) {
       enhancedGson.toJson(object, type, writer);
     }
   }
 
-  static void writeCoefficients(Iterable<AvailableGuardian> object, Path where) throws IOException {
+  static void writeCoefficients(Iterable<DecryptingGuardian> object, Path where) throws IOException {
     LagrangeCoefficientsPojo coeffs = new LagrangeCoefficientsPojo(
             StreamSupport.stream(object.spliterator(), false)
-            .collect(Collectors.toMap(AvailableGuardian::guardianId, AvailableGuardian::lagrangeCoefficient)));
+            .collect(Collectors.toMap(DecryptingGuardian::guardianId, DecryptingGuardian::lagrangeCoefficient)));
     try (FileWriter writer = new FileWriter(where.toFile())) {
       enhancedGson.toJson(coeffs, LagrangeCoefficientsPojo.class, writer);
     }
   }
 
-  static void writeSubmittedBallot(SubmittedBallot object, Path where) throws IOException {
-    Type type = new TypeToken<SubmittedBallot>(){}.getType();
+  static void writeSubmittedBallot(EncryptedBallot object, Path where) throws IOException {
+    Type type = new TypeToken<EncryptedBallot>(){}.getType();
     try (FileWriter writer = new FileWriter(where.toFile())) {
       enhancedGson.toJson(object, type, writer);
     }
@@ -48,8 +51,8 @@ public class ConvertToJson {
     }
   }
 
-  static void writeCiphertextTally(CiphertextTally object, Path where) throws IOException {
-    Type type = new TypeToken<CiphertextTally>(){}.getType();
+  static void writeCiphertextTally(EncryptedTally object, Path where) throws IOException {
+    Type type = new TypeToken<EncryptedTally>(){}.getType();
     try (FileWriter writer = new FileWriter(where.toFile())) {
       enhancedGson.toJson(object, type, writer);
     }

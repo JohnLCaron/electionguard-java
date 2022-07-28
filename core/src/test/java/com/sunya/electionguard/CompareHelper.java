@@ -1,5 +1,7 @@
 package com.sunya.electionguard;
 
+import com.sunya.electionguard.ballot.EncryptedBallot;
+import com.sunya.electionguard.ballot.EncryptedTally;
 import electionguard.ballot.Guardian;
 
 import java.io.IOException;
@@ -10,14 +12,14 @@ import static com.google.common.truth.Truth.assertThat;
 
 public class CompareHelper {
 
-  public static void compareCiphertextTally(CiphertextTally actual, CiphertextTally expected) {
-    for (Map.Entry<String, CiphertextTally.Contest> entry : expected.contests.entrySet()) {
-      CiphertextTally.Contest expectedContest = entry.getValue();
-      CiphertextTally.Contest contest = actual.contests.get(entry.getKey());
+  public static void compareCiphertextTally(EncryptedTally actual, EncryptedTally expected) {
+    for (Map.Entry<String, EncryptedTally.Contest> entry : expected.contests.entrySet()) {
+      EncryptedTally.Contest expectedContest = entry.getValue();
+      EncryptedTally.Contest contest = actual.contests.get(entry.getKey());
       assertThat(contest).isNotNull();
-      for (Map.Entry<String, CiphertextTally.Selection> entry2 : expectedContest.selections.entrySet()) {
-        CiphertextTally.Selection expectedSelection = entry2.getValue();
-        CiphertextTally.Selection selection = contest.selections.get(entry2.getKey());
+      for (Map.Entry<String, EncryptedTally.Selection> entry2 : expectedContest.selections.entrySet()) {
+        EncryptedTally.Selection expectedSelection = entry2.getValue();
+        EncryptedTally.Selection selection = contest.selections.get(entry2.getKey());
         compareCiphertextTallySelection(selection, expectedSelection);
         assertThat(selection).isEqualTo(expectedSelection);
       }
@@ -29,7 +31,7 @@ public class CompareHelper {
   //  public final Group.ElementModQ selectionHash;
   //  private final ElGamal.Ciphertext ciphertext; // only accessed through ciphertext(), so subclass can override
   //  public final boolean isPlaceholderSelection;
-  public static void compareCiphertextTallySelection(CiphertextTally.Selection actual, CiphertextTally.Selection expected) {
+  public static void compareCiphertextTallySelection(EncryptedTally.Selection actual, EncryptedTally.Selection expected) {
     assertThat(actual.selectionId).isEqualTo(expected.selectionId);
     assertThat(actual.sequenceOrder).isEqualTo(expected.sequenceOrder);
     assertThat(actual.selectionHash).isEqualTo(expected.selectionHash);
@@ -142,7 +144,7 @@ public class CompareHelper {
     }
   }
 
-  public static void compareCiphertextBallot(SubmittedBallot actual, SubmittedBallot expected) throws IOException {
+  public static void compareCiphertextBallot(EncryptedBallot actual, EncryptedBallot expected) throws IOException {
     int contestIdx = 0;
     for (CiphertextBallot.Contest contest : actual.contests) {
       CiphertextBallot.Contest econtest = expected.contests.get(contestIdx);

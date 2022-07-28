@@ -5,8 +5,8 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import com.sunya.electionguard.AvailableGuardian;
-import com.sunya.electionguard.CiphertextTally;
+import com.sunya.electionguard.ballot.DecryptingGuardian;
+import com.sunya.electionguard.ballot.EncryptedTally;
 import com.sunya.electionguard.CiphertextTallyBuilder;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.InternalManifest;
@@ -16,7 +16,6 @@ import com.sunya.electionguard.Scheduler;
 import com.sunya.electionguard.decrypting.DecryptingMediator;
 import com.sunya.electionguard.decrypting.DecryptingTrustee;
 import com.sunya.electionguard.input.ManifestInputValidation;
-import com.sunya.electionguard.json.PublisherOld;
 import com.sunya.electionguard.publish.Consumer;
 import com.sunya.electionguard.publish.ElectionRecord;
 import com.sunya.electionguard.publish.PrivateData;
@@ -164,10 +163,10 @@ public class RunDecryptionSimulator2 {
   final Manifest election;
 
   Iterable<DecryptingTrustee> guardians;
-  CiphertextTally encryptedTally;
+  EncryptedTally encryptedTally;
   PlaintextTally decryptedTally;
   List<PlaintextTally> spoiledDecryptedTallies;
-  List<AvailableGuardian> availableGuardians;
+  List<DecryptingGuardian> availableGuardians;
   int quorum;
   int numberOfGuardians;
 

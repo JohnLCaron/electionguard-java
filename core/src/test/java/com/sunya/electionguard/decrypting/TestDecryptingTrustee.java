@@ -24,7 +24,7 @@ public class TestDecryptingTrustee {
     assertThat(trustee1.id()).isEqualTo(GUARDIAN_ID + 1);
     assertThat(trustee1.electionPublicKey()).isNotNull();
 
-    assertThat(trustee1.guardianCommittments().size()).isEqualTo(NGUARDIANS);
-    assertThat(trustee1.otherGuardianPartialKeyBackups().size()).isEqualTo(NGUARDIANS-1);
+    assertThat(trustee1.coefficientCommitments().size()).isEqualTo(NGUARDIANS);
+    assertThat(trustee1.secretKeyShares().size()).isEqualTo(NGUARDIANS-1);
   }
 }

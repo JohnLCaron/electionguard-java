@@ -11,7 +11,7 @@ import java.math.BigInteger;
 import java.util.List;
 
 import com.sunya.electionguard.Manifest;
-import com.sunya.electionguard.SubmittedBallot;
+import com.sunya.electionguard.ballot.EncryptedBallot;
 import com.sunya.electionguard.publish.ElectionRecord;
 
 import static com.sunya.electionguard.CiphertextBallot.Contest;
@@ -38,7 +38,7 @@ public class ContestVoteLimitsVerifier {
     int nballots  = 0;
     int ncontests  = 0;
     int nselections  = 0;
-    for (SubmittedBallot ballot : electionRecord.submittedBallots()) {
+    for (EncryptedBallot ballot : electionRecord.submittedBallots()) {
       nballots++;
       if (show) System.out.printf("Ballot %s.%n", ballot.object_id());
       for (Contest contest : ballot.contests) {

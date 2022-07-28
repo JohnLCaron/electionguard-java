@@ -1,10 +1,10 @@
 package com.sunya.electionguard.publish;
 
-import com.sunya.electionguard.AvailableGuardian;
+import com.sunya.electionguard.ballot.DecryptingGuardian;
 import com.sunya.electionguard.Manifest;
-import com.sunya.electionguard.SubmittedBallot;
+import com.sunya.electionguard.ballot.EncryptedBallot;
 import com.sunya.electionguard.Group;
-import com.sunya.electionguard.CiphertextTally;
+import com.sunya.electionguard.ballot.EncryptedTally;
 import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.ElectionConstants;
 
@@ -17,11 +17,12 @@ public interface ElectionRecord extends ElectionContext {
   String protoVersion();
   Manifest manifest();
   List<electionguard.ballot.Guardian> guardians();
-  Iterable<SubmittedBallot> submittedBallots(); // All ballots, not just cast! // may be empty
-  @Nullable CiphertextTally ciphertextTally();
+  Iterable<EncryptedBallot> submittedBallots(); // All ballots, not just cast! // may be empty
+  @Nullable
+  EncryptedTally ciphertextTally();
   @Nullable PlaintextTally decryptedTally();
   Iterable<PlaintextTally> spoiledBallotTallies(); // may be empty
-  List<AvailableGuardian> availableGuardians(); // may be empty
+  List<DecryptingGuardian> availableGuardians(); // may be empty
 
   /** The extended base hash, Qbar in the spec. */
   Group.ElementModQ extendedHash();

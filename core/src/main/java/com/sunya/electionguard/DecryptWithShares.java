@@ -3,6 +3,8 @@ package com.sunya.electionguard;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.flogger.FluentLogger;
+import com.sunya.electionguard.ballot.EncryptedBallot;
+import com.sunya.electionguard.ballot.EncryptedTally;
 import com.sunya.electionguard.publish.ElectionContext;
 
 import java.util.ArrayList;
@@ -22,12 +24,12 @@ public class DecryptWithShares {
 
   /** Decrypt a collection of ciphertext spoiled ballots into decrypted plaintext tallies. */
   public static List<PlaintextTally> decrypt_spoiled_ballots(
-          Iterable<SubmittedBallot> ballots,
+          Iterable<EncryptedBallot> ballots,
           Map<String, Map<String, DecryptionShare>> shares, // MAP(AVAILABLE_GUARDIAN_ID, Map(BALLOT_ID, DecryptionShare))
           ElectionContext context) {
 
     List<PlaintextTally> result = new ArrayList<>();
-    for (SubmittedBallot ballot : ballots) {
+    for (EncryptedBallot ballot : ballots) {
       HashMap<String, DecryptionShare> ballot_shares = new HashMap<>();
       for (Map.Entry<String, Map<String, DecryptionShare>> entry : shares.entrySet()) {
         Map<String, DecryptionShare> map2 = entry.getValue();
@@ -56,12 +58,12 @@ public class DecryptWithShares {
    * @return A PlaintextTally or None if there is an error
    */
   public static Optional<PlaintextTally> decrypt_tally(
-          CiphertextTally tally,
+          EncryptedTally tally,
           Map<String, DecryptionShare> shares, // Map(AVAILABLE_GUARDIAN_ID, DecryptionShare)
           ElectionContext context) {
 
     Map<String, PlaintextTally.Contest> contests = new HashMap<>();
-    for (CiphertextTally.Contest tallyContest : tally.contests.values()) {
+    for (EncryptedTally.Contest tallyContest : tally.contests.values()) {
       Optional<PlaintextTally.Contest> pc = decrypt_contest_with_decryption_shares(
               CiphertextContest.createFrom(tallyContest), shares, context.extendedHash());
       if (pc.isEmpty()) {
@@ -84,12 +86,12 @@ public class DecryptWithShares {
 
   /** Decrypt a collection of ciphertext spoiled ballots into Map(BALLOT_ID, PlaintextTally). */
   public static Optional<Map<String, PlaintextTally>> decrypt_ballots(
-          Iterable<SubmittedBallot> ballots,
+          Iterable<EncryptedBallot> ballots,
           Map<String, Map<String, DecryptionShare>> shares, // MAP(AVAILABLE_GUARDIAN_ID, Map(BALLOT_ID, DecryptionShare))
           ElectionContext context) {
 
     Map<String, PlaintextTally> result = new HashMap<>();
-    for (SubmittedBallot ballot : ballots) {
+    for (EncryptedBallot ballot : ballots) {
       HashMap<String, DecryptionShare> ballot_shares = new HashMap<>();
       for (Map.Entry<String, Map<String, DecryptionShare>> entry : shares.entrySet()) {
         Map<String, DecryptionShare> map2 = entry.getValue();
@@ -109,7 +111,7 @@ public class DecryptWithShares {
 
   /** Decrypt a single ciphertext ballot into a decrypted plaintext ballot. */
   public static Optional<PlaintextTally> decrypt_ballot(
-          SubmittedBallot ballot,
+          EncryptedBallot ballot,
           Map<String, DecryptionShare> shares,
           ElementModQ extended_base_hash) {
 

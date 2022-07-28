@@ -1,6 +1,6 @@
 package com.sunya.electionguard.input;
 
-import com.sunya.electionguard.CiphertextTally;
+import com.sunya.electionguard.ballot.EncryptedTally;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.Group;
 
@@ -21,16 +21,16 @@ public class CiphertextTallyInputBuilder {
     return c;
   }
 
-  CiphertextTally build() {
-    return new CiphertextTally(id, contests.stream().collect(Collectors.toMap(c -> c.id, c -> c.build())));
+  EncryptedTally build() {
+    return new EncryptedTally(id, contests.stream().collect(Collectors.toMap(c -> c.id, c -> c.build())));
   }
 
-  CiphertextTally buildBadContest() {
-    return new CiphertextTally(id, contests.stream().collect(Collectors.toMap(c -> c.id + "bad", c -> c.build())));
+  EncryptedTally buildBadContest() {
+    return new EncryptedTally(id, contests.stream().collect(Collectors.toMap(c -> c.id + "bad", c -> c.build())));
   }
 
-  CiphertextTally buildBadSelection() {
-    return new CiphertextTally(id, contests.stream().collect(Collectors.toMap(c -> c.id, c -> c.buildBad())));
+  EncryptedTally buildBadSelection() {
+    return new EncryptedTally(id, contests.stream().collect(Collectors.toMap(c -> c.id, c -> c.buildBad())));
   }
 
   public class ContestBuilder {
@@ -54,12 +54,12 @@ public class CiphertextTallyInputBuilder {
       return CiphertextTallyInputBuilder.this;
     }
 
-    CiphertextTally.Contest build() {
-      return new CiphertextTally.Contest(id, seq++, hash, selections.stream().collect(Collectors.toMap(s -> s.id, s -> s.build())));
+    EncryptedTally.Contest build() {
+      return new EncryptedTally.Contest(id, seq++, hash, selections.stream().collect(Collectors.toMap(s -> s.id, s -> s.build())));
     }
 
-    CiphertextTally.Contest buildBad() {
-      return new CiphertextTally.Contest(id, seq++, hash, selections.stream().collect(Collectors.toMap(s -> s.id + "bad", s -> s.build())));
+    EncryptedTally.Contest buildBad() {
+      return new EncryptedTally.Contest(id, seq++, hash, selections.stream().collect(Collectors.toMap(s -> s.id + "bad", s -> s.build())));
     }
 
     public class SelectionBuilder {
@@ -73,8 +73,8 @@ public class CiphertextTallyInputBuilder {
         this.ciphertext = ciphertext;
       }
 
-      CiphertextTally.Selection build() {
-        return new CiphertextTally.Selection(id, seq++, hash, ciphertext);
+      EncryptedTally.Selection build() {
+        return new EncryptedTally.Selection(id, seq++, hash, ciphertext);
       }
     }
   }

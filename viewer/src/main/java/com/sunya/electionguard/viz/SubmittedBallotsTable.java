@@ -7,10 +7,8 @@ package com.sunya.electionguard.viz;
 
 import com.sunya.electionguard.InternalManifest;
 import com.sunya.electionguard.Manifest;
-import com.sunya.electionguard.SubmittedBallot;
+import com.sunya.electionguard.ballot.EncryptedBallot;
 import com.sunya.electionguard.CiphertextBallot;
-import com.sunya.electionguard.publish.CloseableIterable;
-import com.sunya.electionguard.publish.CloseableIterator;
 import com.sunya.electionguard.publish.ElectionContext;
 import ucar.ui.prefs.BeanTable;
 import ucar.ui.widget.BAMutil;
@@ -25,7 +23,6 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Formatter;
-import java.util.Iterator;
 import java.util.Optional;
 
 public class SubmittedBallotsTable extends JPanel {
@@ -87,11 +84,11 @@ public class SubmittedBallotsTable extends JPanel {
     add(split2, BorderLayout.CENTER);
   }
 
-  void setAcceptedBallots(Manifest manifest, ElectionContext context, Iterable<SubmittedBallot> acceptedBallots) {
+  void setAcceptedBallots(Manifest manifest, ElectionContext context, Iterable<EncryptedBallot> acceptedBallots) {
     this.manifest = new InternalManifest(manifest);
     this.context = context;
     java.util.List<SubmittedBallotBean> beanList = new ArrayList<>();
-    for (SubmittedBallot ballot : acceptedBallots) {
+    for (EncryptedBallot ballot : acceptedBallots) {
       beanList.add(new SubmittedBallotBean(ballot));
     }
       ballotTable.setBeans(beanList);
@@ -133,7 +130,7 @@ public class SubmittedBallotsTable extends JPanel {
     prefs.putInt("splitPos2", split2.getDividerLocation());
   }
 
-  String computeBallotSize(SubmittedBallot ballot) {
+  String computeBallotSize(EncryptedBallot ballot) {
     int intSizes = 0;
     int stringSizes = 0;
     int countContests = 0;
@@ -206,11 +203,11 @@ public class SubmittedBallotsTable extends JPanel {
   }
 
   public static class SubmittedBallotBean {
-    SubmittedBallot ballot;
+    EncryptedBallot ballot;
 
     public SubmittedBallotBean(){}
 
-    SubmittedBallotBean(SubmittedBallot ballot) {
+    SubmittedBallotBean(EncryptedBallot ballot) {
       this.ballot = ballot;
     }
 

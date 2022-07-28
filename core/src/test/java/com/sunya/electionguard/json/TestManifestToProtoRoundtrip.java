@@ -17,7 +17,7 @@ public class TestManifestToProtoRoundtrip {
 
   @BeforeContainer
   public static void setup() throws IOException {
-    publisher = new JsonPublisher(TestParameterVerifier.topdirJsonExample, PublisherOld.Mode.readonly);
+    publisher = new JsonPublisher(TestParameterVerifier.topdirJsonExample, JsonPublisher.Mode.readonly);
   }
 
   @Example

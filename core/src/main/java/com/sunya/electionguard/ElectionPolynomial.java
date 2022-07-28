@@ -1,6 +1,5 @@
 package com.sunya.electionguard;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 
 import javax.annotation.Nullable;
@@ -12,11 +11,8 @@ import java.util.Objects;
 
 import static com.sunya.electionguard.Group.ElementModQ;
 import static com.sunya.electionguard.Group.ElementModP;
-import static com.sunya.electionguard.Group.ZERO_MOD_Q;
 import static com.sunya.electionguard.Group.add_q;
 import static com.sunya.electionguard.Group.g_pow_p;
-import static com.sunya.electionguard.Group.mult_q;
-import static com.sunya.electionguard.Group.pow_q;
 import static com.sunya.electionguard.Group.rand_q;
 
 /**
@@ -38,12 +34,25 @@ public class ElectionPolynomial {
   /** A proof of possession of the private key for each secret coefficient. (not secret) */
   public final ImmutableList<SchnorrProof> coefficient_proofs;
 
-  // LOOK test all sizes == quorum
   public ElectionPolynomial(List<Group.ElementModQ> coefficients, List<Group.ElementModP> coefficient_commitments,
                      List<SchnorrProof> coefficient_proofs) {
     this.coefficients = ImmutableList.copyOf(coefficients);
     this.coefficient_commitments = ImmutableList.copyOf(coefficient_commitments);
     this.coefficient_proofs = ImmutableList.copyOf(coefficient_proofs);
+  }
+
+  // The value of the polynomial at xcoord
+  public ElementModQ valueAt(int xcoord) {
+    ElementModQ xcoordQ = Group.int_to_q_unchecked(xcoord);
+    ElementModQ computedValue = Group.ZERO_MOD_Q;
+    ElementModQ xcoordPower = Group.ONE_MOD_Q;
+
+    for (ElementModQ coefficient : this.coefficients) {
+      ElementModQ term = Group.mult_q(coefficient, xcoordPower);
+      computedValue = Group.add_q(computedValue, term);
+      xcoordPower = Group.mult_q(xcoordPower, xcoordQ);
+    }
+    return computedValue;
   }
 
   @Override
@@ -101,26 +110,6 @@ public class ElectionPolynomial {
   }
 
   /**
-   * Computes the coordinate value of the election polynomial at exponent_modifier.
-   *
-   * @param exponent_modifier: Unique modifier (usually sequence order) for exponent
-   * @param polynomial:        A Guardian's polynomial
-   */
-  public static ElementModQ compute_polynomial_coordinate(BigInteger exponent_modifier, ElectionPolynomial polynomial) {
-    Preconditions.checkArgument(Group.between1andQ(exponent_modifier), "exponent_modifier is out of range");
-
-    ElementModQ computed_value = ZERO_MOD_Q;
-    int count = 0;
-    for (ElementModQ coefficient : polynomial.coefficients) {
-      ElementModQ exponent = pow_q(exponent_modifier, BigInteger.valueOf(count));
-      ElementModQ factor = mult_q(coefficient, exponent);
-      computed_value = add_q(computed_value, factor);
-      count++;
-    }
-    return computed_value;
-  }
-
-  /**
    * Compute the lagrange coefficient for a specific coordinate against N degrees.
    *
    * @param coordinate: the coordinate to plot, usually a Guardian's Sequence Order
@@ -150,30 +139,26 @@ public class ElectionPolynomial {
    * Verify a polynomial coordinate value is in fact on the polynomial's curve.
    *
    * @param expected                Expected value
-   * @param coordinate              Value to be checked
+   * @param xcoord              Value to be checked
    * @param commitments Commitments for coefficients of polynomial
    */
-  public static boolean verify_polynomial_coordinate(ElementModQ expected, BigInteger coordinate, List<ElementModP> commitments) {
-    ElementModP commitment_output = compute_gPcoordinate(coordinate, commitments);
-
-    ElementModP value_output = g_pow_p(expected);
-    return value_output.equals(commitment_output);
+  public static boolean verifyPolynomialCoordinate(ElementModQ expected, int xcoord, List<ElementModP> commitments) {
+    ElementModP calculated = calculateGexpPiAtL(xcoord, commitments);
+    ElementModP gexpected = g_pow_p(expected);
+    return gexpected.equals(calculated);
   }
 
-  /**
-   * Compute g^P(coordinate).
-   *
-   * @param coordinate              Polynomial coordinate.
-   * @param coefficient_commitments Commitments for coefficients of polynomial (K_ij)
-   */
-  public static ElementModP compute_gPcoordinate(BigInteger coordinate, List<ElementModP> coefficient_commitments) {
+  // Used in KeyCeremonyTrustee and DecryptingTrustee
+  // g^Pi(ℓ) mod p = Product ((K_i,j)^ℓ^j) mod p, j = 0, k-1 because there are always k coefficients
+  public static ElementModP calculateGexpPiAtL(int xcoord, List<ElementModP> coefficientCommitments) {
+    ElementModQ xcoordQ = Group.int_to_q_unchecked(xcoord);
     ElementModP result = Group.ONE_MOD_P;
-    int count = 0;
-    for (ElementModP commitment : coefficient_commitments) {
-      ElementModP exponent = Group.int_to_p_unchecked(Group.pow_pi(coordinate, BigInteger.valueOf(count)));
-      ElementModP factor = Group.pow_p(commitment, exponent);
-      result = Group.mult_p(result, factor);
-      count++;
+    ElementModQ xcoordPower = Group.ONE_MOD_Q; // ℓ^j
+
+    for (ElementModP commitment : coefficientCommitments) {
+      ElementModP term = Group.pow_p(commitment, xcoordPower); // (K_i,j)^ℓ^j
+      result = Group.mult_p(result, term);
+      xcoordPower = Group.mult_q(xcoordPower, xcoordQ);
     }
     return result;
   }

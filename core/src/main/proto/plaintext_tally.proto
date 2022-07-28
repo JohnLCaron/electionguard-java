@@ -19,16 +19,16 @@ message PlaintextTallyContest {
 message PlaintextTallySelection {
   string selection_id = 1; // matches SelectionDescription.selection_id
   uint32 tally = 2;
-  ElementModP value = 3; // // g^tally or M in the spec.
+  ElementModP value = 3; // g^tally or M in the spec.
   ElGamalCiphertext message = 4;
-  repeated PartialDecryption partial_decryptions = 5; // one for each Available Guardian
+  repeated PartialDecryption partial_decryptions = 5; // one for each Guardian, available or not
 }
 
 // A Guardian's Partial Decryption of a selection
 message PartialDecryption {
-  string selection_id = 1; // matches SelectionDescription.selection_id
-  string guardian_id = 2; // The Available Guardian that this share belongs to
-  ElementModP share = 3; // The Share of the decryption of a selection. `M_i` in the spec.
+  string selection_id = 1;  // matches SelectionDescription.selection_id
+  string guardian_id = 2;   // The Guardian that this share belongs to
+  ElementModP share = 3;    // The Share of the decryption of a selection. `M_i` in the spec.
 
   // The Proof that the share was decrypted correctly
   oneof proof_or_parts {
@@ -39,14 +39,14 @@ message PartialDecryption {
 
 // artifact because oneof cant have repeated fields
 message RecoveredParts {
-  repeated MissingPartialDecryption fragments = 1;
+  repeated RecoveredPartialDecryption fragments = 1;
 }
 
-message MissingPartialDecryption {
-  string selection_id = 1; // matches SelectionDescription.selection_id
-  string guardian_id = 2;  // The Available Guardian that this share belongs to
+message RecoveredPartialDecryption {
+  reserved 1;
+  string decrypting_guardian_id = 2;  // The Available Guardian that this share belongs to
   string missing_guardian_id = 3; //  // The Missing Guardian for whom this share is calculated on behalf of.
   ElementModP share = 4; // The Share of the decryption of a selection. M_il in the spec.
-  ElementModP recovery_key = 5; // The Public Key for the missing_guardian that corresponds to the available guardian's share of the secret.
+  ElementModP recovery_key = 5; // g^Pi(ℓ), where Pi(ℓ) is the value of the missing_guardian i secret polynomial at available guardian ℓ coordinate.
   GenericChaumPedersenProof proof = 6; // The Proof that the share was decrypted correctly.
 }

@@ -13,7 +13,8 @@ import com.sunya.electionguard.decrypting.DecryptingTrustee;
 import com.sunya.electionguard.input.ManifestInputValidation;
 import com.sunya.electionguard.publish.Consumer;
 import com.sunya.electionguard.publish.PrivateData;
-import com.sunya.electionguard.json.PublisherOld;
+import com.sunya.electionguard.json.JsonPublisher;
+import com.sunya.electionguard.publish.Publisher;
 import electionguard.ballot.ElectionConfig;
 import electionguard.ballot.ElectionInitialized;
 
@@ -297,14 +298,14 @@ public class PerformKeyCeremony {
             emptyMap()
     );
 
-    PublisherOld publisher = new PublisherOld(publishDir, PublisherOld.Mode.createNew);
+    Publisher publisher = new Publisher(publishDir, Publisher.Mode.createNew);
     publisher.writeElectionInitialized(electionInitialized);
 
     // save private data for decrypting
     List<DecryptingTrustee> trustees = this.guardians.stream()
             .map(g -> g.toDecryptingTrustee())
             .toList();
-    PrivateData privateData = publisher.makePrivateData(false, false);
+    PrivateData privateData = new PrivateData(publishDir, false, false);
     trustees.forEach(it -> privateData.writeTrustee(it));
     return true;
   }

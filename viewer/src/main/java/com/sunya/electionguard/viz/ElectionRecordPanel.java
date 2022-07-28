@@ -2,7 +2,7 @@ package com.sunya.electionguard.viz;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
-import com.sunya.electionguard.AvailableGuardian;
+import com.sunya.electionguard.ballot.DecryptingGuardian;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.ElectionConstants;
 import com.sunya.electionguard.Manifest;
@@ -196,7 +196,7 @@ class ElectionRecordPanel extends JPanel {
       }
 
       f.format("%n  Available Guardians    lagrange%n");
-      for (AvailableGuardian guardian : record.availableGuardians()) {
+      for (DecryptingGuardian guardian : record.availableGuardians()) {
         f.format("    %10s %10d %10s%n", guardian.guardianId(), guardian.xCoordinate(), guardian.lagrangeCoefficient());
       }
 

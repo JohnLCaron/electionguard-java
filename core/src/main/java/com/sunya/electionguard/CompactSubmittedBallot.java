@@ -1,6 +1,7 @@
 package com.sunya.electionguard;
 
 import com.google.common.base.Preconditions;
+import com.sunya.electionguard.ballot.EncryptedBallot;
 import com.sunya.electionguard.publish.ElectionContext;
 
 import javax.annotation.concurrent.Immutable;
@@ -32,7 +33,7 @@ public class CompactSubmittedBallot {
 
   /** Compress a submitted ballot into a compact submitted ballot. */
   static CompactSubmittedBallot compress_submitted_ballot(
-          SubmittedBallot ballot,
+          EncryptedBallot ballot,
           PlaintextBallot plaintext_ballot, // LOOK surprising, what is the use case?
           ElementModQ ballot_nonce) {
 
@@ -46,7 +47,7 @@ public class CompactSubmittedBallot {
   }
 
   /** Expand a compact submitted ballot using context and the election manifest into a submitted ballot. */
-  static SubmittedBallot expand_compact_submitted_ballot(
+  static EncryptedBallot expand_compact_submitted_ballot(
           CompactSubmittedBallot compact_ballot,
           InternalManifest internal_manifest,
           ElectionContext context) {
@@ -64,7 +65,7 @@ public class CompactSubmittedBallot {
             Encrypt.encrypt_ballot_contests(
                     plaintext_ballot, internal_manifest, context, nonce_seed).orElseThrow();
 
-    return SubmittedBallot.create(
+    return EncryptedBallot.create(
             plaintext_ballot.object_id(),
             plaintext_ballot.ballotStyleId,
             internal_manifest.manifest.cryptoHash(),

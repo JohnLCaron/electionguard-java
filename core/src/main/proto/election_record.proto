@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-import "ciphertext_tally.proto";
+import "encrypted_tally.proto";
 import "common.proto";
 import "manifest.proto";
 import "plaintext_tally.proto";
@@ -54,19 +54,20 @@ message Guardian {
 
 message TallyResult {
   ElectionInitialized election_init = 1;
-  CiphertextTally ciphertext_tally = 2;
+  EncryptedTally encrypted_tally = 2;
   repeated string ballot_ids = 3;
   repeated string tally_ids = 4;
+  map<string, string> metadata = 5;
 }
 
 message DecryptionResult {
   TallyResult tally_result = 1;
   PlaintextTally decrypted_tally = 2;
-  repeated AvailableGuardian decrypting_guardians = 3;
+  repeated DecryptingGuardian decrypting_guardians = 3;
   map<string, string> metadata = 4;
 }
 
-message AvailableGuardian {
+message DecryptingGuardian {
   string guardian_id = 1;
   uint32 x_coordinate = 2; // x coordinate in the secret polynomial. must be > 0
   ElementModQ lagrange_coefficient = 3;

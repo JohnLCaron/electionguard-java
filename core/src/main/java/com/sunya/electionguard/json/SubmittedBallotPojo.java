@@ -5,7 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 import com.sunya.electionguard.BallotBox;
 import com.sunya.electionguard.ChaumPedersen;
-import com.sunya.electionguard.SubmittedBallot;
+import com.sunya.electionguard.ballot.EncryptedBallot;
 import com.sunya.electionguard.CiphertextBallot;
 import com.sunya.electionguard.ElGamal;
 
@@ -81,14 +81,14 @@ public class SubmittedBallotPojo {
   ////////////////////////////////////////////////////////////////////////////
   // deserialize
 
-  public static SubmittedBallot deserialize(JsonElement jsonElem) {
+  public static EncryptedBallot deserialize(JsonElement jsonElem) {
     Gson gson = GsonTypeAdapters.enhancedGson();
     SubmittedBallotPojo pojo = gson.fromJson(jsonElem, SubmittedBallotPojo.class);
     return translateBallot(pojo);
   }
 
-  private static SubmittedBallot translateBallot(SubmittedBallotPojo pojo) {
-    return new SubmittedBallot(
+  private static EncryptedBallot translateBallot(SubmittedBallotPojo pojo) {
+    return new EncryptedBallot(
             pojo.object_id,
             pojo.style_id,
             pojo.manifest_hash,
@@ -167,14 +167,14 @@ public class SubmittedBallotPojo {
   ////////////////////////////////////////////////////////////////////////////
   // serialize
 
-  public static JsonElement serialize(SubmittedBallot src) {
+  public static JsonElement serialize(EncryptedBallot src) {
     Gson gson = GsonTypeAdapters.enhancedGson();
     SubmittedBallotPojo pojo = convertSubmittedBallot(src);
     Type typeOfSrc = new TypeToken<SubmittedBallotPojo>() {}.getType();
     return gson.toJsonTree(pojo, typeOfSrc);
   }
 
-  private static SubmittedBallotPojo convertSubmittedBallot(SubmittedBallot org) {
+  private static SubmittedBallotPojo convertSubmittedBallot(EncryptedBallot org) {
     SubmittedBallotPojo pojo = new SubmittedBallotPojo();
     pojo.object_id = org.object_id();
     pojo.style_id = org.ballotStyleId;

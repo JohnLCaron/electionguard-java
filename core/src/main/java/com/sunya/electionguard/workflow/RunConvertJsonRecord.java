@@ -3,7 +3,7 @@ package com.sunya.electionguard.workflow;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
-import com.sunya.electionguard.CiphertextTally;
+import com.sunya.electionguard.ballot.EncryptedTally;
 import com.sunya.electionguard.ElectionConstants;
 import com.sunya.electionguard.ElectionCryptoContext;
 import com.sunya.electionguard.Manifest;
@@ -165,7 +165,7 @@ public class RunConvertJsonRecord {
     );
     publisher.writeElectionInitialized(init);
 
-    CiphertextTally ciphertextTally = consumer.ciphertextTally();
+    EncryptedTally ciphertextTally = consumer.ciphertextTally();
     if (ciphertextTally != null) {
       TallyResult tallyResult = new TallyResult(
               init,

@@ -33,7 +33,7 @@ class KeyCeremonyRemoteTrusteeProxy implements KeyCeremonyTrusteeIF {
   }
 
   @Override
-  public Optional<KeyCeremony2.PublicKeySet> sendPublicKeys() {
+  public Optional<KeyCeremony2.PublicKeys> sendPublicKeys() {
     try {
       logger.atInfo().log("%s sendPublicKeys", id());
       RemoteKeyCeremonyTrusteeProto.PublicKeySetRequest request = RemoteKeyCeremonyTrusteeProto.PublicKeySetRequest.getDefaultInstance();
@@ -42,12 +42,17 @@ class KeyCeremonyRemoteTrusteeProxy implements KeyCeremonyTrusteeIF {
         logger.atSevere().log("sendPublicKeys failed: %s", response.getError());
         return Optional.empty();
       }
+      List<Group.ElementModP> commitments = response.getCoefficientComittmentsList().stream()
+              .map(CommonConvert::importElementModP)
+              .toList();
       List<SchnorrProof> proofs = response.getCoefficientProofsList().stream()
               .map(CommonConvert::importSchnorrProof)
               .toList();
-      return Optional.of(new KeyCeremony2.PublicKeySet(
+
+      return Optional.of(new KeyCeremony2.PublicKeys(
               response.getOwnerId(),
               response.getGuardianXCoordinate(),
+              commitments,
               proofs));
 
     } catch (StatusRuntimeException e) {
@@ -57,11 +62,11 @@ class KeyCeremonyRemoteTrusteeProxy implements KeyCeremonyTrusteeIF {
   }
 
   @Override
-  public String receivePublicKeys(KeyCeremony2.PublicKeySet keyset) {
+  public String receivePublicKeys(KeyCeremony2.PublicKeys keyset) {
     try {
-      logger.atInfo().log("%s receivePublicKeys from %s", id(), keyset.ownerId());
+      logger.atInfo().log("%s receivePublicKeys from %s", id(), keyset.guardianId());
       RemoteKeyCeremonyTrusteeProto.PublicKeySet.Builder request = RemoteKeyCeremonyTrusteeProto.PublicKeySet.newBuilder();
-      request.setOwnerId(keyset.ownerId())
+      request.setOwnerId(keyset.guardianId())
               .setGuardianXCoordinate(keyset.guardianXCoordinate());
       keyset.coefficientProofs().forEach(p -> request.addCoefficientProofs(CommonConvert.publishSchnorrProof(p)));
 
@@ -78,16 +83,16 @@ class KeyCeremonyRemoteTrusteeProxy implements KeyCeremonyTrusteeIF {
   }
 
   @Override
-  public Optional<KeyCeremony2.PartialKeyBackup> sendPartialKeyBackup(String guardianId) {
+  public Optional<KeyCeremony2.SecretKeyShare> sendPartialKeyBackup(String guardianId) {
     try {
       RemoteKeyCeremonyTrusteeProto.PartialKeyBackupRequest request = RemoteKeyCeremonyTrusteeProto.PartialKeyBackupRequest.newBuilder().setGuardianId(guardianId).build();
-      RemoteKeyCeremonyTrusteeProto.PartialKeyBackup response = blockingStub.sendPartialKeyBackup(request);
-      return Optional.of(new KeyCeremony2.PartialKeyBackup(
-              response.getGeneratingGuardianId(),
-              response.getDesignatedGuardianId(),
-              response.getDesignatedGuardianXCoordinate(),
-              CommonConvert.importElementModQ(response.getCoordinate()),
-              response.getError()));
+      RemoteKeyCeremonyTrusteeProto.PartialKeyBackup backup = blockingStub.sendPartialKeyBackup(request);
+      return Optional.of(new KeyCeremony2.SecretKeyShare(
+              backup.getGeneratingGuardianId(),
+              backup.getDesignatedGuardianId(),
+              backup.getDesignatedGuardianXCoordinate(),
+              CommonConvert.importHashedCiphertext(backup.getEncryptedCoordinate()),
+              backup.getError()));
 
     } catch (StatusRuntimeException e) {
       logger.atSevere().withCause(e).log("sendPartialKeyBackup failed: ");
@@ -96,13 +101,13 @@ class KeyCeremonyRemoteTrusteeProxy implements KeyCeremonyTrusteeIF {
   }
 
   @Override
-  public Optional<KeyCeremony2.PartialKeyVerification> verifyPartialKeyBackup(KeyCeremony2.PartialKeyBackup backup) {
+  public Optional<KeyCeremony2.PartialKeyVerification> verifyPartialKeyBackup(KeyCeremony2.SecretKeyShare backup) {
     try {
       RemoteKeyCeremonyTrusteeProto.PartialKeyBackup.Builder request = RemoteKeyCeremonyTrusteeProto.PartialKeyBackup.newBuilder();
       request.setGeneratingGuardianId(backup.generatingGuardianId())
               .setDesignatedGuardianId(backup.designatedGuardianId())
               .setDesignatedGuardianXCoordinate(backup.designatedGuardianXCoordinate())
-              .setCoordinate(CommonConvert.publishElementModQ(backup.coordinate()));
+              .setEncryptedCoordinate(CommonConvert.publishHashedCiphertext(backup.encryptedCoordinate()));
 
       RemoteKeyCeremonyTrusteeProto.PartialKeyVerification response = blockingStub.verifyPartialKeyBackup(request.build());
       return Optional.of(new KeyCeremony2.PartialKeyVerification(

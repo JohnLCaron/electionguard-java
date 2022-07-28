@@ -3,10 +3,11 @@ package com.sunya.electionguard.verifier;
 import com.sunya.electionguard.CiphertextBallot;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.Hash;
-import com.sunya.electionguard.SubmittedBallot;
+import com.sunya.electionguard.ballot.EncryptedBallot;
 import com.sunya.electionguard.publish.Consumer;
 import com.sunya.electionguard.publish.ElectionRecord;
-import com.sunya.electionguard.json.PublisherOld;
+import com.sunya.electionguard.publish.Publisher;
+import electionguard.ballot.ElectionConfig;
 import net.jqwik.api.Example;
 
 import java.io.IOException;
@@ -14,15 +15,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.sunya.electionguard.json.PublisherOld.Mode.createIfMissing;
+import static com.sunya.electionguard.publish.Publisher.Mode.createIfMissing;
 
 // try to modify a SubmittedBallot and see if it still validates
-public class TestAttackSubmittedBallot {
+public class TestAttackEncryptedBallot {
   private static final boolean write = true;
   private static final String output = "/home/snake/tmp/electionguard/attack/encrypted";
   private static final String ballotId = "ballot-id--790149674";
 
-  public TestAttackSubmittedBallot() throws IOException {
+  public TestAttackEncryptedBallot() throws IOException {
     String topdir = TestParameterVerifier.topdirProto;
 
     Consumer consumer = new Consumer(topdir);
@@ -32,9 +33,9 @@ public class TestAttackSubmittedBallot {
     boolean sevOk = sev.verify_all_selections();
     assertThat(sevOk).isTrue();
 
-    List<SubmittedBallot> ballots = new ArrayList<>();
+    List<EncryptedBallot> ballots = new ArrayList<>();
     TestSelectionEncryptionVerifier.Tester tester = new TestSelectionEncryptionVerifier.Tester(electionRecord);
-    for (SubmittedBallot ballot : electionRecord.submittedBallots()) {
+    for (EncryptedBallot ballot : electionRecord.submittedBallots()) {
       if (ballot.ballotId.equals(ballotId)) { // random ballot to change
         CiphertextBallot.Contest contestChanged = null;
         int idx = 0;
@@ -54,7 +55,7 @@ public class TestAttackSubmittedBallot {
         List<Group.ElementModQ> contest_hashes = contests.stream().map(s -> s.crypto_hash).toList();
         Group.ElementModQ change_crypto = Hash.hash_elems(ballot.ballotId, ballot.manifestHash, contest_hashes);
 
-        ballots.add(new SubmittedBallot(
+        ballots.add(new EncryptedBallot(
                 ballot.ballotId,
                 ballot.ballotStyleId,
                 ballot.manifestHash,
@@ -72,8 +73,9 @@ public class TestAttackSubmittedBallot {
       }
 
       if (write) {
-        PublisherOld publisher = new PublisherOld(output, createIfMissing);
-        publisher.writeEncryptionResultsProto(electionRecord, ballots);
+        //         publisher.writeEncryptionResultsProto(electionRecord, ballots);
+        Publisher publisher = new Publisher(output, createIfMissing);
+        publisher.writeSubmittedBallots(ballots);
       }
     }
   }

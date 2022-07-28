@@ -1,6 +1,7 @@
-package com.sunya.electionguard;
+package com.sunya.electionguard.ballot;
 
 import com.google.common.base.Preconditions;
+import com.sunya.electionguard.Group;
 
 /**
  * An available Guardian when decrypting.
@@ -8,12 +9,12 @@ import com.google.common.base.Preconditions;
  * @param xCoordinate the guardian x coordinate value
  * @param lagrangeCoefficient the lagrange coefficient used for compensated decrypting
  */
-public record AvailableGuardian(
+public record DecryptingGuardian(
   String guardianId,
   Integer xCoordinate,
   Group.ElementModQ lagrangeCoefficient) {
 
-  public AvailableGuardian {
+  public DecryptingGuardian {
     Preconditions.checkNotNull(guardianId);
     Preconditions.checkArgument(xCoordinate > 0);
   }

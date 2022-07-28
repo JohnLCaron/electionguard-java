@@ -25,22 +25,22 @@ public class KeyCeremonyTrusteeSimulator implements KeyCeremonyTrusteeIF {
   }
 
   @Override
-  public Optional<KeyCeremony2.PublicKeySet> sendPublicKeys() {
+  public Optional<KeyCeremony2.PublicKeys> sendPublicKeys() {
     return Optional.of(this.delegate.sharePublicKeys());
   }
 
   @Override
-  public String receivePublicKeys(KeyCeremony2.PublicKeySet publicKeys) {
+  public String receivePublicKeys(KeyCeremony2.PublicKeys publicKeys) {
     return this.delegate.receivePublicKeys(publicKeys);
   }
 
   @Override
-  public Optional<KeyCeremony2.PartialKeyBackup> sendPartialKeyBackup(String otherId) {
+  public Optional<KeyCeremony2.SecretKeyShare> sendPartialKeyBackup(String otherId) {
     return Optional.of(this.delegate.sendPartialKeyBackup(otherId));
   }
 
   @Override
-  public Optional<KeyCeremony2.PartialKeyVerification> verifyPartialKeyBackup(KeyCeremony2.PartialKeyBackup backup) {
+  public Optional<KeyCeremony2.PartialKeyVerification> verifyPartialKeyBackup(KeyCeremony2.SecretKeyShare backup) {
     return Optional.of(this.delegate.verifyPartialKeyBackup(backup));
   }
 

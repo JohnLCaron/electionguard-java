@@ -2,7 +2,9 @@ package com.sunya.electionguard.json;
 
 import com.google.common.collect.ImmutableList;
 import com.sunya.electionguard.*;
-import electionguard.ballot.ElectionConfig;
+import com.sunya.electionguard.ballot.DecryptingGuardian;
+import com.sunya.electionguard.ballot.EncryptedBallot;
+import com.sunya.electionguard.ballot.EncryptedTally;
 import net.jqwik.api.Example;
 
 import java.io.File;
@@ -32,10 +34,10 @@ public class TestJsonRoundtrip {
       coeffs.put("test" + i + 1, Group.rand_q());
     }
 
-    List<AvailableGuardian> ags = new ArrayList<>();
+    List<DecryptingGuardian> ags = new ArrayList<>();
     for (int i = 0; i < n; i++) {
       String key = "test" + i + 1;
-      ags.add(new AvailableGuardian(key, i + 1, coeffs.get(key)));
+      ags.add(new DecryptingGuardian(key, i + 1, coeffs.get(key)));
     }
 
     // original
@@ -67,8 +69,8 @@ public class TestJsonRoundtrip {
     Map<String, Group.ElementModQ> coeffs = new HashMap<>();
     coeffs.put("test", nonormalQ);
 
-    List<AvailableGuardian> ags = new ArrayList<>();
-    ags.add(new AvailableGuardian("test", 1, nonormalQ));
+    List<DecryptingGuardian> ags = new ArrayList<>();
+    ags.add(new DecryptingGuardian("test", 1, nonormalQ));
 
     // expected after normalization
     Map<String, Group.ElementModQ> coeffsN= new HashMap<>();
@@ -136,11 +138,11 @@ public class TestJsonRoundtrip {
     String outputFile = file.getAbsolutePath();
 
     // original
-    AvailableGuardian org = new AvailableGuardian("test", 42, Group.TWO_MOD_Q);
+    DecryptingGuardian org = new DecryptingGuardian("test", 42, Group.TWO_MOD_Q);
     // write json
     ConvertToJson.writeAvailableGuardian(org, file.toPath());
     // read it back
-    AvailableGuardian fromFile = ConvertFromJson.readAvailableGuardian(outputFile);
+    DecryptingGuardian fromFile = ConvertFromJson.readAvailableGuardian(outputFile);
     assertThat(fromFile).isEqualTo(org);
   }
 
@@ -181,11 +183,11 @@ public class TestJsonRoundtrip {
 
     // original
     // String object_id, ElementModQ description_hash, Map<String, CiphertextTallySelection> tally_selections
-    CiphertextTally org = new CiphertextTally("testTally", new HashMap<>());
+    EncryptedTally org = new EncryptedTally("testTally", new HashMap<>());
     // write json
     ConvertToJson.writeCiphertextTally(org, file.toPath());
     // read it back
-    CiphertextTally fromFile = ConvertFromJson.readCiphertextTally(outputFile);
+    EncryptedTally fromFile = ConvertFromJson.readCiphertextTally(outputFile);
     assertThat(fromFile).isEqualTo(org);
   }
 
@@ -218,7 +220,7 @@ public class TestJsonRoundtrip {
             Optional.of(Group.ONE_MOD_Q),
             Optional.empty());
 
-    SubmittedBallot org = new SubmittedBallot(
+    EncryptedBallot org = new EncryptedBallot(
             "testBallotRoundtrip",
             "ballotStyle",
             Group.ONE_MOD_Q,
@@ -232,7 +234,7 @@ public class TestJsonRoundtrip {
     // write json
     ConvertToJson.writeSubmittedBallot(org, file.toPath());
     // read it back
-    SubmittedBallot fromFile = ConvertFromJson.readSubmittedBallot(outputFile);
+    EncryptedBallot fromFile = ConvertFromJson.readSubmittedBallot(outputFile);
     assertThat(fromFile).isEqualTo(org);
   }
 

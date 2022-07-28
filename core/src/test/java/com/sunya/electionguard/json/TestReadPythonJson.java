@@ -1,6 +1,8 @@
 package com.sunya.electionguard.json;
 
 import com.sunya.electionguard.*;
+import com.sunya.electionguard.ballot.EncryptedBallot;
+import com.sunya.electionguard.ballot.EncryptedTally;
 import com.sunya.electionguard.verifier.TestParameterVerifier;
 import net.jqwik.api.Example;
 import net.jqwik.api.lifecycle.BeforeContainer;
@@ -16,7 +18,7 @@ public class TestReadPythonJson {
 
   @BeforeContainer
   public static void setup() throws IOException {
-    publisher = new JsonPublisher(pythonPublish, PublisherOld.Mode.readonly);
+    publisher = new JsonPublisher(pythonPublish, JsonPublisher.Mode.readonly);
     System.out.printf("TestReadPythonJson from %s%n", publisher.publishPath());
   }
 
@@ -44,7 +46,7 @@ public class TestReadPythonJson {
 
   @Example
   public void testEncryptedTallyPythonJson() throws IOException {
-    CiphertextTally fromPython = ConvertFromJson.readCiphertextTally(publisher.encryptedTallyPath().toString());
+    EncryptedTally fromPython = ConvertFromJson.readCiphertextTally(publisher.encryptedTallyPath().toString());
     assertThat(fromPython).isNotNull();
     System.out.printf("%n%s%n%n", fromPython);
   }
@@ -94,7 +96,7 @@ public class TestReadPythonJson {
   @Example
   public void testSubmittedBallotsPythonJson() throws IOException {
     for (File file : publisher.ballotFiles()) {
-      SubmittedBallot fromPython = ConvertFromJson.readSubmittedBallot(file.getAbsolutePath());
+      EncryptedBallot fromPython = ConvertFromJson.readSubmittedBallot(file.getAbsolutePath());
       assertThat(fromPython).isNotNull();
       System.out.printf("%n%s%n%n", fromPython);
     }
@@ -104,7 +106,7 @@ public class TestReadPythonJson {
   public void testProblemPythonJson() throws IOException {
     // this is failing because Optional is encoded as "None".
     String filename = pythonPublish + "/encrypted_ballots/ballot_03a29d15-667c-4ac8-afd7-549f19b8e4eb.json";
-    SubmittedBallot fromPython = ConvertFromJson.readSubmittedBallot(filename);
+    EncryptedBallot fromPython = ConvertFromJson.readSubmittedBallot(filename);
     assertThat(fromPython).isNotNull();
     System.out.printf("%s%n", fromPython);
   }

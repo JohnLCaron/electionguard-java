@@ -7,8 +7,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableList;
 import com.google.common.flogger.FluentLogger;
-import com.sunya.electionguard.AvailableGuardian;
-import com.sunya.electionguard.CiphertextTally;
+import com.sunya.electionguard.ballot.DecryptingGuardian;
+import com.sunya.electionguard.ballot.EncryptedTally;
 import com.sunya.electionguard.CiphertextTallyBuilder;
 import com.sunya.electionguard.ElectionConstants;
 import com.sunya.electionguard.Group;
@@ -211,10 +211,10 @@ public class RunDecryptingMediator {
   boolean decryptSpoiled;
   TallyResult tallyResult;
 
-  CiphertextTally encryptedTally;
+  EncryptedTally encryptedTally;
   PlaintextTally decryptedTally;
   List<PlaintextTally> spoiledDecryptedTallies;
-  List<AvailableGuardian> availableGuardians;
+  List<DecryptingGuardian> availableGuardians;
   final Publisher publisher;
 
   RunDecryptingMediator(Consumer consumer, ElectionRecord electionRecord, TallyResult tallyResult,

@@ -13,16 +13,16 @@ public interface KeyCeremonyTrusteeIF {
   int xCoordinate();
 
   /** Each guardian shares their public keys with all the other guardians. */
-  Optional<KeyCeremony2.PublicKeySet> sendPublicKeys();
+  Optional<KeyCeremony2.PublicKeys> sendPublicKeys();
 
   /** Receive publicKeys from another guardian, and validates. Return error message or empty string on success. */
-  String receivePublicKeys(KeyCeremony2.PublicKeySet keyset);
+  String receivePublicKeys(KeyCeremony2.PublicKeys keyset);
 
   /** Each guardian shares partial key backups for the other guardians. */
-  Optional<KeyCeremony2.PartialKeyBackup> sendPartialKeyBackup(String otherGuardianId);
+  Optional<KeyCeremony2.SecretKeyShare> sendPartialKeyBackup(String otherGuardianId);
 
   /** Each guardian verifies their own partial key backups. */
-  Optional<KeyCeremony2.PartialKeyVerification> verifyPartialKeyBackup(KeyCeremony2.PartialKeyBackup backup);
+  Optional<KeyCeremony2.PartialKeyVerification> verifyPartialKeyBackup(KeyCeremony2.SecretKeyShare backup);
 
   /** For any partial backup verification failures, the challenged guardian responds to the challenge. */
   Optional<KeyCeremony2.PartialKeyChallengeResponse> sendBackupChallenge(String guardianId);

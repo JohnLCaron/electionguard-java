@@ -1,6 +1,7 @@
 package com.sunya.electionguard.verifier;
 
 import com.sunya.electionguard.*;
+import com.sunya.electionguard.ballot.EncryptedBallot;
 import com.sunya.electionguard.publish.ElectionRecord;
 
 import static com.sunya.electionguard.Group.ElementModQ;
@@ -23,7 +24,7 @@ public class SelectionEncryptionVerifier {
     int nballots  = 0;
     int ncontests  = 0;
     int nselections  = 0;
-    for (SubmittedBallot ballot : electionRecord.submittedBallots()) {
+    for (EncryptedBallot ballot : electionRecord.submittedBallots()) {
       nballots++;
       for (CiphertextBallot.Contest contest : ballot.contests) {
         ncontests++;

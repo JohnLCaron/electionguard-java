@@ -1,6 +1,6 @@
 package com.sunya.electionguard.input;
 
-import com.sunya.electionguard.CiphertextTally;
+import com.sunya.electionguard.ballot.EncryptedTally;
 import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.TestUtils;
 import net.jqwik.api.Example;
@@ -10,7 +10,7 @@ import java.util.Formatter;
 import static com.google.common.truth.Truth.assertThat;
 
 /** Tester for {@link CiphertextTallyInputValidation */
-public class TestCiphertextTallyInputValidation {
+public class TestEncryptedTallyInputValidation {
 
   private boolean validateElection(Manifest election) {
     ManifestInputValidation validator = new ManifestInputValidation(election);
@@ -22,7 +22,7 @@ public class TestCiphertextTallyInputValidation {
     return isValid;
   }
 
-  void validateTally(Manifest election, CiphertextTally tally, String expectMessage) {
+  void validateTally(Manifest election, EncryptedTally tally, String expectMessage) {
     CiphertextTallyInputValidation validator = new CiphertextTallyInputValidation(election);
     Formatter problems = new Formatter();
     boolean isValid = validator.validateTally(tally, problems);

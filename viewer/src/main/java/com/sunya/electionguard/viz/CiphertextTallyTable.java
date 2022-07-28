@@ -6,7 +6,7 @@
 package com.sunya.electionguard.viz;
 
 import com.google.common.collect.ImmutableList;
-import com.sunya.electionguard.CiphertextTally;
+import com.sunya.electionguard.ballot.EncryptedTally;
 import ucar.ui.prefs.BeanTable;
 import ucar.ui.widget.BAMutil;
 import ucar.ui.widget.IndependentWindow;
@@ -67,11 +67,11 @@ public class CiphertextTallyTable extends JPanel {
     add(split2, BorderLayout.CENTER);
   }
 
-  void setCiphertextTally(CiphertextTally plaintextTally) {
+  void setCiphertextTally(EncryptedTally plaintextTally) {
     tallyTable.setBeans(ImmutableList.of(new CiphertextTallyBean(plaintextTally)));
 
     java.util.List<ContestBean> beanList = new ArrayList<>();
-    for (CiphertextTally.Contest c : plaintextTally.contests.values()) {
+    for (EncryptedTally.Contest c : plaintextTally.contests.values()) {
       beanList.add(new ContestBean(c));
     }
     contestTable.setBeans(beanList);
@@ -80,7 +80,7 @@ public class CiphertextTallyTable extends JPanel {
 
   void setContest(ContestBean contestBean) {
     java.util.List<SelectionBean> beanList = new ArrayList<>();
-    for (CiphertextTally.Selection s : contestBean.contest.selections.values()) {
+    for (EncryptedTally.Selection s : contestBean.contest.selections.values()) {
       beanList.add(new SelectionBean(s));
     }
     selectionTable.setBeans(beanList);
@@ -119,11 +119,11 @@ public class CiphertextTallyTable extends JPanel {
   }
 
   public class CiphertextTallyBean {
-    CiphertextTally tally;
+    EncryptedTally tally;
 
     public CiphertextTallyBean(){}
 
-    CiphertextTallyBean(CiphertextTally tally) {
+    CiphertextTallyBean(EncryptedTally tally) {
       this.tally = tally;
     }
 
@@ -133,11 +133,11 @@ public class CiphertextTallyTable extends JPanel {
   }
 
   public class ContestBean {
-    CiphertextTally.Contest contest;
+    EncryptedTally.Contest contest;
 
     public ContestBean(){}
 
-    ContestBean(CiphertextTally.Contest contest) {
+    ContestBean(EncryptedTally.Contest contest) {
       this.contest = contest;
     }
     public String getContestId() {
@@ -149,11 +149,11 @@ public class CiphertextTallyTable extends JPanel {
   }
 
   public class SelectionBean {
-    CiphertextTally.Selection selection;
+    EncryptedTally.Selection selection;
 
     public SelectionBean(){}
 
-    SelectionBean(CiphertextTally.Selection selection) {
+    SelectionBean(EncryptedTally.Selection selection) {
       this.selection = selection;
     }
 

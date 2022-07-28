@@ -1,7 +1,7 @@
 package com.sunya.electionguard.input;
 
 import com.google.common.flogger.FluentLogger;
-import com.sunya.electionguard.CiphertextTally;
+import com.sunya.electionguard.ballot.EncryptedTally;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.Manifest;
 
@@ -22,10 +22,10 @@ public class CiphertextTallyInputValidation {
   }
 
   /** Determine if a tally is valid and well-formed for the given election manifest. */
-  public boolean validateTally(CiphertextTally tally, Formatter problems) {
+  public boolean validateTally(EncryptedTally tally, Formatter problems) {
     Messenger messes = new Messenger(tally.object_id());
 
-    for (Map.Entry<String, CiphertextTally.Contest> entry : tally.contests.entrySet()) {
+    for (Map.Entry<String, EncryptedTally.Contest> entry : tally.contests.entrySet()) {
       if (!entry.getKey().equals(entry.getValue().object_id())) {
         String msg = String.format("CiphertextTally.B.1 Contest id key '%s' doesnt match value '%s'", entry.getKey(),
                 entry.getValue().object_id());
@@ -34,7 +34,7 @@ public class CiphertextTallyInputValidation {
         break;
       }
 
-      CiphertextTally.Contest tallyContest = entry.getValue();
+      EncryptedTally.Contest tallyContest = entry.getValue();
       ElectionContest manifestContest = contestMap.get(tallyContest.object_id());
       // Referential integrity of tallyContest id and cryptoHash
       if (manifestContest == null) {
@@ -55,10 +55,10 @@ public class CiphertextTallyInputValidation {
   }
 
   /** Determine if contest is valid. */
-  void validateContest(CiphertextTally.Contest tallyContest, ElectionContest manifestContest, Messenger messes) {
+  void validateContest(EncryptedTally.Contest tallyContest, ElectionContest manifestContest, Messenger messes) {
     Messenger contestMesses = messes.nested(tallyContest.object_id());
 
-    for (Map.Entry<String, CiphertextTally.Selection> entry : tallyContest.selections.entrySet()) {
+    for (Map.Entry<String, EncryptedTally.Selection> entry : tallyContest.selections.entrySet()) {
       if (!entry.getKey().equals(entry.getValue().object_id())) {
         String msg = String.format("CiphertextTally.B.2 Selection id key '%s' doesnt match value '%s'", entry.getKey(),
                 entry.getValue().object_id());
@@ -66,7 +66,7 @@ public class CiphertextTallyInputValidation {
         logger.atWarning().log(msg);
         break;
       }
-      CiphertextTally.Selection tallySelection = entry.getValue();
+      EncryptedTally.Selection tallySelection = entry.getValue();
 
       Manifest.SelectionDescription manifestSelection = manifestContest.selectionMap.get(tallySelection.object_id());
       // Referential integrity of tallySelection id

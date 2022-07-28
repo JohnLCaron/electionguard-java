@@ -9,16 +9,16 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
-import com.sunya.electionguard.AvailableGuardian;
+import com.sunya.electionguard.ballot.DecryptingGuardian;
 import com.sunya.electionguard.BallotBox;
 import com.sunya.electionguard.ElectionConstants;
 import com.sunya.electionguard.ElectionCryptoContext;
 import com.sunya.electionguard.Encrypt;
 import com.sunya.electionguard.GuardianRecord;
 import com.sunya.electionguard.Manifest;
-import com.sunya.electionguard.SubmittedBallot;
+import com.sunya.electionguard.ballot.EncryptedBallot;
 import com.sunya.electionguard.Group;
-import com.sunya.electionguard.CiphertextTally;
+import com.sunya.electionguard.ballot.EncryptedTally;
 import com.sunya.electionguard.PlaintextBallot;
 import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.standard.GuardianPrivateRecord;
@@ -38,8 +38,8 @@ class GsonTypeAdapters {
 
   static Gson enhancedGson() {
     return new GsonBuilder().setPrettyPrinting().serializeNulls()
-            .registerTypeAdapter(AvailableGuardian.class, new AvailableGuardianSerializer())
-            .registerTypeAdapter(AvailableGuardian.class, new AvailableGuardianDeserializer())
+            .registerTypeAdapter(DecryptingGuardian.class, new AvailableGuardianSerializer())
+            .registerTypeAdapter(DecryptingGuardian.class, new AvailableGuardianDeserializer())
             .registerTypeAdapter(BallotBox.State.class, new BallotBoxStateSerializer())
             .registerTypeAdapter(BallotBox.State.class, new BallotBoxStateDeserializer())
             .registerTypeAdapter(BigInteger.class, new BigIntegerDeserializer())
@@ -48,8 +48,8 @@ class GsonTypeAdapters {
             .registerTypeAdapter(Boolean.class, new BooleanDeserializer())
             .registerTypeAdapter(LagrangeCoefficientsPojo.class, new LagrangeCoefficientsSerializer())
             .registerTypeAdapter(LagrangeCoefficientsPojo.class, new LagrangeCoefficientsDeserializer())
-            .registerTypeAdapter(CiphertextTally.class, new CiphertextTallySerializer())
-            .registerTypeAdapter(CiphertextTally.class, new CiphertextTallyDeserializer())
+            .registerTypeAdapter(EncryptedTally.class, new CiphertextTallySerializer())
+            .registerTypeAdapter(EncryptedTally.class, new CiphertextTallyDeserializer())
             .registerTypeAdapter(ElectionConstants.class, new ElectionConstantsSerializer())
             .registerTypeAdapter(ElectionConstants.class, new ElectionConstantsDeserializer())
             .registerTypeAdapter(ElectionCryptoContext.class, new ElectionContextSerializer())
@@ -74,22 +74,22 @@ class GsonTypeAdapters {
             .registerTypeAdapter(PlaintextBallot.class, new PlaintextBallotDeserializer())
             .registerTypeAdapter(PlaintextTally.class, new PlaintextTallySerializer())
             .registerTypeAdapter(PlaintextTally.class, new PlaintextTallyDeserializer())
-            .registerTypeAdapter(SubmittedBallot.class, new CiphertextBallotSerializer())
-            .registerTypeAdapter(SubmittedBallot.class, new CiphertextBallotDeserializer())
+            .registerTypeAdapter(EncryptedBallot.class, new CiphertextBallotSerializer())
+            .registerTypeAdapter(EncryptedBallot.class, new CiphertextBallotDeserializer())
             .create();
   }
 
-  private static class AvailableGuardianDeserializer implements JsonDeserializer<AvailableGuardian> {
+  private static class AvailableGuardianDeserializer implements JsonDeserializer<DecryptingGuardian> {
     @Override
-    public AvailableGuardian deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+    public DecryptingGuardian deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
             throws JsonParseException {
       return AvailableGuardianPojo.deserialize(json);
     }
   }
 
-  private static class AvailableGuardianSerializer implements JsonSerializer<AvailableGuardian> {
+  private static class AvailableGuardianSerializer implements JsonSerializer<DecryptingGuardian> {
     @Override
-    public JsonElement serialize(AvailableGuardian src, Type typeOfSrc, JsonSerializationContext context) {
+    public JsonElement serialize(DecryptingGuardian src, Type typeOfSrc, JsonSerializationContext context) {
       return AvailableGuardianPojo.serialize(src);
     }
   }
@@ -186,16 +186,16 @@ class GsonTypeAdapters {
     }
   }
 
-  private static class CiphertextBallotSerializer implements JsonSerializer<SubmittedBallot> {
+  private static class CiphertextBallotSerializer implements JsonSerializer<EncryptedBallot> {
     @Override
-    public JsonElement serialize(SubmittedBallot src, Type typeOfSrc, JsonSerializationContext context) {
+    public JsonElement serialize(EncryptedBallot src, Type typeOfSrc, JsonSerializationContext context) {
       return SubmittedBallotPojo.serialize(src);
     }
   }
 
-  private static class CiphertextBallotDeserializer implements JsonDeserializer<SubmittedBallot> {
+  private static class CiphertextBallotDeserializer implements JsonDeserializer<EncryptedBallot> {
     @Override
-    public SubmittedBallot deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+    public EncryptedBallot deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
             throws JsonParseException {
       return SubmittedBallotPojo.deserialize(json);
     }
@@ -231,16 +231,16 @@ class GsonTypeAdapters {
     }
   }
 
-  private static class CiphertextTallySerializer implements JsonSerializer<CiphertextTally> {
+  private static class CiphertextTallySerializer implements JsonSerializer<EncryptedTally> {
     @Override
-    public JsonElement serialize(CiphertextTally src, Type typeOfSrc, JsonSerializationContext context) {
+    public JsonElement serialize(EncryptedTally src, Type typeOfSrc, JsonSerializationContext context) {
       return CiphertextTallyPojo.serialize(src);
     }
   }
 
-  private static class CiphertextTallyDeserializer implements JsonDeserializer<CiphertextTally> {
+  private static class CiphertextTallyDeserializer implements JsonDeserializer<EncryptedTally> {
     @Override
-    public CiphertextTally deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+    public EncryptedTally deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
             throws JsonParseException {
       return CiphertextTallyPojo.deserialize(json);
     }

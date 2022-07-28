@@ -1,8 +1,7 @@
 package com.sunya.electionguard.json;
 
 import com.sunya.electionguard.PlaintextTally;
-import com.sunya.electionguard.protoconvert.PlaintextTallyFromProto;
-import com.sunya.electionguard.protoconvert.PlaintextTallyToProto;
+import com.sunya.electionguard.protoconvert.PlaintextTallyConvert;
 import electionguard.protogen.PlaintextTallyProto;
 import com.sunya.electionguard.verifier.TestParameterVerifier;
 import net.jqwik.api.Example;
@@ -21,11 +20,11 @@ public class TestPlaintextBallotToProtoRoundtrip {
   }
 
   @Example
-  public void testSpoiledBallotsRoundtrip() throws IOException {
+  public void testSpoiledBallotsRoundtrip() {
     assertThat(consumer.spoiledBallots()).isNotEmpty();
     for (PlaintextTally tally : consumer.spoiledBallots()) {
-      PlaintextTallyProto.PlaintextTally proto = PlaintextTallyToProto.publishPlaintextTally(tally);
-      PlaintextTally roundtrip = PlaintextTallyFromProto.importPlaintextTally(proto);
+      PlaintextTallyProto.PlaintextTally proto = PlaintextTallyConvert.publishPlaintextTally(tally);
+      PlaintextTally roundtrip = PlaintextTallyConvert.importPlaintextTally(proto);
       assertThat(roundtrip).isEqualTo(tally);
     }
   }

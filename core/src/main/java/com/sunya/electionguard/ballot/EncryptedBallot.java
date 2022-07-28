@@ -1,6 +1,10 @@
-package com.sunya.electionguard;
+package com.sunya.electionguard.ballot;
 
 import com.google.common.flogger.FluentLogger;
+import com.sunya.electionguard.BallotBox;
+import com.sunya.electionguard.CiphertextBallot;
+import com.sunya.electionguard.Group;
+import com.sunya.electionguard.Hash;
 
 import javax.annotation.concurrent.Immutable;
 import java.util.Comparator;
@@ -14,11 +18,11 @@ import java.util.Optional;
  * Note this ballot includes all proofs but no nonces.
  */
 @Immutable
-public class SubmittedBallot extends CiphertextBallot {
+public class EncryptedBallot extends CiphertextBallot {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   // python: from_ciphertext_ballot
-  public static SubmittedBallot createFromCiphertextBallot(CiphertextBallot ballot, BallotBox.State state) {
+  public static EncryptedBallot createFromCiphertextBallot(CiphertextBallot ballot, BallotBox.State state) {
     return create(ballot.object_id(), ballot.ballotStyleId, ballot.manifestHash, Optional.of(ballot.code_seed),
             ballot.contests, ballot.code, Optional.of(ballot.timestamp), state);
   }
@@ -37,7 +41,7 @@ public class SubmittedBallot extends CiphertextBallot {
    * @param timestampO:              Timestamp at which the ballot encryption is generated in seconds since the epoch UTC
    * @param state:                   ballot state
    */
-  static SubmittedBallot create(
+  public static EncryptedBallot create(
           String ballotId,
           String ballotStyleId,
           Group.ElementModQ manifest_hash,
@@ -65,7 +69,7 @@ public class SubmittedBallot extends CiphertextBallot {
     // copy the contests and selections, removing all nonces
     List<Contest> new_contests = contests.stream().map(Contest::removeNonces).toList();
 
-    return new SubmittedBallot(
+    return new EncryptedBallot(
             ballotId,
             ballotStyleId,
             manifest_hash,
@@ -82,7 +86,7 @@ public class SubmittedBallot extends CiphertextBallot {
   public final BallotBox.State state;
 
   // public to allow proto serialization; use SubmittedBallot.create()
-  public SubmittedBallot(String ballotId,
+  public EncryptedBallot(String ballotId,
                          String ballotStyleId,
                          Group.ElementModQ manifest_hash,
                          Group.ElementModQ code_seed,
@@ -100,7 +104,7 @@ public class SubmittedBallot extends CiphertextBallot {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     if (!super.equals(o)) return false;
-    SubmittedBallot that = (SubmittedBallot) o;
+    EncryptedBallot that = (EncryptedBallot) o;
     return timestamp == that.timestamp &&
             ballotId.equals(that.ballotId) &&
             ballotStyleId.equals(that.ballotStyleId) &&

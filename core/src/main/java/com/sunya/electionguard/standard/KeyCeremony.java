@@ -221,8 +221,7 @@ public class KeyCeremony {
           ElectionPolynomial polynomial,
           ElectionPublicKey designated_guardian_key) {
 
-    ElementModQ value = ElectionPolynomial.compute_polynomial_coordinate(
-            BigInteger.valueOf(designated_guardian_key.sequence_order()), polynomial);
+    ElementModQ value = polynomial.valueAt(designated_guardian_key.sequence_order());
     return new ElectionPartialKeyBackup(
             owner_id,
             designated_guardian_key.owner_id(),
@@ -246,7 +245,7 @@ public class KeyCeremony {
             backup.owner_id(),
             backup.designated_id(),
             verifier_id,
-            ElectionPolynomial.verify_polynomial_coordinate(backup.value(), BigInteger.valueOf(backup.designated_sequence_order()),
+            ElectionPolynomial.verifyPolynomialCoordinate(backup.value(), backup.designated_sequence_order(),
                     election_public_key.coefficient_commitments()));
   }
 
@@ -265,7 +264,7 @@ public class KeyCeremony {
             backup.owner_id(),
             backup.designated_id(),
             backup.designated_sequence_order(),
-            ElectionPolynomial.compute_polynomial_coordinate(BigInteger.valueOf(backup.designated_sequence_order()), polynomial),
+            polynomial.valueAt(backup.designated_sequence_order()),
             polynomial.coefficient_commitments,
             polynomial.coefficient_proofs);
   }
@@ -284,8 +283,8 @@ public class KeyCeremony {
             challenge.owner_id(),
             challenge.designated_id(),
             verifier_id,
-            ElectionPolynomial.verify_polynomial_coordinate(challenge.value(),
-                    BigInteger.valueOf(challenge.designated_sequence_order()),
+            ElectionPolynomial.verifyPolynomialCoordinate(challenge.value(),
+                    challenge.designated_sequence_order(),
                     challenge.coefficient_commitments()));
   }
 

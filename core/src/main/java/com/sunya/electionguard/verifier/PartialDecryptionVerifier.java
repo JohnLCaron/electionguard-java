@@ -3,7 +3,7 @@ package com.sunya.electionguard.verifier;
 import com.google.common.base.Preconditions;
 import com.google.common.flogger.FluentLogger;
 import com.sunya.electionguard.Group;
-import com.sunya.electionguard.AvailableGuardian;
+import com.sunya.electionguard.ballot.DecryptingGuardian;
 import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.publish.ElectionRecord;
 
@@ -66,11 +66,11 @@ public class PartialDecryptionVerifier {
   /** Verify 10.A for available guardians lagrange coefficients, if there are missing guardians. */
   boolean verify_lagrange_coefficients() {
     boolean error = false;
-    List<AvailableGuardian> guardians = electionRecord.availableGuardians();
+    List<DecryptingGuardian> guardians = electionRecord.availableGuardians();
 
-    for (AvailableGuardian guardian : guardians) {
+    for (DecryptingGuardian guardian : guardians) {
       List<Integer> seq_others = new ArrayList<>();
-      for (AvailableGuardian other : guardians) {
+      for (DecryptingGuardian other : guardians) {
         if (!other.guardianId().equals(guardian.guardianId())) {
           seq_others.add(other.xCoordinate());
         }

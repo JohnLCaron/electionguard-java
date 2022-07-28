@@ -19,7 +19,7 @@ public class ElementModPojo {
     BigInteger biggy = gson.fromJson(jsonElem, BigInteger.class);
     int size = biggy.toByteArray().length;
     if (32 != size) {
-      System.out.printf("HEY");
+      // System.out.printf("HEY deserializeQ %d%n", size);
     }
     return Group.int_to_q(biggy).orElseThrow();
   }
@@ -29,7 +29,7 @@ public class ElementModPojo {
     BigInteger biggy = gson.fromJson(jsonElem, BigInteger.class);
     int size = biggy.toByteArray().length;
     if (512 != size) {
-      System.out.printf("HEY");
+      // System.out.printf("HEY deserializeP %d%n", size);
     }
     return Group.int_to_p(biggy).orElseThrow();
   }

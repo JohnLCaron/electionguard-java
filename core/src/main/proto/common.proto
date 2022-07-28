@@ -21,8 +21,8 @@ message ElGamalCiphertext {
 }
 
 message GenericChaumPedersenProof {
-  ElementModP pad = 1; // a in the spec  // 1.0 only
-  ElementModP data = 2; // b in the spec  // 1.0 only
+  reserved 1;
+  reserved 2;
   ElementModQ challenge = 3; // c in the spec
   ElementModQ response = 4; // v in the spec
 }
@@ -35,8 +35,8 @@ message HashedElGamalCiphertext {
 }
 
 message SchnorrProof {
-  ElementModP public_key = 1; // k in the spec // 1.0 only
-  ElementModP commitment = 2; // h in the spec // 1.0 only
+  reserved 1;
+  reserved 2;
   ElementModQ challenge = 3; // c in the spec
   ElementModQ response = 4; // u in the spec
 }

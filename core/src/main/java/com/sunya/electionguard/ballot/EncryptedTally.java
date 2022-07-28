@@ -1,8 +1,10 @@
-package com.sunya.electionguard;
+package com.sunya.electionguard.ballot;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
+import com.sunya.electionguard.CiphertextSelection;
+import com.sunya.electionguard.ElGamal;
 
 import javax.annotation.concurrent.Immutable;
 import java.util.Map;
@@ -11,13 +13,13 @@ import static com.sunya.electionguard.Group.ElementModQ;
 
 /** The encrypted representation of the summed votes for a collection of ballots */
 @Immutable
-public class CiphertextTally {
+public class EncryptedTally {
   /** Unique internal identifier used by other elements to reference this element. */
   private final String tallyId;
   /** The collection of contests in the election, keyed by contest_id. */
   public final ImmutableMap<String, Contest> contests; // Map(CONTEST_ID, CiphertextTally.Contest)
 
-  public CiphertextTally(String tallyId, Map<String, Contest> contests) {
+  public EncryptedTally(String tallyId, Map<String, Contest> contests) {
     Preconditions.checkArgument(!Strings.isNullOrEmpty(tallyId));
     this.tallyId = tallyId;
     this.contests = ImmutableMap.copyOf(contests);
@@ -31,7 +33,7 @@ public class CiphertextTally {
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-    CiphertextTally that = (CiphertextTally) o;
+    EncryptedTally that = (EncryptedTally) o;
     return tallyId.equals(that.tallyId) && contests.equals(that.contests);
   }
 

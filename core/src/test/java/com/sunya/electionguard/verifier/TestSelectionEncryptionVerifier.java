@@ -2,6 +2,7 @@ package com.sunya.electionguard.verifier;
 
 import com.google.common.base.Preconditions;
 import com.sunya.electionguard.*;
+import com.sunya.electionguard.ballot.EncryptedBallot;
 import com.sunya.electionguard.json.JsonConsumer;
 import com.sunya.electionguard.publish.Consumer;
 import com.sunya.electionguard.publish.ElectionRecord;
@@ -36,21 +37,21 @@ public class TestSelectionEncryptionVerifier {
 
     // not sure how different this is from SelectionEncryptionVerifier ??
     Tester tester = new Tester(electionRecord);
-    for (SubmittedBallot ballot : electionRecord.submittedBallots()) {
+    for (EncryptedBallot ballot : electionRecord.submittedBallots()) {
       for (CiphertextBallot.Contest contest : ballot.contests) {
         tester.verify_a_contest(contest);
       }
     }
 
     // not currently part of SelectionEncryptionVerifier
-    for (SubmittedBallot ballot : electionRecord.submittedBallots()) {
+    for (EncryptedBallot ballot : electionRecord.submittedBallots()) {
       assertThat(ballot.is_valid_encryption(electionRecord.manifest().cryptoHash(),
               electionRecord.electionPublicKey(),
               electionRecord.extendedHash()));
     }
 
     // ballot chaining (box 6)
-    for (SubmittedBallot ballot : electionRecord.submittedBallots()) {
+    for (EncryptedBallot ballot : electionRecord.submittedBallots()) {
       ElementModQ crypto_hash = ballot.crypto_hash;
       ElementModQ prev_hash = ballot.code_seed;
       ElementModQ curr_hash = ballot.code;

@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.List;
 
-import static com.sunya.electionguard.protoconvert.DecryptingTrusteeToProto.publishDecryptingTrustee;
+import static com.sunya.electionguard.protoconvert.DecryptingTrusteeConvert.publishDecryptingTrustee;
 
 /** Publishes the Manifest Record to Json or protobuf files. */
 public class PrivateData {

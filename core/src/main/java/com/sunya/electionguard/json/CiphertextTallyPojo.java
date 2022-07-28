@@ -5,7 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.Group;
-import com.sunya.electionguard.CiphertextTally;
+import com.sunya.electionguard.ballot.EncryptedTally;
 
 import java.lang.reflect.Type;
 import java.util.HashMap;
@@ -38,37 +38,37 @@ public class CiphertextTallyPojo {
   ////////////////////////////////////////////////////////////////////////////
   // deserialize
 
-  public static CiphertextTally deserialize(JsonElement jsonElem) {
+  public static EncryptedTally deserialize(JsonElement jsonElem) {
     Gson gson = GsonTypeAdapters.enhancedGson();
     CiphertextTallyPojo pojo = gson.fromJson(jsonElem, CiphertextTallyPojo.class);
     return translateTally(pojo);
   }
 
-  private static CiphertextTally translateTally(CiphertextTallyPojo pojo) {
-    Map<String, CiphertextTally.Contest> contests = new HashMap<>();
+  private static EncryptedTally translateTally(CiphertextTallyPojo pojo) {
+    Map<String, EncryptedTally.Contest> contests = new HashMap<>();
     for (Map.Entry<String, CiphertextTallyContestPojo> entry : pojo.contests.entrySet()) {
       contests.put(entry.getKey(), translateContest(entry.getValue()));
     }
 
-    return new CiphertextTally(
+    return new EncryptedTally(
             pojo.object_id,
             contests);
   }
 
-  private static CiphertextTally.Contest translateContest(CiphertextTallyContestPojo pojo) {
-    Map<String, CiphertextTally.Selection> selections = new HashMap<>();
+  private static EncryptedTally.Contest translateContest(CiphertextTallyContestPojo pojo) {
+    Map<String, EncryptedTally.Selection> selections = new HashMap<>();
     for (Map.Entry<String, CiphertextTallySelectionPojo> entry : pojo.selections.entrySet()) {
       selections.put(entry.getKey(), translateSelection(entry.getValue()));
     }
-    return new CiphertextTally.Contest(
+    return new EncryptedTally.Contest(
             pojo.object_id,
             pojo.sequence_order,
             pojo.description_hash,
             selections);
   }
 
-  private static CiphertextTally.Selection translateSelection(CiphertextTallySelectionPojo pojo) {
-    return new CiphertextTally.Selection(
+  private static EncryptedTally.Selection translateSelection(CiphertextTallySelectionPojo pojo) {
+    return new EncryptedTally.Selection(
             pojo.object_id,
             pojo.sequence_order,
             pojo.description_hash,
@@ -84,16 +84,16 @@ public class CiphertextTallyPojo {
   ////////////////////////////////////////////////////////////////////////////
   // serialize
 
-  public static JsonElement serialize(CiphertextTally src) {
+  public static JsonElement serialize(EncryptedTally src) {
     Gson gson = GsonTypeAdapters.enhancedGson();
     CiphertextTallyPojo pojo = convertTally(src);
     Type typeOfSrc = new TypeToken<CiphertextTallyPojo>() {}.getType();
     return gson.toJsonTree(pojo, typeOfSrc);
   }
 
-  private static CiphertextTallyPojo convertTally(CiphertextTally org) {
+  private static CiphertextTallyPojo convertTally(EncryptedTally org) {
     Map<String, CiphertextTallyContestPojo> contests = new HashMap<>();
-    for (Map.Entry<String, CiphertextTally.Contest> entry : org.contests.entrySet()) {
+    for (Map.Entry<String, EncryptedTally.Contest> entry : org.contests.entrySet()) {
       contests.put(entry.getKey(), convertContest(entry.getValue()));
     }
 
@@ -103,9 +103,9 @@ public class CiphertextTallyPojo {
     return pojo;
   }
 
-  private static CiphertextTallyContestPojo convertContest(CiphertextTally.Contest org) {
+  private static CiphertextTallyContestPojo convertContest(EncryptedTally.Contest org) {
     Map<String, CiphertextTallySelectionPojo> selections = new HashMap<>();
-    for (Map.Entry<String, CiphertextTally.Selection> entry : org.selections.entrySet()) {
+    for (Map.Entry<String, EncryptedTally.Selection> entry : org.selections.entrySet()) {
       selections.put(entry.getKey(), convertSelection(entry.getValue()));
     }
     CiphertextTallyContestPojo pojo = new CiphertextTallyContestPojo();
@@ -116,7 +116,7 @@ public class CiphertextTallyPojo {
     return pojo;
   }
 
-  private static CiphertextTallySelectionPojo convertSelection(CiphertextTally.Selection org) {
+  private static CiphertextTallySelectionPojo convertSelection(EncryptedTally.Selection org) {
     CiphertextTallySelectionPojo pojo = new CiphertextTallySelectionPojo();
     pojo.object_id = org.object_id();
     pojo.sequence_order = org.sequence_order();

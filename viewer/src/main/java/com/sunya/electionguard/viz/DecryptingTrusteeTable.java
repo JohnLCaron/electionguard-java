@@ -5,7 +5,6 @@
 
 package com.sunya.electionguard.viz;
 
-import com.google.common.collect.ImmutableList;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.decrypting.DecryptingTrustee;
 import com.sunya.electionguard.keyceremony.KeyCeremony2;
@@ -86,13 +85,13 @@ public class DecryptingTrusteeTable extends JPanel {
     this.current = trusteeBean.object;
 
     java.util.List<PartialKeyBackupBean> beanList = new ArrayList<>();
-    for (Map.Entry<String, KeyCeremony2.PartialKeyBackup> e : trusteeBean.object.otherGuardianPartialKeyBackups().entrySet()) {
-      beanList.add(new PartialKeyBackupBean(e.getKey(), e.getValue()));
+    for (KeyCeremony2.SecretKeyShare e : trusteeBean.object.secretKeyShares()) {
+      beanList.add(new PartialKeyBackupBean(e.generatingGuardianId(), e));
     }
     backupTable.setBeans(beanList);
 
     java.util.List<GuardianCommittmentsBean> bean2List = new ArrayList<>();
-    for (Map.Entry<String, java.util.List<Group.ElementModP>> e : trusteeBean.object.guardianCommittments().entrySet()) {
+    for (Map.Entry<String, java.util.List<Group.ElementModP>> e : trusteeBean.object.coefficientCommitments().entrySet()) {
       bean2List.add(new GuardianCommittmentsBean(e.getKey(), e.getValue()));
     }
     commitmentTable.setBeans(bean2List);
@@ -127,20 +126,20 @@ public class DecryptingTrusteeTable extends JPanel {
       return object.xCoordinate();
     }
     public String getElectionPrivateKey() {
-      return object.election_keypair().secret_key().toString();
+      return object.electionKeypair().secret_key().toString();
     }
     public String getElectionPublicKey() {
-      return object.election_keypair().public_key().toShortString();
+      return object.electionKeypair().public_key().toShortString();
     }
   }
 
   public class PartialKeyBackupBean {
     String key;
-    KeyCeremony2.PartialKeyBackup object;
+    KeyCeremony2.SecretKeyShare object;
 
     public PartialKeyBackupBean(){}
 
-    PartialKeyBackupBean(String key, KeyCeremony2.PartialKeyBackup object) {
+    PartialKeyBackupBean(String key, KeyCeremony2.SecretKeyShare object) {
       this.key = key;
       this.object = object;
     }
@@ -158,7 +157,7 @@ public class DecryptingTrusteeTable extends JPanel {
       return object.designatedGuardianXCoordinate();
     }
     public String getCoordinate() {
-      return object.coordinate().toString();
+      return object.encryptedCoordinate().toString();
     }
   }
 

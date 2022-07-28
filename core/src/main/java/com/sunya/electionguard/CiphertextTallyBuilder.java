@@ -4,6 +4,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.flogger.FluentLogger;
+import com.sunya.electionguard.ballot.EncryptedBallot;
+import com.sunya.electionguard.ballot.EncryptedTally;
 import com.sunya.electionguard.publish.ElectionContext;
 
 import javax.annotation.concurrent.Immutable;
@@ -78,13 +80,13 @@ public class CiphertextTallyBuilder {
   /**
    * Append a collection of Ballots to the tally, parallelized over these ballots, for each selection.
    */
-  public int batch_append(Iterable<SubmittedBallot> ballotsIterable) {
+  public int batch_append(Iterable<EncryptedBallot> ballotsIterable) {
     // Map(SELECTION_ID, Map(BALLOT_ID, Ciphertext)
     Map<String, Map<String, ElGamal.Ciphertext>> cast_ballot_selections = new HashMap<>();
 
     // Find all the ballots for each selection.
     AtomicInteger count = new AtomicInteger();
-    for (SubmittedBallot ballot : ballotsIterable) {
+    for (EncryptedBallot ballot : ballotsIterable) {
       if (ballot.state == State.CAST && !cast_ballot_ids.contains(ballot.object_id()) &&
                       BallotValidations.ballot_is_valid_for_election(ballot, this.manifest, this.context)) {
         // collect the selections so they can be accumulated in parallel
@@ -105,7 +107,7 @@ public class CiphertextTallyBuilder {
   }
 
   /** Append a ballot to the tally. Potentially parellizable over this ballot's selections. */
-  public boolean append(SubmittedBallot ballot) {
+  public boolean append(EncryptedBallot ballot) {
     if (ballot.state == State.UNKNOWN) {
       logger.atWarning().log("append cannot add %s with invalid state", ballot.object_id());
       return false;
@@ -135,7 +137,7 @@ public class CiphertextTallyBuilder {
   }
 
   /** Add a single cast ballot to the tally. Potentially parellizable over this ballot's selections. */
-  private boolean add_cast(SubmittedBallot ballot) {
+  private boolean add_cast(EncryptedBallot ballot) {
     // iterate through the contests and elgamal add
     for (CiphertextBallot.Contest contest : ballot.contests) {
       // This should never happen since the ballot is validated against the election metadata
@@ -223,8 +225,8 @@ public class CiphertextTallyBuilder {
   }
 
   /** Build the immutable CiphertextTally. */
-  public CiphertextTally build() {
-    return new CiphertextTally(
+  public EncryptedTally build() {
+    return new EncryptedTally(
             this.object_id,
             this.contests.entrySet().stream().collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue().build())));
   }
@@ -360,9 +362,9 @@ public class CiphertextTallyBuilder {
       return Objects.hash(super.hashCode(), description_hash, selections);
     }
 
-    CiphertextTally.Contest build() {
+    EncryptedTally.Contest build() {
       // String object_id, ElementModQ description_hash, Map<String, CiphertextTallySelection> tally_selections
-      return new CiphertextTally.Contest(
+      return new EncryptedTally.Contest(
               this.object_id, this.sequence_order, this.description_hash,
               this.selections.entrySet().stream().collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue().build())));
     }
@@ -393,8 +395,8 @@ public class CiphertextTallyBuilder {
       return this.ciphertext_accumulate;
     }
 
-    CiphertextTally.Selection build() {
-      return new CiphertextTally.Selection(
+    EncryptedTally.Selection build() {
+      return new EncryptedTally.Selection(
               this.object_id(), this.sequence_order(), this.description_hash(), this.ciphertext_accumulate);
     }
   }

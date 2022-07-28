@@ -17,8 +17,8 @@ public class CiphertextSelection {
   private final ElGamal.Ciphertext ciphertext; // only accessed through ciphertext(), so subclass can override
   public final boolean isPlaceholderSelection;
 
-  CiphertextSelection(String selectionId, int sequenceOrder, Group.ElementModQ selectionHash,
-                      ElGamal.Ciphertext ciphertext, boolean isPlaceholderSelection) {
+  protected CiphertextSelection(String selectionId, int sequenceOrder, Group.ElementModQ selectionHash,
+                                ElGamal.Ciphertext ciphertext, boolean isPlaceholderSelection) {
     Preconditions.checkArgument(!Strings.isNullOrEmpty(selectionId));
     this.selectionId = selectionId;
     this.sequenceOrder = sequenceOrder;

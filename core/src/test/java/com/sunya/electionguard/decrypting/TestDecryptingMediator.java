@@ -4,7 +4,7 @@ import com.google.common.base.Stopwatch;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.PlaintextBallot;
 import com.sunya.electionguard.PlaintextTally;
-import com.sunya.electionguard.SubmittedBallot;
+import com.sunya.electionguard.ballot.EncryptedBallot;
 import com.sunya.electionguard.TestProperties;
 import com.sunya.electionguard.protoconvert.TrusteeFromProto;
 import com.sunya.electionguard.publish.CloseableIterable;
@@ -39,7 +39,7 @@ public class TestDecryptingMediator extends TestProperties {
   Map<String, Group.ElementModP> guardianPublicKeys;
 
   Map<String, Integer> expectedTally;
-  CloseableIterable<SubmittedBallot> spoiledBallots;
+  CloseableIterable<EncryptedBallot> spoiledBallots;
 
   public TestDecryptingMediator() throws IOException {
     trustees.add(TrusteeFromProto.readTrustee(path.decryptingTrusteePath(TRUSTEE_DATA_DIR, "remoteTrustee1")));

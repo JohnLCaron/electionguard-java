@@ -6,11 +6,11 @@ import com.sunya.electionguard.BallotBox;
 import com.sunya.electionguard.CiphertextBallot;
 import com.sunya.electionguard.CiphertextContest;
 import com.sunya.electionguard.CiphertextSelection;
-import com.sunya.electionguard.CiphertextTally;
+import com.sunya.electionguard.ballot.EncryptedTally;
 import com.sunya.electionguard.DecryptionShare;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.Group;
-import com.sunya.electionguard.SubmittedBallot;
+import com.sunya.electionguard.ballot.EncryptedBallot;
 import com.sunya.electionguard.publish.ElectionContext;
 
 import java.util.ArrayList;
@@ -42,12 +42,12 @@ public class RemoteDecryptions {
    */
   public static DecryptionShare computeDecryptionShareForTally(
           DecryptingTrusteeIF guardian,
-          CiphertextTally tally,
+          EncryptedTally tally,
           ElectionContext context) {
 
     // Get all the Ciphertext that need to be decrypted, and do so in one call
     List<ElGamal.Ciphertext> texts = new ArrayList<>();
-    for (CiphertextTally.Contest tallyContest : tally.contests.values()) {
+    for (EncryptedTally.Contest tallyContest : tally.contests.values()) {
       for (CiphertextSelection selection : tallyContest.selections.values()) {
         texts.add(selection.ciphertext());
       }
@@ -57,7 +57,7 @@ public class RemoteDecryptions {
     // Create the guardian's DecryptionShare for the tally
     int count = 0;
     Map<String, CiphertextDecryptionContest> contests = new HashMap<>();
-    for (CiphertextTally.Contest tallyContest : tally.contests.values()) {
+    for (EncryptedTally.Contest tallyContest : tally.contests.values()) {
 
       Map<String, CiphertextDecryptionSelection> selections = new HashMap<>();
       for (CiphertextSelection tallySelection : tallyContest.selections.values()) {
@@ -93,11 +93,11 @@ public class RemoteDecryptions {
   /** Compute the DecryptionShare for a list of ballots for a guardian. */
   public static Optional<Map<String, DecryptionShare>> computeDecryptionShareForBallots(
           DecryptingTrusteeIF guardian,
-          Iterable<SubmittedBallot> ballots,
+          Iterable<EncryptedBallot> ballots,
           ElectionContext context) {
 
     Map<String, DecryptionShare> shares = new HashMap<>();
-    for (SubmittedBallot ballot : ballots) {
+    for (EncryptedBallot ballot : ballots) {
       DecryptionShare ballot_share = computeDecryptionShareForBallot(guardian, ballot, context);
       shares.put(ballot.object_id(), ballot_share);
     }
@@ -116,7 +116,7 @@ public class RemoteDecryptions {
    */
   private static DecryptionShare computeDecryptionShareForBallot(
           DecryptingTrusteeIF guardian,
-          SubmittedBallot ballot,
+          EncryptedBallot ballot,
           ElectionContext context) {
 
     // Get all the Ciphertext that need to be decrypted, and do so in one call
@@ -179,12 +179,12 @@ public class RemoteDecryptions {
   public static CompensatedDecryptionShare computeCompensatedDecryptionShareForTally(
           DecryptingTrusteeIF guardian,
           String missing_guardian_id,
-          CiphertextTally tally,
+          EncryptedTally tally,
           ElectionContext context) {
 
     // Get all the Ciphertext that need to be decrypted, and do so in one call
     List<ElGamal.Ciphertext> texts = new ArrayList<>();
-    for (CiphertextTally.Contest tallyContest : tally.contests.values()) {
+    for (EncryptedTally.Contest tallyContest : tally.contests.values()) {
       for (CiphertextSelection selection : tallyContest.selections.values()) {
         texts.add(selection.ciphertext());
       }
@@ -198,7 +198,7 @@ public class RemoteDecryptions {
     // Create the guardian's DecryptionShare for the tally
     int count = 0;
     Map<String, CiphertextCompensatedDecryptionContest> contests = new HashMap<>();
-    for (CiphertextTally.Contest tallyContest : tally.contests.values()) {
+    for (EncryptedTally.Contest tallyContest : tally.contests.values()) {
 
       Map<String, CiphertextCompensatedDecryptionSelection> selections = new HashMap<>();
       for (CiphertextSelection tallySelection : tallyContest.selections.values()) {
@@ -253,7 +253,7 @@ public class RemoteDecryptions {
   public static CompensatedDecryptionShare computeCompensatedDecryptionShareForBallot(
           DecryptingTrusteeIF guardian,
           String missing_guardian_id,
-          SubmittedBallot ballot,
+          EncryptedBallot ballot,
           ElectionContext context) {
 
     // Get all the Ciphertext that need to be decrypted, and do so in one call
@@ -326,12 +326,12 @@ public class RemoteDecryptions {
   public static DecryptionShare reconstruct_decryption_share_for_tally(
           String missing_guardian_id,
           Group.ElementModP missing_public_key,
-          CiphertextTally tally,
+          EncryptedTally tally,
           Map<String, CompensatedDecryptionShare> shares, // Map(GUARDIAN_ID, CompensatedDecryptionShare)
           Map<String, Group.ElementModQ> lagrange_coefficients) {
 
     Map<String, CiphertextDecryptionContest> contests = new HashMap<>();
-    for (CiphertextTally.Contest contest : tally.contests.values()) {
+    for (EncryptedTally.Contest contest : tally.contests.values()) {
       CiphertextDecryptionContest dcontest = reconstruct_decryption_contest(
               missing_guardian_id,
               CiphertextContest.createFrom(contest),
@@ -355,7 +355,7 @@ public class RemoteDecryptions {
   public static DecryptionShare reconstruct_decryption_share_for_ballot(
           String missing_guardian_id,
           Group.ElementModP missing_public_key,
-          SubmittedBallot ballot,
+          EncryptedBallot ballot,
           Map<String, CompensatedDecryptionShare> shares, // Dict[AVAILABLE_GUARDIAN_ID, CompensatedBallotDecryptionShare]
           Map<String, Group.ElementModQ> lagrange_coefficients) { // Dict[AVAILABLE_GUARDIAN_ID, ElementModQ]
 

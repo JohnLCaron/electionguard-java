@@ -1,7 +1,7 @@
 package com.sunya.electionguard.json;
 
-import com.sunya.electionguard.AvailableGuardian;
-import com.sunya.electionguard.CiphertextTally;
+import com.sunya.electionguard.ballot.DecryptingGuardian;
+import com.sunya.electionguard.ballot.EncryptedTally;
 import com.sunya.electionguard.ElectionConstants;
 import com.sunya.electionguard.ElectionCryptoContext;
 import com.sunya.electionguard.Encrypt;
@@ -9,7 +9,7 @@ import com.sunya.electionguard.GuardianRecord;
 import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.PlaintextBallot;
 import com.sunya.electionguard.PlaintextTally;
-import com.sunya.electionguard.SubmittedBallot;
+import com.sunya.electionguard.ballot.EncryptedBallot;
 import com.sunya.electionguard.publish.ElectionRecord;
 
 import javax.annotation.Nullable;
@@ -21,6 +21,12 @@ import java.util.Formatter;
 
 /** Publishes the Manifest Record to JSON */
 public class JsonPublisher {
+  public enum Mode {readonly,
+    writeonly, // write new files, but do not create directories
+    createIfMissing, // create directories if not already exist
+    createNew // create clean directories
+  }
+
   //// json
   static final String JSON_SUFFIX = ".json";
 
@@ -46,14 +52,14 @@ public class JsonPublisher {
   static final String AVAILABLE_GUARDIAN_PREFIX = "available_guardian_";
 
   private final String topdir;
-  private final PublisherOld.Mode createMode;
+  private final Mode createMode;
   private final Path electionRecordDir;
   private final Path devicesDirPath;
   private final Path ballotsDirPath;
   private final Path spoiledBallotDirPath;
   private final Path guardianDirPath;
 
-  public JsonPublisher(String where, PublisherOld.Mode createMode) throws IOException {
+  public JsonPublisher(String where, Mode createMode) throws IOException {
     this.topdir = where;
     this.createMode = createMode;
 
@@ -64,14 +70,14 @@ public class JsonPublisher {
     this.spoiledBallotDirPath = electionRecordDir.resolve(SPOILED_BALLOTS_DIR);
     // this.availableGuardianDirPath = publishDirectory.resolve(AVAILABLE_GUARDIANS_DIR);
 
-    if (createMode == PublisherOld.Mode.createNew) {
+    if (createMode == Mode.createNew) {
       if (!Files.exists(electionRecordDir)) {
         Files.createDirectories(electionRecordDir);
       } else {
         // too dangerous removeAllFiles();
       }
       createDirs();
-    } else if (createMode == PublisherOld.Mode.createIfMissing) {
+    } else if (createMode == Mode.createIfMissing) {
       if (!Files.exists(electionRecordDir)) {
         Files.createDirectories(electionRecordDir);
       }
@@ -83,7 +89,7 @@ public class JsonPublisher {
     }
   }
 
-  public JsonPublisher(Path electionRecordDir, PublisherOld.Mode createMode) throws IOException {
+  public JsonPublisher(Path electionRecordDir, Mode createMode) throws IOException {
     this.createMode = createMode;
     this.topdir = electionRecordDir.toAbsolutePath().toString();
 
@@ -94,14 +100,14 @@ public class JsonPublisher {
     this.spoiledBallotDirPath = electionRecordDir.resolve(SPOILED_BALLOTS_DIR);
     // this.availableGuardianDirPath = publishDirectory.resolve(AVAILABLE_GUARDIANS_DIR);
 
-    if (createMode == PublisherOld.Mode.createNew) {
+    if (createMode == Mode.createNew) {
       if (!Files.exists(electionRecordDir)) {
         Files.createDirectories(electionRecordDir);
       } else {
         removeAllFiles();
       }
       createDirs();
-    } else if (createMode == PublisherOld.Mode.createIfMissing) {
+    } else if (createMode == Mode.createIfMissing) {
       if (!Files.exists(electionRecordDir)) {
         Files.createDirectories(electionRecordDir);
       }
@@ -244,7 +250,7 @@ public class JsonPublisher {
           ElectionConstants constants,
           Iterable<GuardianRecord> guardianRecords) throws IOException {
 
-    if (createMode == PublisherOld.Mode.readonly) {
+    if (createMode == Mode.readonly) {
       throw new UnsupportedOperationException("Trying to write to readonly election record");
     }
 
@@ -259,12 +265,12 @@ public class JsonPublisher {
 
   public void writeDecryptionResultsJson(
           ElectionRecord election,
-          CiphertextTally encryptedTally,
+          EncryptedTally encryptedTally,
           PlaintextTally decryptedTally,
           Iterable<PlaintextTally> spoiledBallots,
-          Iterable<AvailableGuardian> availableGuardians) throws IOException {
+          Iterable<DecryptingGuardian> availableGuardians) throws IOException {
 
-    if (createMode == PublisherOld.Mode.readonly) {
+    if (createMode == Mode.readonly) {
       throw new UnsupportedOperationException("Trying to write to readonly election record");
     }
 
@@ -293,14 +299,14 @@ public class JsonPublisher {
           ElectionCryptoContext context,
           ElectionConstants constants,
           Iterable<Encrypt.EncryptionDevice> devices,
-          Iterable<SubmittedBallot> ciphertext_ballots,
-          CiphertextTally ciphertext_tally,
+          Iterable<EncryptedBallot> ciphertext_ballots,
+          EncryptedTally ciphertext_tally,
           PlaintextTally decryptedTally,
           @Nullable Iterable<GuardianRecord> guardianRecords,
           @Nullable Iterable<PlaintextTally> spoiledBallots,
-          @Nullable Iterable<AvailableGuardian> availableGuardians) throws IOException {
+          @Nullable Iterable<DecryptingGuardian> availableGuardians) throws IOException {
 
-    if (createMode == PublisherOld.Mode.readonly) {
+    if (createMode == Mode.readonly) {
       throw new UnsupportedOperationException("Trying to write to readonly election record");
     }
 
@@ -312,7 +318,7 @@ public class JsonPublisher {
       ConvertToJson.writeDevice(device, this.devicePath(device.location()));
     }
 
-    for (SubmittedBallot ballot : ciphertext_ballots) {
+    for (EncryptedBallot ballot : ciphertext_ballots) {
       ConvertToJson.writeSubmittedBallot(ballot, this.ballotPath(ballot.object_id()));
     }
 
@@ -338,7 +344,7 @@ public class JsonPublisher {
 
   // These are input ballots that did not validate (not spoiled ballots). put them somewhere to be examined later.
   public void publish_invalid_ballots(String directory, Iterable<PlaintextBallot> invalid_ballots) throws IOException {
-    if (createMode == PublisherOld.Mode.readonly) {
+    if (createMode == Mode.readonly) {
       throw new UnsupportedOperationException("Trying to write to readonly election record");
     }
 

@@ -1,5 +1,7 @@
 package com.sunya.electionguard;
 
+import com.sunya.electionguard.ballot.EncryptedTally;
+
 import java.util.ArrayList;
 
 /**
@@ -16,7 +18,7 @@ public class CiphertextContest {
     this.selections = selections;
   }
 
-  public static CiphertextContest createFrom(CiphertextTally.Contest tallyContest) {
+  public static CiphertextContest createFrom(EncryptedTally.Contest tallyContest) {
     return new CiphertextContest(tallyContest.object_id(), tallyContest.contestDescriptionHash,
             new ArrayList<>(tallyContest.selections.values()));
   }

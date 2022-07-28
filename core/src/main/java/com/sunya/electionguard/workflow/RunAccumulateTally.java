@@ -3,7 +3,7 @@ package com.sunya.electionguard.workflow;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
-import com.sunya.electionguard.CiphertextTally;
+import com.sunya.electionguard.ballot.EncryptedTally;
 import com.sunya.electionguard.CiphertextTallyBuilder;
 import com.sunya.electionguard.InternalManifest;
 import com.sunya.electionguard.Manifest;
@@ -111,7 +111,7 @@ public class RunAccumulateTally {
   final ElectionRecord electionRecord;
   final Manifest election;
 
-  CiphertextTally encryptedTally;
+  EncryptedTally encryptedTally;
 
   public RunAccumulateTally(Consumer consumer, ElectionRecord electionRecord) {
     this.consumer = consumer;

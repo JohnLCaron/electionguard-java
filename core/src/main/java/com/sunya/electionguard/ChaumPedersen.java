@@ -470,6 +470,10 @@ public class ChaumPedersen {
       this.constant = constant;
     }
 
+    public ChaumPedersen.ChaumPedersenProof getProof() {
+      return new ChaumPedersen.ChaumPedersenProof(this.pad, this.data, this.challenge, this.response);
+    }
+
     @Override
     public String toString() {
       return "ConstantChaumPedersenProof{" +

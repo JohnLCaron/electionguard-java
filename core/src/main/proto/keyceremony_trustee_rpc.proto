@@ -25,7 +25,8 @@ message PublicKeySet {
   string owner_id = 1; // the Trustee's id
   uint32 guardian_x_coordinate = 2; // the Trustee's xcoordinate
   reserved 3; // the Trustee's RSA public key
-  repeated SchnorrProof coefficient_proofs = 4; // The polynomial coefficients commitments and proofs
+  repeated ElementModP coefficient_comittments = 6; // The polynomial coefficients commitments
+  repeated SchnorrProof coefficient_proofs = 4; // The polynomial coefficient proofs
   string error = 5; // if not empty, an error has occurred.
 }
 
@@ -37,7 +38,10 @@ message PartialKeyBackup {
   string generating_guardian_id = 1; // The Id of the Trustee that generated this backup.
   string designated_guardian_id = 2; // The Id of the Trustee to receive this backup.
   uint32 designated_guardian_x_coordinate = 3; // The x coefficient of the designated guardian.
-  ElementModQ coordinate = 4; // The coordinate of the designated guardian.
+  // Pi(l) = The generatingGuardian's polynomial value at designatedGuardianXCoordinate: Pi(l)
+  reserved 4;
+  // This is the encryption of that = Eℓ (Pi(ℓ)), see spec 1.03 eq 17.
+  HashedElGamalCiphertext encrypted_coordinate = 6;
   string error = 5; // if not empty, an error has occurred.
 }
 

@@ -16,19 +16,17 @@ public class KeyCeremonyTrusteeToProto {
     builder.setGuardianId(trustee.id);
     builder.setGuardianXCoordinate(trustee.xCoordinate);
     builder.setElectionKeypair(convertElgamalKeypair(trustee.secrets().election_key_pair));
-    trustee.otherGuardianPartialKeyBackups.values().forEach(k -> builder.addSecretKeyShares(convertElectionPartialKeyBackup(k)));
-    trustee.allGuardianPublicKeys.values().forEach(k -> builder.addCoefficientCommitments(convertCoefficients(k)));
+    trustee.guardianSecretKeyShares.values().forEach(k -> builder.addSecretKeyShares(convertElectionPartialKeyBackup(k)));
+    trustee.guardianPublicKeys.values().forEach(k -> builder.addCoefficientCommitments(convertCoefficients(k)));
     return builder.build();
   }
 
-  private static TrusteeProto.SecretKeyShare convertElectionPartialKeyBackup(KeyCeremony2.PartialKeyBackup org) {
+  private static TrusteeProto.SecretKeyShare convertElectionPartialKeyBackup(KeyCeremony2.SecretKeyShare org) {
     TrusteeProto.SecretKeyShare.Builder builder = TrusteeProto.SecretKeyShare.newBuilder();
     builder.setGeneratingGuardianId(org.generatingGuardianId());
     builder.setDesignatedGuardianId(org.designatedGuardianId());
     builder.setDesignatedGuardianXCoordinate(org.designatedGuardianXCoordinate());
-    if (org.coordinate() != null) {
-      builder.setGeneratingGuardianValue(CommonConvert.publishElementModQ(org.coordinate()));
-    }
+    builder.setEncryptedCoordinate(CommonConvert.publishHashedCiphertext(org.encryptedCoordinate()));
     builder.setError(org.error());
     return builder.build();
   }
@@ -40,9 +38,9 @@ public class KeyCeremonyTrusteeToProto {
     return builder.build();
   }
 
-  private static TrusteeProto.CommitmentSet convertCoefficients(KeyCeremony2.PublicKeySet publicKetSey) {
+  private static TrusteeProto.CommitmentSet convertCoefficients(KeyCeremony2.PublicKeys publicKetSey) {
     TrusteeProto.CommitmentSet.Builder builder = TrusteeProto.CommitmentSet.newBuilder();
-    builder.setGuardianId(publicKetSey.ownerId());
+    builder.setGuardianId(publicKetSey.guardianId());
     for (SchnorrProof proof : publicKetSey.coefficientProofs()) {
       builder.addCommitments(publishElementModP(proof.publicKey));
     }

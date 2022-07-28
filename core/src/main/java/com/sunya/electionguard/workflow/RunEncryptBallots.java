@@ -5,7 +5,7 @@ import com.google.common.base.Stopwatch;
 import com.google.common.collect.Iterables;
 import com.sunya.electionguard.BallotBox;
 import com.sunya.electionguard.InternalManifest;
-import com.sunya.electionguard.SubmittedBallot;
+import com.sunya.electionguard.ballot.EncryptedBallot;
 import com.sunya.electionguard.input.BallotInputValidation;
 import com.sunya.electionguard.CiphertextBallot;
 import com.sunya.electionguard.Manifest;
@@ -141,7 +141,7 @@ public class RunEncryptBallots {
         if (ballotValidator.validateBallot(ballot, problems)) {
           Optional<CiphertextBallot> encrypted_ballot = encryptor.encryptBallot(ballot);
           if (encrypted_ballot.isPresent()) {
-            Optional<SubmittedBallot> accepted = encryptor.castOrSpoil(encrypted_ballot.get(), random.nextBoolean());
+            Optional<EncryptedBallot> accepted = encryptor.castOrSpoil(encrypted_ballot.get(), random.nextBoolean());
             if (accepted.isEmpty()) {
               System.out.printf("***castOrSpoil failed%n");
             } else {
@@ -224,7 +224,7 @@ public class RunEncryptBallots {
   }
 
   // Accept each ballot by marking it as either cast or spoiled.
-  Optional<SubmittedBallot> castOrSpoil(CiphertextBallot ballot, boolean spoil) {
+  Optional<EncryptedBallot> castOrSpoil(CiphertextBallot ballot, boolean spoil) {
     if (spoil) {
       return this.ballotBox.spoil(ballot);
     } else {

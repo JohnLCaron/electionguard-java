@@ -10,13 +10,13 @@ import com.sunya.electionguard.CiphertextBallot;
 import com.sunya.electionguard.CiphertextContest;
 import com.sunya.electionguard.ElectionCryptoContext;
 import com.sunya.electionguard.CiphertextSelection;
-import com.sunya.electionguard.CiphertextTally;
+import com.sunya.electionguard.ballot.EncryptedTally;
 import com.sunya.electionguard.DecryptionShare;
 import com.sunya.electionguard.ElGamal;
 import com.sunya.electionguard.ElectionPolynomial;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.Scheduler;
-import com.sunya.electionguard.SubmittedBallot;
+import com.sunya.electionguard.ballot.EncryptedBallot;
 import com.sunya.electionguard.publish.ElectionContext;
 
 import javax.annotation.Nullable;
@@ -51,11 +51,11 @@ public class Decryptions {
    */
   public static Optional<DecryptionShare> compute_decryption_share(
           KeyCeremony.ElectionKeyPair guardian_keys,
-          CiphertextTally tally,
+          EncryptedTally tally,
           ElectionContext context) {
 
     Map<String, CiphertextDecryptionContest> contests = new HashMap<>();
-    for (CiphertextTally.Contest tallyContest : tally.contests.values()) {
+    for (EncryptedTally.Contest tallyContest : tally.contests.values()) {
       Optional<CiphertextDecryptionContest> contest_share =
               compute_decryption_share_for_contest(guardian_keys,
                       CiphertextContest.createFrom(tallyContest),
@@ -76,12 +76,12 @@ public class Decryptions {
   /** Compute the DecryptionShare for a list of ballots for a guardian. */
   static Optional<Map<String, DecryptionShare>> compute_decryption_share_for_ballots(
           KeyCeremony.ElectionKeyPair guardian_keys,
-          Iterable<SubmittedBallot> ballots,
+          Iterable<EncryptedBallot> ballots,
           ElectionContext context) {
 
   Map<String, DecryptionShare> shares = new HashMap<>();
 
-    for (SubmittedBallot ballot : ballots) {
+    for (EncryptedBallot ballot : ballots) {
       Optional<DecryptionShare> ballot_share = compute_decryption_share_for_ballot(
               guardian_keys, ballot, context);
       if (ballot_share.isEmpty()) {
@@ -96,7 +96,7 @@ public class Decryptions {
   /** Compute the DecryptionShare for a single ballot for a guardian. */
   public static Optional<DecryptionShare> compute_decryption_share_for_ballot(
           KeyCeremony.ElectionKeyPair guardian_keys,
-          SubmittedBallot ballot,
+          EncryptedBallot ballot,
           ElectionContext context) {
 
     // Map(CONTEST_ID, CiphertextDecryptionContest)
@@ -221,12 +221,12 @@ public class Decryptions {
           KeyCeremony.ElectionPublicKey guardian_key,
           KeyCeremony.ElectionPublicKey missing_guardian_key,
           KeyCeremony.ElectionPartialKeyBackup missing_guardian_backup,
-          CiphertextTally tally,
+          EncryptedTally tally,
           ElectionCryptoContext context) {
 
     Map<String, CiphertextCompensatedDecryptionContest> contests = new HashMap<>();
 
-    for (CiphertextTally.Contest contest : tally.contests.values()) {
+    for (EncryptedTally.Contest contest : tally.contests.values()) {
       Optional<CiphertextCompensatedDecryptionContest> dcontest = compute_compensated_decryption_share_for_contest(
               guardian_key,
               missing_guardian_key,
@@ -296,12 +296,12 @@ public class Decryptions {
           KeyCeremony.ElectionPublicKey guardian_key,
           KeyCeremony.ElectionPublicKey missing_guardian_key,
           KeyCeremony.ElectionPartialKeyBackup missing_guardian_backup,
-          Iterable<SubmittedBallot> ballots,
+          Iterable<EncryptedBallot> ballots,
           ElectionCryptoContext context) {
 
     Map<String, CompensatedDecryptionShare> decrypted_ballots = new HashMap<>();
 
-    for (SubmittedBallot spoiled_ballot : ballots) {
+    for (EncryptedBallot spoiled_ballot : ballots) {
       Optional<CompensatedDecryptionShare> compensated_ballot = compute_compensated_decryption_share_for_ballot(
               guardian_key,
               missing_guardian_key,
@@ -324,7 +324,7 @@ public class Decryptions {
           KeyCeremony.ElectionPublicKey guardian_key,
           KeyCeremony.ElectionPublicKey missing_guardian_key,
           KeyCeremony.ElectionPartialKeyBackup missing_guardian_backup,
-          SubmittedBallot ballot,
+          EncryptedBallot ballot,
           ElectionCryptoContext context) {
 
     Map<String, CiphertextCompensatedDecryptionContest> contests = new HashMap<>();
@@ -569,12 +569,12 @@ public class Decryptions {
    */
   public static DecryptionShare reconstruct_decryption_share(
           KeyCeremony.ElectionPublicKey missing_guardian_key,
-          CiphertextTally tally,
+          EncryptedTally tally,
           Map<String, CompensatedDecryptionShare> shares, // Map(GUARDIAN_ID, CompensatedDecryptionShare)
           Map<String, Group.ElementModQ> lagrange_coefficients) {
 
     Map<String, CiphertextDecryptionContest> contests = new HashMap<>();
-    for (CiphertextTally.Contest contest : tally.contests.values()) {
+    for (EncryptedTally.Contest contest : tally.contests.values()) {
       CiphertextDecryptionContest dcontest = reconstruct_decryption_contest(
               missing_guardian_key.owner_id(),
               CiphertextContest.createFrom(contest),
@@ -656,12 +656,12 @@ public class Decryptions {
   // Map(BALLOT_ID, DecryptionShare)
   static Map<String, DecryptionShare> reconstruct_decryption_shares_for_ballots(
           KeyCeremony.ElectionPublicKey public_key,
-          Iterable<SubmittedBallot> ballots,
+          Iterable<EncryptedBallot> ballots,
           Map<String, Map<String, CompensatedDecryptionShare>> shares, // Map(BALLOT_ID, Map(available_guardian, CompensatedDecryptionShare))
           Map<String, Group.ElementModQ> lagrange_coefficients) { // Map(available_guardian, ElementModQ)
 
     Map<String, DecryptionShare> result = new HashMap<>();
-    for (SubmittedBallot ballot : ballots) {
+    for (EncryptedBallot ballot : ballots) {
       Preconditions.checkArgument(shares.containsKey(ballot.object_id()));
       DecryptionShare ballot_share = reconstruct_decryption_share_for_ballot(
               public_key,
@@ -683,7 +683,7 @@ public class Decryptions {
    */
   public static DecryptionShare reconstruct_decryption_share_for_ballot(
           KeyCeremony.ElectionPublicKey public_key,
-          SubmittedBallot ballot,
+          EncryptedBallot ballot,
           Map<String, CompensatedDecryptionShare> shares, // Dict[AVAILABLE_GUARDIAN_ID, CompensatedBallotDecryptionShare]
           Map<String, Group.ElementModQ> lagrange_coefficients) { // Dict[AVAILABLE_GUARDIAN_ID, ElementModQ]
 

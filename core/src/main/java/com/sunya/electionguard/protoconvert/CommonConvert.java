@@ -1,5 +1,6 @@
 package com.sunya.electionguard.protoconvert;
 
+import at.favre.lib.bytes.Bytes;
 import com.google.protobuf.ByteString;
 import com.sunya.electionguard.ChaumPedersen;
 import com.sunya.electionguard.ElGamal;
@@ -87,22 +88,13 @@ public class CommonConvert {
 
     return new HashedElGamalCiphertext(
             importElementModP(ciphertext.getC0()),
-            ciphertext.getC1().toByteArray(),
+            Bytes.from((ciphertext.getC1().toByteArray())),
             importUInt256fromQ(ciphertext.getC2()),
             ciphertext.getNumBytes()
     );
   }
 
   public static ChaumPedersen.ChaumPedersenProof importChaumPedersenProof(CommonProto.GenericChaumPedersenProof proof) {
-    if (proof.hasPad() && proof.hasData()) {
-      // ver1
-      return new ChaumPedersen.ChaumPedersenProof(
-              importElementModP(proof.getPad()),
-              importElementModP(proof.getData()),
-              importElementModQ(proof.getChallenge()),
-              importElementModQ(proof.getResponse()));
-    }
-    // ver2
     return new ChaumPedersen.ChaumPedersenProof(
             importElementModQ(proof.getChallenge()),
             importElementModQ(proof.getResponse()));
@@ -110,8 +102,8 @@ public class CommonConvert {
 
   public static SchnorrProof importSchnorrProof(CommonProto.SchnorrProof proof) {
     return new SchnorrProof(
-            importElementModP(proof.getPublicKey()),
-            importElementModP(proof.getCommitment()),
+            null,
+            null,
             importElementModQ(proof.getChallenge()),
             importElementModQ(proof.getResponse()));
   }
@@ -153,7 +145,7 @@ public class CommonConvert {
   public static CommonProto.HashedElGamalCiphertext publishHashedCiphertext(HashedElGamalCiphertext ciphertext) {
     CommonProto.HashedElGamalCiphertext.Builder builder = CommonProto.HashedElGamalCiphertext.newBuilder();
     builder.setC0(publishElementModP(ciphertext.c0()));
-    builder.setC1(ByteString.copyFrom(ciphertext.c1()));
+    builder.setC1(ByteString.copyFrom(ciphertext.c1().array()));
     builder.setC2(publishUInt256(ciphertext.c2()));
     builder.setNumBytes(ciphertext.numBytes());
     return builder.build();
@@ -161,12 +153,6 @@ public class CommonConvert {
 
   public static CommonProto.GenericChaumPedersenProof publishChaumPedersenProof(ChaumPedersen.ChaumPedersenProof proof) {
     CommonProto.GenericChaumPedersenProof.Builder builder = CommonProto.GenericChaumPedersenProof.newBuilder();
-    if (proof.pad != null) {
-      builder.setPad(publishElementModP(proof.pad));
-    }
-    if (proof.data != null) {
-      builder.setData(publishElementModP(proof.data));
-    }
     builder.setChallenge(publishElementModQ(proof.challenge));
     builder.setResponse(publishElementModQ(proof.response));
     return builder.build();
@@ -174,12 +160,6 @@ public class CommonConvert {
 
   public static CommonProto.SchnorrProof publishSchnorrProof(SchnorrProof proof) {
     CommonProto.SchnorrProof.Builder builder = CommonProto.SchnorrProof.newBuilder();
-    if (proof.publicKey != null) {
-      builder.setPublicKey(publishElementModP(proof.publicKey));
-    }
-    if (proof.commitment != null) {
-      builder.setCommitment(publishElementModP(proof.commitment));
-    }
     builder.setChallenge(publishElementModQ(proof.challenge));
     builder.setResponse(publishElementModQ(proof.response));
     return builder.build();

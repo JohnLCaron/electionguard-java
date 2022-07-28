@@ -1,7 +1,7 @@
 package com.sunya.electionguard.input;
 
 import com.google.common.flogger.FluentLogger;
-import com.sunya.electionguard.CiphertextTally;
+import com.sunya.electionguard.ballot.EncryptedTally;
 import com.sunya.electionguard.DecryptionShare;
 import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.PlaintextTally;
@@ -18,11 +18,11 @@ public class PlaintextTallyInputValidation {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   private final Map<String, ElectionContest> contestMap;
-  private final CiphertextTally ctally;
+  private final EncryptedTally ctally;
   private final int nguardians;
   private final int navailable;
 
-  public PlaintextTallyInputValidation(Manifest election, CiphertextTally ctally, int nguardians, int navailable) {
+  public PlaintextTallyInputValidation(Manifest election, EncryptedTally ctally, int nguardians, int navailable) {
     this.contestMap = election.contests().stream().collect(Collectors.toMap(c -> c.contestId(), ElectionContest::new));
     this.ctally = ctally;
     this.nguardians = nguardians;
@@ -58,7 +58,7 @@ public class PlaintextTallyInputValidation {
         validateManifestContest(tallyContest, manifestContest, messes);
       }
 
-      CiphertextTally.Contest ciphertextContest = ctally.contests.get(tallyContest.contestId());
+      EncryptedTally.Contest ciphertextContest = ctally.contests.get(tallyContest.contestId());
       // Referential integrity of tallyContest id and cryptoHash
       if (ciphertextContest == null) {
         String msg = String.format("PlaintextTally.B.1 PlaintextTally Contest '%s' does not exist in CiphertextTally.Contest",
@@ -73,13 +73,13 @@ public class PlaintextTallyInputValidation {
   }
 
   /** Determine if contest is valid. */
-  void validateCiphertextContest(PlaintextTally.Contest tallyContest, CiphertextTally.Contest ciphertextContest, ValidationMessenger messes) {
+  void validateCiphertextContest(PlaintextTally.Contest tallyContest, EncryptedTally.Contest ciphertextContest, ValidationMessenger messes) {
     ValidationMessenger contestMesses = messes.nested("CiphertextContest", tallyContest.contestId());
 
     for (Map.Entry<String, PlaintextTally.Selection> entry : tallyContest.selections().entrySet()) {
       PlaintextTally.Selection tallySelection = entry.getValue();
 
-      CiphertextTally.Selection ciphertextSelection = ciphertextContest.selections.get(tallySelection.selectionId());
+      EncryptedTally.Selection ciphertextSelection = ciphertextContest.selections.get(tallySelection.selectionId());
       // Referential integrity of tallySelection id
       if (ciphertextSelection == null) {
         String msg = String.format("PlaintextTally.B.2 PlaintextTally Selection '%s' does not exist in CiphertextTally contest",

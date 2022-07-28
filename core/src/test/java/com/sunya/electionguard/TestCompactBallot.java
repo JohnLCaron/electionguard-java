@@ -1,5 +1,6 @@
 package com.sunya.electionguard;
 
+import com.sunya.electionguard.ballot.EncryptedBallot;
 import net.jqwik.api.Example;
 import java.util.Optional;
 
@@ -9,7 +10,7 @@ public class TestCompactBallot {
 
   PlaintextBallot plaintext_ballot;
   Group.ElementModQ ballot_nonce;
-  SubmittedBallot submitted_ballot;
+  EncryptedBallot submitted_ballot;
   InternalManifest internal_manifest;
   ElectionCryptoContext context;
 
@@ -28,7 +29,7 @@ public class TestCompactBallot {
             Optional.empty(), true).orElseThrow();
     this.ballot_nonce = ciphertext_ballot.nonce.orElseThrow();
 
-    this.submitted_ballot = SubmittedBallot.createFromCiphertextBallot(ciphertext_ballot, BallotBox.State.CAST);
+    this.submitted_ballot = EncryptedBallot.createFromCiphertextBallot(ciphertext_ballot, BallotBox.State.CAST);
   }
 
   @Example
@@ -51,7 +52,7 @@ public class TestCompactBallot {
     assertThat(compact_ballot).isNotNull();
     assertThat(this.submitted_ballot.object_id()).isEqualTo(compact_ballot.compact_plaintext_ballot.object_id);
 
-    SubmittedBallot expanded_ballot = CompactSubmittedBallot.expand_compact_submitted_ballot(
+    EncryptedBallot expanded_ballot = CompactSubmittedBallot.expand_compact_submitted_ballot(
             compact_ballot, this.internal_manifest, this.context);
 
     assertThat(expanded_ballot).isNotNull();

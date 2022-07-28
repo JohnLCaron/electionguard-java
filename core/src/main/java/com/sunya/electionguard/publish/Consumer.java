@@ -2,13 +2,14 @@ package com.sunya.electionguard.publish;
 
 import com.google.common.collect.AbstractIterator;
 import com.sunya.electionguard.*;
+import com.sunya.electionguard.ballot.EncryptedBallot;
 import com.sunya.electionguard.json.JsonConsumer;
 import com.sunya.electionguard.protoconvert.ElectionConfigConvert;
 import com.sunya.electionguard.protoconvert.ElectionInitializedConvert;
 import com.sunya.electionguard.protoconvert.ElectionResultsConvert;
-import com.sunya.electionguard.protoconvert.SubmittedBallotFromProto;
+import com.sunya.electionguard.protoconvert.EncryptedBallotConvert;
 import com.sunya.electionguard.protoconvert.PlaintextBallotFromProto;
-import com.sunya.electionguard.protoconvert.PlaintextTallyFromProto;
+import com.sunya.electionguard.protoconvert.PlaintextTallyConvert;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -79,7 +80,7 @@ public class Consumer {
   }
 
   // all submitted ballots cast or spoiled
-  public CloseableIterable<SubmittedBallot> iterateSubmittedBallots() {
+  public CloseableIterable<EncryptedBallot> iterateSubmittedBallots() {
     if (Files.exists(path.submittedBallotPath())) {
       return () -> new SubmittedBallotIterator(path.submittedBallotPath().toString(),
               b -> true);
@@ -89,20 +90,20 @@ public class Consumer {
   }
 
   // all submitted ballots cast only
-  public CloseableIterable<SubmittedBallot> iterateCastBallots() {
+  public CloseableIterable<EncryptedBallot> iterateCastBallots() {
     if (Files.exists(path.submittedBallotPath())) {
       return () -> new SubmittedBallotIterator(path.submittedBallotPath().toString(),
-              b -> b.getState() == CiphertextBallotProto.SubmittedBallot.BallotState.CAST);
+              b -> b.getState() == EncryptedBallotProto.EncryptedBallot.BallotState.CAST);
     } else {
       return CloseableIterableAdapter.empty();
     }
   }
 
   // all submitted ballots spoiled only
-  public CloseableIterable<SubmittedBallot> iterateSpoiledBallots() {
+  public CloseableIterable<EncryptedBallot> iterateSpoiledBallots() {
     if (Files.exists(path.submittedBallotPath())) {
       return () -> new SubmittedBallotIterator(path.submittedBallotPath().toString(),
-              b -> b.getState() == CiphertextBallotProto.SubmittedBallot.BallotState.SPOILED);
+              b -> b.getState() == EncryptedBallotProto.EncryptedBallot.BallotState.SPOILED);
     } else {
       return CloseableIterableAdapter.empty();
     }
@@ -128,24 +129,24 @@ public class Consumer {
   // These create iterators, so that we never have to read in all ballots at once.
   // Making them Closeable makes sure that the FileInputStream gets closed.
 
-  private static class SubmittedBallotIterator extends AbstractIterator<SubmittedBallot>
-                                     implements CloseableIterator<SubmittedBallot> {
+  private static class SubmittedBallotIterator extends AbstractIterator<EncryptedBallot>
+                                     implements CloseableIterator<EncryptedBallot> {
     private final String filename;
-    private final Predicate<CiphertextBallotProto.SubmittedBallot> filter;
+    private final Predicate<EncryptedBallotProto.EncryptedBallot> filter;
     private FileInputStream input;
-    SubmittedBallotIterator(String filename, Predicate<CiphertextBallotProto.SubmittedBallot> filter) {
+    SubmittedBallotIterator(String filename, Predicate<EncryptedBallotProto.EncryptedBallot> filter) {
       this.filename = filename;
       this.filter = filter;
     }
 
     @Override
-    protected SubmittedBallot computeNext() {
+    protected EncryptedBallot computeNext() {
       try {
         if (input == null) {
           this.input = new FileInputStream(filename);
         }
         while (true) {
-          CiphertextBallotProto.SubmittedBallot ballotProto = CiphertextBallotProto.SubmittedBallot.parseDelimitedFrom(input);
+          EncryptedBallotProto.EncryptedBallot ballotProto = EncryptedBallotProto.EncryptedBallot.parseDelimitedFrom(input);
           if (ballotProto == null) {
             input.close();
             return endOfData();
@@ -153,7 +154,7 @@ public class Consumer {
           if (!filter.test(ballotProto)) {
             continue; // skip it
           }
-          return SubmittedBallotFromProto.translateFromProto(ballotProto);
+          return EncryptedBallotConvert.importEncryptedBallot(ballotProto);
         }
       } catch (IOException e) {
         throw new RuntimeException(e);
@@ -240,7 +241,7 @@ public class Consumer {
           input.close();
           return endOfData();
         }
-        return PlaintextTallyFromProto.importPlaintextTally(tallyProto);
+        return PlaintextTallyConvert.importPlaintextTally(tallyProto);
       } catch (IOException e) {
         throw new RuntimeException(e);
       }

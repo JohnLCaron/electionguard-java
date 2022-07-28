@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.sunya.electionguard.ElectionPolynomial;
 import com.sunya.electionguard.Group;
 import com.sunya.electionguard.SchnorrProof;
+import com.sunya.electionguard.core.HashedElGamalCiphertext;
 
 import javax.annotation.Nullable;
 import java.math.BigInteger;
@@ -15,21 +16,23 @@ import static com.sunya.electionguard.Group.ElementModP;
 public class KeyCeremony2 {
 
   /**
-   * A Guardian's public key set of auxiliary and election keys, coefficient_commitments, and proofs.
-   * @param ownerId guardian object_id
+   * A Guardian's public key set of election keys, coefficient_commitments, and proofs.
+   * @param guardianId guardian object_id
    * @param guardianXCoordinate guardian x coordinate (aka sequence_order)
-   * @param coefficientProofs The election polynomial coefficients commitments and proofs
+   * @param coefficientCommitments The election polynomial coefficients commitments
+   * @param coefficientProofs The election polynomial coefficients proofs
    */
-  public record PublicKeySet(
-    String ownerId,
+  public record PublicKeys(
+    String guardianId,
     int guardianXCoordinate,
+    List<ElementModP> coefficientCommitments,
     List<SchnorrProof> coefficientProofs) {
 
-    public PublicKeySet {
+    public PublicKeys {
       coefficientProofs = List.copyOf(coefficientProofs);
     }
 
-    public ElementModP electionPublicKey() {
+    public ElementModP publicKey() {
       return coefficientCommitments().get(0);
     }
 
@@ -52,16 +55,16 @@ public class KeyCeremony2 {
    * @param generatingGuardianId The Id of the guardian that generated this backup
    * @param designatedGuardianId The Id of the guardian to receive this backup
    * @param designatedGuardianXCoordinate TThe x coordinate (aka sequence order) of the designated guardian
-   * @param coordinate TThe coordinate of generatingGuardianId polynomial's value at designatedGuardianXCoordinate
+   * @param encryptedCoordinate Encryption of the coordinate of generatingGuardianId polynomial's value at designatedGuardianXCoordinate, El(P𝑖_{l})
    */
-  public record PartialKeyBackup(
+  public record SecretKeyShare(
       String generatingGuardianId,
       String designatedGuardianId,
       int designatedGuardianXCoordinate,
-      @Nullable Group.ElementModQ coordinate,
+      HashedElGamalCiphertext encryptedCoordinate,
       @Nullable String error) {
 
-    public PartialKeyBackup {
+    public SecretKeyShare {
       if (error == null || error.trim().isEmpty()) {
         error = "";
       }
@@ -107,9 +110,9 @@ public class KeyCeremony2 {
   public static PartialKeyVerification verifyElectionPartialKeyChallenge(
           PartialKeyChallengeResponse response, List<ElementModP> coefficient_commitments) {
 
-    boolean ok = ElectionPolynomial.verify_polynomial_coordinate(
+    boolean ok = ElectionPolynomial.verifyPolynomialCoordinate(
             response.coordinate(),
-            BigInteger.valueOf(response.designatedGuardianXCoordinate()),
+            response.designatedGuardianXCoordinate(),
             coefficient_commitments);
 
     return new PartialKeyVerification(

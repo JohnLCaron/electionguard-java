@@ -11,12 +11,12 @@ import java.nio.charset.StandardCharsets;
 
 import static com.google.common.truth.Truth.assertThat;
 
-public class TestHashedElGamal {
+public class TestHashedElGamalCiphertext {
 
   @Example
   public void testHashedElGamal() {
     ElGamal.KeyPair keypair = TestUtils.elgamal_keypairs();
-    HashedElGamal subject = HashedElGamal.create(
+    HashedElGamalCiphertext subject = HashedElGamalCiphertext.create(
             Bytes.from("message"),
             keypair.public_key(),
             TestUtils.elements_mod_q());
@@ -52,7 +52,7 @@ public class TestHashedElGamal {
     System.out.printf("secretKey='%s'%n", secretKey.base16());
     System.out.printf("publicKey='%s'%n", publicKey.base16());
 
-    HashedElGamal subject = HashedElGamal.create(
+    HashedElGamalCiphertext subject = HashedElGamalCiphertext.create(
             Bytes.from("message"),
             publicKey,
             nonce);

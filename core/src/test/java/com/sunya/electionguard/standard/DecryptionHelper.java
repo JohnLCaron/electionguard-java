@@ -1,9 +1,9 @@
 package com.sunya.electionguard.standard;
 
 import com.sunya.electionguard.ElectionCryptoContext;
-import com.sunya.electionguard.CiphertextTally;
+import com.sunya.electionguard.ballot.EncryptedTally;
 import com.sunya.electionguard.DecryptionShare;
-import com.sunya.electionguard.SubmittedBallot;
+import com.sunya.electionguard.ballot.EncryptedBallot;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -22,8 +22,8 @@ public class DecryptionHelper {
           List<Guardian> available_guardians,
           DecryptionMediator mediator,
           ElectionCryptoContext context,
-          CiphertextTally ciphertext_tally,
-          List<SubmittedBallot> spoiled_ballots) {
+          EncryptedTally ciphertext_tally,
+          List<EncryptedBallot> spoiled_ballots) {
 
     announcement(
             available_guardians,
@@ -40,8 +40,8 @@ public class DecryptionHelper {
           int quorum,
           DecryptionMediator mediator,
           ElectionCryptoContext context,
-          CiphertextTally ciphertext_tally,
-          List<SubmittedBallot> spoiled_ballots) {
+          EncryptedTally ciphertext_tally,
+          List<EncryptedBallot> spoiled_ballots) {
 
     announcement(
             all_guardians.subList(0, quorum),
@@ -61,8 +61,8 @@ public class DecryptionHelper {
           List<KeyCeremony.ElectionPublicKey> all_guardians_keys,
           DecryptionMediator mediator,
           ElectionCryptoContext context,
-          CiphertextTally ciphertext_tally,
-          List<SubmittedBallot> spoiled_ballots) {
+          EncryptedTally ciphertext_tally,
+          List<EncryptedBallot> spoiled_ballots) {
 
             announcement(
             available_guardians,
@@ -82,8 +82,8 @@ public class DecryptionHelper {
           List<KeyCeremony.ElectionPublicKey> all_guardians_keys,
           DecryptionMediator mediator,
           ElectionCryptoContext context,
-          CiphertextTally ciphertext_tally,
-          List<SubmittedBallot> spoiled_ballots) {
+          EncryptedTally ciphertext_tally,
+          List<EncryptedBallot> spoiled_ballots) {
 
     if (spoiled_ballots == null) {
       spoiled_ballots = new ArrayList<>();
@@ -116,8 +116,8 @@ public class DecryptionHelper {
           List<Guardian> available_guardians,
           DecryptionMediator mediator,
           ElectionCryptoContext context,
-          CiphertextTally ciphertext_tally,
-          @Nullable List<SubmittedBallot> spoiled_ballots) {
+          EncryptedTally ciphertext_tally,
+          @Nullable List<EncryptedBallot> spoiled_ballots) {
 
    if (spoiled_ballots == null) {
      spoiled_ballots = new ArrayList<>();

@@ -9,7 +9,6 @@ import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.json.JsonConsumer;
 import com.sunya.electionguard.json.JsonPrivateData;
 import com.sunya.electionguard.json.JsonPublisher;
-import com.sunya.electionguard.json.PublisherOld;
 import net.jqwik.api.Example;
 
 import java.io.IOException;
@@ -71,7 +70,7 @@ public class TestGuardianSerializing {
     Path tmp = Files.createTempDirectory(null);
     tmp.toFile().deleteOnExit();
     this.outputDir = "/home/snake/tmp/publishTmp"; // tmp.toAbsolutePath().toString();
-    this.publisher = new JsonPublisher(outputDir, PublisherOld.Mode.createNew);
+    this.publisher = new JsonPublisher(outputDir, JsonPublisher.Mode.createNew);
     this.pdata = new JsonPrivateData(outputDir, true, true);
 
     this.guardians = new ArrayList<>();

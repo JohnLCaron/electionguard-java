@@ -2,9 +2,9 @@ package com.sunya.electionguard.json;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.sunya.electionguard.AvailableGuardian;
+import com.sunya.electionguard.ballot.DecryptingGuardian;
 import com.sunya.electionguard.BallotBox;
-import com.sunya.electionguard.CiphertextTally;
+import com.sunya.electionguard.ballot.EncryptedTally;
 import com.sunya.electionguard.ElectionConstants;
 import com.sunya.electionguard.ElectionCryptoContext;
 import com.sunya.electionguard.Encrypt;
@@ -12,7 +12,7 @@ import com.sunya.electionguard.Group;
 import com.sunya.electionguard.GuardianRecord;
 import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.PlaintextTally;
-import com.sunya.electionguard.SubmittedBallot;
+import com.sunya.electionguard.ballot.EncryptedBallot;
 import com.sunya.electionguard.publish.CloseableIterable;
 import com.sunya.electionguard.publish.CloseableIterableAdapter;
 import com.sunya.electionguard.publish.ElectionRecord;
@@ -36,10 +36,10 @@ public class ElectionRecordJson implements ElectionRecord {
   public final ElectionCryptoContext context;
   public final ImmutableList<GuardianRecord> guardianRecords; // may be empty
   public final ImmutableList<Encrypt.EncryptionDevice> devices; // may be empty
-  public final CloseableIterable<SubmittedBallot> acceptedBallots; // All ballots, not just cast! // may be empty
-  @Nullable public final CiphertextTally ciphertextTally;
+  public final CloseableIterable<EncryptedBallot> acceptedBallots; // All ballots, not just cast! // may be empty
+  @Nullable public final EncryptedTally ciphertextTally;
   @Nullable public final PlaintextTally decryptedTally;
-  public final ImmutableList<AvailableGuardian> availableGuardians; // may be empty
+  public final ImmutableList<DecryptingGuardian> availableGuardians; // may be empty
   public final ImmutableMap<String, Integer> contestVoteLimits;
   public CloseableIterable<PlaintextTally> spoiledBallotTallies;
 
@@ -49,11 +49,11 @@ public class ElectionRecordJson implements ElectionRecord {
                             ElectionCryptoContext context,
                             @Nullable List<GuardianRecord> guardianRecords,
                             @Nullable List<Encrypt.EncryptionDevice> devices,
-                            @Nullable CiphertextTally encryptedTally,
+                            @Nullable EncryptedTally encryptedTally,
                             @Nullable PlaintextTally decryptedTally,
-                            @Nullable CloseableIterable<SubmittedBallot> acceptedBallots,
+                            @Nullable CloseableIterable<EncryptedBallot> acceptedBallots,
                             @Nullable CloseableIterable<PlaintextTally> spoiledBallotTallies,
-                            @Nullable List<AvailableGuardian> availableGuardians) {
+                            @Nullable List<DecryptingGuardian> availableGuardians) {
     this.protoVersion = version;
     this.manifest = manifest;
     this.constants = constants;
@@ -73,7 +73,7 @@ public class ElectionRecordJson implements ElectionRecord {
     contestVoteLimits = builder.build();
   }
 
-  public ElectionRecordJson setBallots(CloseableIterable<SubmittedBallot> acceptedBallots,
+  public ElectionRecordJson setBallots(CloseableIterable<EncryptedBallot> acceptedBallots,
                                        CloseableIterable<PlaintextTally> spoiledBallots) {
     return new ElectionRecordJson(currentVersion,
             this.manifest,
@@ -104,7 +104,7 @@ public class ElectionRecordJson implements ElectionRecord {
   }
 
   @Override
-  public Iterable<SubmittedBallot> submittedBallots() {
+  public Iterable<EncryptedBallot> submittedBallots() {
     return acceptedBallots;
   }
 
@@ -145,7 +145,7 @@ public class ElectionRecordJson implements ElectionRecord {
 
   @org.jetbrains.annotations.Nullable
   @Override
-  public CiphertextTally ciphertextTally() {
+  public EncryptedTally ciphertextTally() {
     return ciphertextTally;
   }
 
@@ -161,7 +161,7 @@ public class ElectionRecordJson implements ElectionRecord {
   }
 
   @Override
-  public List<AvailableGuardian> availableGuardians() {
+  public List<DecryptingGuardian> availableGuardians() {
     return availableGuardians;
   }
 
@@ -194,9 +194,9 @@ public class ElectionRecordJson implements ElectionRecord {
   }
 
   /** Make a map of guardian_id, guardian's public_key. */
-  public Iterable<SubmittedBallot> spoiledBallots() {
-    ImmutableList.Builder<SubmittedBallot> result = ImmutableList.builder();
-    for (SubmittedBallot ballot : this.acceptedBallots) {
+  public Iterable<EncryptedBallot> spoiledBallots() {
+    ImmutableList.Builder<EncryptedBallot> result = ImmutableList.builder();
+    for (EncryptedBallot ballot : this.acceptedBallots) {
       if (ballot.state == BallotBox.State.SPOILED) {
         result.add(ballot);
       }

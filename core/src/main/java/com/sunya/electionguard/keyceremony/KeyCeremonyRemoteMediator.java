@@ -33,7 +33,7 @@ public class KeyCeremonyRemoteMediator {
   final int quorum;
   final List<KeyCeremonyTrusteeIF> trusteeProxies;
 
-  final Map<String, KeyCeremony2.PublicKeySet> publicKeysMap = new HashMap<>();
+  final Map<String, KeyCeremony2.PublicKeys> publicKeysMap = new HashMap<>();
   final List<Guardian> guardianRecords = new ArrayList<>();
 
   Group.ElementModP jointKey;
@@ -109,12 +109,12 @@ public class KeyCeremonyRemoteMediator {
   public boolean round1() {
     boolean fail = false;
     for (KeyCeremonyTrusteeIF trustee : trusteeProxies) {
-      Optional<KeyCeremony2.PublicKeySet> publicKeysO = trustee.sendPublicKeys();
+      Optional<KeyCeremony2.PublicKeys> publicKeysO = trustee.sendPublicKeys();
       if (publicKeysO.isEmpty()) {
         fail = true;
       } else {
-        KeyCeremony2.PublicKeySet publicKeys = publicKeysO.get();
-        this.publicKeysMap.put(publicKeys.ownerId(), publicKeys);
+        KeyCeremony2.PublicKeys publicKeys = publicKeysO.get();
+        this.publicKeysMap.put(publicKeys.guardianId(), publicKeys);
         // one could gather all PublicKeySets and send all at once, for 2*n, rather than n*n total messages.
         for (KeyCeremonyTrusteeIF recipient : trusteeProxies) {
           if (!trustee.id().equals(recipient.id())) {
@@ -143,11 +143,11 @@ public class KeyCeremonyRemoteMediator {
         if (!trustee.id().equals(recipient.id())) {
           // Each guardian T_i then publishes the encryption E_l(P_i(l)) for every other guardian T_l
           // This is the ElectionPartialKeyBackup
-          Optional<KeyCeremony2.PartialKeyBackup> backupO = trustee.sendPartialKeyBackup(recipient.id());
+          Optional<KeyCeremony2.SecretKeyShare> backupO = trustee.sendPartialKeyBackup(recipient.id());
           if (backupO.isEmpty()) {
             fail = true;
           } else {
-            KeyCeremony2.PartialKeyBackup backup = backupO.get();
+            KeyCeremony2.SecretKeyShare backup = backupO.get();
             Optional<KeyCeremony2.PartialKeyVerification> verifyO = recipient.verifyPartialKeyBackup(backup);
             if (verifyO.isEmpty()) {
               fail = true;
@@ -199,7 +199,7 @@ public class KeyCeremonyRemoteMediator {
           // alternate guardian. If, however, the published P_i(l) satisfy both the published
           // encryption and the equation above, the claim of malfeasance is dismissed and the key
           // generation process continues undeterred.
-          KeyCeremony2.PublicKeySet challengedGuardianKeys = publicKeysMap.get(response.generatingGuardianId());
+          KeyCeremony2.PublicKeys challengedGuardianKeys = publicKeysMap.get(response.generatingGuardianId());
           KeyCeremony2.PartialKeyVerification challenge_verify = KeyCeremony2.verifyElectionPartialKeyChallenge(response, challengedGuardianKeys.coefficientCommitments());
           if (!challenge_verify.error().isEmpty()) {
             System.out.printf("***FAILED to validate Guardian %s backup that was challenged by Guardian %s error = %s%n",
@@ -253,13 +253,13 @@ public class KeyCeremonyRemoteMediator {
 
   public boolean makeCoefficientValidationSets() {
     // The hashing is order dependent, use the x coordinate to sort.
-    List<KeyCeremony2.PublicKeySet> sorted = this.publicKeysMap.values().stream()
-            .sorted(Comparator.comparing(KeyCeremony2.PublicKeySet::guardianXCoordinate)).toList();
+    List<KeyCeremony2.PublicKeys> sorted = this.publicKeysMap.values().stream()
+            .sorted(Comparator.comparing(KeyCeremony2.PublicKeys::guardianXCoordinate)).toList();
 
     List<Group.ElementModP> commitments = new ArrayList<>();
-    for (KeyCeremony2.PublicKeySet keys : sorted) {
+    for (KeyCeremony2.PublicKeys keys : sorted) {
       GuardianRecord guardianRecord = new GuardianRecord(
-              keys.ownerId(),
+              keys.guardianId(),
               keys.guardianXCoordinate(),
               keys.coefficientCommitments().get(0),
               keys.coefficientCommitments(),

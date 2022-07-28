@@ -1,8 +1,8 @@
 package com.sunya.electionguard.json;
 
 import com.google.common.base.Preconditions;
-import com.sunya.electionguard.AvailableGuardian;
-import com.sunya.electionguard.CiphertextTally;
+import com.sunya.electionguard.ballot.DecryptingGuardian;
+import com.sunya.electionguard.ballot.EncryptedTally;
 import com.sunya.electionguard.ElectionConstants;
 import com.sunya.electionguard.ElectionCryptoContext;
 import com.sunya.electionguard.Encrypt;
@@ -10,7 +10,7 @@ import com.sunya.electionguard.Group;
 import com.sunya.electionguard.GuardianRecord;
 import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.PlaintextTally;
-import com.sunya.electionguard.SubmittedBallot;
+import com.sunya.electionguard.ballot.EncryptedBallot;
 import com.sunya.electionguard.publish.CloseableIterableAdapter;
 import com.sunya.electionguard.publish.ElectionRecord;
 
@@ -35,11 +35,11 @@ public class JsonConsumer {
   }
 
   public JsonConsumer(String topDir) throws IOException {
-    publisher = new JsonPublisher(topDir, PublisherOld.Mode.readonly);
+    publisher = new JsonPublisher(topDir, JsonPublisher.Mode.readonly);
   }
 
   public static JsonConsumer fromElectionRecord(String electionRecordDir) throws IOException {
-    return new JsonConsumer(new JsonPublisher(Path.of(electionRecordDir), PublisherOld.Mode.readonly));
+    return new JsonConsumer(new JsonPublisher(Path.of(electionRecordDir), JsonPublisher.Mode.readonly));
   }
 
   public String location() {
@@ -115,7 +115,7 @@ public class JsonConsumer {
   }
 
   @Nullable
-  public CiphertextTally ciphertextTally() throws IOException {
+  public EncryptedTally ciphertextTally() throws IOException {
     if (Files.exists(publisher.encryptedTallyPath())) {
       return ConvertFromJson.readCiphertextTally(publisher.encryptedTallyPath().toString());
     }
@@ -131,16 +131,16 @@ public class JsonConsumer {
     return result;
   }
 
-  public List<SubmittedBallot> acceptedBallots() throws IOException {
-    List<SubmittedBallot> result = new ArrayList<>();
+  public List<EncryptedBallot> acceptedBallots() throws IOException {
+    List<EncryptedBallot> result = new ArrayList<>();
     for (File file : publisher.ballotFiles()) {
-      SubmittedBallot fromPython = ConvertFromJson.readSubmittedBallot(file.getAbsolutePath());
+      EncryptedBallot fromPython = ConvertFromJson.readSubmittedBallot(file.getAbsolutePath());
       result.add(fromPython);
     }
     return result;
   }
 
-  public List<AvailableGuardian> availableGuardians() throws IOException {
+  public List<DecryptingGuardian> availableGuardians() throws IOException {
     if (!publisher.coefficientsPath().toFile().exists()) {
       return new ArrayList<>();
     }
@@ -148,10 +148,10 @@ public class JsonConsumer {
             GuardianRecord::guardianId, gr -> gr));
     LagrangeCoefficientsPojo coeffPojo = ConvertFromJson.readCoefficients(publisher.coefficientsPath().toString());
     // Preconditions.checkArgument(grs.size() == pojo.coefficients.size());
-    List<AvailableGuardian> result = new ArrayList<>();
+    List<DecryptingGuardian> result = new ArrayList<>();
     for (Map.Entry<String, Group.ElementModQ> entry : coeffPojo.coefficients.entrySet()) {
       GuardianRecord gr = grMap.get(entry.getKey());
-      AvailableGuardian avail = new AvailableGuardian(entry.getKey(), gr.xCoordinate(), entry.getValue());
+      DecryptingGuardian avail = new DecryptingGuardian(entry.getKey(), gr.xCoordinate(), entry.getValue());
       result.add(avail);
     }
     return result;

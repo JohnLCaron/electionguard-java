@@ -1,13 +1,6 @@
 package com.sunya.electionguard.json;
 
-import com.sunya.electionguard.CiphertextTally;
-import com.sunya.electionguard.CompareHelper;
-import com.sunya.electionguard.DecryptionShare;
-import com.sunya.electionguard.GuardianRecord;
-import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.core.UInt256;
-import com.sunya.electionguard.protoconvert.ElectionRecordFromProto;
-import com.sunya.electionguard.protoconvert.ElectionRecordToProto;
 import com.sunya.electionguard.protoconvert.ElectionResultsConvert;
 import com.sunya.electionguard.publish.ElectionRecord;
 import com.sunya.electionguard.publish.Consumer;
@@ -20,15 +13,12 @@ import electionguard.ballot.ElectionInitialized;
 import electionguard.ballot.Guardian;
 import electionguard.ballot.TallyResult;
 import electionguard.protogen.ElectionRecordProto;
-import electionguard.protogen.ElectionRecordProto1;
 import net.jqwik.api.Example;
 import net.jqwik.api.lifecycle.BeforeContainer;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
-import java.util.Map;
 
 import static com.google.common.truth.Truth.assertThat;
 import static java.util.Collections.emptyList;
@@ -60,31 +50,6 @@ public class TestPythonSampleElectionRecord {
     assertThat(consumer.acceptedBallots()).isNotEmpty();
   }
 
-  // @Example
-  public void testElectionRecordProto1() throws IOException {
-    ElectionRecordProto1.ElectionRecord protoFromJson = ElectionRecordToProto.buildElectionRecord(
-            consumer.manifest(),
-            consumer.constants(),
-            consumer.context(),
-            consumer.guardianRecords(),
-            consumer.devices(),
-            consumer.ciphertextTally(),
-            consumer.decryptedTally(),
-            consumer.availableGuardians());
-
-    // doesnt work
-    ElectionRecord roundtrip = ElectionRecordFromProto.translateFromProto(protoFromJson);
-    assertThat(roundtrip.manifest()).isEqualTo(consumer.manifest());
-    CiphertextTally expected = consumer.ciphertextTally();
-    assertThat(roundtrip.ciphertextTally()).isEqualTo(expected);
-    PlaintextTally expectedDecryptedTally = consumer.decryptedTally();
-    CompareHelper.comparePlaintextTally(roundtrip.decryptedTally(), expectedDecryptedTally);
-    assertThat(roundtrip.decryptedTally()).isEqualTo(expectedDecryptedTally);
-    List<GuardianRecord> records = consumer.guardianRecords();
-    roundtrip.guardians().stream().forEach(g -> CompareHelper.compareGuardian(g, records));
-    assertThat(roundtrip.availableGuardians()).isEqualTo(consumer.availableGuardians());
-  }
-
   // DecryptionResult
 
   @Example
@@ -95,7 +60,7 @@ public class TestPythonSampleElectionRecord {
     compareDecryptionResult(roundtrip, dresult);
 
     assertThat(roundtrip.getDecryptedTally()).isEqualTo(consumer.decryptedTally());
-    assertThat(roundtrip.getAvailableGuardians()).isEqualTo(consumer.availableGuardians());
+    assertThat(roundtrip.getDecryptingGuardians()).isEqualTo(consumer.availableGuardians());
   }
 
   void compareDecryptionResult(DecryptionResult roundtrip, DecryptionResult expected) throws IOException {
@@ -105,7 +70,7 @@ public class TestPythonSampleElectionRecord {
     assertThat(roundtrip).isEqualTo(expected);
 
     assertThat(roundtrip.getDecryptedTally()).isEqualTo(expected.getDecryptedTally());
-    assertThat(roundtrip.getAvailableGuardians()).isEqualTo(expected.getAvailableGuardians());
+    assertThat(roundtrip.getDecryptingGuardians()).isEqualTo(expected.getDecryptingGuardians());
   }
 
   void compareConfig(ElectionConfig config, ElectionConfig expected) {

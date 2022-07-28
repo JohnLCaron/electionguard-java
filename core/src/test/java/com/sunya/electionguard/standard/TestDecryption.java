@@ -7,7 +7,7 @@ import com.sunya.electionguard.BallotBox;
 import com.sunya.electionguard.BallotFactory;
 import com.sunya.electionguard.CiphertextBallot;
 import com.sunya.electionguard.ElectionCryptoContext;
-import com.sunya.electionguard.CiphertextTally;
+import com.sunya.electionguard.ballot.EncryptedTally;
 import com.sunya.electionguard.CiphertextTallyBuilder;
 import com.sunya.electionguard.DecryptWithShares;
 import com.sunya.electionguard.DecryptionShare;
@@ -20,7 +20,7 @@ import com.sunya.electionguard.InternalManifest;
 import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.PlaintextBallot;
 import com.sunya.electionguard.PlaintextTally;
-import com.sunya.electionguard.SubmittedBallot;
+import com.sunya.electionguard.ballot.EncryptedBallot;
 import com.sunya.electionguard.TallyTestHelper;
 import com.sunya.electionguard.TestProperties;
 import net.jqwik.api.Example;
@@ -51,10 +51,10 @@ public class TestDecryption extends TestProperties {
   ElectionCryptoContext context;
   PlaintextBallot fake_cast_ballot;
   PlaintextBallot fake_spoiled_ballot;
-  SubmittedBallot encrypted_fake_cast_ballot;
-  SubmittedBallot encrypted_fake_spoiled_ballot;
+  EncryptedBallot encrypted_fake_cast_ballot;
+  EncryptedBallot encrypted_fake_spoiled_ballot;
   Map<String, Integer> expected_plaintext_tally;
-  CiphertextTally publishedTally;
+  EncryptedTally publishedTally;
   BallotBox ballot_box;
 
   public TestDecryption() {
@@ -207,7 +207,7 @@ public class TestDecryption extends TestProperties {
 
   @Example
   public void test_compute_selection() {
-    CiphertextTally.Selection first_selection =
+    EncryptedTally.Selection first_selection =
             this.publishedTally.contests.values().stream().flatMap(contest -> contest.selections.values().stream())
                     .findFirst().orElseThrow(RuntimeException::new);
 
@@ -226,7 +226,7 @@ public class TestDecryption extends TestProperties {
     ElectionPublicKey available_guardian_2_key = available_guardian_2.share_key();
     ElectionPublicKey missing_guardian_key = missing_guardian.share_key();
             
-    CiphertextTally.Selection first_selection =
+    EncryptedTally.Selection first_selection =
             this.publishedTally.contests.values().stream().flatMap(contest -> contest.selections.values().stream())
                     .findFirst().orElseThrow(RuntimeException::new);
 
@@ -337,7 +337,7 @@ public class TestDecryption extends TestProperties {
     Guardian available_guardian = this.guardians.get(0);
     Guardian missing_guardian = this.guardians.get(2);
 
-    CiphertextTally.Selection first_selection =
+    EncryptedTally.Selection first_selection =
             this.publishedTally.contests.values().stream().flatMap(contest -> contest.selections.values().stream())
                     .findFirst().orElseThrow(RuntimeException::new);
     
@@ -367,7 +367,7 @@ public class TestDecryption extends TestProperties {
     Map<String, ElectionPartialKeyBackup> missing_guardian_backups = missing_guardian.share_election_partial_key_backups().stream()
             .collect(Collectors.toMap(b -> b.designated_id(), b -> b));
   
-    CiphertextTally tally = this.publishedTally;
+    EncryptedTally tally = this.publishedTally;
 
     Map<String, DecryptionShare.CompensatedDecryptionShare> compensated_shares =
             available_guardians.stream().collect(Collectors.toMap(
@@ -402,7 +402,7 @@ public class TestDecryption extends TestProperties {
     Map<String, ElectionPartialKeyBackup> missing_guardian_backups = missing_guardian.share_election_partial_key_backups().stream()
             .collect(Collectors.toMap(b -> b.designated_id(), b -> b));
 
-    SubmittedBallot ballot = encrypted_fake_cast_ballot;
+    EncryptedBallot ballot = encrypted_fake_cast_ballot;
 
     Map<String, DecryptionShare.CompensatedDecryptionShare> compensated_ballot_shares = new HashMap<>();
     for (Guardian available_guardian : available_guardians) {
@@ -440,7 +440,7 @@ public class TestDecryption extends TestProperties {
     Map<String, ElectionPartialKeyBackup> missing_guardian_backups = missing_guardian.share_election_partial_key_backups().stream()
             .collect(Collectors.toMap(b -> b.designated_id(), b -> b));
 
-    SubmittedBallot ballot = encrypted_fake_spoiled_ballot;
+    EncryptedBallot ballot = encrypted_fake_spoiled_ballot;
 
     Map<String, DecryptionShare.CompensatedDecryptionShare> compensated_shares = new HashMap<>();
     for (Guardian available_guardian : available_guardians) {

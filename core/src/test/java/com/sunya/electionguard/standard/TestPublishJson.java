@@ -10,12 +10,11 @@ import com.sunya.electionguard.Group;
 import com.sunya.electionguard.GuardianRecord;
 import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.InternalManifest;
-import com.sunya.electionguard.CiphertextTally;
+import com.sunya.electionguard.ballot.EncryptedTally;
 import com.sunya.electionguard.PlaintextBallot;
 import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.json.JsonPrivateData;
 import com.sunya.electionguard.json.JsonPublisher;
-import com.sunya.electionguard.json.PublisherOld;
 import net.jqwik.api.Example;
 import net.jqwik.api.lifecycle.BeforeProperty;
 
@@ -56,10 +55,10 @@ public class TestPublishJson {
     List<GuardianRecord> coefficients = ImmutableList.of(guardian.publish());
     PlaintextTally plaintext_tally = new PlaintextTally("PlaintextTallyId", ImmutableMap.of());
 
-    CiphertextTally ciphertext_tally =
+    EncryptedTally ciphertext_tally =
             new CiphertextTallyBuilder("CiphertextTallyId", metadata, context).build();
 
-    JsonPublisher publisher = new JsonPublisher(outputDir, PublisherOld.Mode.createNew);
+    JsonPublisher publisher = new JsonPublisher(outputDir, JsonPublisher.Mode.createNew);
     publisher.writeElectionRecordJson(
             election,
             context,

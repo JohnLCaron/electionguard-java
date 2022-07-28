@@ -5,7 +5,7 @@ import com.sunya.electionguard.BallotBox;
 import com.sunya.electionguard.BallotFactory;
 import com.sunya.electionguard.CiphertextBallot;
 import com.sunya.electionguard.ElectionCryptoContext;
-import com.sunya.electionguard.CiphertextTally;
+import com.sunya.electionguard.ballot.EncryptedTally;
 import com.sunya.electionguard.CiphertextTallyBuilder;
 import com.sunya.electionguard.DecryptionShare;
 import com.sunya.electionguard.ElectionBuilder;
@@ -17,7 +17,7 @@ import com.sunya.electionguard.InternalManifest;
 import com.sunya.electionguard.Manifest;
 import com.sunya.electionguard.PlaintextBallot;
 import com.sunya.electionguard.PlaintextTally;
-import com.sunya.electionguard.SubmittedBallot;
+import com.sunya.electionguard.ballot.EncryptedBallot;
 import com.sunya.electionguard.TallyTestHelper;
 import com.sunya.electionguard.TestProperties;
 import net.jqwik.api.Example;
@@ -56,11 +56,11 @@ public class TestDecryptionMediator extends TestProperties {
   BallotBox ballot_box;
   PlaintextBallot fake_cast_ballot;
   PlaintextBallot fake_spoiled_ballot;
-  SubmittedBallot encrypted_fake_cast_ballot;
-  SubmittedBallot encrypted_fake_spoiled_ballot;
-  CiphertextTally ciphertext_tally;
+  EncryptedBallot encrypted_fake_cast_ballot;
+  EncryptedBallot encrypted_fake_spoiled_ballot;
+  EncryptedTally ciphertext_tally;
 
-  List<SubmittedBallot> spoiled_ballots = new ArrayList<>();
+  List<EncryptedBallot> spoiled_ballots = new ArrayList<>();
 
   public TestDecryptionMediator() {
 
@@ -266,7 +266,7 @@ public class TestDecryptionMediator extends TestProperties {
     List<PlaintextBallot> plaintext_ballots = electionTestHelper.plaintext_voted_ballots(imanifest, nballots);
     Map<String, Integer> expected_plaintext_tally = TallyTestHelper.accumulate_plaintext_ballots(plaintext_ballots);
 
-    CiphertextTally encrypted_tally = this.generate_encrypted_tally(desc.internalManifest, desc.context, plaintext_ballots);
+    EncryptedTally encrypted_tally = this.generate_encrypted_tally(desc.internalManifest, desc.context, plaintext_ballots);
 
     DecryptionMediator mediator = new DecryptionMediator(desc.context);
     DecryptionHelper.perform_decryption_setup(this.guardians, mediator, desc.context, encrypted_tally, new ArrayList<>());
@@ -276,7 +276,7 @@ public class TestDecryptionMediator extends TestProperties {
     assertThat(selections).isEqualTo(expected_plaintext_tally);
   }
 
-  private CiphertextTally generate_encrypted_tally(
+  private EncryptedTally generate_encrypted_tally(
           InternalManifest imanifest,
           ElectionCryptoContext context,
           List<PlaintextBallot> ballots) {

@@ -5,8 +5,8 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.ListMultimap;
 import com.google.common.flogger.FluentLogger;
 import com.sunya.electionguard.BallotBox;
-import com.sunya.electionguard.CiphertextTally;
-import com.sunya.electionguard.SubmittedBallot;
+import com.sunya.electionguard.ballot.EncryptedTally;
+import com.sunya.electionguard.ballot.EncryptedBallot;
 import com.sunya.electionguard.CiphertextBallot;
 import com.sunya.electionguard.ElGamal;
 
@@ -19,10 +19,10 @@ import java.util.List;
 public class BallotAggregationVerifier {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
-  final Iterable<SubmittedBallot> acceptedBallots;
-  final CiphertextTally encryptedTally;
+  final Iterable<EncryptedBallot> acceptedBallots;
+  final EncryptedTally encryptedTally;
 
-  public BallotAggregationVerifier(Iterable<SubmittedBallot> acceptedBallots, CiphertextTally encryptedTally) {
+  public BallotAggregationVerifier(Iterable<EncryptedBallot> acceptedBallots, EncryptedTally encryptedTally) {
     this.acceptedBallots = acceptedBallots;
     this.encryptedTally = encryptedTally;
   }
@@ -42,9 +42,9 @@ public class BallotAggregationVerifier {
 
     int ncontests = 0;
     int nselections = 0;
-    for (CiphertextTally.Contest contest : encryptedTally.contests.values()) {
+    for (EncryptedTally.Contest contest : encryptedTally.contests.values()) {
       ncontests++;
-      for (CiphertextTally.Selection selection : contest.selections.values()) {
+      for (EncryptedTally.Selection selection : contest.selections.values()) {
         nselections++;
         String key = contest.object_id() + "." + selection.object_id();
         List<ElGamal.Ciphertext> encryptions = agg.selectionEncryptions.get(key);
@@ -73,8 +73,8 @@ public class BallotAggregationVerifier {
   private static class SelectionAggregator {
     ListMultimap<String, ElGamal.Ciphertext> selectionEncryptions = ArrayListMultimap.create();
     int nballotsCast = 0;
-    SelectionAggregator(Iterable<SubmittedBallot> ballots) {
-      for (SubmittedBallot ballot : ballots) {
+    SelectionAggregator(Iterable<EncryptedBallot> ballots) {
+      for (EncryptedBallot ballot : ballots) {
         if (ballot.state == BallotBox.State.CAST) {
           nballotsCast++;
           for (CiphertextBallot.Contest contest : ballot.contests) {

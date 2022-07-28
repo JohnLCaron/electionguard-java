@@ -8,7 +8,8 @@ import com.sunya.electionguard.Group;
 import com.sunya.electionguard.PlaintextTally;
 import com.sunya.electionguard.publish.Consumer;
 import com.sunya.electionguard.publish.ElectionRecord;
-import com.sunya.electionguard.json.PublisherOld;
+import com.sunya.electionguard.publish.Publisher;
+import electionguard.ballot.DecryptionResult;
 import net.jqwik.api.Example;
 
 import java.io.IOException;
@@ -195,9 +196,15 @@ public class TestAttackTallyDecryption {
   }
 
   boolean publish(String inputDir, String publishDir, ElectionRecord electionRecord, PlaintextTally decryptedTally) throws IOException {
-    PublisherOld publisher = new PublisherOld(publishDir, PublisherOld.Mode.createNew);
-    publisher.writeDecryptedTallyProto(electionRecord, decryptedTally);
+    Publisher publisher = new Publisher(publishDir, Publisher.Mode.createNew);
+    // publisher.writeDecryptedTallyProto(electionRecord, decryptedTally);
     publisher.copyAcceptedBallots(inputDir);
+    //     val tallyResult: TallyResult,
+    //    val decryptedTally: PlaintextTally,
+    //    val decryptingGuardians: List<DecryptingGuardian>,
+    //    val metadata: Map<String, String> = emptyMap(),
+    //DecryptionResult results = new DecryptionResult(electionRecord, decryptedTally, decryptingGuardians);
+    //publisher.writeDecryptionResults(results);
     return true;
   }
 
