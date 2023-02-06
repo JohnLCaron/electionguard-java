@@ -5,6 +5,7 @@ import com.google.common.collect.Iterables;
 
 import javax.annotation.concurrent.Immutable;
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
 
@@ -114,8 +115,11 @@ public class Group {
       return between(BigInteger.ZERO, elem, primes.smallPrime);
     }
 
+    /** Returns the bytes of the element with the number of bytes as a multiple of 4 .
+     * This matches the pattern that is implemented in the python library */
     public Bytes bytes() {
-      return Group.normalize(this.elem, primes.sizeQ);
+      byte[] allBytes = this.elem.toByteArray();
+      return Bytes.wrap(Arrays.copyOfRange(allBytes, allBytes[0] == 0 ? 1 : 0, allBytes.length));
     }
   }
 
@@ -131,8 +135,11 @@ public class Group {
       return between(BigInteger.ZERO, elem, primes.largePrime);
     }
 
+    /** Returns the bytes of the element with the number of bytes as a multiple of 4 .
+     * This matches the pattern that is implemented in the python library */
     public Bytes bytes() {
-      return Group.normalize(this.elem, primes.sizeP);
+      byte[] allBytes = this.elem.toByteArray();
+      return Bytes.wrap(Arrays.copyOfRange(allBytes, allBytes[0] == 0 ? 1 : 0, allBytes.length));
     }
 
     /**
