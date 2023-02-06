@@ -233,10 +233,10 @@ public class Group {
   }
 
   /**
-    Given a BigInteger, returns an ElementModQ. Allows
-    for the input to be out-of-bounds, and thus creating an invalid
-    element (i.e., outside of [0,Q)). Useful for tests of it
-    you're absolutely, positively, certain the input is in-bounds.
+   Given a BigInteger, returns an ElementModQ. Allows
+   for the input to be out-of-bounds, and thus creating an invalid
+   element (i.e., outside of [0,Q)). Useful for tests of it
+   you're absolutely, positively, certain the input is in-bounds.
    */
   public static ElementModQ int_to_q_unchecked(BigInteger biggy) {
     return new ElementModQ(biggy);
