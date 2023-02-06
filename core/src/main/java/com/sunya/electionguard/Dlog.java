@@ -39,7 +39,7 @@ public class Dlog {
     BigInteger G = getPrimes().generator;
     while (!e.equals(dlog_max_elem)) {
       dlog_max_exp = dlog_max_exp + 1;
-      if (dlog_max_exp > MAX) {
+      if (dlog_max_exp > max) {
         throw new RuntimeException(String.format("Discrete_log_internal exceeds max %d%n", dlog_max_exp));
       }
       dlog_max_elem = mult_pi(G, dlog_max_elem);
