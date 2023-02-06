@@ -13,13 +13,17 @@ import static com.sunya.electionguard.Group.*;
  * Performance will degrade if it's much larger.
  */
 public class Dlog {
-  private static final int MAX = 1000; // max vote count - TODO should be settable
+  private static int max = 1000; // max vote count - TODO should be settable
   private static final Cache<BigInteger, Integer> cache = CacheBuilder.newBuilder().build();
   static {
     cache.put(BigInteger.ONE, 0);
   }
   private static BigInteger dlog_max_elem = BigInteger.ONE;
   private static int dlog_max_exp = 0;
+
+  public static void setMax(int max) {
+    Dlog.max = max;
+  }
 
   public static Integer discrete_log(ElementModP elem) {
     Integer result = cache.getIfPresent(elem.elem);
@@ -35,7 +39,7 @@ public class Dlog {
     BigInteger G = getPrimes().generator;
     while (!e.equals(dlog_max_elem)) {
       dlog_max_exp = dlog_max_exp + 1;
-      if (dlog_max_exp > MAX) {
+      if (dlog_max_exp > max) {
         throw new RuntimeException(String.format("Discrete_log_internal exceeds max %d%n", dlog_max_exp));
       }
       dlog_max_elem = mult_pi(G, dlog_max_elem);
