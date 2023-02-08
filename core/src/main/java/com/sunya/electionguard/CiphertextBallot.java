@@ -87,7 +87,11 @@ public class CiphertextBallot implements Hash.CryptoHashCheckable {
     List<Group.ElementModQ> contest_hashes = contests.stream()
             .sorted(Comparator.comparingInt(CiphertextBallot.Contest::sequence_order))
             .map(c -> c.crypto_hash).toList();
-    return Hash.hash_elems(ballotId, manifestHash, contest_hashes);
+    List<Object> hashInput = new ArrayList<>();
+    hashInput.add(ballotId);
+    hashInput.add((manifestHash));
+    hashInput.addAll(contest_hashes);
+    return Hash.hash_elems(hashInput);
   }
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -153,7 +157,11 @@ public class CiphertextBallot implements Hash.CryptoHashCheckable {
             .sorted(Comparator.comparingInt(Selection::sequence_order))
             .map(s -> s.crypto_hash)
             .toList();
-    Group.ElementModQ result = Hash.hash_elems(object_id, seed_hash, selection_hashes);
+    List<Object> hashInput = new ArrayList<>();
+    hashInput.add(object_id);
+    hashInput.add(seed_hash);
+    hashInput.addAll(selection_hashes);
+    Group.ElementModQ result = Hash.hash_elems(hashInput);
     logger.atFine().log("%n%n ciphertext_ballot_context_crypto_hash:%n %s%n %s%n %s%n%s%n", object_id, seed_hash, selection_hashes, result);
     return result;
   }
