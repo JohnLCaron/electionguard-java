@@ -3,10 +3,7 @@ package com.sunya.electionguard;
 import com.google.common.flogger.FluentLogger;
 
 import javax.annotation.concurrent.Immutable;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * An encrypted ballot that is accepted for inclusion in election results. An accepted ballot is either cast or spoiled.
@@ -56,8 +53,11 @@ public class SubmittedBallot extends CiphertextBallot {
             .sorted(Comparator.comparingInt(CiphertextBallot.Contest::sequence_order))
             .map(c -> c.crypto_hash)
             .toList();
-
-    Group.ElementModQ crypto_hash = Hash.hash_elems(ballotId, manifest_hash, contest_hashes);
+    List<Object> hashInput = new ArrayList<>();
+    hashInput.add(ballotId);
+    hashInput.add(manifest_hash);
+    hashInput.addAll(contest_hashes);
+    Group.ElementModQ crypto_hash = Hash.hash_elems(hashInput.toArray());
 
     long timestamp = timestampO.orElse(System.currentTimeMillis());
     Group.ElementModQ code_seed = code_seedO.orElse(manifest_hash); // LOOK spec #6.A says H0 = H(Qbar)

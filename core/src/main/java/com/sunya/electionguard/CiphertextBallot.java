@@ -91,7 +91,7 @@ public class CiphertextBallot implements Hash.CryptoHashCheckable {
     hashInput.add(ballotId);
     hashInput.add((manifestHash));
     hashInput.addAll(contest_hashes);
-    return Hash.hash_elems(hashInput);
+    return Hash.hash_elems(hashInput.toArray());
   }
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -161,7 +161,7 @@ public class CiphertextBallot implements Hash.CryptoHashCheckable {
     hashInput.add(object_id);
     hashInput.add(seed_hash);
     hashInput.addAll(selection_hashes);
-    Group.ElementModQ result = Hash.hash_elems(hashInput);
+    Group.ElementModQ result = Hash.hash_elems(hashInput.toArray());
     logger.atFine().log("%n%n ciphertext_ballot_context_crypto_hash:%n %s%n %s%n %s%n%s%n", object_id, seed_hash, selection_hashes, result);
     return result;
   }
