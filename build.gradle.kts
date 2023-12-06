@@ -6,6 +6,8 @@ plugins {
     base
     `java-library`
     alias(libs.plugins.owaspDepCheckPlugin)
+    `maven-publish`
+    signing
 }
 
 subprojects {
@@ -61,6 +63,22 @@ tasks.test {
     include("**/Test*.class")
 }
 
+
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            groupId = "edu.kit.kastel.electionguard"
+            artifactId = "electionguard"
+            version = "1.1"
+
+            from(components["java"])
+        }
+    }
+}
+
+
+
 tasks.withType<Javadoc> {
     group = "documentation"
 
@@ -76,3 +94,4 @@ tasks.withType<Javadoc> {
     // So, turn it off.
     (options as StandardJavadocDocletOptions).addStringOption("Xdoclint:none", "-quiet")
 }
+
