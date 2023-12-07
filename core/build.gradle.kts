@@ -13,6 +13,7 @@ plugins {
     `java-library`
     alias(libs.plugins.protobufPlugin)
     alias(libs.plugins.execforkPlugin)
+    `maven-publish`
 
     kotlin("jvm") version "1.6.21"
 }
@@ -133,5 +134,17 @@ tasks {
         exclude("/META-INF/PFOPENSO.*")
         // sourcesMain.allSource.forEach { println("add from sources: ${it.name}") }
         from(sourcesMain.output)
+    }
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            groupId = "edu.kit.kastel.electionguard.core"
+            artifactId = "electionguard.core"
+            version = "1.1"
+
+            from(components["java"])
+        }
     }
 }
