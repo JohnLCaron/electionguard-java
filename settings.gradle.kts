@@ -18,7 +18,6 @@ dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
     repositories {
         mavenLocal()
-        jcenter() // jcommander not on maven central TODO remove
         mavenCentral()
         gradlePluginPortal()
     }

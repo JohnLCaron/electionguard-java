@@ -7,7 +7,6 @@ plugins {
     `java-library`
     alias(libs.plugins.owaspDepCheckPlugin)
     `maven-publish`
-    signing
 }
 
 subprojects {
@@ -76,8 +75,6 @@ publishing {
         }
     }
 }
-
-
 
 tasks.withType<Javadoc> {
     group = "documentation"
