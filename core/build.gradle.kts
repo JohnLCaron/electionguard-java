@@ -80,9 +80,9 @@ sourceSets {
 }
 
 java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(11))
-    }
+    // see Notes section in README.md 
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
 tasks.test {
