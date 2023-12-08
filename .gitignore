@@ -16,7 +16,7 @@ atlassian-ide-plugin.xml
 */*/out/
 
 # Ignore the Gradle cache directory.
-#.gradle/
+.gradle/
 # Ignore the output that Gradle generates in the "build/" directories...
 build/
 
@@ -34,3 +34,5 @@ Thumbs.db
 *.swp
 *.*~
 ._*
+
+.jqwik-database
